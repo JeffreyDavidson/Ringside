@@ -11,6 +11,11 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware(['middleware' => 'auth'])->group(function() {
+    Route::post('/wrestlers', 'WrestlersController@store');
+    Route::get('/wrestlers/new', 'WrestlersController@create');
 });
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

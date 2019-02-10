@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Wrestler;
+use App\Policies\WrestlerPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -13,7 +15,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        'App\Model' => 'App\Policies\ModelPolicy',
+        Wrestler::class => WrestlerPolicy::class,
+
     ];
 
     /**
