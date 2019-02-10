@@ -12,8 +12,7 @@
 */
 
 Route::middleware(['middleware' => 'auth'])->group(function() {
-    Route::post('/wrestlers', 'WrestlersController@store');
-    Route::get('/wrestlers/new', 'WrestlersController@create');
+    Route::resource('wrestler', 'WrestlersController');
 });
 
 Auth::routes();

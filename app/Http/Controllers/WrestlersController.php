@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Wrestler;
 use App\Http\Requests\StoreWrestlerRequest;
+use App\Http\Requests\UpdateWrestlerRequest;
 
 class WrestlersController extends Controller
 {
@@ -32,5 +33,21 @@ class WrestlersController extends Controller
         $wrestler = Wrestler::create($request->except(['feet', 'inches']));
 
         return redirect('/wrestlers');
+    }
+
+    public function edit(Wrestler $wrestler)
+    {
+        $this->authorize('update', $wrestler);
+
+        return response()->view('wrestlers.edit', compact('wrestler'));
+    }
+
+    public function update(UpdateWrestlerRequest $request, Wrestler $wrestler)
+    {
+        $request->merge(['height' => ($request->input('feet') * 12) + $request->input('inches')]);
+
+        $wrestler->update($request->except(['feet', 'inches']));
+
+        return redirect(route('wrestler.index'));
     }
 }
