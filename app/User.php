@@ -38,4 +38,14 @@ class User extends Authenticatable
     {
         return $this->role_id === Role::ADMINISTRATOR;
     }
+
+    /**
+     * Get the user's wrestler.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function wrestler()
+    {
+        return $this->hasOne(Wrestler::class);
+    }
 }

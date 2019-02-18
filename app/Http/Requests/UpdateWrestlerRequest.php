@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateWrestlerRequest extends FormRequest
@@ -13,9 +14,7 @@ class UpdateWrestlerRequest extends FormRequest
      */
     public function authorize()
     {
-        $wrestler = $this->route('wrestler');
-
-        return $this->user()->can('update', $wrestler);
+        return $this->user()->can('update', Wrestler::class);
     }
 
     /**

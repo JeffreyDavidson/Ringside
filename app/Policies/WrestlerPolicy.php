@@ -27,8 +27,141 @@ class WrestlerPolicy
      * @param  \App\User  $user
      * @return bool
      */
-    public function update(User $user, Wrestler $wrestler)
+    public function update(User $user)
     {
         return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can delete a wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function delete(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can restore a deleted wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function restore(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can retire a wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function retire(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can unretire a retired wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function unretire(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can suspend a wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function suspend(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can reinstate a suspended wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function reinstate(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can injure a wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function injure(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can recover an injured wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function recover(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can deactivate an active wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function deactivate(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can activate an inactive wrestler.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function activate(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can view active wrestlers.
+     *
+     * @param  \App\User  $user
+     * @return bool
+     */
+    public function viewList(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can view a profile for a wrestler.
+     *
+     * @param  \App\User  $user
+     * @param  \App\Wrestler  $wrestler
+     * @return bool
+     */
+    public function view(User $user, Wrestler $wrestler)
+    {
+        return $user->isAdministrator() || $wrestler->user->is($user);
     }
 }
