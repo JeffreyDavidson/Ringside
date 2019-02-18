@@ -12,7 +12,7 @@ class CreateWrestlerTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Valid Parameters for reqeust.
+     * Valid Parameters for request.
      *
      * @param  array $overrides
      * @return array
@@ -35,7 +35,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->get('/wrestlers/new');
+        $response = $this->get(route('wrestlers.create'));
 
         $response->assertViewIs('wrestlers.create');
     }
@@ -45,7 +45,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('basic-user');
 
-        $response = $this->get('/wrestlers/new');
+        $response = $this->get(route('wrestlers.create'));
 
         $response->assertStatus(403);
     }
@@ -53,7 +53,7 @@ class CreateWrestlerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_creating_a_wrestler()
     {
-        $response = $this->get('/wrestlers/new');
+        $response = $this->get(route('wrestlers.create'));
 
         $response->assertRedirect('/login');
     }
@@ -63,10 +63,9 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams());
+        $response = $this->post(route('wrestlers.store'), $this->validParams());
 
-        $response->assertStatus(302);
-        $response->assertRedirect('/wrestlers');
+        $response->assertRedirect(route('wrestlers.index'));
         tap(Wrestler::first(), function ($wrestler) {
             $this->assertEquals('Example Wrestler Name', $wrestler->name);
             $this->assertEquals(76, $wrestler->height);
@@ -77,11 +76,46 @@ class CreateWrestlerTest extends TestCase
     }
 
     /** @test */
+    public function a_wrestler_slug_is_generated_when_created()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('wrestlers.store'), $this->validParams());
+        tap(Wrestler::first(), function ($wrestler) {
+            $this->assertEquals('example-wrestler-name', $wrestler->slug);
+        });
+    }
+
+    /** @test */
+    public function a_wrestler_hired_today_or_before_is_active()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['hired_at' => today()->toDateTimeString()]));
+
+        tap(Wrestler::first(), function ($wrestler) {
+            $this->assertTrue($wrestler->is_active);
+        });
+    }
+
+    /** @test */
+    public function a_wrestler_hired_after_today_is_inactive()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['hired_at' => Carbon::tomorrow()->toDateTimeString()]));
+
+        tap(Wrestler::first(), function ($wrestler) {
+            $this->assertFalse($wrestler->is_active);
+        });
+    }
+
+    /** @test */
     public function a_basic_user_cannot_create_a_wrestler()
     {
         $this->actAs('basic-user');
 
-        $response = $this->post('/wrestlers', $this->validParams());
+        $response = $this->post(route('wrestlers.store'), $this->validParams());
 
         $response->assertStatus(403);
     }
@@ -89,7 +123,7 @@ class CreateWrestlerTest extends TestCase
     /** @test */
     public function a_guest_cannot_create_a_wrestler()
     {
-        $response = $this->post('/wrestlers', $this->validParams());
+        $response = $this->post(route('wrestlers.store'), $this->validParams());
 
         $response->assertRedirect('/login');
     }
@@ -99,7 +133,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['name' => '']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['name' => '']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('name');
@@ -110,7 +144,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['feet' => 'not-an-integer']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['feet' => 'not-an-integer']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('feet');
@@ -121,7 +155,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['feet' => 'not-an-integer']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['feet' => 'not-an-integer']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('feet');
@@ -132,7 +166,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['inches' => '']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['inches' => '']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('inches');
@@ -143,7 +177,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['inches' => 'not-an-integer']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['inches' => 'not-an-integer']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('inches');
@@ -154,7 +188,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['inches' => 13]));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['inches' => 13]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('inches');
@@ -165,7 +199,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['weight' => '']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['weight' => '']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('weight');
@@ -176,7 +210,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['weight' => 'not-an-integer']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['weight' => 'not-an-integer']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('weight');
@@ -187,7 +221,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['hometown' => '']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['hometown' => '']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('hometown');
@@ -198,7 +232,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['signature_move' => '']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['signature_move' => '']));
 
         $response->assertSessionDoesntHaveErrors('signature_move');
     }
@@ -208,7 +242,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['hired_at' => '']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['hired_at' => '']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('hired_at');
@@ -219,7 +253,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['hired_at' => today()->toDateString()]));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['hired_at' => today()->toDateString()]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('hired_at');
@@ -230,7 +264,7 @@ class CreateWrestlerTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post('/wrestlers', $this->validParams(['hired_at' => 'not-a-datetime']));
+        $response = $this->post(route('wrestlers.store'), $this->validParams(['hired_at' => 'not-a-datetime']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('hired_at');

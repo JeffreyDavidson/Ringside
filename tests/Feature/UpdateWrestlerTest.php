@@ -35,7 +35,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->get(route('wrestler.edit', $wrestler));
+        $response = $this->get(route('wrestlers.edit', $wrestler));
 
         $response->assertViewIs('wrestlers.edit');
         $this->assertTrue($response->data('wrestler')->is($wrestler));
@@ -47,7 +47,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('basic-user');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->get(route('wrestler.edit', $wrestler));
+        $response = $this->get(route('wrestlers.edit', $wrestler));
 
         $response->assertStatus(403);
     }
@@ -57,7 +57,7 @@ class UpdateWrestlerTest extends TestCase
     {
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->get(route('wrestler.edit', $wrestler));
+        $response = $this->get(route('wrestlers.edit', $wrestler));
 
         $response->assertRedirect('/login');
     }
@@ -68,9 +68,9 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams());
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams());
 
-        $response->assertRedirect(route('wrestler.index'));
+        $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertEquals('Example Wrestler Name', $wrestler->name);
             $this->assertEquals(76, $wrestler->height);
@@ -86,7 +86,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('basic-user');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams());
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams());
 
         $response->assertStatus(403);
     }
@@ -96,7 +96,7 @@ class UpdateWrestlerTest extends TestCase
     {
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams());
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams());
 
         $response->assertRedirect('/login');
     }
@@ -107,7 +107,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'name' => ''
         ]));
 
@@ -121,7 +121,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'feet' => ''
         ]));
 
@@ -135,7 +135,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'feet' => 'not-an-integer'
         ]));
 
@@ -149,7 +149,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'inches' => ''
         ]));
 
@@ -163,7 +163,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'inches' => 'not-an-integer'
         ]));
 
@@ -177,7 +177,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'inches' => 13
         ]));
 
@@ -191,7 +191,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'weight' => ''
         ]));
 
@@ -205,7 +205,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'weight' => 'not-an-integer'
         ]));
 
@@ -219,7 +219,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'hometown' => ''
         ]));
 
@@ -233,7 +233,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'signature_move' => ''
         ]));
 
@@ -246,7 +246,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'hired_at' => ''
         ]));
 
@@ -260,7 +260,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'hired_at' => today()->toDateString()
         ]));
 
@@ -274,7 +274,7 @@ class UpdateWrestlerTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->patch(route('wrestler.update', $wrestler), $this->validParams([
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams([
             'hired_at' => 'not-a-datetime'
         ]));
 
