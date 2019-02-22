@@ -80,22 +80,24 @@ class WrestlerPolicy
      * Determine whether the user can suspend a wrestler.
      *
      * @param  \App\User  $user
+     * @param  \App\Wrestler  $wrestler
      * @return bool
      */
-    public function suspend(User $user)
+    public function suspend(User $user, Wrestler $wrestler)
     {
-        return $user->isAdministrator();
+        return $user->isAdministrator() && !$wrestler->isSuspended();
     }
 
     /**
      * Determine whether the user can reinstate a suspended wrestler.
      *
      * @param  \App\User  $user
+     * @param  \App\Wrestler  $wrestler
      * @return bool
      */
-    public function reinstate(User $user)
+    public function reinstate(User $user, Wrestler $wrestler)
     {
-        return $user->isAdministrator();
+        return $user->isAdministrator() && $wrestler->isSuspended();
     }
 
     /**

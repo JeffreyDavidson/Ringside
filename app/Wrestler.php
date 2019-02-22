@@ -4,6 +4,7 @@ namespace App;
 
 use App\Traits\Hireable;
 use App\Traits\Injurable;
+use App\Traits\Sluggable;
 use App\Traits\Retireable;
 use App\Traits\Activatable;
 use App\Traits\Suspendable;
@@ -13,7 +14,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends Model
 {
-    use SoftDeletes, Retireable, Suspendable, Injurable, Activatable, Hireable;
+    use SoftDeletes,
+        Retireable,
+        Suspendable,
+        Injurable,
+        Activatable,
+        Hireable,
+        Sluggable;
 
     /**
      * The attributes that aren't mass assignable.
@@ -39,20 +46,6 @@ class Wrestler extends Model
     ];
 
     /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-     protected static function boot()
-     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->slug = Str::slug($model->name);
-        });
-     }
-
-    /**
      * Get the user belonging to the wrestler.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -60,6 +53,26 @@ class Wrestler extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the tag teams the wrestler has belonged to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tagteams()
+    {
+        return $this->belongsToMany(TagTeam::class);
+    }
+
+    /**
+     * Get the current tag team of the wrestler.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tagteam()
+    {
+        return $this->belongsToMany(TagTeam::class)->where('is_active', true);
     }
 
     /**

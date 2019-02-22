@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\TagTeam;
 use App\Wrestler;
 use App\Retirement;
+use App\Policies\TagTeamPolicy;
 use App\Policies\WrestlerPolicy;
 use App\Policies\RetirementPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Wrestler::class => WrestlerPolicy::class,
+        TagTeam::class => TagTeamPolicy::class,
     ];
 
     /**
