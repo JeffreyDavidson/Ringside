@@ -4,19 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Wrestler;
 
-class SuspensionsController extends Controller
+class WrestlerSuspensionsController extends Controller
 {
     /**
      * Suspend a wrestler.
      *
-     * @param  \App\Wrestler  $wrestler
+     * @param  \App\Models\Wrestler  $wrestler
      * @return \lluminate\Http\RedirectResponse
      */
     public function store(Wrestler $wrestler)
     {
-        $this->authorize('suspend', Wrestler::class);
-
-        abort_if($wrestler->isSuspended(), 403);
+        $this->authorize('suspend', $wrestler);
 
         $wrestler->suspend();
 
@@ -26,14 +24,12 @@ class SuspensionsController extends Controller
     /**
      * Reinstate a suspended wrestler.
      *
-     * @param  \App\Wrestler  $wrestler
+     * @param  \App\Models\Wrestler  $wrestler
      * @return \lluminate\Http\RedirectResponse
      */
     public function destroy(Wrestler $wrestler)
     {
-        $this->authorize('reinstate', Wrestler::class);
-
-        abort_unless($wrestler->isSuspended(), 403);
+        $this->authorize('reinstate', $wrestler);
 
         $wrestler->reinstate();
 
