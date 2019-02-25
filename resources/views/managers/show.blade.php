@@ -1,0 +1,1 @@
+{{ $manager->full_name }}
