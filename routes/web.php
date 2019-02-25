@@ -42,6 +42,22 @@ Route::middleware(['middleware' => 'auth'])->group(function() {
     Route::delete('/tag-teams/{tagteam}/unretire', 'TagTeamRetirementsController@destroy')->name('tagteams.unretire');
     Route::get('/tag-teams/state/{state?}', 'TagTeamsController@index')->name('tagteams.index');
     Route::get('/tag-teams/{tagteam}', 'TagTeamsController@show')->name('tagteams.show');
+    Route::get('/managers/create', 'ManagersController@create')->name('managers.create');
+    Route::post('/managers', 'ManagersController@store')->name('managers.store');
+    Route::get('/managers/{manager}/edit', 'ManagersController@edit')->name('managers.edit');
+    Route::patch('/managers/{manager}', 'ManagersController@update')->name('managers.update');
+    Route::delete('/managers/{manager}', 'ManagersController@destroy')->name('managers.destroy');
+    Route::patch('/managers/{manager}/restore', 'ManagersController@restore')->name('managers.restore');
+    Route::post('/managers/{manager}/retire', 'ManagerRetirementsController@store')->name('managers.retire');
+    Route::delete('/managers/{manager}/unretire', 'ManagerRetirementsController@destroy')->name('managers.unretire');
+    Route::post('/managers/{manager}/injure', 'ManagerInjuriesController@store')->name('managers.injure');
+    Route::delete('/managers/{manager}/recover', 'ManagerInjuriesController@destroy')->name('managers.recover');
+    Route::post('/managers/{manager}/deactivate', 'ManagerActivationsController@destroy')->name('managers.deactivate');
+    Route::post('/managers/{manager}/activate', 'ManagerActivationsController@store')->name('managers.activate');
+    Route::post('/managers/{manager}/suspend', 'ManagerSuspensionsController@store')->name('managers.suspend');
+    Route::delete('/managers/{manager}/reinstate', 'ManagerSuspensionsController@destroy')->name('managers.reinstate');
+    Route::get('/managers/state/{state?}', 'ManagersController@index')->name('managers.index');
+    Route::get('/managers/{manager}', 'ManagersController@show')->name('managers.show');
 });
 
 Auth::routes();

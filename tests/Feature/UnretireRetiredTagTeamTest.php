@@ -6,7 +6,7 @@ use App\TagTeam;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class UnretireTagTeamTest extends TestCase
+class UnretireRetiredTagTeamTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -68,4 +68,3 @@ class UnretireTagTeamTest extends TestCase
         $this->assertCount(2, $tagteam->wrestlers->filter->isActive());
     }
 }
-
