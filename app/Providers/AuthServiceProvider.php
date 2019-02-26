@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Manager;
+use App\Referee;
 use App\TagTeam;
 use App\Wrestler;
 use App\Retirement;
 use App\Policies\ManagerPolicy;
+use App\Policies\RefereePolicy;
 use App\Policies\TagTeamPolicy;
 use App\Policies\WrestlerPolicy;
 use App\Policies\RetirementPolicy;
@@ -24,6 +26,7 @@ class AuthServiceProvider extends ServiceProvider
         Wrestler::class => WrestlerPolicy::class,
         TagTeam::class => TagTeamPolicy::class,
         Manager::class => ManagerPolicy::class,
+        Referee::class => RefereePolicy::class,
     ];
 
     /**

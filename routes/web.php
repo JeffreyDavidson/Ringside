@@ -58,6 +58,19 @@ Route::middleware(['middleware' => 'auth'])->group(function() {
     Route::delete('/managers/{manager}/reinstate', 'ManagerSuspensionsController@destroy')->name('managers.reinstate');
     Route::get('/managers/state/{state?}', 'ManagersController@index')->name('managers.index');
     Route::get('/managers/{manager}', 'ManagersController@show')->name('managers.show');
+    Route::get('/referees/create', 'RefereesController@create')->name('referees.create');
+    Route::post('/referees', 'RefereesController@store')->name('referees.store');
+    Route::get('/referees/{referee}/edit', 'RefereesController@edit')->name('referees.edit');
+    Route::patch('/referees/{referee}', 'RefereesController@update')->name('referees.update');
+    Route::delete('/referees/{referee}', 'RefereesController@destroy')->name('referees.destroy');
+    Route::patch('/referees/{referee}/restore', 'RefereesController@restore')->name('referees.restore');
+    Route::get('/referees', 'RefereesController@index')-> name('referees.index');
+    Route::post('/referees/{referee}/retire', 'RefereeRetirementsController@store')->name('referees.retire');
+    Route::delete('/referees/{referee}/unretire', 'RefereeRetirementsController@destroy')->name('referees.unretire');
+    Route::post('/referees/{referee}/injure', 'RefereeInjuriesController@store')->name('referees.injure');
+    Route::delete('/referees/{referee}/recover', 'RefereeInjuriesController@destroy')->name('referees.recover');
+    Route::post('/referees/{referee}/deactivate', 'RefereeActivationsController@destroy')->name('referees.deactivate');
+    Route::post('/referees/{referee}/activate', 'RefereeActivationsController@store')->name('referees.activate');
 });
 
 Auth::routes();
