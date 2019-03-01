@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Wrestler;
+use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
 
 class CanJoinTagTeam implements Rule

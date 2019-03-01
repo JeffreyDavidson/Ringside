@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\User;
-use App\Wrestler;
+use App\Models\User;
+use App\Models\Wrestler;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class WrestlerPolicy
@@ -13,7 +13,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can create wrestlers.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function create(User $user)
@@ -24,7 +24,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can update a wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function update(User $user)
@@ -35,7 +35,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can delete a wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function delete(User $user)
@@ -46,7 +46,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can restore a deleted wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function restore(User $user)
@@ -57,7 +57,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can retire a wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function retire(User $user)
@@ -68,7 +68,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can unretire a retired wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function unretire(User $user)
@@ -79,8 +79,8 @@ class WrestlerPolicy
     /**
      * Determine whether the user can suspend a wrestler.
      *
-     * @param  \App\User  $user
-     * @param  \App\Wrestler  $wrestler
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Wrestler  $wrestler
      * @return bool
      */
     public function suspend(User $user, Wrestler $wrestler)
@@ -91,8 +91,8 @@ class WrestlerPolicy
     /**
      * Determine whether the user can reinstate a suspended wrestler.
      *
-     * @param  \App\User  $user
-     * @param  \App\Wrestler  $wrestler
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Wrestler  $wrestler
      * @return bool
      */
     public function reinstate(User $user, Wrestler $wrestler)
@@ -103,7 +103,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can injure a wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function injure(User $user)
@@ -114,7 +114,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can recover an injured wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function recover(User $user)
@@ -125,7 +125,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can deactivate an active wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function deactivate(User $user)
@@ -136,7 +136,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can activate an inactive wrestler.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function activate(User $user)
@@ -147,7 +147,7 @@ class WrestlerPolicy
     /**
      * Determine whether the user can view active wrestlers.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function viewList(User $user)
@@ -158,8 +158,8 @@ class WrestlerPolicy
     /**
      * Determine whether the user can view a profile for a wrestler.
      *
-     * @param  \App\User  $user
-     * @param  \App\Wrestler  $wrestler
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Wrestler  $wrestler
      * @return bool
      */
     public function view(User $user, Wrestler $wrestler)

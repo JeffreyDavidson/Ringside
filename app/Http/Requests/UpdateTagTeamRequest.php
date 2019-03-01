@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\TagTeam;
+use App\Models\TagTeam;
 use App\Rules\CanJoinTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 

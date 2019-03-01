@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Manager;
+use App\Models\Manager;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateManagerRequest extends FormRequest
