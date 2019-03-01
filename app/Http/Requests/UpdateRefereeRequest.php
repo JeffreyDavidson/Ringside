@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Referee;
+use App\Models\Referee;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRefereeRequest extends FormRequest

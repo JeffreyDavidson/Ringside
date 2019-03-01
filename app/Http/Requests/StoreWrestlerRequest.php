@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Wrestler;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreWrestlerRequest extends FormRequest

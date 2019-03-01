@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Retirement;
+use App\Models\Retirement;
 
 trait Retireable
 {

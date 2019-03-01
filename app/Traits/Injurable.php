@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Injury;
+use App\Models\Injury;
 
 trait Injurable
 {

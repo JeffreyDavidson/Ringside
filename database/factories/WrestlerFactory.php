@@ -1,9 +1,10 @@
 <?php
 
+use App\Models\Wrestler;
 use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 
-$factory->define(\App\Wrestler::class, function (Faker $faker) {
+$factory->define(Wrestler::class, function (Faker $faker) {
     $name = $faker->name;
 
     return [
@@ -16,22 +17,22 @@ $factory->define(\App\Wrestler::class, function (Faker $faker) {
     ];
 });
 
-$factory->state(App\Wrestler::class, 'active', [
+$factory->state(Wrestler::class, 'active', [
     'is_active' => true,
 ]);
 
-$factory->afterCreatingState(\App\Wrestler::class, 'retired', function ($wrestler) {
+$factory->afterCreatingState(Wrestler::class, 'retired', function ($wrestler) {
     $wrestler->retire();
 });
 
-$factory->afterCreatingState(\App\Wrestler::class, 'suspended', function ($wrestler) {
+$factory->afterCreatingState(Wrestler::class, 'suspended', function ($wrestler) {
     $wrestler->suspend();
 });
 
-$factory->afterCreatingState(\App\Wrestler::class, 'injured', function ($wrestler) {
+$factory->afterCreatingState(Wrestler::class, 'injured', function ($wrestler) {
     $wrestler->injure();
 });
 
-$factory->afterCreatingState(\App\Wrestler::class, 'inactive', function ($wrestler) {
+$factory->afterCreatingState(Wrestler::class, 'inactive', function ($wrestler) {
     $wrestler->deactivate();
 });

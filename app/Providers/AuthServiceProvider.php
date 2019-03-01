@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\Manager;
-use App\Referee;
-use App\TagTeam;
-use App\Wrestler;
-use App\Retirement;
+use App\Models\Manager;
+use App\Models\Referee;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
+use App\Models\Retirement;
 use App\Policies\ManagerPolicy;
 use App\Policies\RefereePolicy;
 use App\Policies\TagTeamPolicy;

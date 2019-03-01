@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Suspension;
+use App\Models\Suspension;
 
 trait Suspendable
 {

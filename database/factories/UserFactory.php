@@ -1,6 +1,7 @@
 <?php
 
-use App\Role;
+use App\Models\Role;
+use App\Models\User;
 use Faker\Generator as Faker;
 
 /*
@@ -14,7 +15,7 @@ use Faker\Generator as Faker;
 |
 */
 
-$factory->define(App\User::class, function (Faker $faker) {
+$factory->define(User::class, function (Faker $faker) {
     return [
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
@@ -25,12 +26,10 @@ $factory->define(App\User::class, function (Faker $faker) {
     ];
 });
 
-$factory->state(App\User::class, 'administrator', [
+$factory->state(User::class, 'administrator', [
     'role_id' => Role::ADMINISTRATOR,
 ]);
 
-$factory->state(App\User::class, 'basic-user', [
+$factory->state(User::class, 'basic-user', [
     'role_id' => Role::BASIC,
 ]);
-
-
