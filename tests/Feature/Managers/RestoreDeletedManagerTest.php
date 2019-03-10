@@ -13,7 +13,6 @@ class RestoreDeletedManagerTest extends TestCase
     /** @test */
     public function an_administrator_can_restore_a_deleted_manager()
     {
-        $this->withoutExceptionHandling();
         $this->actAs('administrator');
         $manager = factory(Manager::class)->create(['deleted_at' => today()->subDays(3)->toDateTimeString()]);
 
