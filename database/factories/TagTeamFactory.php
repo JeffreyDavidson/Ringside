@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use App\Models\TagTeam;
 use Faker\Generator as Faker;
 
@@ -17,6 +18,10 @@ $factory->afterCreating(TagTeam::class, function ($tagteam, $faker) {
 
 $factory->state(TagTeam::class, 'active', [
     'is_active' => true,
+]);
+
+$factory->state(TagTeam::class, 'future', [
+    'hired_at' => Carbon::tomorrow()->toDateTimeString(),
 ]);
 
 $factory->afterCreatingState(TagTeam::class, 'suspended', function ($tagteam) {

@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use App\Models\Wrestler;
 use Illuminate\Support\Str;
 use Faker\Generator as Faker;
@@ -19,6 +20,10 @@ $factory->define(Wrestler::class, function (Faker $faker) {
 
 $factory->state(Wrestler::class, 'active', [
     'is_active' => true,
+]);
+
+$factory->state(Wrestler::class, 'future', [
+    'hired_at' => Carbon::tomorrow()->toDateTimeString(),
 ]);
 
 $factory->afterCreatingState(Wrestler::class, 'retired', function ($wrestler) {

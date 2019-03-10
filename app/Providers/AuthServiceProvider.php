@@ -2,16 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Stable;
 use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use App\Models\Retirement;
+use App\Policies\StablePolicy;
 use App\Policies\ManagerPolicy;
 use App\Policies\RefereePolicy;
 use App\Policies\TagTeamPolicy;
 use App\Policies\WrestlerPolicy;
-use App\Policies\RetirementPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -27,6 +27,7 @@ class AuthServiceProvider extends ServiceProvider
         TagTeam::class => TagTeamPolicy::class,
         Manager::class => ManagerPolicy::class,
         Referee::class => RefereePolicy::class,
+        Stable::class => StablePolicy::class,
     ];
 
     /**

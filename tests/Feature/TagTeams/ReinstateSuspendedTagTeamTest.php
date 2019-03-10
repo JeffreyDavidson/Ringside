@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\TagTeams;
 
-use App\Models\TagTeam;
 use Tests\TestCase;
+use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ReinstateSuspendedTagTeamTest extends TestCase
@@ -13,7 +13,6 @@ class ReinstateSuspendedTagTeamTest extends TestCase
     /** @test */
     public function an_administrator_can_reinstate_a_suspended_tag_team()
     {
-        $this->withoutExceptionHandling();
         $this->actAs('administrator');
         $tagteam = factory(TagTeam::class)->states('suspended')->create();
 

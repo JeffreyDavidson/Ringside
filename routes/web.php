@@ -59,6 +59,18 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
         Route::post('/referees/{referee}/deactivate', 'RefereeActivationsController@destroy')->name('referees.deactivate');
         Route::post('/referees/{referee}/activate', 'RefereeActivationsController@store')->name('referees.activate');
     });
+
+    Route::namespace('Stables')->group(function () {
+        Route::get('/stables/state/{state?}', 'StablesController@index')->name('stables.index');
+        Route::resource('stables', 'StablesController')->except('index');
+        Route::patch('/stables/{stable}/restore', 'StablesController@restore')->name('stables.restore');
+        Route::post('/stables/{stable}/retire', 'StableRetirementsController@store')->name('stables.retire');
+        Route::delete('/stables/{stable}/unretire', 'StableRetirementsController@destroy')->name('stables.unretire');
+        Route::post('/stables/{stable}/deactivate', 'StableActivationsController@destroy')->name('stables.deactivate');
+        Route::post('/stables/{stable}/activate', 'StableActivationsController@store')->name('stables.activate');
+        Route::post('/stables/{stable}/suspend', 'StableSuspensionsController@store')->name('stables.suspend');
+        Route::delete('/stables/{stable}/reinstate', 'StableSuspensionsController@destroy')->name('stables.reinstate');
+    });
 });
 
 Auth::routes();
