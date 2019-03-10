@@ -23,11 +23,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        Wrestler::class => WrestlerPolicy::class,
-        TagTeam::class => TagTeamPolicy::class,
-        Manager::class => ManagerPolicy::class,
-        Referee::class => RefereePolicy::class,
-        Stable::class => StablePolicy::class,
+
     ];
 
     /**
@@ -39,6 +35,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        Gate::guessPolicyNamesUsing(function ($class) {
+            return '\\App\\Policies\\'.class_basename($class).'Policy';
+        });
     }
 }
