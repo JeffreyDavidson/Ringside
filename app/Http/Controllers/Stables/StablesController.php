@@ -103,8 +103,6 @@ class StablesController extends Controller
         $stable->wrestlers()->syncWithoutDetaching($newStableWrestlers);
         $stable->tagteams()->syncWithoutDetaching($newStableTagTeams);
 
-        // dd($stable->wrestlers);
-
         return redirect()->route('stables.index');
     }
 
