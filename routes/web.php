@@ -75,6 +75,16 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::namespace('Venues')->group(function () {
         Route::resource('venues', 'VenuesController')->except('destroy');
     });
+
+    Route::namespace('Titles')->group(function () {
+        Route::get('/titles/state/{state?}', 'TitlesController@index')->name('titles.index');
+        Route::resource('titles', 'TitlesController')->except('index');
+        Route::patch('/titles/{title}/restore', 'TitlesController@restore')->name('titles.restore');
+        Route::post('/titles/{title}/retire', 'TitleRetirementsController@store')->name('titles.retire');
+        Route::delete('/titles/{title}/unretire', 'TitleRetirementsController@destroy')->name('titles.unretire');
+        Route::post('/titles/{title}/deactivate', 'TitleActivationsController@destroy')->name('titles.deactivate');
+        Route::post('/titles/{title}/activate', 'TitleActivationsController@store')->name('titles.activate');
+    });
 });
 
 Auth::routes();
