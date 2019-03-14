@@ -71,6 +71,10 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
         Route::post('/stables/{stable}/suspend', 'StableSuspensionsController@store')->name('stables.suspend');
         Route::delete('/stables/{stable}/reinstate', 'StableSuspensionsController@destroy')->name('stables.reinstate');
     });
+
+    Route::namespace('Venues')->group(function () {
+        Route::resource('venues', 'VenuesController')->except('destroy');
+    });
 });
 
 Auth::routes();
