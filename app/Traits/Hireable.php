@@ -5,7 +5,7 @@ namespace App\Traits;
 trait Hireable
 {
     /**
-     * Undocumented function
+     * Boot the trait for every model.
      *
      * @return void
      */
