@@ -3,7 +3,6 @@
 namespace Tests\Feature\MatchTypes;
 
 use Tests\TestCase;
-use App\Models\MatchType;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
