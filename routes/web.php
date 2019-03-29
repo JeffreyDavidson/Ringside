@@ -85,6 +85,13 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
         Route::post('/titles/{title}/deactivate', 'TitleActivationsController@destroy')->name('titles.deactivate');
         Route::post('/titles/{title}/activate', 'TitleActivationsController@store')->name('titles.activate');
     });
+
+    Route::namespace('Events')->group(function () {
+        Route::get('/events/state/{state?}', 'EventsController@index')->name('events.index');
+        Route::resource('events', 'EventsController')->except('index');
+        Route::post('/events/{event}/archive', 'ArchivedEventsController@store')->name('events.archive');
+        Route::patch('/events/{event}/restore', 'EventsController@restore')->name('events.restore');
+    });
 });
 
 Auth::routes();
