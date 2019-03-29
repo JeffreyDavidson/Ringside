@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Models\Stable;
-use Illuminate\Validation\Rule;
 use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,7 +26,6 @@ class UpdateStableRequest extends FormRequest
      */
     public function rules()
     {
-        // dd($this->all());
         return [
             'name' => ['required'],
             'started_at' => ['required', 'date_format:Y-m-d H:i:s'],
@@ -47,11 +45,13 @@ class UpdateStableRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $totalStableMembers = count($this->wrestlers) + (count($this->tagteams) * 2);
+            if (is_array($this->wrestlers) && is_array($this->tagteams)) {
+                $totalStableMembers = count($this->wrestlers) + (count($this->tagteams) * 2);
 
-            if ($totalStableMembers < 3) {
-                $validator->errors()->add('wrestlers', 'Make sure you have at least 3 members in the stable!');
-                $validator->errors()->add('tagteams', 'Make sure you have at least 3 members in the stable!');
+                if ($totalStableMembers < 3) {
+                    $validator->errors()->add('wrestlers', 'Make sure you have at least 3 members in the stable!');
+                    $validator->errors()->add('tagteams', 'Make sure you have at least 3 members in the stable!');
+                }
             }
         });
     }
