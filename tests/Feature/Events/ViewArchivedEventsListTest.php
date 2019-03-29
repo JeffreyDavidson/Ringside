@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class ViewArchivedEventListTest extends TestCase
+class ViewArchivedEventsListTest extends TestCase
 {
     use RefreshDatabase;
 
