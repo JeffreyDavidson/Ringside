@@ -49,7 +49,7 @@ class Stable extends Model
      *
      * @var array
      */
-    protected $dates = ['started_at', 'deleted_at'];
+    protected $dates = ['started_at'];
 
     /**
      * The attributes that should be cast to native types.

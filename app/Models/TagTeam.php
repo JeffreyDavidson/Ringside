@@ -36,7 +36,7 @@ class TagTeam extends Model
      *
      * @var array
      */
-    protected $dates = ['hired_at', 'deleted_at'];
+    protected $dates = ['hired_at'];
 
     /**
      * The attributes that should be cast to native types.
