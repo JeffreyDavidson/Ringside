@@ -27,15 +27,15 @@
         <!--end::Fonts -->
 
         <!--begin::Global Theme Styles(used by all pages) -->
-        <link href="css/base/style.bundle.css" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('css/base/style.bundle.css') }}" rel="stylesheet" type="text/css" />
 
         <!--end::Global Theme Styles -->
 
         <!--begin::Layout Skins(used by all pages) -->
-		<link href="css/skins/header/base/light.css" rel="stylesheet" type="text/css" />
-		<link href="css/skins/header/menu/light.css" rel="stylesheet" type="text/css" />
-		<link href="css/skins/brand/dark.css" rel="stylesheet" type="text/css" />
-        <link href="css/skins/aside/dark.css" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('css/skins/header/base/light.css') }}" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('css/skins/header/menu/light.css') }}" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('css/skins/brand/dark.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('css/skins/aside/dark.css') }}" rel="stylesheet" type="text/css" />
 
         <!--end::Layout Skins -->
 
@@ -90,25 +90,25 @@
         <!-- end:: Page -->
 
         <!--begin:: Global Mandatory Vendors -->
-		<script src="js/vendors/general/jquery/dist/jquery.js" type="text/javascript"></script>
-		<script src="js/vendors/general/popper.js/dist/umd/popper.js" type="text/javascript"></script>
-		<script src="js/vendors/general/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
-		<script src="js/vendors/general/js-cookie/src/js.cookie.js" type="text/javascript"></script>
-		<script src="js/vendors/general/moment/min/moment.min.js" type="text/javascript"></script>
-		<script src="js/vendors/general/tooltip.js/dist/umd/tooltip.min.js" type="text/javascript"></script>
-		<script src="js/vendors/general/perfect-scrollbar/dist/perfect-scrollbar.js" type="text/javascript"></script>
-		<script src="js/vendors/general/sticky-js/dist/sticky.min.js" type="text/javascript"></script>
-		<script src="js/vendors/general/wnumb/wNumb.js" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/jquery/dist/jquery.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/popper.js/dist/umd/popper.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/js-cookie/src/js.cookie.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/moment/min/moment.min.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/tooltip.js/dist/umd/tooltip.min.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/perfect-scrollbar/dist/perfect-scrollbar.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/sticky-js/dist/sticky.min.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/vendors/general/wnumb/wNumb.js') }}" type="text/javascript"></script>
 
         <!--end:: Global Mandatory Vendors -->
 
         <!--begin::Global Theme Bundle(used by all pages) -->
-		<script src="js/base/scripts.bundle.js" type="text/javascript"></script>
+		<script src="{{ asset('js/base/scripts.bundle.js') }}" type="text/javascript"></script>
 
         <!--end::Global Theme Bundle -->
 
         <!--begin::Global App Bundle(used by all pages) -->
-		<script src="js/app.bundle.js" type="text/javascript"></script>
+		<script src="{{ asset('js/app.bundle.js') }}" type="text/javascript"></script>
 
 		<!--end::Global App Bundle -->
     </body>
