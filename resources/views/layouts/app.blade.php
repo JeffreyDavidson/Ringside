@@ -1,80 +1,117 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en">
 
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+	<!-- begin::Head -->
+	<head>
+        <meta charset="utf-8" />
+        <meta name="description" content="Updates and statistics">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+        <!-- CSRF Token -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+        <title>{{ config('app.name', 'Ringside') }}</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
+		<!--begin::Fonts -->
+		<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js"></script>
+		<script>
+			WebFont.load({
+				google: {
+					"families": ["Poppins:300,400,500,600,700", "Roboto:300,400,500,600,700"]
+				},
+				active: function() {
+					sessionStorage.fonts = true;
+				}
+			});
+		</script>
 
-    <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-</head>
-<body>
-    <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <!--end::Fonts -->
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav mr-auto">
+        <!--begin::Global Theme Styles(used by all pages) -->
+        <link href="css/base/style.bundle.css" rel="stylesheet" type="text/css" />
 
-                    </ul>
+        <!--end::Global Theme Styles -->
 
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <!-- Authentication Links -->
-                        @guest
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                            </li>
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }} <span class="caret"></span>
-                                </a>
+        <!--begin::Layout Skins(used by all pages) -->
+		<link href="css/skins/header/base/light.css" rel="stylesheet" type="text/css" />
+		<link href="css/skins/header/menu/light.css" rel="stylesheet" type="text/css" />
+		<link href="css/skins/brand/dark.css" rel="stylesheet" type="text/css" />
+        <link href="css/skins/aside/dark.css" rel="stylesheet" type="text/css" />
 
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
+        <!--end::Layout Skins -->
 
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                        @csrf
-                                    </form>
-                                </div>
-                            </li>
-                        @endguest
-                    </ul>
+		<link rel="shortcut icon" href="{{ resource_path('assets/media/logos/favicon.ico') }}" />
+    </head>
+
+    <!-- end::Head -->
+
+    <!-- begin::Body -->
+    <body class="kt-header--fixed kt-header-mobile--fixed kt-subheader--fixed kt-subheader--enabled kt-subheader--solid kt-aside--enabled kt-aside--fixed kt-page--loading">
+
+        <!-- begin:: Page -->
+        <div class="kt-grid kt-grid--hor kt-grid--root">
+			<div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--ver kt-page">
+
+				<!-- begin:: Aside -->
+                <button class="kt-aside-close " id="kt_aside_close_btn"><i class="la la-close"></i></button>
+                @include('layouts.partials.aside')
+
+                <!-- end:: Aside -->
+                <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor kt-wrapper" id="kt_wrapper">
+
+                    <!-- begin:: Header -->
+					<div id="kt_header" class="kt-header kt-grid__item  kt-header--fixed ">
+
+                        <!-- begin:: Header Menu -->
+						<button class="kt-header-menu-wrapper-close" id="kt_header_menu_mobile_close_btn"><i class="la la-close"></i></button>
+                        @include('layouts.partials.header')
+
+                        <!-- end:: Header Menu -->
+
+                        <!-- begin:: Header Topbar -->
+                        @include('layouts.partials.header-topbar')
+
+                        <!-- end:: Header Topbar -->
+                    </div>
+
+                    <!-- end:: Header -->
+                    <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor">
+                        @yield('content-head')
+                        @yield('content')
+                    </div>
+
+                    <!-- begin:: Footer -->
+                    @include('layouts.partials.footer')
+
+                    <!-- end:: Footer -->
                 </div>
             </div>
-        </nav>
+        </div>
 
-        <main class="py-4">
-            @yield('content')
-        </main>
-    </div>
-</body>
+        <!-- end:: Page -->
+
+        <!--begin:: Global Mandatory Vendors -->
+		<script src="js/vendors/general/jquery/dist/jquery.js" type="text/javascript"></script>
+		<script src="js/vendors/general/popper.js/dist/umd/popper.js" type="text/javascript"></script>
+		<script src="js/vendors/general/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+		<script src="js/vendors/general/js-cookie/src/js.cookie.js" type="text/javascript"></script>
+		<script src="js/vendors/general/moment/min/moment.min.js" type="text/javascript"></script>
+		<script src="js/vendors/general/tooltip.js/dist/umd/tooltip.min.js" type="text/javascript"></script>
+		<script src="js/vendors/general/perfect-scrollbar/dist/perfect-scrollbar.js" type="text/javascript"></script>
+		<script src="js/vendors/general/sticky-js/dist/sticky.min.js" type="text/javascript"></script>
+		<script src="js/vendors/general/wnumb/wNumb.js" type="text/javascript"></script>
+
+        <!--end:: Global Mandatory Vendors -->
+
+        <!--begin::Global Theme Bundle(used by all pages) -->
+		<script src="js/base/scripts.bundle.js" type="text/javascript"></script>
+
+        <!--end::Global Theme Bundle -->
+
+        <!--begin::Global App Bundle(used by all pages) -->
+		<script src="js/app.bundle.js" type="text/javascript"></script>
+
+		<!--end::Global App Bundle -->
+    </body>
+
+    <!-- end::Body -->
 </html>
