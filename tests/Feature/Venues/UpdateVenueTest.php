@@ -117,7 +117,19 @@ class UpdateVenueTest extends TestCase
         $this->actAs('administrator');
         $venue = factory(Venue::class)->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['name' => '']));
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['name' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_venue_name_must_be_a_string()
+    {
+        $this->actAs('administrator');
+        $venue = factory(Venue::class)->create();
+
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['name' => ['not-an-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('name');
@@ -129,7 +141,19 @@ class UpdateVenueTest extends TestCase
         $this->actAs('administrator');
         $venue = factory(Venue::class)->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['address1' => '']));
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['address1' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('address1');
+    }
+
+    /** @test */
+    public function a_venue_address1_must_be_a_string()
+    {
+        $this->actAs('administrator');
+        $venue = factory(Venue::class)->create();
+
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['address1' => ['not-an-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('address1');
@@ -141,7 +165,19 @@ class UpdateVenueTest extends TestCase
         $this->actAs('administrator');
         $venue = factory(Venue::class)->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['city' => '']));
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['city' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('city');
+    }
+
+    /** @test */
+    public function a_venue_city_must_be_a_string()
+    {
+        $this->actAs('administrator');
+        $venue = factory(Venue::class)->create();
+
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['city' => ['not-a-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('city');
@@ -153,7 +189,19 @@ class UpdateVenueTest extends TestCase
         $this->actAs('administrator');
         $venue = factory(Venue::class)->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['state' => '']));
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['state' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('state');
+    }
+
+    /** @test */
+    public function a_venue_state_must_be_a_string()
+    {
+        $this->actAs('administrator');
+        $venue = factory(Venue::class)->create();
+
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['state' => ['not-a-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('state');
@@ -165,7 +213,31 @@ class UpdateVenueTest extends TestCase
         $this->actAs('administrator');
         $venue = factory(Venue::class)->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => '']));
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('zip');
+    }
+
+    /** @test */
+    public function a_venue_zip_must_be_an_integer()
+    {
+        $this->actAs('administrator');
+        $venue = factory(Venue::class)->create();
+
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => 'not-an-integer']));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('zip');
+    }
+
+    /** @test */
+    public function a_venue_zip_must_be_five_digits_long()
+    {
+        $this->actAs('administrator');
+        $venue = factory(Venue::class)->create();
+
+        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => '123456']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('zip');
