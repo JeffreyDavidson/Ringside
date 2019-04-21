@@ -25,12 +25,27 @@ class StoreVenueRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required'],
-            'address1' => ['required'],
-            'address2' => ['nullable'],
-            'city' => ['required'],
-            'state' => ['required'],
-            'zip' => ['required'],
+            'name' => ['required', 'string'],
+            'address1' => ['required', 'string'],
+            'address2' => ['nullable', 'string'],
+            'city' => ['required', 'string'],
+            'state' => ['required', 'string'],
+            'zip' => ['required', 'integer', 'digits:5'],
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'name' => 'venue name',
+            'address1' => 'street address',
+            'address2' => 'suite number',
+            'zip' => 'zip code',
         ];
     }
 }

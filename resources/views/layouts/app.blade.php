@@ -26,6 +26,11 @@
 
         <!--end::Fonts -->
 
+        <!--begin:: Global Optional Vendors -->
+        <link href="{{ asset('css/vendors/line-awesome/css/line-awesome.css') }}" rel="stylesheet" type="text/css" />
+
+        <!--end:: Global Optional Vendors -->
+
         <!--begin::Global Theme Styles(used by all pages) -->
         <link href="{{ asset('css/base/style.bundle.css') }}" rel="stylesheet" type="text/css" />
 
@@ -76,7 +81,9 @@
                     <!-- end:: Header -->
                     <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor">
                         @yield('content-head')
-                        @yield('content')
+                        <div class="kt-content  kt-grid__item kt-grid__item--fluid" id="kt_content">
+                            @yield('content')
+                        </div>
                     </div>
 
                     <!-- begin:: Footer -->
@@ -106,6 +113,9 @@
 		<script src="{{ asset('js/base/scripts.bundle.js') }}" type="text/javascript"></script>
 
         <!--end::Global Theme Bundle -->
+
+        <script src="{{ asset('js/vendors/custom/datatables/datatables.bundle.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('js/app/custom/general/crud/datatables/basic/basic.js') }}" type="text/javascript"></script>
 
         <!--begin::Global App Bundle(used by all pages) -->
 		<script src="{{ asset('js/app.bundle.js') }}" type="text/javascript"></script>

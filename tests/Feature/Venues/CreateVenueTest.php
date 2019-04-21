@@ -70,7 +70,7 @@ class CreateVenueTest extends TestCase
             $this->assertEquals('Suite 100', $venue->address2);
             $this->assertEquals('Laraville', $venue->city);
             $this->assertEquals('New York', $venue->state);
-            $this->assertEquals('12345', $venue->zip);
+            $this->assertEquals(12345, $venue->zip);
         });
     }
 
@@ -79,7 +79,7 @@ class CreateVenueTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post(route('venues.store'), $this->validParams(['address2' => '']));
+        $response = $this->post(route('venues.store'), $this->validParams(['address2' => null]));
 
         $response->assertSessionHasNoErrors();
     }
@@ -107,18 +107,40 @@ class CreateVenueTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post(route('venues.store'), $this->validParams(['name' => '']));
+        $response = $this->post(route('venues.store'), $this->validParams(['name' => null]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('name');
     }
 
     /** @test */
-    public function a_venue_address1_is_required()
+    public function a_venue_name_must_be_a_string()
     {
         $this->actAs('administrator');
 
-        $response = $this->post(route('venues.store'), $this->validParams(['address1' => '']));
+        $response = $this->post(route('venues.store'), $this->validParams(['name' => ['not-a-string']]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_venue_address_is_required()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('venues.store'), $this->validParams(['address1' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('address1');
+    }
+
+    /** @test */
+    public function a_venue_address_must_be_a_string()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('venues.store'), $this->validParams(['address1' => ['not-a-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('address1');
@@ -129,7 +151,18 @@ class CreateVenueTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post(route('venues.store'), $this->validParams(['city' => '']));
+        $response = $this->post(route('venues.store'), $this->validParams(['city' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('city');
+    }
+
+    /** @test */
+    public function a_venue_city_must_be_a_string()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('venues.store'), $this->validParams(['city' => ['not-a-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('city');
@@ -140,7 +173,18 @@ class CreateVenueTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post(route('venues.store'), $this->validParams(['state' => '']));
+        $response = $this->post(route('venues.store'), $this->validParams(['state' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('state');
+    }
+
+    /** @test */
+    public function a_venue_state_must_be_a_string()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('venues.store'), $this->validParams(['state' => ['not-a-string']]));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('state');
@@ -151,7 +195,29 @@ class CreateVenueTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->post(route('venues.store'), $this->validParams(['zip' => '']));
+        $response = $this->post(route('venues.store'), $this->validParams(['zip' => null]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('zip');
+    }
+
+    /** @test */
+    public function a_venue_zip_must_be_an_integer()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('venues.store'), $this->validParams(['zip' => 'not-an-integer']));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('zip');
+    }
+
+    /** @test */
+    public function a_venue_zip_must_be_five_digits_long()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('venues.store'), $this->validParams(['zip' => '123456']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('zip');
