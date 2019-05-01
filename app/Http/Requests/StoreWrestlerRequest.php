@@ -25,13 +25,26 @@ class StoreWrestlerRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
-            'feet' => 'required|integer',
-            'inches' => 'required|integer|max:12',
-            'weight' => 'required|integer',
-            'hometown' => 'required',
-            'signature_move' => 'nullable',
-            'hired_at' => 'required|date_format:Y-m-d H:i:s'
+            'name' => ['required', 'string', 'min:3'],
+            'feet' => ['required', 'numeric', 'min:5', 'max:7'],
+            'inches' => ['required', 'numeric', 'max:11'],
+            'weight' => ['required', 'numeric'],
+            'hometown' => ['required', 'string'],
+            'signature_move' => ['nullable', 'string'],
+            'hired_at' => ['required', 'string', 'date'],
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'hired_at' => 'date hired',
+            'signature_move' => 'signature move',
         ];
     }
 }

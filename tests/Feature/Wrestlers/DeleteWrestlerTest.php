@@ -3,6 +3,7 @@
 namespace Tests\Feature\Wrestlers;
 
 use Tests\TestCase;
+use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -13,10 +14,11 @@ class DeleteWrestlerTest extends TestCase
     /** @test */
     public function an_administrator_can_delete_a_wrestler()
     {
-        $this->actAs('administrator');
+        $user = factory(User::class)->states('administrator')->create();
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->delete(route('wrestlers.destroy', $wrestler));
+        $response = $this->actingAs($user)
+                        ->delete(route('wrestlers.destroy', $wrestler));
 
         $this->assertSoftDeleted('wrestlers', ['name' => $wrestler->name]);
     }
@@ -24,10 +26,11 @@ class DeleteWrestlerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_delete_a_wrestler()
     {
-        $this->actAs('basic-user');
+        $user = factory(User::class)->states('basic-user')->create();
         $wrestler = factory(Wrestler::class)->create();
 
-        $response = $this->delete(route('wrestlers.destroy', $wrestler));
+        $response = $this->actingAs($user)
+                        ->delete(route('wrestlers.destroy', $wrestler));
 
         $response->assertStatus(403);
     }
