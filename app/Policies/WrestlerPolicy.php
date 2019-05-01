@@ -25,9 +25,10 @@ class WrestlerPolicy
      * Determine whether the user can update a wrestler.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Wrestler  $wrestler
      * @return bool
      */
-    public function update(User $user)
+    public function update(User $user, Wrestler $wrestler)
     {
         return $user->isAdministrator();
     }
@@ -36,9 +37,10 @@ class WrestlerPolicy
      * Determine whether the user can delete a wrestler.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Wrestler  $wrestler
      * @return bool
      */
-    public function delete(User $user)
+    public function delete(User $user, Wrestler $wrestler)
     {
         return $user->isAdministrator();
     }

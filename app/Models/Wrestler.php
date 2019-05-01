@@ -122,4 +122,44 @@ class Wrestler extends Model
 
         return $feet . '\'' . $inches . '"';
     }
+
+    /**
+     * Return the wrestler's hired at date formatted.
+     *
+     * @return string
+     */
+    public function getFormattedHiredAtAttribute()
+    {
+        return $this->hired_at->format('M d, Y');
+    }
+
+    /**
+     * Return the wrestler's status.
+     *
+     * @return string
+     */
+    public function getStatusAttribute()
+    {
+        return $this->is_active ? 'Active' : 'Inactive';
+    }
+
+    /**
+     * Return the wrestler's status.
+     *
+     * @return string
+     */
+    public function getFeetAttribute()
+    {
+        return floor($this->height / 12);
+    }
+
+    /**
+     * Return the wrestler's status.
+     *
+     * @return string
+     */
+    public function getInchesAttribute()
+    {
+        return $this->height % 12;
+    }
 }
