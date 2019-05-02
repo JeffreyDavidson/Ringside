@@ -13,13 +13,13 @@
         <form class="kt-form" method="post" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
-                <input class="form-control" type="text" placeholder="Email" name="email" autocomplete="off">
+                <input class="form-control @error('email') is-invalid @enderror" type="text" placeholder="Email" name="email" autocomplete="off">
                 @error('email')
                     <div id="email-error" class="error invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
             <div class="form-group">
-                <input class="form-control" type="password" placeholder="Password" name="password">
+                <input class="form-control @error('password') is-invalid @enderror" type="password" placeholder="Password" name="password">
                 @error('password')
                     <div id="password-error" class="error invalid-feedback">{{ $message }}</div>
                 @enderror
