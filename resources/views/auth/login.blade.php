@@ -13,7 +13,7 @@
         <form class="kt-form" method="post" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
-                <input class="form-control @error('email') is-invalid @enderror" type="text" placeholder="Email" name="email" autocomplete="off">
+                <input class="form-control @error('email') is-invalid @enderror" type="text" placeholder="Email" name="email" autocomplete="off" autofocus>
                 @error('email')
                     <div id="email-error" class="error invalid-feedback">{{ $message }}</div>
                 @enderror
