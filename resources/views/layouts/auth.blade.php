@@ -30,17 +30,17 @@
 		<!--end::Fonts -->
 
 		<!--begin::Page Custom Styles(used by this page) -->
-		<link href="./assets/css/demo1/pages/custom/general/login/login-1.css" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css" />
 
 		<!--end::Page Custom Styles -->
 
 		<!--begin:: Global Mandatory Vendors -->
-		<link href="./assets/vendors/general/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet" type="text/css" />
+		{{-- <link href="./assets/vendors/general/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet" type="text/css" /> --}}
 
 		<!--end:: Global Mandatory Vendors -->
 
 		<!--begin:: Global Optional Vendors -->
-		<link href="./assets/vendors/general/tether/dist/css/tether.css" rel="stylesheet" type="text/css" />
+		{{-- <link href="./assets/vendors/general/tether/dist/css/tether.css" rel="stylesheet" type="text/css" />
 		<link href="./assets/vendors/general/bootstrap-datepicker/dist/css/bootstrap-datepicker3.css" rel="stylesheet" type="text/css" />
 		<link href="./assets/vendors/general/bootstrap-datetime-picker/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css" />
 		<link href="./assets/vendors/general/bootstrap-timepicker/css/bootstrap-timepicker.css" rel="stylesheet" type="text/css" />
@@ -64,23 +64,15 @@
 		<link href="./assets/vendors/custom/vendors/line-awesome/css/line-awesome.css" rel="stylesheet" type="text/css" />
 		<link href="./assets/vendors/custom/vendors/flaticon/flaticon.css" rel="stylesheet" type="text/css" />
 		<link href="./assets/vendors/custom/vendors/flaticon2/flaticon.css" rel="stylesheet" type="text/css" />
-		<link href="./assets/vendors/general/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+		<link href="./assets/vendors/general/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" /> --}}
 
 		<!--end:: Global Optional Vendors -->
 
 		<!--begin::Global Theme Styles(used by all pages) -->
-		<link href="./assets/css/demo1/style.bundle.css" rel="stylesheet" type="text/css" />
-
-		<!--end::Global Theme Styles -->
-
-		<!--begin::Layout Skins(used by all pages) -->
-		<link href="./assets/css/demo1/skins/header/base/light.css" rel="stylesheet" type="text/css" />
-		<link href="./assets/css/demo1/skins/header/menu/light.css" rel="stylesheet" type="text/css" />
-		<link href="./assets/css/demo1/skins/brand/dark.css" rel="stylesheet" type="text/css" />
-		<link href="./assets/css/demo1/skins/aside/dark.css" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('css/theme.css') }}" rel="stylesheet" type="text/css" />
 
 		<!--end::Layout Skins -->
-		<link rel="shortcut icon" href="./assets/media/logos/favicon.ico" />
+		{{-- <link rel="shortcut icon" href="./assets/media/logos/favicon.ico" /> --}}
 	</head>
 
 	<!-- end::Head -->
@@ -95,26 +87,16 @@
 
 					<!--begin::Aside-->
 					<div class="kt-grid__item kt-grid__item--order-tablet-and-mobile-2 kt-grid kt-grid--hor kt-login__aside" style="background-image: url(./assets/media//bg/bg-4.jpg);">
-						<div class="kt-grid__item">
-							<a href="#" class="kt-login__logo">
-								<img src="./assets/media/logos/logo-4.png">
-							</a>
-						</div>
 						<div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--ver">
 							<div class="kt-grid__item kt-grid__item--middle">
-								<h3 class="kt-login__title">Welcome to Metronic!</h3>
-								<h4 class="kt-login__subtitle">The ultimate Bootstrap & Angular 6 admin theme framework for next generation web apps.</h4>
+                                <h3 class="kt-login__title">Welcome to {{ config('app.name') }}!</h3>
+                                <h4 class="kt-login__subtitle">The ultimate wrestling promotor web application.</h4>
 							</div>
 						</div>
 						<div class="kt-grid__item">
 							<div class="kt-login__info">
 								<div class="kt-login__copyright">
-									&copy 2018 Metronic
-								</div>
-								<div class="kt-login__menu">
-									<a href="#" class="kt-link">Privacy</a>
-									<a href="#" class="kt-link">Legal</a>
-									<a href="#" class="kt-link">Contact</a>
+									&copy {{ date('Y') }} {{ config('app.namne', 'Ringside') }}
 								</div>
 							</div>
 						</div>
@@ -125,16 +107,8 @@
 					<!--begin::Content-->
 					<div class="kt-grid__item kt-grid__item--fluid  kt-grid__item--order-tablet-and-mobile-1  kt-login__wrapper">
 
-						<!--begin::Head-->
-						<div class="kt-login__head">
-							<span class="kt-login__signup-label">Don't have an account yet?</span>&nbsp;&nbsp;
-							<a href="#" class="kt-link kt-login__signup-link">Sign Up!</a>
-						</div>
-
-						<!--end::Head-->
-
 						<!--begin::Body-->
-						{{-- @include('auth.login') --}}
+						@yield('content')
 
 						<!--end::Body-->
 					</div>
@@ -147,7 +121,7 @@
 		<!-- end:: Page -->
 
 		<!-- begin::Global Config(global config for global JS sciprts) -->
-		<script>
+		{{-- <script>
 			var KTAppOptions = {
 				"colors": {
 					"state": {
@@ -166,12 +140,12 @@
 					}
 				}
 			};
-		</script>
+		</script> --}}
 
 		<!-- end::Global Config -->
 
 		<!--begin:: Global Mandatory Vendors -->
-		<script src="./assets/vendors/general/jquery/dist/jquery.js" type="text/javascript"></script>
+		{{-- <script src="./assets/vendors/general/jquery/dist/jquery.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/popper.js/dist/umd/popper.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/js-cookie/src/js.cookie.js" type="text/javascript"></script>
@@ -179,12 +153,12 @@
 		<script src="./assets/vendors/general/tooltip.js/dist/umd/tooltip.min.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/perfect-scrollbar/dist/perfect-scrollbar.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/sticky-js/dist/sticky.min.js" type="text/javascript"></script>
-		<script src="./assets/vendors/general/wnumb/wNumb.js" type="text/javascript"></script>
+		<script src="./assets/vendors/general/wnumb/wNumb.js" type="text/javascript"></script> --}}
 
 		<!--end:: Global Mandatory Vendors -->
 
 		<!--begin:: Global Optional Vendors -->
-		<script src="./assets/vendors/general/jquery-form/dist/jquery.form.min.js" type="text/javascript"></script>
+		{{-- <script src="./assets/vendors/general/jquery-form/dist/jquery.form.min.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/block-ui/jquery.blockUI.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js" type="text/javascript"></script>
 		<script src="./assets/vendors/custom/js/vendors/bootstrap-datepicker.init.js" type="text/javascript"></script>
@@ -233,17 +207,17 @@
 		<script src="./assets/vendors/general/jquery.repeater/src/lib.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/jquery.repeater/src/jquery.input.js" type="text/javascript"></script>
 		<script src="./assets/vendors/general/jquery.repeater/src/repeater.js" type="text/javascript"></script>
-		<script src="./assets/vendors/general/dompurify/dist/purify.js" type="text/javascript"></script>
+		<script src="./assets/vendors/general/dompurify/dist/purify.js" type="text/javascript"></script> --}}
 
 		<!--end:: Global Optional Vendors -->
 
 		<!--begin::Global Theme Bundle(used by all pages) -->
-		<script src="./assets/js/demo1/scripts.bundle.js" type="text/javascript"></script>
+		{{-- <script src="./assets/js/demo1/scripts.bundle.js" type="text/javascript"></script> --}}
 
 		<!--end::Global Theme Bundle -->
 
 		<!--begin::Page Scripts(used by this page) -->
-		<script src="./assets/js/demo1/pages/login/login-1.js" type="text/javascript"></script>
+		{{-- <script src="./assets/js/demo1/pages/login/login-1.js" type="text/javascript"></script> --}}
 
 		<!--end::Page Scripts -->
 	</body>

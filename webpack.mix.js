@@ -11,5 +11,15 @@ const mix = require('laravel-mix');
  |
  */
 
-mix.js('resources/js/app.js', 'public/js')
-   .sass('resources/sass/app.scss', 'public/css');
+mix.js("resources/js/app.js", "public/js")
+    .styles(
+        [
+            "resources/css/theme/style.bundle.css",
+            "resources/css/theme/skins/header/base/light.css",
+            "resources/css/theme/skins/header/menu/light.css",
+            "resources/css/theme/skins/header/brand/dark.css",
+            "resources/css/theme/skins/header/aside/dark.css"
+        ],
+        "public/css/theme.css"
+    )
+    .sass("resources/sass/app.scss", "public/css");
