@@ -12,9 +12,7 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $policies = [
-
-    ];
+    protected $policies = [];
 
     /**
      * Register any authentication / authorization services.
@@ -26,7 +24,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::guessPolicyNamesUsing(function ($class) {
-            return '\\App\\Policies\\'.class_basename($class).'Policy';
+            return '\\App\\Policies\\' . class_basename($class) . 'Policy';
+        });
+
         Gate::before(function ($user, $ability) {
             if ($user->isSuperAdministrator()) {
                 return true;
