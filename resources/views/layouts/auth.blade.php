@@ -90,7 +90,7 @@
 						<div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--ver">
 							<div class="kt-grid__item kt-grid__item--middle">
                                 <h3 class="kt-login__title">Welcome to {{ config('app.name') }}!</h3>
-                                <h4 class="kt-login__subtitle">The ultimate wrestling promotor web application.</h4>
+                                <h4 class="kt-login__subtitle">The ultimate wrestling promoter web application.</h4>
 							</div>
 						</div>
 						<div class="kt-grid__item">
