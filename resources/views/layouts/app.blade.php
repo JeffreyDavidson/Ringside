@@ -26,25 +26,10 @@
 
         <!--end::Fonts -->
 
-        <!--begin:: Global Optional Vendors -->
-        <link href="{{ asset('css/vendors/line-awesome/css/line-awesome.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('css/vendors.css') }}" rel="stylesheet" type="text/css" />
 
-        <!--end:: Global Optional Vendors -->
-
-        <!--begin::Global Theme Styles(used by all pages) -->
-        <link href="{{ asset('css/base/style.bundle.css') }}" rel="stylesheet" type="text/css" />
-
-        <!--end::Global Theme Styles -->
-
-        <!--begin::Layout Skins(used by all pages) -->
-		<link href="{{ asset('css/skins/header/base/light.css') }}" rel="stylesheet" type="text/css" />
-		<link href="{{ asset('css/skins/header/menu/light.css') }}" rel="stylesheet" type="text/css" />
-		<link href="{{ asset('css/skins/brand/dark.css') }}" rel="stylesheet" type="text/css" />
-        <link href="{{ asset('css/skins/aside/dark.css') }}" rel="stylesheet" type="text/css" />
-
-        <!--end::Layout Skins -->
-
-		<link rel="shortcut icon" href="{{ resource_path('assets/media/logos/favicon.ico') }}" />
+        <link href="{{ asset('css/theme.css') }}" rel="stylesheet" type="text/css" />
     </head>
 
     <!-- end::Head -->
@@ -96,8 +81,11 @@
 
         <!-- end:: Page -->
 
+        <script src="{{ asset('js/vendors.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('js/app.js') }}" type="text/javascript"></script>
+
         <!--begin:: Global Mandatory Vendors -->
-		<script src="{{ asset('js/vendors/general/jquery/dist/jquery.js') }}" type="text/javascript"></script>
+		{{-- <script src="{{ asset('js/vendors/general/jquery/dist/jquery.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/vendors/general/popper.js/dist/umd/popper.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/vendors/general/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
 		<script src="{{ asset('js/vendors/general/js-cookie/src/js.cookie.js') }}" type="text/javascript"></script>
@@ -118,7 +106,7 @@
         <script src="{{ asset('js/app/custom/general/crud/datatables/basic/basic.js') }}" type="text/javascript"></script>
 
         <!--begin::Global App Bundle(used by all pages) -->
-		<script src="{{ asset('js/app.bundle.js') }}" type="text/javascript"></script>
+		<script src="{{ asset('js/app.bundle.js') }}" type="text/javascript"></script> --}}
 
 		<!--end::Global App Bundle -->
     </body>
