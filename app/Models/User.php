@@ -30,6 +30,16 @@ class User extends Authenticatable
     ];
 
     /**
+     * Check to see if the user is a super administrator.
+     *
+     * @return bool
+     */
+    public function isSuperAdministrator()
+    {
+        return $this->role_id === Role::SUPER_ADMINISTRATOR;
+    }
+
+    /**
      * Check to see if the user is an administrator.
      *
      * @return bool
