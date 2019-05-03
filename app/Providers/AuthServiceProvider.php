@@ -27,6 +27,10 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::guessPolicyNamesUsing(function ($class) {
             return '\\App\\Policies\\'.class_basename($class).'Policy';
+        Gate::before(function ($user, $ability) {
+            if ($user->isSuperAdministrator()) {
+                return true;
+            }
         });
     }
 }
