@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use App\Role;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -57,5 +58,17 @@ class User extends Authenticatable
     public function wrestler()
     {
         return $this->hasOne(Wrestler::class);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param  string $password
+     * @return void
+     */
+    public function setPasswordAttribute($password)
+    {
+
+        $this->attributes['password'] = Hash::make($password);
     }
 }
