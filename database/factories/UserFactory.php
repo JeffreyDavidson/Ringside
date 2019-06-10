@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Role;
+use App\Enums\Role;
 use App\Models\User;
 use Faker\Generator as Faker;
 
@@ -23,14 +23,14 @@ $factory->define(User::class, function (Faker $faker) {
         'email_verified_at' => now(),
         'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
         'remember_token' => str_random(10),
-        'role_id' => Role::ADMINISTRATOR,
+        'role_id' => Role::ADMINISTRATOR()->label,
     ];
 });
 
 $factory->state(User::class, 'administrator', [
-    'role_id' => Role::ADMINISTRATOR,
+    'role_id' => Role::ADMINISTRATOR()->label,
 ]);
 
 $factory->state(User::class, 'basic-user', [
-    'role_id' => Role::BASIC,
+    'role_id' => Role::BASIC()->label,
 ]);

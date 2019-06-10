@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use App\Role;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -37,7 +37,7 @@ class User extends Authenticatable
      */
     public function isSuperAdministrator()
     {
-        return $this->role_id === Role::SUPER_ADMINISTRATOR;
+        return $this->role === Role::SUPER_ADMINISTRATOR()->label;
     }
 
     /**
@@ -47,7 +47,7 @@ class User extends Authenticatable
      */
     public function isAdministrator()
     {
-        return $this->role_id === Role::ADMINISTRATOR;
+        return $this->role === Role::ADMINISTRATOR()->label;
     }
 
     /**
