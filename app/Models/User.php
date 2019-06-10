@@ -31,6 +31,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'role' => Role::class,
+    ];
+
+    /**
      * Check to see if the user is a super administrator.
      *
      * @return bool
