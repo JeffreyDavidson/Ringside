@@ -5,6 +5,9 @@
 <div class="kt-subheader kt-grid__item" id="kt_subheader">
     <div class="kt-subheader__main">
         <h3 class="kt-subheader__title">Venues</h3>
+        <a href="{{ route('venues.create') }}" class="btn btn-label-primary btn-bold btn-icon-h kt-margin-l-10">
+			Add New
+		</a>
     </div>
 </div>
 
@@ -13,27 +16,12 @@
 
 @section('content')
 <div class="kt-portlet kt-portlet--mobile">
-    <div class="kt-portlet__head kt-portlet__head--lg">
-        <div class="kt-portlet__head-label">
-            <h3 class="kt-portlet__head-title">
-                Venues
-            </h3>
-        </div>
-        <div class="kt-portlet__head-toolbar">
-            <div class="kt-portlet__head-wrapper">
-                <div class="kt-portlet__head-actions">
-                    <a href="{{ route('venues.create') }}" class="btn btn-brand btn-elevate btn-icon-sm">
-                        <i class="la la-plus"></i>
-                        New Venue
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="kt-portlet__head kt-portlet__head--lg"></div>
     <div class="kt-portlet__body">
 
         <!--begin: Datatable -->
-        @include('venues.partials.table')
+        <div class="kt-datatable" id="kt_apps_venue_list_datatable"></div>
+        {{-- @include('venues.partials.table') --}}
 
         <!--end: Datatable -->
     </div>
