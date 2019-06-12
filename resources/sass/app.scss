@@ -7,9 +7,6 @@
 // Bootstrap
 @import "~bootstrap/scss/bootstrap";
 
+@import "../../node_modules/datatables/media/css/jquery.dataTables.css";
+@import "../css/theme/components/datatables.bundle.css";
 @import "../css/theme/pages/login-1.css";
-
-.navbar-laravel {
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-}

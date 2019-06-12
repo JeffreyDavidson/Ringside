@@ -81,34 +81,33 @@
 
         <!-- end:: Page -->
 
-        <script src="{{ asset('js/vendors.js') }}" type="text/javascript"></script>
-        <script src="{{ asset('js/app.js') }}" type="text/javascript"></script>
+        <script>
+			var KTAppOptions = {
+				"colors": {
+					"state": {
+						"brand": "#5d78ff",
+						"dark": "#282a3c",
+						"light": "#ffffff",
+						"primary": "#5867dd",
+						"success": "#34bfa3",
+						"info": "#36a3f7",
+						"warning": "#ffb822",
+						"danger": "#fd3995"
+					},
+					"base": {
+						"label": ["#c5cbe3", "#a1a8c3", "#3d4465", "#3e4466"],
+						"shape": ["#f0f3ff", "#d9dffa", "#afb4d4", "#646c9a"]
+					}
+				}
+			};
+		</script>
 
-        <!--begin:: Global Mandatory Vendors -->
-		{{-- <script src="{{ asset('js/vendors/general/jquery/dist/jquery.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/popper.js/dist/umd/popper.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/js-cookie/src/js.cookie.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/moment/min/moment.min.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/tooltip.js/dist/umd/tooltip.min.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/perfect-scrollbar/dist/perfect-scrollbar.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/sticky-js/dist/sticky.min.js') }}" type="text/javascript"></script>
-		<script src="{{ asset('js/vendors/general/wnumb/wNumb.js') }}" type="text/javascript"></script>
+        <script src="{{ asset('js/manifest.js') }}"></script>
+        <script src="{{ asset('js/vendor.js') }}"></script>
+        @stack('scripts-before')
+        <script src="{{ asset('js/app.js') }}"></script>
+        @stack('scripts-after')
 
-        <!--end:: Global Mandatory Vendors -->
-
-        <!--begin::Global Theme Bundle(used by all pages) -->
-		<script src="{{ asset('js/base/scripts.bundle.js') }}" type="text/javascript"></script>
-
-        <!--end::Global Theme Bundle -->
-
-        <script src="{{ asset('js/vendors/custom/datatables/datatables.bundle.js') }}" type="text/javascript"></script>
-        <script src="{{ asset('js/app/custom/general/crud/datatables/basic/basic.js') }}" type="text/javascript"></script>
-
-        <!--begin::Global App Bundle(used by all pages) -->
-		<script src="{{ asset('js/app.bundle.js') }}" type="text/javascript"></script> --}}
-
-		<!--end::Global App Bundle -->
     </body>
 
     <!-- end::Body -->

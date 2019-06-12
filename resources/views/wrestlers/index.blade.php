@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('scripts-after')
+    <script src="{{ mix('js/wrestlers/index.js') }}"></script>
+@endpush
+
 @section('content-head')
 <!-- begin:: Content Head -->
 <div class="kt-subheader kt-grid__item" id="kt_subheader">
@@ -34,8 +38,7 @@
         <div class="kt-portlet__body">
 
             <!--begin: Datatable -->
-
-            @include('wrestlers.partials.table')
+            <table data-table="wrestlers.index" class="table table-striped- table-bordered table-hover table-checkable"></table>
 
             <!--end: Datatable -->
         </div>

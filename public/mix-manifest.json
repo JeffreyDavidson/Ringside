@@ -1,7 +1,9 @@
 {
-    "/css/app.css": "/css/app.css",
-    "/js/vendors.js": "/js/vendors.js",
-    "/css/theme.css": "/css/theme.css",
     "/js/app.js": "/js/app.js",
-    "/css/vendors.css": "/css/vendors.css"
+    "/js/manifest.js": "/js/manifest.js",
+    "/js/vendor.js": "/js/vendor.js",
+    "/js/wrestlers/index.js": "/js/wrestlers/index.js",
+    "/css/app.css": "/css/app.css",
+    "/css/theme.css": "/css/theme.css",
+    "/css/fonts.css": "/css/fonts.css"
 }
