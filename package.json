@@ -24,6 +24,8 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "block-ui": "^2.70.1",
+        "bootstrap-select": "^1.13.10",
         "datatables": "^1.10.18",
         "js-cookie": "^2.2.0",
         "lodash.endswith": "^4.2.1",

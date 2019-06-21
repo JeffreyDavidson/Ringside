@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Venues;
 
 use App\Models\Venue;
+use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVenueRequest;
 use App\Http\Requests\UpdateVenueRequest;
@@ -14,13 +16,17 @@ class VenuesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, DataTables $table)
     {
         $this->authorize('viewList', Venue::class);
 
-        $venues = Venue::all();
+        if ($request->ajax()) {
+            $query = Venue::query();
 
-        return view('venues.index', compact('venues'));
+            return $table->eloquent($query)->addColumn('action', 'venues.partials.action-cell')->toJson();
+        }
+
+        return view('venues.index');
     }
 
     /**

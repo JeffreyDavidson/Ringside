@@ -531,7 +531,7 @@ window.KTUtilElementDataStore = {};
 window.KTUtilElementDataStoreID = 0;
 window.KTUtilDelegatedEventHandlers = {};
 
-var KTUtil = (function() {
+window.KTUtil = (function() {
     var resizeHandlers = [];
 
     /** @type {object} breakpoints The device width breakpoints **/

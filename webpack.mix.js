@@ -85,5 +85,7 @@ mix.extract([
     "perfect-scrollbar",
     "sticky-js",
     "wnumb",
-    "datatables"
+    "datatables",
+    "block-ui",
+    "bootstrap-select"
 ]);
