@@ -15,21 +15,26 @@ class ViewVenuesTest extends TestCase
     {
         $this->actAs('administrator');
         $venues = factory(Venue::class, 3)->create();
+        $venues->first()->update(['name' => 'Test name with \\"&\' symbols']);
 
         $response = $this->get(route('venues.index'));
+        $responseAjax = $this->getJson(route('venues.index'), ['X-Requested-With' => 'XMLHttpRequest']);
 
         $response->assertOk();
         $response->assertViewIs('venues.index');
-        $response->assertSee(e($venues[0]->name));
-        $response->assertSee(e($venues[1]->name));
-        $response->assertSee(e($venues[2]->name));
+        $responseAjax->assertJson([
+            'recordsTotal' => $venues->count(),
+            'data'         => $venues->map(function (Venue $venue) {
+                return ['id' => $venue->id, 'name' => e($venue->name)];
+            })->toArray(),
+        ]);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_all_venues()
     {
         $this->actAs('basic-user');
-        $venues = factory(Venue::class, 3)->create();
+        factory(Venue::class, 3)->create();
 
         $response = $this->get(route('venues.index'));
 
@@ -39,10 +44,10 @@ class ViewVenuesTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_all_venues()
     {
-        $venues = factory(Venue::class, 3)->create();
+        factory(Venue::class, 3)->create();
 
         $response = $this->get(route('venues.index'));
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('login'));
     }
 }

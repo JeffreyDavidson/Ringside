@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 	<!-- begin::Head -->
@@ -23,7 +24,7 @@
 				}
 			});
 		</script>
-
+        <link href="{{ asset('css/fonts.css') }}" rel="stylesheet" type="text/css" />
         <!--end::Fonts -->
 
         <link href="{{ asset('css/app.css') }}" rel="stylesheet" type="text/css" />
