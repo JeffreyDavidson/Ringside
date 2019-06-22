@@ -57,7 +57,7 @@ class UpdateVenueTest extends TestCase
 
         $response = $this->get(route('venues.edit', $venue));
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('/login'));
     }
 
     /** @test */
@@ -108,7 +108,7 @@ class UpdateVenueTest extends TestCase
 
         $response = $this->patch(route('venues.update', $venue), $this->validParams());
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('/login'));
     }
 
     /** @test */

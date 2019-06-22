@@ -53,7 +53,7 @@ class CreateVenueTest extends TestCase
     {
         $response = $this->get(route('venues.create'));
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('login'));
     }
 
     /** @test */
@@ -99,7 +99,7 @@ class CreateVenueTest extends TestCase
     {
         $response = $this->post(route('venues.store'), $this->validParams());
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('/login'));
     }
 
     /** @test */
