@@ -6,6 +6,12 @@
     <div class="kt-subheader__main">
         <h3 class="kt-subheader__title">{{ $venue->name }}</h3>
     </div>
+    <div class="kt-subheader__toolbar">
+        <a href="{{ route('venues.index') }}"
+            class="btn btn-label-brand btn-bold">
+            Back To Venues
+        </a>
+    </div>
 </div>
 
 <!-- end:: Content Head -->
