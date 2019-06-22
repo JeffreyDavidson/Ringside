@@ -40,6 +40,6 @@ class ViewVenueTest extends TestCase
 
         $response = $this->get(route('venues.show', ['venue' => $venue]));
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('/login'));
     }
 }
