@@ -6,9 +6,10 @@ $.extend(true, $.fn.dataTable.defaults, {
     orderable: true,
     searchable: true,
     responsive: true,
+    searchDelay: 100,
+    pageLength: 10,
     language: {
-        search: "_INPUT_",
-        searchPlaceholder: "Search by any column value...",
+        search: "Search:",
         lengthMenu: "_MENU_"
     },
     columnDefs: [
@@ -22,7 +23,5 @@ $.extend(true, $.fn.dataTable.defaults, {
         ["10 per page", "25 per page", "50 per page", "100 per page"]
     ],
     dom:
-        "<'row be-datatable-header'<'col-sm-6'f><'col-sm-6'l>>" +
-        "<'row be-datatable-body'<'col-sm-12'tr>>" +
-        "<'row be-datatable-footer'<'col-sm-5'i><'col-sm-7'p>>"
+        "<'row'<'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'p><'col-sm-12 col-md-5'i><'col-sm-12 col-md-2'l>>"
 });

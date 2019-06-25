@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Titles;
 
 use App\Models\Title;
+use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTitleRequest;
 use App\Http\Requests\UpdateTitleRequest;
@@ -15,13 +17,17 @@ class TitlesController extends Controller
      * @param  string  $state
      * @return \Illuminate\Http\Response
      */
-    public function index($state = 'active')
+    public function index(Request $request, DataTables $table)
     {
         $this->authorize('viewList', Title::class);
 
-        $titles = Title::hasState($state)->get();
+        if ($request->ajax()) {
+            $query = Title::query();
 
-        return view('titles.index', compact('titles'));
+            return $table->eloquent($query)->addColumn('action', 'titles.partials.action-cell')->toJson();
+        }
+
+        return view('titles.index');
     }
 
     /**
