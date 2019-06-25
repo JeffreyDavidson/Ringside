@@ -46,10 +46,10 @@
 
 @section('content')
 <div class="kt-portlet kt-portlet--mobile">
-    <div class="kt-portlet__body">
+    <div class="kt-portlet__body p-0">
 
         <!--begin: Datatable -->
-        <table id="titles_table" data-table="titles.index" class="table table-striped- table-bordered table-hover"></table>
+        <table id="titles_table" data-table="titles.index" class="table table-hover"></table>
 
         <!--end: Datatable -->
     </div>

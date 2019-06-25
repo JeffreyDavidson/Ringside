@@ -10,7 +10,7 @@ const searchInput = $("#generalSearch");
 // begin first table
 table.DataTable({
     // Order settings
-    order: [[1, "desc"]],
+    order: [[0, "asc"]],
     ajax: "/titles",
     columns: [
         { data: "id", title: "Title ID" },
