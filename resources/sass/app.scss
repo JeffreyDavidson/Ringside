@@ -7,7 +7,20 @@
 // Bootstrap
 @import "~bootstrap/scss/bootstrap";
 
-@import "../../node_modules/datatables/media/css/jquery.dataTables.css";
+// @import "../../node_modules/datatables/media/css/jquery.dataTables.css";
 @import "../../node_modules/bootstrap-select/dist/css/bootstrap-select.css";
 @import "../css/theme/components/datatables.bundle.css";
 @import "../css/theme/pages/login-1.css";
+
+.dataTables_wrapper .dataTables_paginate .pagination .page-item {
+    margin-right: 0.4rem;
+    margin-left: 0;
+}
+
+.dataTables_length {
+    text-align: right;
+}
+
+div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+    justify-content: flex-start;
+}
