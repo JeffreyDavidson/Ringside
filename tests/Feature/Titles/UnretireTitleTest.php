@@ -6,7 +6,8 @@ use Tests\TestCase;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class UnretireRetiredTitleTest extends TestCase
+/** @group titles */
+class UnretireTitleTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -16,7 +17,7 @@ class UnretireRetiredTitleTest extends TestCase
         $this->actAs('administrator');
         $title = factory(Title::class)->states('retired')->create();
 
-        $response = $this->delete(route('titles.unretire', $title));
+        $response = $this->put(route('titles.unretire', $title));
 
         $response->assertRedirect(route('titles.index'));
         $this->assertNotNull($title->fresh()->previousRetirement->ended_at);
@@ -28,7 +29,7 @@ class UnretireRetiredTitleTest extends TestCase
         $this->actAs('basic-user');
         $title = factory(Title::class)->states('retired')->create();
 
-        $response = $this->delete(route('titles.unretire', $title));
+        $response = $this->put(route('titles.unretire', $title));
 
         $response->assertStatus(403);
     }
@@ -38,7 +39,7 @@ class UnretireRetiredTitleTest extends TestCase
     {
         $title = factory(Title::class)->states('retired')->create();
 
-        $response = $this->delete(route('titles.unretire', $title));
+        $response = $this->put(route('titles.unretire', $title));
 
         $response->assertRedirect('/login');
     }
@@ -49,7 +50,7 @@ class UnretireRetiredTitleTest extends TestCase
         $this->actAs('administrator');
         $title = factory(Title::class)->create();
 
-        $response = $this->delete(route('titles.unretire', $title));
+        $response = $this->put(route('titles.unretire', $title));
 
         $response->assertStatus(403);
     }

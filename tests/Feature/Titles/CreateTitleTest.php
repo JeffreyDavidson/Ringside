@@ -7,6 +7,7 @@ use Tests\TestCase;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/** @group titles */
 class CreateTitleTest extends TestCase
 {
     use RefreshDatabase;
@@ -20,7 +21,7 @@ class CreateTitleTest extends TestCase
     private function validParams($overrides = [])
     {
         return array_replace([
-            'name' => 'Example Title Name',
+            'name' => 'Example Name Title',
             'introduced_at' => today()->toDateTimeString(),
         ], $overrides);
     }
@@ -56,50 +57,37 @@ class CreateTitleTest extends TestCase
     /** @test */
     public function an_administrator_can_create_a_title()
     {
-        $this->withoutExceptionHandling();
         $this->actAs('administrator');
 
         $response = $this->post(route('titles.store'), $this->validParams());
 
         $response->assertRedirect(route('titles.index'));
         tap(Title::first(), function ($title) {
-            $this->assertEquals('Example Title Name', $title->name);
+            $this->assertEquals('Example Name Title', $title->name);
         });
     }
 
     /** @test */
-    public function a_title_slug_is_generated_when_created()
-    {
-        $this->actAs('administrator');
-
-        $response = $this->post(route('titles.store'), $this->validParams());
-
-        tap(Title::first(), function ($title) {
-            $this->assertEquals('example-title-name', $title->slug);
-        });
-    }
-
-    /** @test */
-    public function a_title_introduced_today_or_before_is_active()
+    public function a_title_introduced_today_or_before_is_usable()
     {
         $this->actAs('administrator');
 
         $response = $this->post(route('titles.store'), $this->validParams(['introduced_at' => today()->toDateTimeString()]));
 
         tap(Title::first(), function ($title) {
-            $this->assertTrue($title->is_active);
+            $this->assertTrue($title->is_usable);
         });
     }
 
     /** @test */
-    public function a_title_introduced_after_today_is_inactive()
+    public function a_title_introduced_after_today_is_pending_introduced()
     {
         $this->actAs('administrator');
 
         $response = $this->post(route('titles.store'), $this->validParams(['introduced_at' => Carbon::tomorrow()->toDateTimeString()]));
 
         tap(Title::first(), function ($title) {
-            $this->assertFalse($title->is_active);
+            $this->assertTrue($title->is_pending_introduced);
         });
     }
 
@@ -127,6 +115,40 @@ class CreateTitleTest extends TestCase
         $this->actAs('administrator');
 
         $response = $this->post(route('titles.store'), $this->validParams(['name' => '']));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_title_name_must_contain_at_least_three_characters()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('titles.store'), $this->validParams(['name' => 'ab']));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_title_name_must_end_with_title_or_titles()
+    {
+        $this->actAs('administrator');
+
+        $response = $this->post(route('titles.store'), $this->validParams(['name' => 'Example Name']));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_title_name_must_be_unique()
+    {
+        $this->actAs('administrator');
+        factory(Title::class)->create(['name' => 'Example Title']);
+
+        $response = $this->post(route('titles.store'), $this->validParams(['name' => 'Example Title']));
 
         $response->assertStatus(302);
         $response->assertSessionHasErrors('name');

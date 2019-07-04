@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/** @group titles */
 class RetireTitleTest extends TestCase
 {
     use RefreshDatabase;
@@ -16,9 +17,9 @@ class RetireTitleTest extends TestCase
         $this->actAs('administrator');
         $title = factory(Title::class)->create();
 
-        $response = $this->post(route('titles.retire', $title));
+        $response = $this->put(route('titles.retire', $title));
 
-        $response->assertRedirect(route('titles.index', ['state' => 'retired']));
+        $response->assertRedirect(route('titles.index'));
         $this->assertEquals(today()->toDateTimeString(), $title->fresh()->retirement->started_at);
     }
 
@@ -28,7 +29,7 @@ class RetireTitleTest extends TestCase
         $this->actAs('basic-user');
         $title = factory(Title::class)->create();
 
-        $response = $this->post(route('titles.retire', $title));
+        $response = $this->put(route('titles.retire', $title));
 
         $response->assertStatus(403);
     }
@@ -38,7 +39,7 @@ class RetireTitleTest extends TestCase
     {
         $title = factory(Title::class)->create();
 
-        $response = $this->post(route('titles.retire', $title));
+        $response = $this->put(route('titles.retire', $title));
 
         $response->assertRedirect('/login');
     }
@@ -49,7 +50,18 @@ class RetireTitleTest extends TestCase
         $this->actAs('administrator');
         $title = factory(Title::class)->states('retired')->create();
 
-        $response = $this->post(route('titles.retire', $title));
+        $response = $this->put(route('titles.retire', $title));
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function an_inactive_title_cannot_be_retired()
+    {
+        $this->actAs('administrator');
+        $title = factory(Title::class)->states('inactive')->create();
+
+        $response = $this->put(route('titles.retire', $title));
 
         $response->assertStatus(403);
     }

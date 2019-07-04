@@ -7,19 +7,21 @@ $factory->define(Title::class, function (Faker $faker) {
     return [
         'name' => $faker->sentence,
         'introduced_at' => today()->toDateTimeString(),
-        'is_active' => true,
     ];
 });
 
-$factory->state(Title::class, 'active', [
-    'is_active' => true,
-]);
+$factory->state(Title::class, 'active', function ($faker) {
+    return [
+        'introduced_at' => $faker->dateTimeBetween('-1 week', '-1 day')
+    ];
+});
+
+$factory->state(Title::class, 'inactive', function ($faker) {
+    return [
+        'introduced_at' => $faker->dateTimeBetween('+1 day', '+1 month')
+    ];
+});
 
 $factory->afterCreatingState(Title::class, 'retired', function ($title) {
     $title->retire();
 });
-
-$factory->afterCreatingState(Title::class, 'inactive', function ($title) {
-    $title->deactivate();
-});
-

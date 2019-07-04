@@ -18,7 +18,7 @@ class TitlePolicy
      */
     public function create(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -29,29 +29,39 @@ class TitlePolicy
      */
     public function update(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
      * Determine whether the user can delete a title.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Title  $title
      * @return bool
      */
-    public function delete(User $user)
+    public function delete(User $user, Title $title)
     {
-        return $user->isAdministrator();
+        if ($title->trashed()) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can restore a deleted title.
+     * Determine whether the user can restore a title.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Title  $title
      * @return bool
      */
-    public function restore(User $user)
+    public function restore(User $user, Title $title)
     {
-        return $user->isAdministrator();
+        if (!$title->trashed()) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -62,34 +72,30 @@ class TitlePolicy
      */
     public function retire(User $user, Title $title)
     {
-        return $user->isAdministrator() && ! $title->isRetired();
+        if ($title->is_pending_introduced || $title->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can unretire a retired title.
+     * Determine whether the user can unretire a title.
      *
      * @param  \App\Models\User  $user
      * @return bool
      */
     public function unretire(User $user, Title $title)
     {
-        return $user->isAdministrator() && $title->isRetired();
+        if (!$title->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can deactivate an active title.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Title  $title
-     * @return bool
-     */
-    public function deactivate(User $user, Title $title)
-    {
-        return $user->isAdministrator() && $title->isActive();
-    }
-
-    /**
-     * Determine whether the user can activate an inactive title.
+     * Determine whether the user can activate a title.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Title  $title
@@ -97,7 +103,11 @@ class TitlePolicy
      */
     public function activate(User $user, Title $title)
     {
-        return $user->isAdministrator() && ! $title->isActive();
+        if ($title->is_usable || $title->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -108,7 +118,7 @@ class TitlePolicy
      */
     public function viewList(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -119,6 +129,6 @@ class TitlePolicy
      */
     public function view(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }

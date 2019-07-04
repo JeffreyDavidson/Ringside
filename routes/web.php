@@ -77,11 +77,10 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
 
     Route::namespace('Titles')->group(function () {
         Route::resource('titles', 'TitlesController');
-        Route::patch('/titles/{title}/restore', 'TitlesController@restore')->name('titles.restore');
-        Route::post('/titles/{title}/retire', 'TitleRetirementsController@store')->name('titles.retire');
-        Route::delete('/titles/{title}/unretire', 'TitleRetirementsController@destroy')->name('titles.unretire');
-        Route::post('/titles/{title}/deactivate', 'TitleActivationsController@destroy')->name('titles.deactivate');
-        Route::post('/titles/{title}/activate', 'TitleActivationsController@store')->name('titles.activate');
+        Route::put('/titles/{title}/restore', 'RestoreController')->name('titles.restore');
+        Route::put('/titles/{title}/retire', 'RetireController')->name('titles.retire');
+        Route::put('/titles/{title}/unretire', 'UnretireController')->name('titles.unretire');
+        Route::put('/titles/{title}/activate', 'ActivateController')->name('titles.activate');
     });
 
     Route::namespace('Events')->group(function () {
