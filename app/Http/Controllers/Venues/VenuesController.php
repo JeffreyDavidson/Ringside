@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 class VenuesController extends Controller
 {
     /**
-     * Retrieve all venues.
+     * View a list of venues.
      *
      * @return \Illuminate\Http\Response
      */
@@ -87,7 +87,7 @@ class VenuesController extends Controller
     }
 
     /**
-     * Update a given Venue.
+     * Update a given venue.
      *
      * @param  \App\Http\Requests\UpdateVenueRequest  $request
      * @param  \App\Models\Venue  $venue

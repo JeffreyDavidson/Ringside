@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/** @group venues */
 class CreateVenueTest extends TestCase
 {
     use RefreshDatabase;
@@ -99,7 +100,7 @@ class CreateVenueTest extends TestCase
     {
         $response = $this->post(route('venues.store'), $this->validParams());
 
-        $response->assertRedirect(route('/login'));
+        $response->assertRedirect(route('login'));
     }
 
     /** @test */
