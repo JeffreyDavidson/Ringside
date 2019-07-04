@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Titles;
 
 use App\Models\Title;
 use Illuminate\Http\Request;
+use App\Filters\TitleFilters;
 use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTitleRequest;
@@ -17,14 +18,23 @@ class TitlesController extends Controller
      * @param  string  $state
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, DataTables $table)
+    public function index(Request $request, DataTables $table, TitleFilters $requestFilter)
     {
         $this->authorize('viewList', Title::class);
 
         if ($request->ajax()) {
             $query = Title::query();
+            $requestFilter->apply($query);
 
-            return $table->eloquent($query)->addColumn('action', 'titles.partials.action-cell')->toJson();
+            return $table->eloquent($query)
+                ->addColumn('action', 'titles.partials.action-cell')
+                ->editColumn('introduced_at', function (Title $title) {
+                    return $title->introduced_at->format('Y-m-d H:s');
+                })
+                ->filterColumn('id', function ($query, $keyword) {
+                    $query->where($query->qualifyColumn('id'), $keyword);
+                })
+                ->toJson();
         }
 
         return view('titles.index');
@@ -39,7 +49,7 @@ class TitlesController extends Controller
     {
         $this->authorize('create', Title::class);
 
-        return response()->view('titles.create');
+        return view('titles.create');
     }
 
     /**
@@ -81,7 +91,7 @@ class TitlesController extends Controller
     }
 
     /**
-     * Create a new title.
+     * Update an existing title.
      *
      * @param  \App\Http\Requests\UpdateTitleRequest  $request
      * @param  \App\Models\Title  $title
@@ -95,33 +105,16 @@ class TitlesController extends Controller
     }
 
     /**
-     * Delete a wrestler.
+     * Delete a title.
      *
-     * @param  App\Models\Wrestler  $wrestler
+     * @param  App\Models\Title  $title
      * @return \lluminate\Http\RedirectResponse
      */
     public function destroy(Title $title)
     {
-        $this->authorize('delete', Title::class);
+        $this->authorize('delete', $title);
 
         $title->delete();
-
-        return redirect()->route('titles.index');
-    }
-
-    /**
-     * Restore a deleted title.
-     *
-     * @param  int  $titleId
-     * @return \lluminate\Http\RedirectResponse
-     */
-    public function restore($titleId)
-    {
-        $title = Title::onlyTrashed()->findOrFail($titleId);
-
-        $this->authorize('restore', Title::class);
-
-        $title->restore();
 
         return redirect()->route('titles.index');
     }

@@ -5,5 +5,7 @@ import "datatables.net/js/jquery.dataTables";
 import "./bootstrappers/datatables.js";
 require("block-ui");
 require("bootstrap-select");
+require("flatpickr");
 window.$ = jQuery;
 window.jQuery = jQuery;
+require("./bootstrappers/global-hooks.js");

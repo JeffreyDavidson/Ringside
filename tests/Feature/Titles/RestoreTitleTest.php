@@ -6,7 +6,8 @@ use Tests\TestCase;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class RestoreDeletedTitleTest extends TestCase
+/** @group titles */
+class RestoreTitleTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -14,9 +15,9 @@ class RestoreDeletedTitleTest extends TestCase
     public function an_administrator_can_restore_a_deleted_title()
     {
         $this->actAs('administrator');
-        $title = factory(Title::class)->create(['deleted_at' => today()->subDays(3)->toDateTimeString()]);
+        $title = factory(Title::class)->create(['deleted_at' => today()->toDateTimeString()]);
 
-        $response = $this->patch(route('titles.restore', $title));
+        $response = $this->put(route('titles.restore', $title));
 
         $response->assertRedirect(route('titles.index'));
         $this->assertNull($title->fresh()->deleted_at);
@@ -26,9 +27,9 @@ class RestoreDeletedTitleTest extends TestCase
     public function a_basic_user_cannot_restore_a_deleted_title()
     {
         $this->actAs('basic-user');
-        $title = factory(Title::class)->create(['deleted_at' => today()->subDays(3)->toDateTimeString()]);
+        $title = factory(Title::class)->create(['deleted_at' => today()->toDateTimeString()]);
 
-        $response = $this->patch(route('titles.restore', $title));
+        $response = $this->put(route('titles.restore', $title));
 
         $response->assertStatus(403);
     }
@@ -36,11 +37,11 @@ class RestoreDeletedTitleTest extends TestCase
     /** @test */
     public function a_guest_cannot_restore_a_deleted_title()
     {
-        $title = factory(Title::class)->create(['deleted_at' => today()->subDays(3)->toDateTimeString()]);
+        $title = factory(Title::class)->create(['deleted_at' => today()->toDateTimeString()]);
 
-        $response = $this->patch(route('titles.restore', $title));
+        $response = $this->put(route('titles.restore', $title));
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect(route('login'));
     }
 
     /** @test */
@@ -49,7 +50,7 @@ class RestoreDeletedTitleTest extends TestCase
         $this->actAs('administrator');
         $title = factory(Title::class)->create();
 
-        $response = $this->patch(route('titles.restore', $title));
+        $response = $this->put(route('titles.restore', $title));
 
         $response->assertStatus(404);
     }

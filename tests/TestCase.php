@@ -26,4 +26,9 @@ abstract class TestCase extends BaseTestCase
 
         return $user;
     }
+
+    protected function ajaxJson($url)
+    {
+        return $this->getJson($url, ['X-Requested-With' => 'XMLHttpRequest']);
+    }
 }

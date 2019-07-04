@@ -16,9 +16,7 @@ class CreateTitlesTable extends Migration
         Schema::create('titles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('slug');
-            $table->datetime('introduced_at');
-            $table->boolean('is_active');
+            $table->dateTime('introduced_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

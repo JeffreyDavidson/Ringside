@@ -1,23 +1,68 @@
 "use strict";
 
-const renderStatusCell = (data, type, full, meta) =>
-    data ? "Active" : "Inactive";
-
 const table = $('[data-table="titles.index"]');
 const rowCounter = $("#kt_subheader_total");
 const searchInput = $("#generalSearch");
+const statusDropdown = $("#status-dropdown");
+const introducedAtStart = $("#introduced_at_start");
+const introducedAtEnd = $("#introduced_at_end");
+
+const filterData = {
+    status: null,
+    introduced_at: null
+};
+
+const updateFilters = () => {
+    filterData.status = statusDropdown.val();
+    if (introducedAtStart.val() && introducedAtEnd.val()) {
+        filterData.introduced_at = [
+            introducedAtStart.val(),
+            introducedAtEnd.val()
+        ];
+    } else if (introducedAtStart.val()) {
+        filterData.introduced_at = [introducedAtStart.val()];
+    } else {
+        filterData.introduced_at = null;
+    }
+
+    table
+        .dataTable()
+        .api()
+        .draw();
+};
+
+const clearFilters = () => {
+    filterData.status = null;
+    filterData.introduced_at = null;
+    statusDropdown.val("");
+    introducedAtStart.val("");
+    introducedAtEnd.val("");
+    table
+        .dataTable()
+        .api()
+        .draw();
+};
 
 // begin first table
 table.DataTable({
     // Order settings
     order: [[0, "asc"]],
-    ajax: "/titles",
+    ajax: {
+        url: window.location.href,
+        data(params) {
+            params.status = filterData.status;
+            params.introduced_at = filterData.introduced_at;
+        }
+    },
     columns: [
         { data: "id", title: "Title ID" },
         { data: "name", title: "Title" },
-        { data: "slug", title: "Slug" },
-        { data: "introduced_at", title: "Date Introduced" },
-        { data: "is_active", title: "Status", render: renderStatusCell },
+        { data: "introduced_at", title: "Date Introduced", searchable: false },
+        {
+            data: "status",
+            title: "Status",
+            searchable: false
+        },
         {
             data: "action",
             title: "Actions",
@@ -45,3 +90,6 @@ table.on("draw.dt", (e, settings) => {
         rowCounter.html(`${settings.fnRecordsDisplay()} Matching Rows`);
     }
 });
+
+$("#applyFilters").click(() => updateFilters());
+$("#clearFilters").click(() => clearFilters());

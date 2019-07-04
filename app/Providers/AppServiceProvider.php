@@ -17,6 +17,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('datatables.request', function () {
             return new CustomDataTablesRequest;
         });
+
+        if ($this->app->environment() !== 'production') {
+            $this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+        }
     }
 
     /**

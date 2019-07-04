@@ -28,7 +28,8 @@ mix.styles(
 mix.styles(
     [
         "resources/vendors/flaticon/flaticon.css",
-        "resources/vendors/flaticon2/flaticon.css"
+        "resources/vendors/flaticon2/flaticon.css",
+        "resources/vendors/line-awesome/css/line-awesome.css"
     ],
     "public/css/fonts.css"
 );
@@ -39,6 +40,7 @@ mix.sass("resources/sass/app.scss", "public/css");
  ************************************************************************/
 mix.copyDirectory("resources/vendors/flaticon/font", "public/css/font");
 mix.copyDirectory("resources/vendors/flaticon2/font", "public/css/font");
+mix.copyDirectory("resources/vendors/line-awesome/fonts", "public/css/font");
 
 /************************************************************************
  * Mix Configuration
@@ -87,5 +89,6 @@ mix.extract([
     "wnumb",
     "datatables.net",
     "block-ui",
-    "bootstrap-select"
+    "bootstrap-select",
+    "flatpickr"
 ]);

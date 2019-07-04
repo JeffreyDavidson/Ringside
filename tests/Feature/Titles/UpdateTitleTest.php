@@ -2,10 +2,12 @@
 
 namespace Tests\Feature\Titles;
 
+use Carbon\Carbon;
 use Tests\TestCase;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/** @group titles */
 class UpdateTitleTest extends TestCase
 {
     use RefreshDatabase;
@@ -19,7 +21,7 @@ class UpdateTitleTest extends TestCase
     private function validParams($overrides = [])
     {
         return array_replace([
-            'name' => 'Example Title Name',
+            'name' => 'Example Name Title',
             'introduced_at' => today()->toDateTimeString(),
         ], $overrides);
     }
@@ -67,7 +69,7 @@ class UpdateTitleTest extends TestCase
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) {
-            $this->assertEquals('Example Title Name', $title->name);
+            $this->assertEquals('Example Name Title', $title->name);
         });
     }
 
@@ -100,6 +102,49 @@ class UpdateTitleTest extends TestCase
 
         $response = $this->patch(route('titles.update', $title), $this->validParams([
             'name' => ''
+        ]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_title_name_must_contain_at_least_3_characters()
+    {
+        $this->actAs('administrator');
+        $title = factory(Title::class)->create();
+
+        $response = $this->patch(route('titles.update', $title), $this->validParams([
+            'name' => 'ab'
+        ]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_title_name_must_end_with_title_or_titles()
+    {
+        $this->actAs('administrator');
+        $title = factory(Title::class)->create();
+
+        $response = $this->patch(route('titles.update', $title), $this->validParams([
+            'name' => 'Example Name'
+        ]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+    /** @test */
+    public function a_title_name_must_be_unique()
+    {
+        $this->actAs('administrator');
+        $title = factory(Title::class)->create(['name' => 'Example One Title']);
+        factory(Title::class)->create(['name' => 'Example Two Title']);
+
+        $response = $this->patch(route('titles.update', $title), $this->validParams([
+            'name' => 'Example Two Title'
         ]));
 
         $response->assertStatus(302);
@@ -142,6 +187,20 @@ class UpdateTitleTest extends TestCase
 
         $response = $this->patch(route('titles.update', $title), $this->validParams([
             'introduced_at' => 'not-a-datetime'
+        ]));
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('introduced_at');
+    }
+
+    /** @test */
+    public function a_title_that_has_been_introduced_in_the_past_must_be_introduced_before_or_on_same_day()
+    {
+        $this->actAs('administrator');
+        $title = factory(Title::class)->create(['introduced_at' => Carbon::yesterday()]);
+
+        $response = $this->patch(route('titles.update', $title), $this->validParams([
+            'introduced_at' => Carbon::today()->addDays(3)->toDateTimeString(),
         ]));
 
         $response->assertStatus(302);
