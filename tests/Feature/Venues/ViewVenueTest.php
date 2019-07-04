@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/** @group venues */
 class ViewVenueTest extends TestCase
 {
     use RefreshDatabase;
@@ -40,6 +41,6 @@ class ViewVenueTest extends TestCase
 
         $response = $this->get(route('venues.show', ['venue' => $venue]));
 
-        $response->assertRedirect(route('/login'));
+        $response->assertRedirect(route('login'));
     }
 }

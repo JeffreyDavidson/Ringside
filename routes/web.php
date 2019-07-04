@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Controllers\Titles\TitlesController;
+use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Titles\RestoreController;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\UnretireController;
@@ -67,7 +68,7 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
         Route::delete('/stables/{stable}/reinstate', [StableSuspensionsController::class, 'destroy'])->name('stables.reinstate');
     });
 
-    Route::resource('venues', 'VenuesController')->except('destroy');
+    Route::resource('venues', VenuesController::class)->except('destroy');
 
     Route::resource('titles', TitlesController::class);
     Route::put('/titles/{title}/restore', RestoreController::class)->name('titles.restore');
