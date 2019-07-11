@@ -81,7 +81,7 @@ class Title extends Model
             return TitleStatus::RETIRED();
         }
 
-        return TitleStatus::INACTIVE();
+        return TitleStatus::PENDING_INTRODUCED();
     }
 
     /**
@@ -139,11 +139,12 @@ class Title extends Model
     }
 
     /**
-     * Scope a query to only include inactive titles.
+    /**
+     * Scope a query to only include pending introduced titles.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopeInactive($query)
+    public function scopePendingIntroduced($query)
     {
         $query->where('introduced_at', '>', now());
     }

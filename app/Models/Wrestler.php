@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler bookable()
  * @method static bool|null forceDelete()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler inactive()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler pending_introduced()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler injured()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler newQuery()
@@ -243,7 +243,7 @@ class Wrestler extends Model
             return WrestlerStatus::SUSPENDED();
         }
 
-        return WrestlerStatus::INACTIVE();
+        return WrestlerStatus::PENDING_INTRODUCED();
     }
 
     /**
@@ -341,7 +341,7 @@ class Wrestler extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopeInactive($query)
+    public function scopePendingIntroduced($query)
     {
         return $query->whereNull('hired_at')
                 ->orWhere('hired_at', '>', now());

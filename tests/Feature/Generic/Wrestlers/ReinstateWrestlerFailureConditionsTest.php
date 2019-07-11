@@ -26,10 +26,10 @@ class ReinstateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_inactive_wrestler_cannot_be_reinstated()
+    public function a_pending_introduced_wrestler_cannot_be_reinstated()
     {
         $this->actAs('administrator');
-        $wrestler = factory(Wrestler::class)->states('inactive')->create();
+        $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
 
         $response = $this->put(route('wrestlers.reinstate', $wrestler));
 
