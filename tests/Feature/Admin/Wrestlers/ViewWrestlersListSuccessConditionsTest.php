@@ -30,24 +30,24 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
             return ['id' => $wrestler->id, 'name' => e($wrestler->name)];
         };
 
-        $bookable  = factory(Wrestler::class, 3)->states('bookable')->create()->map($mapToIdAndName);
-        $retired   = factory(Wrestler::class, 3)->states('retired')->create()->map($mapToIdAndName);
-        $suspended = factory(Wrestler::class, 3)->states('suspended')->create()->map($mapToIdAndName);
-        $injured   = factory(Wrestler::class, 3)->states('injured')->create()->map($mapToIdAndName);
+        $bookable          = factory(Wrestler::class, 3)->states('bookable')->create()->map($mapToIdAndName);
         $pendingIntroduced = factory(Wrestler::class, 3)->states('pending-introduced')->create()->map($mapToIdAndName);
+        $retired           = factory(Wrestler::class, 3)->states('retired')->create()->map($mapToIdAndName);
+        $suspended         = factory(Wrestler::class, 3)->states('suspended')->create()->map($mapToIdAndName);
+        $injured           = factory(Wrestler::class, 3)->states('injured')->create()->map($mapToIdAndName);
 
         $this->wrestlers = collect([
-            'bookable'  => $bookable,
-            'retired'   => $retired,
-            'suspended' => $suspended,
-            'injured'   => $injured,
-            'all'       => collect()
-                ->concat($bookable)
-                ->concat($retired)
-                ->concat($suspended)
-                ->concat($injured)
+            'bookable'           => $bookable,
             'pending-introduced' => $pendingIntroduced,
+            'retired'            => $retired,
+            'suspended'          => $suspended,
+            'injured'            => $injured,
+            'all'                => collect()
+                                ->concat($bookable)
                                 ->concat($pendingIntroduced)
+                                ->concat($retired)
+                                ->concat($suspended)
+                                ->concat($injured)
         ]);
     }
 
