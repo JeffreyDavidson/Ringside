@@ -3,7 +3,6 @@
 namespace Tests\Feature\User\Wrestlers;
 
 use Tests\TestCase;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -36,10 +35,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_creating_a_wrestler()
     {
-        $user = factory(User::class)->states('basic-user')->create();
+        $this->actAs('basic-user');
 
-        $response = $this->actingAs($user)
-                        ->get(route('wrestlers.create'));
+        $response = $this->get(route('wrestlers.create'));
 
         $response->assertForbidden();
     }
@@ -47,10 +45,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_create_a_wrestler()
     {
-        $user = factory(User::class)->states('basic-user')->create();
+        $this->actAs('basic-user');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams());
 
         $response->assertForbidden();

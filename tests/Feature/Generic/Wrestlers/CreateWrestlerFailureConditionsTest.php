@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Feature\Admin\Wrestlers;
+namespace Tests\Feature\Generic\Wrestlers;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -37,10 +36,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_name_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'name' => '',
                         ]));
@@ -54,10 +52,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_name_must_be_a_string()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'name' => ['not-a-string'],
                         ]));
@@ -71,10 +68,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_name_must_be_at_least_three_characters()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'name' => 'Ab',
                         ]));
@@ -88,10 +84,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_feet_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'feet' => '',
                         ]));
@@ -105,10 +100,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_feet_must_be_numeric()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'feet' => 'not-numeric',
                         ]));
@@ -122,10 +116,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_feet_must_be_a_minimum_of_five()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'feet' => '4',
                         ]));
@@ -139,10 +132,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_feet_must_be_a_maximum_of_seven()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'feet' => '8',
                         ]));
@@ -156,10 +148,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_inches_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'inches' => '',
                         ]));
@@ -173,10 +164,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_inches_is_must_be_numeric()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'inches' => 'not-numeric',
                         ]));
@@ -190,10 +180,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_inches_must_be_less_than_twelve()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'inches' => '12',
                         ]));
@@ -207,10 +196,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_weight_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'weight' => '',
                         ]));
@@ -224,10 +212,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_weight_must_be_numeric()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'weight' => 'not-numeric',
                         ]));
@@ -241,10 +228,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hometown_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'hometown' => '',
                         ]));
@@ -258,10 +244,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hometown_must_be_a_string()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'hometown' => ['not-a-string'],
                         ]));
@@ -275,10 +260,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_signature_move_must_be_a_string_if_present()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'signature_move' => ['not-a-string'],
                         ]));
@@ -292,10 +276,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hired_at_date_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'hired_at' => '',
                         ]));
@@ -309,10 +292,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hired_at_must_be_a_string()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'hired_at' => ['not-a-date-format'],
                         ]));
@@ -326,10 +308,9 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hired_at_must_be_in_date_format()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.create'))
+        $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
                             'hired_at' => 'not-a-date-format',
                         ]));

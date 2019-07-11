@@ -1,15 +1,14 @@
 <?php
 
-namespace Tests\Feature\SuperAdmin\Wrestlers;
+namespace Tests\Feature\Generic\Wrestlers;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group wrestlers
- * @group superadmins
+ * @group generics
  */
 class UpdateWrestlerFailureConditionsTest extends TestCase
 {
@@ -53,90 +52,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function an_administrator_can_view_the_form_for_editing_a_wrestler()
-    {
-        $user = factory(User::class)->states('administrator')->create();
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->actingAs($user)
-                        ->get(route('wrestlers.edit', $wrestler));
-
-        $response->assertViewIs('wrestlers.edit');
-        $this->assertTrue($response->data('wrestler')->is($wrestler));
-    }
-
-    /** @test */
-    public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
-    {
-        $user = factory(User::class)->states('basic-user')->create();
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->actingAs($user)
-                        ->get(route('wrestlers.edit', $wrestler));
-
-        $response->assertStatus(403);
-    }
-
-    /** @test */
-    public function a_guest_cannot_view_the_form_for_editing_a_wrestler()
-    {
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->get(route('wrestlers.edit', $wrestler));
-
-        $response->assertRedirect('/login');
-    }
-
-    /** @test */
-    public function an_administrator_can_update_a_wrestler()
-    {
-        $user = factory(User::class)->states('administrator')->create();
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
-                        ->patch(route('wrestlers.update', $wrestler), $this->validParams());
-
-        $response->assertRedirect(route('wrestlers.index'));
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals('Example Wrestler Name', $wrestler->name);
-            $this->assertEquals(76, $wrestler->height);
-            $this->assertEquals(240, $wrestler->weight);
-            $this->assertEquals('Laraville, FL', $wrestler->hometown);
-            $this->assertEquals('The Finisher', $wrestler->signature_move);
-        });
-    }
-
-    /** @test */
-    public function a_basic_user_cannot_update_a_wrestler()
-    {
-        $user = factory(User::class)->states('basic-user')->create();
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->actingAs($user)
-                        ->patch(route('wrestlers.update', $wrestler), $this->validParams());
-
-        $response->assertStatus(403);
-    }
-
-    /** @test */
-    public function a_guest_cannot_update_a_wrestler()
-    {
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams());
-
-        $response->assertRedirect('/login');
-    }
-
-    /** @test */
     public function a_wrestler_name_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'name' => '',
                         ]));
@@ -151,11 +72,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_name_must_be_a_string()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'name' => ['not-a-string'],
                         ]));
@@ -170,11 +90,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_name_must_be_at_least_three_characters()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'name' => 'Ab',
                         ]));
@@ -187,13 +106,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_feet_is_required()
+    public function a_wrestler_height_in_feet_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'feet' => '',
                         ]));
@@ -206,13 +124,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_feet_must_be_numeric()
+    public function a_wrestler_height_in_feet_must_be_numeric()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'feet' => 'not-an-integer',
                         ]));
@@ -225,13 +142,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_feet_must_be_a_minimum_of_five()
+    public function a_wrestler_height_in_feet_must_be_a_minimum_of_five()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'feet' => '4',
                         ]));
@@ -244,13 +160,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_feet_must_be_a_maximum_of_seven()
+    public function a_wrestler_height_in_feet_must_be_a_maximum_of_seven()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'feet' => '8',
                         ]));
@@ -263,13 +178,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_inches_is_required()
+    public function a_wrestler_height_in_inches_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'inches' => '',
                         ]));
@@ -282,13 +196,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_inches_is_must_be_numeric()
+    public function a_wrestler_height_in_inches_is_must_be_numeric()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'inches' => 'not-an-integer',
                         ]));
@@ -301,13 +214,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_inches_must_be_less_than_twelve()
+    public function a_wrestler_height_in_inches_must_be_less_than_twelve()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'inches' => 12,
                         ]));
@@ -322,11 +234,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_weight_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'weight' => '',
                         ]));
@@ -341,11 +252,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_weight_must_be_numeric()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'weight' => 'not-an-integer',
                         ]));
@@ -360,11 +270,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hometown_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'hometown' => '',
                         ]));
@@ -379,11 +288,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hometown_must_be_a_string()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'hometown' => ['not-a-string'],
                         ]));
@@ -396,28 +304,12 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_signature_move_is_optional()
-    {
-        $user = factory(User::class)->states('administrator')->create();
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
-                        ->patch(route('wrestlers.update', $wrestler), $this->validParams([
-                            'signature_move' => '',
-                        ]));
-
-        $response->assertSessionDoesntHaveErrors('signature_move');
-    }
-
-    /** @test */
     public function a_wrestler_signature_move_must_be_a_string_if_present()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'signature_move' => ['not-a-string'],
                         ]));
@@ -432,11 +324,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hired_at_date_is_required()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'hired_at' => '',
                         ]));
@@ -451,11 +342,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hired_at_date_must_be_a_string()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'hired_at' => ['not-a-string'],
                         ]));
@@ -470,11 +360,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_wrestler_hired_at_must_be_in_date_format()
     {
-        $user = factory(User::class)->states('administrator')->create();
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
                             'hired_at' => 'not-a-date-format',
                         ]));
