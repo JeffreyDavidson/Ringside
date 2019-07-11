@@ -21,7 +21,7 @@ class ActivateTitleTest extends TestCase
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) {
-            $this->assertTrue($title->is_usable);
+            $this->assertTrue($title->is_bookable);
             $this->assertEquals(now()->toDateTimeString(), $title->introduced_at->toDateTimeString());
         });
     }

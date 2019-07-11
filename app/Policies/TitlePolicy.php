@@ -103,7 +103,7 @@ class TitlePolicy
      */
     public function activate(User $user, Title $title)
     {
-        if ($title->is_usable || $title->is_retired) {
+        if ($title->is_bookable || $title->is_retired) {
             return false;
         }
 

@@ -63,7 +63,7 @@ class Title extends Model
      *
      * @var array
      */
-    protected $appends = ['is_usable'];
+    protected $appends = ['is_bookable'];
 
     /**
      * Determine the status of the title.
@@ -73,8 +73,8 @@ class Title extends Model
      */
     public function getStatusAttribute()
     {
-        if ($this->is_usable) {
-            return TitleStatus::ACTIVE();
+        if ($this->is_bookable) {
+            return TitleStatus::BOOKABLE();
         }
 
         if ($this->isRetired()) {
@@ -99,7 +99,7 @@ class Title extends Model
      *
      * @return bool
      */
-    public function getIsUsableAttribute()
+    public function getIsBookableAttribute()
     {
         return !($this->isRetired() || $this->is_pending_introduced);
     }
@@ -129,7 +129,7 @@ class Title extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopeActive($query)
+    public function scopeBookable($query)
     {
         $query->whereDoesntHave('retirements', function (Builder $query) {
             $query->whereNull('ended_at');

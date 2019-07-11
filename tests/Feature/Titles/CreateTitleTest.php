@@ -68,14 +68,14 @@ class CreateTitleTest extends TestCase
     }
 
     /** @test */
-    public function a_title_introduced_today_or_before_is_usable()
+    public function a_title_introduced_today_or_before_is_bookable()
     {
         $this->actAs('administrator');
 
         $response = $this->post(route('titles.store'), $this->validParams(['introduced_at' => today()->toDateTimeString()]));
 
         tap(Title::first(), function ($title) {
-            $this->assertTrue($title->is_usable);
+            $this->assertTrue($title->is_bookable);
         });
     }
 

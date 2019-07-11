@@ -5,7 +5,7 @@ use App\Enums\WrestlerStatus;
 
 return [
     TitleStatus::class => [
-        TitleStatus::ACTIVE => 'Active',
+        TitleStatus::BOOKABLE => 'Bookable',
         TitleStatus::PENDING_INTRODUCED => 'Pending Introduced',
         TitleStatus::RETIRED => 'Retired',
     ],
