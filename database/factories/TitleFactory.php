@@ -10,7 +10,7 @@ $factory->define(Title::class, function (Faker $faker) {
     ];
 });
 
-$factory->state(Title::class, 'active', function ($faker) {
+$factory->state(Title::class, 'bookable', function ($faker) {
     return [
         'introduced_at' => $faker->dateTimeBetween('-1 week', '-1 day')
     ];

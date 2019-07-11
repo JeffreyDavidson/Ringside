@@ -22,8 +22,8 @@ class TitleFilters extends Filters
     public function status($status)
     {
         switch ($status) {
-            case 'only_active':
-                $this->builder->active();
+            case 'only_bookable':
+                $this->builder->bookable();
                 break;
             case 'only_pending_introduced':
                 $this->builder->pendingIntroduced();
