@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use App\Traits\Sluggable;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use Sluggable,
-        SoftDeletes;
+    use SoftDeletes;
 
     /**
      * The attributes that aren't mass assignable.

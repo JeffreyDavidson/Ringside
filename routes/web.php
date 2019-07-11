@@ -7,6 +7,15 @@ use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Titles\RestoreController;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\UnretireController;
+use App\Http\Controllers\Wrestlers\InjureController;
+use App\Http\Controllers\Wrestlers\RecoverController;
+use App\Http\Controllers\Wrestlers\SuspendController;
+use App\Http\Controllers\Wrestlers\ReinstateController;
+use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Http\Controllers\Wrestlers\RestoreController as WrestlerRestoreController;
+use App\Http\Controllers\Wrestlers\RetireController as WrestlerRetireController;
+use App\Http\Controllers\Wrestlers\UnretireController as WrestlerUnretireController;
+use App\Http\Controllers\Wrestlers\ActivateController as WrestlerActivateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,16 +31,15 @@ use App\Http\Controllers\Titles\UnretireController;
 Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
     Route::prefix('roster')->group(function () {
-        Route::resource('wrestlers', 'WrestlersController');
-        Route::patch('/wrestlers/{wrestler}/restore', [WrestlersController::class, 'restore'])->name('wrestlers.restore');
-        Route::post('/wrestlers/{wrestler}/retire', [WrestlerRetirementsController::class, 'store'])->name('wrestlers.retire');
-        Route::delete('/wrestlers/{wrestler}/unretire', [WrestlerRetirementsController::class, 'destroy'])->name('wrestlers.unretire');
-        Route::delete('/wrestlers/{wrestler}/reinstate', [WrestlerSuspensionsController::class, 'destroy'])->name('wrestlers.reinstate');
-        Route::post('/wrestlers/{wrestler}/injure', [WrestlerInjuriesController::class, 'store'])->name('wrestlers.injure');
-        Route::delete('/wrestlers/{wrestler}/recover', [WrestlerInjuriesController::class, 'destroy'])->name('wrestlers.recover');
-        Route::post('/wrestlers/{wrestler}/deactivate', [WrestlerActivationsController::class, 'destroy'])->name('wrestlers.deactivate');
-        Route::post('/wrestlers/{wrestler}/activate', [WrestlerActivationsController::class, 'store'])->name('wrestlers.activate');
-        Route::post('/wrestlers/{wrestler}/suspend', [WrestlerSuspensionsController::class, 'store'])->name('wrestlers.suspend');
+        Route::resource('wrestlers', WrestlersController::class);
+        Route::put('/wrestlers/{wrestler}/restore', WrestlerRestoreController::class)->name('wrestlers.restore');
+        Route::put('/wrestlers/{wrestler}/activate', WrestlerActivateController::class)->name('wrestlers.activate');
+        Route::put('/wrestlers/{wrestler}/retire', WrestlerRetireController::class)->name('wrestlers.retire');
+        Route::put('/wrestlers/{wrestler}/unretire', WrestlerUnretireController::class)->name('wrestlers.unretire');
+        Route::put('/wrestlers/{wrestler}/suspend', SuspendController::class)->name('wrestlers.suspend');
+        Route::put('/wrestlers/{wrestler}/reinstate', ReinstateController::class)->name('wrestlers.reinstate');
+        Route::put('/wrestlers/{wrestler}/injure', InjureController::class)->name('wrestlers.injure');
+        Route::put('/wrestlers/{wrestler}/recover', RecoverController::class)->name('wrestlers.recover');
         Route::resource('tagteams', 'TagTeamsController');
         Route::patch('/tag-teams/{tagteam}/restore', [TagTeamsController::class, 'restore'])->name('tagteams.restore');
         Route::post('/tag-teams/{tagteam}/suspend', [TagTeamSuspensionsController::class, 'store'])->name('tagteams.suspend');

@@ -2,23 +2,13 @@
 
 namespace App\Models;
 
-use App\Traits\Hireable;
-use App\Traits\Injurable;
-use App\Traits\Retireable;
-use App\Traits\Activatable;
-use App\Traits\Suspendable;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Manager extends Model
 {
-    use SoftDeletes,
-        Retireable,
-        Suspendable,
-        Injurable,
-        Activatable,
-        Hireable;
+    use SoftDeletes;
 
     /**
      * The "booting" method of the model.

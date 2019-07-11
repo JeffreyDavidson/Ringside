@@ -12,18 +12,17 @@ $factory->define(Wrestler::class, function (Faker $faker) {
         'name' => $name,
         'height' => $faker->numberBetween(60, 95),
         'weight' => $faker->numberBetween(180, 500),
-        'hometown' => $faker->city .', '.$faker->state,
+        'hometown' => $faker->city . ', ' . $faker->state,
         'signature_move' => Str::title($faker->words(3, true)),
         'hired_at' => $faker->dateTime(),
-        'is_active' => true,
     ];
 });
 
-$factory->state(Wrestler::class, 'active', [
-    'is_active' => true,
+$factory->state(Wrestler::class, 'bookable', [
+    'hired_at' => Carbon::yesterday()->toDateTimeString(),
 ]);
 
-$factory->state(Wrestler::class, 'future', [
+$factory->state(Wrestler::class, 'inactive', [
     'hired_at' => Carbon::tomorrow()->toDateTimeString(),
 ]);
 
@@ -37,8 +36,4 @@ $factory->afterCreatingState(Wrestler::class, 'suspended', function ($wrestler) 
 
 $factory->afterCreatingState(Wrestler::class, 'injured', function ($wrestler) {
     $wrestler->injure();
-});
-
-$factory->afterCreatingState(Wrestler::class, 'inactive', function ($wrestler) {
-    $wrestler->deactivate();
 });

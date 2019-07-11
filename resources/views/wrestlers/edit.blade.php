@@ -6,6 +6,12 @@
     <div class="kt-subheader__main">
         <h3 class="kt-subheader__title">Wrestlers</h3>
     </div>
+    <div class="kt-subheader__toolbar">
+        <a href="{{ route('wrestlers.index') }}"
+            class="btn btn-label-brand btn-bold">
+            Back To Wrestlers
+        </a>
+    </div>
 </div>
 
 <!-- end:: Content Head -->
@@ -19,14 +25,6 @@
             <h3 class="kt-portlet__head-title">
                 Edit Wrestler Form
             </h3>
-        </div>
-        <div class="kt-portlet__head-toolbar">
-            <div class="kt-portlet__head-actions">
-                <a href="{{ route('wrestlers.index') }}" class="btn btn-brand btn-elevate btn-bold">
-                    <i class="la la-angle-double-left"></i>
-                    Back to Wrestlers
-                </a>
-            </div>
         </div>
     </div>
 
