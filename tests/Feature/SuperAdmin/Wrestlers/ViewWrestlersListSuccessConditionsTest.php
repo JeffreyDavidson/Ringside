@@ -31,23 +31,23 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
         };
 
         $bookable  = factory(Wrestler::class, 3)->states('bookable')->create()->map($mapToIdAndName);
-        $inactive  = factory(Wrestler::class, 3)->states('inactive')->create()->map($mapToIdAndName);
         $retired   = factory(Wrestler::class, 3)->states('retired')->create()->map($mapToIdAndName);
         $suspended = factory(Wrestler::class, 3)->states('suspended')->create()->map($mapToIdAndName);
         $injured   = factory(Wrestler::class, 3)->states('injured')->create()->map($mapToIdAndName);
+        $pendingIntroduced = factory(Wrestler::class, 3)->states('pending-introduced')->create()->map($mapToIdAndName);
 
         $this->wrestlers = collect([
             'bookable'  => $bookable,
-            'inactive'  => $inactive,
             'retired'   => $retired,
             'suspended' => $suspended,
             'injured'   => $injured,
             'all'       => collect()
                 ->concat($bookable)
-                ->concat($inactive)
                 ->concat($retired)
                 ->concat($suspended)
                 ->concat($injured)
+            'pending-introduced' => $pendingIntroduced,
+                                ->concat($pendingIntroduced)
         ]);
     }
 
@@ -89,15 +89,15 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_super_administrator_can_view_inactive_wrestlers()
+    public function a_super_administrator_can_view_pending_introduced_wrestlers()
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_inactive']));
+        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_pending_introduced']));
 
         $responseAjax->assertJson([
-            'recordsTotal' => $this->wrestlers->get('inactive')->count(),
-            'data'         => $this->wrestlers->get('inactive')->toArray(),
+            'recordsTotal' => $this->wrestlers->get('pending-introduced')->count(),
+            'data'         => $this->wrestlers->get('pending-introduced')->toArray(),
         ]);
     }
 

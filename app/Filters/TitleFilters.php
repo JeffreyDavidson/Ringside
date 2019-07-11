@@ -25,8 +25,8 @@ class TitleFilters extends Filters
             case 'only_active':
                 $this->builder->active();
                 break;
-            case 'only_inactive':
-                $this->builder->inactive();
+            case 'only_pending_introduced':
+                $this->builder->pendingIntroduced();
                 break;
             case 'only_retired':
                 $this->builder->retired();

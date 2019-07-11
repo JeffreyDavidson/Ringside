@@ -16,7 +16,7 @@ $factory->state(Title::class, 'active', function ($faker) {
     ];
 });
 
-$factory->state(Title::class, 'inactive', function ($faker) {
+$factory->state(Title::class, 'pending-introduced', function ($faker) {
     return [
         'introduced_at' => $faker->dateTimeBetween('+1 day', '+1 month')
     ];

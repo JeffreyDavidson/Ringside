@@ -153,7 +153,7 @@ class WrestlerPolicy
     }
 
     /**
-     * Determine whether the user can activate an inactive wrestler.
+     * Determine whether the user can activate a pending introduced wrestler.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Wrestler  $wrestler

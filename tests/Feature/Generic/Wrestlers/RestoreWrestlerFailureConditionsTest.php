@@ -22,10 +22,10 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function an_inactive_wrestler_cannot_be_restored()
+    public function a_pending_introduced_wrestler_cannot_be_restored()
     {
         $this->actAs('administrator');
-        $wrestler = factory(Wrestler::class)->states('inactive')->create();
+        $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
 
         $response = $this->patch(route('wrestlers.restore', $wrestler));
 

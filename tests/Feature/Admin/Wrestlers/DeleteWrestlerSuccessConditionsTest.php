@@ -27,10 +27,10 @@ class DeleteWrestlerSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function an_administrator_can_delete_an_inactive_wrestler()
+    public function an_administrator_can_delete_a_pending_introduced_wrestler()
     {
         $this->actAs('administrator');
-        $wrestler = factory(Wrestler::class)->states('inactive')->create();
+        $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
 
         $response = $this->delete(route('wrestlers.destroy', $wrestler));
 

@@ -22,7 +22,7 @@ $factory->state(Wrestler::class, 'bookable', [
     'hired_at' => Carbon::yesterday()->toDateTimeString(),
 ]);
 
-$factory->state(Wrestler::class, 'inactive', [
+$factory->state(Wrestler::class, 'pending-introduced', [
     'hired_at' => Carbon::tomorrow()->toDateTimeString(),
 ]);
 
