@@ -3,7 +3,6 @@
 namespace Tests\Feature\SuperAdmin\Wrestlers;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -55,11 +54,10 @@ class UpdateWrestlerSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_the_form_for_editing_a_wrestler()
     {
-        $user = factory(User::class)->states('super-administrator')->create();
+        $this->actAs('super-administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->get(route('wrestlers.edit', $wrestler));
+        $response = $this->get(route('wrestlers.edit', $wrestler));
 
         $response->assertViewIs('wrestlers.edit');
         $this->assertTrue($response->data('wrestler')->is($wrestler));
@@ -68,11 +66,10 @@ class UpdateWrestlerSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_update_a_wrestler()
     {
-        $user = factory(User::class)->states('super-administrator')->create();
+        $this->actAs('super-administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
+        $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams());
 
         $response->assertRedirect(route('wrestlers.index'));
@@ -82,25 +79,6 @@ class UpdateWrestlerSuccessConditionsTest extends TestCase
             $this->assertEquals(240, $wrestler->weight);
             $this->assertEquals('Laraville, FL', $wrestler->hometown);
             $this->assertEquals('The Finisher', $wrestler->signature_move);
-        });
-    }
-
-    /** @test */
-    public function a_wrestler_signature_move_is_optional()
-    {
-        $user = factory(User::class)->states('super-administrator')->create();
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->actingAs($user)
-                        ->from(route('wrestlers.edit', $wrestler))
-                        ->patch(route('wrestlers.update', $wrestler), $this->validParams([
-                            'signature_move' => '',
-                        ]));
-
-        $response->assertSessionDoesntHaveErrors('signature_move');
-        $response->assertRedirect(route('wrestlers.index'));
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertNull($wrestler->signature_move);
         });
     }
 }

@@ -3,7 +3,6 @@
 namespace Tests\Feature\Wrestlers;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -55,11 +54,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
     {
-        $user = factory(User::class)->states('basic-user')->create();
+        $this->actAs('basic-user');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->get(route('wrestlers.edit', $wrestler));
+        $response = $this->get(route('wrestlers.edit', $wrestler));
 
         $response->assertForbidden();
     }
@@ -67,11 +65,10 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_update_a_wrestler()
     {
-        $user = factory(User::class)->states('basic-user')->create();
+        $this->actAs('basic-user');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->actingAs($user)
-                        ->patch(route('wrestlers.update', $wrestler), $this->validParams());
+        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams());
 
         $response->assertForbidden();
     }

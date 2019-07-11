@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\User\Wrestlers;
+namespace Tests\Feature\Generic\Wrestlers;
 
 use Tests\TestCase;
 use App\Models\Wrestler;
@@ -8,9 +8,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group wrestlers
- * @group users
+ * @group generics
  */
-class UpdateWrestlerFailureConditionsTest extends TestCase
+class UpdateWrestlerSuccessConditionsTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -52,24 +52,20 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
+    public function a_wrestler_signature_move_is_optional()
     {
-        $this->actAs('basic-user');
+        $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
 
-        $response = $this->get(route('wrestlers.edit', $wrestler));
+        $response = $this->from(route('wrestlers.edit', $wrestler))
+                        ->patch(route('wrestlers.update', $wrestler), $this->validParams([
+                            'signature_move' => '',
+                        ]));
 
-        $response->assertForbidden();
-    }
-
-    /** @test */
-    public function a_basic_user_cannot_update_a_wrestler()
-    {
-        $this->actAs('basic-user');
-        $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
-
-        $response = $this->patch(route('wrestlers.update', $wrestler), $this->validParams());
-
-        $response->assertForbidden();
+        $response->assertSessionDoesntHaveErrors('signature_move');
+        $response->assertRedirect(route('wrestlers.index'));
+        tap($wrestler->first(), function ($wrestler) {
+            $this->assertNull($wrestler->signature_move);
+        });
     }
 }

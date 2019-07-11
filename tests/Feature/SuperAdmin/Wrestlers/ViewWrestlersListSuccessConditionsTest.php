@@ -37,16 +37,16 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
         $pendingIntroduced = factory(Wrestler::class, 3)->states('pending-introduced')->create()->map($mapToIdAndName);
 
         $this->wrestlers = collect([
-            'bookable'  => $bookable,
-            'retired'   => $retired,
-            'suspended' => $suspended,
-            'injured'   => $injured,
-            'all'       => collect()
-                ->concat($bookable)
-                ->concat($retired)
-                ->concat($suspended)
-                ->concat($injured)
+            'bookable'           => $bookable,
+            'retired'            => $retired,
+            'suspended'          => $suspended,
+            'injured'            => $injured,
             'pending-introduced' => $pendingIntroduced,
+            'all'                => collect()
+                                ->concat($bookable)
+                                ->concat($retired)
+                                ->concat($suspended)
+                                ->concat($injured)
                                 ->concat($pendingIntroduced)
         ]);
     }
@@ -54,7 +54,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_wrestlers_page()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $response = $this->get(route('wrestlers.index'));
 
@@ -65,7 +65,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_all_wrestlers()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $responseAjax = $this->ajaxJson(route('wrestlers.index'));
 
@@ -78,7 +78,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_bookable_wrestlers()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_bookable']));
 
@@ -91,7 +91,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_pending_introduced_wrestlers()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_pending_introduced']));
 
@@ -104,7 +104,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_retired_wrestlers()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_retired']));
 
@@ -117,7 +117,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_suspended_wrestlers()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_suspended']));
 
@@ -130,7 +130,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_injured_wrestlers()
     {
-        $this->actAs('administrator');
+        $this->actAs('super-administrator');
 
         $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_injured']));
 

@@ -15,7 +15,7 @@ class ActivateWrestlerTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_guest_cannot_activate_an_pending_ntroduced_wrestler()
+    public function a_guest_cannot_activate_a_pending_introduced_wrestler()
     {
         $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
 
