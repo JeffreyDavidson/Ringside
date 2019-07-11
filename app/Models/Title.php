@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\TitleStatus;
-use App\Traits\Retireable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -43,8 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Title extends Model
 {
-    use Retireable,
-        SoftDeletes;
+    use Retireable;
 
     /**
      * The attributes that aren't mass assignable.

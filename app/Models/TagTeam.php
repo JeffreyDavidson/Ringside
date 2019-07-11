@@ -2,27 +2,13 @@
 
 namespace App\Models;
 
-use App\Traits\Hireable;
-use App\Traits\Sluggable;
-use App\Traits\Retireable;
-use App\Traits\Activatable;
-use App\Traits\Suspendable;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TagTeam extends Model
 {
-    use SoftDeletes,
-        Suspendable,
-        Activatable,
-        Hireable,
-        Sluggable;
-
-    use Retireable {
-        Retireable::retire as private retireableRetire;
-        Retireable::unretire as private retireableUnRetire;
-    }
+    use SoftDeletes;
 
     /**
      * The attributes that aren't mass assignable.

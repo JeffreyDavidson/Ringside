@@ -12,12 +12,20 @@ class WrestlersTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(Wrestler::class, 50)->create(['hired_at' => now()->subYears(1)]);
+        for ($w = 1; $w <= 50; $w++) {
+            factory(Wrestler::class)->create([
+                'name' => 'Wrestler '.$w,
+                'hired_at' => now()->subYears(1)
+            ]);
+        }
 
         for ($i = 1; $i <= 12; $i++) {
-            factory(Wrestler::class, 5)->create([
-                'hired_at' => now()->subYear(1)->addMonth($i)
-            ]);
+            for ($j = 51; $j <= 55; $j++) {
+                factory(Wrestler::class)->create([
+                    'name' => 'Wrestler '. $j,
+                    'hired_at' => now()->subYear(1)->addMonth($i)
+                ]);
+            }
         }
     }
 }

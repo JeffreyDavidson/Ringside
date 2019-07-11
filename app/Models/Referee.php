@@ -2,20 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\Hireable;
-use App\Traits\Injurable;
-use App\Traits\Retireable;
-use App\Traits\Activatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends Model
 {
-    use SoftDeletes,
-        Retireable,
-        Injurable,
-        Activatable,
-        Hireable;
+    use SoftDeletes;
 
     /**
      * The "booting" method of the model.

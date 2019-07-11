@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\Sluggable;
-use App\Traits\Retireable;
-use App\Traits\Activatable;
-use App\Traits\Suspendable;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -13,15 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stable extends Model
 {
-    use SoftDeletes,
-        Activatable,
-        Suspendable,
-        Sluggable;
-
-    use Retireable {
-        Retireable::retire as private retireStable;
-        Retireable::unretire as private unretireStable;
-    }
+    use SoftDeletes;
 
     /**
      * The "booting" method of the model.
