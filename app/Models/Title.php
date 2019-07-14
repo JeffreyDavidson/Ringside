@@ -42,7 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Title extends Model
 {
-    use Retireable;
+    use SoftDeletes;
 
     /**
      * The attributes that aren't mass assignable.
@@ -66,6 +66,26 @@ class Title extends Model
     protected $appends = ['is_bookable'];
 
     /**
+     * Get the retirements of the title.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function retirements()
+    {
+        return $this->morphMany(Retirement::class, 'retiree');
+    }
+
+    /**
+     * Get the current retirement of the title.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function retirement()
+    {
+        return $this->morphOne(Retirement::class, 'retiree')->whereNull('ended_at');
+    }
+
+    /**
      * Determine the status of the title.
      *
      * @return \App\Enum\TitleStatus
@@ -77,7 +97,7 @@ class Title extends Model
             return TitleStatus::BOOKABLE();
         }
 
-        if ($this->isRetired()) {
+        if ($this->is_retired) {
             return TitleStatus::RETIRED();
         }
 
@@ -101,7 +121,7 @@ class Title extends Model
      */
     public function getIsBookableAttribute()
     {
-        return !($this->isRetired() || $this->is_pending_introduced);
+        return !($this->is_retired || $this->is_pending_introduced);
     }
 
     /**
@@ -111,7 +131,7 @@ class Title extends Model
      */
     public function getIsRetiredAttribute()
     {
-        return $this->isRetired();
+        return $this->retirements()->whereNull('ended_at')->exists();
     }
 
     /**
@@ -139,6 +159,18 @@ class Title extends Model
     }
 
     /**
+     * Scope a query to only include retired titles.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeRetired($query)
+    {
+        return $query->whereHas('retirements', function ($query) {
+            $query->whereNull('ended_at');
+        });
+    }
+
     /**
      * Scope a query to only include pending introduced titles.
      *
@@ -161,6 +193,31 @@ class Title extends Model
         return $this;
     }
 
+    /**
+     * Retire a title.
+     *
+     * @return \App\Models\Retirement
+     */
+    public function retire()
+    {
+        $this->retirements()->create(['started_at' => now()]);
+    }
+
+    /**
+     * Unretire a title.
+     *
+     * @return bool
+     */
+    public function unretire()
+    {
+        return $this->retirement()->update(['ended_at' => now()]);
+    }
+
+    /**
+     * Convert the model instance to an array.
+     *
+     * @return array
+     */
     public function toArray()
     {
         $data                 = parent::toArray();
