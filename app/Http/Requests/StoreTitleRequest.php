@@ -25,7 +25,7 @@ class StoreTitleRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'min:3', 'ends_with:Title, Titles', 'unique:titles'],
+            'name' => ['required', 'min:3', 'ends_with:Title, Titles', 'unique:titles,name'],
             'introduced_at' => ['required', 'date_format:Y-m-d H:i:s'],
         ];
     }

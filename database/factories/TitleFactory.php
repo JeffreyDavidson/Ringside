@@ -6,7 +6,7 @@ use Faker\Generator as Faker;
 $factory->define(Title::class, function (Faker $faker) {
     return [
         'name' => $faker->sentence,
-        'introduced_at' => today()->toDateTimeString(),
+        'introduced_at' => now()->toDateTimeString(),
     ];
 });
 
