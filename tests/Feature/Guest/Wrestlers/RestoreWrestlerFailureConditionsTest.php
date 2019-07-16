@@ -13,7 +13,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
     /** @test */
     public function a_guest_cannot_restore_a_deleted_wrestler()
     {
-        $wrestler = factory(Wrestler::class)->create(['deleted_at' => today()->subDays(3)->toDateTimeString()]);
+        $wrestler = factory(Wrestler::class)->create(['deleted_at' => now()->subDays(3)->toDateTimeString()]);
 
         $response = $this->patch(route('wrestlers.restore', $wrestler));
 

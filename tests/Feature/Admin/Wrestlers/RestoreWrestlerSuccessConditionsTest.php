@@ -18,7 +18,7 @@ class RestoreWrestlerSuccessConditionsTest extends TestCase
     public function an_administrator_can_restore_a_deleted_wrestler()
     {
         $this->actAs('administrator');
-        $wrestler = factory(Wrestler::class)->create(['deleted_at' => today()->subDays(3)->toDateTimeString()]);
+        $wrestler = factory(Wrestler::class)->create(['deleted_at' => now()->subDays(3)->toDateTimeString()]);
 
         $response = $this->put(route('wrestlers.restore', $wrestler));
 
