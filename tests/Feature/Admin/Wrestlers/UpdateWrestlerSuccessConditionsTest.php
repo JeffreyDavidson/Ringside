@@ -28,7 +28,6 @@ class UpdateWrestlerSuccessConditionsTest extends TestCase
             'weight' => 240,
             'hometown' => 'Old City, State',
             'signature_move' => 'Old Finisher',
-            'hired_at' => today()->toDateString(),
         ], $overrides);
     }
 
@@ -47,7 +46,7 @@ class UpdateWrestlerSuccessConditionsTest extends TestCase
             'weight' => '240',
             'hometown' => 'Laraville, FL',
             'signature_move' => 'The Finisher',
-            'hired_at' => today()->toDateString(),
+            'started_at' => now()->toDateString(),
         ], $overrides);
     }
 

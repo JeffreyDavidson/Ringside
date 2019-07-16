@@ -29,7 +29,7 @@ class CreateWrestlerSuccessConditionsTest extends TestCase
             'weight' => '240',
             'hometown' => 'Laraville, FL',
             'signature_move' => 'The Finisher',
-            'hired_at' => now()->toDateTimeString(),
+            'started_at' => now()->toDateTimeString(),
         ], $overrides);
     }
 
@@ -59,7 +59,7 @@ class CreateWrestlerSuccessConditionsTest extends TestCase
             $this->assertEquals(240, $wrestler->weight);
             $this->assertEquals('Laraville, FL', $wrestler->hometown);
             $this->assertEquals('The Finisher', $wrestler->signature_move);
-            $this->assertEquals(today()->toDateString(), $wrestler->hired_at->toDateString());
+            $this->assertEquals(now()->toDateTimeString(), $wrestler->employment->started_at);
         });
     }
 }

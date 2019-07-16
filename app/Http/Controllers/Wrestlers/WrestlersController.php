@@ -29,8 +29,8 @@ class WrestlersController extends Controller
 
             return $table->eloquent($query)
                 ->addColumn('action', 'wrestlers.partials.action-cell')
-                ->editColumn('hired_at', function (Wrestler $wrestler) {
-                    return $wrestler->hired_at->format('Y-m-d H:s');
+                ->editColumn('started_at', function (Wrestler $wrestler) {
+                    return $wrestler->employment->started_at->format('Y-m-d H:s');
                 })
                 ->filterColumn('id', function ($query, $keyword) {
                     $query->where($query->qualifyColumn('id'), $keyword);
@@ -61,7 +61,8 @@ class WrestlersController extends Controller
      */
     public function store(StoreWrestlerRequest $request)
     {
-        Wrestler::create($request->all());
+        $wrestler = Wrestler::create($request->except('started_at'));
+        $wrestler->employments()->create($request->only('started_at'));
 
         return redirect()->route('wrestlers.index');
     }
@@ -101,7 +102,15 @@ class WrestlersController extends Controller
      */
     public function update(UpdateWrestlerRequest $request, Wrestler $wrestler)
     {
-        $wrestler->update($request->all());
+        $wrestler->update($request->except('started_at'));
+
+        if ($wrestler->employments()->exists() && !is_null($request->input('started_at'))) {
+            if ($wrestler->employment->started_at != $request->input('started_at')) {
+                $wrestler->employment()->update($request->only('started_at'));
+            }
+        } else {
+            $wrestler->employments()->create($request->only('started_at'));
+        }
 
         return redirect()->route('wrestlers.index');
     }

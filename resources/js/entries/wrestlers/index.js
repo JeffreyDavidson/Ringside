@@ -4,12 +4,12 @@ const table = $('[data-table="wrestlers.index"]');
 const rowCounter = $("#kt_subheader_total");
 const searchInput = $("#generalSearch");
 const statusDropdown = $("#status-dropdown");
-const introducedAtStart = $("#hired_at_start");
-const introducedAtEnd = $("#hired_at_end");
+const startedAtStart = $("#started_at_start");
+const startedAtEnd = $("#started_at_end");
 
 const filterData = {
     status: null,
-    hired_at: null
+    started_at: null
 };
 
 // begin first table
@@ -18,14 +18,14 @@ table.DataTable({
         url: window.location.href,
         data(params) {
             params.status = filterData.status;
-            params.introduced_at = filterData.introduced_at;
+            params.started_at = filterData.started_at;
         }
     },
     columns: [
         { data: "id", title: "Wrestler ID" },
         { data: "name", title: "Name" },
         { data: "hometown", title: "hometown" },
-        { data: "hired_at", title: "Date Hired" },
+        { data: "started_at", title: "Date Started" },
         { data: "status", title: "Status", searchable: false },
         {
             data: "action",

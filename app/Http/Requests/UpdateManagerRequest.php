@@ -27,7 +27,7 @@ class UpdateManagerRequest extends FormRequest
         return [
             'first_name' => ['required'],
             'last_name' => ['required'],
-            'hired_at' => ['required', 'date_format:Y-m-d H:i:s']
+            'started_at' => ['required', 'date_format:Y-m-d H:i:s']
         ];
     }
 }
