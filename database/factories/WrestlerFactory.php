@@ -14,26 +14,41 @@ $factory->define(Wrestler::class, function (Faker $faker) {
         'weight' => $faker->numberBetween(180, 500),
         'hometown' => $faker->city . ', ' . $faker->state,
         'signature_move' => Str::title($faker->words(3, true)),
-        'hired_at' => $faker->dateTime(),
     ];
 });
 
-$factory->state(Wrestler::class, 'bookable', [
-    'hired_at' => Carbon::yesterday()->toDateTimeString(),
-]);
+$factory->afterCreatingState(Wrestler::class, 'bookable', function ($wrestler) {
+    $wrestler->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+});
 
-$factory->state(Wrestler::class, 'pending-introduced', [
-    'hired_at' => Carbon::tomorrow()->toDateTimeString(),
-]);
+$factory->afterCreatingState(Wrestler::class, 'pending-introduced', function ($wrestler) {
+    $wrestler->employments()->create([
+        'started_at' => Carbon::tomorrow()->toDateTimeString()
+    ]);
+});
 
 $factory->afterCreatingState(Wrestler::class, 'retired', function ($wrestler) {
+    $wrestler->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+
     $wrestler->retire();
 });
 
 $factory->afterCreatingState(Wrestler::class, 'suspended', function ($wrestler) {
+    $wrestler->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+
     $wrestler->suspend();
 });
 
 $factory->afterCreatingState(Wrestler::class, 'injured', function ($wrestler) {
+    $wrestler->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+
     $wrestler->injure();
 });

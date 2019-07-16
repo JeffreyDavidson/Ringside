@@ -28,7 +28,6 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
             'weight' => 240,
             'hometown' => 'Old City, State',
             'signature_move' => 'Old Finisher',
-            'hired_at' => today()->toDateString(),
         ], $overrides);
     }
 
@@ -47,7 +46,7 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
             'weight' => '240',
             'hometown' => 'Laraville, FL',
             'signature_move' => 'The Finisher',
-            'hired_at' => today()->toDateString(),
+            'started_at' => now()->toDateTimeString(),
         ], $overrides);
     }
 
@@ -322,56 +321,59 @@ class UpdateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_hired_at_date_is_required()
+    public function a_wrestler_started_at_date_is_required()
     {
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
+        $wrestler->employments()->create(['started_at' => now()->toDateTimeString()]);
 
         $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
-                            'hired_at' => '',
+                            'started_at' => '',
                         ]));
 
         $response->assertRedirect(route('wrestlers.edit', $wrestler));
-        $response->assertSessionHasErrors('hired_at');
+        $response->assertSessionHasErrors('started_at');
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(today()->toDateString(), $wrestler->hired_at->toDateString());
+            $this->assertEquals(now()->toDateTimeString(), $wrestler->employment->started_at->toDateTimeString());
         });
     }
 
     /** @test */
-    public function a_wrestler_hired_at_date_must_be_a_string()
+    public function a_wrestler_started_at_date_must_be_a_string()
     {
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
+        $wrestler->employments()->create(['started_at' => now()->toDateTimeString()]);
 
         $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
-                            'hired_at' => ['not-a-string'],
+                            'started_at' => ['not-a-string'],
                         ]));
 
         $response->assertRedirect(route('wrestlers.edit', $wrestler));
-        $response->assertSessionHasErrors('hired_at');
+        $response->assertSessionHasErrors('started_at');
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(today()->toDateString(), $wrestler->hired_at->toDateString());
+            $this->assertEquals(now()->toDateTimeString(), $wrestler->employment->started_at->toDateTimeString());
         });
     }
 
     /** @test */
-    public function a_wrestler_hired_at_must_be_in_date_format()
+    public function a_wrestler_started_at_must_be_in_date_format()
     {
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->create($this->oldAttributes());
+        $wrestler->employments()->create(['started_at' => now()->toDateTimeString()]);
 
         $response = $this->from(route('wrestlers.edit', $wrestler))
                         ->patch(route('wrestlers.update', $wrestler), $this->validParams([
-                            'hired_at' => 'not-a-date-format',
+                            'started_at' => 'not-a-date-format',
                         ]));
 
         $response->assertRedirect(route('wrestlers.edit', $wrestler));
-        $response->assertSessionHasErrors('hired_at');
+        $response->assertSessionHasErrors('started_at');
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(today()->toDateString(), $wrestler->hired_at->toDateString());
+            $this->assertEquals(now()->toDateTImeString(), $wrestler->employment->started_at->toDateTimeString());
         });
     }
 }

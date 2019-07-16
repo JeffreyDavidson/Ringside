@@ -80,13 +80,6 @@ class Wrestler extends Model
     protected $guarded = [];
 
     /**
-     * The attributes that should be mutated to dates.
-     *
-     * @var array
-     */
-    protected $dates = ['hired_at'];
-
-    /**
      * Get the user belonging to the wrestler.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -197,6 +190,26 @@ class Wrestler extends Model
     }
 
     /**
+     * Get all of the employments of the wrestler.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function employments()
+    {
+        return $this->morphMany(Employment::class, 'employable')->whereNull('ended_at');
+    }
+
+    /**
+     * Get the current employment of the wrestler.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function employment()
+    {
+        return $this->morphOne(Employment::class, 'employable')->whereNull('ended_at');
+    }
+
+    /**
      * Return the wrestler's height formatted.
      *
      * @return string
@@ -214,9 +227,9 @@ class Wrestler extends Model
      *
      * @return string
      */
-    public function getFormattedHiredAtAttribute()
+    public function getFormattedEmploymentStartAtAttribute()
     {
-        return $this->hired_at->format('M d, Y');
+        return $this->employments()->latest()->first()->started_at->format('M d, Y');
     }
 
     /**
@@ -253,7 +266,7 @@ class Wrestler extends Model
      */
     public function getIsBookableAttribute()
     {
-        return $this->is_hired && !($this->is_retired || $this->is_injured || $this->is_suspended);
+        return $this->is_employed && !($this->is_retired || $this->is_injured || $this->is_suspended);
     }
 
     /**
@@ -261,9 +274,9 @@ class Wrestler extends Model
      *
      * @return bool
      */
-    public function getIsHiredAttribute()
+    public function getIsEmployedAttribute()
     {
-        return !is_null($this->hired_at) && $this->hired_at->isPast();
+        return $this->employments()->where('started_at', '<=', now())->whereNull('ended_at')->exists();
     }
 
     /**
@@ -324,16 +337,15 @@ class Wrestler extends Model
      */
     public function scopeBookable($query)
     {
-        return $query->where('hired_at', '<=', now())
-                ->whereDoesntHave('retirements', function (Builder $query) {
-                    $query->whereNull('ended_at');
-                })
-                ->whereDoesntHave('injuries', function (Builder $query) {
-                    $query->whereNull('ended_at');
-                })
-                ->whereDoesntHave('suspensions', function (Builder $query) {
-                    $query->whereNull('ended_at');
-                });
+        return $query->whereHas('employments', function (Builder $query) {
+            $query->where('started_at', '<=', now())->whereNull('ended_at');
+        })->whereDoesntHave('retirements', function (Builder $query) {
+            $query->whereNull('ended_at');
+        })->whereDoesntHave('injuries', function (Builder $query) {
+            $query->whereNull('ended_at');
+        })->whereDoesntHave('suspensions', function (Builder $query) {
+            $query->whereNull('ended_at');
+        });
     }
 
     /**
@@ -343,8 +355,9 @@ class Wrestler extends Model
      */
     public function scopePendingIntroduced($query)
     {
-        return $query->whereNull('hired_at')
-                ->orWhere('hired_at', '>', now());
+        return $query->whereHas('employments', function (Builder $query) {
+            $query->whereNull('started_at')->orWhere('started_at', '>', now());
+        });
     }
 
     /**
@@ -393,7 +406,7 @@ class Wrestler extends Model
      */
     public function activate()
     {
-        return $this->update(['hired_at' => now()]);
+        return $this->employments()->latest()->first()->update(['started_at' => now()]);
     }
 
     /**

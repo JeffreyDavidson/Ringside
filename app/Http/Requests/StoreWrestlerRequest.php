@@ -32,7 +32,7 @@ class StoreWrestlerRequest extends FormRequest
             'weight' => ['required', 'numeric'],
             'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'hired_at' => ['required', 'string', 'date'],
+            'started_at' => ['required', 'string', 'date'],
         ];
     }
 
@@ -44,7 +44,7 @@ class StoreWrestlerRequest extends FormRequest
     public function attributes()
     {
         return [
-            'hired_at' => 'date hired',
+            'started_at' => 'date started',
             'signature_move' => 'signature move',
         ];
     }

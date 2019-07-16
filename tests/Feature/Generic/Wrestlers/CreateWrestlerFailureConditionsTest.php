@@ -29,7 +29,7 @@ class CreateWrestlerFailureConditionsTest extends TestCase
             'weight' => '240',
             'hometown' => 'Laraville, FL',
             'signature_move' => 'The Finisher',
-            'hired_at' => now()->toDateTimeString(),
+            'started_at' => now()->toDateTimeString(),
         ], $overrides);
     }
 
@@ -274,50 +274,50 @@ class CreateWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_hired_at_date_is_required()
+    public function a_wrestler_started_at_date_is_required()
     {
         $this->actAs('administrator');
 
         $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
-                            'hired_at' => '',
+                            'started_at' => '',
                         ]));
 
         $response->assertStatus(302);
         $response->assertRedirect(route('wrestlers.create'));
-        $response->assertSessionHasErrors('hired_at');
+        $response->assertSessionHasErrors('started_at');
         $this->assertEquals(0, Wrestler::count());
     }
 
     /** @test */
-    public function a_wrestler_hired_at_must_be_a_string()
+    public function a_wrestler_started_at_must_be_a_string()
     {
         $this->actAs('administrator');
 
         $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
-                            'hired_at' => ['not-a-date-format'],
+                            'started_at' => ['not-a-date-format'],
                         ]));
 
         $response->assertStatus(302);
         $response->assertRedirect(route('wrestlers.create'));
-        $response->assertSessionHasErrors('hired_at');
+        $response->assertSessionHasErrors('started_at');
         $this->assertEquals(0, Wrestler::count());
     }
 
     /** @test */
-    public function a_wrestler_hired_at_must_be_in_date_format()
+    public function a_wrestler_startd_at_must_be_in_date_format()
     {
         $this->actAs('administrator');
 
         $response = $this->from(route('wrestlers.create'))
                         ->post(route('wrestlers.store'), $this->validParams([
-                            'hired_at' => 'not-a-date-format',
+                            'started_at' => 'not-a-date-format',
                         ]));
 
         $response->assertStatus(302);
         $response->assertRedirect(route('wrestlers.create'));
-        $response->assertSessionHasErrors('hired_at');
+        $response->assertSessionHasErrors('started_at');
         $this->assertEquals(0, Wrestler::count());
     }
 }

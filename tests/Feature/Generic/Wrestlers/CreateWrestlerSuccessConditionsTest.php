@@ -30,18 +30,18 @@ class CreateWrestlerSuccessConditionsTest extends TestCase
             'weight' => '240',
             'hometown' => 'Laraville, FL',
             'signature_move' => 'The Finisher',
-            'hired_at' => now()->toDateTimeString(),
+            'started_at' => now()->toDateTimeString(),
         ], $overrides);
     }
 
     /** @test */
-    public function a_wrestler_hired_today_or_before_is_bookable()
+    public function a_wrestler_started_today_or_before_is_bookable()
     {
         $this->actAs('administrator');
 
         $this->from(route('wrestlers.create'))
             ->post(route('wrestlers.store'), $this->validParams([
-                'hired_at' => today()->toDateTimeString()
+                'started_at' => now()->toDateTimeString()
             ]));
 
         tap(Wrestler::first(), function ($wrestler) {
@@ -50,18 +50,18 @@ class CreateWrestlerSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_hired_after_today_is_not_bookable()
+    public function a_wrestler_started_after_today_is_not_bookable()
     {
         $this->actAs('administrator');
 
         $this->from(route('wrestlers.create'))
             ->post(route('wrestlers.store'), $this->validParams([
-                'hired_at' => Carbon::tomorrow()->toDateTimeString()
+                'started_at' => Carbon::tomorrow()->toDateTimeString()
             ]));
 
         tap(Wrestler::first(), function ($wrestler) {
             $this->assertFalse($wrestler->is_bookable);
-            $this->assertFalse($wrestler->is_hired);
+            $this->assertFalse($wrestler->is_employed);
         });
     }
 

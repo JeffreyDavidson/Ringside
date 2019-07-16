@@ -25,7 +25,7 @@ class UpdateTagTeamTest extends TestCase
         return array_replace([
             'name' => 'Example Tag Team Name',
             'signature_move' => 'The Finisher',
-            'hired_at' => today()->toDateTimeString(),
+            'hired_at' => now()->toDateTimeString(),
             'wrestlers' => $overrides['wrestlers'] ?? $wrestlers->modelKeys(),
         ], $overrides);
     }
@@ -164,7 +164,7 @@ class UpdateTagTeamTest extends TestCase
         $tagteam = factory(TagTeam::class)->create();
 
         $response = $this->patch(route('tagteams.update', $tagteam), $this->validParams([
-            'hired_at' => today()->toDateString()
+            'hired_at' => now()->toDateString()
         ]));
 
         $response->assertStatus(302);

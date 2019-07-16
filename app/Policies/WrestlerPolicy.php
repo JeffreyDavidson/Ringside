@@ -65,7 +65,7 @@ class WrestlerPolicy
      */
     public function retire(User $user, Wrestler $wrestler)
     {
-        if (!$wrestler->is_hired || $wrestler->is_retired) {
+        if (!$wrestler->is_employed || $wrestler->is_retired) {
             return false;
         }
 
@@ -97,7 +97,7 @@ class WrestlerPolicy
      */
     public function suspend(User $user, Wrestler $wrestler)
     {
-        if (!$wrestler->is_hired || !$wrestler->is_bookable || $wrestler->is_suspended) {
+        if (!$wrestler->is_employed || !$wrestler->is_bookable || $wrestler->is_suspended) {
             return false;
         }
 
@@ -129,7 +129,7 @@ class WrestlerPolicy
      */
     public function injure(User $user, Wrestler $wrestler)
     {
-        if (!$wrestler->is_hired || !$wrestler->is_bookable || $wrestler->is_injured) {
+        if (!$wrestler->is_employed || !$wrestler->is_bookable || $wrestler->is_injured) {
             return false;
         }
 
@@ -145,7 +145,7 @@ class WrestlerPolicy
      */
     public function recover(User $user, Wrestler $wrestler)
     {
-        if (!$wrestler->is_hired || !$wrestler->is_injured) {
+        if (!$wrestler->is_employed || !$wrestler->is_injured) {
             return false;
         }
 
@@ -161,7 +161,7 @@ class WrestlerPolicy
      */
     public function activate(User $user, Wrestler $wrestler)
     {
-        if ($wrestler->is_hired) {
+        if ($wrestler->is_employed) {
             return false;
         }
 
