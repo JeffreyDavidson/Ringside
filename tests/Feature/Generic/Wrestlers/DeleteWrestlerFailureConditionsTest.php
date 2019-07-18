@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  * @group wrestlers
  * @group generic
  */
-class DeleteWrestlerTest extends TestCase
+class DeleteWrestlerFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
 

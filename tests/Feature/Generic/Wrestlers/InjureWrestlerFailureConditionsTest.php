@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Generic\Wrestlers;
 
-use App\Models\Wrestler;
 use Tests\TestCase;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group wrestlers
- * @group generic
+ * @group generics
  */
 class InjureWrestlerFailureConditionsTest extends TestCase
 {

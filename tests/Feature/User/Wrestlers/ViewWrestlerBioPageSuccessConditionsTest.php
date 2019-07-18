@@ -6,6 +6,10 @@ use App\Models\Wrestler;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @group wrestlers
+ * @group users
+ */
 class ViewWrestlerBioPageSuccessConditionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -16,7 +20,7 @@ class ViewWrestlerBioPageSuccessConditionsTest extends TestCase
         $signedInUser = $this->actAs('basic-user');
         $wrestler = factory(Wrestler::class)->create(['user_id' => $signedInUser->id]);
 
-        $response = $this->get(route('wrestlers.show', ['wrestler' => $wrestler]));
+        $response = $this->get(route('wrestlers.show', $wrestler));
 
         $response->assertOk();
     }

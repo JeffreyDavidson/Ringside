@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  * @group wrestlers
  * @group guests
  */
-class ActivateWrestlerTest extends TestCase
+class ActivateWrestlerFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
 

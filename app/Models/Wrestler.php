@@ -106,7 +106,9 @@ class Wrestler extends Model
      */
     public function tagteam()
     {
-        return $this->belongsToMany(TagTeam::class)->where('is_active', true);
+        return $this->belongsToMany(TagTeam::class)->whereHas('employments', function (Builder $query) {
+            $query->where('started_at', '<=', now());
+        });
     }
 
     /**
@@ -227,7 +229,7 @@ class Wrestler extends Model
      *
      * @return string
      */
-    public function getFormattedEmploymentStartAtAttribute()
+    public function getFormattedStartedAtAttribute()
     {
         return $this->employments()->latest()->first()->started_at->format('M d, Y');
     }
