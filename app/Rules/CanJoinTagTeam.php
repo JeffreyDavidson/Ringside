@@ -17,12 +17,9 @@ class CanJoinTagTeam implements Rule
     public function passes($attribute, $value)
     {
         $wrestler = Wrestler::find($value);
+        $startedAtDate = $wrestler->employment->started_at;
 
-        if ($wrestler->hired_at->isFuture()) {
-            return false;
-        }
-
-        if (! $wrestler->is_active) {
+        if (is_null($startedAtDate) || $startedAtDate->isFuture()) {
             return false;
         }
 

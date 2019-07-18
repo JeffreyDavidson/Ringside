@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\TagTeams;
 
 use App\Models\TagTeam;
+use Illuminate\Http\Request;
+use App\Filters\TagTeamFilters;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTagTeamRequest;
 use App\Http\Requests\UpdateTagTeamRequest;
@@ -10,18 +13,33 @@ use App\Http\Requests\UpdateTagTeamRequest;
 class TagTeamsController extends Controller
 {
     /**
-     * Retrieve tag teams of a specific state.
+     * View a list of tag teams.
      *
-     * @param  string  $state
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Yajra\DataTables\DataTables  $table
+     * @return \Illuminate\View\View
      */
-    public function index($state = 'active')
+    public function index(Request $request, DataTables $table, TagTeamFilters $requestFilter)
     {
         $this->authorize('viewList', TagTeam::class);
 
-        $tagteams = TagTeam::hasState($state)->get();
+        if ($request->ajax()) {
+            $query = TagTeam::query();
+            $requestFilter->apply($query);
 
-        return response()->view('tagteams.index', compact('tagteams'));
+            return $table->eloquent($query)
+                ->addColumn('action', 'tagteams.partials.action-cell')
+                ->editColumn('started_at', function (TagTeam $tagteam) {
+                    return $tagteam->employment->started_at->format('Y-m-d H:s');
+                })
+                ->filterColumn('id', function ($query, $keyword) {
+                    $query->where($query->qualifyColumn('id'), $keyword);
+                })
+                ->toJson();
+        }
+
+
+        return view('tagteams.index');
     }
 
     /**
@@ -29,11 +47,11 @@ class TagTeamsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(TagTeam $tagteam)
     {
         $this->authorize('create', TagTeam::class);
 
-        return response()->view('tagteams.create');
+        return response()->view('tagteams.create', compact('tagteam'));
     }
 
     /**
@@ -44,8 +62,8 @@ class TagTeamsController extends Controller
      */
     public function store(StoreTagTeamRequest $request)
     {
-        $tagteam = TagTeam::create($request->except('wrestlers'));
-
+        $tagteam = TagTeam::create($request->except(['wrestlers', 'started_at']));
+        $tagteam->employments()->create($request->only('started_at'));
         $tagteam->addWrestlers($request->input('wrestlers'));
 
         return redirect()->route('tagteams.index');
@@ -86,9 +104,11 @@ class TagTeamsController extends Controller
      */
     public function update(UpdateTagTeamRequest $request, TagTeam $tagteam)
     {
-        $tagteam->update($request->except('wrestlers'));
-
+        $tagteam->update($request->except(['wrestlers', 'started_at']));
+        // dd($tagteam->wrestlers->modelKeys());
+        $tagteam->employment($request->only('started_at'));
         $tagteam->wrestlers()->sync($request->input('wrestlers'));
+        // dd($tagteam->wrestlers->modelKeys());
 
         return redirect()->route('tagteams.index');
     }
@@ -104,23 +124,6 @@ class TagTeamsController extends Controller
         $this->authorize('delete', TagTeam::class);
 
         $tagteam->delete();
-
-        return redirect()->route('tagteams.index');
-    }
-
-    /**
-     * Restore a deleted tag team.
-     *
-     * @param  int  $tagteamId
-     * @return \lluminate\Http\RedirectResponse
-     */
-    public function restore($tagteamId)
-    {
-        $tagteam = TagTeam::onlyTrashed()->findOrFail($tagteamId);
-
-        $this->authorize('restore', TagTeam::class);
-
-        $tagteam->restore();
 
         return redirect()->route('tagteams.index');
     }

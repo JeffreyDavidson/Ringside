@@ -2,36 +2,44 @@
 
 use Carbon\Carbon;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Faker\Generator as Faker;
 
 $factory->define(TagTeam::class, function (Faker $faker) {
     return [
         'name' => $faker->words(2, true),
-        'hired_at' => now()->subDays(2)->toDateTimeString(),
-        'is_active' => true,
+        'signature_move' => $faker->words(4, true),
     ];
 });
 
-$factory->afterCreating(TagTeam::class, function ($tagteam, $faker) {
-    $tagteam->wrestlers()->attach(factory(App\Models\Wrestler::class, 2)->create(['hired_at' => $tagteam->hired_at]));
+$factory->afterCreating(TagTeam::class, function ($tagteam) {
+    $tagteam->wrestlers()->attach(factory(Wrestler::class, 2)->states('bookable')->create());
 });
 
-$factory->state(TagTeam::class, 'active', [
-    'is_active' => true,
-]);
+$factory->afterCreatingState(TagTeam::class, 'bookable', function ($tagteam) {
+    $tagteam->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+});
 
-$factory->state(TagTeam::class, 'future', [
-    'hired_at' => Carbon::tomorrow()->toDateTimeString(),
-]);
+$factory->afterCreatingState(TagTeam::class, 'pending-introduced', function ($tagteam) {
+    $tagteam->employments()->create([
+        'started_at' => Carbon::tomorrow()->toDateTimeString()
+    ]);
+});
 
 $factory->afterCreatingState(TagTeam::class, 'suspended', function ($tagteam) {
+    $tagteam->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+
     $tagteam->suspend();
 });
 
-$factory->afterCreatingState(TagTeam::class, 'inactive', function ($tagteam) {
-    $tagteam->deactivate();
-});
-
 $factory->afterCreatingState(TagTeam::class, 'retired', function ($tagteam) {
+    $tagteam->employments()->create([
+        'started_at' => Carbon::yesterday()->toDateTimeString()
+    ]);
+
     $tagteam->retire();
 });

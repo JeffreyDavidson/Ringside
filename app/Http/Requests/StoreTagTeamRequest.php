@@ -26,9 +26,9 @@ class StoreTagTeamRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required'],
-            'signature_move' => ['nullable'],
-            'hired_at' => ['required', 'date_format:Y-m-d H:i:s'],
+            'name' => ['nullable', 'string', 'unique:tag_teams,name'],
+            'signature_move' => ['nullable', 'string'],
+            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
             'wrestlers' => ['required', 'array', 'size:2'],
             'wrestlers.*' => ['bail', 'integer', 'exists:wrestlers,id', new CanJoinTagTeam],
         ];
