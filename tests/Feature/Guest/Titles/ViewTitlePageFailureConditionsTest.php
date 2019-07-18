@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  * @group titles
  * @group guests
  */
-class ViewTitlePageTest extends TestCase
+class ViewTitlePageFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
 
