@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group tagteams
- * @group generic
+ * @group generics
  */
 class DeleteTagTeamFailureConditionsTest extends TestCase
 {

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group titles
- * @group generic
+ * @group generics
  */
 class RetireTitleFailureConditionsTest extends TestCase
 {
