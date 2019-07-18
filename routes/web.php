@@ -8,14 +8,21 @@ use App\Http\Controllers\Titles\RestoreController;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\UnretireController;
 use App\Http\Controllers\Wrestlers\InjureController;
+use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Wrestlers\RecoverController;
 use App\Http\Controllers\Wrestlers\SuspendController;
 use App\Http\Controllers\Wrestlers\ReinstateController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Controllers\Wrestlers\RestoreController as WrestlerRestoreController;
+use App\Http\Controllers\TagTeams\RetireController as TagTeamRetireController;
+use App\Http\Controllers\TagTeams\RestoreController as TagTeamRestoreController;
+use App\Http\Controllers\TagTeams\SuspendController as TagTeamSuspendController;
 use App\Http\Controllers\Wrestlers\RetireController as WrestlerRetireController;
-use App\Http\Controllers\Wrestlers\UnretireController as WrestlerUnretireController;
+use App\Http\Controllers\TagTeams\ActivateController as TagTeamActivateController;
+use App\Http\Controllers\TagTeams\UnretireController as TagTeamUnretireController;
+use App\Http\Controllers\Wrestlers\RestoreController as WrestlerRestoreController;
+use App\Http\Controllers\TagTeams\ReinstateController as TagTeamReinstateController;
 use App\Http\Controllers\Wrestlers\ActivateController as WrestlerActivateController;
+use App\Http\Controllers\Wrestlers\UnretireController as WrestlerUnretireController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,14 +47,13 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
         Route::put('/wrestlers/{wrestler}/reinstate', ReinstateController::class)->name('wrestlers.reinstate');
         Route::put('/wrestlers/{wrestler}/injure', InjureController::class)->name('wrestlers.injure');
         Route::put('/wrestlers/{wrestler}/recover', RecoverController::class)->name('wrestlers.recover');
-        Route::resource('tagteams', 'TagTeamsController');
-        Route::patch('/tag-teams/{tagteam}/restore', [TagTeamsController::class, 'restore'])->name('tagteams.restore');
-        Route::post('/tag-teams/{tagteam}/suspend', [TagTeamSuspensionsController::class, 'store'])->name('tagteams.suspend');
-        Route::delete('/tag-teams/{tagteam}/reinstate', [TagTeamSuspensionsController::class, 'destroy'])->name('tagteams.reinstate');
-        Route::post('/tag-teams/{tagteam}/deactivate', [TagTeamActivationsController::class, 'destroy'])->name('tagteams.deactivate');
-        Route::post('/tag-teams/{tagteam}/activate', [TagTeamActivationsController::class, 'store'])->name('tagteams.activate');
-        Route::post('/tag-teams/{tagteam}/retire', [TagTeamRetirementsController::class, 'store'])->name('tagteams.retire');
-        Route::delete('/tag-teams/{tagteam}/unretire', [TagTeamRetirementsController::class, 'destroy'])->name('tagteams.unretire');
+        Route::resource('tagteams', TagTeamsController::class);
+        Route::put('/tag-teams/{tagteam}/restore', TagTeamRestoreController::class)->name('tagteams.restore');
+        Route::put('/tag-teams/{tagteam}/suspend', TagTeamSuspendController::class)->name('tagteams.suspend');
+        Route::put('/tag-teams/{tagteam}/reinstate', TagTeamReinstateController::class)->name('tagteams.reinstate');
+        Route::put('/tag-teams/{tagteam}/activate', TagTeamActivateController::class)->name('tagteams.activate');
+        Route::put('/tag-teams/{tagteam}/retire', TagTeamRetireController::class)->name('tagteams.retire');
+        Route::put('/tag-teams/{tagteam}/unretire', TagTeamUnretireController::class)->name('tagteams.unretire');
         Route::resource('managers', 'ManagersController');
         Route::patch('/managers/{manager}/restore', [ManagersController::class, 'restore'])->name('managers.restore');
         Route::post('/managers/{manager}/retire', [ManagerRetirementsController::class, 'store'])->name('managers.retire');

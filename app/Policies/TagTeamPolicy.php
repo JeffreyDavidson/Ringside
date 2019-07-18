@@ -11,14 +11,14 @@ class TagTeamPolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can create wrestlers.
+     * Determine whether the user can create tag teams.
      *
      * @param  \App\Models\User  $user
      * @return bool
      */
     public function create(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class TagTeamPolicy
      */
     public function update(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class TagTeamPolicy
      */
     public function delete(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -51,7 +51,7 @@ class TagTeamPolicy
      */
     public function restore(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -63,7 +63,11 @@ class TagTeamPolicy
      */
     public function suspend(User $user, TagTeam $tagteam)
     {
-        return $user->isAdministrator() && !$tagteam->isSuspended();
+        if ($tagteam->is_suspended) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -75,19 +79,11 @@ class TagTeamPolicy
      */
     public function reinstate(User $user, TagTeam $tagteam)
     {
-        return $user->isAdministrator() && $tagteam->isSuspended();
-    }
+        if (!$tagteam->is_suspended) {
+            return false;
+        }
 
-    /**
-     * Determine whether the user can deactivate an active tag team.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\TagTeam  $tagteam
-     * @return bool
-     */
-    public function deactivate(User $user, TagTeam $tagteam)
-    {
-        return $user->isAdministrator() && $tagteam->isActive();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -99,7 +95,10 @@ class TagTeamPolicy
      */
     public function activate(User $user, TagTeam $tagteam)
     {
-        return $user->isAdministrator() && ! $tagteam->isActive();
+        if ($tagteam->is_bookable) {
+            return false;
+        }
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -111,7 +110,11 @@ class TagTeamPolicy
      */
     public function retire(User $user, TagTeam $tagteam)
     {
-        return $user->isAdministrator() && ! $tagteam->isRetired();
+        if ($tagteam->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -123,7 +126,11 @@ class TagTeamPolicy
      */
     public function unretire(User $user, TagTeam $tagteam)
     {
-        return $user->isAdministrator() && $tagteam->isRetired();
+        if (!$tagteam->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -134,7 +141,7 @@ class TagTeamPolicy
      */
     public function viewList(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -146,6 +153,10 @@ class TagTeamPolicy
      */
     public function view(User $user, TagTeam $tagteam)
     {
-        return $user->isAdministrator() || $tagteam->user->is($user);
+        if (!is_null($tagteam->user) && $tagteam->user->is($user)) {
+            return true;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }
