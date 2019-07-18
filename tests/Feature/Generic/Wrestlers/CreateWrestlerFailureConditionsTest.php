@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group wrestlers
- * @group admins
+ * @group generics
  */
 class CreateWrestlerFailureConditionsTest extends TestCase
 {

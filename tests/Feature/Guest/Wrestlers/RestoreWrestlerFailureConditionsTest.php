@@ -6,6 +6,10 @@ use App\Models\Wrestler;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @group wrestlers
+ * @group guests
+ */
 class RestoreWrestlerFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -15,7 +19,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
     {
         $wrestler = factory(Wrestler::class)->create(['deleted_at' => now()->subDays(3)->toDateTimeString()]);
 
-        $response = $this->patch(route('wrestlers.restore', $wrestler));
+        $response = $this->put(route('wrestlers.restore', $wrestler));
 
         $response->assertRedirect(route('login'));
     }

@@ -6,6 +6,10 @@ use App\Models\Wrestler;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @group wrestlers
+ * @group generics
+ */
 class RestoreWrestlerFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -16,7 +20,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->states('bookable')->create();
 
-        $response = $this->patch(route('wrestlers.restore', $wrestler));
+        $response = $this->put(route('wrestlers.restore', $wrestler));
 
         $response->assertNotFound();
     }
@@ -27,7 +31,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
 
-        $response = $this->patch(route('wrestlers.restore', $wrestler));
+        $response = $this->put(route('wrestlers.restore', $wrestler));
 
         $response->assertNotFound();
     }
@@ -38,7 +42,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->states('retired')->create();
 
-        $response = $this->patch(route('wrestlers.restore', $wrestler));
+        $response = $this->put(route('wrestlers.restore', $wrestler));
 
         $response->assertNotFound();
     }
@@ -49,7 +53,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->states('suspended')->create();
 
-        $response = $this->patch(route('wrestlers.restore', $wrestler));
+        $response = $this->put(route('wrestlers.restore', $wrestler));
 
         $response->assertNotFound();
     }
@@ -60,7 +64,7 @@ class RestoreWrestlerFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->states('injured')->create();
 
-        $response = $this->patch(route('wrestlers.restore', $wrestler));
+        $response = $this->put(route('wrestlers.restore', $wrestler));
 
         $response->assertNotFound();
     }

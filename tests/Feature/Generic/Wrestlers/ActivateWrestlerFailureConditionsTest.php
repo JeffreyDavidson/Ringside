@@ -8,9 +8,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group wrestlers
- * @group generic
+ * @group generics
  */
-class ActivateWrestlerTest extends TestCase
+class ActivateWrestlerFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
 

@@ -7,6 +7,10 @@ use App\Models\Wrestler;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @group wrestlers
+ * @group users
+ */
 class ViewWrestlerBioPageFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
