@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\User\Titles;
 
-use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -10,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  * @group titles
  * @group users
  */
-class CreateTitleTest extends TestCase
+class CreateTitleFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
 

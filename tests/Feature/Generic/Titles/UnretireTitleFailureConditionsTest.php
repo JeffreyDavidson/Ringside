@@ -6,7 +6,10 @@ use Tests\TestCase;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-/** @group titles */
+/**
+ * @group titles
+ * @group generic
+ */
 class UnretireTitleFailureConditionsTest extends TestCase
 {
     use RefreshDatabase;
