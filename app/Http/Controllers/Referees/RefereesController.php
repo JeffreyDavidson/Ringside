@@ -14,11 +14,11 @@ class RefereesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Referee $referee)
     {
         $this->authorize('create', Referee::class);
 
-        return response()->view('referees.create');
+        return view('referees.create', compact('referee'));
     }
 
     /**
@@ -29,7 +29,8 @@ class RefereesController extends Controller
      */
     public function store(StoreRefereeRequest $request)
     {
-        $referee = Referee::create($request->all());
+        $referee = Referee::create($request->except('started_at'));
+        $referee->employments()->create($request->only('started_at'));
 
         return redirect()->route('referees.index');
     }
@@ -56,7 +57,8 @@ class RefereesController extends Controller
      */
     public function update(UpdateRefereeRequest $request, Referee $referee)
     {
-        $referee->update($request->all());
+        $referee->update($request->except('started_at'));
+        $referee->employment()->update($request->only('started_at'));
 
         return redirect()->route('referees.index');
     }
@@ -72,23 +74,6 @@ class RefereesController extends Controller
         $this->authorize('delete', Referee::class);
 
         $referee->delete();
-
-        return redirect()->route('referees.index');
-    }
-
-    /**
-     * Restore a deleted referee.
-     *
-     * @param  int  $refereeId
-     * @return \lluminate\Http\RedirectResponse
-     */
-    public function restore($refereeId)
-    {
-        $referee = Referee::onlyTrashed()->findOrFail($refereeId);
-
-        $this->authorize('restore', Referee::class);
-
-        $referee->restore();
 
         return redirect()->route('referees.index');
     }
