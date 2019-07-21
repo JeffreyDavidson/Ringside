@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Referee;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRefereeRequest extends FormRequest
@@ -14,7 +13,9 @@ class UpdateRefereeRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', Referee::class);
+        $referee = $this->route('referee');
+
+        return $this->user()->can('update', $referee);
     }
 
     /**
@@ -24,10 +25,22 @@ class UpdateRefereeRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'first_name' => ['required'],
-            'last_name' => ['required'],
-            'started_at' => ['required', 'date_format:Y-m-d H:i:s']
+        $rules = [
+            'first_name' => ['required', 'string'],
+            'last_name' => ['required', 'string'],
+            'started_at' => ['string', 'date_format:Y-m-d H:i:s']
         ];
+
+        if ($this->referee->employment) {
+            if ($this->referee->employment->started_at) {
+                $rules['started_at'][] = 'required';
+            }
+
+            if ($this->referee->employment->started_at && $this->referee->employment->started_at->isPast()) {
+                $rules['started_at'][] = 'before_or_equal:' . $this->referee->employment->started_at->toDateTimeString();
+            }
+        }
+
+        return $rules;
     }
 }

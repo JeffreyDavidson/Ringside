@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TitleStatus;
+use App\Enums\RefereeStatus;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 
@@ -22,5 +23,12 @@ return [
         TagTeamStatus::PENDING_INTRODUCED => 'Pending Introduced',
         TagTeamStatus::RETIRED => 'Retired',
         TagTeamStatus::SUSPENDED => 'Suspended',
+    ],
+    RefereeStatus::class => [
+        RefereeStatus::BOOKABLE => 'Bookable',
+        RefereeStatus::PENDING_INTRODUCED => 'Pending Introduced',
+        RefereeStatus::RETIRED => 'Retired',
+        RefereeStatus::SUSPENDED => 'Suspended',
+        RefereeStatus::INJURED => 'Injured',
     ],
 ];

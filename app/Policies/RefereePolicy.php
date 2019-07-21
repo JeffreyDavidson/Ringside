@@ -18,7 +18,7 @@ class RefereePolicy
      */
     public function create(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class RefereePolicy
      */
     public function update(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class RefereePolicy
      */
     public function delete(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -51,7 +51,7 @@ class RefereePolicy
      */
     public function restore(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -63,7 +63,11 @@ class RefereePolicy
      */
     public function retire(User $user, Referee $referee)
     {
-        return $user->isAdministrator() && ! $referee->isRetired();
+        if ($referee->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -75,7 +79,11 @@ class RefereePolicy
      */
     public function unretire(User $user, Referee $referee)
     {
-        return $user->isAdministrator() && $referee->isRetired();
+        if (!$referee->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -87,7 +95,11 @@ class RefereePolicy
      */
     public function injure(User $user, Referee $referee)
     {
-        return $user->isAdministrator() && ! $referee->isInjured();
+        if ($referee->is_injured) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -99,23 +111,15 @@ class RefereePolicy
      */
     public function recover(User $user, Referee $referee)
     {
-        return $user->isAdministrator() && $referee->isInjured();
+        if (!$referee->is_injured) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can deactivate an active referee.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
-     * @return bool
-     */
-    public function deactivate(User $user, Referee $referee)
-    {
-        return $user->isAdministrator() && $referee->isActive();
-    }
-
-    /**
-     * Determine whether the user can activate an inactive referee.
+     * Determine whether the user can activate a pending introduced referee.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Referee  $referee
@@ -123,6 +127,12 @@ class RefereePolicy
      */
     public function activate(User $user, Referee $referee)
     {
-        return $user->isAdministrator() && ! $referee->isActive();
+        // dd(!$referee->is_pending_introduced);
+        // dd($user->isSuperAdministrator() || $user->isAdministrator());
+        if ($referee->is_employed) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }
