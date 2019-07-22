@@ -1,8 +1,9 @@
 {
     "/js/app.js": "/js/app.js",
     "/js/manifest.js": "/js/manifest.js",
-    "/js/tagteams/index.js": "/js/tagteams/index.js",
+    "/js/referees/index.js": "/js/referees/index.js",
     "/css/app.css": "/css/app.css",
+    "/js/tagteams/index.js": "/js/tagteams/index.js",
     "/js/titles/index.js": "/js/titles/index.js",
     "/js/vendor.js": "/js/vendor.js",
     "/js/venues/index.js": "/js/venues/index.js",

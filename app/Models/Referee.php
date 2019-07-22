@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\RefereeStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -216,6 +217,16 @@ class Referee extends Model
     public function getIsInjuredAttribute()
     {
         return $this->injuries()->whereNull('ended_at')->exists();
+    }
+
+    /**
+     * Get the full name of the referee.
+     *
+     * @return string
+     */
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 
     /**

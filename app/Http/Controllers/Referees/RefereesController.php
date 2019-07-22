@@ -3,12 +3,44 @@
 namespace App\Http\Controllers\Referees;
 
 use App\Models\Referee;
+use Illuminate\Http\Request;
+use App\Filters\RefereeFilters;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRefereeRequest;
 use App\Http\Requests\UpdateRefereeRequest;
 
 class RefereesController extends Controller
 {
+    /**
+     * View a list of wrestlers.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Yajra\DataTables\DataTables  $table
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request, DataTables $table, RefereeFilters $requestFilter)
+    {
+        $this->authorize('viewList', Referee::class);
+
+        if ($request->ajax()) {
+            $query = Referee::query();
+            $requestFilter->apply($query);
+
+            return $table->eloquent($query)
+                ->addColumn('action', 'referees.partials.action-cell')
+                ->editColumn('started_at', function (Referee $referee) {
+                    return $referee->employment->started_at->format('Y-m-d H:s');
+                })
+                ->filterColumn('id', function ($query, $keyword) {
+                    $query->where($query->qualifyColumn('id'), $keyword);
+                })
+                ->toJson();
+        }
+
+        return view('referees.index');
+    }
+
     /**
      * Show the form for creating a new referee.
      *
@@ -33,6 +65,19 @@ class RefereesController extends Controller
         $referee->employments()->create($request->only('started_at'));
 
         return redirect()->route('referees.index');
+    }
+
+    /**
+     * Show the profile of a referee.
+     *
+     * @param  \App\Models\Referee  $referee
+     * @return \Illuminate\View\View
+     */
+    public function show(Referee $referee)
+    {
+        $this->authorize('view', $referee);
+
+        return view('referees.show', compact('referee'));
     }
 
     /**

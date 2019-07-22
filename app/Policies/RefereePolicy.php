@@ -127,12 +127,33 @@ class RefereePolicy
      */
     public function activate(User $user, Referee $referee)
     {
-        // dd(!$referee->is_pending_introduced);
-        // dd($user->isSuperAdministrator() || $user->isAdministrator());
         if ($referee->is_employed) {
             return false;
         }
 
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can view list of referees.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function viewList(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can view a profile for a referee.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Referee  $referee
+     * @return bool
+     */
+    public function view(User $user, Referee $referee)
+    {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }
