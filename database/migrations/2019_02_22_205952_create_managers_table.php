@@ -18,9 +18,6 @@ class CreateManagersTable extends Migration
             $table->unsignedInteger('user_id')->nullable();
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('slug');
-            $table->datetime('hired_at');
-            $table->boolean('is_active');
             $table->timestamps();
             $table->softDeletes();
         });

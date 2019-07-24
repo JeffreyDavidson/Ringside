@@ -18,40 +18,43 @@ class ManagerPolicy
      */
     public function create(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
      * Determine whether the user can update a manager.
      *
      * @param  App\Models\User  $user
+     * @param  App\Models\Manager  $manager
      * @return bool
      */
-    public function update(User $user)
+    public function update(User $user, Manager $manager)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
      * Determine whether the user can delete a manager.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Manager  $manager
      * @return bool
      */
-    public function delete(User $user)
+    public function delete(User $user, Manager $manager)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
      * Determine whether the user can restore a deleted manager.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Manager  $manager
      * @return bool
      */
-    public function restore(User $user)
+    public function restore(User $user, Manager $manager)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -63,7 +66,11 @@ class ManagerPolicy
      */
     public function retire(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && !$manager->isRetired();
+        if (!$manager->is_employed || $manager->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -75,7 +82,11 @@ class ManagerPolicy
      */
     public function unretire(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && $manager->isRetired();
+        if (!$manager->is_retired) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -87,7 +98,11 @@ class ManagerPolicy
      */
     public function suspend(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && ! $manager->isSuspended();
+        if (!$manager->is_employed || !$manager->is_bookable || $manager->is_suspended) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -99,7 +114,11 @@ class ManagerPolicy
      */
     public function reinstate(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && $manager->isSuspended();
+        if (!$manager->is_suspended) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -111,7 +130,11 @@ class ManagerPolicy
      */
     public function injure(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && !$manager->isInjured();
+        if (!$manager->is_employed || !$manager->is_bookable || $manager->is_injured) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -123,19 +146,11 @@ class ManagerPolicy
      */
     public function recover(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && $manager->isInjured();
-    }
+        if (!$manager->is_employed || !$manager->is_injured) {
+            return false;
+        }
 
-    /**
-     * Determine whether the user can deactivate an active manager.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Manager  $manager
-     * @return bool
-     */
-    public function deactivate(User $user, Manager $manager)
-    {
-        return $user->isAdministrator() && $manager->isActive();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -147,7 +162,11 @@ class ManagerPolicy
      */
     public function activate(User $user, Manager $manager)
     {
-        return $user->isAdministrator() && ! $manager->isActive();
+        if ($manager->is_employed) {
+            return false;
+        }
+
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -158,7 +177,7 @@ class ManagerPolicy
      */
     public function viewList(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -170,6 +189,6 @@ class ManagerPolicy
      */
     public function view(User $user, Manager $manager)
     {
-        return $user->isAdministrator() || $manager->user->is($user);
+        return $user->isSuperAdministrator() ||  $user->isAdministrator() || $manager->user->is($user);
     }
 }
