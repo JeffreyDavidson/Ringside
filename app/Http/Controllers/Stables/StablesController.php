@@ -122,7 +122,7 @@ class StablesController extends Controller
                 $stable->employments()->create($request->only('started_at'));
             }
         }
-        
+
         $stable->wrestlerHistory()->sync($request->input('wrestlers'));
         $stable->tagTeamHistory()->sync($request->input('tagteams'));
 
