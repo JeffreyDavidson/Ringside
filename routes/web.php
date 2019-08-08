@@ -1,5 +1,5 @@
 <?php
-
+// Auth::loginUsingId(1);
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Controllers\Titles\TitlesController;
@@ -15,30 +15,30 @@ use App\Http\Controllers\Wrestlers\RecoverController;
 use App\Http\Controllers\Wrestlers\SuspendController;
 use App\Http\Controllers\Wrestlers\ReinstateController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Http\Controllers\Managers\InjureController as ManagerInjureController;
+use App\Http\Controllers\Managers\RetireController as ManagerRetireController;
 use App\Http\Controllers\Referees\InjureController as RefereeInjureController;
 use App\Http\Controllers\Referees\RetireController as RefereeRetireController;
 use App\Http\Controllers\TagTeams\RetireController as TagTeamRetireController;
+use App\Http\Controllers\Managers\RecoverController as ManagerRecoverController;
+use App\Http\Controllers\Managers\RestoreController as ManagerRestoreController;
+use App\Http\Controllers\Managers\SuspendController as ManagerSuspendController;
 use App\Http\Controllers\Referees\RecoverController as RefereeRecoverController;
 use App\Http\Controllers\Referees\RestoreController as RefereeRestoreController;
 use App\Http\Controllers\TagTeams\RestoreController as TagTeamRestoreController;
 use App\Http\Controllers\TagTeams\SuspendController as TagTeamSuspendController;
 use App\Http\Controllers\Wrestlers\RetireController as WrestlerRetireController;
+use App\Http\Controllers\Managers\ActivateController as ManagerActivateController;
+use App\Http\Controllers\Managers\UnretireController as ManagerUnretireController;
 use App\Http\Controllers\Referees\ActivateController as RefereeActivateController;
 use App\Http\Controllers\Referees\UnretireController as RefereeUnretireController;
 use App\Http\Controllers\TagTeams\ActivateController as TagTeamActivateController;
 use App\Http\Controllers\TagTeams\UnretireController as TagTeamUnretireController;
 use App\Http\Controllers\Wrestlers\RestoreController as WrestlerRestoreController;
+use App\Http\Controllers\Managers\ReinstateController as ManagerReinstateController;
 use App\Http\Controllers\TagTeams\ReinstateController as TagTeamReinstateController;
 use App\Http\Controllers\Wrestlers\ActivateController as WrestlerActivateController;
 use App\Http\Controllers\Wrestlers\UnretireController as WrestlerUnretireController;
-use App\Http\Controllers\Managers\ActivateController as ManagerActivateController;
-use App\Http\Controllers\Managers\SuspendController as ManagerSuspendController;
-use App\Http\Controllers\Managers\ReinstateController as ManagerReinstateController;
-use App\Http\Controllers\Managers\RetireController as ManagerRetireController;
-use App\Http\Controllers\Managers\UnretireController as ManagerUnretireController;
-use App\Http\Controllers\Managers\InjureController as ManagerInjureController;
-use App\Http\Controllers\Managers\RecoverController as ManagerRecoverController;
-use App\Http\Controllers\Managers\RestoreController as ManagerRestoreController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,14 +86,6 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
         Route::put('/referees/{referee}/injure', RefereeInjureController::class)->name('referees.injure');
         Route::put('/referees/{referee}/recover', RefereeRecoverController::class)->name('referees.recover');
         Route::put('/referees/{referee}/activate', RefereeActivateController::class)->name('referees.activate');
-        Route::resource('stables', StablesController::class);
-        Route::patch('/stables/{stable}/restore', [StablesController::class, 'restore'])->name('stables.restore');
-        Route::post('/stables/{stable}/retire', [StableRetirementsController::class, 'store'])->name('stables.retire');
-        Route::delete('/stables/{stable}/unretire', [StableRetirementsController::class, 'destroy'])->name('stables.unretire');
-        Route::post('/stables/{stable}/deactivate', [StableActivationsController::class, 'destroy'])->name('stables.deactivate');
-        Route::post('/stables/{stable}/activate', [StableActivationsController::class, 'store'])->name('stables.activate');
-        Route::post('/stables/{stable}/suspend', [StableSuspensionsController::class, 'store'])->name('stables.suspend');
-        Route::delete('/stables/{stable}/reinstate', [StableSuspensionsController::class, 'destroy'])->name('stables.reinstate');
     });
 
     Route::resource('venues', VenuesController::class)->except('destroy');
@@ -110,3 +102,10 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
 });
 
 Auth::routes();
+
+/************************************************************************
+ * Only Roster
+ ************************************************************************/
+Route::middleware(['auth'])->group(function () {
+    Route::group([], __DIR__ . '/web/stables.php');
+});

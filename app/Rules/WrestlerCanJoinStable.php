@@ -8,8 +8,16 @@ use Illuminate\Contracts\Validation\Rule;
 
 class WrestlerCanJoinStable implements Rule
 {
+    /**
+     * @var \App\Models\Stable
+     */
     protected $stable;
 
+    /**
+     * Undocumented function
+     *
+     * @param \App\Models\Stable $stable
+     */
     public function __construct(Stable $stable)
     {
         $this->stable = $stable;
@@ -26,19 +34,25 @@ class WrestlerCanJoinStable implements Rule
     {
         $wrestler = Wrestler::find($value);
 
-        if (! $wrestler) return false;
-
-        if ($wrestler->hired_at->isFuture()) {
+        if (! $wrestler) {
             return false;
         }
 
-        if (!$wrestler->is_active) {
+        if (!data_get($wrestler, 'employment.started_at')) {
             return false;
         }
 
-        if ($wrestler->whereHas('stables', function ($query) {
-            $query->where('is_active', true)->whereKeyNot($this->stable->id);
-        })->exists()) {
+        if ($wrestler->employment->started_at->isFuture()) {
+            return false;
+        }
+
+        if (!$wrestler->is_bookable) {
+            return false;
+        }
+
+        // We need to to make sure the wrestler isn't in any
+        // bookable stables excluding the current stable.
+        if ($wrestler->stables()->bookable()->whereKeyNot($this->stable->id)->exists()) {
             return false;
         }
 

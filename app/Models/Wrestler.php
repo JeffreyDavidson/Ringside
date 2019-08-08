@@ -6,6 +6,7 @@ use App\Enums\WrestlerStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Eloquent\Concerns\HasCustomRelationships;
 
 /**
  * App\Models\Wrestler
@@ -70,7 +71,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Wrestler extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasCustomRelationships;
+
 
     /**
      * The attributes that aren't mass assignable.
@@ -114,11 +116,11 @@ class Wrestler extends Model
     /**
      * Get the stables the wrestler is a member of.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     * @return \App\Eloquent\Relationships\LeaveableMorphToMany
      */
     public function stables()
     {
-        return $this->morphToMany(Stable::class, 'member');
+        return $this->leaveableMorphToMany(Stable::class, 'member')->using(Member::class);
     }
 
     /**
@@ -128,7 +130,7 @@ class Wrestler extends Model
      */
     public function stable()
     {
-        return $this->morphToMany(Stable::class, 'member')->where('is_active', true);
+        // return $this->morphToMany(Stable::class, 'member')->where('is_active', true);
     }
 
     /**

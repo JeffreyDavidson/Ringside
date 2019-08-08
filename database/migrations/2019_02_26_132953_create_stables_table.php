@@ -17,9 +17,6 @@ class CreateStablesTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id')->nullable();
             $table->string('name');
-            $table->string('slug');
-            $table->datetime('started_at');
-            $table->boolean('is_active');
             $table->timestamps();
             $table->softDeletes();
         });

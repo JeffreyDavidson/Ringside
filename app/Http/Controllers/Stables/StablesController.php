@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Stables;
 
 use App\Models\Stable;
+use Illuminate\Http\Request;
+use App\Filters\StableFilters;
+use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStableRequest;
 use App\Http\Requests\UpdateStableRequest;
@@ -10,18 +13,32 @@ use App\Http\Requests\UpdateStableRequest;
 class StablesController extends Controller
 {
     /**
-     * Retrieve stables of a specific state.
+     * View a list of stables.
      *
-     * @param  string  $state
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Yajra\DataTables\DataTables  $table
+     * @return \Illuminate\View\View
      */
-    public function index($state = 'active')
+    public function index(Request $request, DataTables $table, StableFilters $requestFilter)
     {
         $this->authorize('viewList', Stable::class);
 
-        $stables = Stable::hasState($state)->get();
+        if ($request->ajax()) {
+            $query = Stable::query();
+            $requestFilter->apply($query);
 
-        return response()->view('stables.index', compact('stables'));
+            return $table->eloquent($query)
+                ->addColumn('action', 'stables.partials.action-cell')
+                ->editColumn('started_at', function (Stable $stable) {
+                    return $stable->employment->started_at ?? null;
+                })
+                ->filterColumn('id', function ($query, $keyword) {
+                    $query->where($query->qualifyColumn('id'), $keyword);
+                })
+                ->toJson();
+        }
+
+        return view('stables.index');
     }
 
     /**
@@ -44,11 +61,21 @@ class StablesController extends Controller
      */
     public function store(StoreStableRequest $request)
     {
-        $stable = Stable::create($request->except(['wrestlers', 'tagteams']));
+        $stable = Stable::create($request->except(['wrestlers', 'tagteams', 'started_at']));
 
-        $stable->addWrestlers($request->only('wrestlers'))->addTagTeams($request->only('tagteams'));
+        if ($request->filled('started_at')) {
+            $stable->employments()->create($request->only('started_at'));
+        }
 
-        return redirect()->route('stables.index');
+        if ($request->filled('wrestlers')) {
+            $stable->addWrestlers($request->input('wrestlers'), $request->input('started_at'));
+        }
+
+        if ($request->filled('tagteams')) {
+            $stable->addTagTeams($request->input('tagteams'), $request->input('started_at'));
+        }
+
+        return redirect()->route('roster.stables.index');
     }
 
     /**
@@ -61,7 +88,7 @@ class StablesController extends Controller
     {
         $this->authorize('view', $stable);
 
-        return response()->view('stables.show', compact('stable'));
+        return view('stables.show', compact('stable'));
     }
 
     /**
@@ -72,9 +99,9 @@ class StablesController extends Controller
      */
     public function edit(Stable $stable)
     {
-        $this->authorize('update', Stable::class);
+        $this->authorize('update', $stable);
 
-        return response()->view('stables.edit', compact('stable'));
+        return view('stables.edit', compact('stable'));
     }
 
     /**
@@ -86,24 +113,20 @@ class StablesController extends Controller
      */
     public function update(UpdateStableRequest $request, Stable $stable)
     {
-        $stable->update($request->except('wrestlers', 'tagteams'));
+        $stable->update($request->except('wrestlers', 'tagteams', 'started_at'));
 
-        $newStableWrestlers = $request->input('wrestlers');
-        $newStableTagTeams = $request->input('tagteams');
+        if ($request->filled('started_at')) {
+            if ($stable->employment && $stable->employment->started_at != $request->input('started_at')) {
+                $stable->employment()->update($request->only('started_at'));
+            } elseif (!$stable->employment) {
+                $stable->employments()->create($request->only('started_at'));
+            }
+        }
+        
+        $stable->wrestlerHistory()->sync($request->input('wrestlers'));
+        $stable->tagTeamHistory()->sync($request->input('tagteams'));
 
-        $currentStableWrestlers = $stable->wrestlers()->whereNull('left_at')->get()->pluck('id');
-        $currentStableTagTeams = $stable->tagteams()->whereNull('left_at')->get()->pluck('id');
-
-        $formerStableWrestlers = $currentStableWrestlers->diff(collect($newStableWrestlers));
-        $formerStableTagTeams = $currentStableTagTeams->diff(collect($newStableTagTeams));
-
-        $stable->wrestlers()->updateExistingPivot($formerStableWrestlers, ['left_at' => now()]);
-        $stable->tagteams()->updateExistingPivot($formerStableTagTeams, ['left_at' => now()]);
-
-        $stable->wrestlers()->syncWithoutDetaching($newStableWrestlers);
-        $stable->tagteams()->syncWithoutDetaching($newStableTagTeams);
-
-        return redirect()->route('stables.index');
+        return redirect()->route('roster.stables.index');
     }
 
     /**
@@ -118,23 +141,6 @@ class StablesController extends Controller
 
         $stable->delete();
 
-        return redirect()->route('stables.index');
-    }
-
-    /**
-     * Restore a deleted stable.
-     *
-     * @param  int  $stableId
-     * @return \lluminate\Http\RedirectResponse
-     */
-    public function restore($stableId)
-    {
-        $stable = Stable::onlyTrashed()->findOrFail($stableId);
-
-        $this->authorize('restore', Stable::class);
-
-        $stable->restore();
-
-        return redirect()->route('stables.index');
+        return redirect()->route('roster.stables.index');
     }
 }

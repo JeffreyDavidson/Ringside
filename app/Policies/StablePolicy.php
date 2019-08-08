@@ -11,14 +11,14 @@ class StablePolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can create managers.
+     * Determine whether the user can create stables.
      *
      * @param  App\User  $user
      * @return bool
      */
     public function create(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class StablePolicy
      */
     public function update(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class StablePolicy
      */
     public function delete(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -51,47 +51,11 @@ class StablePolicy
      */
     public function restore(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can suspend a stable.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Stable  $stable
-     * @return bool
-     */
-    public function suspend(User $user, Stable $stable)
-    {
-        return $user->isAdministrator() && !$stable->isSuspended();
-    }
-
-    /**
-     * Determine whether the user can suspend a stable.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Stable  $stable
-     * @return bool
-     */
-    public function reinstate(User $user, Stable $stable)
-    {
-        return $user->isAdministrator() && $stable->isSuspended();
-    }
-
-    /**
-     * Determine whether the user can deactivate an active stable.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Stable  $stable
-     * @return bool
-     */
-    public function deactivate(User $user, Stable $stable)
-    {
-        return $user->isAdministrator() && $stable->isActive();
-    }
-
-    /**
-     * Determine whether the user can activate an inactive stable.
+     * Determine whether the user can activate a stable.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Stable  $stable
@@ -99,7 +63,15 @@ class StablePolicy
      */
     public function activate(User $user, Stable $stable)
     {
-        return $user->isAdministrator() && !$stable->isActive();
+        if (!($user->isSuperAdministrator() || $user->isAdministrator())) {
+            return false;
+        }
+
+        if ($stable->is_bookable || $stable->is_retired) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -111,11 +83,19 @@ class StablePolicy
      */
     public function retire(User $user, Stable $stable)
     {
-        return $user->isAdministrator() && !$stable->isRetired();
+        if (!($user->isSuperAdministrator() || $user->isAdministrator())) {
+            return false;
+        }
+
+        if (!$stable->is_employed || $stable->is_retired) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Determine whether the user can unretire a retired stable.
+     * Determine whether the user can unretire a stable.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Stable  $stable
@@ -123,7 +103,40 @@ class StablePolicy
      */
     public function unretire(User $user, Stable $stable)
     {
-        return $user->isAdministrator() && $stable->isRetired();
+        if (!($user->isSuperAdministrator() || $user->isAdministrator())) {
+            return false;
+        }
+
+        if (!$stable->is_retired) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine whether the user can unretire a stable.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Stable  $stable
+     * @return bool
+     */
+    public function disassemble(User $user, Stable $stable)
+    {
+        if (!($user->isSuperAdministrator() || $user->isAdministrator())) {
+            return false;
+        }
+
+        if ($stable->members->count() == 0) {
+            return false;
+        }
+
+
+        if (!$stable->is_bookable) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -134,7 +147,7 @@ class StablePolicy
      */
     public function viewList(User $user)
     {
-        return $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
@@ -146,6 +159,6 @@ class StablePolicy
      */
     public function view(User $user, Stable $stable)
     {
-        return $user->isAdministrator() || $stable->user->is($user);
+        return $user->isSuperAdministrator() || $user->isAdministrator() || $stable->user->is($user);
     }
 }
