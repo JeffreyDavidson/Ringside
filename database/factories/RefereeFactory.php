@@ -41,7 +41,7 @@ $factory->afterCreatingState(Referee::class, 'suspended', function ($referee) {
     $referee->suspend();
 });
 
-$factory->afterCreatingState(Referee::class, 'pending-introduced', function ($referee) {
+$factory->afterCreatingState(Referee::class, 'pending-introduction', function ($referee) {
     $referee->employments()->create([
         'started_at' => Carbon::tomorrow()->toDateTimeString()
     ]);

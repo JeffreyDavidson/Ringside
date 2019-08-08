@@ -31,13 +31,13 @@ class ViewTagTeamsListSuccessConditionsTest extends TestCase
         };
 
         $bookable          = factory(TagTeam::class, 3)->states('bookable')->create()->map($mapToIdAndName);
-        $pendingIntroduced = factory(TagTeam::class, 3)->states('pending-introduced')->create()->map($mapToIdAndName);
+        $pendingIntroduced = factory(TagTeam::class, 3)->states('pending-introduction')->create()->map($mapToIdAndName);
         $retired           = factory(TagTeam::class, 3)->states('retired')->create()->map($mapToIdAndName);
         $suspended         = factory(TagTeam::class, 3)->states('suspended')->create()->map($mapToIdAndName);
 
         $this->tagteams = collect([
             'bookable'           => $bookable,
-            'pending-introduced' => $pendingIntroduced,
+            'pending-introduction' => $pendingIntroduced,
             'retired'            => $retired,
             'suspended'          => $suspended,
             'all'                => collect()
@@ -86,15 +86,15 @@ class ViewTagTeamsListSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_super_administrator_can_view_pending_introduced_tag_teams()
+    public function a_super_administrator_can_view_pending_introduction_tag_teams()
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'only_pending_introduced']));
+        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'only_pending_introduction']));
 
         $responseAjax->assertJson([
-            'recordsTotal' => $this->tagteams->get('pending-introduced')->count(),
-            'data'         => $this->tagteams->get('pending-introduced')->toArray(),
+            'recordsTotal' => $this->tagteams->get('pending-introduction')->count(),
+            'data'         => $this->tagteams->get('pending-introduction')->toArray(),
         ]);
     }
 

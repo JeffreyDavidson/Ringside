@@ -15,10 +15,10 @@ class ActivateWrestlerFailureConditionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_basic_user_cannot_activate_a_pending_introduced_wrestler()
+    public function a_basic_user_cannot_activate_a_pending_introduction_wrestler()
     {
         $this->actAs('basic-user');
-        $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
+        $wrestler = factory(Wrestler::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('wrestlers.activate', $wrestler));
 

@@ -93,7 +93,7 @@ class ViewManagersListSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_super_administrator_can_view_pending_introduced_managers()
+    public function a_super_administrator_can_view_pending_introduction_managers()
     {
         $this->actAs('super-administrator');
 

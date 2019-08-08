@@ -45,7 +45,7 @@ use App\Eloquent\Concerns\HasCustomRelationships;
  * @property-read \App\Models\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler bookable()
  * @method static bool|null forceDelete()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler pending_introduced()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler pending_introduction()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler injured()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Wrestler newQuery()
@@ -260,7 +260,7 @@ class Wrestler extends Model
             return WrestlerStatus::SUSPENDED();
         }
 
-        return WrestlerStatus::PENDING_INTRODUCED();
+        return WrestlerStatus::PENDING_INTRODUCTION();
     }
 
     /**

@@ -10,25 +10,25 @@ use App\Enums\WrestlerStatus;
 return [
     TitleStatus::class => [
         TitleStatus::BOOKABLE => 'Bookable',
-        TitleStatus::PENDING_INTRODUCED => 'Pending Introduced',
+        TitleStatus::PENDING_INTRODUCTION => 'Pending Introduced',
         TitleStatus::RETIRED => 'Retired',
     ],
     WrestlerStatus::class => [
         WrestlerStatus::BOOKABLE => 'Bookable',
-        WrestlerStatus::PENDING_INTRODUCED => 'Pending Introduced',
+        WrestlerStatus::PENDING_INTRODUCTION => 'Pending Introduced',
         WrestlerStatus::RETIRED => 'Retired',
         WrestlerStatus::SUSPENDED => 'Suspended',
         WrestlerStatus::INJURED => 'Injured',
     ],
     TagTeamStatus::class => [
         TagTeamStatus::BOOKABLE => 'Bookable',
-        TagTeamStatus::PENDING_INTRODUCED => 'Pending Introduced',
+        TagTeamStatus::PENDING_INTRODUCTION => 'Pending Introduced',
         TagTeamStatus::RETIRED => 'Retired',
         TagTeamStatus::SUSPENDED => 'Suspended',
     ],
     RefereeStatus::class => [
         RefereeStatus::BOOKABLE => 'Bookable',
-        RefereeStatus::PENDING_INTRODUCED => 'Pending Introduced',
+        RefereeStatus::PENDING_INTRODUCTION => 'Pending Introduced',
         RefereeStatus::RETIRED => 'Retired',
         RefereeStatus::SUSPENDED => 'Suspended',
         RefereeStatus::INJURED => 'Injured',

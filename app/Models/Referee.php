@@ -166,7 +166,7 @@ class Referee extends Model
             return RefereeStatus::SUSPENDED();
         }
 
-        return RefereeStatus::PENDING_INTRODUCED();
+        return RefereeStatus::PENDING_INTRODUCTION();
     }
 
     /**

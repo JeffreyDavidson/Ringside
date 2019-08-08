@@ -15,9 +15,9 @@ class ActivateTagTeamFailureConditionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_guest_cannot_activate_an_pending_introduced_tag_team()
+    public function a_guest_cannot_activate_an_pending_introduction_tag_team()
     {
-        $tagteam = factory(TagTeam::class)->states('pending-introduced')->create();
+        $tagteam = factory(TagTeam::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('tagteams.activate', $tagteam));
 

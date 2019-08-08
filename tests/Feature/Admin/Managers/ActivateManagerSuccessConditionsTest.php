@@ -15,7 +15,7 @@ class ActivateManagerSuccessConditionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function an_administrator_can_activate_a_pending_introduced_manager()
+    public function an_administrator_can_activate_a_pending_introduction_manager()
     {
         $this->actAs('administrator');
         $manager = factory(Manager::class)->states('pending-introduction')->create();

@@ -101,7 +101,7 @@ class Title extends Model
             return TitleStatus::RETIRED();
         }
 
-        return TitleStatus::PENDING_INTRODUCED();
+        return TitleStatus::PENDING_INTRODUCTION();
     }
 
     /**
@@ -121,7 +121,7 @@ class Title extends Model
      */
     public function getIsBookableAttribute()
     {
-        return !($this->is_retired || $this->is_pending_introduced);
+        return !($this->is_retired || $this->is_pending_introduction);
     }
 
     /**

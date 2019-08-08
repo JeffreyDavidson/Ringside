@@ -25,7 +25,7 @@ class RefereeFilters extends Filters
             case 'only_bookable':
                 $this->builder->bookable();
                 break;
-            case 'only_pending_introduced':
+            case 'only_pending_introduction':
                 $this->builder->pendingIntroduced();
                 break;
             case 'only_retired':

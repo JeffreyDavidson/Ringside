@@ -26,10 +26,10 @@ class DeleteRefereeSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_super_administrator_can_delete_a_pending_introduced_referee()
+    public function a_super_administrator_can_delete_a_pending_introduction_referee()
     {
         $this->actAs('super-administrator');
-        $referee = factory(Referee::class)->states('pending-introduced')->create();
+        $referee = factory(Referee::class)->states('pending-introduction')->create();
 
         $this->delete(route('referees.destroy', $referee));
 

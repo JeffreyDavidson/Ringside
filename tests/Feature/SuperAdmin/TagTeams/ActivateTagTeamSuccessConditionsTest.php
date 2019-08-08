@@ -18,7 +18,7 @@ class ActivateTagTeamSuccessConditionsTest extends TestCase
     public function a_super_administrator_can_activate_an_inactive_tag_team()
     {
         $this->actAs('super-administrator');
-        $tagteam = factory(TagTeam::class)->states('pending-introduced')->create();
+        $tagteam = factory(TagTeam::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('tagteams.activate', $tagteam));
 

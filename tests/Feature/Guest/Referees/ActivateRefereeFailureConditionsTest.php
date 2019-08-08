@@ -15,9 +15,9 @@ class ActivateRefereeFailureConditionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_guest_cannot_activate_a_pending_introduced_referee()
+    public function a_guest_cannot_activate_a_pending_introduction_referee()
     {
-        $referee = factory(Referee::class)->states('pending-introduced')->create();
+        $referee = factory(Referee::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('referees.activate', $referee));
 

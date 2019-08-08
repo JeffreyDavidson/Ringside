@@ -25,11 +25,11 @@ class ViewTitlesListSuccessConditionsTest extends TestCase
         };
 
         $bookable          = factory(Title::class, 3)->states('bookable')->create()->map($mapToIdAndName);
-        $pendingIntroduced = factory(Title::class, 3)->states('pending-introduced')->create()->map($mapToIdAndName);
+        $pendingIntroduced = factory(Title::class, 3)->states('pending-introduction')->create()->map($mapToIdAndName);
         $retired           = factory(Title::class, 3)->states('retired')->create()->map($mapToIdAndName);
 
         $this->titles = collect([
-            'pending-introduced' => $pendingIntroduced,
+            'pending-introduction' => $pendingIntroduced,
             'bookable'           => $bookable,
             'retired'            => $retired,
             'all'                => collect()
@@ -77,14 +77,14 @@ class ViewTitlesListSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_super_administrator_can_view_all_pending_introduced_titles()
+    public function a_super_administrator_can_view_all_pending_introduction_titles()
     {
         $this->actAs('super-administrator');
-        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'only_pending_introduced']));
+        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'only_pending_introduction']));
 
         $responseAjax->assertJson([
-            'recordsTotal' => $this->titles->get('pending-introduced')->count(),
-            'data'         => $this->titles->get('pending-introduced')->toArray(),
+            'recordsTotal' => $this->titles->get('pending-introduction')->count(),
+            'data'         => $this->titles->get('pending-introduction')->toArray(),
         ]);
     }
 
