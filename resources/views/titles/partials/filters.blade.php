@@ -15,7 +15,7 @@
                     <select class="form-control" name="status" id="status-dropdown">
                         <option value="">Select</option>
                         <option value="only_bookable">Bookable</option>
-                        <option value="only_pending_introduced">Pending Introduced</option>
+                        <option value="only_pending_introduction">Pending Introduced</option>
                         <option value="only_retired">Retired</option>
                     </select>
                 </div>

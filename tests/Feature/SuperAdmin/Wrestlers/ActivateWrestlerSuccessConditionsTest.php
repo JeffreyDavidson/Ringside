@@ -15,10 +15,10 @@ class ActivateWrestlerSuccessCondtionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_super_administrator_can_activate_a_pending_introduced_wrestler()
+    public function a_super_administrator_can_activate_a_pending_introduction_wrestler()
     {
         $this->actAs('super-administrator');
-        $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
+        $wrestler = factory(Wrestler::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('wrestlers.activate', $wrestler));
 

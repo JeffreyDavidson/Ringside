@@ -42,14 +42,14 @@ class CreateTitleSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_title_introduced_after_today_is_pending_introduced()
+    public function a_title_introduced_after_today_is_pending_introduction()
     {
         $this->actAs('administrator');
 
         $this->post(route('titles.store'), $this->validParams(['introduced_at' => Carbon::tomorrow()->toDateTimeString()]));
 
         tap(Title::first(), function ($title) {
-            $this->assertTrue($title->is_pending_introduced);
+            $this->assertTrue($title->is_pending_introduction);
         });
     }
 }

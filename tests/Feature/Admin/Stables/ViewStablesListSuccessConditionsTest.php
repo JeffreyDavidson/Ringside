@@ -83,7 +83,7 @@ class ViewStablesSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function an_administrator_can_view_pending_introduced_stables()
+    public function an_administrator_can_view_pending_introduction_stables()
     {
         $this->actAs('administrator');
 

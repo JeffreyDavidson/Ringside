@@ -26,10 +26,10 @@ class UnretireTitleFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_title_cannot_unretire()
+    public function a_pending_introduction_title_cannot_unretire()
     {
         $this->actAs('administrator');
-        $title = factory(Title::class)->states('pending-introduced')->create();
+        $title = factory(Title::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('titles.unretire', $title));
 

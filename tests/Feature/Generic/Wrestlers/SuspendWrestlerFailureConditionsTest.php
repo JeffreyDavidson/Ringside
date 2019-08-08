@@ -37,10 +37,10 @@ class SuspendWrestlerFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_wrestler_cannot_be_suspended()
+    public function a_pending_introduction_wrestler_cannot_be_suspended()
     {
         $this->actAs('administrator');
-        $wrestler = factory(Wrestler::class)->states('pending-introduced')->create();
+        $wrestler = factory(Wrestler::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('wrestlers.suspend', $wrestler));
 

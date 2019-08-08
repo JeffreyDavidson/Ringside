@@ -23,7 +23,7 @@ $factory->afterCreatingState(Wrestler::class, 'bookable', function ($wrestler) {
     ]);
 });
 
-$factory->afterCreatingState(Wrestler::class, 'pending-introduced', function ($wrestler) {
+$factory->afterCreatingState(Wrestler::class, 'pending-introduction', function ($wrestler) {
     $wrestler->employments()->create([
         'started_at' => Carbon::tomorrow()->toDateTimeString()
     ]);

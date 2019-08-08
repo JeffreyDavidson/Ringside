@@ -37,10 +37,10 @@ class UnretireTagTeamFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_tag_team_cannot_be_unretired()
+    public function a_pending_introduction_tag_team_cannot_be_unretired()
     {
         $this->actAs('administrator');
-        $tagteam = factory(TagTeam::class)->states('pending-introduced')->create();
+        $tagteam = factory(TagTeam::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('tagteams.unretire', $tagteam));
 

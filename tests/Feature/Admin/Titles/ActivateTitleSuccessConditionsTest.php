@@ -15,10 +15,10 @@ class ActivateTitleSuccessConditionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function an_administrator_can_activate_a_pending_introduced_title()
+    public function an_administrator_can_activate_a_pending_introduction_title()
     {
         $this->actAs('administrator');
-        $title = factory(Title::class)->states('pending-introduced')->create();
+        $title = factory(Title::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('titles.activate', $title));
 

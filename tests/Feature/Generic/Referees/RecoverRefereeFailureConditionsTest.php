@@ -26,10 +26,10 @@ class RecoverRefereeFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_referee_cannot_be_recovered()
+    public function a_pending_introduction_referee_cannot_be_recovered()
     {
         $this->actAs('administrator');
-        $referee = factory(Referee::class)->states('pending-introduced')->create();
+        $referee = factory(Referee::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('referees.recover', $referee));
 

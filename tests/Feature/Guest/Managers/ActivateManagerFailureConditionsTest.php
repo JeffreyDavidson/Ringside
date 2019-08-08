@@ -15,7 +15,7 @@ class ActivateManagerFailureConditionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_guest_cannot_activate_pending_introduced_manager()
+    public function a_guest_cannot_activate_pending_introduction_manager()
     {
         $manager = factory(Manager::class)->states('pending-introduction')->create();
 

@@ -26,7 +26,7 @@ class RetireRefereeFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_retired_referee_cannot_be_retired()
+    public function a_pending_introduction_retired_referee_cannot_be_retired()
     {
         $this->actAs('administrator');
         $referee = factory(Referee::class)->states('retired')->create();

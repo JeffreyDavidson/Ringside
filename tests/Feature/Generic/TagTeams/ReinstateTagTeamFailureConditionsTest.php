@@ -26,10 +26,10 @@ class ReinstateTagTeamFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_tag_team_cannot_be_reinstated()
+    public function a_pending_introduction_tag_team_cannot_be_reinstated()
     {
         $this->actAs('administrator');
-        $tagteam = factory(TagTeam::class)->states('pending-introduced')->create();
+        $tagteam = factory(TagTeam::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('tagteams.reinstate', $tagteam));
 

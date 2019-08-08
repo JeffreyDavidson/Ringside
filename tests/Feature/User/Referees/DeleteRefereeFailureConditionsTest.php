@@ -26,10 +26,10 @@ class DeleteRefereeFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_basic_user_cannot_delete_a_pending_introduced_referee()
+    public function a_basic_user_cannot_delete_a_pending_introduction_referee()
     {
         $this->actAs('basic-user');
-        $referee = factory(Referee::class)->states('pending-introduced')->create();
+        $referee = factory(Referee::class)->states('pending-introduction')->create();
 
         $response = $this->delete(route('referees.destroy', $referee));
 

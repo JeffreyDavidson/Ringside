@@ -26,10 +26,10 @@ class UnretireRefereeFailureConditionsTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_introduced_referee_cannot_be_unretired()
+    public function a_pending_introduction_referee_cannot_be_unretired()
     {
         $this->actAs('administrator');
-        $referee = factory(Referee::class)->states('pending-introduced')->create();
+        $referee = factory(Referee::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('referees.unretire', $referee));
 

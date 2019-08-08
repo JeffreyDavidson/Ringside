@@ -27,10 +27,10 @@ class DeleteTitleSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function an_administrator_can_delete_a_pending_introduced_title()
+    public function an_administrator_can_delete_a_pending_introduction_title()
     {
         $this->actAs('administrator');
-        $title = factory(Title::class)->states('pending-introduced')->create();
+        $title = factory(Title::class)->states('pending-introduction')->create();
 
         $response = $this->delete(route('titles.destroy', $title));
 

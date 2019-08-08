@@ -139,7 +139,7 @@ class TagTeam extends Model
             return TagTeamStatus::SUSPENDED();
         }
 
-        return TagTeamStatus::PENDING_INTRODUCED();
+        return TagTeamStatus::PENDING_INTRODUCTION();
     }
 
     /**

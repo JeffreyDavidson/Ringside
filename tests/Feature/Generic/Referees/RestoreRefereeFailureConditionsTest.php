@@ -48,10 +48,10 @@ class RestoreRefereeTest extends TestCase
     }
     
     /** @test */
-    public function a_pending_introduced_referee_cannot_be_restored()
+    public function a_pending_introduction_referee_cannot_be_restored()
     {
         $this->actAs('administrator');
-        $referee = factory(Referee::class)->states('pending-introduced')->create();
+        $referee = factory(Referee::class)->states('pending-introduction')->create();
 
         $response = $this->put(route('referees.restore', $referee));
 

@@ -35,14 +35,14 @@ class ViewRefereesListSuccessConditionsTest extends TestCase
         };
 
         $bookable          = factory(Referee::class, 3)->states('bookable')->create()->map($mapToIdAndName);
-        $pendingIntroduced = factory(Referee::class, 3)->states('pending-introduced')->create()->map($mapToIdAndName);
+        $pendingIntroduced = factory(Referee::class, 3)->states('pending-introduction')->create()->map($mapToIdAndName);
         $retired           = factory(Referee::class, 3)->states('retired')->create()->map($mapToIdAndName);
         $suspended         = factory(Referee::class, 3)->states('suspended')->create()->map($mapToIdAndName);
         $injured           = factory(Referee::class, 3)->states('injured')->create()->map($mapToIdAndName);
 
         $this->referees = collect([
             'bookable'           => $bookable,
-            'pending-introduced' => $pendingIntroduced,
+            'pending-introduction' => $pendingIntroduced,
             'retired'            => $retired,
             'suspended'          => $suspended,
             'injured'            => $injured,
@@ -93,15 +93,15 @@ class ViewRefereesListSuccessConditionsTest extends TestCase
     }
 
     /** @test */
-    public function an_administrator_can_view_pending_introduced_referees()
+    public function an_administrator_can_view_pending_introduction_referees()
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('referees.index', ['status' => 'only_pending_introduced']));
+        $responseAjax = $this->ajaxJson(route('referees.index', ['status' => 'only_pending_introduction']));
 
         $responseAjax->assertJson([
-            'recordsTotal' => $this->referees->get('pending-introduced')->count(),
-            'data'         => $this->referees->get('pending-introduced')->toArray(),
+            'recordsTotal' => $this->referees->get('pending-introduction')->count(),
+            'data'         => $this->referees->get('pending-introduction')->toArray(),
         ]);
     }
 

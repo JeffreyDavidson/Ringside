@@ -22,7 +22,7 @@ $factory->afterCreatingState(TagTeam::class, 'bookable', function ($tagteam) {
     ]);
 });
 
-$factory->afterCreatingState(TagTeam::class, 'pending-introduced', function ($tagteam) {
+$factory->afterCreatingState(TagTeam::class, 'pending-introduction', function ($tagteam) {
     $tagteam->employments()->create([
         'started_at' => Carbon::tomorrow()->toDateTimeString()
     ]);
