@@ -116,7 +116,6 @@ class TagTeam extends Model
     public function employment()
     {
         return $this->morphOne(Employment::class, 'employable')->whereNull('ended_at');
-        // return $this->morphOne(Employment::class, 'employable')->whereNull('ended_at')->withPivot('started_at', 'ended_at');
     }
 
     /**
