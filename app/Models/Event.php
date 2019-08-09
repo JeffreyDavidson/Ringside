@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EventStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -34,6 +35,21 @@ class Event extends Model
     }
 
     /**
+     * Determine the status of the event.
+     *
+     * @return \App\Enum\EventStatus
+     *
+     */
+    public function getStatusAttribute()
+    {
+        if ($this->is_scheduled) {
+            return EventStatus::SCHEDULED();
+        }
+
+        return EventStatus::PAST();
+    }
+
+    /**
      * Scope a query to only include scheduled events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -56,11 +72,11 @@ class Event extends Model
     }
 
     /**
-     * Checks to see if the event is scheduled.
+     * Checks to see if the event is scheduled for a future date.
      *
      * @return boolean
      */
-    public function isScheduled()
+    public function getIsScheduledAttribute()
     {
         return $this->date->isFuture();
     }
@@ -70,8 +86,21 @@ class Event extends Model
      *
      * @return boolean
      */
-    public function isPast()
+    public function getIsPastAttribute()
     {
         return $this->date->isPast();
+    }
+
+    /**
+     * Convert the model instance to an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $data                 = parent::toArray();
+        $data['status']       = $this->status->label();
+
+        return $data;
     }
 }
