@@ -1,7 +1,8 @@
 {
     "/js/app.js": "/js/app.js",
-    "/js/managers/index.js": "/js/managers/index.js",
+    "/js/events/index.js": "/js/events/index.js",
     "/css/app.css": "/css/app.css",
+    "/js/managers/index.js": "/js/managers/index.js",
     "/js/manifest.js": "/js/manifest.js",
     "/js/referees/index.js": "/js/referees/index.js",
     "/js/stables/index.js": "/js/stables/index.js",

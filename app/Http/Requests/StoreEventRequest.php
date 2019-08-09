@@ -25,10 +25,10 @@ class StoreEventRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required'],
-            'date' => ['required', 'date_format:Y-m-d H:i:s'],
-            'venue_id' => ['required', 'integer', 'exists:venues,id'],
-            'preview' => ['required'],
+            'name' => ['required', 'string', 'unique:events'],
+            'date' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+            'venue_id' => ['nullable', 'integer', 'exists:venues,id'],
+            'preview' => ['nullable'],
         ];
     }
 }

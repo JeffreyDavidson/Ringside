@@ -1,6 +1,7 @@
 <?php
 // Auth::loginUsingId(1);
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Venues\VenuesController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Managers\ReinstateController as ManagerReinstateControl
 use App\Http\Controllers\TagTeams\ReinstateController as TagTeamReinstateController;
 use App\Http\Controllers\Wrestlers\ActivateController as WrestlerActivateController;
 use App\Http\Controllers\Wrestlers\UnretireController as WrestlerUnretireController;
+use App\Http\Controllers\Events\RestoreController as EventRestoreController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,9 +98,8 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::put('/titles/{title}/unretire', UnretireController::class)->name('titles.unretire');
     Route::put('/titles/{title}/activate', ActivateController::class)->name('titles.activate');
 
-    Route::resource('events', 'EventsController');
-    Route::post('/events/{event}/archive', [ArchivedEventsController::class, 'store'])->name('events.archive');
-    Route::patch('/events/{event}/restore', [EventsController::class, 'restore'])->name('events.restore');
+    Route::resource('events', EventsController::class);
+    Route::put('/events/{event}/restore', EventRestoreController::class)->name('events.restore');
 });
 
 Auth::routes();
