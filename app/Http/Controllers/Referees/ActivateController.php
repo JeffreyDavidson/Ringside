@@ -15,7 +15,6 @@ class ActivateController extends Controller
      */
     public function __invoke(Referee $referee)
     {
-        // dd($referee);
         $this->authorize('activate', $referee);
 
         $referee->activate();
