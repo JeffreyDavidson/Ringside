@@ -105,10 +105,9 @@ class TagTeamsController extends Controller
     public function update(UpdateTagTeamRequest $request, TagTeam $tagteam)
     {
         $tagteam->update($request->except(['wrestlers', 'started_at']));
-        // dd($tagteam->wrestlers->modelKeys());
+
         $tagteam->employment($request->only('started_at'));
         $tagteam->wrestlers()->sync($request->input('wrestlers'));
-        // dd($tagteam->wrestlers->modelKeys());
 
         return redirect()->route('tagteams.index');
     }

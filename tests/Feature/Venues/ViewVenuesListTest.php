@@ -68,8 +68,6 @@ class ViewVenuesListTest extends TestCase
     public function a_super_administrator_can_view_all_venues()
     {
         $this->actAs('super-administrator');
-        // dd($this->venues->first());
-        // $this->venues->first()->update(['name' => 'Test name with \\"&\' symbols']);
 
         $responseAjax = $this->ajaxJson(route('venues.index'));
 
