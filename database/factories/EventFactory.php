@@ -23,8 +23,3 @@ $factory->state(Event::class, 'scheduled', [
 $factory->state(Event::class, 'past', [
     'date' => Carbon::yesterday()->toDateTimeString(),
 ]);
-
-$factory->state(Event::class, 'archived', [
-    'date' => Carbon::yesterday()->subMonths(2)->toDateTimeString(),
-    'archived_at' => Carbon::yesterday()->toDateTimeString(),
-]);

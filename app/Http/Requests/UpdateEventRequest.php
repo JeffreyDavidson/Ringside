@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Event;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateEventRequest extends FormRequest
@@ -14,7 +14,9 @@ class UpdateEventRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', Event::class);
+        $event = $this->route('event');
+
+        return $this->user()->can('update', $event);
     }
 
     /**
@@ -25,10 +27,10 @@ class UpdateEventRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required'],
-            'date' => ['required', 'date_format:Y-m-d H:i:s'],
-            'venue_id' => ['required', 'integer', 'exists:venues,id'],
-            'preview' => ['required'],
+            'name' => ['filled', 'string', Rule::unique('events')->ignore($this->route('event')->id)],
+            'date' => ['sometimes', 'string', 'date_format:Y-m-d H:i:s'],
+            'venue_id' => ['nullable', 'integer', 'exists:venues,id'],
+            'preview' => ['nullable'],
         ];
     }
 }
