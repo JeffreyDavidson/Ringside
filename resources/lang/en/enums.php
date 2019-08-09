@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\EventStatus;
 use App\Enums\TitleStatus;
 use App\Enums\StableStatus;
 use App\Enums\ManagerStatus;
@@ -44,5 +45,9 @@ return [
         StableStatus::BOOKABLE => 'Bookable',
         StableStatus::PENDING_INTRODUCTION => 'Pending Introduction',
         StableStatus::RETIRED => 'Retired',
+    ],
+    EventStatus::class => [
+        EventStatus::SCHEDULED => 'Scheduled',
+        EventStatus::PAST => 'Past',
     ],
 ];

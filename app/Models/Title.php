@@ -109,7 +109,7 @@ class Title extends Model
      *
      * @return bool
      */
-    public function getIsPendingIntroducedAttribute()
+    public function getIsPendingIntroductionAttribute()
     {
         return is_null($this->introduced_at) || $this->introduced_at->isFuture();
     }
