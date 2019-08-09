@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Venues\VenuesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +15,6 @@ use App\Http\Controllers\Venues\VenuesController;
 
 Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
-    Route::resource('venues', VenuesController::class)->except('destroy');
 });
 
 Auth::routes();
@@ -44,4 +42,11 @@ Route::middleware(['auth'])->group(function () {
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__ . '/web/events.php');
+});
+
+/************************************************************************
+ * Only Venues
+ ************************************************************************/
+Route::middleware(['auth'])->group(function () {
+    Route::group([], __DIR__ . '/web/venues.php');
 });
