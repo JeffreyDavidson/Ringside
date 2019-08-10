@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Requests\CustomDataTablesRequest;
 
@@ -30,6 +31,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Blade::component('components.filter', 'filter');
     }
 }

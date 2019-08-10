@@ -12,6 +12,34 @@ const filterData = {
     date: null
 };
 
+const updateFilters = () => {
+    filterData.status = statusDropdown.val();
+    if (dateStart.val() && dateEnd.val()) {
+        filterData.date = [dateStart.val(), dateEnd.val()];
+    } else if (dateStart.val()) {
+        filterData.date = [dateStart.val()];
+    } else {
+        filterData.date = null;
+    }
+
+    table
+        .dataTable()
+        .api()
+        .draw();
+};
+
+const clearFilters = () => {
+    filterData.status = null;
+    filterData.date_at = null;
+    statusDropdown.val("");
+    dateStart.val("");
+    dateEnd.val("");
+    table
+        .dataTable()
+        .api()
+        .draw();
+};
+
 // begin first table
 table.DataTable({
     ajax: {
@@ -22,7 +50,7 @@ table.DataTable({
         }
     },
     columns: [
-        { data: "id", title: "Wrestler ID" },
+        { data: "id", title: "Event ID" },
         { data: "name", title: "Name" },
         { data: "date", title: "Date" },
         { data: "status", title: "Status", searchable: false },

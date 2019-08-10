@@ -12,6 +12,34 @@ const filterData = {
     started_at: null
 };
 
+const updateFilters = () => {
+    filterData.status = statusDropdown.val();
+    if (startedAtStart.val() && startedAtEnd.val()) {
+        filterData.started_at = [startedAtStart.val(), startedAtEnd.val()];
+    } else if (startedAtStart.val()) {
+        filterData.started_at = [startedAtStart.val()];
+    } else {
+        filterData.started_at = null;
+    }
+
+    table
+        .dataTable()
+        .api()
+        .draw();
+};
+
+const clearFilters = () => {
+    filterData.status = null;
+    filterData.started_at = null;
+    statusDropdown.val("");
+    startedAtStart.val("");
+    startedAtEnd.val("");
+    table
+        .dataTable()
+        .api()
+        .draw();
+};
+
 // begin first table
 table.DataTable({
     ajax: {

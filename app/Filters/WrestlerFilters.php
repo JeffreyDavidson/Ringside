@@ -11,7 +11,7 @@ class WrestlerFilters extends Filters
      *
      * @var array
      */
-    protected $filters = ['status', 'hired_at'];
+    protected $filters = ['status', 'started_at'];
 
     /**
      * Filter a query to include wrestlers of a status.
@@ -43,18 +43,24 @@ class WrestlerFilters extends Filters
     }
 
     /**
-     * Filter a query to include wrestlers of a specific date hired.
+     * Filter a query to include wrestlers of a specific date started.
      *
-     * @param  array  $hiredAt
+     * @param  array  $startedAt
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function hired_at($hiredAt)
+    public function started_at($startedAt)
     {
-        if (isset($hiredAt[0]) && !isset($hiredAt[1])) {
-            $this->builder->whereDate('hired_at', '=', Carbon::parse($hiredAt[0])->toDateString());
-        } elseif (isset($hiredAt[1])) {
-            $this->builder->whereDate('hired_at', '>=', Carbon::parse($hiredAt[0])->toDateString());
-            $this->builder->whereDate('hired_at', '<', Carbon::parse($hiredAt[1])->toDateString());
+        if (isset($startedAt[0]) && !isset($startedAt[1])) {
+            $this->builder->whereHas('employment', function ($query) use ($startedAt) {
+                $query->whereDate('started_at', '=', Carbon::parse($startedAt[0])->toDateString());
+            });
+        } elseif (isset($startedAt[1])) {
+            $this->builder->whereHas('employment', function ($query) use ($startedAt) {
+                $query->whereBetween('started_at', [
+                    Carbon::parse($startedAt[0])->toDateString(),
+                    Carbon::parse($startedAt[1])->toDateString()
+                ]);
+            });
         }
 
         return $this->builder;
