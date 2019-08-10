@@ -30,11 +30,12 @@ class ManagersController extends Controller
 
             return $table->eloquent($query)
                 ->addColumn('action', 'managers.partials.action-cell')
-                ->editColumn('name', function (Manager $manager) {
-                    return $manager->full_name;
-                })
                 ->editColumn('started_at', function (Manager $manager) {
                     return $manager->employment->started_at ?? null;
+                })
+                ->filterColumn('name', function ($query, $keyword) {
+                    $sql = "CONCAT(managers.first_name, ' ', managers.last_name)  like ?";
+                    $query->whereRaw($sql, ["%{$keyword}%"]);
                 })
                 ->filterColumn('id', function ($query, $keyword) {
                     $query->where($query->qualifyColumn('id'), $keyword);

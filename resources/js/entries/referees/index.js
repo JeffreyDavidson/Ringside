@@ -51,8 +51,7 @@ table.DataTable({
     },
     columns: [
         { data: "id", title: "Wrestler ID" },
-        { data: "first_name", title: "First Name" },
-        { data: "last_name", title: "Last Name" },
+        { data: "name", title: "Name" },
         { data: "started_at", title: "Date Started", searchable: false },
         { data: "status", title: "Status", searchable: false },
         {
