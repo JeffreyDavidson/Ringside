@@ -385,6 +385,7 @@ class Referee extends Model
     {
         $data                 = parent::toArray();
         $data['status']       = $this->status->label();
+        $data['name']         = $this->full_name;
 
         return $data;
     }

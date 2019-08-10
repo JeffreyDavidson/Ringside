@@ -32,6 +32,10 @@ class RefereesController extends Controller
                 ->editColumn('started_at', function (Referee $referee) {
                     return $referee->employment->started_at->format('Y-m-d H:s');
                 })
+                ->filterColumn('name', function ($query, $keyword) {
+                    $sql = "CONCAT(referees.first_name, ' ', referees.last_name)  like ?";
+                    $query->whereRaw($sql, ["%{$keyword}%"]);
+                })
                 ->filterColumn('id', function ($query, $keyword) {
                     $query->where($query->qualifyColumn('id'), $keyword);
                 })
