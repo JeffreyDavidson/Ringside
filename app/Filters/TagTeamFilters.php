@@ -40,7 +40,7 @@ class TagTeamFilters extends Filters
     }
 
     /**
-     * Filter a query to include wrestlers of a specific date started.
+     * Filter a query to include tag teams of a specific date started.
      *
      * @param  array  $startedAt
      * @return \Illuminate\Database\Eloquent\Builder
@@ -48,10 +48,16 @@ class TagTeamFilters extends Filters
     public function started_at($startedAt)
     {
         if (isset($startedAt[0]) && !isset($startedAt[1])) {
-            $this->builder->whereDate('started_at', '=', Carbon::parse($startedAt[0])->toDateString());
+            $this->builder->whereHas('employment', function ($query) use ($startedAt) {
+                $query->whereDate('started_at', '=', Carbon::parse($startedAt[0])->toDateString());
+            });
         } elseif (isset($startedAt[1])) {
-            $this->builder->whereDate('started_at', '>=', Carbon::parse($startedAt[0])->toDateString());
-            $this->builder->whereDate('started_at', '<', Carbon::parse($startedAt[1])->toDateString());
+            $this->builder->whereHas('employment', function ($query) use ($startedAt) {
+                $query->whereBetween('started_at', [
+                    Carbon::parse($startedAt[0])->toDateString(),
+                    Carbon::parse($startedAt[1])->toDateString()
+                ]);
+            });
         }
 
         return $this->builder;

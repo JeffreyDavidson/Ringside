@@ -11,7 +11,7 @@
         <h3 class="kt-subheader__title">Referees</h3>
         <span class="kt-subheader__separator kt-subheader__separator--v"></span>
         @include('partials.search')
-        @include('wrestlers.partials.filters')
+        @include('referees.partials.filters')
     </div>
     <div class="kt-subheader__toolbar">
         <a href="{{ route('referees.create') }}"
