@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Wrestler;
+use App\Models\TagTeam;
 use Illuminate\Database\Seeder;
 
-class WrestlersTableSeeder extends Seeder
+class TagTeamsTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,18 +13,18 @@ class WrestlersTableSeeder extends Seeder
     public function run()
     {
         for ($w = 1; $w <= 50; $w++) {
-            factory(Wrestler::class)->create([
-                'name' => 'Wrestler '.$w,
+            factory(TagTeam::class)->create([
+                'name' => 'Tag Team '.$w,
             ])->employments()->create([
-                'started_at' => now()->subYear(1)
+                'started_at' => now()->subYears(1)
             ]);
         }
 
         $eNum = 51;
-        for ($i = 1; $i <= 12; $i++) {
+        for ($i = 1; $i <= 15; $i++) {
             for ($j = 1; $j <= 5; $j++) {
-                factory(Wrestler::class)->create([
-                    'name' => 'Wrestler '. $eNum,
+                factory(TagTeam::class)->create([
+                    'name' => 'Tag Team '. $eNum,
                 ])->employments()->create([
                     'started_at' => now()->subYear(1)->addMonth($i)
                 ]);
