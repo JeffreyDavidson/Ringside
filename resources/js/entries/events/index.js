@@ -52,7 +52,7 @@ table.DataTable({
     columns: [
         { data: "id", title: "Event ID" },
         { data: "name", title: "Name" },
-        { data: "date", title: "Date" },
+        { data: "date", title: "Date", searchable: false },
         { data: "status", title: "Status", searchable: false },
         {
             data: "action",
