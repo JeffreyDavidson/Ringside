@@ -50,7 +50,7 @@ table.DataTable({
         }
     },
     columns: [
-        { data: "id", title: "Wrestler ID" },
+        { data: "id", title: "Referee ID" },
         { data: "name", title: "Name" },
         { data: "started_at", title: "Date Started", searchable: false },
         { data: "status", title: "Status", searchable: false },
