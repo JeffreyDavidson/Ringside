@@ -44,11 +44,13 @@ class TitleFilters extends Filters
      */
     public function introduced_at($introducedAt)
     {
-        if (isset($introducedAt[0]) && !isset($introducedAt[1])) {
-            $this->builder->whereDate('introduced_at', '=', Carbon::parse($introducedAt[0])->toDateString());
-        } elseif (isset($introducedAt[1])) {
-            $this->builder->whereDate('introduced_at', '>=', Carbon::parse($introducedAt[0])->toDateString());
-            $this->builder->whereDate('introduced_at', '<', Carbon::parse($introducedAt[1])->toDateString());
+        if (isset($introducedAt[1])) {
+            $this->builder->whereBetween('started_at', [
+                Carbon::parse($introducedAt[0])->toDateString(),
+                Carbon::parse($introducedAt[1])->toDateString()
+            ]);
+        } elseif (isset($introducedAt[0])) {
+            $this->builder->whereDate('date', Carbon::parse($introducedAt[0])->toDateString());
         }
 
         return $this->builder;
