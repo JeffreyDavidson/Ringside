@@ -14,7 +14,7 @@
         @include('stables.partials.filters')
     </div>
     <div class="kt-subheader__toolbar">
-        <a href="{{ route('roster.stables.create') }}"
+        <a href="{{ route('stables.create') }}"
             class="btn btn-label-brand btn-bold">
             Add Stable
         </a>

@@ -20,7 +20,7 @@ class RetireStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->put(route('roster.stables.retire', $stable));
+        $response = $this->put(route('stables.retire', $stable));
 
         $response->assertForbidden();
     }
@@ -31,7 +31,7 @@ class RetireStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->put(route('roster.stables.retire', $stable));
+        $response = $this->put(route('stables.retire', $stable));
 
         $response->assertForbidden();
     }

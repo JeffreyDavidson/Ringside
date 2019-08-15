@@ -19,7 +19,7 @@ class ViewStableBioPageTest extends TestCase
     {
         $stable = factory(Stable::class)->create();
 
-        $response = $this->get(route('roster.stables.show', $stable));
+        $response = $this->get(route('stables.show', $stable));
 
         $response->assertRedirect(route('login'));
     }

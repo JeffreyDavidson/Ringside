@@ -20,9 +20,9 @@ class RetireStableSuccessConditionsTest extends TestCase
         $this->actAs('super-administrator');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->put(route('roster.stables.retire', $stable));
+        $response = $this->put(route('stables.retire', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         $this->assertEquals(now()->toDateTimeString(), $stable->fresh()->retirement->started_at);
     }
 }

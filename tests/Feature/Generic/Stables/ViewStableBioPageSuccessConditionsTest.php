@@ -20,7 +20,7 @@ class ViewStableBioPageSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create(['name' => 'Example Stable Name']);
 
-        $response = $this->get(route('roster.stables.show', $stable));
+        $response = $this->get(route('stables.show', $stable));
 
         $response->assertSee('Example Stable Name');
     }

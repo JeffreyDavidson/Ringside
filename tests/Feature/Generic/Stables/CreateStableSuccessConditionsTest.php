@@ -45,7 +45,7 @@ class CreateStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $createdWrestlers = factory(Wrestler::class, 3)->states('bookable')->create();
 
-        $this->post(route('roster.stables.store'), $this->validParams([
+        $this->post(route('stables.store'), $this->validParams([
             'started_at' => $now->toDateTimeString(),
             'wrestlers' => $createdWrestlers->modelKeys()
         ]));
@@ -62,7 +62,7 @@ class CreateStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $createdTagTeams = factory(TagTeam::class, 3)->states('bookable')->create();
 
-        $this->post(route('roster.stables.store'), $this->validParams([
+        $this->post(route('stables.store'), $this->validParams([
             'tagteams' => $createdTagTeams->modelKeys()
         ]));
 
@@ -80,7 +80,7 @@ class CreateStableSuccessConditionsTest extends TestCase
 
         $this->actAs('administrator');
 
-        $this->post(route('roster.stables.store'), $this->validParams([
+        $this->post(route('stables.store'), $this->validParams([
             'started_at' => $now->toDateTimeString()
         ]));
 
@@ -110,7 +110,7 @@ class CreateStableSuccessConditionsTest extends TestCase
 
         $this->actAs('administrator');
 
-        $this->post(route('roster.stables.store'), $this->validParams([
+        $this->post(route('stables.store'), $this->validParams([
             'started_at' => ''
         ]));
 

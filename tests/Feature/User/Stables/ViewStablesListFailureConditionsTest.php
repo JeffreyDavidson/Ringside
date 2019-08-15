@@ -18,7 +18,7 @@ class ViewStablesListFailureConditionsTest extends TestCase
     {
         $this->actAs('basic-user');
 
-        $response = $this->get(route('roster.stables.index'));
+        $response = $this->get(route('stables.index'));
 
         $response->assertForbidden();
     }

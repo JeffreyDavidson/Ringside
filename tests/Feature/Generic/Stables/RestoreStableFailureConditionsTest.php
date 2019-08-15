@@ -20,7 +20,7 @@ class RestoreStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->put(route('roster.stables.restore', $stable));
+        $response = $this->put(route('stables.restore', $stable));
 
         $response->assertNotFound();
     }
@@ -31,7 +31,7 @@ class RestoreStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->put(route('roster.stables.restore', $stable));
+        $response = $this->put(route('stables.restore', $stable));
 
         $response->assertNotFound();
     }
@@ -42,7 +42,7 @@ class RestoreStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->put(route('roster.stables.restore', $stable));
+        $response = $this->put(route('stables.restore', $stable));
 
         $response->assertNotFound();
     }

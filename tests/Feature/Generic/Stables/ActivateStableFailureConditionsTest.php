@@ -20,7 +20,7 @@ class ActivateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->put(route('roster.stables.activate', $stable));
+        $response = $this->put(route('stables.activate', $stable));
 
         $response->assertForbidden();
     }
@@ -31,7 +31,7 @@ class ActivateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->put(route('roster.stables.activate', $stable));
+        $response = $this->put(route('stables.activate', $stable));
 
         $response->assertForbidden();
     }

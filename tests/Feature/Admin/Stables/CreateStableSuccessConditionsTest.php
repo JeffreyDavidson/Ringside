@@ -41,7 +41,7 @@ class CreateStableSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->get(route('roster.stables.create'));
+        $response = $this->get(route('stables.create'));
 
         $response->assertViewIs('stables.create');
     }
@@ -54,9 +54,9 @@ class CreateStableSuccessConditionsTest extends TestCase
 
         $this->actAs('administrator');
 
-        $response = $this->post(route('roster.stables.store'), $this->validParams());
+        $response = $this->post(route('stables.store'), $this->validParams());
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         tap(Stable::first(), function ($stable) use ($now) {
             $this->assertEquals('Example Stable Name', $stable->name);
             $this->assertEquals($now->toDateTimeString(), $stable->employment->started_at->toDateTimeString());

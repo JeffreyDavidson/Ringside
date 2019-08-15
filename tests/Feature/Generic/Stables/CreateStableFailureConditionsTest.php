@@ -40,13 +40,13 @@ class CreateStableFailureConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'name' => ''
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('name');
         $this->assertEquals(0, Stable::count());
     }
@@ -56,13 +56,13 @@ class CreateStableFailureConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'name' => ['not-a-string']
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('name');
         $this->assertEquals(0, Stable::count());
     }
@@ -73,13 +73,13 @@ class CreateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         factory(Stable::class)->create(['name' => 'Example Stable Name']);
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'name' => 'Example Stable Name'
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('name');
         $this->assertEquals(1, Stable::count());
     }
@@ -89,13 +89,13 @@ class CreateStableFailureConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'started_at' => ['not-a-string']
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('started_at');
         $this->assertEquals(0, Stable::count());
     }
@@ -105,13 +105,13 @@ class CreateStableFailureConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'started_at' => now()->toDateString()
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('started_at');
         $this->assertEquals(0, Stable::count());
     }
@@ -122,14 +122,14 @@ class CreateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $wrestler = factory(Wrestler::class)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'wrestlers' => [$wrestler->getKey()],
                             'tagteams' => [],
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('tagteams');
         $this->assertEquals(0, Stable::count());
     }
@@ -140,14 +140,14 @@ class CreateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $tagteam = factory(TagTeam::class)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.create'))
-                        ->post(route('roster.stables.store'), $this->validParams([
+        $response = $this->from(route('stables.create'))
+                        ->post(route('stables.store'), $this->validParams([
                             'tagteams' => [$tagteam->getKey()],
                             'wrestlers' => [],
                         ]));
 
         $response->assertStatus(302);
-        $response->assertRedirect(route('roster.stables.create'));
+        $response->assertRedirect(route('stables.create'));
         $response->assertSessionHasErrors('wrestlers');
         $this->assertEquals(0, Stable::count());
     }

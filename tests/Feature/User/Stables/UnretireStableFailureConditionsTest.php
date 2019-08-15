@@ -20,7 +20,7 @@ class UnretireStableFailureConditionsTest extends TestCase
         $this->actAs('basic-user');
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->put(route('roster.stables.unretire', $stable));
+        $response = $this->put(route('stables.retire', $stable));
 
         $response->assertForbidden();
     }

@@ -20,9 +20,9 @@ class ActivateStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->put(route('roster.stables.activate', $stable));
+        $response = $this->put(route('stables.activate', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) {
             $this->assertTrue($stable->is_bookable);
         });

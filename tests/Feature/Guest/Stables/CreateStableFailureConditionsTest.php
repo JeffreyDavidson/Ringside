@@ -37,7 +37,7 @@ class CreateStableFailureConditionsTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_creating_a_stable()
     {
-        $response = $this->get(route('roster.stables.create'));
+        $response = $this->get(route('stables.create'));
 
         $response->assertRedirect(route('login'));
     }
@@ -45,7 +45,7 @@ class CreateStableFailureConditionsTest extends TestCase
     /** @test */
     public function a_guest_cannot_create_a_stable()
     {
-        $response = $this->post(route('roster.stables.store'), $this->validParams());
+        $response = $this->post(route('stables.store'), $this->validParams());
 
         $response->assertRedirect(route('login'));
     }

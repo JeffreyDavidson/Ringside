@@ -21,9 +21,9 @@ class RestoreStableSuccessConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $stable->delete();
 
-        $response = $this->put(route('roster.stables.restore', $stable));
+        $response = $this->put(route('stables.restore', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         $this->assertNull($stable->fresh()->deleted_at);
     }
 }

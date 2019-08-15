@@ -20,9 +20,9 @@ class UnretireStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->put(route('roster.stables.unretire', $stable));
+        $response = $this->put(route('stables.unretire', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         $this->assertEquals(now()->toDateTimeString(), $stable->fresh()->retirements()->latest()->first()->ended_at);
     }
 }

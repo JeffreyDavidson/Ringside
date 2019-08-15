@@ -20,7 +20,7 @@ class RetireStableFailureConditionsTest extends TestCase
         $this->actAs('basic-user');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->put(route('roster.stables.retire', $stable));
+        $response = $this->put(route('stables.retire', $stable));
 
         $response->assertForbidden();
     }

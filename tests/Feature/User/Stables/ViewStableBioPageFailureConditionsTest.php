@@ -22,7 +22,7 @@ class ViewStableBioPageFailureConditionsTest extends TestCase
         $otherUser = factory(User::class)->create();
         $stable = factory(Stable::class)->create(['user_id' => $otherUser->id]);
 
-        $response = $this->get(route('roster.stables.show', $stable));
+        $response = $this->get(route('stables.show', $stable));
 
         $response->assertForbidden();
     }

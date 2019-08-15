@@ -39,7 +39,7 @@ class CreateStableTest extends TestCase
     {
         $this->actAs('basic-user');
 
-        $response = $this->get(route('roster.stables.create'));
+        $response = $this->get(route('stables.create'));
 
         $response->assertForbidden();
     }
@@ -49,7 +49,7 @@ class CreateStableTest extends TestCase
     {
         $this->actAs('basic-user');
 
-        $response = $this->post(route('roster.stables.store'), $this->validParams());
+        $response = $this->post(route('stables.store'), $this->validParams());
 
         $response->assertForbidden();
     }

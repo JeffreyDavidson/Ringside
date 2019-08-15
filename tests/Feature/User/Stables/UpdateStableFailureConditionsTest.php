@@ -41,7 +41,7 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('basic-user');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->get(route('roster.stables.edit', $stable));
+        $response = $this->get(route('stables.edit', $stable));
 
         $response->assertForbidden();
     }
@@ -52,7 +52,7 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('basic-user');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->put(route('roster.stables.update', $stable), $this->validParams());
+        $response = $this->put(route('stables.update', $stable), $this->validParams());
 
         $response->assertForbidden();
     }

@@ -21,6 +21,6 @@ class RestoreController extends Controller
 
         $stable->restore();
 
-        return redirect()->route('roster.stables.index');
+        return redirect()->route('stables.index');
     }
 }
