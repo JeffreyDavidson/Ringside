@@ -3,6 +3,7 @@
 namespace App\Filters;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class EventFilters extends Filters
 {
@@ -21,13 +22,8 @@ class EventFilters extends Filters
      */
     public function status($status)
     {
-        switch ($status) {
-            case 'only_scheduled':
-                $this->builder->scheduled();
-                break;
-            case 'only_past':
-                $this->builder->past();
-                break;
+        if (method_exists($this->builder->getModel(), 'scope' . Str::studly($status))) {
+            $this->builder->{Str::camel($status)}();
         }
 
         return $this->builder;
