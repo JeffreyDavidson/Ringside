@@ -41,11 +41,13 @@ class EventFilters extends Filters
      */
     public function date($date)
     {
-        if (isset($date[0]) && !isset($date[1])) {
-            $this->builder->whereDate('date', '=', Carbon::parse($date[0])->toDateString());
-        } elseif (isset($date[1])) {
-            $this->builder->whereDate('date', '>=', Carbon::parse($date[0])->toDateString());
-            $this->builder->whereDate('date', '<', Carbon::parse($date[1])->toDateString());
+        if (isset($date[1])) {
+            $this->builder->whereBetween('started_at', [
+                Carbon::parse($date[0])->toDateString(),
+                Carbon::parse($date[1])->toDateString()
+            ]);
+        } elseif (isset($date[0])) {
+            $this->builder->whereDate('date', Carbon::parse($date[0])->toDateString());
         }
 
         return $this->builder;
