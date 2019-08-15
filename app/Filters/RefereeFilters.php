@@ -3,6 +3,7 @@
 namespace App\Filters;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class RefereeFilters extends Filters
 {
@@ -11,7 +12,7 @@ class RefereeFilters extends Filters
      *
      * @var array
      */
-    protected $filters = ['status', 'hired_at'];
+    protected $filters = ['status', 'started_at'];
 
     /**
      * Filter a query to include referees of a status.
@@ -21,22 +22,8 @@ class RefereeFilters extends Filters
      */
     public function status($status)
     {
-        switch ($status) {
-            case 'only_bookable':
-                $this->builder->bookable();
-                break;
-            case 'only_pending_introduction':
-                $this->builder->pendingIntroduced();
-                break;
-            case 'only_retired':
-                $this->builder->retired();
-                break;
-            case 'only_suspended':
-                $this->builder->suspended();
-                break;
-            case 'only_injured':
-                $this->builder->injured();
-                break;
+        if (method_exists($this->builder->getModel(), 'scope' . Str::studly($status))) {
+            $this->builder->{Str::camel($status)}();
         }
 
         return $this->builder;

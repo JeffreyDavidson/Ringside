@@ -3,6 +3,7 @@
 namespace App\Filters;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class TitleFilters extends Filters
 {
@@ -21,16 +22,8 @@ class TitleFilters extends Filters
      */
     public function status($status)
     {
-        switch ($status) {
-            case 'only_bookable':
-                $this->builder->bookable();
-                break;
-            case 'only_pending_introduction':
-                $this->builder->pendingIntroduced();
-                break;
-            case 'only_retired':
-                $this->builder->retired();
-                break;
+        if (method_exists($this->builder->getModel(), 'scope' . Str::studly($status))) {
+            $this->builder->{Str::camel($status)}();
         }
 
         return $this->builder;
