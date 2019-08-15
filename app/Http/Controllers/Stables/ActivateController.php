@@ -19,6 +19,6 @@ class ActivateController extends Controller
 
         $stable->activate();
 
-        return redirect()->route('roster.stables.index');
+        return redirect()->route('stables.index');
     }
 }

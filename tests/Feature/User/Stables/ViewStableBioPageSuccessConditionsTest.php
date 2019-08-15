@@ -20,7 +20,7 @@ class ViewStableBioPageSuccessConditionsTest extends TestCase
         $signedInUser = $this->actAs('basic-user');
         $stable = factory(Stable::class)->create(['user_id' => $signedInUser->id]);
 
-        $response = $this->get(route('roster.stables.show', $stable));
+        $response = $this->get(route('stables.show', $stable));
 
         $response->assertOk();
     }

@@ -19,7 +19,7 @@ class DeleteStableFailureConditionsTest extends TestCase
     {
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->delete(route('roster.stables.destroy', $stable));
+        $response = $this->delete(route('stables.destroy', $stable));
 
         $response->assertRedirect(route('login'));
     }
@@ -29,7 +29,7 @@ class DeleteStableFailureConditionsTest extends TestCase
     {
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->delete(route('roster.stables.destroy', $stable));
+        $response = $this->delete(route('stables.destroy', $stable));
 
         $response->assertRedirect(route('login'));
     }
@@ -39,7 +39,7 @@ class DeleteStableFailureConditionsTest extends TestCase
     {
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->delete(route('roster.stables.destroy', $stable));
+        $response = $this->delete(route('stables.destroy', $stable));
 
         $response->assertRedirect(route('login'));
     }

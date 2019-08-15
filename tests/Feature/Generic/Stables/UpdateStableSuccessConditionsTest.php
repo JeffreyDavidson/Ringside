@@ -47,8 +47,8 @@ class UpdateStableSuccessConditionsTest extends TestCase
         $wrestler = factory(Wrestler::class)->states('bookable')->create();
         $stable->wrestlerHistory()->attach($wrestler->getKey(), ['left_at' => now()]);
 
-        $this->from(route('roster.stables.edit', $stable))
-            ->put(route('roster.stables.update', [$stable]), [
+        $this->from(route('stables.edit', $stable))
+            ->put(route('stables.update', [$stable]), [
                 'wrestlers' => [$wrestler->getKey()]
             ]);
 
@@ -65,8 +65,8 @@ class UpdateStableSuccessConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $newStableWrestlers = factory(Wrestler::class, 2)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-            ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams([
                 'wrestlers' => $newStableWrestlers->modelKeys(),
             ]));
 
@@ -87,8 +87,8 @@ class UpdateStableSuccessConditionsTest extends TestCase
 
         $newStableWrestlers = factory(Wrestler::class, 2)->states('bookable')->create();
 
-        $this->from(route('roster.stables.edit', $stable))
-            ->put(route('roster.stables.update', $stable), $this->validParams([
+        $this->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams([
                 'wrestlers' => $newStableWrestlers->modelKeys(),
             ]));
 
@@ -106,8 +106,8 @@ class UpdateStableSuccessConditionsTest extends TestCase
         $formerTagTeams = $stable->currentTagTeams;
         $tagteams = factory(TagTeam::class, 2)->states('bookable')->create();
 
-        $this->from(route('roster.stables.edit', $stable))
-            ->put(route('roster.stables.update', $stable), $this->validParams([
+        $this->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams([
                 'tagteams' => $tagteams->modelKeys(),
             ]));
 
@@ -124,8 +124,8 @@ class UpdateStableSuccessConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $tagteams = factory(TagTeam::class, 2)->states('bookable')->create();
 
-        $this->from(route('roster.stables.edit', $stable))
-            ->put(route('roster.stables.update', $stable), $this->validParams([
+        $this->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams([
                 'tagteams' => $tagteams->modelKeys(),
             ]));
 

@@ -20,9 +20,9 @@ class DeleteStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->delete(route('roster.stables.destroy', $stable));
+        $response = $this->delete(route('stables.destroy', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         $this->assertSoftDeleted('stables', ['name' => $stable->name]);
     }
 
@@ -32,9 +32,9 @@ class DeleteStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->delete(route('roster.stables.destroy', $stable));
+        $response = $this->delete(route('stables.destroy', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         $this->assertSoftDeleted('stables', ['name' => $stable->name]);
     }
 
@@ -44,9 +44,9 @@ class DeleteStableSuccessConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('retired')->create();
 
-        $response = $this->delete(route('roster.stables.destroy', $stable));
+        $response = $this->delete(route('stables.destroy', $stable));
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         $this->assertSoftDeleted('stables', ['name' => $stable->name]);
     }
 }

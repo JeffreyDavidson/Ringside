@@ -6,7 +6,7 @@
         <ul class="kt-nav">
             @can('view', $model)
                 <li class="kt-nav__item">
-                    <a href="{{ route('roster.stables.show', $model) }}" class="kt-nav__link">
+                    <a href="{{ route('stables.show', $model) }}" class="kt-nav__link">
                         <i class="kt-nav__link-icon flaticon2-expand"></i>
                         <span class="kt-nav__link-text">View</span>
                     </a>
@@ -14,7 +14,7 @@
             @endcan
             @can('update', $model)
                 <li class="kt-nav__item">
-                    <a href="{{ route('roster.stables.edit', $model) }}" class="kt-nav__link">
+                    <a href="{{ route('stables.edit', $model) }}" class="kt-nav__link">
                         <i class="kt-nav__link-icon flaticon2-contract"></i>
                         <span class="kt-nav__link-text">Edit</span>
                     </a>
@@ -22,7 +22,7 @@
             @endcan
             @can('delete', $model)
                 <li class="kt-nav__item">
-                    <form action="{{ route('roster.stables.destroy', $model) }}" method="post" class="kt-nav__link">
+                    <form action="{{ route('stables.destroy', $model) }}" method="post" class="kt-nav__link">
                         @csrf
                         @method('DELETE')
                         <button class="btn w-100 text-left p-0">
@@ -34,7 +34,7 @@
             @endcan
             @can('retire', $model)
                 <li class="kt-nav__item">
-                    <form action="{{ route('roster.stables.retire', $model) }}" method="post" class="kt-nav__link">
+                    <form action="{{ route('stables.retire', $model) }}" method="post" class="kt-nav__link">
                         @csrf
                         @method('PUT')
                         <button class="btn w-100 text-left p-0">
@@ -46,7 +46,7 @@
             @endcan
             @can('unretire', $model)
                 <li class="kt-nav__item">
-                    <form action="{{ route('roster.stables.unretire', $model) }}" method="post" class="kt-nav__link">
+                    <form action="{{ route('stables.retire', $model) }}" method="post" class="kt-nav__link">
                         @csrf
                         @method('PUT')
                         <button class="btn w-100 text-left p-0">
@@ -58,7 +58,7 @@
             @endcan
             @can('activate', $model)
                 <li class="kt-nav__item">
-                    <form action="{{ route('roster.stables.activate', $model) }}" method="post" class="kt-nav__link">
+                    <form action="{{ route('stables.activate', $model) }}" method="post" class="kt-nav__link">
                         @csrf
                         @method('PUT')
                         <button class="btn w-100 text-left p-0">
@@ -70,7 +70,7 @@
             @endcan
             @can('disassemble', $model)
                 <li class="kt-nav__item">
-                    <form action="{{ route('roster.stables.activate', $model) }}" method="post" class="kt-nav__link">
+                    <form action="{{ route('stables.activate', $model) }}" method="post" class="kt-nav__link">
                         @csrf
                         @method('PUT')
                         <button class="btn w-100 text-left p-0">

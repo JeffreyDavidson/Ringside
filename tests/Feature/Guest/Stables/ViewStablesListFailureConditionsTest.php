@@ -16,7 +16,7 @@ class ViewStablesListFailureConditionsTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_stables_page()
     {
-        $response = $this->get(route('roster.stables.index'));
+        $response = $this->get(route('stables.index'));
 
         $response->assertRedirect(route('login'));
     }

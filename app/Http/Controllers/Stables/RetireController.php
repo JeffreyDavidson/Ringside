@@ -19,6 +19,6 @@ class RetireController extends Controller
 
         $stable->retire();
 
-        return redirect()->route('roster.stables.index');
+        return redirect()->route('stables.index');
     }
 }

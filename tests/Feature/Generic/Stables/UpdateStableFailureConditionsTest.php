@@ -41,12 +41,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'name' => ''
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('name');
     }
 
@@ -57,12 +57,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         factory(Stable::class)->create(['name' => 'Example Stable Name']);
         $stableB = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stableB))
-                        ->put(route('roster.stables.update', $stableB), $this->validParams([
+        $response = $this->from(route('stables.edit', $stableB))
+                        ->put(route('stables.update', $stableB), $this->validParams([
                             'name' => 'Example Stable Name'
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stableB));
+        $response->assertRedirect(route('stables.edit', $stableB));
         $response->assertSessionHasErrors('name');
     }
 
@@ -72,12 +72,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'started_at' => ''
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('started_at');
     }
 
@@ -87,12 +87,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'started_at' => today()->toDateString()
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('started_at');
     }
 
@@ -102,12 +102,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'started_at' => 'not-a-datetime'
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('started_at');
     }
 
@@ -118,13 +118,13 @@ class UpdateStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $tagteam = factory(TagTeam::class)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => [$tagteam->getKey()],
                             'wrestlers' => null,
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers');
     }
 
@@ -134,12 +134,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'wrestlers' => 'not-an-array',
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers');
     }
 
@@ -149,12 +149,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'wrestlers' => ['not-an-integer'],
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers.*');
     }
 
@@ -164,12 +164,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'wrestlers' => [99],
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers.*');
     }
 
@@ -180,12 +180,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $wrestler = factory(Wrestler::class)->states('pending-introduction')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'wrestlers' => [$wrestler->getKey()]
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers.*');
     }
 
@@ -196,12 +196,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $wrestler = factory(Wrestler::class)->states('pending-introduction')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'wrestlers' => [$wrestler->getKey()]
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers.*');
     }
 
@@ -212,12 +212,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $otherStable = factory(Stable::class)->states('bookable')->create();
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'wrestlers' => [$otherStable->currentWrestlers->first()->getKey()]
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('wrestlers.*');
     }
 
@@ -227,12 +227,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => 'not-an-array',
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams');
     }
 
@@ -243,13 +243,13 @@ class UpdateStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $wrestlers = factory(Wrestler::class, 2)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => null,
                             'wrestlers' => $wrestlers->modelKeys(),
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams');
     }
 
@@ -259,12 +259,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => ['not-an-integer'],
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams.*');
     }
 
@@ -274,12 +274,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => [99],
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams.*');
     }
 
@@ -290,12 +290,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $tagteam = factory(TagTeam::class)->states('pending-introduction')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => [$tagteam->getKey()]
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams.*');
     }
 
@@ -306,12 +306,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $tagteam = factory(TagTeam::class)->states('pending-introduction')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => [$tagteam->getKey()]
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams.*');
     }
 
@@ -322,12 +322,12 @@ class UpdateStableFailureConditionsTest extends TestCase
         $otherStable = factory(Stable::class)->states('bookable')->create();
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->from(route('roster.stables.edit', $stable))
-                        ->put(route('roster.stables.update', $stable), $this->validParams([
+        $response = $this->from(route('stables.edit', $stable))
+                        ->put(route('stables.update', $stable), $this->validParams([
                             'tagteams' => [$otherStable->currentTagTeams->first()->getKey()]
                         ]));
 
-        $response->assertRedirect(route('roster.stables.edit', $stable));
+        $response->assertRedirect(route('stables.edit', $stable));
         $response->assertSessionHasErrors('tagteams.*');
     }
 }

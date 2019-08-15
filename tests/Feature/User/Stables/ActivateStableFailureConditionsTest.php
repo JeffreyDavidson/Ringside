@@ -20,7 +20,7 @@ class ActivateStableFailureConditionsTest extends TestCase
         $this->actAs('basic-user');
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->put(route('roster.stables.activate', $stable));
+        $response = $this->put(route('stables.activate', $stable));
 
         $response->assertForbidden();
     }

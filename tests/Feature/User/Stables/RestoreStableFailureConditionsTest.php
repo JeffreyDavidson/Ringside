@@ -21,7 +21,7 @@ class RestoreStableFailureConditionsTest extends TestCase
         $stable = factory(Stable::class)->create();
         $stable->delete();
 
-        $response = $this->put(route('roster.stables.restore', $stable));
+        $response = $this->put(route('stables.restore', $stable));
 
         $response->assertForbidden();
     }

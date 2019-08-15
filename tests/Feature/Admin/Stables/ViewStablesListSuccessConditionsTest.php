@@ -50,7 +50,7 @@ class ViewStablesSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $response = $this->get(route('roster.stables.index'));
+        $response = $this->get(route('stables.index'));
 
         $response->assertOk();
         $response->assertViewIs('stables.index');
@@ -61,7 +61,7 @@ class ViewStablesSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('roster.stables.index'));
+        $responseAjax = $this->ajaxJson(route('stables.index'));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->stables->get('all')->count(),
@@ -74,7 +74,7 @@ class ViewStablesSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('roster.stables.index', ['status' => 'only_bookable']));
+        $responseAjax = $this->ajaxJson(route('stables.index', ['status' => 'bookable']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->stables->get('bookable')->count(),
@@ -87,7 +87,7 @@ class ViewStablesSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('roster.stables.index', ['status' => 'only_pending_introduction']));
+        $responseAjax = $this->ajaxJson(route('stables.index', ['status' => 'pending-introduction']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->stables->get('pending-introduction')->count(),
@@ -100,7 +100,7 @@ class ViewStablesSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('roster.stables.index', ['status' => 'only_retired']));
+        $responseAjax = $this->ajaxJson(route('stables.index', ['status' => 'retired']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->stables->get('retired')->count(),

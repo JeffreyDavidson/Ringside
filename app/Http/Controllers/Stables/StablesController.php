@@ -75,7 +75,7 @@ class StablesController extends Controller
             $stable->addTagTeams($request->input('tagteams'), $request->input('started_at'));
         }
 
-        return redirect()->route('roster.stables.index');
+        return redirect()->route('stables.index');
     }
 
     /**
@@ -126,7 +126,7 @@ class StablesController extends Controller
         $stable->wrestlerHistory()->sync($request->input('wrestlers'));
         $stable->tagTeamHistory()->sync($request->input('tagteams'));
 
-        return redirect()->route('roster.stables.index');
+        return redirect()->route('stables.index');
     }
 
     /**
@@ -141,6 +141,6 @@ class StablesController extends Controller
 
         $stable->delete();
 
-        return redirect()->route('roster.stables.index');
+        return redirect()->route('stables.index');
     }
 }

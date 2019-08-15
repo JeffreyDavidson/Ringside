@@ -41,7 +41,7 @@ class UpdateStableSucessConditionsTest extends TestCase
         $this->actAs('super-administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->get(route('roster.stables.edit', $stable));
+        $response = $this->get(route('stables.edit', $stable));
 
         $response->assertViewIs('stables.edit');
         $this->assertTrue($response->data('stable')->is($stable));
@@ -53,9 +53,9 @@ class UpdateStableSucessConditionsTest extends TestCase
         $this->actAs('super-administrator');
         $stable = factory(Stable::class)->create();
 
-        $response = $this->put(route('roster.stables.update', $stable), $this->validParams());
+        $response = $this->put(route('stables.update', $stable), $this->validParams());
 
-        $response->assertRedirect(route('roster.stables.index'));
+        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) {
             $this->assertEquals('Example Stable Name', $stable->name);
         });

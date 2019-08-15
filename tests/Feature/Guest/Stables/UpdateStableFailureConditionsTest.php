@@ -40,7 +40,7 @@ class UpdateStableFailureConditionsTest extends TestCase
     {
         $stable = factory(Stable::class)->create();
 
-        $response = $this->get(route('roster.stables.edit', $stable));
+        $response = $this->get(route('stables.edit', $stable));
 
         $response->assertRedirect(route('login'));
     }
@@ -50,7 +50,7 @@ class UpdateStableFailureConditionsTest extends TestCase
     {
         $stable = factory(Stable::class)->create();
 
-        $response = $this->put(route('roster.stables.update', $stable), $this->validParams());
+        $response = $this->put(route('stables.update', $stable), $this->validParams());
 
         $response->assertRedirect(route('login'));
     }

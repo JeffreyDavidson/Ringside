@@ -20,7 +20,7 @@ class UnretireStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('bookable')->create();
 
-        $response = $this->put(route('roster.stables.unretire', $stable));
+        $response = $this->put(route('stables.unretire', $stable));
 
         $response->assertForbidden();
     }
@@ -31,7 +31,7 @@ class UnretireStableFailureConditionsTest extends TestCase
         $this->actAs('administrator');
         $stable = factory(Stable::class)->states('pending-introduction')->create();
 
-        $response = $this->put(route('roster.stables.unretire', $stable));
+        $response = $this->put(route('stables.unretire', $stable));
 
         $response->assertForbidden();
     }
