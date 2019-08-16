@@ -30,7 +30,7 @@ class RefereesController extends Controller
             return $table->eloquent($query)
                 ->addColumn('action', 'referees.partials.action-cell')
                 ->editColumn('started_at', function (Referee $referee) {
-                    return $referee->employment->started_at->format('Y-m-d H:s');
+                    return $referee->employment->started_at->format('Y-m-d H:s') ?: null;
                 })
                 ->filterColumn('name', function ($query, $keyword) {
                     $sql = "CONCAT(referees.first_name, ' ', referees.last_name)  like ?";
@@ -66,7 +66,10 @@ class RefereesController extends Controller
     public function store(StoreRefereeRequest $request)
     {
         $referee = Referee::create($request->except('started_at'));
-        $referee->employments()->create($request->only('started_at'));
+
+        if (!is_null($request->input('started_at'))) {
+            $referee->employments()->create($request->only('started_at'));
+        }
 
         return redirect()->route('referees.index');
     }
@@ -92,7 +95,7 @@ class RefereesController extends Controller
      */
     public function edit(Referee $referee)
     {
-        $this->authorize('update', Referee::class);
+        $this->authorize('update', $referee);
 
         return view('referees.edit', compact('referee'));
     }
@@ -107,7 +110,14 @@ class RefereesController extends Controller
     public function update(UpdateRefereeRequest $request, Referee $referee)
     {
         $referee->update($request->except('started_at'));
-        $referee->employment()->update($request->only('started_at'));
+
+        if ($referee->employments()->exists() && !is_null($request->input('started_at'))) {
+            if ($referee->employment->started_at != $request->input('started_at')) {
+                $referee->employment()->update($request->only('started_at'));
+            }
+        } else {
+            $referee->employments()->create($request->only('started_at'));
+        }
 
         return redirect()->route('referees.index');
     }
@@ -120,7 +130,7 @@ class RefereesController extends Controller
      */
     public function destroy(Referee $referee)
     {
-        $this->authorize('delete', Referee::class);
+        $this->authorize('delete', $referee);
 
         $referee->delete();
 

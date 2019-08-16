@@ -24,10 +24,11 @@ class RefereePolicy
     /**
      * Determine whether the user can update a referee.
      *
-     * @param  App\Models\User  $user
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Referee  $referee
      * @return bool
      */
-    public function update(User $user)
+    public function update(User $user, Referee $referee)
     {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
@@ -36,6 +37,7 @@ class RefereePolicy
      * Determine whether the user can delete a referee.
      *
      * @param  \App\Models\User  $user
+     * @param  \App\Models\Referee  $referee
      * @return bool
      */
     public function delete(User $user)
@@ -63,7 +65,7 @@ class RefereePolicy
      */
     public function retire(User $user, Referee $referee)
     {
-        if ($referee->is_retired) {
+        if (!$referee->is_employed || $referee->is_retired) {
             return false;
         }
 
@@ -95,7 +97,7 @@ class RefereePolicy
      */
     public function injure(User $user, Referee $referee)
     {
-        if ($referee->is_injured) {
+        if (!$referee->is_employed || !$referee->is_bookable || $referee->is_injured) {
             return false;
         }
 
@@ -111,7 +113,7 @@ class RefereePolicy
      */
     public function recover(User $user, Referee $referee)
     {
-        if (!$referee->is_injured) {
+        if (!$referee->is_employed || !$referee->is_injured) {
             return false;
         }
 
@@ -119,7 +121,7 @@ class RefereePolicy
     }
 
     /**
-     * Determine whether the user can activate a pending introduced referee.
+     * Determine whether the user can activate a referee that is pending introduction.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Referee  $referee
