@@ -84,7 +84,7 @@ class ViewManagersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'only_bookable']));
+        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'bookable']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->managers->get('bookable')->count(),
@@ -97,7 +97,7 @@ class ViewManagersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'only_pending_introduction']));
+        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'pending-introduction']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->managers->get('pending-introduction')->count(),
@@ -110,7 +110,7 @@ class ViewManagersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'only_retired']));
+        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'retired']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->managers->get('retired')->count(),
@@ -123,7 +123,7 @@ class ViewManagersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'only_suspended']));
+        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'suspended']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->managers->get('suspended')->count(),
@@ -136,7 +136,7 @@ class ViewManagersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'only_injured']));
+        $responseAjax = $this->ajaxJson(route('managers.index', ['status' => 'injured']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->managers->get('injured')->count(),
