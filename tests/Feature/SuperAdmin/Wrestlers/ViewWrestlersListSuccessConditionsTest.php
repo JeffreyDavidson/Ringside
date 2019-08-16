@@ -80,7 +80,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_bookable']));
+        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'bookable']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->wrestlers->get('bookable')->count(),
@@ -93,7 +93,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_pending_introduction']));
+        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'pending-introduction']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->wrestlers->get('pending-introduction')->count(),
@@ -106,7 +106,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_retired']));
+        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'retired']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->wrestlers->get('retired')->count(),
@@ -119,7 +119,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_suspended']));
+        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'suspended']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->wrestlers->get('suspended')->count(),
@@ -132,7 +132,7 @@ class ViewWrestlersListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'only_injured']));
+        $responseAjax = $this->ajaxJson(route('wrestlers.index', ['status' => 'injured']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->wrestlers->get('injured')->count(),

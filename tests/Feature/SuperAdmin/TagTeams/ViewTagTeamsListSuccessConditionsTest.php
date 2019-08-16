@@ -77,7 +77,7 @@ class ViewTagTeamsListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'only_bookable']));
+        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'bookable']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->tagteams->get('bookable')->count(),
@@ -90,7 +90,7 @@ class ViewTagTeamsListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'only_pending_introduction']));
+        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'pending-introduction']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->tagteams->get('pending-introduction')->count(),
@@ -103,7 +103,7 @@ class ViewTagTeamsListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'only_retired']));
+        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'retired']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->tagteams->get('retired')->count(),
@@ -116,7 +116,7 @@ class ViewTagTeamsListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'only_suspended']));
+        $responseAjax = $this->ajaxJson(route('tagteams.index', ['status' => 'suspended']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->tagteams->get('suspended')->count(),

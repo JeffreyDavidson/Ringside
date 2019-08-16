@@ -68,7 +68,7 @@ class ViewTitlesListSuccessConditionsTest extends TestCase
     {
         $this->actAs('administrator');
 
-        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'only_bookable']));
+        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'bookable']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->titles->get('bookable')->count(),
@@ -80,7 +80,7 @@ class ViewTitlesListSuccessConditionsTest extends TestCase
     public function an_administrator_can_view_all_pending_introduction_titles()
     {
         $this->actAs('administrator');
-        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'only_pending_introduction']));
+        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'pending-introduction']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->titles->get('pending-introduction')->count(),
@@ -92,7 +92,7 @@ class ViewTitlesListSuccessConditionsTest extends TestCase
     public function an_administrator_can_view_all_retired_titles()
     {
         $this->actAs('administrator');
-        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'only_retired']));
+        $responseAjax = $this->ajaxJson(route('titles.index', ['status' => 'retired']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->titles->get('retired')->count(),

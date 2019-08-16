@@ -74,7 +74,7 @@ class ViewScheduledEventListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('events.index', ['status' => 'only_scheduled']));
+        $responseAjax = $this->ajaxJson(route('events.index', ['status' => 'scheduled']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->events->get('scheduled')->count(),
@@ -87,7 +87,7 @@ class ViewScheduledEventListSuccessConditionsTest extends TestCase
     {
         $this->actAs('super-administrator');
 
-        $responseAjax = $this->ajaxJson(route('events.index', ['status' => 'only_past']));
+        $responseAjax = $this->ajaxJson(route('events.index', ['status' => 'past']));
 
         $responseAjax->assertJson([
             'recordsTotal' => $this->events->get('past')->count(),

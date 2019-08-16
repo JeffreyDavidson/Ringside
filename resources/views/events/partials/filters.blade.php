@@ -4,8 +4,9 @@
             <label>Status:</label>
             <select class="form-control" name="status" id="status-dropdown">
                 <option value="">Select</option>
-                <option value="only_scheduled">Bookable</option>
-                <option value="only_past">Past</option>
+                @foreach (\App\Enums\EventStatus::labels() as $value => $label)
+                    <option value="{{ $value }}"> {{ $label }}</option>
+                @endforeach
             </select>
         </div>
     </div>
