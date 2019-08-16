@@ -92,7 +92,7 @@
                                 </a>
                             </li>
                             <li class="kt-menu__item {{ set_active('stables.index') }}" aria-haspopup="true">
-                                <a href="{{ route('roster.stables.index') }}" class="kt-menu__link">
+                                <a href="{{ route('stables.index') }}" class="kt-menu__link">
                                     <i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i>
                                     <span class="kt-menu__link-text">Stables</span>
                                 </a>
