@@ -24,14 +24,11 @@ class WrestlersController extends Controller
         $this->authorize('viewList', Wrestler::class);
 
         if ($request->ajax()) {
-            $query = Wrestler::query();
+            $query = Wrestler::with('employment');
             $requestFilter->apply($query);
 
             return $table->eloquent($query)
                 ->addColumn('action', 'wrestlers.partials.action-cell')
-                ->editColumn('started_at', function (Wrestler $wrestler) {
-                    return $wrestler->employment->started_at->format('Y-m-d H:s');
-                })
                 ->filterColumn('id', function ($query, $keyword) {
                     $query->where($query->qualifyColumn('id'), $keyword);
                 })
