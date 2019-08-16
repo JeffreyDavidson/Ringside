@@ -5,8 +5,8 @@ namespace App\Enums;
 use MadWeb\Enum\Enum;
 
 /**
- * @method static EVENTStatus SCHEDULED()
- * @method static EVENTStatus PAST()
+ * @method static EventStatus SCHEDULED()
+ * @method static EventStatus PAST()
  */
 final class EventStatus extends Enum
 {

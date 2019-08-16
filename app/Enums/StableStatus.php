@@ -12,6 +12,6 @@ use MadWeb\Enum\Enum;
 final class StableStatus extends Enum
 {
     const BOOKABLE = 'bookable';
-    const RETIRED = 'retired';
     const PENDING_INTRODUCTION = 'pending-introduction';
+    const RETIRED = 'retired';
 }
