@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Wrestlers;
 
 use App\Models\Wrestler;
-use Illuminate\Http\Request;
 use App\Filters\WrestlerFilters;
 use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWrestlerRequest;
 use App\Http\Requests\UpdateWrestlerRequest;
+use App\Http\Requests\IndexWrestlerRequest;
 
 class WrestlersController extends Controller
 {
@@ -19,7 +19,7 @@ class WrestlersController extends Controller
      * @param  \Yajra\DataTables\DataTables  $table
      * @return \Illuminate\View\View
      */
-    public function index(Request $request, DataTables $table, WrestlerFilters $requestFilter)
+    public function index(IndexWrestlerRequest $request, DataTables $table, WrestlerFilters $requestFilter)
     {
         $this->authorize('viewList', Wrestler::class);
 
