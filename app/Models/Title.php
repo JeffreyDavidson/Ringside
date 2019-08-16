@@ -176,7 +176,7 @@ class Title extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopePendingIntroduced($query)
+    public function scopePendingIntroduction($query)
     {
         $query->where('introduced_at', '>', now());
     }

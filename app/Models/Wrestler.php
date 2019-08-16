@@ -353,15 +353,15 @@ class Wrestler extends Model
     }
 
     /**
-     * Scope a query to only include inactive wrestlers.
+     * Scope a query to only include wrestlers that haven't started.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopePendingIntroduced($query)
+    public function scopePendingIntroduction($query)
     {
         return $query->whereHas('employments', function (Builder $query) {
-            $query->whereNull('started_at')->orWhere('started_at', '>', now());
-        });
+            $query->where('started_at', '>', now());
+        })->orWhereDoesntHave('employment');
     }
 
     /**

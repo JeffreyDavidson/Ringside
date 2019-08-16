@@ -212,7 +212,7 @@ class TagTeam extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopePendingIntroduced($query)
+    public function scopePendingIntroduction($query)
     {
         return $query->whereHas('employments', function (Builder $query) {
             $query->whereNull('started_at')->orWhere('started_at', '>', now());
