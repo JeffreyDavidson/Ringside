@@ -8,4 +8,5 @@ require("bootstrap-select");
 require("flatpickr");
 window.$ = jQuery;
 window.jQuery = jQuery;
+window.Noty = require("noty");
 require("./bootstrappers/global-hooks.js");

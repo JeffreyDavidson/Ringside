@@ -47,6 +47,16 @@ table.DataTable({
         data(params) {
             params.status = filterData.status;
             params.started_at = filterData.started_at;
+        },
+        error: function(xhr, error, code) {
+            console.log(JSON.parse(xhr.responseText.errors));
+            console.log(xhr);
+            console.log(error);
+            new Noty({
+                type: "error",
+                layout: "topRight",
+                text: JSON.parse(xhr.responseText.errors)
+            }).show();
         }
     },
     columns: [
