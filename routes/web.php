@@ -20,7 +20,7 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
 Auth::routes();
 
 /************************************************************************
- * Only Roster
+ * Roster
  ************************************************************************/
 Route::middleware(['auth'])->prefix('roster')->group(function () {
     Route::group([], __DIR__ . '/web/stables.php');
@@ -31,21 +31,21 @@ Route::middleware(['auth'])->prefix('roster')->group(function () {
 });
 
 /************************************************************************
- * Only Titles
+ * Titles
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__ . '/web/titles.php');
 });
 
 /************************************************************************
- * Only Events
+ * Events
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__ . '/web/events.php');
 });
 
 /************************************************************************
- * Only Venues
+ * Venues
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__ . '/web/venues.php');
