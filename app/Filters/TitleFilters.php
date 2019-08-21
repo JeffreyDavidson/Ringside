@@ -3,31 +3,17 @@
 namespace App\Filters;
 
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 
 class TitleFilters extends Filters
 {
+    use Concerns\FiltersByStatus;
+    
     /**
      * Registered filters to operate upon.
      *
      * @var array
      */
     protected $filters = ['status', 'introduced_at'];
-
-    /**
-     * Filter a query to include titles of a status.
-     *
-     * @param  string  $status
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function status($status)
-    {
-        if (method_exists($this->builder->getModel(), 'scope' . Str::studly($status))) {
-            $this->builder->{Str::camel($status)}();
-        }
-
-        return $this->builder;
-    }
 
     /**
      * Filter a query to include titles of a specific date introduced.
