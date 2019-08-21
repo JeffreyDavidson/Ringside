@@ -2,12 +2,8 @@
     <div class="kt-nav__item">
         <div class="form-group m-3">
             <label>Status:</label>
-            <select class="form-control" name="status" id="status-dropdown">
-                <option value="">Select</option>
-                @foreach (\App\Enums\EventStatus::labels() as $value => $label)
-                    <option value="{{ $value }}"> {{ $label }}</option>
-                @endforeach
-            </select>
+            @statusSelect(['statuses' => \App\Enums\EventStatus::labels()])
+            @endstatusSelect
         </div>
     </div>
     <div class="kt-nav__item">

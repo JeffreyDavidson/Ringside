@@ -115,7 +115,7 @@ class StablePolicy
     }
 
     /**
-     * Determine whether the user can unretire a stable.
+     * Determine whether the user can disassemble a stable.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Stable  $stable

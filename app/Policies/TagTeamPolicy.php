@@ -63,7 +63,7 @@ class TagTeamPolicy
      */
     public function suspend(User $user, TagTeam $tagteam)
     {
-        if ($tagteam->is_suspended) {
+        if (!$tagteam->is_employed || !$tagteam->is_bookable || $tagteam->is_suspended) {
             return false;
         }
 
@@ -95,7 +95,7 @@ class TagTeamPolicy
      */
     public function activate(User $user, TagTeam $tagteam)
     {
-        if ($tagteam->is_bookable) {
+        if ($tagteam->is_employed) {
             return false;
         }
         return $user->isSuperAdministrator() || $user->isAdministrator();
