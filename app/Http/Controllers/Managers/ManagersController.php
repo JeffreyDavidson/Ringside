@@ -25,14 +25,11 @@ class ManagersController extends Controller
         $this->authorize('viewList', Manager::class);
 
         if ($request->ajax()) {
-            $query = Manager::query();
+            $query = Manager::with('employment');
             $requestFilter->apply($query);
 
             return $table->eloquent($query)
                 ->addColumn('action', 'managers.partials.action-cell')
-                ->editColumn('started_at', function (Manager $manager) {
-                    return $manager->employment->started_at ?? null;
-                })
                 ->filterColumn('name', function ($query, $keyword) {
                     $sql = "CONCAT(managers.first_name, ' ', managers.last_name)  like ?";
                     $query->whereRaw($sql, ["%{$keyword}%"]);

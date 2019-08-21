@@ -5,92 +5,36 @@
     <div class="dropdown-menu dropdown-menu-right">
         <ul class="kt-nav">
             @can('view', $model)
-                <li class="kt-nav__item">
-                    <a href="{{ route('tagteams.show', $model) }}" class="kt-nav__link">
-                        <i class="kt-nav__link-icon flaticon2-expand"></i>
-                        <span class="kt-nav__link-text">View</span>
-                    </a>
-                </li>
+                @viewbutton(['route' => route('tagteams.show', $model)])
+                @endviewbutton
             @endcan
             @can('update', $model)
-                <li class="kt-nav__item">
-                    <a href="{{ route('tagteams.edit', $model) }}" class="kt-nav__link">
-                        <i class="kt-nav__link-icon flaticon2-contract"></i>
-                        <span class="kt-nav__link-text">Edit</span>
-                    </a>
-                </li>
+                @editbutton(['route' => route('tagteams.edit', $model)])
+                @endeditbutton
             @endcan
             @can('delete', $model)
-                <li class="kt-nav__item">
-                    <form action="{{ route('tagteams.destroy', $model) }}" method="post" class="kt-nav__link">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn w-100 text-left p-0">
-                            <i class="kt-nav__link-icon flaticon2-trash"></i>
-                            <span class="kt-nav__link-text">Delete</span>
-                        </button>
-                    </form>
-                </li>
+                @deletebutton(['route' => route('tagteams.destroy', $model)])
+                @enddeletebutton
             @endcan
             @can('retire', $model)
-                <li class="kt-nav__item">
-                    <form action="{{ route('tagteams.retire', $model) }}" method="post" class="kt-nav__link">
-                        @csrf
-                        @method('PUT')
-                        <button class="btn w-100 text-left p-0">
-                            <i class="kt-nav__link-icon flaticon2-time"></i>
-                            <span class="kt-nav__link-text">Retire</span>
-                        </button>
-                    </form>
-                </li>
+                @retirebutton(['route' => route('tagteams.retire', $model)])
+                @endretirebutton
             @endcan
             @can('unretire', $model)
-                <li class="kt-nav__item">
-                    <form action="{{ route('tagteams.unretire', $model) }}" method="post" class="kt-nav__link">
-                        @csrf
-                        @method('PUT')
-                        <button class="btn w-100 text-left p-0">
-                            <i class="kt-nav__link-icon flaticon2-reload"></i>
-                            <span class="kt-nav__link-text">Unretire</span>
-                        </button>
-                    </form>
-                </li>
+                @unretirebutton(['route' => route('tagteams.unretire', $model)])
+                @endunretirebutton
             @endcan
             @can('activate', $model)
-                <li class="kt-nav__item">
-                    <form action="{{ route('tagteams.activate', $model) }}" method="post" class="kt-nav__link">
-                        @csrf
-                        @method('PUT')
-                        <button class="btn w-100 text-left p-0">
-                            <i class="kt-nav__link-icon flaticon2-power"></i>
-                            <span class="kt-nav__link-text">Activate</span>
-                        </button>
-                    </form>
-                </li>
+                @activatebutton(['route' => route('tagteams.activate', $model)])
+                @endactivatebutton
             @endcan
             @can('suspend', $model)
-                <li class="kt-nav__item">
-                    <form action="{{ route('tagteams.suspend', $model) }}" method="post" class="kt-nav__link">
-                        @csrf
-                        @method('PUT')
-                        <button class="btn w-100 text-left p-0">
-                            <i class="kt-nav__link-icon flaticon2-power"></i>
-                            <span class="kt-nav__link-text">Suspend</span>
-                        </button>
-                    </form>
-                </li>
+                @suspendbutton(['route' => route('tagteams.suspend', $model)])
+                @endsuspendbutton
             @endcan
             @can('reinstate', $model)
-                <li class="kt-nav__item">
-                    <form action="{{ route('tagteams.reinstate', $model) }}" method="post" class="kt-nav__link">
-                        @csrf
-                        @method('PUT')
-                        <button class="btn w-100 text-left p-0">
-                            <i class="kt-nav__link-icon flaticon2-power"></i>
-                            <span class="kt-nav__link-text">Reinstate</span>
-                        </button>
-                    </form>
-                </li>
+                @reinstatebutton(['route' => route('tagteams.reinstate', $model)])
+                @endreinstatebutton
             @endcan
         </ul>
     </div>

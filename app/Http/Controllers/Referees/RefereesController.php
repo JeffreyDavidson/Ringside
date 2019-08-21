@@ -24,14 +24,11 @@ class RefereesController extends Controller
         $this->authorize('viewList', Referee::class);
 
         if ($request->ajax()) {
-            $query = Referee::query();
+            $query = Referee::with('employment');
             $requestFilter->apply($query);
 
             return $table->eloquent($query)
                 ->addColumn('action', 'referees.partials.action-cell')
-                ->editColumn('started_at', function (Referee $referee) {
-                    return $referee->employment->started_at->format('Y-m-d H:s') ?: null;
-                })
                 ->filterColumn('name', function ($query, $keyword) {
                     $sql = "CONCAT(referees.first_name, ' ', referees.last_name)  like ?";
                     $query->whereRaw($sql, ["%{$keyword}%"]);

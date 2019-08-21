@@ -12,20 +12,9 @@
 @endsection
 
 @section('content')
-<!--Begin::App-->
-<div class="kt-grid kt-grid--desktop kt-grid--ver kt-grid--ver-desktop kt-app" id="kt_app">
-
-    <!--Begin:: App Aside Mobile Toggle-->
-    <button class="kt-app__aside-close" id="kt_user_profile_aside_close">
-        <i class="la la-close"></i>
-    </button>
-
-    <!--End:: App Aside Mobile Toggle-->
-
-    <!--Begin:: App Aside-->
-    <div class="kt-grid__item kt-app__toggle kt-app__aside" id="kt_app_aside">
-
-        <!--begin:: Widgets/Applications/User/Profile1-->
+<!--begin:: Widgets/Applications/User/Profile1-->
+<div class="row">
+    <div class="col-lg-3">
         <div class="kt-portlet kt-portlet--height-fluid-">
             <div class="kt-portlet__head  kt-portlet__head--noborder">
                 <div class="kt-portlet__head-label">
@@ -42,7 +31,7 @@
                         </div>
                         <div class="kt-widget__content">
                             <div class="kt-widget__section">
-                                <span class="kt-widget__username"">{{ $referee->full_name }}</span>
+                                <span class="kt-widget__username"">{{ $referee->name }}</span>
                             </div>
                         </div>
                     </div>
@@ -50,20 +39,11 @@
 
                 <!--end::Widget -->
                 </div>
-			</div>
+            </div>
 
-			<!--end:: Widgets/Applications/User/Profile1-->
+            <!--end:: Widgets/Applications/User/Profile1-->
         </div>
-
     </div>
-
-    <!--End:: App Aside-->
-
-    <!--Begin:: App Content-->
-    <div class="kt-grid__item kt-grid__item--fluid kt-app__content">
-
-    </div>
-    <!--End:: App Content-->
 </div>
 
 <!--End::App-->
