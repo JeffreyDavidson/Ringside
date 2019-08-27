@@ -31,33 +31,6 @@ class Manager extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
-    /**
-     * Determine the status of the manager.
-     *
-     * @return \App\Enum\ManagerStatus
-     *
-     */
-    public function getStatusAttribute()
-    {
-        if ($this->is_bookable) {
-            return ManagerStatus::BOOKABLE();
-        }
-
-        if ($this->is_retired) {
-            return ManagerStatus::RETIRED();
-        }
-
-        if ($this->is_injured) {
-            return ManagerStatus::INJURED();
-        }
-
-        if ($this->is_suspended) {
-            return ManagerStatus::SUSPENDED();
-        }
-
-        return ManagerStatus::PENDING_INTRODUCTION();
-    }
 
     /**
      * Determine if a manager is bookable.
@@ -83,31 +56,10 @@ class Manager extends Model
      * Scope a query to only include bookable managers.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder
      */
     public function scopeBookable($query)
     {
-        return $query->whereHas('employments', function (Builder $query) {
-            $query->where('started_at', '<=', now())->whereNull('ended_at');
-        })->whereDoesntHave('retirements', function (Builder $query) {
-            $query->whereNull('ended_at');
-        })->whereDoesntHave('injuries', function (Builder $query) {
-            $query->whereNull('ended_at');
-        })->whereDoesntHave('suspensions', function (Builder $query) {
-            $query->whereNull('ended_at');
-        });
-    }
-
-    /**
-     * Convert the model instance to an array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data                 = parent::toArray();
-        $data['status']       = $this->status->label();
-        $data['name']         = $this->full_name;
-
-        return $data;
+        return $query->where('status', ManagerStatus::BOOKABLE);
     }
 }

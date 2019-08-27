@@ -152,40 +152,13 @@ class Wrestler extends Model
     }
 
     /**
-     * Return the wrestler's hired at date formatted.
+     * Return the wrestler's started at date formatted.
      *
      * @return string
      */
     public function getFormattedStartedAtAttribute()
     {
         return $this->employments()->latest()->first()->started_at->format('M d, Y');
-    }
-
-    /**
-     * Determine the status of the wrestler.
-     *
-     * @return \App\Enum\WrestlerStatus
-     *
-     */
-    public function getStatusAttribute()
-    {
-        if ($this->is_bookable) {
-            return WrestlerStatus::BOOKABLE();
-        }
-
-        if ($this->is_retired) {
-            return WrestlerStatus::RETIRED();
-        }
-
-        if ($this->is_injured) {
-            return WrestlerStatus::INJURED();
-        }
-
-        if ($this->is_suspended) {
-            return WrestlerStatus::SUSPENDED();
-        }
-
-        return WrestlerStatus::PENDING_INTRODUCTION();
     }
 
     /**
@@ -225,27 +198,6 @@ class Wrestler extends Model
      */
     public function scopeBookable($query)
     {
-        return $query->whereHas('employments', function (Builder $query) {
-            $query->where('started_at', '<=', now())->whereNull('ended_at');
-        })->whereDoesntHave('retirements', function (Builder $query) {
-            $query->whereNull('ended_at');
-        })->whereDoesntHave('injuries', function (Builder $query) {
-            $query->whereNull('ended_at');
-        })->whereDoesntHave('suspensions', function (Builder $query) {
-            $query->whereNull('ended_at');
-        });
-    }
-
-    /**
-     * Convert the model instance to an array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data                 = parent::toArray();
-        $data['status']       = $this->status->label();
-
-        return $data;
+        return $query->where('status', WrestlerStatus::BOOKABLE);
     }
 }

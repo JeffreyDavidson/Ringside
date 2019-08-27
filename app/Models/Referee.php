@@ -67,33 +67,6 @@ class Referee extends Model
     protected $guarded = [];
 
     /**
-     * Determine the status of the referee.
-     *
-     * @return \App\Enum\RefereeStatus
-     *
-     */
-    public function getStatusAttribute()
-    {
-        if ($this->is_bookable) {
-            return RefereeStatus::BOOKABLE();
-        }
-
-        if ($this->is_retired) {
-            return RefereeStatus::RETIRED();
-        }
-
-        if ($this->is_injured) {
-            return RefereeStatus::INJURED();
-        }
-
-        if ($this->is_suspended) {
-            return RefereeStatus::SUSPENDED();
-        }
-
-        return RefereeStatus::PENDING_INTRODUCTION();
-    }
-
-    /**
      * Determine if a referee is bookable.
      *
      * @return bool
@@ -120,28 +93,6 @@ class Referee extends Model
      */
     public function scopeBookable($query)
     {
-        return $query->whereHas('employments', function (Builder $query) {
-            $query->where('started_at', '<=', now())->whereNull('ended_at');
-        })->whereDoesntHave('retirements', function (Builder $query) {
-            $query->whereNull('ended_at');
-        })->whereDoesntHave('injuries', function (Builder $query) {
-            $query->whereNull('ended_at');
-        })->whereDoesntHave('suspensions', function (Builder $query) {
-            $query->whereNull('ended_at');
-        });
-    }
-
-    /**
-     * Convert the model instance to an array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data                 = parent::toArray();
-        $data['status']       = $this->status->label();
-        $data['name']         = $this->full_name;
-
-        return $data;
+        return $query->where('status', RefereeStatus::BOOKABLE);
     }
 }

@@ -19,6 +19,7 @@ class CreateEventsTable extends Migration
             $table->datetime('date')->nullable();
             $table->unsignedInteger('venue_id')->nullable();
             $table->text('preview')->nullable();
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });

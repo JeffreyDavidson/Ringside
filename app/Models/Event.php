@@ -35,21 +35,6 @@ class Event extends Model
     }
 
     /**
-     * Determine the status of the event.
-     *
-     * @return \App\Enum\EventStatus
-     *
-     */
-    public function getStatusAttribute()
-    {
-        if ($this->is_scheduled) {
-            return EventStatus::SCHEDULED();
-        }
-
-        return EventStatus::PAST();
-    }
-
-    /**
      * Scope a query to only include scheduled events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -57,7 +42,7 @@ class Event extends Model
      */
     public function scopeScheduled($query)
     {
-        return $query->where('date', '>', now());
+        return $query->where('status', EventStatus::SCHEDULED);
     }
 
     /**
@@ -68,7 +53,7 @@ class Event extends Model
      */
     public function scopePast($query)
     {
-        return $query->where('date', '<', now());
+        return $query->where('status', EventStatus::PAST);
     }
 
     /**
@@ -89,18 +74,5 @@ class Event extends Model
     public function getIsPastAttribute()
     {
         return $this->date->isPast();
-    }
-
-    /**
-     * Convert the model instance to an array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data                 = parent::toArray();
-        $data['status']       = $this->status->label();
-
-        return $data;
     }
 }

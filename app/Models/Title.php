@@ -212,17 +212,4 @@ class Title extends Model
     {
         return $this->retirement()->update(['ended_at' => now()]);
     }
-
-    /**
-     * Convert the model instance to an array.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data                 = parent::toArray();
-        $data['status']       = $this->status->label();
-
-        return $data;
-    }
 }

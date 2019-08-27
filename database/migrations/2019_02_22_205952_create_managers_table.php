@@ -18,6 +18,7 @@ class CreateManagersTable extends Migration
             $table->unsignedInteger('user_id')->nullable();
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -12,4 +12,21 @@ class Retirement extends Model
      * @var array
      */
     protected $guarded = [];
+
+    /**
+     * The relationships that should be touched on save.
+     *
+     * @var array
+     */
+    protected $touches = ['retiree'];
+
+    /**
+     * Retrieve the retired model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function retiree()
+    {
+        return $this->morphTo();
+    }
 }
