@@ -19,4 +19,21 @@ class Employment extends Model
      * @var array
      */
     protected $dates = ['started_at', 'ended_at'];
+
+    /**
+     * The relationships that should be touched on save.
+     *
+     * @var array
+     */
+    protected $touches = ['employable'];
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function employable()
+    {
+        return $this->morphTo();
+    }
 }

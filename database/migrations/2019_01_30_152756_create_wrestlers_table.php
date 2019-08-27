@@ -21,6 +21,7 @@ class CreateWrestlersTable extends Migration
             $table->integer('weight');
             $table->string('hometown');
             $table->string('signature_move')->nullable();
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });
