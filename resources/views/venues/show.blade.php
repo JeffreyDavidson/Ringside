@@ -56,7 +56,9 @@
                         <div class="kt-widget__content">
                             <div class="kt-widget__info">
                                 <span class="kt-widget__label">Location:</span>
-                                <span class="kt-widget__data">{!! $venue->fullAddress !!}</span>
+                                <span class="kt-widget__data">
+                                    @include('venues.partials.address')
+                                </span>
                             </div>
                         </div>
                     </div>
