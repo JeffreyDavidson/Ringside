@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Spatie\BladeX\Facades\BladeX;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Requests\CustomDataTablesRequest;
@@ -44,5 +45,6 @@ class AppServiceProvider extends ServiceProvider
         Blade::component('components.buttons.suspend', 'suspendbutton');
         Blade::component('components.buttons.unretire', 'unretirebutton');
         Blade::component('components.buttons.view', 'viewbutton');
+        BladeX::component('components.*');
     }
 }
