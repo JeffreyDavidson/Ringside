@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "34b047f41f6da26edfd55535cdfd4a9f",
+    "content-hash": "56dbf750060356f5a68bd5a6f8854ba2",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1508,6 +1508,146 @@
                 "uuid"
             ],
             "time": "2018-07-19T23:38:55+00:00"
+        },
+        {
+            "name": "spatie/laravel-blade-x",
+            "version": "2.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-blade-x.git",
+                "reference": "1978597d0afc63782aecd062cf8ede7d0ef306f7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-blade-x/zipball/1978597d0afc63782aecd062cf8ede7d0ef306f7",
+                "reference": "1978597d0afc63782aecd062cf8ede7d0ef306f7",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/view": "~5.8.0|^6.0",
+                "php": "^7.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~3.8.0|^4.0",
+                "phpunit/phpunit": "^8.0",
+                "spatie/phpunit-snapshot-assertions": "^2.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\BladeX\\BladeXServiceProvider"
+                    ],
+                    "aliases": {
+                        "BladeX": "Spatie\\BladeX\\Facades\\BladeX"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\BladeX\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian De Deyne",
+                    "email": "sebastian@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Brent Roose",
+                    "email": "brent@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Ruben Van Assche",
+                    "email": "ruben@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Alex Vanderbist",
+                    "email": "alex@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Supercharged Blade components",
+            "homepage": "https://github.com/spatie/laravel-blade-x",
+            "keywords": [
+                "blade",
+                "components",
+                "html",
+                "laravel-blade-x",
+                "spatie"
+            ],
+            "time": "2019-12-14T16:30:35+00:00"
+        },
+        {
+            "name": "spatie/laravel-view-models",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-view-models.git",
+                "reference": "9eeaa79b68a25c92089a5c5cf94f34d4fecc7bbe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-view-models/zipball/9eeaa79b68a25c92089a5c5cf94f34d4fecc7bbe",
+                "reference": "9eeaa79b68a25c92089a5c5cf94f34d4fecc7bbe",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "~5.5|~5.6|~5.7|~5.8|^6.0",
+                "php": "^7.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~3.5|~3.6|~3.7|~3.8|^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\ViewModels\\Providers\\ViewModelsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\ViewModels\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brent Roose",
+                    "email": "brent@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "View models in Laravel",
+            "homepage": "https://github.com/spatie/laravel-view-models",
+            "keywords": [
+                "laravel-view-models",
+                "spatie"
+            ],
+            "time": "2019-09-04T07:31:58+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
