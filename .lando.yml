@@ -1,0 +1,30 @@
+name: Ringside
+recipe: laravel
+services:
+  database:
+    portforward: 3306
+config:
+  webroot: public
+  php: '7.2'
+  database: mysql:5.7
+  cache: redis
+  xdebug: true
+tooling:
+  reseed:
+    service: appserver
+    description: "Seed the database"
+    cmd: "php artisan db:seed"
+  tinker:
+    service: appserver
+    description: "Drop into a tinker console"
+    cmd: "php artisan tinker"
+  ide:
+    service: appserver
+    description: "Update the IDE docs"
+    cmd:
+      - "php artisan ide-helper:meta"
+      - "php artisan ide-helper:models --write --reset"
+  migrate:
+    service: appserver
+    description: "Quick migrate"
+    cmd: "php artisan migrate"
