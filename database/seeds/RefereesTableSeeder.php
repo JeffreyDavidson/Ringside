@@ -1,7 +1,8 @@
 <?php
 
-use App\Models\Referee;
 use Illuminate\Database\Seeder;
+use Tests\Factories\RefereeFactory;
+use Tests\Factories\EmploymentFactory;
 
 class RefereesTableSeeder extends Seeder
 {
@@ -12,26 +13,46 @@ class RefereesTableSeeder extends Seeder
      */
     public function run()
     {
-        for ($w = 1; $w <= 10; $w++) {
-            factory(Referee::class)->create([
-                'first_name' => 'Referee',
-                'last_name' => $w,
-            ])->employments()->create([
-                'started_at' => now()->subYears(1)
-            ]);
+        for ($w = 1; $w <= 50; $w++) {
+            RefereeFactory::new()
+                ->bookable(
+                    EmploymentFactory::new()->started(now()->subYears(1))
+                )
+                ->create(['first_name' => 'Referee', 'last_name' => $w]);
         }
 
-        $eNum = 11;
-        for ($i = 1; $i <= 15; $i++) {
-            for ($j = 1; $j <= 2; $j++) {
-                factory(Referee::class)->create([
-                    'first_name' => 'Referee',
-                    'last_name' => $eNum,
-                ])->employments()->create([
-                    'started_at' => now()->subYear(1)->addMonth($i)
-                ]);
+        $eNum = 51;
+        for ($i = 1; $i <= 12; $i++) {
+            for ($j = 1; $j <= 5; $j++) {
+                RefereeFactory::new()
+                    ->pendingEmployment(
+                        EmploymentFactory::new()->started(now()->subYears(1)->addMonth($i))
+                    )
+                    ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
+
                 $eNum ++;
             }
         }
+
+        for ($i = 1; $i <= 3; $i++) {
+            for ($j = 1; $j <= 5; $j++) {
+                RefereeFactory::new()
+                    ->pendingEmployment(
+                        EmploymentFactory::new()->started(now()->addMonth($i))
+                    )
+                    ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
+
+                $eNum ++;
+            }
+        }
+
+        for ($i = 1; $i <= 10; $i++) {
+            RefereeFactory::new()
+                ->unemployed()
+                ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
+
+            $eNum ++;
+        }
+
     }
 }

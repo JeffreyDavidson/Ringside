@@ -72,10 +72,6 @@ class TitlePolicy
      */
     public function retire(User $user, Title $title)
     {
-        if ($title->is_pending_introduction || $title->is_retired) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
@@ -87,10 +83,6 @@ class TitlePolicy
      */
     public function unretire(User $user, Title $title)
     {
-        if (!$title->is_retired) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
@@ -101,12 +93,20 @@ class TitlePolicy
      * @param  \App\Models\Title  $title
      * @return bool
      */
-    public function activate(User $user, Title $title)
+    public function activate(User $user)
     {
-        if ($title->is_bookable || $title->is_retired) {
-            return false;
-        }
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
 
+    /**
+     * Determine whether the user can deactivate a title.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Title  $title
+     * @return bool
+     */
+    public function deactivate(User $user)
+    {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 

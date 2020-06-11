@@ -1,5 +1,7 @@
 <?php
 
+Auth::loginUsingId(5);
+
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -13,40 +15,42 @@ use App\Http\Controllers\DashboardController;
 |
 */
 
+Route::namespace('App\Http\Controllers')->group(function () {
+    Auth::routes();
+});
+
 Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
 });
-
-Auth::routes();
 
 /************************************************************************
  * Roster
  ************************************************************************/
 Route::middleware(['auth'])->prefix('roster')->group(function () {
-    Route::group([], __DIR__ . '/web/stables.php');
-    Route::group([], __DIR__ . '/web/wrestlers.php');
-    Route::group([], __DIR__ . '/web/managers.php');
-    Route::group([], __DIR__ . '/web/referees.php');
-    Route::group([], __DIR__ . '/web/tagteams.php');
+    Route::group([], __DIR__.'/web/stables.php');
+    Route::group([], __DIR__.'/web/wrestlers.php');
+    Route::group([], __DIR__.'/web/managers.php');
+    Route::group([], __DIR__.'/web/referees.php');
+    Route::group([], __DIR__.'/web/tagteams.php');
 });
 
 /************************************************************************
  * Titles
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
-    Route::group([], __DIR__ . '/web/titles.php');
+    Route::group([], __DIR__.'/web/titles.php');
 });
 
 /************************************************************************
  * Events
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
-    Route::group([], __DIR__ . '/web/events.php');
+    Route::group([], __DIR__.'/web/events.php');
 });
 
 /************************************************************************
  * Venues
  ************************************************************************/
 Route::middleware(['auth'])->group(function () {
-    Route::group([], __DIR__ . '/web/venues.php');
+    Route::group([], __DIR__.'/web/venues.php');
 });

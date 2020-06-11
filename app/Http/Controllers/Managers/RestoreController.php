@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Managers;
 
-use App\Models\Manager;
 use App\Http\Controllers\Controller;
+use App\Models\Manager;
 
 class RestoreController extends Controller
 {

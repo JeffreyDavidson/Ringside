@@ -1,41 +1,61 @@
-<div class="dropdown">
-    <a href="javascript:;" class="btn btn-sm btn-clean btn-icon btn-icon-md" data-toggle="dropdown">
-        <i class="flaticon-more-1"></i>
-    </a>
-    <div class="dropdown-menu dropdown-menu-right">
-        <ul class="kt-nav">
-            @can('view', $model)
-                @viewbutton(['route' => route('tagteams.show', $model)])
-                @endviewbutton
+<x-actions-dropdown>
+    @can('view', $tagTeam)
+        <x-buttons.view :route="route('tag-teams.show', $tagTeam)" />
+    @endcan
+
+    @can('update', $tagTeam)
+        <x-buttons.edit :route="route('tag-teams.edit', $tagTeam)" />
+    @endcan
+
+    @can('delete', $tagTeam)
+        <x-buttons.delete :route="route('tag-teams.destroy', $tagTeam)" />
+    @endcan
+
+    @if ($actions->contains('retire'))
+        @if($tagTeam->canBeRetired())
+            @can('retire', $tagTeam)
+                <x-buttons.retire :route="route('tag-teams.retire', $tagTeam)" />
             @endcan
-            @can('update', $model)
-                @editbutton(['route' => route('tagteams.edit', $model)])
-                @endeditbutton
+        @endif
+    @endif
+
+    @if ($actions->contains('unretire'))
+        @if($tagTeam->canBeUnretired())
+            @can('unretire', $tagTeam)
+                <x-buttons.unretire :route="route('tag-teams.unretire', $tagTeam)" />
             @endcan
-            @can('delete', $model)
-                @deletebutton(['route' => route('tagteams.destroy', $model)])
-                @enddeletebutton
+        @endif
+    @endif
+
+    @if ($actions->contains('employ'))
+        @if($tagTeam->canBeEmployed())
+            @can('employ', $tagTeam)
+                <x-buttons.employ :route="route('tag-teams.employ', $tagTeam)" />
             @endcan
-            @can('retire', $model)
-                @retirebutton(['route' => route('tagteams.retire', $model)])
-                @endretirebutton
+        @endif
+    @endif
+
+    @if ($actions->contains('release'))
+        @if($tagTeam->canBeReleased())
+            @can('release', $tagTeam)
+                <x-buttons.release :route="route('tag-teams.release', $tagTeam)" />
             @endcan
-            @can('unretire', $model)
-                @unretirebutton(['route' => route('tagteams.unretire', $model)])
-                @endunretirebutton
+        @endif
+    @endif
+
+    @if ($actions->contains('suspend'))
+        @if($tagTeam->canBeSuspended())
+            @can('suspend', $tagTeam)
+                <x-buttons.suspend :route="route('tag-teams.suspend', $tagTeam)" />
             @endcan
-            @can('activate', $model)
-                @activatebutton(['route' => route('tagteams.activate', $model)])
-                @endactivatebutton
+        @endif
+    @endif
+
+    @if ($actions->contains('reinstate'))
+        @if($tagTeam->canBeReinstated())
+            @can('reinstate', $tagTeam)
+                <x-buttons.reinstate :route="route('tag-teams.reinstate', $tagTeam)" />
             @endcan
-            @can('suspend', $model)
-                @suspendbutton(['route' => route('tagteams.suspend', $model)])
-                @endsuspendbutton
-            @endcan
-            @can('reinstate', $model)
-                @reinstatebutton(['route' => route('tagteams.reinstate', $model)])
-                @endreinstatebutton
-            @endcan
-        </ul>
-    </div>
-</div>
+        @endif
+    @endif
+</x-actions-dropdown>

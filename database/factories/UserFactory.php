@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 
 /*
@@ -22,19 +23,25 @@ $factory->define(User::class, function (Faker $faker) {
         'email' => $faker->unique()->safeEmail,
         'email_verified_at' => now(),
         'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
-        'remember_token' => str_random(10),
+        'remember_token' => Str::random(10),
         'role' => Role::ADMINISTRATOR,
     ];
 });
 
-$factory->state(User::class, 'super-administrator', [
-    'role' => Role::SUPER_ADMINISTRATOR,
-]);
+$factory->state(User::class, 'super-administrator', function ($faker) {
+    return [
+       'role' => Role::SUPER_ADMINISTRATOR,
+    ];
+});
 
-$factory->state(User::class, 'administrator', [
-    'role' => Role::ADMINISTRATOR,
-]);
+$factory->state(User::class, 'administrator', function ($faker) {
+    return [
+        'role' => Role::ADMINISTRATOR,
+    ];
+});
 
-$factory->state(User::class, 'basic-user', [
-    'role' => Role::BASIC,
-]);
+$factory->state(User::class, 'basic-user', function ($faker) {
+    return [
+        'role' => Role::BASIC,
+    ];
+});

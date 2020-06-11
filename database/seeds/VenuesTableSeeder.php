@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Venue;
 use Illuminate\Database\Seeder;
+use Tests\Factories\VenueFactory;
 
 class VenuesTableSeeder extends Seeder
 {
@@ -12,10 +12,8 @@ class VenuesTableSeeder extends Seeder
      */
     public function run()
     {
-        for ($w = 1; $w <= 300; $w++) {
-            factory(Venue::class)->create([
-                'name' => 'Venue '.$w,
-            ]);
+        for ($w = 1; $w <= 100; $w++) {
+            VenueFactory::new()->create(['name' => 'Venue '.$w]);
         }
     }
 }

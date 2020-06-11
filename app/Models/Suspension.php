@@ -6,19 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Suspension extends Model
 {
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [];
+    use Concerns\Unguarded;
 
     /**
-     * The relationships that should be touched on save.
+     * The attributes that should be mutated to dates.
      *
      * @var array
      */
-    protected $touches = ['suspendable'];
+    protected $dates = ['started_at', 'ended_at'];
 
     /**
      * Retrieve the suspended model.

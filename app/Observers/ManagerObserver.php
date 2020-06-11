@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Manager;
 use App\Enums\ManagerStatus;
+use App\Models\Manager;
 
 class ManagerObserver
 {
@@ -15,16 +15,18 @@ class ManagerObserver
      */
     public function saving(Manager $manager)
     {
-        if ($manager->is_bookable) {
-            $manager->status = ManagerStatus::BOOKABLE;
-        } elseif ($manager->is_retired) {
+        if ($manager->isRetired()) {
             $manager->status = ManagerStatus::RETIRED;
-        } elseif ($manager->is_injured) {
-            $manager->status =  ManagerStatus::INJURED;
-        } elseif ($manager->is_suspended) {
+        } elseif ($manager->isInjured()) {
+            $manager->status = ManagerStatus::INJURED;
+        } elseif ($manager->isSuspended()) {
             $manager->status = ManagerStatus::SUSPENDED;
+        } elseif ($manager->isAvailable()) {
+            $manager->status = ManagerStatus::AVAILABLE;
+        } elseif ($manager->isPendingEmployment()) {
+            $manager->status = ManagerStatus::PENDING_EMPLOYMENT;
         } else {
-            $manager->status = ManagerStatus::PENDING_INTRODUCTION;
+            $manager->status = ManagerStatus::UNEMPLOYED;
         }
     }
 }

@@ -7,20 +7,18 @@ use App\Enums\TitleStatus;
 
 class TitleObserver
 {
-    /**
-     * Handle the Title "saving" event.
-     *
-     * @param  App\Models\Title  $title
-     * @return void
-     */
     public function saving(Title $title)
     {
-        if ($title->is_scheduled) {
-            $title->status = TitleStatus::BOOKABLE;
-        } elseif ($title->is_retired) {
+        if ($title->isRetired()) {
             $title->status = TitleStatus::RETIRED;
+        } elseif ($title->isActive()) {
+            $title->status = TitleStatus::ACTIVE;
+        } elseif ($title->isDeactivated()) {
+            $title->status = TitleStatus::INACTIVE;
+        } elseif ($title->hasFutureActivation()) {
+            $title->status = TitleStatus::FUTURE_ACTIVATION;
         } else {
-            $title->status = TitleStatus::PENDING_INTRODUCTION;
+            $title->status = TitleStatus::UNACTIVATED;
         }
     }
 }

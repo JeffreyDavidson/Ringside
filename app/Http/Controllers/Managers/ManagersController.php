@@ -2,43 +2,22 @@
 
 namespace App\Http\Controllers\Managers;
 
-use App\Models\Manager;
-use Illuminate\Http\Request;
-use App\Filters\ManagerFilters;
-use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreManagerRequest;
-use App\Http\Requests\UpdateManagerRequest;
+use App\Http\Requests\Managers\StoreRequest;
+use App\Http\Requests\Managers\UpdateRequest;
+use App\Models\Manager;
+use App\ViewModels\ManagerViewModel;
 
 class ManagersController extends Controller
 {
     /**
      * View a list of managers.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Yajra\DataTables\DataTables  $table
-     * @param  \App\Filters\ManagerFilters  $requestFilter
      * @return \Illuminate\View\View
      */
-    public function index(Request $request, DataTables $table, ManagerFilters $requestFilter)
+    public function index()
     {
         $this->authorize('viewList', Manager::class);
-
-        if ($request->ajax()) {
-            $query = Manager::with('employment');
-            $requestFilter->apply($query);
-
-            return $table->eloquent($query)
-                ->addColumn('action', 'managers.partials.action-cell')
-                ->filterColumn('name', function ($query, $keyword) {
-                    $sql = "CONCAT(managers.first_name, ' ', managers.last_name)  like ?";
-                    $query->whereRaw($sql, ["%{$keyword}%"]);
-                })
-                ->filterColumn('id', function ($query, $keyword) {
-                    $query->where($query->qualifyColumn('id'), $keyword);
-                })
-                ->toJson();
-        }
 
         return view('managers.index');
     }
@@ -52,21 +31,21 @@ class ManagersController extends Controller
     {
         $this->authorize('create', Manager::class);
 
-        return view('managers.create', compact('manager'));
+        return view('managers.create', new ManagerViewModel());
     }
 
     /**
      * Create a new manager.
      *
-     * @param  \App\Http\Requests\StoreManagerRequest  $request
+     * @param  App\Http\Requests\Managers\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreManagerRequest $request)
+    public function store(StoreRequest $request)
     {
         $manager = Manager::create($request->except('started_at'));
 
         if ($request->filled('started_at')) {
-            $manager->employments()->create($request->only('started_at'));
+            $manager->employ($request->input('started_at'));
         }
 
         return redirect()->route('managers.index');
@@ -75,7 +54,7 @@ class ManagersController extends Controller
     /**
      * Show the profile of a manager.
      *
-     * @param  \App\Models\Manager  $manager
+     * @param  App\Models\Manager  $manager
      * @return \Illuminate\Http\Response
      */
     public function show(Manager $manager)
@@ -88,35 +67,30 @@ class ManagersController extends Controller
     /**
      * Show the form for editing a manager.
      *
-     * @param  \App\Models\Manager  $manager
+     * @param  App\Models\Manager  $manager
      * @return \Illuminate\Http\Response
      */
     public function edit(Manager $manager)
     {
         $this->authorize('update', $manager);
 
-        return view('managers.edit', compact('manager'));
+        return view('managers.edit', new ManagerViewModel($manager));
     }
 
     /**
      * Update a given manager.
      *
-     * @param  \App\Http\Requests\UpdateManagerRequest  $request
-     * @param  \App\Models\Manager  $manager
-     * @return \lluminate\Http\RedirectResponse
+     * @param  App\Http\Requests\Managers\UpdateRequest  $request
+     * @param  App\Models\Manager  $manager
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateManagerRequest $request, Manager $manager)
+    public function update(UpdateRequest $request, Manager $manager)
     {
         $manager->update($request->except('started_at'));
 
-        if ($manager->employment()->exists() && !is_null($request->input('started_at'))) {
-            if ($manager->employment->started_at != $request->input('started_at')) {
-                $manager->employment()->update($request->only('started_at'));
-            }
-        } else {
-            $manager->employments()->create($request->only('started_at'));
+        if ($request->filled('started_at')) {
+            $manager->employ($request->input('started_at'));
         }
-
 
         return redirect()->route('managers.index');
     }
@@ -124,8 +98,8 @@ class ManagersController extends Controller
     /**
      * Delete a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @return \lluminate\Http\RedirectResponse
+     * @param  App\Models\Manager  $manager
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Manager $manager)
     {

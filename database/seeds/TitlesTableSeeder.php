@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Title;
 use Illuminate\Database\Seeder;
+use Tests\Factories\TitleFactory;
 
 class TitlesTableSeeder extends Seeder
 {
@@ -12,22 +12,26 @@ class TitlesTableSeeder extends Seeder
      */
     public function run()
     {
-        for ($w = 1; $w <= 5; $w++) {
-            factory(Title::class)->create([
-                'name' => 'Title '.$w,
-                'introduced_at' => now()->subYear(1)
-            ]);
+        for ($w = 0; $w < 5; $w++) {
+            TitleFactory::new()
+                ->active()
+                ->create();
         }
 
-        $eNum = 6;
-        for ($i = 1; $i <= 12; $i++) {
-            for ($j = 1; $j <= 2; $j++) {
-                factory(Title::class)->create([
-                    'name' => 'Title '. $eNum,
-                    'introduced_at' => now()->subYear(1)->addMonths($i)
-                ]);
-                $eNum ++;
-            }
-        }
+        TitleFactory::new()
+            ->futureActivation()
+            ->create();
+
+        TitleFactory::new()
+            ->retired()
+            ->create();
+
+        TitleFactory::new()
+            ->inactive()
+            ->create();
+
+        TitleFactory::new()
+            ->unactivated()
+            ->create();
     }
 }

@@ -15,10 +15,12 @@ class EventObserver
      */
     public function saving(Event $event)
     {
-        if ($event->is_scheduled) {
+        if ($event->isScheduled()) {
             $event->status = EventStatus::SCHEDULED;
-        } else {
+        } elseif ($event->isPast()) {
             $event->status = EventStatus::PAST;
+        } else {
+            $event->status = EventStatus::PENDING;
         }
     }
 }

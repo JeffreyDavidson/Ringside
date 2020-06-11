@@ -8,14 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use SoftDeletes;
-
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [];
+    use SoftDeletes,
+        Concerns\Unguarded;
 
     /**
      * The attributes that should be mutated to dates.
@@ -67,12 +61,17 @@ class Event extends Model
     }
 
     /**
-     * Checks to see if the event has past.
+     * Checks to see if the event has taken place.
      *
      * @return boolean
      */
     public function getIsPastAttribute()
     {
         return $this->date->isPast();
+    }
+
+    public function getFormattedDateAttribute()
+    {
+        return $this->date->format('F j, Y');
     }
 }

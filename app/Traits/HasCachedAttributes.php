@@ -9,6 +9,9 @@ use Illuminate\Support\Str;
  */
 trait HasCachedAttributes
 {
+
+    protected $cachedAttributes = [];
+
     /**
      * Determine if a get mutator exists for an attribute.
      *
@@ -32,13 +35,26 @@ trait HasCachedAttributes
     {
         $studlyKey = Str::studly($key);
         if (method_exists($this, "get{$studlyKey}CachedAttribute")) {
-            if (!isset($this->attributes[$key])) {
-                $this->attributes[$key] = $this->{"get{$studlyKey}CachedAttribute"}($value);
+            if (!isset($this->cachedAttributes[$key])) {
+                $this->cachedAttributes[$key] = $this->{"get{$studlyKey}CachedAttribute"}($value);
             }
+            return $this->cachedAttributes[$key];
+        }
+        return $this->{"get{$studlyKey}Attribute"}($value);
+    }
 
-            return $this->attributes[$key];
+    /**
+     *  @param  array  $keys
+     *  @return void
+     */
+    public function forgetCachedAttribute($keys = null)
+    {
+        if(is_null($keys)) {
+            $keys = array_keys($this->cachedAttributes);
         }
 
-        return $this->{"get{$studlyKey}Attribute"}($value);
+        foreach(is_array($keys) ? $keys : func_get_args() as $key) {
+            unset($this->cachedAttributes[$key]);
+        }
     }
 }

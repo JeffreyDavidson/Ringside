@@ -1,7 +1,8 @@
 <?php
 
-use App\Models\TagTeam;
 use Illuminate\Database\Seeder;
+use Tests\Factories\TagTeamFactory;
+use Tests\Factories\EmploymentFactory;
 
 class TagTeamsTableSeeder extends Seeder
 {
@@ -12,24 +13,48 @@ class TagTeamsTableSeeder extends Seeder
      */
     public function run()
     {
-        for ($w = 1; $w <= 50; $w++) {
-            factory(TagTeam::class)->create([
-                'name' => 'Tag Team '.$w,
-            ])->employments()->create([
-                'started_at' => now()->subYears(1)
-            ]);
+        $eNum = 1;
+
+        for ($w = 1; $w <= 20; $w++) {
+            TagTeamFactory::new()
+                ->bookable(
+                    EmploymentFactory::new()->started(now()->subYears(1))
+                )
+                ->create(['name' => 'Tag Team '.$w]);
+
+            $eNum ++;
         }
 
-        $eNum = 51;
-        for ($i = 1; $i <= 15; $i++) {
-            for ($j = 1; $j <= 5; $j++) {
-                factory(TagTeam::class)->create([
-                    'name' => 'Tag Team '. $eNum,
-                ])->employments()->create([
-                    'started_at' => now()->subYear(1)->addMonth($i)
-                ]);
+        for ($i = 1; $i <= 12; $i++) {
+            for ($j = 1; $j <= 2; $j++) {
+                TagTeamFactory::new()
+                    ->pendingEmployment(
+                        EmploymentFactory::new()->started(now()->subYears(1)->addMonth($i))
+                    )
+                    ->create(['name' => 'Tag Team '.$eNum]);
+
                 $eNum ++;
             }
+        }
+
+        for ($i = 1; $i <= 3; $i++) {
+            for ($j = 1; $j <= 2; $j++) {
+                TagTeamFactory::new()
+                    ->pendingEmployment(
+                        EmploymentFactory::new()->started(now()->addMonth($i))
+                    )
+                    ->create(['name' => 'Tag Team '.$eNum]);
+
+                $eNum ++;
+            }
+        }
+
+        for ($i = 1; $i <= 10; $i++) {
+            TagTeamFactory::new()
+                ->unemployed()
+                ->create(['name' => 'Tag Team '.$eNum]);
+
+            $eNum ++;
         }
     }
 }

@@ -11,7 +11,7 @@ class RestoreController extends Controller
      * Restore a deleted referee.
      *
      * @param  int  $refereeId
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke($refereeId)
     {

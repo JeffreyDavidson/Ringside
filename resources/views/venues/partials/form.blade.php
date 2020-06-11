@@ -1,56 +1,57 @@
 <div class="form-group">
-    <label>Venue Name:</label>
-    <input type="text" class="form-control {{ $errors->has('name') ? 'is-invalid' : '' }}" name="name" placeholder="Enter venue name" value="{{ $venue->name ?? old('name') }}">
-    @if ($errors->has('name'))
-        <div id="name-error" class="error invalid-feedback">{{ $errors->first('name') }}</div>
-    @endif
+    <x-form.inputs.text
+        name="name"
+        label="Venue Name"
+        :value="old('name', $venue->name)"
+    />
 </div>
+
 <div class="row">
     <div class="col-lg-8">
         <div class="form-group">
-            <label>Street Address:</label>
-            <input type="text" class="form-control {{ $errors->has('address1') ? 'is-invalid' : '' }}" name="address1" placeholder="Enter street address" value="{{ $venue->address1 ?? old('address1') }}">
-            @if ($errors->has('address1'))
-                <div id="address1-error" class="error invalid-feedback">{{ $errors->first('address1') }}</div>
-            @endif
+            <x-form.inputs.text
+                name="address1"
+                label="Street Address"
+                :value="old('address1', $venue->address1)"
+            />
         </div>
     </div>
     <div class="col-lg-4">
         <div class="form-group">
-            <label>Suite Number:</label>
-            <input type="text" class="form-control {{ $errors->has('address2') ? 'is-invalid' : '' }}" name="address2" placeholder="Enter suite number" value="{{ $venue->address2 ?? old('address2') }}">
-            @if ($errors->has('address2'))
-                <div id="address2-error" class="error invalid-feedback">{{ $errors->first('address2') }}</div>
-            @endif
+            <x-form.inputs.text
+                name="address2"
+                label="Suite Number"
+                :value="old('address2', $venue->address2)"
+            />
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-lg-4">
         <div class="form-group">
-            <label>City:</label>
-            <input type="text" class="form-control {{ $errors->has('city') ? 'is-invalid' : '' }}" name="city" placeholder="Enter city" value="{{ $venue->city ?? old('city') }}">
-            @if ($errors->has('city'))
-                <div id="city-error" class="error invalid-feedback">{{ $errors->first('city') }}</div>
-            @endif
+            <x-form.inputs.text
+                name="city"
+                label="City"
+                :value="old('city', $venue->city)"
+            />
         </div>
     </div>
     <div class="col-lg-4">
         <div class="form-group">
-            <label>State:</label>
-            <input type="text" class="form-control {{ $errors->has('state') ? 'is-invalid' : '' }}" name="state" placeholder="Enter state" value="{{ $venue->state ?? old('state') }}">
-            @if ($errors->has('state'))
-                <div id="email-error" class="error invalid-feedback">{{ $errors->first('state') }}</div>
-            @endif
+            <x-form.inputs.text
+                name="state"
+                label="State"
+                :value="old('state', $venue->state)"
+            />
         </div>
     </div>
     <div class="col-lg-4">
         <div class="form-group">
-            <label>Zip Code:</label>
-            <input type="text" class="form-control {{ $errors->has('zip') ? 'is-invalid' : '' }}" name="zip" placeholder="Enter zip" value="{{ $venue->zip ?? old('zip') }}">
-            @if ($errors->has('zip'))
-                <div id="zip-error" class="error invalid-feedback">{{ $errors->first('zip') }}</div>
-            @endif
+            <x-form.inputs.text
+                name="zip"
+                label="Zip"
+                :value="old('zip', $venue->zip)"
+            />
         </div>
     </div>
 </div>

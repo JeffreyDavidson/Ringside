@@ -2,42 +2,22 @@
 
 namespace App\Http\Controllers\Referees;
 
-use App\Models\Referee;
-use Illuminate\Http\Request;
-use App\Filters\RefereeFilters;
-use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreRefereeRequest;
-use App\Http\Requests\UpdateRefereeRequest;
+use App\Http\Requests\Referees\StoreRequest;
+use App\Http\Requests\Referees\UpdateRequest;
+use App\Models\Referee;
+use App\ViewModels\RefereeViewModel;
 
 class RefereesController extends Controller
 {
     /**
-     * View a list of wrestlers.
+     * View a list of referees.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Yajra\DataTables\DataTables  $table
      * @return \Illuminate\View\View
      */
-    public function index(Request $request, DataTables $table, RefereeFilters $requestFilter)
+    public function index()
     {
         $this->authorize('viewList', Referee::class);
-
-        if ($request->ajax()) {
-            $query = Referee::with('employment');
-            $requestFilter->apply($query);
-
-            return $table->eloquent($query)
-                ->addColumn('action', 'referees.partials.action-cell')
-                ->filterColumn('name', function ($query, $keyword) {
-                    $sql = "CONCAT(referees.first_name, ' ', referees.last_name)  like ?";
-                    $query->whereRaw($sql, ["%{$keyword}%"]);
-                })
-                ->filterColumn('id', function ($query, $keyword) {
-                    $query->where($query->qualifyColumn('id'), $keyword);
-                })
-                ->toJson();
-        }
 
         return view('referees.index');
     }
@@ -47,25 +27,25 @@ class RefereesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Referee $referee)
+    public function create()
     {
         $this->authorize('create', Referee::class);
 
-        return view('referees.create', compact('referee'));
+        return view('referees.create', new RefereeViewModel());
     }
 
     /**
      * Create a new referee.
      *
-     * @param  \App\Http\Requests\StoreRefereeRequest  $request
+     * @param  App\Http\Requests\Referees\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRefereeRequest $request)
+    public function store(StoreRequest $request)
     {
         $referee = Referee::create($request->except('started_at'));
 
-        if (!is_null($request->input('started_at'))) {
-            $referee->employments()->create($request->only('started_at'));
+        if ($request->filled('started_at')) {
+            $referee->employ($request->input('started_at'));
         }
 
         return redirect()->route('referees.index');
@@ -74,7 +54,7 @@ class RefereesController extends Controller
     /**
      * Show the profile of a referee.
      *
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\Referee  $referee
      * @return \Illuminate\View\View
      */
     public function show(Referee $referee)
@@ -87,33 +67,29 @@ class RefereesController extends Controller
     /**
      * Show the form for editing a referee.
      *
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\Referee  $referee
      * @return \Illuminate\Http\Response
      */
     public function edit(Referee $referee)
     {
         $this->authorize('update', $referee);
 
-        return view('referees.edit', compact('referee'));
+        return view('referees.edit', new RefereeViewModel($referee));
     }
 
     /**
      * Update a given referee.
      *
-     * @param  \App\Http\Requests\UpdateRefereeRequest  $request
-     * @param  \App\Models\Referee  $referee
-     * @return \lluminate\Http\RedirectResponse
+     * @param  App\Http\Requests\Referees\UpdateRequest  $request
+     * @param  App\Models\Referee  $referee
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRefereeRequest $request, Referee $referee)
+    public function update(UpdateRequest $request, Referee $referee)
     {
         $referee->update($request->except('started_at'));
 
-        if ($referee->employments()->exists() && !is_null($request->input('started_at'))) {
-            if ($referee->employment->started_at != $request->input('started_at')) {
-                $referee->employment()->update($request->only('started_at'));
-            }
-        } else {
-            $referee->employments()->create($request->only('started_at'));
+        if ($request->filled('started_at')) {
+            $referee->employ($request->input('started_at'));
         }
 
         return redirect()->route('referees.index');
@@ -123,7 +99,7 @@ class RefereesController extends Controller
      * Delete a referee.
      *
      * @param  App\Models\Referee  $referee
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Referee $referee)
     {

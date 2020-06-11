@@ -1,7 +1,4 @@
 const mix = require("laravel-mix");
-const endsWith = require("lodash.endswith");
-const glob = require("glob");
-const output = require("friendly-errors-webpack-plugin/src/output");
 
 /*
  |--------------------------------------------------------------------------
@@ -53,24 +50,6 @@ mix.copyDirectory("resources/vendors/line-awesome/fonts", "public/css/font");
 mix.disableSuccessNotifications();
 mix.sourceMaps(false, "inline-source-map");
 
-/************************************************************************
- * Spit out all our entries as individual files
- * * specifically it's anything in resources/js/entries/*
- *   or any child directories, that get made into their own files
- * * It could be simpler, but we also make it output a line in the console
- *   for each entry.
- ************************************************************************/
-/** @var {String[]} */
-const entries = glob.sync("resources/js/entries/**/*.js");
-const buildOutputPath = file =>
-    file.replace("resources/js/entries/", "public/js/");
-entries
-    .filter(entry => !endsWith(entry, "app.js"))
-    .forEach(file => {
-        output.title("info", "ENTRY", file);
-        mix.js(file, buildOutputPath(file));
-    });
-// We need to manually run this last as otherwise our output path breaks.
 mix.js("resources/js/entries/app.js", "public/js/app.js");
 
 /************************************************************************
@@ -87,7 +66,6 @@ mix.extract([
     "perfect-scrollbar",
     "sticky-js",
     "wnumb",
-    "datatables.net",
     "block-ui",
     "bootstrap-select",
     "flatpickr"

@@ -2,11 +2,17 @@
 
 namespace Tests\Feature\Venues;
 
+use App\Enums\Role;
 use Tests\TestCase;
 use App\Models\Venue;
+use Tests\Factories\VenueFactory;
+use App\Http\Requests\Venues\UpdateRequest;
+use App\Http\Controllers\Venues\VenuesController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-/** @group venues */
+/**
+ * @group venues
+ */
 class UpdateVenueTest extends TestCase
 {
     use RefreshDatabase;
@@ -32,10 +38,10 @@ class UpdateVenueTest extends TestCase
     /** @test */
     public function an_administrator_can_view_the_form_for_editing_a_venue()
     {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
+        $this->actAs(Role::ADMINISTRATOR);
+        $venue = VenueFactory::new()->create();
 
-        $response = $this->get(route('venues.edit', $venue));
+        $response = $this->editRequest($venue);
 
         $response->assertViewIs('venues.edit');
     }
@@ -43,10 +49,10 @@ class UpdateVenueTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_venue()
     {
-        $this->actAs('basic-user');
-        $venue = factory(Venue::class)->create();
+        $this->actAs(Role::BASIC);
+        $venue = VenueFactory::new()->create();
 
-        $response = $this->get(route('venues.edit', $venue));
+        $response = $this->editRequest($venue);
 
         $response->assertStatus(403);
     }
@@ -54,9 +60,9 @@ class UpdateVenueTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_venue()
     {
-        $venue = factory(Venue::class)->create();
+        $venue = VenueFactory::new()->create();
 
-        $response = $this->get(route('venues.edit', $venue));
+        $response = $this->editRequest($venue);
 
         $response->assertRedirect(route('login'));
     }
@@ -64,10 +70,10 @@ class UpdateVenueTest extends TestCase
     /** @test */
     public function an_administrator_can_update_a_venue()
     {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
+        $this->actAs(Role::ADMINISTRATOR);
+        $venue = VenueFactory::new()->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams());
+        $response = $this->updateRequest($venue, $this->validParams());
 
         $response->assertRedirect(route('venues.index'));
         tap(Venue::first(), function ($venue) {
@@ -81,166 +87,23 @@ class UpdateVenueTest extends TestCase
     }
 
     /** @test */
-    public function a_venue_address2_is_optional()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['address2' => '']));
-
-        $response->assertSessionHasNoErrors();
-    }
-
-    /** @test */
     public function a_basic_user_cannot_update_a_venue()
     {
-        $this->actAs('basic-user');
-        $venue = factory(Venue::class)->create();
+        $this->actAs(Role::BASIC);
+        $venue = VenueFactory::new()->create();
 
-        $response = $this->patch(route('venues.update', $venue), $this->validParams());
+        $response = $this->updateRequest($venue, $this->validParams());
 
         $response->assertStatus(403);
     }
 
     /** @test */
-    public function a_guest_cannot_update_a_venue()
+    public function update_validates_using_a_form_request()
     {
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams());
-
-        $response->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function a_venue_name_is_required()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['name' => null]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function a_venue_name_must_be_a_string()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['name' => ['not-an-string']]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function a_venue_address1_is_required()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['address1' => null]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('address1');
-    }
-
-    /** @test */
-    public function a_venue_address1_must_be_a_string()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['address1' => ['not-an-string']]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('address1');
-    }
-
-    /** @test */
-    public function a_venue_city_is_required()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['city' => null]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('city');
-    }
-
-    /** @test */
-    public function a_venue_city_must_be_a_string()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['city' => ['not-a-string']]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('city');
-    }
-
-    /** @test */
-    public function a_venue_state_is_required()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['state' => null]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('state');
-    }
-
-    /** @test */
-    public function a_venue_state_must_be_a_string()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['state' => ['not-a-string']]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('state');
-    }
-
-    /** @test */
-    public function a_venue_zip_is_required()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => null]));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('zip');
-    }
-
-    /** @test */
-    public function a_venue_zip_must_be_an_integer()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => 'not-an-integer']));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('zip');
-    }
-
-    /** @test */
-    public function a_venue_zip_must_be_five_digits_long()
-    {
-        $this->actAs('administrator');
-        $venue = factory(Venue::class)->create();
-
-        $response = $this->patch(route('venues.update', $venue), $this->validParams(['zip' => '123456']));
-
-        $response->assertStatus(302);
-        $response->assertSessionHasErrors('zip');
+        $this->assertActionUsesFormRequest(
+            VenuesController::class,
+            'update',
+            UpdateRequest::class
+        );
     }
 }
