@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Managers;
 
-use App\Models\Manager;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\ReinstateRequest;
+use App\Models\Manager;
 
 class ReinstateController extends Controller
 {
     /**
      * Reinstate a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @return \lluminate\Http\RedirectResponse
+     * @param  App\Models\Manager  $manager
+     * @param  App\Http\Requests\Managers\ReinstateRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager)
+    public function __invoke(Manager $manager, ReinstateRequest $request)
     {
-        $this->authorize('reinstate', $manager);
-
         $manager->reinstate();
 
         return redirect()->route('managers.index');

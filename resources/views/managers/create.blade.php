@@ -1,51 +1,18 @@
-@extends('layouts.app')
-
-@section('content-head')
-<!-- begin:: Content Head -->
-<div class="kt-subheader kt-grid__item" id="kt_subheader">
-    <div class="kt-subheader__main">
-        <h3 class="kt-subheader__title">Managers</h3>
-    </div>
-    <div class="kt-subheader__toolbar">
-        <a href="{{ route('managers.index') }}"
-            class="btn btn-label-brand btn-bold">
-            Back To Managers
-        </a>
-    </div>
-</div>
-
-<!-- end:: Content Head -->
-@endsection
-
-@section('content')
-<!--begin::Portlet-->
-<div class="kt-portlet">
-    <div class="kt-portlet__head">
-        <div class="kt-portlet__head-label">
-            <h3 class="kt-portlet__head-title">
-                Create Manager Form
-            </h3>
-        </div>
-    </div>
-
-    <!--begin::Form-->
-    <form class="kt-form" method="post" action="{{ route('managers.store') }}">
-        @csrf
-        <div class="kt-portlet__body">
-            <div class="kt-section kt-section--first">
-                @include('managers.partials.form')
-            </div>
-        </div>
-        <div class="kt-portlet__foot">
-            <div class="kt-form__actions">
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <button type="reset" class="btn btn-secondary">Cancel</button>
-            </div>
-        </div>
-    </form>
-
-     <!--end::Form-->
-</div>
-
-<!--end::Portlet-->
-@endsection
+<x-layouts.app>
+    <x-subheader title="Managers">
+        <x-slot name="actions">
+            <a href="{{ route('managers.index') }}" class="btn btn-label-brand btn-bold">
+                Back To Managers
+            </a>
+        </x-slot>
+    </x-subheader>
+    <x-content>
+        <x-portlet title="Create Manager Form">
+            <x-form.form class="kt-form" method="post" :action="route('managers.store')">
+                <div class="kt-portlet__body">
+                    @include('managers.partials.form')
+                </div>
+            </x-form>
+        </x-portlet>
+    </x-content>
+</x-layouts.app>

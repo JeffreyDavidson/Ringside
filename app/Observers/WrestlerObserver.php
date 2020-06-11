@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Wrestler;
 use App\Enums\WrestlerStatus;
+use App\Models\Wrestler;
 
 class WrestlerObserver
 {
@@ -15,16 +15,20 @@ class WrestlerObserver
      */
     public function saving(Wrestler $wrestler)
     {
-        if ($wrestler->is_bookable) {
-            $wrestler->status = WrestlerStatus::BOOKABLE;
-        } elseif ($wrestler->is_retired) {
+        if ($wrestler->isRetired()) {
             $wrestler->status = WrestlerStatus::RETIRED;
-        } elseif ($wrestler->is_injured) {
-            $wrestler->status =  WrestlerStatus::INJURED;
-        } elseif ($wrestler->is_suspended) {
+        } elseif ($wrestler->isInjured()) {
+            $wrestler->status = WrestlerStatus::INJURED;
+        } elseif ($wrestler->isSuspended()) {
             $wrestler->status = WrestlerStatus::SUSPENDED;
+        } elseif ($wrestler->isBookable()) {
+            $wrestler->status = WrestlerStatus::BOOKABLE;
+        } elseif ($wrestler->isReleased()) {
+            $wrestler->status = WrestlerStatus::RELEASED;
+        } elseif ($wrestler->isPendingEmployment()) {
+            $wrestler->status = WrestlerStatus::PENDING_EMPLOYMENT;
         } else {
-            $wrestler->status = WrestlerStatus::PENDING_INTRODUCTION;
+            $wrestler->status = WrestlerStatus::UNEMPLOYED;
         }
     }
 }

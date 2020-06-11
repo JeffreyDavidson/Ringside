@@ -2,25 +2,26 @@
 
 namespace App\Models;
 
+use App\Eloquent\Concerns\HasCustomRelationships;
 use App\Enums\ManagerStatus;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manager extends Model
+class Manager extends SingleRosterMember
 {
     use SoftDeletes,
-        Concerns\CanBeSuspended,
-        Concerns\CanBeInjured,
-        Concerns\CanBeRetired,
-        Concerns\CanBeEmployed;
+        HasCustomRelationships,
+        Concerns\HasFullName,
+        Concerns\CanBeStableMember,
+        Concerns\Unguarded;
 
     /**
-     * The attributes that aren't mass assignable.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    protected $guarded = [];
+    protected $casts = [
+        'status' => ManagerStatus::class,
+    ];
 
     /**
      * Get the user belonging to the manager.
@@ -33,33 +34,23 @@ class Manager extends Model
     }
 
     /**
-     * Determine if a manager is bookable.
-     *
-     * @return bool
-     */
-    public function getIsBookableAttribute()
-    {
-        return $this->is_employed && !($this->is_retired || $this->is_injured || $this->is_suspended);
-    }
-
-    /**
-     * Get the full name of the manager.
-     *
-     * @return string
-     */
-    public function getFullNameAttribute()
-    {
-        return $this->first_name . ' '. $this->last_name;
-    }
-
-    /**
-     * Scope a query to only include bookable managers.
+     * Scope a query to only include available managers.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @param  \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeBookable($query)
+    public function scopeAvailable($query)
     {
-        return $query->where('status', ManagerStatus::BOOKABLE);
+        return $query->where('status', 'available');
+    }
+
+    /**
+     * Check to see if the model is available.
+     *
+     * @return bool
+     */
+    public function isAvailable()
+    {
+        return $this->currentEmployment()->exists();
     }
 }

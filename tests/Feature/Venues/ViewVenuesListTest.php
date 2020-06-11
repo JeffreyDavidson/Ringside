@@ -2,11 +2,14 @@
 
 namespace Tests\Feature\Venues;
 
-use Tests\TestCase;
-use App\Models\Venue;
+use App\Enums\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\VenueFactory;
+use Tests\TestCase;
 
-/** @group venues */
+/**
+ * @group venues
+ */
 class ViewVenuesListTest extends TestCase
 {
     use RefreshDatabase;
@@ -17,37 +20,16 @@ class ViewVenuesListTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $mapToIdAndName = function (Venue $venue) {
-            return ['id' => $venue->id, 'name' => e($venue->name)];
-        };
 
-        $this->venues = factory(Venue::class, 3)->create()->map($mapToIdAndName);
-    }
-
-    /** @test */
-    public function a_basic_user_cannot_view_venues_page()
-    {
-        $this->actAs('basic-user');
-
-        $response = $this->get(route('venues.index'));
-
-        $response->assertStatus(403);
-    }
-
-    /** @test */
-    public function a_guest_cannot_view_venues_page()
-    {
-        $response = $this->get(route('venues.index'));
-
-        $response->assertRedirect(route('login'));
+        $this->venues = VenueFactory::new()->count(3)->create();
     }
 
     /** @test */
     public function an_super_administrator_can_view_venues_page()
     {
-        $this->actAs('super-administrator');
+        $this->actAs(Role::SUPER_ADMINISTRATOR);
 
-        $response = $this->get(route('venues.index'));
+        $response = $this->indexRequest('venues');
 
         $response->assertOk();
         $response->assertViewIs('venues.index');
@@ -56,9 +38,9 @@ class ViewVenuesListTest extends TestCase
     /** @test */
     public function an_administrator_can_view_venues_page()
     {
-        $this->actAs('administrator');
+        $this->actAs(Role::ADMINISTRATOR);
 
-        $response = $this->get(route('venues.index'));
+        $response = $this->indexRequest('venues');
 
         $response->assertOk();
         $response->assertViewIs('venues.index');
@@ -67,7 +49,7 @@ class ViewVenuesListTest extends TestCase
     /** @test */
     public function a_super_administrator_can_view_all_venues()
     {
-        $this->actAs('super-administrator');
+        $this->actAs(Role::SUPER_ADMINISTRATOR);
 
         $responseAjax = $this->ajaxJson(route('venues.index'));
 
@@ -80,8 +62,7 @@ class ViewVenuesListTest extends TestCase
     /** @test */
     public function an_administrator_can_view_all_venues()
     {
-        $this->actAs('administrator');
-        // $this->venues->first()->update(['name' => 'Test name with \\"&\' symbols']);
+        $this->actAs(Role::ADMINISTRATOR);
 
         $responseAjax = $this->ajaxJson(route('venues.index'));
 
@@ -89,5 +70,23 @@ class ViewVenuesListTest extends TestCase
             'recordsTotal' => $this->venues->count(),
             'data'         => $this->venues->toArray(),
         ]);
+    }
+
+    /** @test */
+    public function a_basic_user_cannot_view_venues_page()
+    {
+        $this->actAs(Role::BASIC);
+
+        $response = $this->indexRequest('venues');
+
+        $response->assertForbidden();
+    }
+
+    /** @test */
+    public function a_guest_cannot_view_venues_page()
+    {
+        $response = $this->indexRequest('venues');
+
+        $response->assertRedirect(route('login'));
     }
 }

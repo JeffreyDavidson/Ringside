@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Referee;
 use App\Enums\RefereeStatus;
+use App\Models\Referee;
 
 class RefereeObserver
 {
@@ -15,16 +15,18 @@ class RefereeObserver
      */
     public function saving(Referee $referee)
     {
-        if ($referee->is_bookable) {
-            $referee->status = RefereeStatus::BOOKABLE;
-        } elseif ($referee->is_retired) {
+        if ($referee->isRetired()) {
             $referee->status = RefereeStatus::RETIRED;
-        } elseif ($referee->is_injured) {
-            $referee->status =  RefereeStatus::INJURED;
-        } elseif ($referee->is_suspended) {
+        } elseif ($referee->isInjured()) {
+            $referee->status = RefereeStatus::INJURED;
+        } elseif ($referee->isSuspended()) {
             $referee->status = RefereeStatus::SUSPENDED;
+        } elseif ($referee->isBookable()) {
+            $referee->status = RefereeStatus::BOOKABLE;
+        } elseif ($referee->isPendingEmployment()) {
+            $referee->status = RefereeStatus::PENDING_EMPLOYMENT;
         } else {
-            $referee->status = RefereeStatus::PENDING_INTRODUCTION;
+            $referee->status = RefereeStatus::UNEMPLOYED;
         }
     }
 }

@@ -1,38 +1,34 @@
-@extends('layouts.app')
+<x-layouts.app>
+    <x-subheader title="Titles">
+        <x-slot name="actions">
+            <a href="{{ route('titles.create') }}" class="btn btn-label-brand btn-bold">
+                Create Titles
+            </a>
+        </x-slot>
+    </x-subheader>
+    <x-content>
+        <x-portlet title="Active Titles">
+            <div class="kt-portlet__body">
+                <livewire:titles.active-titles>
+            </div>
+        </x-portlet>
 
-@push('scripts-after')
-    <script src="{{ mix('js/titles/index.js') }}"></script>
-@endpush
+        <x-portlet title="Future Activation And Unactivated Titles">
+            <div class="kt-portlet__body">
+                <livewire:titles.future-activation-and-unactivated-titles>
+            </div>
+        </x-portlet>
 
-@section('content-head')
-<!-- begin:: Content Head -->
-<div class="kt-subheader kt-grid__item" id="kt_subheader">
-    <div class="kt-subheader__main">
-        <h3 class="kt-subheader__title">Titles</h3>
-        <span class="kt-subheader__separator kt-subheader__separator--v"></span>
-        @include('partials.search')
-        @include('titles.partials.filters')
-    </div>
-    <div class="kt-subheader__toolbar">
-        <a href="{{ route('titles.create') }}"
-            class="btn btn-label-brand btn-bold">
-            Add Title
-        </a>
-    </div>
-</div>
+        <x-portlet title="Inactive Titles">
+            <div class="kt-portlet__body">
+                <livewire:titles.inactive-titles>
+            </div>
+        </x-portlet>
 
-<!-- end:: Content Head -->
-@endsection
-
-@section('content')
-<div class="kt-portlet kt-portlet--mobile">
-    <div class="kt-portlet__body p-0">
-
-        <!--begin: Datatable -->
-        <table id="titles_table" data-table="titles.index" class="table table-hover"></table>
-
-        <!--end: Datatable -->
-    </div>
-</div>
-@endsection
-
+        <x-portlet title="Retired Titles">
+            <div class="kt-portlet__body">
+                <livewire:titles.retired-titles>
+            </div>
+        </x-portlet>
+    </x-content>
+</x-layouts.app>

@@ -18,6 +18,7 @@ class CreateTagTeamsTable extends Migration
             $table->unsignedInteger('user_id')->nullable();
             $table->string('name');
             $table->string('signature_move')->nullable();
+            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });

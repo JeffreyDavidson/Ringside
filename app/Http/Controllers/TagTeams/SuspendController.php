@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\TagTeams;
 
-use App\Models\TagTeam;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TagTeams\SuspendRequest;
+use App\Models\TagTeam;
 
 class SuspendController extends Controller
 {
     /**
      * Suspend a tag team.
      *
-     * @param  \App\Models\TagTeam  $tagteam
+     * @param  App\Models\TagTeam  $tagTeam
+     * @param  App\Http\Requests\TagTeams\SuspendRequest  $request
      * @return \lluminate\Http\RedirectResponse
      */
-    public function __invoke(TagTeam $tagteam)
+    public function __invoke(TagTeam $tagTeam, SuspendRequest $request)
     {
-        $this->authorize('suspend', $tagteam);
+        $tagTeam->suspend();
 
-        $tagteam->suspend();
-
-        return redirect()->route('tagteams.index');
+        return redirect()->route('tag-teams.index');
     }
 }

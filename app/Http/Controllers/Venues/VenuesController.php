@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Venues;
 
-use App\Models\Venue;
-use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreVenueRequest;
-use App\Http\Requests\UpdateVenueRequest;
-use Illuminate\Database\Eloquent\Builder;
+use App\Http\Requests\Venues\StoreRequest;
+use App\Http\Requests\Venues\UpdateRequest;
+use App\Models\Venue;
+use App\ViewModels\VenueViewModel;
 
 class VenuesController extends Controller
 {
@@ -17,20 +15,9 @@ class VenuesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, DataTables $table)
+    public function index()
     {
         $this->authorize('viewList', Venue::class);
-
-        if ($request->ajax()) {
-            $query = Venue::query();
-
-            return $table->eloquent($query)
-                ->filterColumn('address', function (Builder $query, $keyword) {
-                    $query->whereRaw('CONCAT(venues.address1, venues.address2)  LIKE ?', ["%{$keyword}%"]);
-                })
-                ->addColumn('action', 'venues.partials.action-cell')
-                ->toJson();
-        }
 
         return view('venues.index');
     }
@@ -40,22 +27,22 @@ class VenuesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Venue $venue)
     {
         $this->authorize('create', Venue::class);
 
-        return view('venues.create');
+        return view('venues.create', compact('venue'));
     }
 
     /**
      * Create a new venue.
      *
-     * @param  \App\Http\Requests\StoreVenueRequest  $request
+     * @param  \App\Http\Requests\Venues\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreVenueRequest $request)
+    public function store(StoreRequest $request)
     {
-        Venue::create($request->all());
+        Venue::create($request->validated());
 
         return redirect()->route('venues.index');
     }
@@ -89,11 +76,11 @@ class VenuesController extends Controller
     /**
      * Update a given venue.
      *
-     * @param  \App\Http\Requests\UpdateVenueRequest  $request
+     * @param  \App\Http\Requests\Venues\UpdateRequest  $request
      * @param  \App\Models\Venue  $venue
      * @return \lluminate\Http\RedirectResponse
      */
-    public function update(UpdateVenueRequest $request, Venue $venue)
+    public function update(UpdateRequest $request, Venue $venue)
     {
         $venue->update($request->all());
 

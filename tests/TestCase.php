@@ -2,13 +2,17 @@
 
 namespace Tests;
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\TestResponse;
+use App\Enums\Role;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Testing\TestResponse;
+use JMac\Testing\Traits\AdditionalAssertions;
+use Tests\Factories\UserFactory;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    use CreatesApplication,
+        AdditionalAssertions,
+        Traits\HasRequests;
 
     /**
      * Setup the test environment.
@@ -24,16 +28,24 @@ abstract class TestCase extends BaseTestCase
         });
     }
 
-    public function actAs($states = [], $attributes = [])
+    public function actAs($role = Role::BASIC, $attributes = [])
     {
-        $user = ($states instanceof User) ? $states : factory(User::class)->states($states)->create($attributes);
+        $user = UserFactory::new()->withRole($role)->create($attributes);
+
         $this->actingAs($user);
 
         return $user;
     }
 
-    protected function ajaxJson($url)
+    /**
+     * Assert that the given class uses the provided trait name.
+     *
+     * @param  string  $trait
+     * @param  mixed   $class
+     * @return void
+     */
+    public function assertUsesTrait($trait, $class)
     {
-        return $this->getJson($url, ['X-Requested-With' => 'XMLHttpRequest']);
+        $this->assertContains($trait, class_uses($class));
     }
 }

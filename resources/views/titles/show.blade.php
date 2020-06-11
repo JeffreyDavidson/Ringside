@@ -1,87 +1,52 @@
-@extends('layouts.app')
-
-@section('content-head')
-<!-- begin:: Content Head -->
-<div class="kt-subheader kt-grid__item" id="kt_subheader">
-    <div class="kt-subheader__main">
-        <h3 class="kt-subheader__title">{{ $title->name }}</h3>
-    </div>
-    <div class="kt-subheader__toolbar">
-        <a href="{{ route('titles.index') }}"
-            class="btn btn-label-brand btn-bold">
-            Back To Titles
-        </a>
-    </div>
-</div>
-
-<!-- end:: Content Head -->
-@endsection
-
-@section('content')
-<!--Begin::App-->
-<div class="kt-grid kt-grid--desktop kt-grid--ver kt-grid--ver-desktop kt-app">
-
-    <!--Begin:: App Aside Mobile Toggle-->
-    <button class="kt-app__aside-close" id="kt_user_profile_aside_close">
-        <i class="la la-close"></i>
-    </button>
-
-    <!--End:: App Aside Mobile Toggle-->
-
-    <!--Begin:: App Aside-->
-    <div class="kt-grid__item kt-app__toggle kt-app__aside" id="kt_user_profile_aside">
-
-        <!--begin:: Widgets/Applications/User/Profile1-->
-        <div class="kt-portlet kt-portlet--height-fluid-">
-            <div class="kt-portlet__head  kt-portlet__head--noborder">
-                <div class="kt-portlet__head-label">
-                    <h3 class="kt-portlet__head-title">
-                    </h3>
-                </div>
+<x-layouts.app>
+    <x-subheader :title="$title->name">
+        <x-slot name="actions">
+            <a href="{{ route('titles.index') }}" class="btn btn-label-brand btn-bold">
+                Back To Titles
+            </a>
+        </x-slot>
+    </x-subheader>
+    <x-content>
+        @empty($title->activated_at)
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning!</strong>&nbsp;This title is not activated!
             </div>
-            <div class="kt-portlet__body kt-portlet__body--fit-y">
-
-                <!--begin::Widget -->
-                <div class="kt-widget kt-widget--user-profile-1">
-                    <div class="kt-widget__head">
-                        <div class="kt-widget__content">
-                            <div class="kt-widget__section">
-                                <a href="#" class="kt-widget__username">
-                                    {{ $title->name }}
-                                </a>
+        @endempty
+        <div class="kt-grid kt-grid--desktop kt-grid--ver kt-grid--ver-desktop kt-app">
+            <div id="kt_profile_aside" class="kt-grid__item kt-app__toggle kt-app__aside">
+                <x-portlet title="Information" headBorder="false">
+                    <div class="kt-portlet__head kt-portlet__head--noborder">
+                        <div class="kt-portlet__head-label">
+                            <h3 class="kt-portlet__head-title"></h3>
+                            <div class="kt-portlet__head-toolbar"></div>
+                        </div>
+                    </div>
+                    <div class="kt-portlet__body kt-portlet__body--fit-y">
+                        <div class="kt-widget kt-widget--user-profile-1">
+                            <div class="kt-widget__head">
+                                <div class="kt-widget__media">
+                                    <img src="https://via.placeholder.com/100" alt="image">
+                                </div>
+                                <div class="kt-widget__content">
+                                    <div class="kt-widget__section">
+                                        <span class="kt-widget__username">{{ $title->name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kt-widget__body">
+                                <div class="kt-widget__content">
+                                    <div class="kt-widget__info">
+                                        @isset($title->activated_at)
+                                            <span class="kt-widget__label">Date Introduced:</span>
+                                            <span class="kt-widget__data">{{ $title->activated_at->toDateString() }}</span>
+                                        @endisset
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="kt-widget__body">
-                        <div class="kt-widget__content">
-                            <div class="kt-widget__info">
-                                <span class="kt-widget__label">Date Introduced:</span>
-                                <span class="kt-widget__data">{!! $title->formatted_introduced_at !!}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!--end::Widget -->
+                </x-portlet>
             </div>
         </div>
-
-        <!--end:: Widgets/Applications/User/Profile1-->
-    </div>
-
-    <!--End:: App Aside-->
-
-    <!--Begin:: App Content-->
-    <div class="kt-grid__item kt-grid__item--fluid kt-app__content">
-
-    </div>
-
-    <!--End:: App Content-->
-</div>
-
-<!--End::App-->
-
-
-
-@endsection
-
+    </x-content>
+</x-layouts.app>

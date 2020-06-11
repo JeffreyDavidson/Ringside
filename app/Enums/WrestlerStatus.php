@@ -6,16 +6,22 @@ use MadWeb\Enum\Enum;
 
 /**
  * @method static WrestlerStatus BOOKABLE()
- * @method static WrestlerStatus PENDING_INTRODUCTION()
  * @method static WrestlerStatus INJURED()
- * @method static WrestlerStatus SUSPENDED()
+ * @method static WrestlerStatus PENDING_EMPLOYMENT()
+ * @method static WrestlerStatus RELEASED()
  * @method static WrestlerStatus RETIRED()
+ * @method static WrestlerStatus SUSPENDED()
+ * @method static WrestlerStatus UNEMPLOYED()
  */
 final class WrestlerStatus extends Enum
 {
+    const __default = self::UNEMPLOYED;
+
     const BOOKABLE = 'bookable';
-    const PENDING_INTRODUCTION = 'pending-introduction';
     const INJURED = 'injured';
-    const SUSPENDED = 'suspended';
+    const PENDING_EMPLOYMENT = 'pending-employment';
+    const RELEASED = 'released';
     const RETIRED = 'retired';
+    const SUSPENDED = 'suspended';
+    const UNEMPLOYED = 'unemployed';
 }

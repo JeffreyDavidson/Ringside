@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Wrestlers;
 
-use App\Models\Wrestler;
 use App\Http\Controllers\Controller;
+use App\Models\Wrestler;
 
 class RestoreController extends Controller
 {

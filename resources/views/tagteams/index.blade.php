@@ -1,38 +1,34 @@
-@extends('layouts.app')
+<x-layouts.app>
+    <x-subheader title="Tag Teams">
+        <x-slot name="actions">
+            <a href="{{ route('tag-teams.create') }}" class="btn btn-label-brand btn-bold">
+                Create Tag Teams
+            </a>
+        </x-slot>
+    </x-subheader>
+    <x-content>
+        <x-portlet title="Employed Tag Teams">
+            <div class="kt-portlet__body">
+                <livewire:tag-teams.employed-tag-teams>
+            </div>
+        </x-portlet>
 
-@push('scripts-after')
-    <script src="{{ mix('js/tagteams/index.js') }}"></script>
-@endpush
+        <x-portlet title="Pending and Unemployed Tag Teams">
+            <div class="kt-portlet__body">
+                <livewire:tag-teams.pending-and-unemployed-tag-teams>
+            </div>
+        </x-portlet>
 
-@section('content-head')
-<!-- begin:: Content Head -->
-<div class="kt-subheader kt-grid__item" id="kt_subheader">
-    <div class="kt-subheader__main">
-        <h3 class="kt-subheader__title">Tag Teams</h3>
-        <span class="kt-subheader__separator kt-subheader__separator--v"></span>
-        @include('partials.search')
-        @include('tagteams.partials.filters')
-    </div>
-    <div class="kt-subheader__toolbar">
-        <a href="{{ route('tagteams.create') }}"
-            class="btn btn-label-brand btn-bold">
-            Add Tag Team
-        </a>
-    </div>
-</div>
+        <x-portlet title="Released Tag Teams">
+            <div class="kt-portlet__body">
+                <livewire:tag-teams.released-tag-teams>
+            </div>
+        </x-portlet>
 
-<!-- end:: Content Head -->
-@endsection
-
-@section('content')
-<div class="kt-portlet kt-portlet--mobile">
-    <div class="kt-portlet__body p-0">
-
-        <!--begin: Datatable -->
-        <table id="tagteams_table" data-table="tagteams.index" class="table table-hover"></table>
-
-        <!--end: Datatable -->
-    </div>
-</div>
-@endsection
-
+        <x-portlet title="Retired Tag Teams">
+            <div class="kt-portlet__body">
+                <livewire:tag-teams.retired-tag-teams>
+            </div>
+        </x-portlet>
+    </x-content>
+</x-layouts.app>

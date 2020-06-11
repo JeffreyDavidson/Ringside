@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Referee;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RefereePolicy
@@ -13,7 +12,7 @@ class RefereePolicy
     /**
      * Determine whether the user can create referees.
      *
-     * @param  \App\Models\User  $user
+     * @param  App\Models\User  $user
      * @return bool
      */
     public function create(User $user)
@@ -24,11 +23,10 @@ class RefereePolicy
     /**
      * Determine whether the user can update a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function update(User $user, Referee $referee)
+    public function update(User $user)
     {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
@@ -36,8 +34,7 @@ class RefereePolicy
     /**
      * Determine whether the user can delete a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
     public function delete(User $user)
@@ -46,9 +43,9 @@ class RefereePolicy
     }
 
     /**
-     * Determine whether the user can restore a deleted referee.
+     * Determine whether the user can restore a referee.
      *
-     * @param  \App\Models\User  $user
+     * @param  App\Models\User  $user
      * @return bool
      */
     public function restore(User $user)
@@ -59,87 +56,84 @@ class RefereePolicy
     /**
      * Determine whether the user can retire a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function retire(User $user, Referee $referee)
+    public function retire(User $user)
     {
-        if (!$referee->is_employed || $referee->is_retired) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can unretire a retired referee.
+     * Determine whether the user can unretire a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function unretire(User $user, Referee $referee)
+    public function unretire(User $user)
     {
-        if (!$referee->is_retired) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
      * Determine whether the user can injure a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function injure(User $user, Referee $referee)
+    public function injure(User $user)
     {
-        if (!$referee->is_employed || !$referee->is_bookable || $referee->is_injured) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can recover an injured referee.
+     * Determine whether the user can recover a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function recover(User $user, Referee $referee)
+    public function clearFromInjury(User $user)
     {
-        if (!$referee->is_employed || !$referee->is_injured) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can activate a referee that is pending introduction.
+     * Determine whether the user can suspend a referee.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function activate(User $user, Referee $referee)
+    public function suspend(User $user)
     {
-        if ($referee->is_employed) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
     /**
-     * Determine whether the user can view list of referees.
+     * Determine whether the user can reinstate a referee.
      *
-     * @param  \App\Models\User  $user
+     * @param  App\Models\User  $user
+     * @return bool
+     */
+    public function reinstate(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can employ a referee.
+     *
+     * @param  App\Models\User  $user
+     * @return bool
+     */
+    public function employ(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can view a list of referees.
+     *
+     * @param  App\Models\User  $user
      * @return bool
      */
     public function viewList(User $user)
@@ -149,12 +143,11 @@ class RefereePolicy
 
     /**
      * Determine whether the user can view a profile for a referee.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Referee  $referee
+     *ååå
+     * @param  App\Models\User  $user
      * @return bool
      */
-    public function view(User $user, Referee $referee)
+    public function view(User $user)
     {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }

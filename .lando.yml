@@ -5,7 +5,7 @@ services:
     portforward: 3306
 config:
   webroot: public
-  php: '7.2'
+  php: '7.4'
   database: mysql:5.7
   cache: redis
   xdebug: true

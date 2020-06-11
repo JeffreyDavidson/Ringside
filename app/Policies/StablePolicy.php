@@ -46,7 +46,7 @@ class StablePolicy
     /**
      * Determine whether the user can restore a deleted stable.
      *
-     * @param  \App\Models\User  $user
+     * @param  App\Models\User  $user
      * @return bool
      */
     public function restore(User $user)
@@ -55,13 +55,13 @@ class StablePolicy
     }
 
     /**
-     * Determine whether the user can activate a stable.
+     * Determine whether the user can employ a stable that is pending activation.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Stable  $stable
+     * @param  App\Models\User  $user
+     * @param  App\Models\Stable  $stable
      * @return bool
      */
-    public function activate(User $user, Stable $stable)
+    public function employ(User $user, Stable $stable)
     {
         if (!($user->isSuperAdministrator() || $user->isAdministrator())) {
             return false;
@@ -142,7 +142,7 @@ class StablePolicy
     /**
      * Determine whether the user can view a list of stables.
      *
-     * @param  \App\Models\User  $user
+     * @param  App\Models\User  $user
      * @return bool
      */
     public function viewList(User $user)
@@ -153,8 +153,8 @@ class StablePolicy
     /**
      * Determine whether the user can view a profile for a stable.
      *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Stable  $stable
+     * @param  App\Models\User  $user
+     * @param  App\Models\Stable  $stable
      * @return bool
      */
     public function view(User $user, Stable $stable)

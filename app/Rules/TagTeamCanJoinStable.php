@@ -24,25 +24,25 @@ class TagTeamCanJoinStable implements Rule
      */
     public function passes($attribute, $value)
     {
-        $tagteam = TagTeam::find($value);
+        $tagTeam = TagTeam::find($value);
 
-        if (! $tagteam) {
+        if (! $tagTeam) {
             return false;
         }
 
-        if (!data_get($tagteam, 'employment.started_at')) {
+        if (!data_get($tagTeam, 'currentEmployment.started_at')) {
             return false;
         }
 
-        if ($tagteam->employment->started_at->isFuture()) {
+        if ($tagTeam->currentEmployment->started_at->isFuture()) {
             return false;
         }
 
-        if (!$tagteam->is_bookable) {
+        if (!$tagTeam->is_bookable) {
             return false;
         }
 
-        if ($tagteam->stables()->bookable()->whereKeyNot($this->stable->id)->exists()) {
+        if ($tagTeam->stables()->bookable()->whereKeyNot($this->stable->id)->exists()) {
             return false;
         }
 

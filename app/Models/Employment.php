@@ -6,12 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employment extends Model
 {
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [];
+    use Concerns\Unguarded;
 
     /**
      * The attributes that should be mutated to dates.
@@ -21,19 +16,23 @@ class Employment extends Model
     protected $dates = ['started_at', 'ended_at'];
 
     /**
-     * The relationships that should be touched on save.
+     * Get the owning employed model.
      *
-     * @var array
-     */
-    protected $touches = ['employable'];
-
-    /**
-     * Undocumented function
-     *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
     public function employable()
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Retrieve an employment started before a given date.
+     *
+     * @param  string $date
+     * @return boolean
+     */
+    public function startedBefore($date)
+    {
+        return $this->started_at->lte($date);
     }
 }

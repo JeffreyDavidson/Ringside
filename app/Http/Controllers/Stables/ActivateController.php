@@ -10,7 +10,7 @@ class ActivateController extends Controller
     /**
      * Activate a stable.
      *
-     * @param  \App\Models\Stable  $stable
+     * @param  App\Models\Stable  $stable
      * @return \lluminate\Http\RedirectResponse
      */
     public function __invoke(Stable $stable)

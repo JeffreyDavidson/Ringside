@@ -2,41 +2,22 @@
 
 namespace App\Http\Controllers\Stables;
 
-use App\Models\Stable;
-use Illuminate\Http\Request;
-use App\Filters\StableFilters;
-use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreStableRequest;
-use App\Http\Requests\UpdateStableRequest;
+use App\Http\Requests\Stables\StoreRequest;
+use App\Http\Requests\Stables\UpdateRequest;
+use App\Models\Stable;
+use App\ViewModels\StableViewModel;
 
 class StablesController extends Controller
 {
     /**
      * View a list of stables.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Yajra\DataTables\DataTables  $table
      * @return \Illuminate\View\View
      */
-    public function index(Request $request, DataTables $table, StableFilters $requestFilter)
+    public function index()
     {
         $this->authorize('viewList', Stable::class);
-
-        if ($request->ajax()) {
-            $query = Stable::query();
-            $requestFilter->apply($query);
-
-            return $table->eloquent($query)
-                ->addColumn('action', 'stables.partials.action-cell')
-                ->editColumn('started_at', function (Stable $stable) {
-                    return $stable->employment->started_at ?? null;
-                })
-                ->filterColumn('id', function ($query, $keyword) {
-                    $query->where($query->qualifyColumn('id'), $keyword);
-                })
-                ->toJson();
-        }
 
         return view('stables.index');
     }
@@ -50,16 +31,16 @@ class StablesController extends Controller
     {
         $this->authorize('create', Stable::class);
 
-        return view('stables.create');
+        return view('stables.create', new StableViewModel());
     }
 
     /**
      * Create a new stable.
      *
-     * @param  \App\Http\Requests\StoreStableRequest  $request
+     * @param  App\Http\Requests\StoreStableRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreStableRequest $request)
+    public function store(StoreRequest $request)
     {
         $stable = Stable::create($request->except(['wrestlers', 'tagteams', 'started_at']));
 
@@ -81,7 +62,7 @@ class StablesController extends Controller
     /**
      * Show the profile of a tag team.
      *
-     * @param  \App\Models\Stable  $stable
+     * @param  App\Models\Stable  $stable
      * @return \Illuminate\Http\Response
      */
     public function show(Stable $stable)
@@ -94,31 +75,31 @@ class StablesController extends Controller
     /**
      * Show the form for editing a stable.
      *
-     * @param  \App\Models\Stable  $stable
+     * @param  App\Models\Stable  $stable
      * @return \lluminate\Http\Response
      */
     public function edit(Stable $stable)
     {
         $this->authorize('update', $stable);
 
-        return view('stables.edit', compact('stable'));
+        return view('stables.edit', new StableViewModel($stable));
     }
 
     /**
      * Update a given stable.
      *
-     * @param  \App\Http\Requests\UpdateStableRequest  $request
-     * @param  \App\Models\Stable  $stable
+     * @param  App\Http\Requests\UpdateStableRequest  $request
+     * @param  App\Models\Stable  $stable
      * @return \lluminate\Http\RedirectResponse
      */
-    public function update(UpdateStableRequest $request, Stable $stable)
+    public function update(UpdateRequest $request, Stable $stable)
     {
         $stable->update($request->except('wrestlers', 'tagteams', 'started_at'));
 
         if ($request->filled('started_at')) {
-            if ($stable->employment && $stable->employment->started_at != $request->input('started_at')) {
-                $stable->employment()->update($request->only('started_at'));
-            } elseif (!$stable->employment) {
+            if ($stable->currentEmployment && $stable->currentEmployment->started_at != $request->input('started_at')) {
+                $stable->currentEmployment()->update($request->only('started_at'));
+            } elseif (!$stable->currentEmployment) {
                 $stable->employments()->create($request->only('started_at'));
             }
         }

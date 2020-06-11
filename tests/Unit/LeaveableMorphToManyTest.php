@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Eloquent\Relationships;
+namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Models\Stable;
@@ -12,62 +12,97 @@ class LeaveableMorphToManyTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function wrestlers_that_are_attached_to_a_stable_are_in_the_stable()
+    public function a_newly_attached_model_is_in_current_and_history()
     {
-        $wrestlersToAddToStable = factory(Wrestler::class, 3)->states('bookable')->create();
+        $wrestler = factory(Wrestler::class)->states('bookable')->create();
         $stable = factory(Stable::class)->create();
 
-        $stable->wrestlerHistory()->attach($wrestlersToAddToStable->modelKeys());
+        $stable->wrestlerHistory()->attach($wrestler->getKey());
 
-        $this->assertCount(3, $stable->wrestlerHistory);
-        $this->assertCount(3, $stable->currentWrestlers);
-    }
-
-    /** @test */
-    public function new_wrestlers_added_to_a_stable_are_in_the_stable()
-    {
-        $wrestlersToAddToStable = factory(Wrestler::class, 3)->states('bookable')->create();
-        $stable = factory(Stable::class)->create();
-        $stable->wrestlerHistory()->attach($wrestlersToAddToStable->modelKeys());
-
-        $onlyStableWrestler = factory(Wrestler::class)->states('bookable')->create();
-
-        $stable->wrestlerHistory()->sync($onlyStableWrestler->getKey());
-
-        $this->assertCount(4, $stable->wrestlerHistory);
+        $this->assertCount(1, $stable->wrestlerHistory);
         $this->assertCount(1, $stable->currentWrestlers);
     }
 
     /** @test */
-    public function new_wrestlers_added_to_a_stable_are_only_wrestlers_in_the_stable()
+    public function a_detached_model_is_in_history_only()
     {
-        $wrestlers = factory(Wrestler::class, 3)->states('bookable')->create();
+        $wrestler = factory(Wrestler::class)->states('bookable')->create();
         $stable = factory(Stable::class)->create();
-        $stable->wrestlerHistory()->attach($wrestlers->modelKeys());
 
-        $newStableWrestler = factory(Wrestler::class)->states('bookable')->create(['name' => 'Kid Wonder']);
-        $wrestlers->push($newStableWrestler);
+        $stable->wrestlerHistory()->attach($wrestler->getKey());
+        $stable->wrestlerHistory()->detach($wrestler->getKey());
 
-        $stable->wrestlerHistory()->sync($wrestlers->modelKeys());
-
-        tap($stable->fresh(), function ($stable) {
-            $this->assertCount(4, $stable->wrestlerHistory);
-            $this->assertCount(4, $stable->currentWrestlers);
-        });
+        $this->assertCount(1, $stable->wrestlerHistory);
+        $this->assertCount(0, $stable->currentWrestlers);
     }
 
     /** @test */
-    public function a_wrestler_removed_from_a_stable_is_not_current()
+    public function a_reattached_model_is_in_current_and_history()
     {
-        $wrestlers = factory(Wrestler::class, 3)->states('bookable')->create();
+        $wrestler = factory(Wrestler::class)->states('bookable')->create();
         $stable = factory(Stable::class)->create();
-        $stable->wrestlerHistory()->attach($wrestlers->modelKeys());
 
-        $stable->wrestlerHistory()->detach($wrestlers->first()->getKey());
+        $stable->wrestlerHistory()->attach($wrestler->getKey());
+        $stable->wrestlerHistory()->detach($wrestler->getKey());
+        $stable->wrestlerHistory()->attach($wrestler->getKey());
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertCount(3, $stable->wrestlerHistory);
-            $this->assertCount(2, $stable->currentWrestlers);
-        });
+        $this->assertCount(2, $stable->wrestlerHistory);
+        $this->assertCount(1, $stable->currentWrestlers);
     }
+
+    /** @test */
+    public function attaching_a_new_model_does_not_affect_other_models()
+    {
+        $stable = factory(Stable::class)->create();
+        $oldWrestler = factory(Wrestler::class)->states('bookable')->create();
+        $stable->wrestlerHistory()->attach($oldWrestler->getKey());
+
+        $newWrestler = factory(Wrestler::class)->states('bookable')->create();
+        $stable->wrestlerHistory()->attach($newWrestler->getKey());
+
+        $this->assertCount(2, $stable->wrestlerHistory);
+        $this->assertCount(2, $stable->currentWrestlers);
+    }
+
+    /** @test */
+    public function detaching_a_model_does_not_affect_other_models()
+    {
+        $stable = factory(Stable::class)->create();
+        $wrestlerA = factory(Wrestler::class)->states('bookable')->create();
+        $wrestlerB = factory(Wrestler::class)->states('bookable')->create();
+        $stable->wrestlerHistory()->attach($wrestlerA->getKey());
+        $stable->wrestlerHistory()->attach($wrestlerB->getKey());
+
+        $stable->wrestlerHistory()->detach($wrestlerA->getKey());
+
+        $this->assertCount(2, $stable->wrestlerHistory);
+        $this->assertCount(1, $stable->currentWrestlers);
+    }
+
+    /** @test */
+    public function syncing_the_relationship_attaches_new_models()
+    {
+        $stable = factory(Stable::class)->create();
+        $newWrestler = factory(Wrestler::class)->states('bookable')->create();
+
+        $stable->wrestlerHistory()->sync([$newWrestler->id]);
+
+        $this->assertCount(1, $stable->wrestlerHistory);
+        $this->assertCount(1, $stable->currentWrestlers);
+    }
+
+    /** @test */
+    public function syncing_the_relationship_detaches_missing_models()
+    {
+        $wrestler = factory(Wrestler::class)->states('bookable')->create();
+        $stable = factory(Stable::class)->create();
+        $stable->wrestlerHistory()->attach($wrestler->getKey());
+        $onlyStableWrestler = factory(Wrestler::class)->states('bookable')->create();
+
+        $stable->wrestlerHistory()->sync($onlyStableWrestler->getKey());
+
+        $this->assertCount(2, $stable->wrestlerHistory);
+        $this->assertCount(1, $stable->currentWrestlers);
+    }
+
 }
