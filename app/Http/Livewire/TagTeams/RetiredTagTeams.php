@@ -14,8 +14,15 @@ class RetiredTagTeams extends Component
 
     public function render()
     {
+        $retiredTagTeams = TagTeam::query()
+            ->retired()
+            ->withCurrentRetiredAtDate()
+            ->orderByCurrentRetiredAtDate()
+            ->orderBy('name')
+            ->paginate($this->perPage);
+
         return view('livewire.tagteams.retired-tagteams', [
-            'retiredTagTeams' => TagTeam::retired()->withRetiredAtDate()->paginate($this->perPage)
+            'retiredTagTeams' => $retiredTagTeams
         ]);
     }
 }

@@ -13,18 +13,11 @@ class TagTeam extends Model
     use SoftDeletes,
         HasCachedAttributes,
         HasCustomRelationships,
-        Concerns\CanBeRetired,
-        Concerns\CanBeSuspended,
-        Concerns\CanBeEmployed,
-        Concerns\CanBeBooked,
+        // Concerns\CanBeRetired,
+        // Concerns\CanBeSuspended,
+        // Concerns\CanBeEmployed,
+        // Concerns\CanBeBooked,
         Concerns\Unguarded;
-
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [];
 
     /**
      * The attributes that should be cast to native types.
@@ -233,6 +226,17 @@ class TagTeam extends Model
     }
 
     /**
+     * Get the current suspension of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function currentSuspension()
+    {
+        return $this->morphOne(Suspension::class, 'suspendable')
+                    ->whereNull('ended_at');
+    }
+
+    /**
      * Determine if the model can be reinstated.
      *
      * @return bool
@@ -320,5 +324,233 @@ class TagTeam extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Get all of the employments of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function employments()
+    {
+        return $this->morphMany(Employment::class, 'employable');
+    }
+
+    /**
+     * Scope a query to only include employed models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeEmployed($query)
+    {
+        return $query->whereHas('currentEmployment')
+                    ->whereDoesntHave('currentSuspension');
+    }
+
+    /**
+     * Get the current employment of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function currentEmployment()
+    {
+        return $this->morphOne(Employment::class, 'employable')
+                    ->where('started_at', '<=', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Get the future employment of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function futureEmployment()
+    {
+        return $this->morphOne(Employment::class, 'employable')
+                    ->where('started_at', '>', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Get the previous employments of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function previousEmployments()
+    {
+        return $this->employments()
+                    ->whereNotNull('ended_at');
+    }
+
+    /**
+     * Get the previous employment of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function previousEmployment()
+    {
+        return $this->previousEmployments()
+                    ->latest('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Scope a query to only include pending employment models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopePendingEmployment($query)
+    {
+        return $query->whereHas('futureEmployment');
+    }
+
+    /**
+     * Scope a query to only include released models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeReleased($query)
+    {
+        return $query->whereHas('previousEmployment')
+                    ->whereDoesntHave('currentEmployment')
+                    ->whereDoesntHave('currentRetirement');
+    }
+
+    /**
+     * Scope a query to only include unemployed models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeUnemployed($query)
+    {
+        return $query->whereDoesntHave('currentEmployment');
+    }
+
+    /**
+     * Scope a query to only include unemployed models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithFirstEmployedAtDate($query)
+    {
+        return $query->addSelect(['first_employed_at' => Employment::select('started_at')
+            ->whereColumn('employable_id', $query->qualifyColumn('id'))
+            ->where('employable_type', $this->getMorphClass())
+            ->orderBy('started_at', 'desc')
+            ->limit(1)
+        ])->withCasts(['first_employed_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the models first activation date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByFirstEmployedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(first_employed_at) $direction");
+    }
+
+    /**
+     * Scope a query to only include released models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithReleasedAtDate($query)
+    {
+        return $query->addSelect(['released_at' => Employment::select('ended_at')
+            ->whereColumn('employable_id', $this->getTable().'.id')
+            ->where('employable_type', $this->getMorphClass())
+            ->orderBy('ended_at', 'desc')
+            ->limit(1)
+        ])->withCasts(['released_at' => 'datetime']);
+    }
+
+
+    /**
+     * Get the current retirement of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function currentRetirement()
+    {
+        return $this->morphOne(Retirement::class, 'retiree')
+                    ->where('started_at', '<=', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Scope a query to only include retired models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeRetired($query)
+    {
+        return $this->whereHas('currentRetirement');
+    }
+
+    /**
+     * Scope a query to only include unemployed models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithCurrentRetiredAtDate($query)
+    {
+        return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
+            ->whereColumn('retiree_id', $this->getTable().'.id')
+            ->where('retiree_type', $this->getMorphClass())
+            ->oldest('started_at')
+            ->limit(1)
+        ])->withCasts(['current_retired_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the models current retirement date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_retired_at) $direction");
+    }
+
+    /**
+     * Scope a query to only include suspended models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSuspended($query)
+    {
+        return $this->whereHas('currentSuspension');
+    }
+
+    /**
+     * Scope a query to include current suspended at dates.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithCurrentSuspendedAtDate($query)
+    {
+        return $query->addSelect(['current_suspended_at' => Suspension::select('started_at')
+            ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
+            ->where('suspendable_type', $this->getMorphClass())
+            ->orderBy('started_at', 'desc')
+            ->limit(1)
+        ])->withCasts(['current_suspended_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the models current suspension date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_suspended_at) $direction");
     }
 }

@@ -12,12 +12,12 @@
                 <td>{{ $referee->full_name }}</td>
                 <td>{{ $referee->released_at->toDateString() }}</td>
                 <td>
-                    @include('referees.partials.action-cell', [
-                        'referee' => $referee,
-                        'actions' => collect([
-                            'employ'
-                        ])
-                    ])
+                    <x-actions-dropdown>
+                        <x-buttons.view :route="route('referees.show', $referee)" />
+                        <x-buttons.edit :route="route('referees.edit', $referee)" />
+                        <x-buttons.delete :route="route('referees.destroy', $referee)" />
+                        <x-buttons.employ :route="route('referees.employ', $referee)" />
+                    </x-actions-dropdown>
                 </td>
             </tr>
         @empty

@@ -13,6 +13,12 @@
             </div>
         </x-portlet>
 
+        <x-portlet title="Future Activation And Unactivated Stables">
+            <div class="kt-portlet__body">
+                <livewire:stables.future-activation-and-unactivated-stables>
+            </div>
+        </x-portlet>
+
         <x-portlet title="Inactive Stables">
             <div class="kt-portlet__body">
                 <livewire:stables.inactive-stables>

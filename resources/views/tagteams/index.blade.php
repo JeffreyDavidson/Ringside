@@ -19,6 +19,12 @@
             </div>
         </x-portlet>
 
+        <x-portlet title="Suspended Tag Teams">
+            <div class="kt-portlet__body">
+                <livewire:tag-teams.suspended-tag-teams>
+            </div>
+        </x-portlet>
+
         <x-portlet title="Released Tag Teams">
             <div class="kt-portlet__body">
                 <livewire:tag-teams.released-tag-teams>
