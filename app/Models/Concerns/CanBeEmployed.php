@@ -84,9 +84,7 @@ trait CanBeEmployed
      */
     public function scopePendingEmployment($query)
     {
-        return $query->whereHas('futureEmployment')
-            ->with('employments')
-            ->withEmployedAtDate();
+        return $query->whereHas('futureEmployment');
     }
 
     /**
@@ -97,8 +95,8 @@ trait CanBeEmployed
     public function scopeEmployed($query)
     {
         return $query->whereHas('currentEmployment')
-            ->with('employments')
-            ->withEmployedAtDate();
+                    ->whereDoesntHave('currentSuspension')
+                    ->whereDoesntHave('currentInjury');
     }
 
     /**
@@ -120,7 +118,7 @@ trait CanBeEmployed
      */
     public function scopeUnemployed($query)
     {
-        return $query->whereDoesntHave('employments');
+        return $query->whereDoesntHave('currentEmployment');
     }
 
     /**
@@ -128,18 +126,38 @@ trait CanBeEmployed
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopeWithEmployedAtDate($query)
+    public function scopeWithFirstEmployedAtDate($query)
     {
-        return $query->addSelect(['employed_at' => Employment::select('started_at')
-            ->whereColumn('employable_id', $this->getTable().'.id')
+        return $query->addSelect(['first_employed_at' => Employment::select('started_at')
+            ->whereColumn('employable_id', $query->qualifyColumn('id'))
             ->where('employable_type', $this->getMorphClass())
             ->orderBy('started_at', 'desc')
             ->limit(1)
-        ])->withCasts(['employed_at' => 'datetime']);
+        ])->withCasts(['first_employed_at' => 'datetime']);
     }
 
     /**
-     * Scope a query to only include unemployed models.
+     * Scope a query to order by the models first activation date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByFirstEmployedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(first_employed_at) $direction");
+    }
+
+    /**
+     * Scope a query to order by the models current deactivation date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByCurrentDeactivatedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_released_at) $direction");
+    }
+
+    /**
+     * Scope a query to only include released models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */

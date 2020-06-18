@@ -74,6 +74,31 @@ trait CanBeInjured
     }
 
     /**
+     * Scope a query to include current injured at dates.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithCurrentInjuredAtDate($query)
+    {
+        return $query->addSelect(['current_injured_at' => Injury::select('started_at')
+            ->whereColumn('injurable_id', $query->qualifyColumn('id'))
+            ->where('injurable_type', $this->getMorphClass())
+            ->orderBy('started_at', 'desc')
+            ->limit(1)
+        ])->withCasts(['current_injured_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the models current injured date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByCurrentInjuredAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_injured_at) $direction");
+    }
+
+    /**
      * Injure a model.
      *
      * @param  string|null $injuredAt
