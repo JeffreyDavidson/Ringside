@@ -36,7 +36,7 @@ class WrestlersTableSeeder extends Seeder
          */
         for ($j = $eNum; $j <= 30; $j++) {
             $start = $startDate;
-            $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1,11));
+            $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
             $employment = EmploymentFactory::new()->started($start);
 
@@ -63,7 +63,7 @@ class WrestlersTableSeeder extends Seeder
             $employment = EmploymentFactory::new()->started($start)->ended($end);
             $retirement = RetirementFactory::new()->started($end);
             WrestlerFactory::new()
-                ->retired($retirement, $employment)
+                ->retired($employment, $retirement)
                 ->create(['name' => 'Wrestler '.$eNum]);
 
             $eNum ++;
@@ -77,7 +77,6 @@ class WrestlersTableSeeder extends Seeder
          * and ended employment date.
          */
         while ($startDate->lessThan($now)) {
-
             for ($i = 0; $i < 5; $i++) {
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
