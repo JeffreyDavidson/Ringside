@@ -74,6 +74,31 @@ trait CanBeSuspended
     }
 
     /**
+     * Scope a query to include current suspended at dates.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithCurrentSuspendedAtDate($query)
+    {
+        return $query->addSelect(['current_suspended_at' => Suspension::select('started_at')
+            ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
+            ->where('suspendable_type', $this->getMorphClass())
+            ->orderBy('started_at', 'desc')
+            ->limit(1)
+        ])->withCasts(['current_suspended_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the models current suspension date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_suspended_at) $direction");
+    }
+
+    /**
      * Suspend a model.
      *
      * @param  string|null $suspendedAt
