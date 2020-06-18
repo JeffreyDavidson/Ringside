@@ -19,6 +19,18 @@
             </div>
         </x-portlet>
 
+         <x-portlet title="Suspended Wrestlers">
+            <div class="kt-portlet__body">
+                <livewire:wrestlers.suspended-wrestlers>
+            </div>
+        </x-portlet>
+
+         <x-portlet title="Injured Wrestlers">
+            <div class="kt-portlet__body">
+                <livewire:wrestlers.injured-wrestlers>
+            </div>
+        </x-portlet>
+
         <x-portlet title="Released Wrestlers">
             <div class="kt-portlet__body">
                 <livewire:wrestlers.released-wrestlers>

@@ -13,6 +13,24 @@
             </div>
         </x-portlet>
 
+        <x-portlet title="Pending and Unemployed Referees">
+            <div class="kt-portlet__body">
+                <livewire:referees.pending-and-unemployed-referees>
+            </div>
+        </x-portlet>
+
+        <x-portlet title="Suspended Referees">
+            <div class="kt-portlet__body">
+                <livewire:referees.suspended-referees>
+            </div>
+        </x-portlet>
+
+         <x-portlet title="Injured Referees">
+            <div class="kt-portlet__body">
+                <livewire:referees.injured-referees>
+            </div>
+        </x-portlet>
+
         <x-portlet title="Released Referees">
             <div class="kt-portlet__body">
                 <livewire:referees.released-referees>
