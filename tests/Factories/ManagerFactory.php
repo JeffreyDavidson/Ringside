@@ -2,19 +2,73 @@
 
 namespace Tests\Factories;
 
+use App\Enums\ManagerStatus;
 use App\Models\Manager;
 use App\Models\TagTeam;
-use App\Enums\ManagerStatus;
-use Faker\Generator as Faker;
+use App\Models\Wrestler;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Faker\Generator as Faker;
 
 class ManagerFactory extends BaseFactory
 {
+    /** @var EmploymentFactory|null */
+    public $employmentFactory;
+
+    /** @var RetirementFactory|null */
+    public $retirementFactory;
+
+    /** @var SuspensionFactory|null */
+    public $suspensionFactory;
+
+    /** @var InjuryFactory|null */
+    public $injuryFactory;
+
+    /** @var TagTeam */
+    public $tagTeam;
+
+    /** @var Wrestler */
+    public $wrestler;
+
+    /** @var $softDeleted */
+    public $softDeleted = false;
+
     protected string $modelClass = Manager::class;
 
     public function create(array $extra = []): Manager
     {
-        return parent::build($extra);
+        $manager = parent::build($extra);
+
+        if ($this->employmentFactory) {
+            $this->employmentFactory->forManager($manager)->create();
+        }
+
+        if ($this->retirementFactory) {
+            $this->retirementFactory->forManager($manager)->create();
+        }
+
+        if ($this->suspensionFactory) {
+            $this->suspensionFactory->forManager($manager)->create();
+        }
+
+        if ($this->injuryFactory) {
+            $this->injuryFactory->forManager($manager)->create();
+        }
+
+        if ($this->wrestler) {
+            $this->wrestler->currentManager()->attach($manager);
+        }
+
+        if ($this->tagTeam) {
+            $this->tagTeam->currentManager()->attach($manager);
+        }
+
+        $manager->save();
+
+        if ($this->softDeleted) {
+            $manager->delete();
+        }
+
+        return $manager;
     }
 
     public function make(array $extra = []): Manager
@@ -31,45 +85,118 @@ class ManagerFactory extends BaseFactory
         ];
     }
 
+    public function employed(EmploymentFactory $employmentFactory = null)
+    {
+        $clone = clone $this;
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new();
+
+        return $clone;
+    }
+
     public function available(): ManagerFactory
     {
-        return tap(clone $this)->overwriteDefaults([
+        $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::AVAILABLE,
         ]);
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now());
+
+        return $clone;
     }
 
     public function pendingEmployment(): ManagerFactory
     {
-        return tap(clone $this)->overwriteDefaults([
+        $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::PENDING_EMPLOYMENT,
         ]);
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now()->addDay());
+
+        return $clone;
     }
 
-    public function retired(): ManagerFactory
+    public function unemployed(): ManagerFactory
     {
         return tap(clone $this)->overwriteDefaults([
+            'status' => ManagerStatus::UNEMPLOYED,
+        ]);
+    }
+
+    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): ManagerFactory
+    {
+        $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::RETIRED,
         ]);
+
+        $start = now()->subMonths(1);
+        $end = now()->subDays(3);
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+
+        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
+
+        return $clone;
     }
 
-    public function suspended(): ManagerFactory
+    public function released(EmploymentFactory $employmentFactory = null): ManagerFactory
     {
-        return tap(clone $this)->overwriteDefaults([
+        $clone = tap(clone $this)->overwriteDefaults([
+            'status' => ManagerStatus::RELEASED,
+        ]);
+
+        $start = now()->subMonths(1);
+        $end = now()->subDays(3);
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+
+        return $clone;
+    }
+
+    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): ManagerFactory
+    {
+        $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::SUSPENDED,
         ]);
+
+        $start = now()->subMonths(1);
+        $end = now()->subDays(3);
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+
+        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($end);
+
+        return $clone;
     }
 
-    public function injured(): ManagerFactory
+    public function injured(EmploymentFactory $employmentFactory = null, InjuryFactory $injuryFactory = null): ManagerFactory
     {
-        return tap(clone $this)->overwriteDefaults([
+        $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::INJURED,
         ]);
+
+        $start = now()->subMonths(1);
+        $end = now()->subDays(3);
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+
+        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($end);
+
+        return $clone;
     }
 
     public function forTagTeam(TagTeam $tagTeam)
     {
         $clone = clone $this;
         $clone->tagTeam = $tagTeam;
+
+        return $clone;
+    }
+
+    public function forWrestler(Wrestler $wrestler)
+    {
+        $clone = clone $this;
+        $clone->wrestler = $wrestler;
 
         return $clone;
     }

@@ -44,7 +44,6 @@ class TitleFactory extends BaseFactory
 
     public function make(array $extra = []): Title
     {
-        dd(parent::build($extra, 'make'));
         return parent::build($extra, 'make');
     }
 
