@@ -19,8 +19,15 @@ class ActiveStables extends Component
 
     public function render()
     {
+        $activeStables = Stable::query()
+            ->active()
+            ->withFirstActivatedAtDate()
+            ->orderByFirstActivatedAtDate()
+            ->orderBy('name')
+            ->paginate($this->perPage);
+
         return view('livewire.stables.active-stables', [
-            'activeStables' => Stable::active()->withActivatedAtDate()->paginate($this->perPage)
+            'activeStables' => $activeStables
         ]);
     }
 }

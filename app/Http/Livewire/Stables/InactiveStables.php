@@ -14,8 +14,15 @@ class InactiveStables extends Component
 
     public function render()
     {
+        $inactiveStables = Stable::query()
+            ->inactive()
+            ->withCurrentDeactivatedAtDate()
+            ->orderByCurrentDeactivatedAtDate()
+            ->orderBy('name')
+            ->paginate($this->perPage);
+
         return view('livewire.stables.inactive-stables', [
-            'inactiveStables' => Stable::inactive()->withDeactivatedAtDate()->paginate($this->perPage)
+            'inactiveStables' => $inactiveStables
         ]);
     }
 }

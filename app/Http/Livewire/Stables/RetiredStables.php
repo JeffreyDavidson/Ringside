@@ -14,8 +14,15 @@ class RetiredStables extends Component
 
     public function render()
     {
+        $retiredStables = Stable::query()
+            ->retired()
+            ->withCurrentRetiredAtDate()
+            ->orderByCurrentRetiredAtDate()
+            ->orderBy('name')
+            ->paginate($this->perPage);
+
         return view('livewire.stables.retired-stables', [
-            'retiredStables' => Stable::retired()->withRetiredAtDate()->paginate($this->perPage)
+            'retiredStables' => $retiredStables
         ]);
     }
 }

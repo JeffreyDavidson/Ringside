@@ -6,7 +6,7 @@ use App\Models\TagTeam;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class EmployedTagTeams extends Component
+class SuspendedTagTeams extends Component
 {
     use WithPagination;
 
@@ -19,15 +19,15 @@ class EmployedTagTeams extends Component
 
     public function render()
     {
-        $employedTagTeams = TagTeam::query()
-            ->employed()
-            ->withFirstEmployedAtDate()
-            ->orderByFirstEmployedAtDate()
-            ->orderBy('name')
+        $suspendedTagTeams = TagTeam::query()
+            ->suspended()
+            ->withCurrentSuspendedAtDate()
+            ->orderByCurrentSuspendedAtDate()
+            ->orderBy('last_name')
             ->paginate($this->perPage);
 
-        return view('livewire.tagteams.employed-tagteams', [
-            'employedTagTeams' => $employedTagTeams
+        return view('livewire.tagteams.suspended-tagteams', [
+            'suspendedTagTeams' => $suspendedTagTeams
         ]);
     }
 }

@@ -12,12 +12,12 @@
                 <td>{{ $manager->full_name }}</td>
                 <td>{{ $manager->released_at->toDateString() }}</td>
                 <td>
-                    @include('managers.partials.action-cell', [
-                        'manager' => $manager,
-                        'actions' => collect([
-                            'employ'
-                        ])
-                    ])
+                    <x-actions-dropdown>
+                        <x-buttons.view :route="route('managers.show', $manager)" />
+                        <x-buttons.edit :route="route('managers.edit', $manager)" />
+                        <x-buttons.delete :route="route('managers.destroy', $manager)" />
+                        <x-buttons.employ :route="route('managers.employ', $manager)" />
+                    </x-actions-dropdown>
                 </td>
             </tr>
         @empty
