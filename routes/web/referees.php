@@ -10,10 +10,12 @@ use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\UnretireController;
 use App\Http\Controllers\Referees\ReinstateController;
 use App\Http\Controllers\Referees\ClearInjuryController;
+use App\Http\Controllers\Referees\ReleaseController;
 
 Route::resource('referees', RefereesController::class);
 Route::put('/referees/{referee}/restore', RestoreController::class)->name('referees.restore');
 Route::put('/referees/{referee}/retire', RetireController::class)->name('referees.retire');
+Route::put('/referees/{referee}/release', ReleaseController::class)->name('referees.release');
 Route::put('/referees/{referee}/unretire', UnretireController::class)->name('referees.unretire');
 Route::put('/referees/{referee}/suspend', SuspendController::class)->name('referees.suspend');
 Route::put('/referees/{referee}/reinstate', ReinstateController::class)->name('referees.reinstate');
