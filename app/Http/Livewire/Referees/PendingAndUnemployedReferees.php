@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Livewire\Wrestlers;
+namespace App\Http\Livewire\Referees;
 
-use App\Models\Wrestler;
+use App\Models\Referee;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class PendingAndUnemployedWrestlers extends Component
+class PendingAndUnemployedReferees extends Component
 {
     use WithPagination;
 
@@ -14,16 +14,17 @@ class PendingAndUnemployedWrestlers extends Component
 
     public function render()
     {
-        $pendingAndUnemployedWrestlers = Wrestler::query()
+        $pendingAndUnemployedReferees = Referee::query()
             ->pendingEmployment()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()
             ->orderByNullsLast('first_employed_at')
+            ->orderBy('last_name')
             ->paginate();
 
-        return view('livewire.wrestlers.pending-and-unemployed-wrestlers', [
-            'pendingAndUnemployedWrestlers' => $pendingAndUnemployedWrestlers
+        return view('livewire.referees.pending-and-unemployed-referees', [
+            'pendingAndUnemployedReferees' => $pendingAndUnemployedReferees
         ]);
     }
 }

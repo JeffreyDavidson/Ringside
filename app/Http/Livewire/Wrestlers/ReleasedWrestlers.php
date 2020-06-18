@@ -14,8 +14,13 @@ class ReleasedWrestlers extends Component
 
     public function render()
     {
+        $releasedWrestlers = Wrestler::query()
+                ->released()
+                ->withReleasedAtDate()
+                ->paginate($this->perPage);
+
         return view('livewire.wrestlers.released-wrestlers', [
-            'releasedWrestlers' => Wrestler::released()->withReleasedAtDate()->paginate($this->perPage)
+            'releasedWrestlers' => $releasedWrestlers
         ]);
     }
 }

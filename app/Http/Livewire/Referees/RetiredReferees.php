@@ -14,8 +14,15 @@ class RetiredReferees extends Component
 
     public function render()
     {
+        $retiredReferees = Referee::query()
+            ->retired()
+            ->withCurrentRetiredAtDate()
+            ->orderByCurrentRetiredAtDate()
+            ->orderBy('last_name')
+            ->paginate($this->perPage);
+
         return view('livewire.referees.retired-referees', [
-            'retiredReferees' => Referee::retired()->withRetiredAtDate()->paginate($this->perPage)
+            'retiredReferees' => $retiredReferees
         ]);
     }
 }

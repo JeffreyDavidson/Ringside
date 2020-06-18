@@ -14,8 +14,14 @@ class ReleasedManagers extends Component
 
     public function render()
     {
+        $releasedManagers = Manager::query()
+            ->released()
+            ->withReleasedAtDate()
+            ->orderBy('last_name')
+            ->paginate($this->perPage);
+
         return view('livewire.managers.released-managers', [
-            'releasedManagers' => Manager::released()->withReleasedAtDate()->paginate($this->perPage)
+            'releasedManagers' => $releasedManagers
         ]);
     }
 }
