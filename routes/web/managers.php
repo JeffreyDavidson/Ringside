@@ -10,6 +10,7 @@ use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\UnretireController;
 use App\Http\Controllers\Managers\ReinstateController;
 use App\Http\Controllers\Managers\ClearInjuryController;
+use App\Http\Controllers\Managers\ReleaseController;
 
 Route::resource('managers', ManagersController::class);
 Route::put('/managers/{manager}/restore', RestoreController::class)->name('managers.restore');
@@ -20,3 +21,4 @@ Route::put('/managers/{manager}/clear-from-injury', ClearInjuryController::class
 Route::put('/managers/{manager}/employ', EmployController::class)->name('managers.employ');
 Route::put('/managers/{manager}/suspend', SuspendController::class)->name('managers.suspend');
 Route::put('/managers/{manager}/reinstate', ReinstateController::class)->name('managers.reinstate');
+Route::put('/managers/{manager}/release', ReleaseController::class)->name('managers.release');
