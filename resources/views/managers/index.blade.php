@@ -13,16 +13,34 @@
             </div>
         </x-portlet>
 
-        <x-portlet title="Released Managers">
+        {{-- <x-portlet title="Pending and Unemployed Managers">
+            <div class="kt-portlet__body">
+                <livewire:managers.pending-and-unemployed-managers>
+            </div>
+        </x-portlet> --}}
+
+        {{--<x-portlet title="Suspended Managers">
+            <div class="kt-portlet__body">
+                <livewire:managers.suspended-managers>
+            </div>
+        </x-portlet>--}}
+
+        {{--<x-portlet title="Injured Managers">
+            <div class="kt-portlet__body">
+                <livewire:managers.injured-managers>
+            </div>
+        </x-portlet>--}}
+
+        {{--<x-portlet title="Released Managers">
             <div class="kt-portlet__body">
                 <livewire:managers.released-managers>
             </div>
-        </x-portlet>
+        </x-portlet>--}}
 
-        <x-portlet title="Retired Managers">
+        {{--<x-portlet title="Retired Managers">
             <div class="kt-portlet__body">
                 <livewire:managers.retired-managers>
             </div>
-        </x-portlet>
+        </x-portlet>--}}
     </x-content>
 </x-layouts.app>

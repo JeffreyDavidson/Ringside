@@ -13,19 +13,13 @@
                 <td>{{ $wrestler->name }}</td>
                 <td>{{ $wrestler->hometown }}</td>
                 <td>
-                    @if($wrestler->hasFutureEmployment())
-                        {{ $wrestler->employed_at->toDateString() }}
+                    @isset($title->first_employed_at)
+                        {{ $title->first_employed_at->toDateString() }}
                     @else
                         TBD
-                    @endif
+                    @endisset
                 </td>
                 <td>
-                    {{-- @include('wrestlers.partials.action-cell', [
-                        'wrestler' => $wrestler,
-                        'actions' => collect([
-                            'retire', 'employ', 'release', 'suspend', 'reinstate', 'injure', 'clearInjury'
-                        ])
-                    ]) --}}
                     <x-actions-dropdown>
                         <x-buttons.view :route="route('wrestlers.show', $wrestler)" />
                         <x-buttons.edit :route="route('wrestlers.edit', $wrestler)" />

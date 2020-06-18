@@ -1,24 +1,25 @@
-<x-datatable :collection="$retiredWrestlers">
+<x-datatable :collection="$injuredWrestlers">
     <thead>
         <th>Id</th>
         <th>Wrestler Name</th>
         <th>Hometown</th>
-        <th>Date Retired</th>
+        <th>Date Injured</th>
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($retiredWrestlers as $wrestler)
+        @forelse($injuredWrestlers as $wrestler)
             <tr>
                 <td>{{ $wrestler->id }}</td>
                 <td>{{ $wrestler->name }}</td>
                 <td>{{ $wrestler->hometown }}</td>
-                <td>{{ $wrestler->current_retired_at->toDateString() }}</td>
+                <td>{{ $wrestler->current_injured_at->toDateString() }}</td>
                 <td>
                     <x-actions-dropdown>
                         <x-buttons.view :route="route('wrestlers.show', $wrestler)" />
                         <x-buttons.edit :route="route('wrestlers.edit', $wrestler)" />
                         <x-buttons.delete :route="route('wrestlers.destroy', $wrestler)" />
-                        <x-buttons.unretire :route="route('wrestlers.unretire', $wrestler)" />
+                        <x-buttons.retire :route="route('wrestlers.retire', $wrestler)" />
+                        <x-buttons.release :route="route('wrestlers.release', $wrestler)" />
                     </x-actions-dropdown>
                 </td>
             </tr>
@@ -29,3 +30,4 @@
         @endforelse
     </tbody>
 </x-datatable>
+
