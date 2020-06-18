@@ -23,6 +23,8 @@ class RefereeObserver
             $referee->status = RefereeStatus::SUSPENDED;
         } elseif ($referee->isBookable()) {
             $referee->status = RefereeStatus::BOOKABLE;
+        } elseif ($referee->isReleased()) {
+            $referee->status = RefereeStatus::RELEASED;
         } elseif ($referee->isPendingEmployment()) {
             $referee->status = RefereeStatus::PENDING_EMPLOYMENT;
         } else {
