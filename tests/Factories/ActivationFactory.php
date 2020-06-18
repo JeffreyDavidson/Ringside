@@ -92,6 +92,7 @@ class ActivationFactory extends BaseFactory
     public function forTitles($titles)
     {
         $clone = clone $this;
+        
         $clone->titles = $titles;
 
         return $clone;

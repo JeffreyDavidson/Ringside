@@ -66,6 +66,7 @@ class EmploymentFactory extends BaseFactory
     public function forTagTeams($tagTeams)
     {
         $clone = clone $this;
+
         $clone->tagTeams = $tagTeams;
 
         return $clone;
@@ -79,7 +80,9 @@ class EmploymentFactory extends BaseFactory
     public function forWrestlers($wrestlers)
     {
         $clone = clone $this;
+
         $clone->wrestlers = $wrestlers;
+
         $clone->tagTeams = [];
 
         return $clone;
@@ -93,6 +96,7 @@ class EmploymentFactory extends BaseFactory
     public function forManagers($managers)
     {
         $clone = clone $this;
+
         $clone->managers = $managers;
 
         return $clone;
@@ -106,6 +110,7 @@ class EmploymentFactory extends BaseFactory
     public function forReferees($referees)
     {
         $clone = clone $this;
+        
         $clone->referees = $referees;
 
         return $clone;
