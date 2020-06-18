@@ -9,22 +9,30 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Faker\Generator as Faker;
 use Illuminate\Support\Collection;
 
 class EmploymentFactory extends BaseFactory
 {
     /** @var \Carbon\Carbon|null */
     public $startDate;
+
     /** @var \Carbon\Carbon|null */
     public $endDate;
+
     /** @var TagTeam[] */
     public $tagTeams;
+
     /** @var Wrestler[] */
     public $wrestlers;
+
     /** @var Manager[] */
     public $managers;
+
     /** @var Referee[] */
     public $referees;
+
+    protected string $modelClass = Employment::class;
 
     /**
      * @param string|Carbon $startDate
@@ -32,6 +40,7 @@ class EmploymentFactory extends BaseFactory
     public function started($startDate = 'now')
     {
         $clone = clone $this;
+
         $clone->startDate = $startDate instanceof Carbon ? $startDate : new Carbon($startDate);
 
         return $clone;
@@ -43,6 +52,7 @@ class EmploymentFactory extends BaseFactory
     public function ended($endDate = 'now')
     {
         $clone = clone $this;
+
         $clone->endDate = $endDate instanceof Carbon ? $endDate : new Carbon($endDate);
 
         return $clone;
@@ -131,5 +141,10 @@ class EmploymentFactory extends BaseFactory
         }
 
         return $employments->count() === 1 ? $employments->first() : $employments;
+    }
+
+    public function getDefaults(Faker $faker): array
+    {
+        return [];
     }
 }
