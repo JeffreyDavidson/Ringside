@@ -6,7 +6,7 @@ use App\Models\Wrestler;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class EmployedWrestlers extends Component
+class SuspendedWrestlers extends Component
 {
     use WithPagination;
 
@@ -19,15 +19,15 @@ class EmployedWrestlers extends Component
 
     public function render()
     {
-        $employedWrestlers = Wrestler::query()
-            ->employed()
-            ->withFirstEmployedAtDate()
-            ->orderByFirstEmployedAtDate()
+        $suspendedWrestlers = Wrestler::query()
+            ->suspended()
+            ->withCurrentSuspendedAtDate()
+            ->orderByCurrentSuspendedAtDate()
             ->orderBy('name')
             ->paginate($this->perPage);
 
-        return view('livewire.wrestlers.employed-wrestlers', [
-            'employedWrestlers' => $employedWrestlers
+        return view('livewire.wrestlers.suspended-wrestlers', [
+            'suspendedWrestlers' => $suspendedWrestlers
         ]);
     }
 }

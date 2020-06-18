@@ -14,8 +14,14 @@ class ReleasedReferees extends Component
 
     public function render()
     {
+        $releasedReferees = Referee::query()
+            ->released()
+            ->withReleasedAtDate()
+            ->orderBy('last_name')
+            ->paginate($this->perPage);
+
         return view('livewire.referees.released-referees', [
-            'releasedReferees' => Referee::released()->withReleasedAtDate()->paginate($this->perPage)
+            'releasedReferees' => $releasedReferees
         ]);
     }
 }

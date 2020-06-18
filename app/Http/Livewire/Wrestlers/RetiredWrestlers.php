@@ -14,8 +14,15 @@ class RetiredWrestlers extends Component
 
     public function render()
     {
+        $retiredWrestlers = Wrestler::query()
+            ->retired()
+            ->withCurrentRetiredAtDate()
+            ->orderByCurrentRetiredAtDate()
+            ->orderBy('name')
+            ->paginate($this->perPage);
+
         return view('livewire.wrestlers.retired-wrestlers', [
-            'retiredWrestlers' => Wrestler::retired()->withRetiredAtDate()->paginate($this->perPage)
+            'retiredWrestlers' => $retiredWrestlers
         ]);
     }
 }

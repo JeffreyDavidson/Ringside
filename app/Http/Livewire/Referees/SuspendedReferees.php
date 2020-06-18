@@ -6,7 +6,7 @@ use App\Models\Referee;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class EmployedReferees extends Component
+class SuspendedReferees extends Component
 {
     use WithPagination;
 
@@ -19,15 +19,15 @@ class EmployedReferees extends Component
 
     public function render()
     {
-        $employedReferees = Referee::query()
-            ->employed()
-            ->withFirstEmployedAtDate()
-            ->orderByFirstEmployedAtDate()
+        $suspendedReferees = Referee::query()
+            ->suspended()
+            ->withCurrentSuspendedAtDate()
+            ->orderByCurrentSuspendedAtDate()
             ->orderBy('last_name')
             ->paginate($this->perPage);
 
-        return view('livewire.referees.employed-referees', [
-            'employedReferees' => $employedReferees
+        return view('livewire.referees.suspended-referees', [
+            'suspendedReferees' => $suspendedReferees
         ]);
     }
 }

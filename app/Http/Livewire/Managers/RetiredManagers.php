@@ -14,8 +14,15 @@ class RetiredManagers extends Component
 
     public function render()
     {
+        $retiredManagers = Manager::query()
+            ->retired()
+            ->withCurrentRetiredAtDate()
+            ->orderByCurrentRetiredAtDate()
+            ->orderBy('last_name')
+            ->paginate($this->perPage);
+
         return view('livewire.managers.retired-managers', [
-            'retiredManagers' => Manager::retired()->withRetiredAtDate()->paginate($this->perPage)
+            'retiredManagers' => $retiredManagers
         ]);
     }
 }

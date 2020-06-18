@@ -6,7 +6,7 @@ use App\Models\Manager;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class EmployedManagers extends Component
+class SuspendedManagers extends Component
 {
     use WithPagination;
 
@@ -19,15 +19,15 @@ class EmployedManagers extends Component
 
     public function render()
     {
-        $employedManagers = Manager::query()
-            ->employed()
-            ->withFirstEmployedAtDate()
-            ->orderByFirstEmployedAtDate()
+        $suspendedManagers = Manager::query()
+            ->suspended()
+            ->withCurrentSuspendedAtDate()
+            ->orderByCurrentSuspendedAtDate()
             ->orderBy('last_name')
             ->paginate($this->perPage);
 
-        return view('livewire.managers.employed-managers', [
-            'employedManagers' => $employedManagers
+        return view('livewire.managers.suspended-managers', [
+            'suspendedManagers' => $suspendedManagers
         ]);
     }
 }
