@@ -44,31 +44,17 @@
 
                 <!-- begin:: Aside -->
                 <button class="kt-aside-close " id="kt_aside_close_btn"><i class="la la-close"></i></button>
-                <x-aside />
+                @include('partials.aside')
 
                 <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor kt-wrapper" id="kt_wrapper">
 
-                    <div id="kt_header" class="kt-header kt-grid__item  kt-header--fixed ">
-
-                        <button class="kt-header-menu-wrapper-close"
-                                id="kt_header_menu_mobile_close_btn"><i
-                                class="la la-close">
-                        </i></button>
-                        <div class="kt-header-menu-wrapper" id="kt_header_menu_wrapper">
-                            <div id="kt_header_menu" class="kt-header-menu kt-header-menu-mobile  kt-header-menu--layout-default ">
-                            </div>
-                        </div>
-
-                        <x-header />
-                        <x-header-topbar />
-
-                    </div>
+                    @include('partials.header')
 
                     <div id="kt_content" class="kt-content kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor">
                         {{ $slot }}
                     </div>
 
-                    <x-footer />
+                    @include('partials.footer')
                 </div>
             </div>
         </div>
