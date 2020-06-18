@@ -13,12 +13,16 @@ class InjuryFactory extends BaseFactory
 {
     /** @var \Carbon\Carbon|null */
     public $startDate;
+
     /** @var \Carbon\Carbon|null */
     public $endDate;
+
     /** @var Wrestler[] */
     public $wrestlers;
+
     /** @var Manager[] */
     public $managers;
+
     /** @var Referee[] */
     public $referees;
 
@@ -28,6 +32,7 @@ class InjuryFactory extends BaseFactory
     public function started($startDate = 'now')
     {
         $clone = clone $this;
+
         $clone->startDate = $startDate instanceof Carbon ? $startDate : new Carbon($startDate);
 
         return $clone;
@@ -39,6 +44,7 @@ class InjuryFactory extends BaseFactory
     public function ended($endDate = 'now')
     {
         $clone = clone $this;
+
         $clone->endDate = $endDate instanceof Carbon ? $endDate : new Carbon($endDate);
 
         return $clone;
@@ -52,6 +58,7 @@ class InjuryFactory extends BaseFactory
     public function forWrestlers($wrestlers)
     {
         $clone = clone $this;
+
         $clone->wrestlers = $wrestlers;
 
         return $clone;
@@ -65,6 +72,7 @@ class InjuryFactory extends BaseFactory
     public function forManagers($managers)
     {
         $clone = clone $this;
+
         $clone->managers = $managers;
 
         return $clone;
@@ -78,6 +86,7 @@ class InjuryFactory extends BaseFactory
     public function forReferees($referees)
     {
         $clone = clone $this;
+        
         $clone->referees = $referees;
 
         return $clone;

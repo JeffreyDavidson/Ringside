@@ -51,6 +51,7 @@ class RetirementFactory extends BaseFactory
     public function started($startDate = 'now')
     {
         $clone = clone $this;
+
         $clone->startDate = $startDate instanceof Carbon ? $startDate : new Carbon($startDate);
 
         return $clone;
@@ -62,6 +63,7 @@ class RetirementFactory extends BaseFactory
     public function ended($endDate = 'now')
     {
         $clone = clone $this;
+
         $clone->endDate = $endDate instanceof Carbon ? $endDate : new Carbon($endDate);
 
         return $clone;
@@ -88,7 +90,9 @@ class RetirementFactory extends BaseFactory
     public function forWrestlers($wrestlers)
     {
         $clone = clone $this;
+
         $clone->wrestlers = $wrestlers;
+
         $clone->tagTeams = [];
 
         return $clone;
@@ -102,6 +106,7 @@ class RetirementFactory extends BaseFactory
     public function forManagers($managers)
     {
         $clone = clone $this;
+
         $clone->managers = $managers;
 
         return $clone;
@@ -115,6 +120,7 @@ class RetirementFactory extends BaseFactory
     public function forReferees($referees)
     {
         $clone = clone $this;
+
         $clone->referees = $referees;
 
         return $clone;
@@ -128,6 +134,7 @@ class RetirementFactory extends BaseFactory
     public function forStables($stables)
     {
         $clone = clone $this;
+
         $clone->stables = $stables;
 
         return $clone;
@@ -187,6 +194,4 @@ class RetirementFactory extends BaseFactory
 
         return $retirements->count() === 1 ? $retirements->first() : $retirements;
     }
-
-
 }
