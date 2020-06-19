@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
-use App\ViewModels\WrestlerViewModel;
 
 class WrestlersController extends Controller
 {
@@ -27,11 +26,11 @@ class WrestlersController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(Wrestler $wrestler)
     {
         $this->authorize('create', Wrestler::class);
 
-        return view('wrestlers.create', new WrestlerViewModel());
+        return view('wrestlers.create', compact('wrestler'));
     }
 
     /**
@@ -42,7 +41,7 @@ class WrestlersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $wrestler = Wrestler::create($request->except('started_at'));
+        $wrestler = Wrestler::create($request->validatedExcept('started_at'));
 
         if ($request->filled('started_at')) {
             $wrestler->employ($request->input('started_at'));
@@ -74,7 +73,7 @@ class WrestlersController extends Controller
     {
         $this->authorize('update', $wrestler);
 
-        return view('wrestlers.edit', new WrestlerViewModel($wrestler));
+        return view('wrestlers.edit', compact('wrestler'));
     }
 
     /**
@@ -86,7 +85,7 @@ class WrestlersController extends Controller
      */
     public function update(UpdateRequest $request, Wrestler $wrestler)
     {
-        $wrestler->update($request->except('started_at'));
+        $wrestler->update($request->validatedExcept('started_at'));
 
         if ($request->filled('started_at')) {
             $wrestler->employ($request->input('started_at'));
