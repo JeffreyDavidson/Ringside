@@ -41,21 +41,22 @@ class TagTeamFactory extends BaseFactory
 
         if ($this->retirementFactory) {
             $this->retirementFactory->forTagTeam($tagTeam)->create();
-
-            if ($this->wrestlerFactory) {
-                for ($i = 1; $i <= count($this->wrestlerFactory->getFactories()); $i++) {
-                    $wrestlerCount = Wrestler::max('id') + 1;
-                    WrestlerFactory::new()
-                        ->forTagTeam($tagTeam)
-                        ->retired($this->employmentFactory, $this->retirementFactory)
-                        ->create(['name' => 'Wrestler '. $wrestlerCount]);
-                }
-            }
         }
 
         if ($this->suspensionFactory) {
             $this->suspensionFactory->forTagTeam($tagTeam)->create();
         }
+
+        // if ($this->wrestlerFactory) {
+        //     for ($i = 1; $i <= count($this->wrestlerFactory->getFactories()); $i++) {
+        //         $wrestlerCount = Wrestler::max('id') + 1;
+        //         WrestlerFactory::new()
+        //                 ->forTagTeam($tagTeam)
+        //                 ->retired($this->employmentFactory, $this->retirementFactory)
+        //                 ->create(['name' => 'Wrestler '. $wrestlerCount]);
+        //     }
+        // }
+
 
         $tagTeam->save();
 
@@ -95,16 +96,18 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function bookable(): TagTeamFactory
+    public function bookable(EmploymentFactory $employmentFactory = null): TagTeamFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::BOOKABLE,
         ]);
 
+        $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
+
         return $clone;
     }
 
-    public function pendingEmployment(): TagTeamFactory
+    public function pendingEmployment(EmploymentFactory $employmentFactory = null): TagTeamFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::PENDING_EMPLOYMENT,
@@ -124,7 +127,7 @@ class TagTeamFactory extends BaseFactory
         ]);
     }
 
-    public function suspended(): TagTeamFactory
+    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): TagTeamFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::SUSPENDED,
@@ -182,4 +185,3 @@ class TagTeamFactory extends BaseFactory
         });
     }
 }
-
