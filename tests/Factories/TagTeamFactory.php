@@ -171,6 +171,9 @@ class TagTeamFactory extends BaseFactory
 
         $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
 
+        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new();
+
+
         return $clone;
     }
 
