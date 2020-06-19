@@ -6,42 +6,103 @@ use App\Enums\StableStatus;
 use App\Models\Stable;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 use Faker\Generator as Faker;
+use Illuminate\Support\Str;
 
 class StableFactory extends BaseFactory
 {
     /** @var ActivationFactory|null */
     public $activationFactory;
+
     /** @var RetirementFactory|null */
     public $retirementFactory;
+
     /** @var WrestlerFactory|null */
     public $wrestlerFactory;
+
     /** @var TagTeamFactory|null */
     public $tagTeamFactory;
+
+    /** @var array|null */
+    public $existingWrestlers;
+
+    /** @var array|null */
+    public $existingTagTeams;
+
+    /** @var $softDeleted */
     public $softDeleted = false;
-    protected $factoriesToClone = [
-        'activationFactory',
-        'retirementFactory',
-        'wrestlerFactory',
-        'tagTeamFactory,'
-    ];
+
+    protected string $modelClass = Stable::class;
+
+    public function create(array $extra = []): Stable
+    {
+        $stable = parent::build($extra);
+
+        if ($this->activationFactory) {
+            $this->activationFactory->forStable($stable)->create();
+        }
+
+        if ($this->retirementFactory) {
+            $this->retirementFactory->forStable($stable)->create();
+        }
+
+        if ($this->wrestlerFactory) {
+            $this->wrestlerFactory->forStable($stable)->create();
+        }
+
+        if ($this->tagTeamFactory) {
+            $this->tagTeamFactory->forStable($stable)->create();
+        }
+
+        $stable->save();
+
+        if ($this->existingWrestlers) {
+            foreach ($this->existingWrestlers as $wrestler) {
+                $wrestler->stableHistory()->attach($stable);
+            }
+        }
+
+        if ($this->existingTagTeams) {
+            foreach ($this->existingTagTeams as $tagTeam) {
+                $tagTeam->stableHistory()->attach($stable);
+            }
+        }
+
+        if ($this->softDeleted) {
+            $stable->delete();
+        }
+
+        return $stable;
+    }
+
+    public function make(array $extra = []): Stable
+    {
+        return parent::build($extra, 'make');
+    }
+
+    public function getDefaults(Faker $faker): array
+    {
+        return [
+            'name' => Str::title($faker->words(2, true)),
+            'status' => StableStatus::__default,
+        ];
+    }
 
     public function pendingActivation(ActivationFactory $activationFactory = null)
     {
-        $clone = clone $this;
-        $clone->attributes['status'] = StableStatus::PENDING_ACTIVATION;
+        $clone = tap(clone $this)->overwriteDefaults([
+            'status' => StableStatus::PENDING_ACTIVATION
+        ]);
+
         $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->addDays(2));
-        $clone->retirementFactory = null;
 
         return $clone;
     }
 
     public function unactivated()
     {
-        $clone = clone $this;
-        $clone->attributes['status'] = StableStatus::UNACTIVATED;
-        $clone->employmentFactory = null;
-
-        return $clone;
+        return tap(clone $this)->overwriteDefaults([
+            'status' => StableStatus::UNACTIVATED
+        ]);
     }
 
     public function active(ActivationFactory $activationFactory = null)
@@ -63,7 +124,7 @@ class StableFactory extends BaseFactory
         return $clone;
     }
 
-    public function retired(RetirementFactory $retirementFactory = null, ActivationFactory $activationFactory = null)
+    public function retired(ActivationFactory $activationFactory = null, RetirementFactory $retirementFactory = null)
     {
         $clone = clone $this;
         $clone->attributes['status'] = StableStatus::RETIRED;
@@ -87,44 +148,5 @@ class StableFactory extends BaseFactory
         $clone->tagTeamFactory = $tagTeamFactory ?? TagTeamFactory::new()->bookable();
 
         return $clone;
-    }
-
-    public function create($attributes = [])
-    {
-        return $this->make(function ($attributes) {
-            $stable = Stable::create($this->resolveAttributes($attributes));
-
-            if ($this->activationFactory) {
-                $this->activationFactory->forStable($stable)->create();
-            }
-
-            if ($this->retirementFactory) {
-                $this->retirementFactory->forStable($stable)->create();
-            }
-
-            if ($this->wrestlerFactory) {
-                $this->wrestlerFactory->forStable($stable)->create();
-            }
-
-            if ($this->tagTeamFactory) {
-                $this->tagTeamFactory->forStable($stable)->create();
-            }
-
-            $stable->save();
-
-            if ($this->softDeleted) {
-                $stable->delete();
-            }
-
-            return $stable;
-        }, $attributes);
-    }
-
-    public function getDefaults(Faker $faker)
-    {
-        return [
-            'name' => $faker->name,
-            'status' => StableStatus::__default,
-        ];
     }
 }

@@ -81,11 +81,11 @@ class WrestlerFactory extends BaseFactory
         ];
     }
 
-    public function employed(EmploymentFactory $employmentFactory = null)
+    public function employ(EmploymentFactory $employmentFactory = null)
     {
         $clone = clone $this;
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new();
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new(now());
 
         return $clone;
     }
@@ -96,9 +96,7 @@ class WrestlerFactory extends BaseFactory
             'status' => WrestlerStatus::BOOKABLE,
         ]);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now());
-
-        $clone->retirementFactory = null;
+        $clone = $clone->employ($employmentFactory ?? null);
 
         return $clone;
     }
@@ -109,7 +107,7 @@ class WrestlerFactory extends BaseFactory
             'status' => WrestlerStatus::PENDING_EMPLOYMENT,
         ]);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now()->addDay(1));
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started(now()->addDay(1)));
 
         return $clone;
     }
@@ -130,7 +128,7 @@ class WrestlerFactory extends BaseFactory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
 
         $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
 
@@ -146,7 +144,7 @@ class WrestlerFactory extends BaseFactory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
 
         return $clone;
     }
@@ -160,7 +158,7 @@ class WrestlerFactory extends BaseFactory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
 
         $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($end);
 
@@ -176,7 +174,7 @@ class WrestlerFactory extends BaseFactory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
 
         $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($end);
 

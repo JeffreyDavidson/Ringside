@@ -47,16 +47,15 @@ class TagTeamFactory extends BaseFactory
             $this->suspensionFactory->forTagTeam($tagTeam)->create();
         }
 
-        // if ($this->wrestlerFactory) {
-        //     for ($i = 1; $i <= count($this->wrestlerFactory->getFactories()); $i++) {
-        //         $wrestlerCount = Wrestler::max('id') + 1;
-        //         WrestlerFactory::new()
-        //                 ->forTagTeam($tagTeam)
-        //                 ->retired($this->employmentFactory, $this->retirementFactory)
-        //                 ->create(['name' => 'Wrestler '. $wrestlerCount]);
-        //     }
-        // }
-
+        if ($this->wrestlerFactory) {
+            for ($i = 1; $i <= count($this->wrestlerFactory->getFactories()); $i++) {
+                $wrestlerCount = Wrestler::max('id') + 1;
+                WrestlerFactory::new()
+                        ->forTagTeam($tagTeam)
+                        ->retired($this->employmentFactory, $this->retirementFactory)
+                        ->create(['name' => 'Wrestler '. $wrestlerCount]);
+            }
+        }
 
         $tagTeam->save();
 
@@ -135,7 +134,11 @@ class TagTeamFactory extends BaseFactory
 
         $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
 
-        $clone = $clone->withWrestlers($wrestlerFactory ?? $this->wrestlerFactory);
+        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new();
+
+        $clone->wrestlerFactory = WrestlerFactory::new()
+            ->suspended($employmentFactory ?? $this->employmentFactory, $suspensionFactory ?? $this->suspensionFactory)
+            ->times(2);
 
         return $clone;
     }
@@ -148,9 +151,11 @@ class TagTeamFactory extends BaseFactory
 
         $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
 
-        $clone = $clone->withWrestlers($wrestlerFactory ?? $this->wrestlerFactory);
-
         $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new();
+
+        $clone->wrestlerFactory = WrestlerFactory::new()
+            ->retired($employmentFactory ?? $this->employmentFactory, $retirementFactory ?? $this->retirementFactory)
+            ->times(2);
 
         return $clone;
     }
@@ -179,9 +184,8 @@ class TagTeamFactory extends BaseFactory
 
     public function withExistingWrestlers(array $wrestlers)
     {
-        return $this->withClone(function ($factory) use ($wrestlers) {
-            $factory->wrestlerFactory = null;
-            $factory->existingWrestlers = $wrestlers;
-        });
+        $clone->existingWrestlers = $wrestlers;
+
+        return $clone;
     }
 }
