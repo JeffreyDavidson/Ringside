@@ -2,12 +2,13 @@
 
 namespace Tests\Factories;
 
-use App\Models\Activation;
-use App\Models\Title;
 use Carbon\Carbon;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use App\Models\Title;
+use App\Models\Stable;
+use App\Models\Activation;
 use Faker\Generator as Faker;
 use Illuminate\Support\Collection;
+use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 
 class ActivationFactory extends BaseFactory
 {
@@ -51,6 +52,10 @@ class ActivationFactory extends BaseFactory
                 // $this->forWrestlers($activation->currentWrestlers)->create();
                 // Stable has wrestlers involved so attach a joined at to the stable.
             }
+            if ($activator instanceof Stable && $activator->currentTagTeams->isNotEmpty()) {
+                // $this->forWrestlers($activation->currentWrestlers)->create();
+                // Stable has wrestlers involved so attach a joined at to the stable.
+            }
         }
 
         return $activations->count() === 1 ? $activations->first() : $activations;
@@ -84,6 +89,20 @@ class ActivationFactory extends BaseFactory
         return $clone;
     }
 
+    public function forStable(Stable $stable)
+    {
+        return $this->forStables([$stable]);
+    }
+
+    public function forStables($stables)
+    {
+        $clone = clone $this;
+
+        $clone->stables = $stables;
+
+        return $clone;
+    }
+
     public function forTitle(Title $title)
     {
         return $this->forTitles([$title]);
@@ -92,7 +111,7 @@ class ActivationFactory extends BaseFactory
     public function forTitles($titles)
     {
         $clone = clone $this;
-        
+
         $clone->titles = $titles;
 
         return $clone;
