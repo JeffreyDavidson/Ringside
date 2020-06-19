@@ -13,9 +13,6 @@ class TagTeam extends Model
     use SoftDeletes,
         HasCachedAttributes,
         HasCustomRelationships,
-        // Concerns\CanBeRetired,
-        // Concerns\CanBeSuspended,
-        // Concerns\CanBeEmployed,
         // Concerns\CanBeBooked,
         Concerns\Unguarded;
 
@@ -397,6 +394,26 @@ class TagTeam extends Model
     }
 
     /**
+     * @return bool
+     */
+    public function isPendingEmployment()
+    {
+        return $this->futureEmployment()->exists();
+    }
+
+    /**
+     * Check to see if the model has been released.
+     *
+     * @return bool
+     */
+    public function isReleased()
+    {
+        return $this->previousEmployment()->exists() &&
+                $this->currentEmployment()->doesntExist() &&
+                $this->currentRetirement()->doesntExist();
+    }
+
+    /**
      * Scope a query to only include pending employment models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
@@ -519,6 +536,16 @@ class TagTeam extends Model
     }
 
     /**
+     * Check to see if the model is retired.
+     *
+     * @return bool
+     */
+    public function isRetired()
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    /**
      * Scope a query to only include suspended models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -552,5 +579,13 @@ class TagTeam extends Model
     public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
     {
         return $query->orderByRaw("DATE(current_suspended_at) $direction");
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSuspended()
+    {
+        return $this->currentSuspension()->exists();
     }
 }
