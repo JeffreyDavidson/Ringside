@@ -18,9 +18,9 @@ class DatabaseSeeder extends Seeder
         $this->call(MatchDecisionsTableSeeder::class);
         $this->call(VenuesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
-        $this->call(TitlesTableSeeder::class);
+        $this->call(TitlesTableSeeder::class, $dateToStart);
         $this->call(WrestlersTableSeeder::class, $dateToStart);
-        // $this->call(TagTeamsTableSeeder::class, $dateToStart);
+        $this->call(TagTeamsTableSeeder::class, $dateToStart);
         $this->call(ManagersTableSeeder::class, $dateToStart);
         $this->call(RefereesTableSeeder::class, $dateToStart);
         // $this->call(StablesTableSeeder::class);

@@ -15,7 +15,6 @@ class TagTeamsTableSeeder extends Seeder
      */
     public function run($dateToStart = null)
     {
-
         $eNum = 1;
         $now = Carbon::now();
 
@@ -35,7 +34,8 @@ class TagTeamsTableSeeder extends Seeder
          * released so we need to make them released and figure out
          * their started and ended employment date.
          */
-        for ($j = $eNum; $j <= 30; $j++) {
+        for ($j = $eNum; $j <= 10; $j++) {
+            dd($startDate);
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
@@ -78,7 +78,7 @@ class TagTeamsTableSeeder extends Seeder
          * and ended employment date.
          */
         while ($startDate->lessThan($now)) {
-            for ($i = 0; $i < 5; $i++) {
+            for ($i = 0; $i < 1; $i++) {
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
@@ -99,11 +99,11 @@ class TagTeamsTableSeeder extends Seeder
         }
 
         /**
-         * We need to create 5 tag teams for the next 3 months and all
+         * We need to create 3 tag teams for the next 3 months and all
          * tag teams should be Pending Employment and should NOT
          * have an ended employment date.
          */
-        for ($j = 1; $j <= 5; $j++) {
+        for ($j = 1; $j <= 3; $j++) {
             $start = $now->copy()->addMonths(3);
 
             $employment = EmploymentFactory::new()->started($start);
@@ -116,10 +116,10 @@ class TagTeamsTableSeeder extends Seeder
         }
 
         /**
-         * We need to create 5 tag teams that do not have an employment date.
+         * We need to create 3 tag teams that do not have an employment date.
          * These tag teams should be marked as being Unemployed.
          */
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 3; $i++) {
             TagTeamFactory::new()
                 ->unemployed()
                 ->create(['name' => 'Tag Team '.$eNum]);
