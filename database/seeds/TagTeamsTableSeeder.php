@@ -35,7 +35,6 @@ class TagTeamsTableSeeder extends Seeder
          * their started and ended employment date.
          */
         for ($j = $eNum; $j <= 10; $j++) {
-            dd($startDate);
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
