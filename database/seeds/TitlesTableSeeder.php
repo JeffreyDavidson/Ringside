@@ -40,10 +40,6 @@ class TitlesTableSeeder extends Seeder
 
             $activation = ActivationFactory::new()->started($start);
 
-            // if ($end->lessThan($now)) {
-            //     $activation = $activation->ended($end);
-            // }
-
             TitleFactory::new()
                 ->active($activation)
                 ->create(['name' => 'Title '.$eNum]);
