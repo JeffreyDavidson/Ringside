@@ -11,6 +11,7 @@ use MadWeb\Enum\Enum;
  * @method static RefereeStatus RELEASED()
  * @method static RefereeStatus RETIRED()
  * @method static RefereeStatus SUSPENDED()
+ * @method static RefereeStatus UNEMPLOYED()
  */
 final class RefereeStatus extends Enum
 {
