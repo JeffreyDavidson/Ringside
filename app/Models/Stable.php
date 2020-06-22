@@ -18,13 +18,6 @@ class Stable extends Model
         Concerns\Unguarded;
 
     /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [];
-
-    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -43,6 +36,65 @@ class Stable extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the wrestlers belonging to the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function wrestlers()
+    {
+        return $this->morphedByMany(Wrestler::class, 'member', 'stable_members');
+    }
+
+    /**
+     * Get all current wrestlers that are members of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function currentWrestlers()
+    {
+        return $this->wrestlers()->whereNull('left_at');
+    }
+
+    /**
+     * Get all previous wrestlers that were members of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function previousWrestlers()
+    {
+        return $this->wrestlers()->whereNotNull('left_at');
+    }
+
+    /**
+     * Get the tag teams belonging to the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function tagTeams()
+    {
+        return $this->morphedByMany(TagTeam::class, 'member');
+    }
+
+    /**
+     * Get all current tag teams that are members of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function currentTagTeams()
+    {
+        return $this->tagTeams()->whereNull('left_at');
+    }
+
+    /**
+     * Get all previous tag teams that were members of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function previousTagTeams()
+    {
+        return $this->tagTeams()->whereNotNull('left_at');
+    }
 
     public function disassemble()
     {
@@ -51,36 +103,6 @@ class Stable extends Model
         $this->touch();
 
         return $this;
-    }
-
-    /**
-     * Get the wrestlers belonging to the tag team.
-     *
-     * @return App\Eloquent\Relationships\LeaveableBelongsToMany
-     */
-    public function wrestlerHistory()
-    {
-        return $this->leaveableBelongsToMany(Wrestler::class, 'tag_team_wrestler', 'tag_team_id', 'wrestler_id');
-    }
-
-    /**
-     * Get all current wrestlers that are members of the tag team.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function currentWrestlers()
-    {
-        return $this->wrestlerHistory()->current();
-    }
-
-    /**
-     * Get all current wrestlers that are members of the tag team.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function previousWrestlers()
-    {
-        return $this->wrestlerHistory()->detached();
     }
 
     /**
