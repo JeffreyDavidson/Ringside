@@ -52,7 +52,7 @@ class WrestlerFactory extends BaseFactory
         }
 
         if ($this->tagTeam) {
-            $this->tagTeam->currentWrestlers()->attach($wrestler);
+            $wrestler->tagTeams()->attach($this->tagTeam);
         }
 
         $wrestler->save();

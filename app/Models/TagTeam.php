@@ -40,9 +40,10 @@ class TagTeam extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function wrestlerHistory()
+    public function wrestlers()
     {
-        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler', 'tag_team_id', 'wrestler_id')->withTimestamps();
+        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler', 'tag_team_id', 'wrestler_id')
+                    ->withTimestamps();
     }
 
     /**
@@ -52,7 +53,7 @@ class TagTeam extends Model
      */
     public function currentWrestlers()
     {
-        return $this->wrestlerHistory()
+        return $this->wrestlers()
                     ->whereNull('left_at')
                     ->limit(2);
     }
@@ -64,7 +65,7 @@ class TagTeam extends Model
      */
     public function previousWrestlers()
     {
-        return $this->wrestlerHistory()
+        return $this->wrestlers()
                     ->whereNotNull('left_at');
     }
 
@@ -73,7 +74,7 @@ class TagTeam extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function stableHistory()
+    public function stables()
     {
         return $this->leaveableMorphToMany(Stable::class, 'member');
     }
@@ -117,7 +118,7 @@ class TagTeam extends Model
      */
     public function addWrestlers($wrestlerIds, $dateJoined = null)
     {
-        $this->wrestlerHistory()->sync([
+        $this->wrestlers()->sync([
             $wrestlerIds[0] => ['joined_at' => $dateJoined],
             $wrestlerIds[1] => ['joined_at' => $dateJoined]
         ]);
