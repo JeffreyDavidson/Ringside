@@ -49,11 +49,7 @@ class TagTeamFactory extends BaseFactory
 
         $tagTeam->save();
 
-        // dd($tagTeam->wrestlers->count());
-        // dd(count($this->wrestlerFactory->getFactories()));
-
         if ($this->existingWrestlers) {
-            // Both wrestlers are already created and just need assigned as a tag team.
             foreach ($this->existingWrestlers as $wrestler) {
                 $wrestler->tagTeams()->attach($tagTeam);
             }
@@ -62,9 +58,6 @@ class TagTeamFactory extends BaseFactory
         } else {
             $this->generateTwoNewWrestlerFactories($tagTeam);
         }
-
-        // dd($tagTeam->wrestlers);
-        // dd($tagTeam->wrestlers->count());
 
         if ($this->softDeleted) {
             $tagTeam->delete();
@@ -218,8 +211,6 @@ class TagTeamFactory extends BaseFactory
     private function addWrestlerFactories(TagTeam $tagTeam)
     {
         foreach ($this->wrestlerFactory->getFactories() as $wrestlerFactory) {
-            // dd($wrestlerFactory);
-            // dd(Wrestler::count());
             $wrestlerCount = Wrestler::max('id') + 1;
 
             $wrestlerFactory->forTagTeam($tagTeam)->create(['name' => 'Wrestler '. $wrestlerCount]);
@@ -236,16 +227,11 @@ class TagTeamFactory extends BaseFactory
      */
     private function generateTwoNewWrestlerFactories(TagTeam $tagTeam)
     {
-
         for ($x = 1; $x <= 2; $x++) {
             $wrestlerCount = Wrestler::max('id') + 1;
             $wrestlerFactory = WrestlerFactory::new();
 
             $wrestlerFactory->forTagTeam($tagTeam)->create(['name' => 'Wrestler '. $wrestlerCount]);
         }
-
-        // dd(Wrestler::count());
-        // dd(Wrestler::with('tagTeams')->get()->toArray());
-        // dd($tagTeam->wrestlers->toArray());
     }
 }
