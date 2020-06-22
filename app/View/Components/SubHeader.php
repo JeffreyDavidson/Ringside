@@ -7,19 +7,15 @@ use Illuminate\View\Component;
 class SubHeader extends Component
 {
     public $title;
-    public $search;
-    public $filters;
 
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($title, $search = false, $filters = null)
+    public function __construct($title)
     {
         $this->title = $title;
-        $this->search = $search;
-        $this->filters = $filters;
     }
 
     /**
