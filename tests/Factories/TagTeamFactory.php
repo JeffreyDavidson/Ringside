@@ -110,10 +110,12 @@ class TagTeamFactory extends BaseFactory
             'status' => TagTeamStatus::PENDING_EMPLOYMENT,
         ]);
 
-        $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
+        $startDate = EmploymentFactory::new()->started(now()->addDay(1));
+
+        $clone = $clone->employed($employmentFactory ?? $startDate);
 
         $clone->wrestlerFactory = WrestlerFactory::new()
-            ->pendingEmployment($employmentFactory ?? $this->employmentFactory)
+            ->pendingEmployment($employmentFactory ?? $startDate)
             ->times(2);
 
         return $clone;
@@ -140,10 +142,15 @@ class TagTeamFactory extends BaseFactory
 
         $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
 
-        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new();
+        $clone->suspensionFactory = $suspensionFactory ??
+            SuspensionFactory::new()
+                            ->started(
+                                $employmentFactory ??
+                                $this->employmentFactory->startDate->addDay()
+                            );
 
         $clone->wrestlerFactory = WrestlerFactory::new()
-            ->suspended($employmentFactory ?? $this->employmentFactory, $suspensionFactory ?? $this->suspensionFactory)
+            ->suspended($clone->employmentFactory, $clone->suspensionFactory)
             ->times(2);
 
         return $clone;
@@ -155,12 +162,16 @@ class TagTeamFactory extends BaseFactory
             'status' => TagTeamStatus::RETIRED,
         ]);
 
-        $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
+        $now = now();
+        $start = $now->copy()->subDays(3);
+        $end = $now->copy()->subDays(1);
 
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new();
+        $clone = $clone->employed($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
+
+        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
 
         $clone->wrestlerFactory = WrestlerFactory::new()
-            ->retired($employmentFactory ?? $this->employmentFactory, $retirementFactory ?? $this->retirementFactory)
+            ->retired($clone->employmentFactory, $clone->retirementFactory)
             ->times(2);
 
         return $clone;
@@ -172,15 +183,14 @@ class TagTeamFactory extends BaseFactory
             'status' => TagTeamStatus::RELEASED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(3);
+        $end = $now->copy()->subDays(1);
 
         $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
 
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new();
-
         $clone->wrestlerFactory = WrestlerFactory::new()
-            ->released($employmentFactory ?? $this->employmentFactory)
+            ->released($clone->employmentFactory)
             ->times(2);
 
         return $clone;

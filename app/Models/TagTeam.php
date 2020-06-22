@@ -224,6 +224,16 @@ class TagTeam extends Model
     }
 
     /**
+     * Get the suspensions of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function suspensions()
+    {
+        return $this->morphMany(Suspension::class, 'suspendable');
+    }
+
+    /**
      * Get the current suspension of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
@@ -486,6 +496,15 @@ class TagTeam extends Model
         ])->withCasts(['released_at' => 'datetime']);
     }
 
+    /**
+     * Get the retirements of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function retirements()
+    {
+        return $this->morphMany(Retirement::class, 'retiree');
+    }
 
     /**
      * Get the current retirement of the model.
