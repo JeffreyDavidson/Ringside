@@ -11,7 +11,7 @@ trait CanBeTagTeamPartner
      *
      * @return App\Eloquent\Relationships\LeaveableBelongsToMany
      */
-    public function tagTeamHistory()
+    public function tagTeams()
     {
         return $this->leaveableBelongsToMany(TagTeam::class, 'tag_team_wrestler', 'wrestler_id', 'tag_team_id');
     }
