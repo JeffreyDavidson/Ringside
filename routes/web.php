@@ -1,6 +1,6 @@
 <?php
 
-Auth::loginUsingId(5);
+// Auth::loginUsingId(5);
 
 use App\Http\Controllers\DashboardController;
 

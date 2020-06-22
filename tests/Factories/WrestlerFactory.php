@@ -125,8 +125,9 @@ class WrestlerFactory extends BaseFactory
             'status' => WrestlerStatus::RETIRED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(2);
+        $end = $now->copy()->subDays(1);
 
         $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
 
@@ -141,8 +142,9 @@ class WrestlerFactory extends BaseFactory
             'status' => WrestlerStatus::RELEASED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(2);
+        $end = $now->copy()->subDays(1);
 
         $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
 
@@ -155,8 +157,9 @@ class WrestlerFactory extends BaseFactory
             'status' => WrestlerStatus::SUSPENDED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(2);
+        $end = $now->copy()->subDays(1);
 
         $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
 
@@ -171,12 +174,12 @@ class WrestlerFactory extends BaseFactory
             'status' => WrestlerStatus::INJURED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(2);
 
         $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
 
-        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($end);
+        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($start->copy()->addDay());
 
         return $clone;
     }

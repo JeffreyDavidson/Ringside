@@ -85,6 +85,15 @@ class ManagerFactory extends BaseFactory
         ];
     }
 
+    public function employ(EmploymentFactory $employmentFactory = null)
+    {
+        $clone = clone $this;
+
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new(now());
+
+        return $clone;
+    }
+
     public function employed(EmploymentFactory $employmentFactory = null)
     {
         $clone = clone $this;
@@ -159,10 +168,11 @@ class ManagerFactory extends BaseFactory
             'status' => ManagerStatus::SUSPENDED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(2);
+        $end = $now->copy()->subDays(1);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
 
         $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($end);
 
@@ -175,12 +185,12 @@ class ManagerFactory extends BaseFactory
             'status' => ManagerStatus::INJURED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(2);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
 
-        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($end);
+        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($start->copy()->addDay());
 
         return $clone;
     }

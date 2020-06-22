@@ -9,6 +9,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Faker\Generator as Faker;
 use Illuminate\Support\Collection;
 
 class SuspensionFactory extends BaseFactory
@@ -30,6 +31,48 @@ class SuspensionFactory extends BaseFactory
 
     /** @var Referee[] */
     public $referees;
+
+    public function create($attributes = [])
+    {
+        $suspendees = collect()
+            ->merge($this->tagTeams)
+            ->merge($this->wrestlers)
+            ->merge($this->referees)
+            ->merge($this->managers)
+            ->flatten(1);
+
+        $this->startDate = $this->startDate ?? now();
+
+        if (empty($suspendees)) {
+            throw new \Exception('Attempted to create a suspension without a suspendable entity');
+        }
+
+        $suspensions = new Collection();
+
+        foreach ($suspendees as $suspendee) {
+            $suspension = new Suspension();
+            $suspension->started_at = $this->startDate;
+            $suspension->ended_at = $this->endDate;
+            $suspension->suspendable()->associate($suspendee);
+            $suspension->save();
+            $suspensions->push($suspension);
+            if ($suspendee instanceof TagTeam && $suspendee->currentWrestlers->isNotEmpty()) {
+                $this->forWrestlers($suspendee->currentWrestlers)->create();
+            }
+        }
+
+        return $suspensions->count() === 1 ? $suspensions->first() : $suspensions;
+    }
+
+    public function make(array $extra = []): TagTeam
+    {
+        return parent::build($extra, 'make');
+    }
+
+    public function getDefaults(Faker $faker): array
+    {
+        return [];
+    }
 
     /**
      * @param string|Carbon $startDate
@@ -107,41 +150,9 @@ class SuspensionFactory extends BaseFactory
     public function forReferees($referees)
     {
         $clone = clone $this;
-        
+
         $clone->referees = $referees;
 
         return $clone;
-    }
-
-    public function create($attributes = [])
-    {
-        $suspendees = collect()
-            ->merge($this->tagTeams)
-            ->merge($this->wrestlers)
-            ->merge($this->referees)
-            ->merge($this->managers)
-            ->flatten(1);
-
-        $this->startDate = $this->startDate ?? now();
-
-        if (empty($suspendees)) {
-            throw new \Exception('Attempted to create a suspension without a suspendable entity');
-        }
-
-        $suspensions = new Collection();
-
-        foreach ($suspendees as $suspendee) {
-            $suspension = new Suspension();
-            $suspension->started_at = $this->startDate;
-            $suspension->ended_at = $this->endDate;
-            $suspension->suspendable()->associate($suspendee);
-            $suspension->save();
-            $suspensions->push($suspension);
-            if ($suspendee instanceof TagTeam && $suspendee->currentWrestlers->isNotEmpty()) {
-                $this->forWrestlers($suspendee->currentWrestlers)->create();
-            }
-        }
-
-        return $suspensions->count() === 1 ? $suspensions->first() : $suspensions;
     }
 }
