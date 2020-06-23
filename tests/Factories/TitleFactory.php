@@ -55,15 +55,22 @@ class TitleFactory extends BaseFactory
         ];
     }
 
+    public function activate(ActivationFactory $activationFactory = null)
+    {
+        $clone = clone $this;
+
+        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started();
+
+        return $clone;
+    }
+
     public function active(ActivationFactory $activationFactory = null): TitleFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TitleStatus::ACTIVE,
         ]);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now());
-
-        $clone->retirementFactory = null;
+        $clone = $clone->activate($activationFactory ?? null);
 
         return $clone;
     }
@@ -74,9 +81,11 @@ class TitleFactory extends BaseFactory
             'status' => TitleStatus::INACTIVE,
         ]);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->subDays(4))->ended(now()->subDays(1));
+        $now = now();
+        $start = $now->copy()->subDays(3);
+        $end = $now->copy()->subDays(1);
 
-        $clone->retirementFactory = null;
+        $clone = $clone->activate($activationFactory ?? ActivationFactory::new()->started($start)->ended($end));
 
         return $clone;
     }
@@ -87,7 +96,7 @@ class TitleFactory extends BaseFactory
             'status' => TitleStatus::FUTURE_ACTIVATION,
         ]);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->addDays(4));
+        $clone = $clone->activate($activationFactory ?? ActivationFactory::new()->started(now()->addDay(1)));
 
         return $clone;
     }
@@ -98,10 +107,11 @@ class TitleFactory extends BaseFactory
             'status' => TitleStatus::RETIRED,
         ]);
 
-        $start = now()->subMonths(1);
-        $end = now()->subDays(3);
+        $now = now();
+        $start = $now->copy()->subDays(3);
+        $end = $now->copy()->subDays(1);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started($start)->ended($end);
+        $clone = $clone->activate($activationFactory ?? ActivationFactory::new()->started($start)->ended($end));
 
         $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
 
