@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
+/**
+ * @group factories
+ */
 class WrestlerFactoryTest extends TestCase
 {
     use RefreshDatabase;

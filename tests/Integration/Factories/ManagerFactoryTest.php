@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\ManagerFactory;
 use Tests\TestCase;
 
+/**
+ * @group factories
+ */
 class ManagerFactoryTest extends TestCase
 {
     use RefreshDatabase;

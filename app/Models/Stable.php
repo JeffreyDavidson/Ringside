@@ -73,7 +73,7 @@ class Stable extends Model
      */
     public function tagTeams()
     {
-        return $this->morphedByMany(TagTeam::class, 'member');
+        return $this->morphedByMany(TagTeam::class, 'member', 'stable_members');
     }
 
     /**
@@ -96,10 +96,45 @@ class Stable extends Model
         return $this->tagTeams()->whereNotNull('left_at');
     }
 
+    /**
+     * Get the members belonging to the stable.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getMembersAttribute()
+    {
+        $wrestlers = $this->wrestlers;
+        $tagTeams = $this->tagTeams;
+
+        $members = $wrestlers->merge($tagTeams);
+
+        return $members;
+    }
+
+    /**
+     * Get all current members of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function currentMembers()
+    {
+        return $this->currentTagTeams()->currentWrestlers();
+    }
+
+    /**
+     * Get all previous members of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
+     */
+    public function previousMembers()
+    {
+        return $this->previousTagTeams()->previousWrestlers();
+    }
+
     public function disassemble()
     {
         $this->currentWrestlers()->detach();
-        $this->currentTagteams()->detach();
+        $this->currentTagTeams()->detach();
         $this->touch();
 
         return $this;
