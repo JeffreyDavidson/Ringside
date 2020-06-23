@@ -85,7 +85,7 @@ class WrestlerFactory extends BaseFactory
     {
         $clone = clone $this;
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new(now());
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started();
 
         return $clone;
     }

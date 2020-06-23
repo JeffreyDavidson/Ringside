@@ -84,7 +84,7 @@ class TagTeamFactory extends BaseFactory
     {
         $clone = clone $this;
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new();
+        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started();
 
         return $clone;
     }
@@ -142,12 +142,8 @@ class TagTeamFactory extends BaseFactory
 
         $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
 
-        $clone->suspensionFactory = $suspensionFactory ??
-            SuspensionFactory::new()
-                            ->started(
-                                $employmentFactory ??
-                                $this->employmentFactory->startDate->addDay()
-                            );
+        $suspensionDefaultStartDate = $clone->employmentFactory->startDate->copy()->addDay();
+        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($suspensionDefaultStartDate);
 
         $clone->wrestlerFactory = WrestlerFactory::new()
             ->suspended($clone->employmentFactory, $clone->suspensionFactory)

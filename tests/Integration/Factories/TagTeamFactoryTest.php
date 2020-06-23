@@ -136,7 +136,7 @@ class TagTeamFactoryTest extends TestCase
         $this->assertCount(1, $tagTeam->suspensions);
 
         $employment = $tagTeam->employments->first();
-        $suspension = $tagTeam->suspension->first();
+        $suspension = $tagTeam->suspensions->first();
 
         $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
@@ -144,12 +144,12 @@ class TagTeamFactoryTest extends TestCase
     /** @test */
     public function wrestlers_are_suspended_at_same_time_as_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->released()->create();
+        $tagTeam = TagTeamFactory::new()->suspended()->create();
 
         $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
             $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
             $this->assertCount(1, $wrestler->employments);
-            $this->assertCount(1, $wrestler->suspension);
+            $this->assertCount(1, $wrestler->suspensions);
 
             $tagTeamEmployment = $tagTeam->employments[0];
             $tagTeamSuspension = $tagTeam->suspensions[0];
@@ -174,7 +174,7 @@ class TagTeamFactoryTest extends TestCase
         $retirement = $tagTeam->retirements->first();
 
         $this->assertTrue($employment->started_at->isPast());
-        $this->assertNull($employment->ended_at);
+        $this->assertNotNull($employment->ended_at);
 
         $this->assertTrue($employment->started_at->lt($retirement->started_at));
     }
@@ -182,7 +182,7 @@ class TagTeamFactoryTest extends TestCase
     /** @test */
     public function wrestlers_are_retired_at_same_time_as_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->released()->create();
+        $tagTeam = TagTeamFactory::new()->retired()->create();
 
         $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
             $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
@@ -195,7 +195,8 @@ class TagTeamFactoryTest extends TestCase
             $wrestlerRetirement = $wrestler->retirements[0];
 
             $this->assertTrue($tagTeamEmployment->started_at->equalTo($wrestlerEmployment->started_at));
-            $this->assertTrue($tagTeamRetirement->ended_at->equalTo($wrestlerRetirement->ended_at));
+            $this->assertTrue($tagTeamEmployment->ended_at->equalTo($wrestlerEmployment->ended_at));
+            $this->assertTrue($tagTeamRetirement->started_at->equalTo($wrestlerRetirement->started_at));
         });
     }
 
