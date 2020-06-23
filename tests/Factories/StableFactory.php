@@ -55,17 +55,7 @@ class StableFactory extends BaseFactory
 
         $stable->save();
 
-        if ($this->existingWrestlers) {
-            foreach ($this->existingWrestlers as $wrestler) {
-                $wrestler->stableHistory()->attach($stable);
-            }
-        }
-
-        if ($this->existingTagTeams) {
-            foreach ($this->existingTagTeams as $tagTeam) {
-                $tagTeam->stableHistory()->attach($stable);
-            }
-        }
+        $this->getMembers($stable);
 
         if ($this->softDeleted) {
             $stable->delete();
@@ -87,10 +77,10 @@ class StableFactory extends BaseFactory
         ];
     }
 
-    public function pendingActivation(ActivationFactory $activationFactory = null)
+    public function futureActivation(ActivationFactory $activationFactory = null)
     {
         $clone = tap(clone $this)->overwriteDefaults([
-            'status' => StableStatus::PENDING_ACTIVATION
+            'status' => StableStatus::FUTURE_ACTIVATION
         ]);
 
         $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->addDays(2));
@@ -148,5 +138,30 @@ class StableFactory extends BaseFactory
         $clone->tagTeamFactory = $tagTeamFactory ?? TagTeamFactory::new()->bookable();
 
         return $clone;
+    }
+
+    private function getMembers($stable)
+    {
+        if ($this->existingWrestlers) {
+            foreach ($this->existingWrestlers as $wrestler) {
+                $wrestler->stables()->attach($stable);
+            }
+        } elseif ($this->wrestlerFactory) {
+            $this->addWrestlerFactories($stable);
+        } else {
+            $this->generateTwoNewWrestlerFactories($stable);
+        }
+
+        if ($this->existingTagTeams) {
+            foreach ($this->existingTagTeams as $tagTeam) {
+                $tagTeam->stables()->attach($stable);
+            }
+        } elseif ($this->tagTeamFactory) {
+            $this->addTagTeamFactories($stable);
+        } else {
+            $this->generateNewTagTeamFactory($stable);
+        }
+
+        return $this;
     }
 }

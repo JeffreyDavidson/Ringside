@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TitleFactory;
 use Tests\TestCase;
 
+/**
+ * @group factories
+ */
 class TitleFactoryTest extends TestCase
 {
     use RefreshDatabase;

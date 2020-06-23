@@ -2,12 +2,16 @@
 
 namespace Tests\Integration\Factories;
 
+use Tests\TestCase;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TagTeamFactory;
-use Tests\TestCase;
+use Tests\Factories\WrestlerFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * @group factories
+ */
 class TagTeamFactoryTest extends TestCase
 {
     use RefreshDatabase;
@@ -27,6 +31,26 @@ class TagTeamFactoryTest extends TestCase
     public function a_tag_team_always_consists_of_two_wrestlers()
     {
         $tagTeam = TagTeamFactory::new()->create();
+
+        $this->assertCount(2, $tagTeam->wrestlers);
+    }
+
+    /** @test */
+    public function existing_wrestlers_can_be_a_tag_team()
+    {
+        $wrestlers = WrestlerFactory::new()->times(2)->create();
+
+        $tagTeam = TagTeamFactory::new()->withExistingWrestlers($wrestlers)->create();
+
+        $this->assertCount(2, $tagTeam->wrestlers);
+        $this->assertTrue($tagTeam->wrestlers->contains($wrestlers[0]));
+        $this->assertTrue($tagTeam->wrestlers->contains($wrestlers[1]));
+    }
+
+    /** @test */
+    public function wrestlers_can_be_added_by_a_tag_team()
+    {
+        $tagTeam = TagTeamFactory::new()->withWrestlers()->create();
 
         $this->assertCount(2, $tagTeam->wrestlers);
     }

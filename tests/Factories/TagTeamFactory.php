@@ -200,8 +200,10 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function withExistingWrestlers(array $wrestlers)
+    public function withExistingWrestlers($wrestlers)
     {
+        $clone = clone $this;
+
         $clone->existingWrestlers = $wrestlers;
 
         return $clone;
