@@ -3,6 +3,7 @@
 namespace Tests\Factories;
 
 use App\Enums\TagTeamStatus;
+use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
@@ -22,6 +23,9 @@ class TagTeamFactory extends BaseFactory
 
     /** @var WrestlerFactory|null */
     public $wrestlerFactory;
+
+    /** @var Stable */
+    public $stable;
 
     /** @var array|null */
     public $existingWrestlers;
@@ -47,17 +51,13 @@ class TagTeamFactory extends BaseFactory
             $this->suspensionFactory->forTagTeam($tagTeam)->create();
         }
 
+        if ($this->stable) {
+            $tagTeam->stables()->attach($this->stable);
+        }
+
         $tagTeam->save();
 
-        if ($this->existingWrestlers) {
-            foreach ($this->existingWrestlers as $wrestler) {
-                $wrestler->tagTeams()->attach($tagTeam);
-            }
-        } elseif ($this->wrestlerFactory) {
-            $this->addWrestlerFactories($tagTeam);
-        } else {
-            $this->generateTwoNewWrestlerFactories($tagTeam);
-        }
+        $this->addWrestlers($tagTeam);
 
         if ($this->softDeleted) {
             $tagTeam->delete();
@@ -192,6 +192,14 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
+    public function forStable(Stable $stable)
+    {
+        $clone = clone $this;
+        $clone->stable = $stable;
+
+        return $clone;
+    }
+
     public function withWrestlers(WrestlerFactory $wrestlerFactory = null)
     {
         $clone = clone $this;
@@ -218,7 +226,26 @@ class TagTeamFactory extends BaseFactory
      */
     private function addWrestlerFactories(TagTeam $tagTeam)
     {
-        foreach ($this->wrestlerFactory->getFactories() as $wrestlerFactory) {
+        $wrestlerFactories = $this->wrestlerFactory->getFactories();
+
+        $count = count($wrestlerFactories);
+
+        if ($count > 2) {
+            // RETURN ERROR FOR TOO MANY WRESTLERS
+        }
+
+        $numberOfWrestlerFactoriesToCreate = 2 - $count;
+
+        $createdWrestlerFactories = [];
+
+        for ($i = 0; $i < $numberOfWrestlerFactoriesToCreate; $i++) {
+            $wrestlerCount = Wrestler::max('id') + 1;
+
+            $createdWrestlerFactories[] = WrestlerFactory::new()
+                    ->create(['name' => 'Wrestler '.$wrestlerCount]);
+        }
+
+        foreach ($createdWrestlerFactories as $wrestlerFactory) {
             $wrestlerCount = Wrestler::max('id') + 1;
 
             $wrestlerFactory->forTagTeam($tagTeam)->create(['name' => 'Wrestler '. $wrestlerCount]);
@@ -235,11 +262,56 @@ class TagTeamFactory extends BaseFactory
      */
     private function generateTwoNewWrestlerFactories(TagTeam $tagTeam)
     {
+        $wrestlers = [];
+
         for ($x = 1; $x <= 2; $x++) {
             $wrestlerCount = Wrestler::max('id') + 1;
-            $wrestlerFactory = WrestlerFactory::new();
 
-            $wrestlerFactory->forTagTeam($tagTeam)->create(['name' => 'Wrestler '. $wrestlerCount]);
+            $wrestlers[] = WrestlerFactory::new()
+                ->forTagTeam($tagTeam)
+                ->create(['name' => 'Wrestler '. $wrestlerCount]);
         }
+
+        return $wrestlers;
+    }
+
+    private function addWrestlers($tagTeam)
+    {
+        if ($this->existingWrestlers) {
+            $numberOfExistingWrestlers = count($this->existingWrestlers);
+            // dd($numberOfExistingWrestlers);
+
+            if ($numberOfExistingWrestlers > 2) {
+                // RETURN ERROR FOR TOO MANY WRESTLERS
+            }
+
+            $numberOfWrestlersToCreate = 2 - $numberOfExistingWrestlers;
+            // dd($numberOfWrestlersToCreate);
+
+            $createdWrestlers = [];
+
+            for ($i = 0; $i < $numberOfWrestlersToCreate; $i++) {
+                $wrestlerCount = Wrestler::max('id') + 1;
+
+                $createdWrestlers[] = WrestlerFactory::new()
+                    ->create(['name' => 'Wrestler '.$wrestlerCount]);
+            }
+
+            // dd($createdWrestlers);
+
+            $tagTeamOfWrestlers = collect($this->existingWrestlers)->merge($createdWrestlers);
+
+            if (count($tagTeamOfWrestlers) > 0) {
+                foreach ($tagTeamOfWrestlers as $wrestler) {
+                    $wrestler->tagTeams()->attach($tagTeam);
+                }
+            }
+        } elseif ($this->wrestlerFactory) {
+            $this->addWrestlerFactories($tagTeam);
+        } else {
+            $this->generateTwoNewWrestlerFactories($tagTeam);
+        }
+
+        return $this;
     }
 }
