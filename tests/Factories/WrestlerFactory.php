@@ -60,7 +60,7 @@ class WrestlerFactory extends BaseFactory
         }
 
         if ($this->stable) {
-            $wrestler->stables()->attach($this->stable);
+            $wrestler->stables()->attach($this->stable, ['joined_at' => now()]);
         }
 
         $wrestler->save();

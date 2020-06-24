@@ -55,7 +55,7 @@ class Event extends Model
      *
      * @return boolean
      */
-    public function getIsScheduledAttribute()
+    public function isScheduled()
     {
         return $this->date->isFuture();
     }
@@ -65,9 +65,19 @@ class Event extends Model
      *
      * @return boolean
      */
-    public function getIsPastAttribute()
+    public function isPast()
     {
         return $this->date->isPast();
+    }
+
+    /**
+     * Checks to see if the event is does not have a scheduled date.
+     *
+     * @return boolean
+     */
+    public function isUnScheduled()
+    {
+        return $this->date === null;
     }
 
     public function getFormattedDateAttribute()

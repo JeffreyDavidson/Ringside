@@ -11,7 +11,7 @@ class Wrestler extends SingleRosterMember
     use SoftDeletes,
         HasCustomRelationships,
         Concerns\HasAHeight,
-        Concerns\CanBeStableMember,
+        // Concerns\CanBeStableMember,
         Concerns\CanBeTagTeamPartner,
         Concerns\CanBeBooked,
         Concerns\Unguarded;
@@ -33,5 +33,10 @@ class Wrestler extends SingleRosterMember
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function stables()
+    {
+        return $this->morphToMany(Stable::class, 'member', 'stable_members');
     }
 }

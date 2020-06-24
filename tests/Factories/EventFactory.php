@@ -11,11 +11,20 @@ use Tests\Factories\VenueFactory;
 
 class EventFactory extends BaseFactory
 {
+    /** @var $softDeleted */
+    public $softDeleted = false;
+
     protected string $modelClass = Event::class;
 
     public function create(array $extra = []): Event
     {
-        return parent::build($extra);
+        $event = parent::build($extra);
+
+        if ($this->softDeleted) {
+            $event->delete();
+        }
+
+        return $event;
     }
 
     public function make(array $extra = []): Event
@@ -56,6 +65,14 @@ class EventFactory extends BaseFactory
         return tap(clone $this)->overwriteDefaults([
             'venue_id' => $venue->id,
         ]);
+    }
+
+    public function softDeleted(): EventFactory
+    {
+        $clone = clone $this;
+        $clone->softDeleted = true;
+
+        return $clone;
     }
 }
 

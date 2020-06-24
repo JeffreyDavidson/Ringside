@@ -8,7 +8,7 @@
     </x-subheader>
     <x-content>
         <x-portlet title="Edit Event Form">
-            <x-form.form method="patch" :action="route('events.update', $title)">
+            <x-form.form method="patch" :action="route('events.update', $event)">
                 <div class="kt-portlet__body">
                     @include('events.partials.form')
                 </div>

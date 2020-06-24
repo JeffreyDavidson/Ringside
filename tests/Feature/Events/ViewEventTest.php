@@ -5,13 +5,12 @@ namespace Tests\Feature\Events;
 use App\Enums\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventFactory;
-use Tests\Factories\VenueFactory;
 use Tests\TestCase;
 
 /**
  * @group events
  */
-class ViewEventSuccessConditionsTest extends TestCase
+class ViewEventTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -28,6 +27,27 @@ class ViewEventSuccessConditionsTest extends TestCase
 
         $response->assertViewIs('events.show');
         $this->assertTrue($response->data('event')->is($event));
+    }
+
+    /** @test */
+    public function a_basic_user_cannot_view_an_event_page()
+    {
+        $this->actAs(Role::BASIC);
+        $event = EventFactory::new()->create();
+
+        $response = $this->showRequest($event);
+
+        $response->assertForbidden();
+    }
+
+    /** @test */
+    public function a_guest_cannot_view_an_event_page()
+    {
+        $event = EventFactory::new()->create();
+
+        $response = $this->showRequest($event);
+
+        $response->assertRedirect(route('login'));
     }
 
     public function adminRoles()

@@ -46,6 +46,10 @@ class StableFactory extends BaseFactory
         }
 
         if ($this->wrestlerFactory) {
+            // dd($this->wrestlerFactory);
+            // foreach ($this->wrestlerFactory->getFactories() as $wrestlerFactory) {
+            //     $wrestlerFactory->forStable($stable)->create();
+            // }
             $this->wrestlerFactory->forStable($stable)->create();
         }
 
@@ -55,7 +59,7 @@ class StableFactory extends BaseFactory
 
         $stable->save();
 
-        $this->getMembers($stable);
+        $this->generateMembers($stable);
 
         if ($this->softDeleted) {
             $stable->delete();
@@ -75,6 +79,15 @@ class StableFactory extends BaseFactory
             'name' => Str::title($faker->words(2, true)),
             'status' => StableStatus::__default,
         ];
+    }
+
+    public function activate(ActivationFactory $activationFactory = null)
+    {
+        $clone = clone $this;
+
+        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started();
+
+        return $clone;
     }
 
     public function futureActivation(ActivationFactory $activationFactory = null)
@@ -97,20 +110,23 @@ class StableFactory extends BaseFactory
 
     public function active(ActivationFactory $activationFactory = null)
     {
-        $clone = clone $this;
+        $clone = tap(clone $this)->overwriteDefaults([
+            'status' => StableStatus::ACTIVE,
+        ]);
 
-        $clone->attributes['status'] = StableStatus::ACTIVE;
+        $clone = $clone->activate($activationFactory ?? null);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new();
+        $clone->wrestlerFactory = WrestlerFactory::new()
+            ->employ(EmploymentFactory::new()->started($activationFactory->startDate ?? null));
 
         return $clone;
     }
 
     public function inactive(ActivationFactory $activationFactory = null)
     {
-        $clone = clone $this;
-
-        $clone->attributes['status'] = StableStatus::INACTIVE;
+        $clone = tap(clone $this)->overwriteDefaults([
+            'status' => StableStatus::INACTIVE,
+        ]);
 
         $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->subMonths(3))->ended(now()->subDay(1));
 
@@ -146,26 +162,58 @@ class StableFactory extends BaseFactory
         return $clone;
     }
 
-    private function getMembers($stable)
+    public function withExistingWrestlers($wrestlers)
     {
-        if ($this->existingWrestlers) {
-            foreach ($this->existingWrestlers as $wrestler) {
-                $wrestler->stables()->attach($stable);
-            }
-        } elseif ($this->wrestlerFactory) {
-            $this->addWrestlerFactories($stable);
-        } else {
-            $this->generateTwoNewWrestlerFactories($stable);
-        }
+        $clone = clone $this;
 
-        if ($this->existingTagTeams) {
-            foreach ($this->existingTagTeams as $tagTeam) {
-                $tagTeam->stables()->attach($stable);
-            }
-        } elseif ($this->tagTeamFactory) {
-            $this->addTagTeamFactories($stable);
+        $clone->existingWrestlers = collect($wrestlers);
+
+        return $clone;
+    }
+
+    public function withExistingTagTeams($tagTeams)
+    {
+        $clone = clone $this;
+
+        $clone->existingTagTeams = collect($tagTeams);
+
+        return $clone;
+    }
+
+    private function generateMembers($stable)
+    {
+        $existingWrestlersCount = $this->existingWrestlers ? count($this->existingWrestlers) : 0;
+        $wrestlersFactoriesCount = $this->wrestlerFactory ? count($this->wrestlerFactory->getFactories()) : 0;
+        $possibleWrestlersCount = $existingWrestlersCount + $wrestlersFactoriesCount;
+
+        $existingTagTeamsCount = $this->existingTagTeams ? count($this->existingTagTeams) : 0;
+        $tagTeamFactoriesCount = $this->tagTeamFactory ? count($this->tagTeamFactory->getFactories()) : 0;
+        $possibleTagTeamsCount = $existingTagTeamsCount + $tagTeamFactoriesCount;
+
+        $totalPossibleMembersCount = $possibleWrestlersCount + $possibleTagTeamsCount * 2;
+
+        if ($totalPossibleMembersCount >= 3) {
+            // There are the minimum requirements for members of a stable.
+            dd('enough members');
         } else {
-            $this->generateNewTagTeamFactory($stable);
+            $wrestlersToAddToStable = collect();
+            // We know by hitting the else that there isn't enough members for this stable so we know we need to create them and add them to the stable or if they already exist then just add them.
+            if ($existingWrestlersCount >= 1) {
+                $wrestlersToAddToStable[] = $this->existingWrestlers;
+            } elseif ($wrestlersFactoriesCount >= 1) {
+                foreach ($this->wrestlerFactory->getFactories() as $wrestlerFactory) {
+                    $wrestlersToAddToStable[] = $wrestlerFactory->create();
+                }
+            } else {
+                $createdWrestlers = WrestlerFactory::new()->times(3)->create();
+                // dd($createdWrestlers);
+                $newCollection = $wrestlersToAddToStable->concat($createdWrestlers);
+            }
+
+            foreach ($newCollection as $wrestler) {
+                // $wrestler->stables()->save($stable, ['joined_at' => now()]);
+                $wrestler->stables()->attach($stable, ['joined_at' => now()]);
+            }
         }
 
         return $this;
