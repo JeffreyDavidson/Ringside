@@ -15,9 +15,9 @@ trait CanBeStableMember
      *
      * @return App\Eloquent\Relationships\LeaveableMorphToMany
      */
-    public function stableHistory()
+    public function stables()
     {
-        return $this->leaveableMorphToMany(Stable::class, 'member')->using(Member::class);
+        return $this->morphToMany(Stable::class, 'member')->using(Member::class);
     }
 
     /**

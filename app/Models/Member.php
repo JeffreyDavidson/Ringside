@@ -2,23 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 class Member extends MorphPivot
 {
+    use Unguarded;
+
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'members';
-
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
-    protected $guarded = [];
+    protected $table = 'stable_members';
 
     /**
      * The attributes that should be mutated to dates.

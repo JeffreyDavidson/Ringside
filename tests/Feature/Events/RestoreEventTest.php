@@ -10,9 +10,21 @@ use Tests\TestCase;
 /**
  * @group events
  */
-class RestoreEventFailureConditionsTest extends TestCase
+class RestoreEventTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** @test */
+    public function an_administrator_can_restore_a_deleted_event()
+    {
+        $this->actAs(Role::ADMINISTRATOR);
+        $event = EventFactory::new()->softDeleted()->create();
+
+        $response = $this->restoreRequest($event);
+
+        $response->assertRedirect(route('events.index'));
+        $this->assertNull($event->fresh()->deleted_at);
+    }
 
     /** @test */
     public function a_basic_user_cannot_restore_a_deleted_event()

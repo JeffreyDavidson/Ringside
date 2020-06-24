@@ -10,7 +10,7 @@ use Tests\TestCase;
 /**
  * @group events
  */
-class DeleteEventSuccessConditionsTest extends TestCase
+class DeleteEventTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -33,6 +33,27 @@ class DeleteEventSuccessConditionsTest extends TestCase
 
         $this->deleteRequest($event);
 
-        $this->assertSoftDeleted($event->name);
+        $this->assertSoftDeleted($event);
+    }
+
+    /** @test */
+    public function a_basic_user_cannot_delete_an_event()
+    {
+        $this->actAs(Role::BASIC);
+        $event = EventFactory::new()->create();
+
+        $response = $this->deleteRequest($event);
+
+        $response->assertForbidden();
+    }
+
+    /** @test */
+    public function a_guest_cannot_delete_an_event()
+    {
+        $event = EventFactory::new()->create();
+
+        $response = $this->deleteRequest($event);
+
+        $response->assertRedirect(route('login'));
     }
 }

@@ -49,7 +49,7 @@ class ActivationFactory extends BaseFactory
             $activation->save();
             $activations->push($activation);
             if ($activator instanceof Stable && $activator->currentWrestlers->isNotEmpty()) {
-                // $this->forWrestlers($activation->currentWrestlers)->create();
+                $this->forWrestlers($activation->currentWrestlers)->create();
                 // Stable has wrestlers involved so attach a joined at to the stable.
             }
             if ($activator instanceof Stable && $activator->currentTagTeams->isNotEmpty()) {

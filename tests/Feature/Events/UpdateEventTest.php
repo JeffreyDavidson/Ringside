@@ -11,7 +11,7 @@ use Tests\TestCase;
 /**
  * @group events
  */
-class UpdateEventFailureConditionsTest extends TestCase
+class UpdateEventTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -29,6 +29,34 @@ class UpdateEventFailureConditionsTest extends TestCase
             'venue_id' => VenueFactory::new()->create()->id,
             'preview' => 'This is an event preview.',
         ], $overrides);
+    }
+
+    /** @test */
+    public function an_administrator_can_view_the_form_for_editing_a_scheduled_event()
+    {
+        $this->actAs(Role::ADMINISTRATOR);
+        $event = EventFactory::new()->scheduled()->create();
+
+        $response = $this->get(route('events.edit', $event));
+
+        $response->assertViewIs('events.edit');
+        $this->assertTrue($response->data('event')->is($event));
+    }
+
+    /** @test */
+    public function an_administrator_can_update_a_scheduled_event()
+    {
+        $this->actAs(Role::ADMINISTRATOR);
+        $event = EventFactory::new()->scheduled()->create();
+
+        $response = $this->patch(route('events.update', $event), $this->validParams());
+
+        $response->assertRedirect(route('events.index'));
+        tap($event->fresh(), function ($event) {
+            $this->assertEquals('Example Event Name', $event->name);
+            $this->assertEquals(now()->toDateTimeString(), $event->date);
+            $this->assertEquals('This is an event preview.', $event->preview);
+        });
     }
 
     /** @test */
@@ -56,7 +84,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_an_event()
     {
-        $event = factory(Event::class)->create();
+        $event = EventFactory::new()->create();
 
         $response = $this->get(route('events.edit', $event));
 
@@ -66,7 +94,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_an_event()
     {
-        $event = factory(Event::class)->create();
+        $event = EventFactory::new()->create();
 
         $response = $this->patch(route('events.update', $event), $this->validParams());
 
@@ -77,7 +105,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function a_past_event_cannot_be_edited()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('past')->create();
+        $event = EventFactory::new()->past()->create();
 
         $response = $this->get(route('events.edit', $event));
 
@@ -88,7 +116,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function a_past_event_cannot_be_updated()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('past')->create();
+        $event = EventFactory::new()->past()->create();
 
         $response = $this->patch(route('events.update', $event), $this->validParams());
 
@@ -99,7 +127,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function an_event_name_must_be_a_string_if_filled()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('scheduled')->create();
+        $event = EventFactory::new()->scheduled()->create();
 
         $response = $this->from(route('events.edit', $event))
                         ->patch(route('events.update', $event), $this->validParams([
@@ -114,8 +142,8 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function an_event_name_must_be_unique()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('scheduled')->create();
-        factory(Event::class)->states('past')->create(['name' => 'Example Event Name']);
+        $event = EventFactory::new()->scheduled()->create();
+        EventFactory::new()->past()->create(['name' => 'Example Event Name']);
 
         $response = $this->from(route('events.edit', $event))
                         ->patch(route('events.update', $event), $this->validParams([
@@ -130,7 +158,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function an_event_date_must_be_a_string_if_filled()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('scheduled')->create();
+        $event = EventFactory::new()->scheduled()->create();
 
         $response = $this->from(route('events.edit', $event))
                         ->patch(route('events.update', $event), $this->validParams([
@@ -145,7 +173,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function an_event_date_must_be_in_datetime_format_if_filled()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('scheduled')->create();
+        $event = EventFactory::new()->scheduled()->create();
 
         $response = $this->from(route('events.edit', $event))
                         ->patch(route('events.update', $event), $this->validParams([
@@ -160,7 +188,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function an_event_venue_id_must_be_an_integer_if_filled()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('scheduled')->create();
+        $event = EventFactory::new()->scheduled()->create();
 
         $response = $this->from(route('events.edit', $event))
                         ->patch(route('events.update', $event), $this->validParams([
@@ -175,7 +203,7 @@ class UpdateEventFailureConditionsTest extends TestCase
     public function an_event_venue_id_must_exist_if_filled()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = factory(Event::class)->states('scheduled')->create();
+        $event = EventFactory::new()->scheduled()->create();
 
         $response = $this->from(route('events.edit', $event))
                         ->patch(route('events.update', $event), $this->validParams([

@@ -34,32 +34,32 @@ class StableFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_stables_active_employment_is_in_the_past()
+    public function a_stables_active_activation_is_in_the_past()
     {
         $stable = StableFactory::new()->active()->create();
 
         $this->assertEquals(StableStatus::ACTIVE, $stable->status);
         $this->assertCount(1, $stable->activations);
 
-        $employment = $stable->activations->first();
+        $activation = $stable->activations->first();
 
-        $this->assertTrue($employment->started_at->isPast());
-        $this->assertNull($employment->ended_at);
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertNull($activation->ended_at);
     }
 
     /** @test */
-    public function a_active_stable_employed_at_same_current_datetime_as_stable()
+    public function a_active_stable_activated_at_same_current_datetime_employment_as_stable()
     {
         $stable = StableFactory::new()->active()->create();
 
-        $stable->wrestlers->each(function ($wrestler) use ($stable) {
-            $this->assertEquals(WrestlerStatus::ACTIVE, $wrestler->status);
-            $this->assertCount(1, $wrestler->activations);
+        $stable->members->each(function ($member) use ($stable) {
+            $this->assertEquals(class_basename(get_class($member)).'Status::ACTIVE', $member->status);
+            $this->assertCount(1, $member->employments);
 
             $stableEmployment = $stable->activations[0];
-            $wrestlerEmployment = $wrestler->activations[0];
+            $memberEmployment = $member->employments[0];
 
-            $this->assertTrue($stableEmployment->started_at->equalTo($wrestlerEmployment->started_at));
+            $this->assertTrue($stableEmployment->started_at->equalTo($memberEmployment->started_at));
             $this->assertNull($stableEmployment->ended_at);
         });
     }
