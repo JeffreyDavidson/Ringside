@@ -98,9 +98,10 @@ class StableFactory extends BaseFactory
     public function active(ActivationFactory $activationFactory = null)
     {
         $clone = clone $this;
+
         $clone->attributes['status'] = StableStatus::ACTIVE;
+
         $clone->activationFactory = $activationFactory ?? ActivationFactory::new();
-        $clone->retirementFactory = null;
 
         return $clone;
     }
@@ -108,7 +109,9 @@ class StableFactory extends BaseFactory
     public function inactive(ActivationFactory $activationFactory = null)
     {
         $clone = clone $this;
+
         $clone->attributes['status'] = StableStatus::INACTIVE;
+
         $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->subMonths(3))->ended(now()->subDay(1));
 
         return $clone;
@@ -117,8 +120,11 @@ class StableFactory extends BaseFactory
     public function retired(ActivationFactory $activationFactory = null, RetirementFactory $retirementFactory = null)
     {
         $clone = clone $this;
+
         $clone->attributes['status'] = StableStatus::RETIRED;
+
         $clone->activationFactory = ActivationFactory::new()->started(now()->subMonths(1))->ended(now()->subDays(3));
+
         $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started(now()->subDays(3));
 
         return $clone;

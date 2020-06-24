@@ -2,10 +2,11 @@
 
 namespace Tests\Factories;
 
+use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Support\Str;
 use App\Enums\WrestlerStatus;
+use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 
@@ -25,6 +26,9 @@ class WrestlerFactory extends BaseFactory
 
     /** @var TagTeam */
     public $tagTeam;
+
+    /** @var Stable */
+    public $stable;
 
     /** @var $softDeleted */
     public $softDeleted = false;
@@ -53,6 +57,10 @@ class WrestlerFactory extends BaseFactory
 
         if ($this->tagTeam) {
             $wrestler->tagTeams()->attach($this->tagTeam);
+        }
+
+        if ($this->stable) {
+            $wrestler->stables()->attach($this->stable);
         }
 
         $wrestler->save();
@@ -188,6 +196,14 @@ class WrestlerFactory extends BaseFactory
     {
         $clone = clone $this;
         $clone->tagTeam = $tagTeam;
+
+        return $clone;
+    }
+
+    public function forStable(Stable $stable)
+    {
+        $clone = clone $this;
+        $clone->stable = $stable;
 
         return $clone;
     }

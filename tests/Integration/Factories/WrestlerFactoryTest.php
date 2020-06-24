@@ -4,6 +4,8 @@ namespace Tests\Integration\Factories;
 
 use App\Enums\WrestlerStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\StableFactory;
+use Tests\Factories\TagTeamFactory;
 use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
@@ -125,5 +127,25 @@ class WrestlerFactoryTest extends TestCase
 
         $this->assertEquals(WrestlerStatus::UNEMPLOYED, $wrestler->status);
         $this->assertCount(0, $wrestler->employments);
+    }
+
+    /** @test */
+    public function a_wrestler_can_be_on_a_tag_team()
+    {
+        $tagTeam = TagTeamFactory::new()->create();
+
+        $wrestler = WrestlerFactory::new()->forTagTeam($tagTeam)->create();
+
+        $this->assertTrue($tagTeam->wrestlers->contains($wrestler));
+    }
+
+    /** @test */
+    public function a_wrestler_can_be_on_a_member_of_a_stable()
+    {
+        $stable = StableFactory::new()->create();
+
+        $wrestler = WrestlerFactory::new()->forStable($stable)->create();
+
+        $this->assertTrue($stable->wrestlers->contains($wrestler));
     }
 }

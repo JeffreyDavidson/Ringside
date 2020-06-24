@@ -2,12 +2,13 @@
 
 namespace Tests\Integration\Factories;
 
-use Tests\TestCase;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\StableFactory;
 use Tests\Factories\TagTeamFactory;
 use Tests\Factories\WrestlerFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group factories
@@ -242,5 +243,15 @@ class TagTeamFactoryTest extends TestCase
             $this->assertEquals(WrestlerStatus::UNEMPLOYED, $wrestler->status);
             $this->assertCount(0, $wrestler->employments);
         });
+    }
+
+    /** @test */
+    public function a_tag_team_can_be_on_a_member_of_a_stable()
+    {
+        $stable = StableFactory::new()->create();
+
+        $tagTeam = TagTeamFactory::new()->forStable($stable)->create();
+
+        $this->assertTrue($stable->tagTeams->contains($tagTeam));
     }
 }
