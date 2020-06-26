@@ -3,10 +3,11 @@
 namespace Tests\Feature\Events;
 
 use App\Enums\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 use Tests\Factories\EventFactory;
 use Tests\Factories\VenueFactory;
-use Tests\TestCase;
+use App\Http\Requests\Events\UpdateRequest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group events
@@ -124,93 +125,12 @@ class UpdateEventTest extends TestCase
     }
 
     /** @test */
-    public function an_event_name_must_be_a_string_if_filled()
+    public function update_validates_using_a_form_request()
     {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
-
-        $response = $this->from(route('events.edit', $event))
-                        ->patch(route('events.update', $event), $this->validParams([
-                            'name' => ['not-a-string'],
-                        ]));
-
-        $response->assertRedirect(route('events.edit', $event));
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function an_event_name_must_be_unique()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
-        EventFactory::new()->past()->create(['name' => 'Example Event Name']);
-
-        $response = $this->from(route('events.edit', $event))
-                        ->patch(route('events.update', $event), $this->validParams([
-                            'name' => 'Example Event Name',
-                        ]));
-
-        $response->assertRedirect(route('events.edit', $event));
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function an_event_date_must_be_a_string_if_filled()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
-
-        $response = $this->from(route('events.edit', $event))
-                        ->patch(route('events.update', $event), $this->validParams([
-                            'date' => ['not-a-string'],
-                        ]));
-
-        $response->assertRedirect(route('events.edit', $event));
-        $response->assertSessionHasErrors('date');
-    }
-
-    /** @test */
-    public function an_event_date_must_be_in_datetime_format_if_filled()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
-
-        $response = $this->from(route('events.edit', $event))
-                        ->patch(route('events.update', $event), $this->validParams([
-                            'date' => now()->toDateString(),
-                        ]));
-
-        $response->assertRedirect(route('events.edit', $event));
-        $response->assertSessionHasErrors('date');
-    }
-
-    /** @test */
-    public function an_event_venue_id_must_be_an_integer_if_filled()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
-
-        $response = $this->from(route('events.edit', $event))
-                        ->patch(route('events.update', $event), $this->validParams([
-                            'venue_id' => 'not-an_integer',
-                        ]));
-
-        $response->assertRedirect(route('events.edit', $event));
-        $response->assertSessionHasErrors('venue_id');
-    }
-
-    /** @test */
-    public function an_event_venue_id_must_exist_if_filled()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
-
-        $response = $this->from(route('events.edit', $event))
-                        ->patch(route('events.update', $event), $this->validParams([
-                            'venue_id' => 999,
-                        ]));
-
-        $response->assertRedirect(route('events.edit', $event));
-        $response->assertSessionHasErrors('venue_id');
+        $this->assertActionUsesFormRequest(
+            EventsController::class,
+            'update',
+            UpdateRequest::class
+        );
     }
 }

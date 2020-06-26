@@ -7,6 +7,8 @@ use Tests\TestCase;
 use App\Models\Event;
 use Tests\Factories\EventFactory;
 use Tests\Factories\VenueFactory;
+use App\Http\Requests\Events\StoreRequest;
+use App\Http\Controllers\Events\EventsController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
@@ -62,39 +64,13 @@ class CreateEventTest extends TestCase
     }
 
     /** @test */
-    public function an_event_date_is_optional()
+    public function store_validates_using_a_form_request()
     {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->post(route('events.store'), $this->validParams([
-            'date' => '',
-        ]));
-
-        $response->assertSessionDoesntHaveErrors('date');
-    }
-
-    /** @test */
-    public function an_event_venue_id_is_optional()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->post(route('events.store'), $this->validParams([
-            'venue_id' => '',
-        ]));
-
-        $response->assertSessionDoesntHaveErrors('venue_id');
-    }
-
-    /** @test */
-    public function an_event_preview_is_optional()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->post(route('events.store'), $this->validParams([
-            'preview' => '',
-        ]));
-
-        $response->assertSessionDoesntHaveErrors('preview');
+        $this->assertActionUsesFormRequest(
+            EventsController::class,
+            'store',
+            StoreRequest::class
+        );
     }
 
     /** @test */
@@ -131,104 +107,5 @@ class CreateEventTest extends TestCase
         $response = $this->post(route('events.store'), $this->validParams());
 
         $response->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function an_event_name_is_required()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'name' => '',
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function an_event_name_must_be_a_string()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'name' => [],
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function an_event_name_must_be_unique()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        EventFactory::new()->create(['name' => 'Example Event Name']);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'name' => 'Example Event Name',
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('name');
-    }
-
-    /** @test */
-    public function an_event_date_must_be_a_string_if_present()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'date' => [],
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('date');
-    }
-
-    /** @test */
-    public function an_event_date_must_be_in_datetime_format_if_filled()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'date' => now()->toDateString(),
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('date');
-    }
-
-    /** @test */
-    public function an_event_venue_id_must_be_an_integer_if_filled()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'venue_id' => 'not-an-integer',
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('venue_id');
-    }
-
-    /** @test */
-    public function an_event_venue_id_must_exist()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $response = $this->from(route('events.create'))
-                        ->post(route('events.store'), $this->validParams([
-                            'venue_id' => 99999999,
-                        ]));
-
-        $response->assertRedirect(route('events.create'));
-        $response->assertSessionHasErrors('venue_id');
     }
 }
