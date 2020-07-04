@@ -13,8 +13,10 @@ class Wrestler extends SingleRosterMember
         Concerns\HasAHeight,
         // Concerns\CanBeStableMember,
         Concerns\CanBeTagTeamPartner,
-        Concerns\CanBeBooked,
-        Concerns\Unguarded;
+        Concerns\CanBeBooked;
+    // Concerns\Unguarded;
+
+    protected $fillable = ['name', 'height', 'weight', 'hometown', 'signature_move'];
 
     /**
      * The attributes that should be cast to native types.

@@ -21,7 +21,7 @@ class TagTeamTest extends TestCase
     /** @test */
     public function a_stable_has_a_name()
     {
-        $stable = factory(Stable::class)->create(['name' => 'Example Stable Name']);
+        $stable = StableFactory::new()->create(['name' => 'Example Stable Name']);
 
         $this->assertEquals('Example Stable Name', $stable->name);
     }
@@ -32,7 +32,7 @@ class TagTeamTest extends TestCase
         $now = Carbon::now();
         Carbon::setTestNow($now);
 
-        $stable = factory(Stable::class)->create();
+        $stable = StableFactory::new()->create();
 
         $stable->employ();
 
@@ -42,7 +42,7 @@ class TagTeamTest extends TestCase
     /** @test */
     public function a_stable_can_add_wrestlers()
     {
-        $stable = factory(Stable::class)->create();
+        $stable = StableFactory::new()->create();
         $wrestler = factory(Wrestler::class)->create();
 
         $stable->addWrestlers($wrestler);
@@ -54,7 +54,7 @@ class TagTeamTest extends TestCase
     /** @test */
     public function a_stable_can_add_tag_teams()
     {
-        $stable = factory(Stable::class)->create();
+        $stable = StableFactory::new()->create();
         $tagTeam = factory(TagTeam::class)->create();
 
         $stable->addTagTeams($tagTeam);
@@ -66,8 +66,8 @@ class TagTeamTest extends TestCase
     /** @test */
     public function a_stable_can_add_managers()
     {
-        $stable = factory(Stable::class)->create();
-        $manager = factory(Manager::class)->create();
+        $stable = StableFactory::new()->create();
+        $manager = ManagerFactory::new()->create();
 
         $stable->addManagers($manager);
 
@@ -78,7 +78,7 @@ class TagTeamTest extends TestCase
     /** @test */
     public function a_stable_can_disassemble()
     {
-        $stable = factory(Stable::class)->create();
+        $stable = StableFactory::new()->create();
         $wrestlers = factory(Wrestler::class, 3)->create();
         $stable->addWrestlers($wrestlers);
 

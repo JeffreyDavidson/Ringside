@@ -17,7 +17,7 @@ class StableObserverTest extends TestCase
     /** @test */
     public function a_stable_has_a_default_status_of_pending_employment()
     {
-        $stable = factory(Stable::class)->create();
+        $stable = StableFactory::new()->create();
 
         $this->assertEquals('pending-employment', $stable->status);
     }
@@ -25,7 +25,7 @@ class StableObserverTest extends TestCase
     /** @test */
     public function an_employed_stable_with_a_current_retirement_has_a_status_of_retired()
     {
-        $stable = factory(Stable::class)->states('retired')->create();
+        $stable = StableFactory::new()->states('retired')->create();
 
         $this->assertEquals('retired', $stable->status);
     }
@@ -33,7 +33,7 @@ class StableObserverTest extends TestCase
     /** @test */
     public function a_stable_with_a_current_suspension_has_a_status_of_suspended()
     {
-        $stable = factory(Stable::class)->states('suspended')->create();
+        $stable = StableFactory::new()->states('suspended')->create();
 
         $this->assertEquals('suspended', $stable->status);
     }
@@ -41,7 +41,7 @@ class StableObserverTest extends TestCase
     /** @test */
     public function a_stable_with_a_current_injury_has_a_status_of_injured()
     {
-        $stable = factory(Stable::class)->states('injured')->create();
+        $stable = StableFactory::new()->states('injured')->create();
 
         $this->assertEquals('injured', $stable->status);
     }
@@ -49,7 +49,7 @@ class StableObserverTest extends TestCase
     /** @test */
     public function a_stable_employed_at_the_current_time_or_in_the_past_without_being_currently_injured_or_retired_or_suspended_has_a_status_of_bookable()
     {
-        $stable = factory(Stable::class)->states('employed')->create();
+        $stable = StableFactory::new()->states('employed')->create();
 
         $this->assertEquals('bookable', $stable->status);
     }

@@ -23,7 +23,7 @@ class CanBeStableMemberTest extends TestCase
     public function a_model_has_a_current_stable_after_joining($modelClass)
     {
         $model = factory($modelClass)->states('bookable')->create();
-        $stable = factory(Stable::class)->states('active')->create();
+        $stable = StableFactory::new()->states('active')->create();
 
         $model->stableHistory()->attach($stable);
 
@@ -38,7 +38,7 @@ class CanBeStableMemberTest extends TestCase
     public function a_stable_remains_in_a_models_history_after_leaving($modelClass)
     {
         $model = factory($modelClass)->create();
-        $stable = factory(Stable::class)->create();
+        $stable = StableFactory::new()->create();
         $model->stableHistory()->attach($stable);
         $model->stableHistory()->detach($stable);
 

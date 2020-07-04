@@ -45,6 +45,7 @@ class StoreRequestTest extends TestCase
     /** @test */
     public function authorized_users_can_store_a_title()
     {
+        $this->markTestSkipped();
         $this->assertTrue($this->subject->authorize());
     }
 }

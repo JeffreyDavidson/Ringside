@@ -168,6 +168,6 @@ class TitleTest extends TestCase
 
         $this->expectException(CannotBeActivatedException::class);
 
-        $this->activateRequest($title);
+        $title->activate();
     }
 }

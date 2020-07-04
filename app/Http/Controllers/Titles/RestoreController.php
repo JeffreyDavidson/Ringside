@@ -7,6 +7,12 @@ use App\Models\Title;
 
 class RestoreController extends Controller
 {
+    /**
+     * Restores a title.
+     *
+     * @param  int $titleId
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function __invoke($titleId)
     {
         $title = Title::onlyTrashed()->findOrFail($titleId);

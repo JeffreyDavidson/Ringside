@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Events;
 
+use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
-use App\Models\Event;
 
 class EventsController extends Controller
 {
@@ -36,7 +36,7 @@ class EventsController extends Controller
     /**
      * Create a new event.
      *
-     * @param  App\Http\Requests\StoreRequest  $request
+     * @param  \App\Http\Requests\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
@@ -49,7 +49,7 @@ class EventsController extends Controller
     /**
      * Show the event.
      *
-     * @param  App\Models\Event  $event
+     * @param  \App\Models\Event  $event
      * @return \Illuminate\Http\Response
      */
     public function show(Event $event)
@@ -76,8 +76,8 @@ class EventsController extends Controller
     /**
      * Create a new event.
      *
-     * @param  App\Http\Requests\Events\UpdateRequest  $request
-     * @param  App\Models\Event  $event
+     * @param  \App\Http\Requests\Events\UpdateRequest  $request
+     * @param  \App\Models\Event  $event
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Event $event)
@@ -90,7 +90,7 @@ class EventsController extends Controller
     /**
      * Delete an event.
      *
-     * @param  App\Models\Event  $event
+     * @param  \App\Models\Event  $event
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Event $event)
@@ -108,7 +108,7 @@ class EventsController extends Controller
      * @param  int  $eventId
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function restore($eventId)
+    public function restore(int $eventId)
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 

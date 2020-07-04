@@ -2,23 +2,37 @@
 
 namespace App\Http\Requests\Titles;
 
-use App\Policies\TitlePolicy;
-use App\Rules\ConditionalActivationStartDateRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Title;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\ConditionalActivationStartDateRule;
 
 class UpdateRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize()
     {
         if (! Auth::check()) {
             return false;
         }
 
-        return $this->user()->can('update', Title::class);
+        if ($this->user()->can('update', Title::class)) {
+            return true;
+        }
+
+        return false;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
     public function rules()
     {
         return [

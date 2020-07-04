@@ -4,6 +4,8 @@ namespace App\Models\Concerns;
 
 use App\Models\Activation;
 use App\Traits\HasCachedAttributes;
+use App\Exceptions\CannotBeActivatedException;
+use App\Exceptions\CannotBeDeactivatedException;
 
 trait CanBeActivated
 {
@@ -189,6 +191,10 @@ trait CanBeActivated
      */
     public function activate($startedAt = null)
     {
+        if (!$this->canBeActivated()) {
+            throw new CannotBeActivatedException();
+        }
+
         $startDate = $startedAt ?? now();
 
         $this->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
@@ -204,6 +210,10 @@ trait CanBeActivated
      */
     public function deactivate($deactivatedAt = null)
     {
+        if (!$this->canBeDeactivated()) {
+            throw new CannotBeDeactivatedException();
+        }
+
         $deactivatedDate = $deactivatedAt ?? now();
 
         $this->currentActivation()->update(['ended_at' => $deactivatedDate]);

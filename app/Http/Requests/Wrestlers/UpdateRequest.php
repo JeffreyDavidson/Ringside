@@ -90,4 +90,20 @@ class UpdateRequest extends FormRequest
             }
         });
     }
+
+    /**
+     * Get the validated data from the request.
+     *
+     * @return array
+     */
+    public function validated()
+    {
+        $validated = array_merge(parent::validated(), [
+            'height' => $this->input('height'),
+        ]);
+
+        unset($validated['feet'], $validated['inches']);
+
+        return $validated;
+    }
 }

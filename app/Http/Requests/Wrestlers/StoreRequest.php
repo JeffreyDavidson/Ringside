@@ -83,12 +83,28 @@ class StoreRequest extends FormRequest
      */
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function (Validator $validator) {
+        $validator->after(function ($validator) {
             if ($validator->errors()->isEmpty()) {
                 $this->merge(['height' => ($this->input('feet') * 12) + $this->input('inches')]);
                 $this->offsetUnset('feet');
                 $this->offsetUnset('inches');
             }
         });
+    }
+
+    /**
+     * Get the validated data from the request.
+     *
+     * @return array
+     */
+    public function validated()
+    {
+        $validated = array_merge(parent::validated(), [
+            'height' => $this->input('height'),
+        ]);
+
+        unset($validated['feet'], $validated['inches']);
+
+        return $validated;
     }
 }

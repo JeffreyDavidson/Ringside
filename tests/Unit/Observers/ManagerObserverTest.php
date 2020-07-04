@@ -18,7 +18,7 @@ class ManagerObserverTest extends TestCase
     /** @test */
     public function a_managers_status_is_calculated_correctly()
     {
-        $manager = factory(Manager::class)->create();
+        $manager = ManagerFactory::new()->create();
         $this->assertEquals('pending-employment', $manager->status);
 
         $manager->employ(Carbon::tomorrow()->toDateTimeString());
