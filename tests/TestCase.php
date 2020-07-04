@@ -48,4 +48,12 @@ abstract class TestCase extends BaseTestCase
     {
         $this->assertContains($trait, class_uses($class));
     }
+
+    public function administrators()
+    {
+        return [
+            'administrator' => [Role::ADMINISTRATOR],
+            'super_administrator' => [Role::SUPER_ADMINISTRATOR],
+        ];
+    }
 }

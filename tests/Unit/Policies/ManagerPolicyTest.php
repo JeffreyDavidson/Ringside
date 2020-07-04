@@ -2,13 +2,14 @@
 
 namespace Tests\Unit\Policies;
 
-use App\Enums\Role;
-use App\Models\Manager;
 use App\Models\User;
-use App\Policies\ManagerPolicy;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\UserFactory;
+use App\Enums\Role;
 use Tests\TestCase;
+use App\Models\Manager;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Policies\ManagerPolicy;
+use Tests\Factories\UserFactory;
+use Tests\Factories\ManagerFactory;
 
 /**
  * @group managers
@@ -230,7 +231,7 @@ class ManagerPolicyTest extends TestCase
     public function an_administrator_can_suspend_a_manager()
     {
         $user = UserFactory::new()->withRole(Role::ADMINISTRATOR)->create();
-        $manager = factory(Manager::class)->create();
+        $manager = ManagerFactory::new()->create();
 
         $this->assertTrue($this->policy->suspend($user));
     }
@@ -319,7 +320,7 @@ class ManagerPolicyTest extends TestCase
     public function a_basic_user_cannot_view_a_manager_profile_not_owned_by_user()
     {
         $user = UserFactory::new()->withRole(Role::BASIC)->create();
-        $manager = factory(Manager::class)->create();
+        $manager = ManagerFactory::new()->create();
 
         $this->assertFalse($this->policy->view($user, $manager));
     }
@@ -328,7 +329,7 @@ class ManagerPolicyTest extends TestCase
     public function an_administrator_can_view_a_manager_profile()
     {
         $user = UserFactory::new()->withRole(Role::ADMINISTRATOR)->create();
-        $manager = factory(Manager::class)->create();
+        $manager = ManagerFactory::new()->create();
 
         $this->assertTrue($this->policy->view($user, $manager));
     }
@@ -337,7 +338,7 @@ class ManagerPolicyTest extends TestCase
     public function a_super_administrator_can_view_a_manager_profile()
     {
         $user = UserFactory::new()->withRole(Role::SUPER_ADMINISTRATOR)->create();
-        $manager = factory(Manager::class)->create();
+        $manager = ManagerFactory::new()->create();
 
         $this->assertTrue($this->policy->view($user, $manager));
     }
@@ -346,7 +347,7 @@ class ManagerPolicyTest extends TestCase
     public function a_basic_user_cannot_view_a_manager_profile_owned_by_user()
     {
         $user = UserFactory::new()->withRole(Role::BASIC)->create();
-        $manager = factory(Manager::class)->create(['user_id' => $user]);
+        $manager = ManagerFactory::new()->create(['user_id' => $user]);
 
         $this->assertTrue($this->policy->view($user, $manager));
     }

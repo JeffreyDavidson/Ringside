@@ -3,9 +3,9 @@
 namespace Tests\Unit\Observers;
 
 use Carbon\Carbon;
-use Tests\TestCase;
-use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\WrestlerFactory;
+use Tests\TestCase;
 
 /**
  * @group wrestlers
@@ -18,7 +18,7 @@ class WrestlerObserverTest extends TestCase
     /** @test */
     public function a_wrestlers_status_is_calculated_correctly()
     {
-        $wrestler = factory(Wrestler::class)->create();
+        $wrestler = WrestlerFactory::new()->create();
         $this->assertEquals('pending-employment', $wrestler->status);
 
         $wrestler->employ(Carbon::tomorrow()->toDateTimeString());

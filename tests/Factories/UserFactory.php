@@ -38,7 +38,7 @@ class UserFactory extends BaseFactory
     public function superAdministrator(): UserFactory
     {
         return tap(clone $this)->overwriteDefaults([
-           'role' => Role::SUPER_ADMINISTRATOR,
+            'role' => Role::SUPER_ADMINISTRATOR,
         ]);
     }
 

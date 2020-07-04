@@ -207,4 +207,12 @@ class WrestlerFactory extends BaseFactory
 
         return $clone;
     }
+
+    public function softDeleted($delete = true)
+    {
+        $clone = clone $this;
+        $clone->softDeleted = $delete;
+
+        return $clone;
+    }
 }

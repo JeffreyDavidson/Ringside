@@ -8,6 +8,13 @@ use App\Models\Title;
 
 class DeactivateController extends Controller
 {
+    /**
+     * Deactivates a title.
+     *
+     * @param  \App\Models\Title $title
+     * @param  \App\Http\Requests\Titles\DeactivateRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function __invoke(Title $title, DeactivateRequest $request)
     {
         $title->deactivate();

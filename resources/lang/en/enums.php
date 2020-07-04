@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Enums\EventStatus;
 use App\Enums\TitleStatus;
 use App\Enums\StableStatus;
@@ -9,6 +10,11 @@ use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 
 return [
+    Role::class => [
+        Role::ADMINISTRATOR => 'Administrator',
+        Role::SUPER_ADMINISTRATOR => 'Super Administrator',
+        Role::BASIC => 'Basic User',
+    ],
     TitleStatus::class => [
         TitleStatus::ACTIVE => 'Active',
         TitleStatus::INACTIVE => 'Inactive',
