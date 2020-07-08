@@ -23,27 +23,36 @@
         </div>
     </div>
 </x-kt-section>
-<x-kt-section title="Wrestlers">
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="form-group">
-                <x-form.inputs.select
-                    name="wrestler1"
-                    label="Tag Team Partner"
-                    :options="$wrestlers"
-                    :isSelected="$isTagTeamPartner1"
-                />
+<x-kt-section>
+    @if($wrestlers->isNotEmpty())
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <x-form.inputs.select
+                        name="wrestler1"
+                        label="Tag Team Partner"
+                        :options="$wrestlers"
+                        :isSelected="$tagTeam->currentWrestlers[0] ?? ''"
+                    />
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <x-form.inputs.select
+                        name="wrestler2"
+                        label="Tag Team Partner"
+                        :options="$wrestlers"
+                        :isSelected="$tagTeam->currentWrestlers[1] ?? ''"
+                    />
+                </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="form-group">
-                <x-form.inputs.select
-                    name="wrestler2"
-                    label="Tag Team Partner"
-                    :options="$wrestlers"
-                    :isSelected="$isTagTeamPartner2"
-                />
-            </div>
-        </div>
-    </div>
+    @else
+        <hr class="kt-separator">
+        <h3 class="kt-section__title">Tag Team Partner 1</h3>
+        @include('wrestlers.partials.form', ['wrestler' => new \App\Models\Wrestler])
+        <hr class="kt-separator">
+        <h3 class="kt-section__title">Tag Team Partner 2</h3>
+        @include('wrestlers.partials.form', ['wrestler' => new \App\Models\Wrestler])
+    @endif
 </x-kt-section>
