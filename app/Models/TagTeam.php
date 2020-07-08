@@ -127,6 +127,16 @@ class TagTeam extends Model
     }
 
     /**
+     * Check to see if the model is employed.
+     *
+     * @return bool
+     */
+    public function isCurrentlyEmployed()
+    {
+        return $this->currentEmployment()->exists();
+    }
+
+    /**
      * Determine if the model can be reinstated.
      *
      * @return bool
@@ -145,6 +155,16 @@ class TagTeam extends Model
     }
 
     /**
+     * Check to see if the model is employed.
+     *
+     * @return bool
+     */
+    public function isUnemployed()
+    {
+        return $this->employments->isEmpty();
+    }
+
+    /**
      * Employ a tag team.
      *
      * @return bool
@@ -153,7 +173,7 @@ class TagTeam extends Model
     {
         $startAtDate = $startAtDate ?? now();
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
-        $this->wrestlerHistory->each->employ($startAtDate);
+        $this->currentWrestlers->each->employ($startAtDate);
 
         return $this->touch();
     }
@@ -212,7 +232,7 @@ class TagTeam extends Model
 
         $this->currentRetirement()->update(['ended_at' => now()]);
 
-        $this->wrestlerHistory()
+        $this->currentWrestlers()
             ->whereHas('currentRetirement', function ($query) use ($dateRetired) {
                 $query->whereDate('started_at', $dateRetired);
             })
@@ -221,6 +241,20 @@ class TagTeam extends Model
             ->unretire();
 
         return $this->touch();
+    }
+
+    /**
+     * Determine if the model can be retired.
+     *
+     * @return bool
+     */
+    public function canBeUnretired()
+    {
+        if (! $this->isRetired()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
