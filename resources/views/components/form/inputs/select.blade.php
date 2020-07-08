@@ -8,7 +8,6 @@
     <option value="">Select</option>
     @foreach ($options as $key => $value)
         <option
-            @if( isset($isSelected) && $isSelected($key)) selected="selected"' @endif
             value="{{ $key }}"
         >{{ $value }}</option>
     @endforeach
