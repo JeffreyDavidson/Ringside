@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
-use App\ViewModels\ManagerViewModel;
 
 class ManagersController extends Controller
 {
@@ -31,7 +30,7 @@ class ManagersController extends Controller
     {
         $this->authorize('create', Manager::class);
 
-        return view('managers.create', new ManagerViewModel());
+        return view('managers.create', compact('manager'));
     }
 
     /**
@@ -42,7 +41,7 @@ class ManagersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $manager = Manager::create($request->except('started_at'));
+        $manager = Manager::create($request->validatedExcept('started_at'));
 
         if ($request->filled('started_at')) {
             $manager->employ($request->input('started_at'));
@@ -74,7 +73,7 @@ class ManagersController extends Controller
     {
         $this->authorize('update', $manager);
 
-        return view('managers.edit', new ManagerViewModel($manager));
+        return view('managers.edit', compact('manager'));
     }
 
     /**
