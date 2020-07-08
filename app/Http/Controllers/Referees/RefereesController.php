@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
-use App\ViewModels\RefereeViewModel;
 
 class RefereesController extends Controller
 {
@@ -27,22 +26,22 @@ class RefereesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Referee $referee)
     {
         $this->authorize('create', Referee::class);
 
-        return view('referees.create', new RefereeViewModel());
+        return view('referees.create', compact('referee'));
     }
 
     /**
      * Create a new referee.
      *
-     * @param  App\Http\Requests\Referees\StoreRequest  $request
+     * @param  \App\Http\Requests\Referees\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
     {
-        $referee = Referee::create($request->except('started_at'));
+        $referee = Referee::create($request->validatedExcept('started_at'));
 
         if ($request->filled('started_at')) {
             $referee->employ($request->input('started_at'));
@@ -54,7 +53,7 @@ class RefereesController extends Controller
     /**
      * Show the profile of a referee.
      *
-     * @param  App\Models\Referee  $referee
+     * @param  \App\Models\Referee  $referee
      * @return \Illuminate\View\View
      */
     public function show(Referee $referee)
@@ -67,21 +66,21 @@ class RefereesController extends Controller
     /**
      * Show the form for editing a referee.
      *
-     * @param  App\Models\Referee  $referee
+     * @param  \App\Models\Referee  $referee
      * @return \Illuminate\Http\Response
      */
     public function edit(Referee $referee)
     {
         $this->authorize('update', $referee);
 
-        return view('referees.edit', new RefereeViewModel($referee));
+        return view('referees.edit', compact('referee'));
     }
 
     /**
      * Update a given referee.
      *
-     * @param  App\Http\Requests\Referees\UpdateRequest  $request
-     * @param  App\Models\Referee  $referee
+     * @param  \App\Http\Requests\Referees\UpdateRequest  $request
+     * @param  \App\Models\Referee  $referee
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Referee $referee)
@@ -98,7 +97,7 @@ class RefereesController extends Controller
     /**
      * Delete a referee.
      *
-     * @param  App\Models\Referee  $referee
+     * @param  \App\Models\Referee  $referee
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Referee $referee)
