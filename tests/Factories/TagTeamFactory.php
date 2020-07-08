@@ -314,4 +314,13 @@ class TagTeamFactory extends BaseFactory
 
         return $this;
     }
+
+    public function softDeleted($delete = true)
+    {
+        $clone = clone $this;
+        $clone->softDeleted = $delete;
+
+        return $clone;
+    }
+
 }
