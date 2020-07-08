@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Eloquent\Concerns\HasCustomRelationships;
 use App\Enums\StableStatus;
 use App\Traits\HasCachedAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -12,8 +11,6 @@ class Stable extends Model
 {
     use SoftDeletes,
         HasCachedAttributes,
-        HasCustomRelationships,
-        Concerns\CanBeRetired,
         Concerns\CanBeActivated,
         Concerns\Unguarded;
 
@@ -131,6 +128,11 @@ class Stable extends Model
         return $this->previousTagTeams()->previousWrestlers();
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function disassemble()
     {
         $this->currentWrestlers()->detach();
@@ -158,5 +160,64 @@ class Stable extends Model
         $this->currentTagTeams->each->retire();
 
         return $this->touch();
+    }
+
+    /**
+     * Check to see if the model is retired.
+     *
+     * @return bool
+     */
+    public function isRetired()
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    /**
+     * Get the current retirement of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function currentRetirement()
+    {
+        return $this->morphOne(Retirement::class, 'retiree')
+                    ->where('started_at', '<=', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Scope a query to only include retired models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeRetired($query)
+    {
+        return $this->whereHas('currentRetirement');
+    }
+
+    /**
+     * Scope a query to only include unemployed models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeWithCurrentRetiredAtDate($query)
+    {
+        return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
+            ->whereColumn('retiree_id', $this->getTable().'.id')
+            ->where('retiree_type', $this->getMorphClass())
+            ->oldest('started_at')
+            ->limit(1)
+        ])->withCasts(['current_retired_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the models current retirement date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     */
+    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_retired_at) $direction");
     }
 }
