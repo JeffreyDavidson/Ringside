@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Stables;
 
-use Illuminate\Validation\Rule;
 use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
