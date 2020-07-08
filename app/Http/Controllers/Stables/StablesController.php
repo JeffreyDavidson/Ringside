@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
 use App\Models\Stable;
-use App\ViewModels\StableViewModel;
 
 class StablesController extends Controller
 {
@@ -27,22 +26,22 @@ class StablesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Stable $stable)
     {
         $this->authorize('create', Stable::class);
 
-        return view('stables.create', new StableViewModel());
+        return view('stables.create', compact('stable'));
     }
 
     /**
      * Create a new stable.
      *
-     * @param  App\Http\Requests\StoreStableRequest  $request
+     * @param  \App\Http\Requests\Stables\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
     {
-        $stable = Stable::create($request->except(['wrestlers', 'tagteams', 'started_at']));
+        $stable = Stable::create($request->validatedExcept(['wrestlers', 'tagteams', 'started_at']));
 
         if ($request->filled('started_at')) {
             $stable->employments()->create($request->only('started_at'));
@@ -75,22 +74,22 @@ class StablesController extends Controller
     /**
      * Show the form for editing a stable.
      *
-     * @param  App\Models\Stable  $stable
-     * @return \lluminate\Http\Response
+     * @param  \App\Models\Stable  $stable
+     * @return \Illuminate\Http\Response
      */
     public function edit(Stable $stable)
     {
         $this->authorize('update', $stable);
 
-        return view('stables.edit', new StableViewModel($stable));
+        return view('stables.edit', compact('stable'));
     }
 
     /**
      * Update a given stable.
      *
-     * @param  App\Http\Requests\UpdateStableRequest  $request
-     * @param  App\Models\Stable  $stable
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Http\Requests\UpdateStableRequest  $request
+     * @param  \App\Models\Stable  $stable
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Stable $stable)
     {
@@ -113,8 +112,8 @@ class StablesController extends Controller
     /**
      * Delete a stable.
      *
-     * @param  App\Models\Stable  $stable
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Models\Stable  $stable
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Stable $stable)
     {

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\TagTeams;
 
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
-use App\Models\TagTeam;
-use App\ViewModels\TagTeamViewModel;
 
 class TagTeamsController extends Controller
 {
@@ -27,22 +27,24 @@ class TagTeamsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(TagTeam $tagTeam)
     {
         $this->authorize('create', TagTeam::class);
 
-        return view('tagteams.create', new TagTeamViewModel());
+        $wrestlers = Wrestler::get()->pluck('name', 'id');
+
+        return view('tagteams.create', compact('tagTeam', 'wrestlers'));
     }
 
     /**
      * Create a new tag team.
      *
-     * @param  App\Http\Requests\TagTeams\StoreRequest  $request
+     * @param  \App\Http\Requests\TagTeams\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
     {
-        $tagTeam = TagTeam::create($request->except(['wrestler1', 'wrestler2', 'started_at']));
+        $tagTeam = TagTeam::create($request->validatedExcept(['wrestler1', 'wrestler2', 'started_at']));
 
         if ($request->filled('started_at')) {
             $tagTeam->employ($request->input('started_at'));
@@ -84,23 +86,25 @@ class TagTeamsController extends Controller
     {
         $this->authorize('update', $tagTeam);
 
-        return view('tagteams.edit', new TagTeamViewModel($tagTeam));
+        $wrestlers = Wrestler::all();
+
+        return view('tagteams.edit', compact('tagTeam', 'wrestlers'));
     }
 
     /**
      * Update a given tag team.
      *
-     * @param  App\Http\Requests\TagTeams\UpdateRequest  $request
-     * @param  App\Models\TagTeam  $tagTeam
+     * @param  \App\Http\Requests\TagTeams\UpdateRequest  $request
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return \lluminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, TagTeam $tagTeam)
     {
-        $tagTeam->update($request->except(['wrestler1', 'wrestler2', 'started_at']));
+        $tagTeam->update($request->validatedExcept(['wrestler1', 'wrestler2', 'started_at']));
 
         $tagTeam->employ($request->input('started_at'));
 
-        $tagTeam->wrestlerHistory()->sync(
+        $tagTeam->currentWrestlers()->sync(
             [$request->input('wrestler1'), $request->input('wrestler2')],
             ['joined_at' => $request->input('started_at')]
         );
@@ -111,7 +115,7 @@ class TagTeamsController extends Controller
     /**
      * Delete a tag team.
      *
-     * @param  App\Models\TagTeam  $tagTeam
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return \lluminate\Http\RedirectResponse
      */
     public function destroy(TagTeam $tagTeam)
