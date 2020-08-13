@@ -3,6 +3,7 @@
 namespace Tests\Unit\Http\Requests\Events;
 
 use App\Http\Requests\Events\StoreRequest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Rule;
 use Tests\Factories\UserFactory;
 use Tests\TestCase;
@@ -12,6 +13,8 @@ use Tests\TestCase;
  */
 class StoreRequestTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @var StoreRequest */
     private $subject;
 
