@@ -51,20 +51,20 @@ class StoreRequestTest extends TestCase
                 'name' => [
                     'required',
                     'string',
-                    Rule::unique('events', 'name')
+                    Rule::unique('events', 'name'),
                 ],
                 'date' => [
                     'nullable',
                     'string',
-                    'date_format:Y-m-d H:i:s'
+                    'date_format:Y-m-d H:i:s',
                 ],
                 'venue_id' => [
                     'nullable',
                     'integer',
-                    Rule::exists('venues', 'id')
+                    Rule::exists('venues', 'id'),
                 ],
                 'preview' => [
-                    'nullable'
+                    'nullable',
                 ],
             ],
             $this->subject->rules()
