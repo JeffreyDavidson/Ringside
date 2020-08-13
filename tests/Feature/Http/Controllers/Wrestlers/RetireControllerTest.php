@@ -14,7 +14,7 @@ use Tests\Factories\WrestlerFactory;
  * @group roster
  * @group feature-roster
  */
-class RetireWrestlerTest extends TestCase
+class RetireControllerTest extends TestCase
 {
     use RefreshDatabase;
 
