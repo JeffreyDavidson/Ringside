@@ -14,7 +14,7 @@ use Tests\Factories\TagTeamFactory;
  * @group roster
  * @group feature-roster
  */
-class RetireTagTeamTest extends TestCase
+class RetireControllerTest extends TestCase
 {
     use RefreshDatabase;
 

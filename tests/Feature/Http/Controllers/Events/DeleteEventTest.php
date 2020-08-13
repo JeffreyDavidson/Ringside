@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Events;
+namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;

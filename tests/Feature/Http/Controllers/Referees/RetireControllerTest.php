@@ -14,7 +14,7 @@ use Tests\Factories\RefereeFactory;
  * @group roster
  * @group feature-roster
  */
-class RetireRefereeTest extends TestCase
+class RetireControllerTest extends TestCase
 {
     use RefreshDatabase;
 
