@@ -29,7 +29,7 @@ class EmployControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->pendingEmployment()->create();
+        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
 
         $response = $this->employRequest($wrestler);
 
@@ -45,7 +45,7 @@ class EmployControllerTest extends TestCase
     public function a_basic_user_cannot_employ_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->pendingEmployment()->create();
+        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($wrestler)->assertForbidden();
     }
@@ -53,7 +53,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_employ_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->pendingEmployment()->create();
+        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($wrestler)->assertRedirect(route('login'));
     }

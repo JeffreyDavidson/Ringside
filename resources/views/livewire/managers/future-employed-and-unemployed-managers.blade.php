@@ -1,15 +1,15 @@
-<x-datatable :collection="$pendingAndUnemployedReferees">
+<x-datatable :collection="$futureEmployedAndUnemployedManagers">
     <thead>
         <th>Id</th>
-        <th>Referee Name</th>
+        <th>Manager Name</th>
         <th>Date Employed</th>
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($pendingAndUnemployedReferees as $referee)
+        @forelse($futureEmployedAndUnemployedManagers as $manager)
             <tr>
-                <td>{{ $referee->id }}</td>
-                <td>{{ $referee->full_name }}</td>
+                <td>{{ $manager->id }}</td>
+                <td>{{ $manager->full_name }}</td>
                 <td>
                     @isset($title->first_employed_at)
                         {{ $title->first_employed_at->toDateString() }}
@@ -19,10 +19,10 @@
                 </td>
                 <td>
                     <x-actions-dropdown>
-                        <x-buttons.view :route="route('referees.show', $referee)" />
-                        <x-buttons.edit :route="route('referees.edit', $referee)" />
-                        <x-buttons.delete :route="route('referees.destroy', $referee)" />
-                        <x-buttons.employ :route="route('referees.employ', $referee)" />
+                        <x-buttons.view :route="route('managers.show', $manager)" />
+                        <x-buttons.edit :route="route('managers.edit', $manager)" />
+                        <x-buttons.delete :route="route('managers.destroy', $manager)" />
+                        <x-buttons.employ :route="route('managers.employ', $manager)" />
                     </x-actions-dropdown>
                 </td>
             </tr>
@@ -33,4 +33,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

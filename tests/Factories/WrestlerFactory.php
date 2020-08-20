@@ -109,10 +109,10 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function pendingEmployment(EmploymentFactory $employmentFactory = null): WrestlerFactory
+    public function withFutureEmployment(EmploymentFactory $employmentFactory = null): WrestlerFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
-            'status' => WrestlerStatus::PENDING_EMPLOYMENT,
+            'status' => WrestlerStatus::FUTURE_EMPLOYMENT,
         ]);
 
         $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started(now()->addDay(1)));

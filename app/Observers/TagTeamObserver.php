@@ -23,8 +23,8 @@ class TagTeamObserver
             $tagTeam->status = TagTeamStatus::BOOKABLE;
         } elseif ($tagTeam->isReleased()) {
             $tagTeam->status = TagTeamStatus::RELEASED;
-        } elseif ($tagTeam->isPendingEmployment()) {
-            $tagTeam->status = TagTeamStatus::PENDING_EMPLOYMENT;
+        } elseif ($tagTeam->hasFutureEmployment()) {
+            $tagTeam->status = TagTeamStatus::FUTURE_EMPLOYMENT;
         } else {
             $tagTeam->status = TagTeamStatus::UNEMPLOYED;
         }

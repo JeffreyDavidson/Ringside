@@ -42,11 +42,11 @@ class CanBeInjuredTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_injured($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_injured($modelClass)
     {
         $this->expectException(CannotBeInjuredException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->injure();
     }
@@ -107,11 +107,11 @@ class CanBeInjuredTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_recovered($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_recovered($modelClass)
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->recover();
     }
@@ -174,7 +174,7 @@ class CanBeInjuredTest extends TestCase
     public function it_can_get_injured_models($modelClass)
     {
         $injuredModel = factory($modelClass)->states('injured')->create();
-        $pendingEmploymentModel = factory($modelClass)->states('pending-employment')->create();
+        $pendingEmploymentModel = factory($modelClass)->states('future-employment')->create();
         $bookableModel = factory($modelClass)->states('bookable')->create();
         $suspendedModel = factory($modelClass)->states('suspended')->create();
         $retiredModel = factory($modelClass)->states('retired')->create();

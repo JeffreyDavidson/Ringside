@@ -6,7 +6,7 @@ use App\Models\TagTeam;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class PendingAndUnemployedTagTeams extends Component
+class FutureEmployedAndUnemployedTagTeams extends Component
 {
     use WithPagination;
 
@@ -19,14 +19,14 @@ class PendingAndUnemployedTagTeams extends Component
 
     public function render()
     {
-        $pendingAndUnemployedTagTeams = TagTeam::query()
-            ->pendingEmployment()
+        $futureEmployedAndUnemployedTagTeams = TagTeam::query()
+            ->futureEmployment()
             ->orWhere
             ->unemployed()
             ->paginate();
 
-        return view('livewire.tagteams.pending-and-unemployed-tagteams', [
-            'pendingAndUnemployedTagTeams' => $pendingAndUnemployedTagTeams
+        return view('livewire.tagteams.future-employed-and-unemployed-tagteams', [
+            'futureEmployedAndUnemployedTagTeams' => $futureEmployedAndUnemployedTagTeams
         ]);
     }
 }

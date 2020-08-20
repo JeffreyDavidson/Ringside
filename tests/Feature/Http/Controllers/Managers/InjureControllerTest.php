@@ -40,7 +40,7 @@ class InjureControllerTest extends TestCase
     public function a_basic_user_cannot_injure_a_manager()
     {
         $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->pendingEmployment()->create();
+        $manager = ManagerFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($manager)->assertForbidden();
     }

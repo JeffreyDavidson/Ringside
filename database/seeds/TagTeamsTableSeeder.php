@@ -99,7 +99,7 @@ class TagTeamsTableSeeder extends Seeder
 
         /**
          * We need to create 3 tag teams for the next 3 months and all
-         * tag teams should be Pending Employment and should NOT
+         * tag teams should be Future Employment and should NOT
          * have an ended employment date.
          */
         for ($j = 1; $j <= 3; $j++) {

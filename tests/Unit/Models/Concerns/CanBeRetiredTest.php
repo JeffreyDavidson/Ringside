@@ -37,7 +37,7 @@ class CanBeRetiredTest extends TestCase
     public function it_can_get_retired_models($modelClass)
     {
         $retiredModel = factory($modelClass)->states('retired')->create();
-        $pendingEmploymentModel = factory($modelClass)->states('pending-employment')->create();
+        $pendingEmploymentModel = factory($modelClass)->states('future-employment')->create();
         $bookableModel = factory($modelClass)->states('bookable')->create();
         $injuredModel = factory($modelClass)->states('injured')->create();
         $suspendedModel = factory($modelClass)->states('suspended')->create();
@@ -116,11 +116,11 @@ class CanBeRetiredTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_retired($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_retired($modelClass)
     {
         $this->expectException(CannotBeRetiredException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->retire();
     }
@@ -156,11 +156,11 @@ class CanBeRetiredTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_unretired($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_unretired($modelClass)
     {
         $this->expectException(CannotBeUnretiredException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->unretire();
     }

@@ -99,7 +99,7 @@ class WrestlersTableSeeder extends Seeder
 
         /**
          * We need to create 5 wrestlers for the next 3 months and all
-         * wrestlers should be Pending Employment and should NOT
+         * wrestlers should be Future Employment and should NOT
          * have an ended employment date.
          */
         for ($j = 1; $j <= 5; $j++) {

@@ -25,8 +25,8 @@ class ManagerObserver
             $manager->status = ManagerStatus::AVAILABLE;
         } elseif ($manager->isReleased()) {
             $manager->status = ManagerStatus::RELEASED;
-        } elseif ($manager->isPendingEmployment()) {
-            $manager->status = ManagerStatus::PENDING_EMPLOYMENT;
+        } elseif ($manager->hasFutureEmployment()) {
+            $manager->status = ManagerStatus::FUTURE_EMPLOYMENT;
         } else {
             $manager->status = ManagerStatus::UNEMPLOYED;
         }

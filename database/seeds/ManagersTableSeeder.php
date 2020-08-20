@@ -99,7 +99,7 @@ class ManagersTableSeeder extends Seeder
 
         /**
          * We need to create 5 managers for the next 3 months and all
-         * managers should be Pending Employment and should NOT
+         * managers should be Future Employment and should NOT
          * have an ended employment date.
          */
         for ($j = 1; $j <= 5; $j++) {

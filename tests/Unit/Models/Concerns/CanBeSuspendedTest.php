@@ -42,11 +42,11 @@ class CanBeSuspendedTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_suspended($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_suspended($modelClass)
     {
         $this->expectException(CannotBeSuspendedException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->suspend();
     }
@@ -107,11 +107,11 @@ class CanBeSuspendedTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_reinstated($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_reinstated($modelClass)
     {
         $this->expectException(CannotBeReinstatedException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->reinstate();
     }
@@ -174,7 +174,7 @@ class CanBeSuspendedTest extends TestCase
     public function it_can_get_suspended_models($modelClass)
     {
         $suspendedModel = factory($modelClass)->states('suspended')->create();
-        $pendingEmploymentModel = factory($modelClass)->states('pending-employment')->create();
+        $pendingEmploymentModel = factory($modelClass)->states('future-employment')->create();
         $bookableModel = factory($modelClass)->states('bookable')->create();
         $injuredModel = factory($modelClass)->states('injured')->create();
         $retiredModel = factory($modelClass)->states('retired')->create();

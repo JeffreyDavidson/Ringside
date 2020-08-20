@@ -23,7 +23,7 @@ return [
     ],
     WrestlerStatus::class => [
         WrestlerStatus::BOOKABLE => 'Bookable',
-        WrestlerStatus::PENDING_EMPLOYMENT => 'Pending Employment',
+        WrestlerStatus::FUTURE_EMPLOYMENT => 'Future Employment',
         WrestlerStatus::RETIRED => 'Retired',
         WrestlerStatus::SUSPENDED => 'Suspended',
         WrestlerStatus::INJURED => 'Injured',
@@ -31,20 +31,20 @@ return [
     ],
     TagTeamStatus::class => [
         TagTeamStatus::BOOKABLE => 'Bookable',
-        TagTeamStatus::PENDING_EMPLOYMENT => 'Pending Employment',
+        TagTeamStatus::FUTURE_EMPLOYMENT => 'Future Employment',
         TagTeamStatus::RETIRED => 'Retired',
         TagTeamStatus::SUSPENDED => 'Suspended',
     ],
     RefereeStatus::class => [
         RefereeStatus::BOOKABLE => 'Bookable',
-        RefereeStatus::PENDING_EMPLOYMENT => 'Pending Employment',
+        RefereeStatus::FUTURE_EMPLOYMENT => 'Future Employment',
         RefereeStatus::RETIRED => 'Retired',
         RefereeStatus::SUSPENDED => 'Suspended',
         RefereeStatus::INJURED => 'Injured',
     ],
     ManagerStatus::class => [
         ManagerStatus::AVAILABLE => 'Available',
-        ManagerStatus::PENDING_EMPLOYMENT => 'Pending Employment',
+        ManagerStatus::FUTURE_EMPLOYMENT => 'Future Employment',
         ManagerStatus::RETIRED => 'Retired',
         ManagerStatus::SUSPENDED => 'Suspended',
         ManagerStatus::INJURED => 'Injured',

@@ -24,7 +24,7 @@ class CanBeBookedTest extends TestCase
     public function it_can_get_bookable_models($modelClass)
     {
         $bookableModel = factory($modelClass)->states('bookable')->create();
-        $pendingEmploymentModel = factory($modelClass)->states('pending-employment')->create();
+        $pendingEmploymentModel = factory($modelClass)->states('future-employment')->create();
         $injuredModel = factory($modelClass)->states('injured')->create();
         $suspendedModel = factory($modelClass)->states('suspended')->create();
         $retiredModel = factory($modelClass)->states('retired')->create();

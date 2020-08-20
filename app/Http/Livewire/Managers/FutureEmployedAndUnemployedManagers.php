@@ -6,7 +6,7 @@ use App\Models\Manager;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class PendingAndUnemployedManagers extends Component
+class FutureEmployedAndUnemployedManagers extends Component
 {
     use WithPagination;
 
@@ -14,8 +14,8 @@ class PendingAndUnemployedManagers extends Component
 
     public function render()
     {
-        $pendingAndUnemployedManagers = Manager::query()
-            ->pendingEmployment()
+        $futureEmployedAndUnemployedManagers = Manager::query()
+            ->futureEmployment()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()
@@ -23,8 +23,8 @@ class PendingAndUnemployedManagers extends Component
             ->orderBy('last_name')
             ->paginate();
 
-        return view('livewire.managers.pending-and-unemployed-managers', [
-            'pendingAndUnemployedManagers' => $pendingAndUnemployedManagers
+        return view('livewire.managers.future-employed-and-unemployed-managers', [
+            'futureEmployedAndUnemployedManagers' => $futureEmployedAndUnemployedManagers
         ]);
     }
 }

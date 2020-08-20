@@ -40,7 +40,7 @@ class InjureControllerTest extends TestCase
     public function a_basic_user_cannot_injure_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->pendingEmployment()->create();
+        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($wrestler)->assertForbidden();
     }
