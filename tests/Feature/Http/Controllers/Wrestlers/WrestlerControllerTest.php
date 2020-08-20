@@ -54,7 +54,7 @@ class WrestlerControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('wrestlers.index');
         $response->assertSeeLivewire('wrestlers.employed-wrestlers');
-        $response->assertSeeLivewire('wrestlers.pending-and-unemployed-wrestlers');
+        $response->assertSeeLivewire('wrestlers.future-employed-and-unemployed-wrestlers');
         $response->assertSeeLivewire('wrestlers.released-wrestlers');
         $response->assertSeeLivewire('wrestlers.suspended-wrestlers');
         $response->assertSeeLivewire('wrestlers.injured-wrestlers');

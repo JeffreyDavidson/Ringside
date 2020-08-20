@@ -49,7 +49,7 @@ class RefereeControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('referees.index');
         $response->assertSeeLivewire('referees.employed-referees');
-        $response->assertSeeLivewire('referees.pending-and-unemployed-referees');
+        $response->assertSeeLivewire('referees.future-employed-and-unemployed-referees');
         $response->assertSeeLivewire('referees.released-referees');
         $response->assertSeeLivewire('referees.suspended-referees');
         $response->assertSeeLivewire('referees.injured-referees');

@@ -29,7 +29,7 @@ class EmployControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $manager = ManagerFactory::new()->pendingEmployment()->create();
+        $manager = ManagerFactory::new()->withFutureEmployment()->create();
 
         $response = $this->employRequest($manager);
 
@@ -45,7 +45,7 @@ class EmployControllerTest extends TestCase
     public function a_basic_user_cannot_employ_a_manager()
     {
         $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->pendingEmployment()->create();
+        $manager = ManagerFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($manager)->assertForbidden();
     }
@@ -53,7 +53,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_employ_a_manager()
     {
-        $manager = ManagerFactory::new()->pendingEmployment()->create();
+        $manager = ManagerFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($manager)->assertRedirect(route('login'));
     }

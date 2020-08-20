@@ -3,9 +3,9 @@
 namespace Tests\Unit\Observers;
 
 use Carbon\Carbon;
-use Tests\TestCase;
-use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\RefereeFactory;
+use Tests\TestCase;
 
 /**
  * @group referees
@@ -18,11 +18,11 @@ class RefereeObserverTest extends TestCase
     /** @test */
     public function a_referees_status_is_calculated_correctly()
     {
-        $referee = factory(Referee::class)->create();
-        $this->assertEquals('pending-employment', $referee->status);
+        $referee = RefereeFactory::new()->create();
+        $this->assertEquals('unemployed', $referee->status);
 
         $referee->employ(Carbon::tomorrow()->toDateTimeString());
-        $this->assertEquals('pending-employment', $referee->status);
+        $this->assertEquals('future-employment', $referee->status);
 
         $referee->employ(Carbon::today()->toDateTimeString());
         $this->assertEquals('bookable', $referee->status);

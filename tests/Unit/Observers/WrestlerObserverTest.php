@@ -19,10 +19,10 @@ class WrestlerObserverTest extends TestCase
     public function a_wrestlers_status_is_calculated_correctly()
     {
         $wrestler = WrestlerFactory::new()->create();
-        $this->assertEquals('pending-employment', $wrestler->status);
+        $this->assertEquals('unemployed', $wrestler->status);
 
         $wrestler->employ(Carbon::tomorrow()->toDateTimeString());
-        $this->assertEquals('pending-employment', $wrestler->status);
+        $this->assertEquals('future-employment', $wrestler->status);
 
         $wrestler->employ(Carbon::today()->toDateTimeString());
         $this->assertEquals('bookable', $wrestler->status);

@@ -13,9 +13,9 @@
             </div>
         </x-portlet>
 
-        <x-portlet title="Pending and Unemployed Managers">
+        <x-portlet title="Future Employed and Unemployed Managers">
             <div class="kt-portlet__body">
-                <livewire:managers.pending-and-unemployed-managers>
+                <livewire:managers.future-employed-and-unemployed-managers>
             </div>
         </x-portlet>
 

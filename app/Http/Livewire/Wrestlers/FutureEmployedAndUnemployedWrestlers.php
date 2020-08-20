@@ -6,7 +6,7 @@ use App\Models\Wrestler;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class PendingAndUnemployedWrestlers extends Component
+class FutureEmployedAndUnemployedWrestlers extends Component
 {
     use WithPagination;
 
@@ -14,16 +14,16 @@ class PendingAndUnemployedWrestlers extends Component
 
     public function render()
     {
-        $pendingAndUnemployedWrestlers = Wrestler::query()
-            ->pendingEmployment()
+        $futureEmploymentAndUnemployedWrestlers = Wrestler::query()
+            ->futureEmployment()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()
             ->orderByNullsLast('first_employed_at')
             ->paginate();
 
-        return view('livewire.wrestlers.pending-and-unemployed-wrestlers', [
-            'pendingAndUnemployedWrestlers' => $pendingAndUnemployedWrestlers
+        return view('livewire.wrestlers.future-employed-and-unemployed-wrestlers', [
+            'futureEmployedAndUnemployedWrestlers' => $futureEmploymentAndUnemployedWrestlers
         ]);
     }
 }

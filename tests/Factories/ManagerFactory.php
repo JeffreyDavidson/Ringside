@@ -81,7 +81,7 @@ class ManagerFactory extends BaseFactory
         return [
             'first_name' => $faker->firstName,
             'last_name' => $faker->lastName,
-            'status' => ManagerStatus::PENDING_EMPLOYMENT,
+            'status' => ManagerStatus::__default,
         ];
     }
 
@@ -114,10 +114,10 @@ class ManagerFactory extends BaseFactory
         return $clone;
     }
 
-    public function pendingEmployment(): ManagerFactory
+    public function withFutureEmployment(): ManagerFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
-            'status' => ManagerStatus::PENDING_EMPLOYMENT,
+            'status' => ManagerStatus::FUTURE_EMPLOYMENT,
         ]);
 
         $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now()->addDay());

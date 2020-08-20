@@ -7,7 +7,7 @@ use MadWeb\Enum\Enum;
 /**
  * @method static WrestlerStatus BOOKABLE()
  * @method static WrestlerStatus INJURED()
- * @method static WrestlerStatus PENDING_EMPLOYMENT()
+ * @method static WrestlerStatus FUTURE_EMPLOYMENT()
  * @method static WrestlerStatus RELEASED()
  * @method static WrestlerStatus RETIRED()
  * @method static WrestlerStatus SUSPENDED()
@@ -19,7 +19,7 @@ final class WrestlerStatus extends Enum
 
     const BOOKABLE = 'bookable';
     const INJURED = 'injured';
-    const PENDING_EMPLOYMENT = 'pending-employment';
+    const FUTURE_EMPLOYMENT = 'future-employment';
     const RELEASED = 'released';
     const RETIRED = 'retired';
     const SUSPENDED = 'suspended';

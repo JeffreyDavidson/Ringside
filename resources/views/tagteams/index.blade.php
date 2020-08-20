@@ -13,9 +13,9 @@
             </div>
         </x-portlet>
 
-        <x-portlet title="Pending and Unemployed Tag Teams">
+        <x-portlet title="Future Employed and Unemployed Tag Teams">
             <div class="kt-portlet__body">
-                <livewire:tag-teams.pending-and-unemployed-tag-teams>
+                <livewire:tag-teams.future-employed-and-unemployed-tag-teams>
             </div>
         </x-portlet>
 

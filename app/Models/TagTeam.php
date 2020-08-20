@@ -441,7 +441,7 @@ class TagTeam extends Model
     /**
      * @return bool
      */
-    public function isPendingEmployment()
+    public function hasFutureEmployment()
     {
         return $this->futureEmployment()->exists();
     }
@@ -459,7 +459,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Scope a query to only include pending employment models.
+     * Scope a query to only include future employment models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */

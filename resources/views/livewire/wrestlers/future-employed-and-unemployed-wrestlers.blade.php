@@ -1,4 +1,4 @@
-<x-datatable :collection="$pendingAndUnemployedWrestlers">
+<x-datatable :collection="$futureEmployedAndUnemployedWrestlers">
     <thead>
         <th>Id</th>
         <th>Wrestler Name</th>
@@ -7,7 +7,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($pendingAndUnemployedWrestlers as $wrestler)
+        @forelse($futureEmployedAndUnemployedWrestlers as $wrestler)
             <tr>
                 <td>{{ $wrestler->id }}</td>
                 <td>{{ $wrestler->name }}</td>
@@ -35,4 +35,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

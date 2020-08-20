@@ -99,7 +99,7 @@ class RefereesTableSeeder extends Seeder
 
         /**
          * We need to create 5 referees for the next 3 months and all
-         * referees should be Pending Employment and should NOT
+         * referees should be Future Employment and should NOT
          * have an ended employment date.
          */
         for ($j = 1; $j <= 5; $j++) {

@@ -22,7 +22,7 @@ class TagTeamObserverTest extends TestCase
         $this->assertEquals('pending-employment', $tagTeam->status);
 
         $tagTeam->employ(Carbon::tomorrow()->toDateTimeString());
-        $this->assertEquals('pending-employment', $tagTeam->status);
+        $this->assertEquals('future-employment', $tagTeam->status);
 
         $tagTeam->employ(Carbon::today()->toDateTimeString());
         $this->assertEquals('bookable', $tagTeam->status);

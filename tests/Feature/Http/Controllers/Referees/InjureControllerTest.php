@@ -40,7 +40,7 @@ class InjureControllerTest extends TestCase
     public function a_basic_user_cannot_injure_a_referee()
     {
         $this->actAs(Role::BASIC);
-        $referee = RefereeFactory::new()->pendingEmployment()->create();
+        $referee = RefereeFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($referee)->assertForbidden();
     }

@@ -88,11 +88,11 @@ class TagTeamFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_is_in_the_future()
+    public function a_tag_team_with_a_future_employment_has_correct_status()
     {
-        $tagTeam = TagTeamFactory::new()->pendingEmployment()->create();
+        $tagTeam = TagTeamFactory::new()->withFutureEmployment()->create();
 
-        $this->assertEquals(TagTeamStatus::PENDING_EMPLOYMENT, $tagTeam->status);
+        $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
         $this->assertCount(1, $tagTeam->employments);
 
         $employment = $tagTeam->employments->first();
@@ -102,12 +102,12 @@ class TagTeamFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_tag_team_employs_at_same_current_datetime_as_tag_team()
+    public function a_future_employment_tag_team_employs_at_same_current_datetime_as_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->pendingEmployment()->create();
+        $tagTeam = TagTeamFactory::new()->withFutureEmployment()->create();
 
         $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
-            $this->assertEquals(WrestlerStatus::PENDING_EMPLOYMENT, $wrestler->status);
+            $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
             $this->assertCount(1, $wrestler->employments);
 
             $tagTeamEmployment = $tagTeam->employments[0];

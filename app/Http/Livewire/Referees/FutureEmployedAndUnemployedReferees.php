@@ -6,7 +6,7 @@ use App\Models\Referee;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class PendingAndUnemployedReferees extends Component
+class FutureEmployedAndUnemployedReferees extends Component
 {
     use WithPagination;
 
@@ -14,8 +14,8 @@ class PendingAndUnemployedReferees extends Component
 
     public function render()
     {
-        $pendingAndUnemployedReferees = Referee::query()
-            ->pendingEmployment()
+        $futureEmployedAndUnemployedReferees = Referee::query()
+            ->futureEmployment()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()
@@ -23,8 +23,8 @@ class PendingAndUnemployedReferees extends Component
             ->orderBy('last_name')
             ->paginate();
 
-        return view('livewire.referees.pending-and-unemployed-referees', [
-            'pendingAndUnemployedReferees' => $pendingAndUnemployedReferees
+        return view('livewire.referees.future-employed-and-unemployed-referees', [
+            'futureEmployedAndUnemployedReferees' => $futureEmployedAndUnemployedReferees
         ]);
     }
 }

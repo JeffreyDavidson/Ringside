@@ -29,7 +29,7 @@ class EmployControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $referee = RefereeFactory::new()->pendingEmployment()->create();
+        $referee = RefereeFactory::new()->withFutureEmployment()->create();
 
         $response = $this->employRequest($referee);
 
@@ -45,7 +45,7 @@ class EmployControllerTest extends TestCase
     public function a_basic_user_cannot_employ_a_referee()
     {
         $this->actAs(Role::BASIC);
-        $referee = RefereeFactory::new()->pendingEmployment()->create();
+        $referee = RefereeFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($referee)->assertForbidden();
     }
@@ -53,7 +53,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_employ_a_referee()
     {
-        $referee = RefereeFactory::new()->pendingEmployment()->create();
+        $referee = RefereeFactory::new()->withFutureEmployment()->create();
 
         $this->employRequest($referee)->assertRedirect(route('login'));
     }

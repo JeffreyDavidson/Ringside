@@ -13,9 +13,9 @@
             </div>
         </x-portlet>
 
-        <x-portlet title="Pending and Unemployed Wrestlers">
+        <x-portlet title="Future Employed and Unemployed Wrestlers">
             <div class="kt-portlet__body">
-                <livewire:wrestlers.pending-and-unemployed-wrestlers>
+                <livewire:wrestlers.future-employed-and-unemployed-wrestlers>
             </div>
         </x-portlet>
 

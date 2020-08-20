@@ -13,9 +13,9 @@
             </div>
         </x-portlet>
 
-        <x-portlet title="Pending and Unemployed Referees">
+        <x-portlet title="Future Employed and Unemployed Referees">
             <div class="kt-portlet__body">
-                <livewire:referees.pending-and-unemployed-referees>
+                <livewire:referees.future-employed-and-unemployed-referees>
             </div>
         </x-portlet>
 

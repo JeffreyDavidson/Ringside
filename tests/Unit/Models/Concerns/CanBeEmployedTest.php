@@ -150,11 +150,11 @@ class CanBeEmployedTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_pending_employment_single_roster_member_cannot_be_fired($modelClass)
+    public function a_future_employment_single_roster_member_cannot_be_fired($modelClass)
     {
         $this->expectException(CannotBeFiredException::class);
 
-        $model = factory($modelClass)->states('pending-employment')->create();
+        $model = factory($modelClass)->states('future-employment')->create();
 
         $model->fire();
     }
@@ -188,9 +188,9 @@ class CanBeEmployedTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function it_can_get_pending_employment_models($modelClass)
+    public function it_can_get_future_employment_models($modelClass)
     {
-        $pendingEmploymentModel = factory($modelClass)->states('pending-employment')->create();
+        $pendingEmploymentModel = factory($modelClass)->states('future-employment')->create();
         $bookableModel = factory($modelClass)->states('bookable')->create();
         $injuredModel = factory($modelClass)->states('injured')->create();
         $suspendedModel = factory($modelClass)->states('suspended')->create();
@@ -212,7 +212,7 @@ class CanBeEmployedTest extends TestCase
      */
     public function it_can_get_employed_models($modelClass)
     {
-        $pendingEmploymentModel = factory($modelClass)->states('pending-employment')->create();
+        $pendingEmploymentModel = factory($modelClass)->states('future-employment')->create();
         $bookableModel = factory($modelClass)->states('bookable')->create();
         $injuredModel = factory($modelClass)->states('injured')->create();
         $suspendedModel = factory($modelClass)->states('suspended')->create();
@@ -232,23 +232,23 @@ class CanBeEmployedTest extends TestCase
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_single_roster_member_without_an_employment_is_pending_employment($modelClass)
+    public function a_single_roster_member_without_an_employment_is_future_employment($modelClass)
     {
         $model = factory($modelClass)->create();
 
-        $this->assertTrue($model->isPendingEmployment());
+        $this->assertTrue($model->hasFutureEmployment());
     }
 
     /**
      * @test
      * @dataProvider modelClassDataProvider
      */
-    public function a_single_roster_member_without_a_suspension_or_injury_or_retirement_and_employed_in_the_future_is_pending_employment($modelClass)
+    public function a_single_roster_member_without_a_suspension_or_injury_or_retirement_and_employed_in_the_future_is_future_employment($modelClass)
     {
         $model = factory($modelClass)->create();
         $model->employ(Carbon::tomorrow());
 
-        $this->assertTrue($model->isPendingEmployment());
+        $this->assertTrue($model->hasFutureEmployment());
     }
 
     public function modelClassDataProvider()

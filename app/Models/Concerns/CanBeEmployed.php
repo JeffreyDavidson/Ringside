@@ -78,11 +78,11 @@ trait CanBeEmployed
     }
 
     /**
-     * Scope a query to only include pending employment models.
+     * Scope a query to only include future employment models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopePendingEmployment($query)
+    public function scopeFutureEmployment($query)
     {
         return $query->whereHas('futureEmployment');
     }
@@ -216,16 +216,6 @@ trait CanBeEmployed
     public function isCurrentlyEmployed()
     {
         return $this->currentEmployment()->exists();
-    }
-
-    /**
-     * Check to see if the model is activated.
-     *
-     * @return bool
-     */
-    public function isPendingEmployment()
-    {
-        return $this->futureEmployment()->exists();
     }
 
     /**

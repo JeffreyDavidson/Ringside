@@ -65,7 +65,7 @@ class RefereeFactory extends BaseFactory
         return [
             'first_name' => $faker->firstName,
             'last_name' => $faker->lastName,
-            'status' => RefereeStatus::PENDING_EMPLOYMENT,
+            'status' => RefereeStatus::__default,
         ];
     }
 
@@ -89,10 +89,10 @@ class RefereeFactory extends BaseFactory
         return $clone;
     }
 
-    public function pendingEmployment(): RefereeFactory
+    public function withFutureEmployment(): RefereeFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
-            'status' => RefereeStatus::PENDING_EMPLOYMENT,
+            'status' => RefereeStatus::FUTURE_EMPLOYMENT,
         ]);
 
         $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now()->addDay());

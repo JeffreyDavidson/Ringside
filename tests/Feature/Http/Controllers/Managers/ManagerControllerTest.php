@@ -51,7 +51,7 @@ class ManagerControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('managers.index');
         $response->assertSeeLivewire('managers.employed-managers');
-        $response->assertSeeLivewire('managers.pending-and-unemployed-managers');
+        $response->assertSeeLivewire('managers.future-employed-and-unemployed-managers');
         $response->assertSeeLivewire('managers.released-managers');
         $response->assertSeeLivewire('managers.suspended-managers');
         $response->assertSeeLivewire('managers.injured-managers');
