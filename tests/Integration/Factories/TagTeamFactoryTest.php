@@ -82,7 +82,7 @@ class TagTeamFactoryTest extends TestCase
     /** @test */
     public function a_tag_team_with_a_future_employment_has_correct_status()
     {
-        $tagTeam = TagTeamFactory::new()->pendingEmployment()->create();
+        $tagTeam = TagTeamFactory::new()->withFutureEmployment()->create();
 
         $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
         $this->assertCount(1, $tagTeam->employments);
@@ -96,7 +96,7 @@ class TagTeamFactoryTest extends TestCase
     /** @test */
     public function a_future_employment_tag_team_employs_at_same_current_datetime_as_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->pendingEmployment()->create();
+        $tagTeam = TagTeamFactory::new()->withFutureEmployment()->create();
 
         $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
             $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
