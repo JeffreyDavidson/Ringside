@@ -26,7 +26,7 @@ class ManagerFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_available_manager_is_employed_in_the_past_and_has_no_end_date()
+    public function an_available_manager_is_employed_in_the_past_and_has_no_end_date()
     {
         $manager = ManagerFactory::new()->available()->create();
 
@@ -40,11 +40,11 @@ class ManagerFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_is_in_the_future()
+    public function a_future_employment_is_in_the_future()
     {
-        $manager = ManagerFactory::new()->pendingEmployment()->create();
+        $manager = ManagerFactory::new()->withFutureEmployment()->create();
 
-        $this->assertEquals(ManagerStatus::PENDING_EMPLOYMENT, $manager->status);
+        $this->assertEquals(ManagerStatus::FUTURE_EMPLOYMENT, $manager->status);
         $this->assertCount(1, $manager->employments);
 
         $employment = $manager->employments[0];

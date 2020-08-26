@@ -28,6 +28,15 @@ class WrestlerFactoryTest extends TestCase
     }
 
     /** @test */
+    public function a_wrestler_by_default_is_unemployed()
+    {
+        $wrestler = WrestlerFactory::new()->create();
+
+        $this->assertEquals(WrestlerStatus::UNEMPLOYED, $wrestler->status);
+        $this->assertCount(0, $wrestler->employments);
+    }
+
+    /** @test */
     public function a_bookable_wrestler_is_employed_in_the_past_and_has_no_end_date()
     {
         $wrestler = WrestlerFactory::new()->bookable()->create();
@@ -42,11 +51,13 @@ class WrestlerFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_is_in_the_future()
+    public function a_wrestler_can_be_employed_in_the_future()
     {
-        $wrestler = WrestlerFactory::new()->pendingEmployment()->create();
+        $wrestler = WrestlerFactory::new()
+            ->withFutureEmployment()
+            ->create();
 
-        $this->assertEquals(WrestlerStatus::PENDING_EMPLOYMENT, $wrestler->status);
+        $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
         $this->assertCount(1, $wrestler->employments);
 
         $employment = $wrestler->employments[0];
@@ -132,20 +143,17 @@ class WrestlerFactoryTest extends TestCase
     /** @test */
     public function a_wrestler_can_be_on_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $wrestler = WrestlerFactory::new()->onATagTeam()->create();
 
-        $wrestler = WrestlerFactory::new()->forTagTeam($tagTeam)->create();
-
-        $this->assertTrue($tagTeam->wrestlers->contains($wrestler));
+        $this->assertTrue($wrestler->tagTeams->isNotEmpty());
     }
 
     /** @test */
     public function a_wrestler_can_be_on_a_member_of_a_stable()
     {
-        $stable = StableFactory::new()->create();
+        $this->markTestIncomplete();
+        $wrestler = WrestlerFactory::new()->inAStable()->create();
 
-        $wrestler = WrestlerFactory::new()->forStable($stable)->create();
-
-        $this->assertTrue($stable->wrestlers->contains($wrestler));
+        $this->assertTrue($wrestler->stables->isNotEmpty());
     }
 }

@@ -4,18 +4,13 @@ namespace Tests\Factories;
 
 use App\Enums\TitleStatus;
 use App\Models\Title;
+use Carbon\Carbon;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
 
 class TitleFactory extends BaseFactory
 {
-    /** @var ActivationFactory|null */
-    public $activationFactory;
-
-    /** @var RetirementFactory|null */
-    public $retirementFactory;
-
     /** @var $softDeleted */
     public $softDeleted = false;
 
@@ -24,14 +19,6 @@ class TitleFactory extends BaseFactory
     public function create(array $extra = []): Title
     {
         $title = parent::build($extra);
-
-        if ($this->activationFactory) {
-            $this->activationFactory->forTitle($title)->create();
-        }
-
-        if ($this->retirementFactory) {
-            $this->retirementFactory->forTitle($title)->create();
-        }
 
         $title->save();
 
@@ -55,27 +42,18 @@ class TitleFactory extends BaseFactory
         ];
     }
 
-    public function activate(ActivationFactory $activationFactory = null)
-    {
-        $clone = clone $this;
-
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started();
-
-        return $clone;
-    }
-
-    public function active(ActivationFactory $activationFactory = null): TitleFactory
+    public function active(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TitleStatus::ACTIVE,
         ]);
 
-        $clone = $clone->activate($activationFactory ?? null);
+        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::yesterday()), 'activations', 1);
 
         return $clone;
     }
 
-    public function inactive(ActivationFactory $activationFactory = null): TitleFactory
+    public function inactive(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TitleStatus::INACTIVE,
@@ -85,23 +63,23 @@ class TitleFactory extends BaseFactory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->activate($activationFactory ?? ActivationFactory::new()->started($start)->ended($end));
+        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::yesterday())->ended($end), 'activations', 1);
 
         return $clone;
     }
 
-    public function futureActivation(ActivationFactory $activationFactory = null): TitleFactory
+    public function withFutureActivation(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TitleStatus::FUTURE_ACTIVATION,
         ]);
 
-        $clone = $clone->activate($activationFactory ?? ActivationFactory::new()->started(now()->addDay(1)));
+        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::tomorrow()), 'activations', 1);
 
         return $clone;
     }
 
-    public function retired(ActivationFactory $activationFactory = null, RetirementFactory $retirementFactory = null): TitleFactory
+    public function retired(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TitleStatus::RETIRED,
@@ -111,9 +89,8 @@ class TitleFactory extends BaseFactory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->activate($activationFactory ?? ActivationFactory::new()->started($start)->ended($end));
-
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
+        $clone = $clone->withFactory(ActivationFactory::new()->started($start)->ended($end), 'activations', 1);
+        $clone = $clone->withFactory(RetirementFactory::new()->started($end), 'retirements', 1);
 
         return $clone;
     }

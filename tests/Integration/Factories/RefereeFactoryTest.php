@@ -40,11 +40,11 @@ class RefereeFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_is_in_the_future()
+    public function a_future_employment_is_in_the_future()
     {
-        $referee = RefereeFactory::new()->pendingEmployment()->create();
+        $referee = RefereeFactory::new()->withFutureEmployment()->create();
 
-        $this->assertEquals(RefereeStatus::PENDING_EMPLOYMENT, $referee->status);
+        $this->assertEquals(RefereeStatus::FUTURE_EMPLOYMENT, $referee->status);
         $this->assertCount(1, $referee->employments);
 
         $employment = $referee->employments[0];

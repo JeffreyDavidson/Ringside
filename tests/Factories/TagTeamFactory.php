@@ -97,10 +97,9 @@ class TagTeamFactory extends BaseFactory
 
         $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
 
-        $clone->existingWrestlers = WrestlerFactory::new()
+        $clone->wrestlerFactory = WrestlerFactory::new()
             ->bookable($employmentFactory ?? $this->employmentFactory)
-            ->times(2)
-            ->create();
+            ->times(2);
 
         return $clone;
     }
@@ -108,7 +107,7 @@ class TagTeamFactory extends BaseFactory
     public function pendingEmployment(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
-            'status' => TagTeamStatus::PENDING_EMPLOYMENT,
+            'status' => TagTeamStatus::FUTURE_EMPLOYMENT,
         ]);
 
         $startDate = EmploymentFactory::new()->started(now()->addDay(1));
@@ -116,7 +115,7 @@ class TagTeamFactory extends BaseFactory
         $clone = $clone->employed($employmentFactory ?? $startDate);
 
         $clone->wrestlerFactory = WrestlerFactory::new()
-            ->pendingEmployment($employmentFactory ?? $startDate)
+            ->withFutureEmployment($employmentFactory ?? $startDate)
             ->times(2);
 
         return $clone;
@@ -211,6 +210,41 @@ class TagTeamFactory extends BaseFactory
     }
 
     /**
+     * This method is used as a to add the already prepared wrestler factories to a tag team. Each wrestler factory
+     * should share the same employment,suspension, retirement, etc.
+     *
+     * @param  App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    private function addWrestlerFactories(TagTeam $tagTeam)
+    {
+        $wrestlerFactories = $this->wrestlerFactory->getFactories();
+
+        $count = count($wrestlerFactories);
+
+        if ($count > 2) {
+            // RETURN ERROR FOR TOO MANY WRESTLERS
+        }
+
+        $numberOfWrestlerFactoriesToCreate = 2 - $count;
+
+        $createdWrestlerFactories = [];
+
+        for ($i = 0; $i < $numberOfWrestlerFactoriesToCreate; $i++) {
+            $wrestlerCount = Wrestler::max('id') + 1;
+
+            $createdWrestlerFactories[] = WrestlerFactory::new()
+                    ->create(['name' => 'Wrestler '.$wrestlerCount]);
+        }
+
+        foreach ($createdWrestlerFactories as $wrestlerFactory) {
+            $wrestlerCount = Wrestler::max('id') + 1;
+
+            $wrestlerFactory->forTagTeam($tagTeam)->create(['name' => 'Wrestler '.$wrestlerCount]);
+        }
+    }
+
+    /**
      * This method is used as a backup to make sure there are always two wrestler factories that need to be created for
      * the tag team. Inside this function it will look at the tag team and create similar attributes for employment,
      * suspension, retirement, etc.
@@ -237,14 +271,12 @@ class TagTeamFactory extends BaseFactory
     {
         if ($this->existingWrestlers) {
             $numberOfExistingWrestlers = count($this->existingWrestlers);
-            // dd($numberOfExistingWrestlers);
 
             if ($numberOfExistingWrestlers > 2) {
                 // RETURN ERROR FOR TOO MANY WRESTLERS
             }
 
             $numberOfWrestlersToCreate = 2 - $numberOfExistingWrestlers;
-            // dd($numberOfWrestlersToCreate);
 
             $createdWrestlers = [];
 
@@ -255,8 +287,6 @@ class TagTeamFactory extends BaseFactory
                     ->create(['name' => 'Wrestler '.$wrestlerCount]);
             }
 
-            // dd($createdWrestlers);
-
             $tagTeamOfWrestlers = collect($this->existingWrestlers)->merge($createdWrestlers);
 
             if (count($tagTeamOfWrestlers) > 0) {
@@ -264,6 +294,8 @@ class TagTeamFactory extends BaseFactory
                     $wrestler->tagTeams()->attach($tagTeam);
                 }
             }
+        } elseif ($this->wrestlerFactory) {
+            $this->addWrestlerFactories($tagTeam);
         } else {
             $this->generateTwoNewWrestlerFactories($tagTeam);
         }

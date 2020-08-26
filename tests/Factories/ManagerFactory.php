@@ -2,27 +2,16 @@
 
 namespace Tests\Factories;
 
-use App\Enums\ManagerStatus;
+use Carbon\Carbon;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use App\Enums\ManagerStatus;
 use Faker\Generator as Faker;
+use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 
 class ManagerFactory extends BaseFactory
 {
-    /** @var EmploymentFactory|null */
-    public $employmentFactory;
-
-    /** @var RetirementFactory|null */
-    public $retirementFactory;
-
-    /** @var SuspensionFactory|null */
-    public $suspensionFactory;
-
-    /** @var InjuryFactory|null */
-    public $injuryFactory;
-
     /** @var TagTeam */
     public $tagTeam;
 
@@ -37,22 +26,6 @@ class ManagerFactory extends BaseFactory
     public function create(array $extra = []): Manager
     {
         $manager = parent::build($extra);
-
-        if ($this->employmentFactory) {
-            $this->employmentFactory->forManager($manager)->create();
-        }
-
-        if ($this->retirementFactory) {
-            $this->retirementFactory->forManager($manager)->create();
-        }
-
-        if ($this->suspensionFactory) {
-            $this->suspensionFactory->forManager($manager)->create();
-        }
-
-        if ($this->injuryFactory) {
-            $this->injuryFactory->forManager($manager)->create();
-        }
 
         if ($this->wrestler) {
             $this->wrestler->currentManager()->attach($manager);
@@ -85,54 +58,36 @@ class ManagerFactory extends BaseFactory
         ];
     }
 
-    public function employ(EmploymentFactory $employmentFactory = null)
-    {
-        $clone = clone $this;
-
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started();
-
-        return $clone;
-    }
-
-    public function employed(EmploymentFactory $employmentFactory = null)
-    {
-        $clone = clone $this;
-
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new();
-
-        return $clone;
-    }
-
-    public function available(): ManagerFactory
+    public function available(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::AVAILABLE,
         ]);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started(Carbon::yesterday()), 'employments', 1);
 
         return $clone;
     }
 
-    public function withFutureEmployment(): ManagerFactory
+    public function withFutureEmployment(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::FUTURE_EMPLOYMENT,
         ]);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now()->addDay());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started(Carbon::tomorrow()), 'employments', 1);
 
         return $clone;
     }
 
-    public function unemployed(): ManagerFactory
+    public function unemployed(): self
     {
         return tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::UNEMPLOYED,
         ]);
     }
 
-    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): ManagerFactory
+    public function retired(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::RETIRED,
@@ -141,14 +96,13 @@ class ManagerFactory extends BaseFactory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
-
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start)->ended($end), 'employments', 1);
+        $clone = $clone->withFactory(RetirementFactory::new()->started($end), 'retirements', 1);
 
         return $clone;
     }
 
-    public function released(EmploymentFactory $employmentFactory = null): ManagerFactory
+    public function released(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::RELEASED,
@@ -157,12 +111,12 @@ class ManagerFactory extends BaseFactory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start)->ended($end), 'employments', 1);
 
         return $clone;
     }
 
-    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): ManagerFactory
+    public function suspended(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::SUSPENDED,
@@ -172,14 +126,13 @@ class ManagerFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
-
-        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start), 'employments', 1);
+        $clone = $clone->withFactory(SuspensionFactory::new()->started($end), 'suspensions', 1);
 
         return $clone;
     }
 
-    public function injured(EmploymentFactory $employmentFactory = null, InjuryFactory $injuryFactory = null): ManagerFactory
+    public function injured(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => ManagerStatus::INJURED,
@@ -188,9 +141,8 @@ class ManagerFactory extends BaseFactory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
-
-        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($start->copy()->addDay());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start), 'employments', 1);
+        $clone = $clone->withFactory(InjuryFactory::new()->started($start->copy()->addDay()), 'injuries', 1);
 
         return $clone;
     }

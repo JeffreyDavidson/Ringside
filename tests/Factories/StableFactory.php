@@ -2,32 +2,15 @@
 
 namespace Tests\Factories;
 
-use App\Enums\StableStatus;
+use Carbon\Carbon;
 use App\Models\Stable;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
-use Faker\Generator as Faker;
+use App\Enums\StableStatus;
 use Illuminate\Support\Str;
+use Faker\Generator as Faker;
+use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 
 class StableFactory extends BaseFactory
 {
-    /** @var ActivationFactory|null */
-    public $activationFactory;
-
-    /** @var RetirementFactory|null */
-    public $retirementFactory;
-
-    /** @var WrestlerFactory|null */
-    public $wrestlerFactory;
-
-    /** @var TagTeamFactory|null */
-    public $tagTeamFactory;
-
-    /** @var array|null */
-    public $existingWrestlers;
-
-    /** @var array|null */
-    public $existingTagTeams;
-
     /** @var $softDeleted */
     public $softDeleted = false;
 
@@ -36,30 +19,6 @@ class StableFactory extends BaseFactory
     public function create(array $extra = []): Stable
     {
         $stable = parent::build($extra);
-
-        if ($this->activationFactory) {
-            $this->activationFactory->forStable($stable)->create();
-        }
-
-        if ($this->retirementFactory) {
-            $this->retirementFactory->forStable($stable)->create();
-        }
-
-        if ($this->wrestlerFactory) {
-            // dd($this->wrestlerFactory);
-            // foreach ($this->wrestlerFactory->getFactories() as $wrestlerFactory) {
-            //     $wrestlerFactory->forStable($stable)->create();
-            // }
-            $this->wrestlerFactory->forStable($stable)->create();
-        }
-
-        if ($this->tagTeamFactory) {
-            $this->tagTeamFactory->forStable($stable)->create();
-        }
-
-        $stable->save();
-
-        $this->generateMembers($stable);
 
         if ($this->softDeleted) {
             $stable->delete();
@@ -81,22 +40,13 @@ class StableFactory extends BaseFactory
         ];
     }
 
-    public function activate(ActivationFactory $activationFactory = null)
-    {
-        $clone = clone $this;
-
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started();
-
-        return $clone;
-    }
-
-    public function futureActivation(ActivationFactory $activationFactory = null)
+    public function withFutureActivation(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => StableStatus::FUTURE_ACTIVATION
         ]);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->addDays(2));
+        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::tomorrow()), 'activations', 1);
 
         return $clone;
     }
@@ -108,40 +58,57 @@ class StableFactory extends BaseFactory
         ]);
     }
 
-    public function active(ActivationFactory $activationFactory = null)
+    public function active(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => StableStatus::ACTIVE,
         ]);
 
-        $clone = $clone->activate($activationFactory ?? null);
-
-        $clone->wrestlerFactory = WrestlerFactory::new()
-            ->employ(EmploymentFactory::new()->started($activationFactory->startDate ?? null));
+        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::yesterday()), 'activations', 1);
+        $clone->withMembers();
 
         return $clone;
     }
 
-    public function inactive(ActivationFactory $activationFactory = null)
+    public function withMembers(): self
+    {
+        $clone = tap(clone $this);
+
+        $clone = $clone->withFactory(WrestlerFactory::new()->bookable(), 'members', 1);
+        $clone = $clone->withFactory(TagTeamFactory::new()->bookable(), 'members', 1);
+        $clone = $clone->withFactory(ManagerFactory::new()->available(), 'members', 1);
+
+        return $clone;
+    }
+
+    public function inactive(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => StableStatus::INACTIVE,
         ]);
 
-        $clone->activationFactory = $activationFactory ?? ActivationFactory::new()->started(now()->subMonths(3))->ended(now()->subDay(1));
+        $now = now();
+        $start = $now->copy()->subDays(2);
+        $end = $now->copy()->subDays(1);
+
+        $clone = $clone->withFactory(ActivationFactory::new()->started($start)->ended($end), 'activations', 1);
 
         return $clone;
     }
 
-    public function retired(ActivationFactory $activationFactory = null, RetirementFactory $retirementFactory = null)
+    public function retired(): self
     {
-        $clone = clone $this;
+        $clone = tap(clone $this)->overwriteDefaults([
+            'status' => StableStatus::RETIRED,
+        ]);
 
-        $clone->attributes['status'] = StableStatus::RETIRED;
+        $now = now();
+        $start = $now->copy()->subDays(3);
+        $end = $now->copy()->subDays(1);
 
-        $clone->activationFactory = ActivationFactory::new()->started(now()->subMonths(1))->ended(now()->subDays(3));
-
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started(now()->subDays(3));
+        $clone = $clone->withFactory(ActivationFactory::new()->started($start)->ended($end), 'activations', 1);
+        $clone = $clone->withFactory(RetirementFactory::new()->started($end), 'retirements', 1);
+        $clone = $this->withMembers();
 
         return $clone;
     }

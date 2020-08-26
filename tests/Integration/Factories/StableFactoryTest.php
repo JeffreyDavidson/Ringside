@@ -65,11 +65,11 @@ class StableFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_is_in_the_future()
+    public function a_future_employment_is_in_the_future()
     {
         $stable = StableFactory::new()->pendingEmployment()->create();
 
-        $this->assertEquals(StableStatus::PENDING_EMPLOYMENT, $stable->status);
+        $this->assertEquals(StableStatus::FUTURE_EMPLOYMENT, $stable->status);
         $this->assertCount(1, $stable->activations);
 
         $employment = $stable->activations->first();
@@ -79,12 +79,12 @@ class StableFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_pending_employment_stable_employs_at_same_current_datetime_as_stable()
+    public function a_future_employment_stable_employs_at_same_current_datetime_as_stable()
     {
         $stable = StableFactory::new()->pendingEmployment()->create();
 
         $stable->wrestlers->each(function ($wrestler) use ($stable) {
-            $this->assertEquals(WrestlerStatus::PENDING_EMPLOYMENT, $wrestler->status);
+            $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
             $this->assertCount(1, $wrestler->activations);
 
             $stableEmployment = $stable->activations[0];
