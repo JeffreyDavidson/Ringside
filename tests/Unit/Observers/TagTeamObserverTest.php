@@ -2,14 +2,15 @@
 
 namespace Tests\Unit\Observers;
 
-use App\Models\TagTeam;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\TagTeamFactory;
 use Tests\TestCase;
 
 /**
  * @group tagteams
  * @group roster
+ * @group observers
  */
 class TagTeamObserverTest extends TestCase
 {
@@ -18,8 +19,8 @@ class TagTeamObserverTest extends TestCase
     /** @test */
     public function a_tag_team_status_is_calculated_correctly()
     {
-        $tagTeam = factory(TagTeam::class)->create();
-        $this->assertEquals('pending-employment', $tagTeam->status);
+        $tagTeam = TagTeamFactory::new()->create();
+        $this->assertEquals('unemployed', $tagTeam->status);
 
         $tagTeam->employ(Carbon::tomorrow()->toDateTimeString());
         $this->assertEquals('future-employment', $tagTeam->status);
@@ -27,10 +28,10 @@ class TagTeamObserverTest extends TestCase
         $tagTeam->employ(Carbon::today()->toDateTimeString());
         $this->assertEquals('bookable', $tagTeam->status);
 
-        $tagTeam = factory(TagTeam::class)->states('suspended')->create();
+        $tagTeam = TagTeamFactory::new()->suspended()->create();
         $this->assertEquals('suspended', $tagTeam->status);
 
-        $tagTeam = factory(TagTeam::class)->states('retired')->create();
+        $tagTeam = TagTeamFactory::new()->retired->create();
         $this->assertEquals('retired', $tagTeam->status);
     }
 }

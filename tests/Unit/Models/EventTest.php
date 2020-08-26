@@ -7,6 +7,7 @@ use Tests\TestCase;
 
 /**
  * @group event
+ * @group models
  */
 class EventTest extends TestCase
 {

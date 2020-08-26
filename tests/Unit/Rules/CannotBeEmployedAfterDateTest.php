@@ -3,11 +3,14 @@
 namespace Tests\Unit\Rules;
 
 use App\Rules\CannotBeEmployedAfterDate;
-use Tests\Factories\EmploymentFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\Factories\EmploymentFactory;
 use Tests\Factories\WrestlerFactory;
+use Tests\TestCase;
 
+/**
+ * @group rules
+ */
 class CannotBeEmployedAfterDateTest extends TestCase
 {
     use RefreshDatabase;

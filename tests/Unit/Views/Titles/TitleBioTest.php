@@ -7,6 +7,9 @@ use NunoMaduro\LaravelMojito\InteractsWithViews;
 use Tests\Factories\TitleFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class TitleBioTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

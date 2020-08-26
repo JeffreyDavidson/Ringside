@@ -11,7 +11,6 @@ use App\Exceptions\CannotBeFiredException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
- * @group roster
  * @group traits
  */
 class CanBeEmployedTest extends TestCase

@@ -10,6 +10,7 @@ use Tests\TestCase;
 /**
  * @group referees
  * @group roster
+ * @group observers
  */
 class RefereeObserverTest extends TestCase
 {

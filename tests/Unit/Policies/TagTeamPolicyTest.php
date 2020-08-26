@@ -5,13 +5,14 @@ namespace Tests\Unit\Policies;
 use App\Models\TagTeam;
 use App\Policies\TagTeamPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\UserFactory;
 use Tests\Factories\TagTeamFactory;
+use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
 /**
  * @group tagteams
  * @group roster
+ * @group policies
  */
 class TagTeamPolicyTest extends TestCase
 {
@@ -296,7 +297,7 @@ class TagTeamPolicyTest extends TestCase
     public function a_basic_user_can_view_a_tag_team_profile_owned_by_user()
     {
         $user = UserFactory::new()->basicUser()->create();
-        $tagTeam = TagTeamFactory::new()->create(['user_id' => $user]);
+        $tagTeam = TagTeamFactory::new()->create(['user_id' => $user->id]);
 
         $this->assertTrue($this->policy->view($user, $tagTeam));
     }

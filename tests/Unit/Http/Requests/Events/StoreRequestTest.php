@@ -3,71 +3,41 @@
 namespace Tests\Unit\Http\Requests\Events;
 
 use App\Http\Requests\Events\StoreRequest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\Rule;
-use Tests\Factories\UserFactory;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
 /**
  * @group events
+ * @group requests
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase;
-
-    /** @var StoreRequest */
-    private $subject;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->subject = new StoreRequest();
-    }
-
     /** @test */
-    public function it_should_not_authorize_the_request_if_the_user_is_not_logged_in()
+    public function authorize_returns_false_when_unauthenticated()
     {
-        $user = UserFactory::new()->basicUser()->make();
         $subject = new StoreRequest();
-        $subject->setUserResolver(function () use ($user) {
-            return $user;
-        });
 
         $this->assertFalse($subject->authorize());
     }
 
     /** @test */
-    public function authorized_users_can_store_a_event()
+    public function rules_returns_validation_requirements()
     {
-        $this->assertTrue($this->subject->authorize());
-    }
+        $subject = $this->createFormRequest(StoreRequest::class);
+        $rules = $subject->rules();
 
-    /** @test */
-    public function all_validation_rules_match()
-    {
-        $this->assertEquals(
+        $this->assertValidationRules(
             [
-                'name' => [
-                    'required',
-                    'string',
-                    Rule::unique('events', 'name'),
-                ],
-                'date' => [
-                    'nullable',
-                    'string',
-                    'date_format:Y-m-d H:i:s',
-                ],
-                'venue_id' => [
-                    'nullable',
-                    'integer',
-                    Rule::exists('venues', 'id'),
-                ],
-                'preview' => [
-                    'nullable',
-                ],
+                'name' => ['required', 'string'],
+                'date' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+                'venue_id' => ['nullable', 'integer'],
+                'preview' => ['nullable'],
             ],
-            $this->subject->rules()
+            $rules
         );
+
+        $this->assertValidationRuleContains($rules['name'], Unique::class);
+        $this->assertValidationRuleContains($rules['venue_id'], Exists::class);
     }
 }

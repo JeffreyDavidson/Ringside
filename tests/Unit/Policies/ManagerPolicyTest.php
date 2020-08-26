@@ -14,6 +14,7 @@ use Tests\Factories\ManagerFactory;
 /**
  * @group managers
  * @group roster
+ * @group policies
  */
 class ManagerPolicyTest extends TestCase
 {
@@ -346,9 +347,10 @@ class ManagerPolicyTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_view_a_manager_profile_owned_by_user()
     {
-        $user = UserFactory::new()->withRole(Role::BASIC)->create();
-        $manager = ManagerFactory::new()->create(['user_id' => $user]);
+        $john = UserFactory::new()->withRole(Role::BASIC)->create();
+        $will = UserFactory::new()->create();
+        $manager = ManagerFactory::new()->create(['user_id' => $will]);
 
-        $this->assertTrue($this->policy->view($user, $manager));
+        $this->assertFalse($this->policy->view($john, $manager));
     }
 }

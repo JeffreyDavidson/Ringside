@@ -3,49 +3,37 @@
 namespace Tests\Unit\Http\Requests\Titles;
 
 use App\Http\Requests\Titles\StoreRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
 /**
  * @group titles
+ * @group requests
  */
 class StoreRequestTest extends TestCase
 {
-    /** @var StoreRequest */
-    private $subject;
-
-    protected function setUp(): void
+    /** @test */
+    public function authorize_returns_false_when_unauthenticated()
     {
-        parent::setUp();
+        $subject = new StoreRequest();
 
-        $this->subject = new StoreRequest();
+        $this->assertFalse($subject->authorize());
     }
 
     /** @test */
-    public function all_validation_rules_match()
+    public function rules_returns_validation_requirements()
     {
-        $this->assertEquals(
+        $subject = $this->createFormRequest(StoreRequest::class);
+        $rules = $subject->rules();
+
+        $this->assertValidationRules(
             [
-                'name' => [
-                    'required',
-                    'min:3',
-                    'ends_with:Title,Titles',
-                    Rule::unique('titles', 'name')
-                ],
-                'activated_at' => [
-                    'nullable',
-                    'string',
-                    'date_format:Y-m-d H:i:s'
-                ],
+                'name' => ['required', 'min:3', 'ends_with:Title,Titles'],
+                'activated_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
             ],
-            $this->subject->rules()
+            $rules
         );
-    }
 
-    /** @test */
-    public function authorized_users_can_store_a_title()
-    {
-        $this->markTestSkipped();
-        $this->assertTrue($this->subject->authorize());
+        $this->assertValidationRuleContains($rules['name'], Unique::class);
     }
 }

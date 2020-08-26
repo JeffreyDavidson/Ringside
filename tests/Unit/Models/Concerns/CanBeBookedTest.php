@@ -2,15 +2,16 @@
 
 namespace Tests\Unit\Models\Concerns;
 
-use Carbon\Carbon;
-use Tests\TestCase;
-use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Factories\ManagerFactory;
+use Tests\Factories\RefereeFactory;
+use Tests\Factories\WrestlerFactory;
+use Tests\TestCase;
 
 /**
- * @group roster
  * @group traits
  */
 class CanBeBookedTest extends TestCase

@@ -4,33 +4,38 @@ namespace Tests\Unit\Http\Requests\Managers;
 
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Rules\ConditionalEmploymentStartDateRule;
-use JMac\Testing\Traits\AdditionalAssertions;
 use Tests\TestCase;
 
-/*
+/**
  * @group managers
  * @group roster
+ * @group requests
  */
 class UpdateRequestTest extends TestCase
 {
-    use AdditionalAssertions;
-
-    /** @var UpdateRequest */
-    private $subject;
-
-    public function setUp(): void
+    /** @test */
+    public function authorized_returns_false_when_unauthenticated()
     {
-        $this->subject = new UpdateRequest();
+        $subject = new UpdateRequest();
+
+        $this->assertFalse($subject->authorize());
     }
 
     /** @test */
     public function rules_returns_validation_requirements()
     {
-        $this->assertValidationRules([
-            'first_name' => ['required', 'string', 'min:3'],
-            'last_name' => ['required', 'string', 'min:3'],
-        ], $this->subject->rules());
+        $this->markTestIncomplete('Needs a route paramter set.');
+        $subject = $this->createFormRequest(UpdateRequest::class);
+        $rules = $subject->rules();
 
-        // $this->assertValidationRuleContains('started_at', ConditionalEmploymentStartDateRule::class);
+        $this->assertValidationRules(
+            [
+                'first_name' => ['required', 'string', 'min:3'],
+                'last_name' => ['required', 'string', 'min:3'],
+            ],
+            $rules
+        );
+
+        $this->assertValidationRuleContains('started_at', ConditionalEmploymentStartDateRule::class);
     }
 }
