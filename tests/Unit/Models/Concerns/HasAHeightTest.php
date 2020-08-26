@@ -7,7 +7,6 @@ use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
- * @group roster
  * @group traits
  */
 class HasAHeightTest extends TestCase

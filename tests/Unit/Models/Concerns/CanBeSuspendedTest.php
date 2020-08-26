@@ -12,7 +12,6 @@ use App\Exceptions\CannotBeReinstatedException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
- * @group roster
  * @group traits
  */
 class CanBeSuspendedTest extends TestCase

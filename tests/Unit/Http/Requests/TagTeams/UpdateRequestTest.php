@@ -3,43 +3,40 @@
 namespace Tests\Unit\Http\Requests\TagTeams;
 
 use App\Http\Requests\TagTeams\UpdateRequest;
-use App\Rules\CanJoinTagTeam;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\Rules\Exists;
+use App\Rules\WrestlerCanJoinTagTeamRule;
 use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
-/*
+/**
  * @group tagteams
  * @group roster
+ * @group requests
  */
 class UpdateRequestTest extends TestCase
 {
-    use RefreshDatabase;
-
-    /** @var UpdateRequest */
-    private $subject;
-
-    public function setUp(): void
+    /** @test */
+    public function authorized_returns_false_when_unauthenticated()
     {
-        $this->subject = new UpdateRequest();
+        $subject = new UpdateRequest();
+
+        $this->assertFalse($subject->authorize());
     }
 
     /** @test */
     public function rules_returns_validation_requirements()
     {
-        $rules = $this->subject->rules();
+        $this->markTestIncomplete('Needs a route paramter set.');
+        $subject = $this->createFormRequest(UpdateRequest::class);
+        $rules = $subject->rules();
 
         $this->assertValidationRules([
             'name' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
-            'wrestlers' => ['nullable', 'array', 'max:2'],
-            'wrestlers.*' => ['bail', 'integer'],
         ], $rules);
 
         $this->assertValidationRuleContains($rules['name'], Unique::class);
-        $this->assertValidationRuleContains($rules['wrestlers.*'], Exists::class);
-        $this->assertValidationRuleContains($rules['wrestlers.*'], CanJoinTagTeam::class);
+        $this->assertValidationRuleContains($rules['started_at'], ConditionalEmploymentStartDateRule::class);
+        $this->assertValidationRuleContains($rules['wrestler1'], WrestlerCanJoinTagTeamRule::class);
+        $this->assertValidationRuleContains($rules['wrestler2'], WrestlerCanJoinTagTeamRule::class);
     }
 }

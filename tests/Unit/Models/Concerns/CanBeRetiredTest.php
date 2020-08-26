@@ -2,17 +2,16 @@
 
 namespace Tests\Unit\Models\Concerns;
 
-use Carbon\Carbon;
-use Tests\TestCase;
+use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\Wrestler;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeUnretiredException;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
- * @group roster
  * @group traits
  */
 class CanBeRetiredTest extends TestCase

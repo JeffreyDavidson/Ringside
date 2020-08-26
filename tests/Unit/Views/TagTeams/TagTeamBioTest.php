@@ -7,6 +7,9 @@ use NunoMaduro\LaravelMojito\InteractsWithViews;
 use Tests\Factories\TagTeamFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class TagTeamBioTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

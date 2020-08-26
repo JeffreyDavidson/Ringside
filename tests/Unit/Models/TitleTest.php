@@ -6,6 +6,10 @@ use App\Enums\TitleStatus;
 use App\Models\Title;
 use Tests\TestCase;
 
+/**
+ * @group titles
+ * @group models
+ */
 class TitleTest extends TestCase
 {
     /** @test */

@@ -10,6 +10,7 @@ use Tests\TestCase;
 /**
  * @group managers
  * @group roster
+ * @group models
  */
 class ManagerTest extends TestCase
 {

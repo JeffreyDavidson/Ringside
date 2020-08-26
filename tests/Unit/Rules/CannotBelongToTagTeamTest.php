@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TagTeamFactory;
 use Tests\TestCase;
 
+/**
+ * @group rules
+ */
 class CannotBelongToTagTeamTest extends TestCase
 {
     use RefreshDatabase;

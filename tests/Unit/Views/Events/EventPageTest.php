@@ -8,6 +8,9 @@ use Tests\Factories\EventFactory;
 use Tests\Factories\VenueFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class EventPageTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

@@ -5,6 +5,9 @@ namespace Tests\Unit\Validation;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 
+/**
+ * @group validation
+ */
 class EndsWithTest extends TestCase
 {
     /**

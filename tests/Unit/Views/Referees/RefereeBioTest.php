@@ -7,6 +7,9 @@ use NunoMaduro\LaravelMojito\InteractsWithViews;
 use Tests\Factories\RefereeFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class RefereeBioTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

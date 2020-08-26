@@ -7,6 +7,9 @@ use NunoMaduro\LaravelMojito\InteractsWithViews;
 use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class WrestlerBioTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

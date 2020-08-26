@@ -7,6 +7,7 @@ use Tests\TestCase;
 
 /**
  * @group roster
+ * @group models
  */
 class SingleRosterMemberTest extends TestCase
 {

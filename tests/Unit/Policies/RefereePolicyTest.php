@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 /**
  * @group referees
  * @group roster
+ * @group policies
  */
 class RefereePolicyTest extends TestCase
 {

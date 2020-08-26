@@ -12,7 +12,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 
 /**
- * @group roster
  * @group traits
  */
 class CanBeInjuredTest extends TestCase

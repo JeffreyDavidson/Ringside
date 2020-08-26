@@ -3,34 +3,36 @@
 namespace Tests\Unit\Http\Requests\Managers;
 
 use App\Http\Requests\Managers\StoreRequest;
-use JMac\Testing\Traits\AdditionalAssertions;
 use Tests\TestCase;
 
-/*
+/**
  * @group managers
  * @group roster
+ * @group requests
  */
 class StoreRequestTest extends TestCase
 {
-    use AdditionalAssertions;
-
-    /** @var StoreRequest */
-    private $subject;
-
-    public function setUp(): void
+    /** @test */
+    public function authorize_returns_false_when_unauthenticated()
     {
-        $this->subject = new StoreRequest();
+        $subject = new StoreRequest();
+
+        $this->assertFalse($subject->authorize());
     }
 
     /** @test */
     public function rules_returns_validation_requirements()
     {
-        $rules = $this->subject->rules();
+        $subject = $this->createFormRequest(StoreRequest::class);
+        $rules = $subject->rules();
 
-        $this->assertValidationRules([
-            'first_name' => ['required', 'string', 'min:3'],
-            'last_name' => ['required', 'string', 'min:3'],
-            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
-        ], $rules);
+        $this->assertValidationRules(
+            [
+                'first_name' => ['required', 'string', 'min:3'],
+                'last_name' => ['required', 'string', 'min:3'],
+                'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+            ],
+            $rules
+        );
     }
 }

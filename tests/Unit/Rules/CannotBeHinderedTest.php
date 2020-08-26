@@ -4,9 +4,12 @@ namespace Tests\Unit\Rules;
 
 use App\Rules\CannotBeHindered;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Tests\Factories\WrestlerFactory;
+use Tests\TestCase;
 
+/**
+ * @group rules
+ */
 class CannotBeHinderedTest extends TestCase
 {
     use RefreshDatabase;

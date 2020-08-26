@@ -2,49 +2,17 @@
 
 namespace Tests\Unit\Http\Requests\Titles;
 
-use Mockery;
-use Tests\TestCase;
-use Illuminate\Http\Request;
-use App\Policies\TitlePolicy;
-use Illuminate\Routing\Route;
-use Tests\Factories\UserFactory;
-use Tests\Factories\TitleFactory;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Unique;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Rules\ConditionalActivationStartDateRule;
+use Illuminate\Validation\Rules\Unique;
+use Tests\TestCase;
 
 /**
  * @group titles
+ * @group requests
  */
 class UpdateRequestTest extends TestCase
 {
-    /** @test */
-    public function all_validation_rules_match()
-    {
-        $title = TitleFactory::new()->make();
-
-        $subject = $this->createFormRequest(UpdateRequest::class, ['title' => $title]);
-        $rules = $subject->rules();
-
-        $this->assertValidationRules(
-            [
-                'name' => [
-                    'required',
-                    'min:3',
-                    'ends_with:Title,Titles',
-                ],
-            ],
-            $subject->rules()
-        );
-
-        $this->assertValidationRuleContains($rules['name'], Unique::class);
-        $this->assertValidationRuleContains(
-            $rules['activated_at'],
-            ConditionalActivationStartDateRule::class
-        );
-    }
-
     /** @test */
     public function authorized_returns_false_when_unathenticated()
     {
@@ -54,17 +22,20 @@ class UpdateRequestTest extends TestCase
     }
 
     /** @test */
-    public function authorized_returns_true_when_users_can_update_a_title()
+    public function rules_returns_validation_requirements()
     {
-        $this->markTestSkipped();
-        $user = UserFactory::new()->make();
+        $this->markTestIncomplete('Needs a route paramter set.');
+        $subject = $this->createFormRequest(UpdateRequest::class);
+        $rules = $subject->rules();
 
-        $this->actingAs($user);
+        $this->assertValidationRules(
+            [
+                'name' => ['required', 'min:3', 'ends_with:Title,Titles'],
+            ],
+            $rules
+        );
 
-        $subject = new UpdateRequest();
-
-        Auth::shouldReceive('user')->once()->andReturn(true);
-
-        // $this->assertTrue($subject->authorize());
+        $this->assertValidationRuleContains($rules['name'], Unique::class);
+        $this->assertValidationRuleContains($rules['activated_at'], ConditionalActivationStartDateRule::class);
     }
 }

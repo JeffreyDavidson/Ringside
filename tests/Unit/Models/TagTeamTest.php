@@ -2,13 +2,14 @@
 
 namespace Tests\Unit\Models;
 
-use Tests\TestCase;
 use App\Models\TagTeam;
 use App\Enums\TagTeamStatus;
+use Tests\TestCase;
 
 /**
  * @group tagteams
  * @group roster
+ * @group models
  */
 class TagTeamTest extends TestCase
 {

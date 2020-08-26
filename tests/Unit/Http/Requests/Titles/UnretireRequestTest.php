@@ -2,39 +2,20 @@
 
 namespace Tests\Unit\Http\Requests\Titles;
 
-use Tests\TestCase;
-use Tests\Factories\UserFactory;
-use Tests\Factories\TitleFactory;
 use App\Http\Requests\Titles\UnretireRequest;
-use App\Exceptions\CannotBeUnretiredException;
+use Tests\TestCase;
 
 /**
  * @group titles
+ * @group requests
  */
 class UnretireRequestTest extends TestCase
 {
-    /** @var UnretireRequest */
-    private $subject;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->subject = new UnretireRequest();
-    }
-
     /** @test */
-    public function authorize_returns_an_exception_when_a_title_tries_to_be_unretired()
+    public function authorized_returns_false_when_unauthenticated()
     {
-        $this->markTestSkipped();
-        $user = UserFactory::new()->administrator()->make();
+        $subject = new UnretireRequest();
 
-        $this->actingAs($user);
-
-        TitleFactory::new()->retired()->make();
-
-        $this->expectException(CannotBeUnretiredException::class);
-
-        $this->assertTrue($this->subject->authorize());
+        $this->assertFalse($subject->authorize());
     }
 }

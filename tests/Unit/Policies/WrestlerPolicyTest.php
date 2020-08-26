@@ -12,6 +12,7 @@ use Tests\TestCase;
 /**
  * @group wrestlers
  * @group roster
+ * @group policies
  */
 class WrestlerPolicyTest extends TestCase
 {
@@ -345,7 +346,7 @@ class WrestlerPolicyTest extends TestCase
     public function a_basic_user_can_view_a_wrestler_profile_owned_by_user()
     {
         $user = UserFactory::new()->basicUser()->create();
-        $wrestler = WrestlerFactory::new()->create(['user_id' => $user]);
+        $wrestler = WrestlerFactory::new()->create(['user_id' => $user->id]);
 
         $this->assertTrue($this->policy->view($user, $wrestler));
     }

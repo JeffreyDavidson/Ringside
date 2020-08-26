@@ -7,6 +7,9 @@ use NunoMaduro\LaravelMojito\InteractsWithViews;
 use Tests\Factories\ManagerFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class ManagerBioTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

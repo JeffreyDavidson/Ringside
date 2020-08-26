@@ -7,6 +7,9 @@ use NunoMaduro\LaravelMojito\InteractsWithViews;
 use Tests\Factories\StableFactory;
 use Tests\TestCase;
 
+/**
+ * @group views
+ */
 class StableBioTest extends TestCase
 {
     use RefreshDatabase, InteractsWithViews;

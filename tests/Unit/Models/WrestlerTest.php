@@ -10,6 +10,7 @@ use Tests\TestCase;
 /**
  * @group wrestlers
  * @group roster
+ * @group models
  */
 class WrestlerTest extends TestCase
 {
