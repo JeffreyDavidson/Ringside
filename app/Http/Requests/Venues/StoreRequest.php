@@ -4,6 +4,7 @@ namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreRequest extends FormRequest
 {
@@ -14,6 +15,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('create', Venue::class);
     }
 
@@ -25,31 +30,12 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [
-                'required',
-                'string'
-            ],
-            'address1' => [
-                'required',
-                'string'
-            ],
-            'address2' => [
-                'nullable',
-                'string'
-            ],
-            'city' => [
-                'required',
-                'string'
-            ],
-            'state' => [
-                'required',
-                'string'
-            ],
-            'zip' => [
-                'required',
-                'integer',
-                'digits:5'
-            ],
+            'name' => ['required', 'string', 'min:3'],
+            'address1' => ['required', 'string'],
+            'address2' => ['nullable', 'string'],
+            'city' => ['required', 'string'],
+            'state' => ['required', 'string'],
+            'zip' => ['required', 'integer', 'digits:5'],
         ];
     }
 

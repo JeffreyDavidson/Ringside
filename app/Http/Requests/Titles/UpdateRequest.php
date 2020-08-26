@@ -3,9 +3,9 @@
 namespace App\Http\Requests\Titles;
 
 use App\Models\Title;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use App\Rules\ConditionalActivationStartDateRule;
 
 class UpdateRequest extends FormRequest

@@ -5,6 +5,7 @@ namespace App\Http\Requests\TagTeams;
 use App\Models\TagTeam;
 use App\Rules\WrestlerCanJoinTagTeamRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
@@ -16,6 +17,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('create', TagTeam::class);
     }
 
@@ -30,16 +35,16 @@ class StoreRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                Rule::unique('tag_teams')
+                Rule::unique('tag_teams'),
             ],
             'signature_move' => [
                 'nullable',
-                'string'
+                'string',
             ],
             'started_at' => [
                 'nullable',
                 'string',
-                'date_format:Y-m-d H:i:s'
+                'date_format:Y-m-d H:i:s',
             ],
             'wrestler1' => [
                 'nullable',
@@ -47,7 +52,7 @@ class StoreRequest extends FormRequest
                 'integer',
                 'different:wrestler2',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinTagTeamRule($this->input('started_at'))
+                new WrestlerCanJoinTagTeamRule($this->input('started_at')),
             ],
             'wrestler2' => [
                 'nullable',
@@ -55,8 +60,8 @@ class StoreRequest extends FormRequest
                 'integer',
                 'different:wrestler1',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinTagTeamRule($this->input('started_at'))
-             ]
+                new WrestlerCanJoinTagTeamRule($this->input('started_at')),
+             ],
         ];
     }
 
