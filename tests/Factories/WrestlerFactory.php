@@ -2,13 +2,13 @@
 
 namespace Tests\Factories;
 
+use App\Enums\WrestlerStatus;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use App\Enums\WrestlerStatus;
-use Illuminate\Support\Str;
-use Faker\Generator as Faker;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Faker\Generator as Faker;
+use Illuminate\Support\Str;
 
 class WrestlerFactory extends BaseFactory
 {
@@ -30,7 +30,7 @@ class WrestlerFactory extends BaseFactory
     /** @var Stable */
     public $stable;
 
-    /** @var $softDeleted */
+    /** @var */
     public $softDeleted = false;
 
     protected string $modelClass = Wrestler::class;
@@ -98,7 +98,7 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function bookable(EmploymentFactory $employmentFactory = null): WrestlerFactory
+    public function bookable(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::BOOKABLE,
@@ -109,7 +109,7 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function withFutureEmployment(EmploymentFactory $employmentFactory = null): WrestlerFactory
+    public function withFutureEmployment(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::FUTURE_EMPLOYMENT,
@@ -120,14 +120,14 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function unemployed(): WrestlerFactory
+    public function unemployed(): self
     {
         return tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::UNEMPLOYED,
         ]);
     }
 
-    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): WrestlerFactory
+    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::RETIRED,
@@ -144,7 +144,7 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function released(EmploymentFactory $employmentFactory = null): WrestlerFactory
+    public function released(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::RELEASED,
@@ -159,7 +159,7 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): WrestlerFactory
+    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::SUSPENDED,
@@ -176,7 +176,7 @@ class WrestlerFactory extends BaseFactory
         return $clone;
     }
 
-    public function injured(EmploymentFactory $employmentFactory = null, InjuryFactory $injuryFactory = null): WrestlerFactory
+    public function injured(EmploymentFactory $employmentFactory = null, InjuryFactory $injuryFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::INJURED,

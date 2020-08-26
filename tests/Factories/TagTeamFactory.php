@@ -30,7 +30,7 @@ class TagTeamFactory extends BaseFactory
     /** @var array|null */
     public $existingWrestlers;
 
-    /** @var $softDeleted */
+    /** @var */
     public $softDeleted = false;
 
     protected string $modelClass = TagTeam::class;
@@ -89,7 +89,7 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function bookable(EmploymentFactory $employmentFactory = null): TagTeamFactory
+    public function bookable(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::BOOKABLE,
@@ -97,14 +97,15 @@ class TagTeamFactory extends BaseFactory
 
         $clone = $clone->employed($employmentFactory ?? $this->employmentFactory);
 
-        $clone->wrestlerFactory = WrestlerFactory::new()
+        $clone->existingWrestlers = WrestlerFactory::new()
             ->bookable($employmentFactory ?? $this->employmentFactory)
-            ->times(2);
+            ->times(2)
+            ->create();
 
         return $clone;
     }
 
-    public function pendingEmployment(EmploymentFactory $employmentFactory = null): TagTeamFactory
+    public function pendingEmployment(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::PENDING_EMPLOYMENT,
@@ -121,7 +122,7 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function unemployed(): TagTeamFactory
+    public function unemployed(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::UNEMPLOYED,
@@ -134,7 +135,7 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): TagTeamFactory
+    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::SUSPENDED,
@@ -152,7 +153,7 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): TagTeamFactory
+    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::RETIRED,
@@ -173,7 +174,7 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function released(EmploymentFactory $employmentFactory = null): TagTeamFactory
+    public function released(EmploymentFactory $employmentFactory = null): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => TagTeamStatus::RELEASED,
@@ -200,14 +201,6 @@ class TagTeamFactory extends BaseFactory
         return $clone;
     }
 
-    public function withWrestlers(WrestlerFactory $wrestlerFactory = null)
-    {
-        $clone = clone $this;
-        $clone->wrestlerFactory = $wrestlerFactory ?? WrestlerFactory::new()->times(2);
-
-        return $clone;
-    }
-
     public function withExistingWrestlers($wrestlers)
     {
         $clone = clone $this;
@@ -215,41 +208,6 @@ class TagTeamFactory extends BaseFactory
         $clone->existingWrestlers = $wrestlers;
 
         return $clone;
-    }
-
-    /**
-     * This method is used as a to add the already prepared wrestler factories to a tag team. Each wrestler factory
-     * should share the same employment,suspension, retirement, etc.
-     *
-     * @param  App\Models\TagTeam $tagTeam
-     * @return void
-     */
-    private function addWrestlerFactories(TagTeam $tagTeam)
-    {
-        $wrestlerFactories = $this->wrestlerFactory->getFactories();
-
-        $count = count($wrestlerFactories);
-
-        if ($count > 2) {
-            // RETURN ERROR FOR TOO MANY WRESTLERS
-        }
-
-        $numberOfWrestlerFactoriesToCreate = 2 - $count;
-
-        $createdWrestlerFactories = [];
-
-        for ($i = 0; $i < $numberOfWrestlerFactoriesToCreate; $i++) {
-            $wrestlerCount = Wrestler::max('id') + 1;
-
-            $createdWrestlerFactories[] = WrestlerFactory::new()
-                    ->create(['name' => 'Wrestler '.$wrestlerCount]);
-        }
-
-        foreach ($createdWrestlerFactories as $wrestlerFactory) {
-            $wrestlerCount = Wrestler::max('id') + 1;
-
-            $wrestlerFactory->forTagTeam($tagTeam)->create(['name' => 'Wrestler '. $wrestlerCount]);
-        }
     }
 
     /**
@@ -269,7 +227,7 @@ class TagTeamFactory extends BaseFactory
 
             $wrestlers[] = WrestlerFactory::new()
                 ->forTagTeam($tagTeam)
-                ->create(['name' => 'Wrestler '. $wrestlerCount]);
+                ->create(['name' => 'Wrestler '.$wrestlerCount]);
         }
 
         return $wrestlers;
@@ -306,8 +264,6 @@ class TagTeamFactory extends BaseFactory
                     $wrestler->tagTeams()->attach($tagTeam);
                 }
             }
-        } elseif ($this->wrestlerFactory) {
-            $this->addWrestlerFactories($tagTeam);
         } else {
             $this->generateTwoNewWrestlerFactories($tagTeam);
         }
@@ -322,5 +278,4 @@ class TagTeamFactory extends BaseFactory
 
         return $clone;
     }
-
 }
