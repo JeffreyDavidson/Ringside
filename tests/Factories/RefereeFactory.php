@@ -4,23 +4,12 @@ namespace Tests\Factories;
 
 use App\Enums\RefereeStatus;
 use App\Models\Referee;
+use Carbon\Carbon;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 use Faker\Generator as Faker;
 
 class RefereeFactory extends BaseFactory
 {
-    /** @var EmploymentFactory|null */
-    public $employmentFactory;
-
-    /** @var RetirementFactory|null */
-    public $retirementFactory;
-
-    /** @var SuspensionFactory|null */
-    public $suspensionFactory;
-
-    /** @var InjuryFactory|null */
-    public $injuryFactory;
-
     /** @var $softDeleted */
     public $softDeleted = false;
 
@@ -29,22 +18,6 @@ class RefereeFactory extends BaseFactory
     public function create(array $extra = []): Referee
     {
         $referee = parent::build($extra);
-
-        if ($this->employmentFactory) {
-            $this->employmentFactory->forReferee($referee)->create();
-        }
-
-        if ($this->suspensionFactory) {
-            $this->suspensionFactory->forReferee($referee)->create();
-        }
-
-        if ($this->retirementFactory) {
-            $this->retirementFactory->forReferee($referee)->create();
-        }
-
-        if ($this->injuryFactory) {
-            $this->injuryFactory->forReferee($referee)->create();
-        }
 
         $referee->save();
 
@@ -69,45 +42,36 @@ class RefereeFactory extends BaseFactory
         ];
     }
 
-    public function employ(EmploymentFactory $employmentFactory = null)
-    {
-        $clone = clone $this;
-
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started();
-
-        return $clone;
-    }
-
-    public function bookable(EmploymentFactory $employmentFactory = null): RefereeFactory
+    public function bookable(): RefereeFactory
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::BOOKABLE,
         ]);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started(Carbon::yesterday()), 'employments', 1);
 
         return $clone;
     }
 
-    public function withFutureEmployment(): RefereeFactory
+    public function withFutureEmployment(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::FUTURE_EMPLOYMENT,
         ]);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started(now()->addDay());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started(Carbon::tomorrow()), 'employments', 1);
 
         return $clone;
     }
 
-    public function unemployed(): RefereeFactory
+    public function unemployed(): self
     {
         return tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::UNEMPLOYED,
         ]);
     }
 
-    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): RefereeFactory
+    public function retired(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::RETIRED,
@@ -117,14 +81,13 @@ class RefereeFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
-
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start)->ended($end), 'employments', 1);
+        $clone = $clone->withFactory(RetirementFactory::new()->started($end), 'retirements', 1);
 
         return $clone;
     }
 
-    public function released(EmploymentFactory $employmentFactory = null): RefereeFactory
+    public function released(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::RELEASED,
@@ -134,12 +97,12 @@ class RefereeFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start)->ended($end), 'employments', 1);
 
         return $clone;
     }
 
-    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): RefereeFactory
+    public function suspended(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::SUSPENDED,
@@ -149,14 +112,13 @@ class RefereeFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
-
-        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start), 'employments', 1);
+        $clone = $clone->withFactory(SuspensionFactory::new()->started($end), 'suspensions', 1);
 
         return $clone;
     }
 
-    public function injured(EmploymentFactory $employmentFactory = null, InjuryFactory $injuryFactory = null): RefereeFactory
+    public function injured(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => RefereeStatus::INJURED,
@@ -165,9 +127,8 @@ class RefereeFactory extends BaseFactory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
-
-        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($start->copy()->addDay());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start), 'employments', 1);
+        $clone = $clone->withFactory(InjuryFactory::new()->started($start->copy()->addDay()), 'injuries', 1);
 
         return $clone;
     }

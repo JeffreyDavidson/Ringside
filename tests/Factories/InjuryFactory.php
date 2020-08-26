@@ -2,122 +2,47 @@
 
 namespace Tests\Factories;
 
-use Carbon\Carbon;
 use App\Models\Injury;
-use App\Models\Manager;
-use App\Models\Referee;
-use App\Models\Wrestler;
-use Illuminate\Support\Collection;
+use Carbon\Carbon;
+use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Faker\Generator as Faker;
 
 class InjuryFactory extends BaseFactory
 {
-    /** @var \Carbon\Carbon|null */
-    public $startDate;
-
-    /** @var \Carbon\Carbon|null */
-    public $endDate;
-
-    /** @var Wrestler[] */
-    public $wrestlers;
-
-    /** @var Manager[] */
-    public $managers;
-
-    /** @var Referee[] */
-    public $referees;
+    protected string $modelClass = Injury::class;
 
     /**
      * @param string|Carbon $startDate
      */
-    public function started($startDate = 'now')
+    public function started($startDate = 'now'): self
     {
-        $clone = clone $this;
-
-        $clone->startDate = $startDate instanceof Carbon ? $startDate : new Carbon($startDate);
-
-        return $clone;
+        return tap(clone $this)->overwriteDefaults([
+            'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
+        ]);
     }
 
     /**
      * @param string|Carbon $endDate
      */
-    public function ended($endDate = 'now')
+    public function ended($endDate = 'now'): self
     {
-        $clone = clone $this;
-
-        $clone->endDate = $endDate instanceof Carbon ? $endDate : new Carbon($endDate);
-
-        return $clone;
+        return tap(clone $this)->overwriteDefaults([
+            'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
+        ]);
     }
 
-    public function forWrestler(Wrestler $wrestler)
+    public function create(array $extra = []): Injury
     {
-        return $this->forWrestlers([$wrestler]);
+        return parent::build($extra);
     }
 
-    public function forWrestlers($wrestlers)
+    public function make(array $extra = []): Injury
     {
-        $clone = clone $this;
-
-        $clone->wrestlers = $wrestlers;
-
-        return $clone;
+        return parent::build($extra, 'make');
     }
 
-    public function forManager(Manager $manager)
+    public function getDefaults(Faker $faker): array
     {
-        return $this->forManagers([$manager]);
-    }
-
-    public function forManagers($managers)
-    {
-        $clone = clone $this;
-
-        $clone->managers = $managers;
-
-        return $clone;
-    }
-
-    public function forReferee(Referee $referee)
-    {
-        return $this->forReferees([$referee]);
-    }
-
-    public function forReferees($referees)
-    {
-        $clone = clone $this;
-        
-        $clone->referees = $referees;
-
-        return $clone;
-    }
-
-    public function create($attributes = [])
-    {
-        $injurables = collect()
-            ->merge($this->wrestlers)
-            ->merge($this->referees)
-            ->merge($this->managers)
-            ->flatten(1);
-
-
-        $this->startDate = $this->startDate ?? now();
-
-        if (empty($injurables)) {
-            throw new \Exception('Attempted to create an injury without an injurable entity');
-        }
-
-        $injuries = new Collection();
-
-        foreach ($injurables as $injuree) {
-            $injury = new Injury();
-            $injury->started_at = $this->startDate;
-            $injury->ended_at = $this->endDate;
-            $injury->injurable()->associate($injuree);
-            $injury->save();
-            $injuries->push($injuree);
-        }
-
-        return $injuries->count() === 1 ? $injuries->first() : $injuries;
+        return [];
     }
 }

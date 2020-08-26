@@ -11,7 +11,7 @@ use Tests\Factories\VenueFactory;
 
 class EventFactory extends BaseFactory
 {
-    /** @var $softDeleted */
+    /** @var */
     public $softDeleted = false;
 
     protected string $modelClass = Event::class;
@@ -41,10 +41,9 @@ class EventFactory extends BaseFactory
             'venue_id' => VenueFactory::new()->create()->id,
             'preview' => $faker->paragraph(),
         ];
-
     }
 
-    public function scheduled(): EventFactory
+    public function scheduled(): self
     {
         return tap(clone $this)->overwriteDefaults([
             'status' => EventStatus::SCHEDULED,
@@ -52,7 +51,7 @@ class EventFactory extends BaseFactory
         ]);
     }
 
-    public function past(): EventFactory
+    public function past(): self
     {
         return tap(clone $this)->overwriteDefaults([
             'status' => EventStatus::PAST,
@@ -67,7 +66,7 @@ class EventFactory extends BaseFactory
         ]);
     }
 
-    public function softDeleted(): EventFactory
+    public function softDeleted(): self
     {
         $clone = clone $this;
         $clone->softDeleted = true;
@@ -75,4 +74,3 @@ class EventFactory extends BaseFactory
         return $clone;
     }
 }
-

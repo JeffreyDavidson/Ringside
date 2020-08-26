@@ -6,24 +6,13 @@ use App\Enums\WrestlerStatus;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
 
 class WrestlerFactory extends BaseFactory
 {
-    /** @var EmploymentFactory|null */
-    public $employmentFactory;
-
-    /** @var RetirementFactory|null */
-    public $retirementFactory;
-
-    /** @var SuspensionFactory|null */
-    public $suspensionFactory;
-
-    /** @var InjuryFactory|null */
-    public $injuryFactory;
-
     /** @var TagTeam */
     public $tagTeam;
 
@@ -38,32 +27,6 @@ class WrestlerFactory extends BaseFactory
     public function create(array $extra = []): Wrestler
     {
         $wrestler = parent::build($extra);
-
-        if ($this->employmentFactory) {
-            $this->employmentFactory->forWrestler($wrestler)->create();
-        }
-
-        if ($this->retirementFactory) {
-            $this->retirementFactory->forWrestler($wrestler)->create();
-        }
-
-        if ($this->suspensionFactory) {
-            $this->suspensionFactory->forWrestler($wrestler)->create();
-        }
-
-        if ($this->injuryFactory) {
-            $this->injuryFactory->forWrestler($wrestler)->create();
-        }
-
-        if ($this->tagTeam) {
-            $wrestler->tagTeams()->attach($this->tagTeam);
-        }
-
-        if ($this->stable) {
-            $wrestler->stables()->attach($this->stable, ['joined_at' => now()]);
-        }
-
-        $wrestler->save();
 
         if ($this->softDeleted) {
             $wrestler->delete();
@@ -89,33 +52,24 @@ class WrestlerFactory extends BaseFactory
         ];
     }
 
-    public function employ(EmploymentFactory $employmentFactory = null)
-    {
-        $clone = clone $this;
-
-        $clone->employmentFactory = $employmentFactory ?? EmploymentFactory::new()->started();
-
-        return $clone;
-    }
-
-    public function bookable(EmploymentFactory $employmentFactory = null): self
+    public function bookable(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::BOOKABLE,
         ]);
 
-        $clone = $clone->employ($employmentFactory ?? null);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started(Carbon::yesterday()), 'employments', 1);
 
         return $clone;
     }
 
-    public function withFutureEmployment(EmploymentFactory $employmentFactory = null): self
+    public function withFutureEmployment(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::FUTURE_EMPLOYMENT,
         ]);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started(now()->addDay(1)));
+        $clone = $clone->withFactory(EmploymentFactory::new()->started(Carbon::tomorrow()), 'employments', 1);
 
         return $clone;
     }
@@ -127,7 +81,7 @@ class WrestlerFactory extends BaseFactory
         ]);
     }
 
-    public function retired(EmploymentFactory $employmentFactory = null, RetirementFactory $retirementFactory = null): self
+    public function retired(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::RETIRED,
@@ -137,14 +91,13 @@ class WrestlerFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
-
-        $clone->retirementFactory = $retirementFactory ?? RetirementFactory::new()->started($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start)->ended($end), 'employments', 1);
+        $clone = $clone->withFactory(RetirementFactory::new()->started($end), 'retirements', 1);
 
         return $clone;
     }
 
-    public function released(EmploymentFactory $employmentFactory = null): self
+    public function released(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::RELEASED,
@@ -154,12 +107,12 @@ class WrestlerFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start)->ended($end));
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start)->ended($end), 'employments', 1);
 
         return $clone;
     }
 
-    public function suspended(EmploymentFactory $employmentFactory = null, SuspensionFactory $suspensionFactory = null): self
+    public function suspended(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::SUSPENDED,
@@ -169,14 +122,13 @@ class WrestlerFactory extends BaseFactory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
-
-        $clone->suspensionFactory = $suspensionFactory ?? SuspensionFactory::new()->started($end);
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start), 'employments', 1);
+        $clone = $clone->withFactory(SuspensionFactory::new()->started($end), 'suspensions', 1);
 
         return $clone;
     }
 
-    public function injured(EmploymentFactory $employmentFactory = null, InjuryFactory $injuryFactory = null): self
+    public function injured(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
             'status' => WrestlerStatus::INJURED,
@@ -185,9 +137,8 @@ class WrestlerFactory extends BaseFactory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        $clone = $clone->employ($employmentFactory ?? EmploymentFactory::new()->started($start));
-
-        $clone->injuryFactory = $injuryFactory ?? InjuryFactory::new()->started($start->copy()->addDay());
+        $clone = $clone->withFactory(EmploymentFactory::new()->started($start), 'employments', 1);
+        $clone = $clone->withFactory(InjuryFactory::new()->started($start->copy()->addDay()), 'injuries', 1);
 
         return $clone;
     }
@@ -195,7 +146,26 @@ class WrestlerFactory extends BaseFactory
     public function forTagTeam(TagTeam $tagTeam)
     {
         $clone = clone $this;
-        $clone->tagTeam = $tagTeam;
+
+        $clone = $clone->withFactory(TagTeamFactory::new(), 'tagteams', 1);
+
+        return $clone;
+    }
+
+    public function onATagTeam()
+    {
+        $clone = clone $this;
+
+        $clone = $clone->withFactory(TagTeamFactory::new(), 'tagteams', 1);
+
+        return $clone;
+    }
+
+    public function inAStable()
+    {
+        $clone = clone $this;
+
+        $clone = $clone->withFactory(StableFactory::new()->joined(Carbon::now()), 'stables', 1);
 
         return $clone;
     }
