@@ -11,7 +11,7 @@ class Wrestler extends SingleRosterMember
     use SoftDeletes,
         HasCustomRelationships,
         Concerns\HasAHeight,
-        // Concerns\CanBeStableMember,
+        Concerns\CanBeStableMember,
         Concerns\CanBeTagTeamPartner,
         Concerns\CanBeBooked;
     // Concerns\Unguarded;
