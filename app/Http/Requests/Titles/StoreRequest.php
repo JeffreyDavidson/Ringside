@@ -3,30 +3,26 @@
 namespace App\Http\Requests\Titles;
 
 use App\Models\Title;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('create', Title::class);
     }
 
     public function rules()
     {
         return [
-            'name' => [
-                'required',
-                'min:3',
-                'ends_with:Title,Titles',
-                Rule::unique('titles', 'name')
-            ],
-            'activated_at' => [
-                'nullable',
-                'string',
-                'date_format:Y-m-d H:i:s'
-            ],
+            'name' => ['required', 'min:3', 'ends_with:Title,Titles', Rule::unique('titles', 'name')],
+            'activated_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
         ];
     }
 

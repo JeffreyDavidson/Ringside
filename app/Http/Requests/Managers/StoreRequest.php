@@ -4,6 +4,7 @@ namespace App\Http\Requests\Managers;
 
 use App\Models\Manager;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreRequest extends FormRequest
 {
@@ -14,6 +15,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('create', Manager::class);
     }
 
@@ -25,21 +30,9 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'first_name' => [
-                'required',
-                'string',
-                'min:3'
-            ],
-            'last_name' => [
-                'required',
-                'string',
-                'min:3'
-            ],
-            'started_at' => [
-                'nullable',
-                'string',
-                'date_format:Y-m-d H:i:s'
-            ],
+            'first_name' => ['required', 'string', 'min:3'],
+            'last_name' => ['required', 'string', 'min:3'],
+            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
         ];
     }
 

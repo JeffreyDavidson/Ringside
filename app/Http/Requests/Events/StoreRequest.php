@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Events;
 
 use App\Models\Event;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
@@ -15,6 +16,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('create', Event::class);
     }
 
@@ -29,20 +34,20 @@ class StoreRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                Rule::unique('events', 'name')
+                Rule::unique('events', 'name'),
             ],
             'date' => [
                 'nullable',
                 'string',
-                'date_format:Y-m-d H:i:s'
+                'date_format:Y-m-d H:i:s',
             ],
             'venue_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('venues', 'id')
+                Rule::exists('venues', 'id'),
             ],
             'preview' => [
-                'nullable'
+                'nullable',
             ],
         ];
     }

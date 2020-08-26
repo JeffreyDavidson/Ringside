@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Titles;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ActivateRequest extends FormRequest
 {
@@ -13,6 +14,10 @@ class ActivateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         $title = $this->route('title');
 
         if ($this->user()->can('activate', $title)) {

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Managers;
 use App\Models\Manager;
 use App\Rules\ConditionalEmploymentStartDateRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateRequest extends FormRequest
 {
@@ -15,6 +16,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('update', Manager::class);
     }
 
@@ -26,19 +31,9 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'first_name' => [
-                'required',
-                'string',
-                'min:3'
-            ],
-            'last_name' => [
-                'required',
-                'string',
-                'min:3'
-            ],
-            'started_at' => [
-                new ConditionalEmploymentStartDateRule($this->route('manager'))
-            ],
+            'first_name' => ['required', 'string', 'min:3'],
+            'last_name' => ['required', 'string', 'min:3'],
+            'started_at' => [new ConditionalEmploymentStartDateRule($this->route('manager'))],
         ];
     }
 

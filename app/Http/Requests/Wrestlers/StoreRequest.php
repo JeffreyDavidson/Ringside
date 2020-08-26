@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
-use Illuminate\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Validator;
 
 class StoreRequest extends FormRequest
 {
@@ -15,6 +16,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (! Auth::check()) {
+            return false;
+        }
+
         return $this->user()->can('create', Wrestler::class);
     }
 
@@ -29,35 +34,35 @@ class StoreRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                'min:3'
+                'min:3',
             ],
             'feet' => [
                 'required',
                 'integer',
                 'min:5',
-                'max:7'
+                'max:7',
             ],
             'inches' => [
                 'required',
                 'integer',
-                'max:11'
+                'max:11',
             ],
             'weight' => [
                 'required',
-                'integer'
+                'integer',
             ],
             'hometown' => [
                 'required',
-                'string'
+                'string',
             ],
             'signature_move' => [
                 'nullable',
-                'string'
+                'string',
             ],
             'started_at' => [
                 'nullable',
                 'string',
-                'date_format:Y-m-d H:i:s'
+                'date_format:Y-m-d H:i:s',
             ],
         ];
     }
