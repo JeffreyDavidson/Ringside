@@ -14,7 +14,6 @@ class Title extends Model
         Concerns\CanBeRetired,
         Concerns\CanBeCompeted,
         Concerns\CanBeActivated,
-        Concerns\CanBeRetired,
         Concerns\Unguarded;
 
     protected $casts = [

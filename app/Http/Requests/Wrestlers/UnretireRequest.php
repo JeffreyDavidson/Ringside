@@ -14,17 +14,10 @@ class UnretireRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Wrestler */
         $wrestler = $this->route('wrestler');
 
-        if (! $this->user()->can('unretire', $wrestler)) {
-            return false;
-        }
-
-        if (! $wrestler->canBeUnretired()) {
-            throw new CannotBeUnretiredException();
-        }
-
-        return true;
+        return $this->user()->can('unretire', $wrestler);
     }
 
     /**

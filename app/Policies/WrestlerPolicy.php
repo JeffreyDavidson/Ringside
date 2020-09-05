@@ -110,12 +110,13 @@ class WrestlerPolicy
     }
 
     /**
-     * Determine whether the user can recover a wrestler.
+     * Determine whether the user can clear a wrestler from an injury.
      *
      * @param  App\Models\User  $user
+     * @param  App\Models\Wrestler  $wrestler
      * @return bool
      */
-    public function clearFromInjury(User $user)
+    public function clearFromInjury(User $user, Wrestler $wrestler)
     {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
@@ -142,7 +143,6 @@ class WrestlerPolicy
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
-
     /**
      * Determine whether the user can view a list of wrestlers.
      *
@@ -163,7 +163,7 @@ class WrestlerPolicy
      */
     public function view(User $user, Wrestler $wrestler)
     {
-        if (!is_null($wrestler->user) && $wrestler->user->is($user)) {
+        if (! is_null($wrestler->user) && $wrestler->user->is($user)) {
             return true;
         }
 

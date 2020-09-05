@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
-class Employment extends Model
+class Employment extends MorphPivot
 {
     use Concerns\Unguarded;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'employments';
 
     /**
      * The attributes that should be mutated to dates.

@@ -2,21 +2,17 @@
 
 namespace App\Models;
 
-use App\Eloquent\Concerns\HasCustomRelationships;
 use App\Enums\WrestlerStatus;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends SingleRosterMember
 {
     use SoftDeletes,
-        HasCustomRelationships,
         Concerns\HasAHeight,
         Concerns\CanBeStableMember,
         Concerns\CanBeTagTeamPartner,
-        Concerns\CanBeBooked;
-    // Concerns\Unguarded;
-
-    protected $fillable = ['name', 'height', 'weight', 'hometown', 'signature_move'];
+        Concerns\CanBeBooked,
+        Concerns\Unguarded;
 
     /**
      * The attributes that should be cast to native types.
@@ -35,10 +31,5 @@ class Wrestler extends SingleRosterMember
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function stables()
-    {
-        return $this->morphToMany(Stable::class, 'member', 'stable_members');
     }
 }

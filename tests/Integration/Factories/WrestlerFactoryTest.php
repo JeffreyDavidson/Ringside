@@ -4,8 +4,6 @@ namespace Tests\Integration\Factories;
 
 use App\Enums\WrestlerStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\StableFactory;
-use Tests\Factories\TagTeamFactory;
 use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 

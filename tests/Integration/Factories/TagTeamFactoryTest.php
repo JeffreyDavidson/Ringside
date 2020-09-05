@@ -29,16 +29,7 @@ class TagTeamFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_tag_team_by_default_is_unemployed()
-    {
-        $tagTeam = TagTeamFactory::new()->create();
-
-        $this->assertEquals(TagTeamStatus::UNEMPLOYED, $tagTeam->status);
-        $this->assertCount(0, $tagTeam->employments);
-    }
-
-    /** @test */
-    public function a_tag_team_consists_of_two_wrestlers()
+    public function a_tag_team_always_consists_of_two_wrestlers()
     {
         $tagTeam = TagTeamFactory::new()->create();
 
@@ -46,15 +37,23 @@ class TagTeamFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_tag_team_can_consist_of_existing_wrestlers()
+    public function existing_wrestlers_can_be_a_tag_team()
     {
         $wrestlers = WrestlerFactory::new()->times(2)->create();
 
         $tagTeam = TagTeamFactory::new()->withExistingWrestlers($wrestlers)->create();
 
         $this->assertCount(2, $tagTeam->wrestlers);
-        $this->assertTrue($tagTeam->wrestlers->contains($wrestlers[0]));
-        $this->assertTrue($tagTeam->wrestlers->contains($wrestlers[1]));
+        $this->assertCollectionHas($tagTeam->wrestlers, $wrestlers[0]);
+        $this->assertCollectionHas($tagTeam->wrestlers, $wrestlers[1]);
+    }
+
+    /** @test */
+    public function wrestlers_can_be_added_by_a_tag_team()
+    {
+        $tagTeam = TagTeamFactory::new()->withWrestlers()->create();
+
+        $this->assertCount(2, $tagTeam->wrestlers);
     }
 
     /** @test */
@@ -72,21 +71,12 @@ class TagTeamFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_bookable_tag_team_makes_each_of_its_wrestlers_bookable()
+    public function a_bookable_tag_team_employed_at_same_current_datetime_as_tag_team()
     {
         $tagTeam = TagTeamFactory::new()->bookable()->create();
 
-        $tagTeam->wrestlers->each(function ($wrestler) {
+        $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-        });
-    }
-
-    /** @test */
-    public function a_bookable_tag_team_employs_each_of_its_wrestlers_at_same_current_datetime_as_tag_team()
-    {
-        $tagTeam = TagTeamFactory::new()->bookable()->create();
-
-        $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
             $this->assertCount(1, $wrestler->employments);
 
             $tagTeamEmployment = $tagTeam->employments[0];
@@ -98,26 +88,9 @@ class TagTeamFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_bookable_tag_team_with_existing_bookable_wrestlers_does_not_have_additional_employment()
+    public function a_tag_team_with_a_future_employment_has_correct_status()
     {
-        $wrestlers = WrestlerFactory::new()->bookable()->times(2)->create();
-        $tagTeam = TagTeamFactory::new()->bookable()->withExistingWrestlers($wrestlers)->create();
-
-        $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
-            $this->assertCount(1, $wrestler->employments);
-
-            $tagTeamEmployment = $tagTeam->employments[0];
-            $wrestlerEmployment = $wrestler->employments[0];
-
-            $this->assertTrue($tagTeamEmployment->started_at->equalTo($wrestlerEmployment->started_at));
-            $this->assertNull($tagTeamEmployment->ended_at);
-        });
-    }
-
-    /** @test */
-    public function a_future_employment_is_in_the_future()
-    {
-        $tagTeam = TagTeamFactory::new()->pendingEmployment()->create();
+        $tagTeam = TagTeamFactory::new()->withFutureEmployment()->create();
 
         $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
         $this->assertCount(1, $tagTeam->employments);
@@ -131,7 +104,7 @@ class TagTeamFactoryTest extends TestCase
     /** @test */
     public function a_future_employment_tag_team_employs_at_same_current_datetime_as_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->pendingEmployment()->create();
+        $tagTeam = TagTeamFactory::new()->withFutureEmployment()->create();
 
         $tagTeam->wrestlers->each(function ($wrestler) use ($tagTeam) {
             $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
@@ -277,7 +250,7 @@ class TagTeamFactoryTest extends TestCase
     {
         $stable = StableFactory::new()->create();
 
-        $tagTeam = TagTeamFactory::new()->forStable($stable)->create();
+        $tagTeam = TagTeamFactory::new()->inStable($stable)->create();
 
         $this->assertTrue($stable->tagTeams->contains($tagTeam));
     }

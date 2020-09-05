@@ -195,30 +195,6 @@ class WrestlerPolicyTest extends TestCase
     }
 
     /** @test */
-    public function a_basic_user_cannot_recover_a_wrestler()
-    {
-        $user = UserFactory::new()->basicUser()->create();
-
-        $this->assertFalse($this->policy->clearFromInjury($user));
-    }
-
-    /** @test */
-    public function an_administrator_can_recover_a_wrestler()
-    {
-        $user = UserFactory::new()->administrator()->create();
-
-        $this->assertTrue($this->policy->clearFromInjury($user));
-    }
-
-    /** @test */
-    public function a_super_administrator_can_recover_a_wrestler()
-    {
-        $user = UserFactory::new()->superAdministrator()->create();
-
-        $this->assertTrue($this->policy->clearFromInjury($user));
-    }
-
-    /** @test */
     public function a_basic_user_cannot_suspend_a_wrestler()
     {
         $user = UserFactory::new()->basicUser()->create();

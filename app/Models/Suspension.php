@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
-class Suspension extends Model
+class Suspension extends MorphPivot
 {
     use Concerns\Unguarded;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'suspensions';
 
     /**
      * The attributes that should be mutated to dates.

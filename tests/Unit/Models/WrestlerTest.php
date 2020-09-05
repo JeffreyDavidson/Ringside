@@ -102,12 +102,6 @@ class WrestlerTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_has_custom_relationships()
-    {
-        $this->assertUsesTrait('App\Eloquent\Concerns\HasCustomRelationships', Wrestler::class);
-    }
-
-    /** @test */
     public function a_wrestler_is_a_single_roster_member()
     {
         $this->assertEquals(SingleRosterMember::class, get_parent_class(Wrestler::class));

@@ -2,6 +2,8 @@
 
 namespace App\Models\Concerns;
 
+use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Retirement;
 use App\Traits\HasCachedAttributes;
 
@@ -12,7 +14,7 @@ trait CanBeRetired
         if (config('app.debug')) {
             $traits = class_uses_recursive(static::class);
 
-            if (!in_array(HasCachedAttributes::class, $traits)) {
+            if (! in_array(HasCachedAttributes::class, $traits)) {
                 throw new \LogicException('CanBeRetired trait used without HasCachedAttributes trait');
             }
         }
@@ -35,8 +37,13 @@ trait CanBeRetired
      */
     public function currentRetirement()
     {
+        \Event::listen('Illuminate\Database\Events\QueryExecuted', function ($query) {
+            //            dump($query->sql, $query->bindings, $query->time);
+            \Illuminate\Support\Facades\Log::info(\Illuminate\Support\Str::replaceArray('?', $query->bindings,
+                                                                                        $query->sql));
+        });
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->where('started_at', '<=', now())
+                    ->wherePivot('started_at', '<=', now())
                     ->whereNull('ended_at')
                     ->limit(1);
     }
@@ -96,7 +103,7 @@ trait CanBeRetired
             ->whereColumn('retiree_id', $this->getTable().'.id')
             ->where('retiree_type', $this->getMorphClass())
             ->oldest('started_at')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
     }
 
@@ -125,12 +132,14 @@ trait CanBeRetired
      */
     public function unretire($unretiredAt = null)
     {
-        $unretiredDate = $unretiredAt ?: now();
+        if ($this->canBeUnretired()) {
+            $unretiredDate = $unretiredAt ?: now();
 
-        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->employ($unretiredAt);
+            $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
+            $this->employ($unretiredAt);
 
-        return $this->touch();
+            return $this->touch();
+        }
     }
 
     /**
@@ -150,20 +159,12 @@ trait CanBeRetired
      */
     public function canBeRetired()
     {
-        if ($this->isUnemployed()) {
-            return false;
-        }
-
-        if ($this->isReleased()) {
-            return false;
-        }
-
-        if ($this->hasFutureEmployment()) {
-            return false;
+        if ($this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment()) {
+            throw new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active employment.');
         }
 
         if ($this->isRetired()) {
-            return false;
+            throw new CannotBeRetiredException('Entity cannot be retired. This entity is retired.');
         }
 
         return true;
@@ -177,7 +178,7 @@ trait CanBeRetired
     public function canBeUnretired()
     {
         if (! $this->isRetired()) {
-            return false;
+            throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
         }
 
         return true;
@@ -190,7 +191,7 @@ trait CanBeRetired
      */
     public function getCurrentRetirementAttribute()
     {
-        if (!$this->relationLoaded('currentRetirement')) {
+        if (! $this->relationLoaded('currentRetirement')) {
             $this->setRelation('currentRetirement', $this->currentRetirement()->get());
         }
 
@@ -204,7 +205,7 @@ trait CanBeRetired
      */
     public function getPreviousRetirementAttribute()
     {
-        if (!$this->relationLoaded('previousRetirement')) {
+        if (! $this->relationLoaded('previousRetirement')) {
             $this->setRelation('previousRetirement', $this->previousRetirement()->get());
         }
 

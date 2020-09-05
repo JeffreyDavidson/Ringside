@@ -26,7 +26,7 @@ class WrestlerFactory extends BaseFactory
 
     public function create(array $extra = []): Wrestler
     {
-        $wrestler = parent::build($extra);
+        $wrestler = $this->build($extra);
 
         if ($this->softDeleted) {
             $wrestler->delete();

@@ -14,17 +14,10 @@ class ReleaseRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Wrestler */
         $wrestler = $this->route('wrestler');
 
-        if (! $this->user()->can('release', $wrestler)) {
-            return false;
-        }
-
-        if (! $wrestler->canBeReleased()) {
-            throw new CannotBeReleasedException();
-        }
-
-        return true;
+        return $this->user()->can('release', $wrestler);
     }
 
     /**

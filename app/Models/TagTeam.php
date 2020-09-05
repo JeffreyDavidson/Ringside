@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Eloquent\Concerns\HasCustomRelationships;
 use App\Enums\TagTeamStatus;
 use App\Traits\HasCachedAttributes;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -12,9 +12,10 @@ class TagTeam extends Model
 {
     use SoftDeletes,
         HasCachedAttributes,
-        HasCustomRelationships,
-        // Concerns\CanBeBooked,
+        Concerns\CanBeBooked,
         Concerns\Unguarded;
+
+    const MAX_WRESTLERS_COUNT = 2;
 
     /**
      * The attributes that should be cast to native types.
@@ -76,27 +77,30 @@ class TagTeam extends Model
      */
     public function stables()
     {
-        return $this->leaveableMorphToMany(Stable::class, 'member');
+        return $this->morphToMany(Stable::class, 'member');
     }
 
     /**
      * Get the current stable of the tag team.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
     public function currentStable()
     {
-        return $this->stableHistory()->current();
+        return $this->stables()
+                    ->whereNull('left_at')
+                    ->limit(1);
     }
 
     /**
-     * Get the current stable of the tag team.
+     * Get the previous stables the tag team has been a part of.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
     public function previousStables()
     {
-        return $this->stableHistory()->detached();
+        return $this->stalbes()
+                    ->whereNotNull('left_at');
     }
 
     /**
@@ -110,17 +114,26 @@ class TagTeam extends Model
     }
 
     /**
-     * Add multiple wrestlers to a tag team.
+     * Add wrestlers to a tag team.
      *
      * @param  array  $wrestlers
      * @param  string|null $dateJoined
+     *
+     * @throws Exception
+
      * @return $this
      */
     public function addWrestlers($wrestlerIds, $dateJoined = null)
     {
+        if (count($wrestlerIds) !== self::MAX_WRESTLERS_COUNT) {
+            throw new Exception('The required number of wrestlers to join a tag team  must be two.');
+        }
+
+        $dateJoined ?? now();
+
         $this->wrestlers()->sync([
             $wrestlerIds[0] => ['joined_at' => $dateJoined],
-            $wrestlerIds[1] => ['joined_at' => $dateJoined]
+            $wrestlerIds[1] => ['joined_at' => $dateJoined],
         ]);
 
         return $this;
@@ -172,6 +185,7 @@ class TagTeam extends Model
     public function employ($startAtDate = null)
     {
         $startAtDate = $startAtDate ?? now();
+
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
         $this->currentWrestlers->each->employ($startAtDate);
 
@@ -501,7 +515,7 @@ class TagTeam extends Model
             ->whereColumn('employable_id', $query->qualifyColumn('id'))
             ->where('employable_type', $this->getMorphClass())
             ->orderBy('started_at', 'desc')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['first_employed_at' => 'datetime']);
     }
 
@@ -526,7 +540,7 @@ class TagTeam extends Model
             ->whereColumn('employable_id', $this->getTable().'.id')
             ->where('employable_type', $this->getMorphClass())
             ->orderBy('ended_at', 'desc')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['released_at' => 'datetime']);
     }
 
@@ -575,7 +589,7 @@ class TagTeam extends Model
             ->whereColumn('retiree_id', $this->getTable().'.id')
             ->where('retiree_type', $this->getMorphClass())
             ->oldest('started_at')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
     }
 
@@ -621,7 +635,7 @@ class TagTeam extends Model
             ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
             ->where('suspendable_type', $this->getMorphClass())
             ->orderBy('started_at', 'desc')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['current_suspended_at' => 'datetime']);
     }
 
