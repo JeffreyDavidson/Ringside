@@ -3,10 +3,11 @@
 namespace Tests;
 
 use App\Enums\Role;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Tests\Factories\UserFactory;
+use Illuminate\Support\Collection;
 use Illuminate\Testing\TestResponse;
 use JMac\Testing\Traits\AdditionalAssertions;
-use Tests\Factories\UserFactory;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -47,6 +48,20 @@ abstract class TestCase extends BaseTestCase
     public function assertUsesTrait($trait, $class)
     {
         $this->assertContains($trait, class_uses($class));
+    }
+
+    public function assertCollectionHas($collection, $entity)
+    {
+        if(is_array($entity) || $entity instanceOf Collection) {
+            foreach($entity as $test) {
+                $this->assertContains($collection, $test);
+            }
+
+            return $this;
+        }
+
+        $this->assertTrue($collection->contains($entity));
+        return $this;
     }
 
     public function administrators()

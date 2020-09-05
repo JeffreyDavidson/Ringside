@@ -2,11 +2,15 @@
 
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
-use App\Enums\Role;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Enums\Role;
 use Tests\TestCase;
+use App\Enums\WrestlerStatus;
 use Tests\Factories\WrestlerFactory;
+use App\Exceptions\CannotBeUnretiredException;
+use App\Http\Requests\Wrestlers\UnretireRequest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Http\Controllers\Wrestlers\UnretireController;
 
 /**
  * @group wrestlers
@@ -22,18 +26,33 @@ class UnretireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_unretires_a_wrestler_and_redirects($administrators)
+    public function invoke_unretires_a_retired_wrestler_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
         $wrestler = WrestlerFactory::new()->retired()->create();
+        // dd($wrestler);
 
         $response = $this->unretireRequest($wrestler);
-
+        dd($response);
         $response->assertRedirect(route('wrestlers.index'));
-        $this->assertEquals($now->toDateTimeString(), $wrestler->fresh()->retirements()->latest()->first()->ended_at);
+        tap($wrestler->fresh(), function ($wrestler) use ($now) {
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+            $this->assertCount(1, $wrestler->retirements);
+            $this->assertEquals($now->toDateTimeString(), $wrestler->retirements->first()->ended_at->toDateTimeString());
+        });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            UnretireController::class,
+            '__invoke',
+            UnretireRequest::class
+        );
     }
 
     /** @test */
@@ -51,5 +70,101 @@ class UnretireControllerTest extends TestCase
         $wrestler = WrestlerFactory::new()->create();
 
         $this->unretireRequest($wrestler)->assertRedirect(route('login'));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_a_bookable_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->bookable()->create();
+
+        $this->unretireRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_a_future_employed_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+
+        $this->unretireRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_injured_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->injured()->create();
+
+        $this->unretireRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_a_released_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->released()->create();
+
+        $this->unretireRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_a_suspended_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->suspended()->create();
+
+        $this->unretireRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_unemployed_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->unemployed()->create();
+
+        $this->unretireRequest($wrestler);
     }
 }

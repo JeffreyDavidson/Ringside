@@ -14,17 +14,10 @@ class SuspendRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Wrestler */
         $wrestler = $this->route('wrestler');
 
-        if (! $this->user()->can('suspend', $wrestler)) {
-            return false;
-        }
-
-        if (! $wrestler->canBeSuspended()) {
-            throw new CannotBeSuspendedException();
-        }
-
-        return true;
+        return $this->user()->can('suspend', $wrestler);
     }
 
     /**

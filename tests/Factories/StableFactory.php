@@ -2,16 +2,16 @@
 
 namespace Tests\Factories;
 
-use Carbon\Carbon;
-use App\Models\Stable;
 use App\Enums\StableStatus;
-use Illuminate\Support\Str;
-use Faker\Generator as Faker;
+use App\Models\Stable;
+use Carbon\Carbon;
 use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Faker\Generator as Faker;
+use Illuminate\Support\Str;
 
 class StableFactory extends BaseFactory
 {
-    /** @var $softDeleted */
+    /** @var */
     public $softDeleted = false;
 
     protected string $modelClass = Stable::class;
@@ -19,6 +19,8 @@ class StableFactory extends BaseFactory
     public function create(array $extra = []): Stable
     {
         $stable = parent::build($extra);
+
+        $this->withMembers();
 
         if ($this->softDeleted) {
             $stable->delete();
@@ -43,7 +45,7 @@ class StableFactory extends BaseFactory
     public function withFutureActivation(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
-            'status' => StableStatus::FUTURE_ACTIVATION
+            'status' => StableStatus::FUTURE_ACTIVATION,
         ]);
 
         $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::tomorrow()), 'activations', 1);
@@ -54,7 +56,7 @@ class StableFactory extends BaseFactory
     public function unactivated()
     {
         return tap(clone $this)->overwriteDefaults([
-            'status' => StableStatus::UNACTIVATED
+            'status' => StableStatus::UNACTIVATED,
         ]);
     }
 

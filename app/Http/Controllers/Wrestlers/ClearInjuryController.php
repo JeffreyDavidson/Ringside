@@ -9,10 +9,10 @@ use App\Models\Wrestler;
 class ClearInjuryController extends Controller
 {
     /**
-     * Clear a wrestler.
+     * Have a wrestler recover from an injury.
      *
-     * @param  App\Models\Wrestler  $wrestler
-     * @param  App\Http\Requests\Wrestlers\ClearInjuryRequest  $request
+     * @param  \App\Models\Wrestler  $wrestler
+     * @param  \App\Http\Requests\Wrestlers\ClearInjuryRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Wrestler $wrestler, ClearInjuryRequest $request)

@@ -3,6 +3,10 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\WrestlerStatus;
+use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Http\Controllers\Wrestlers\ClearInjuryController;
+use App\Http\Requests\Wrestlers\ClearInjuryRequest;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\WrestlerFactory;
@@ -22,7 +26,7 @@ class ClearInjuryControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_marks_a_wrestler_as_being_recovered_and_redirects($administrators)
+    public function invoke_marks_an_injured_wrestler_as_being_recovered_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -33,7 +37,23 @@ class ClearInjuryControllerTest extends TestCase
         $response = $this->clearInjuryRequest($wrestler);
 
         $response->assertRedirect(route('wrestlers.index'));
-        $this->assertEquals($now->toDateTimeString(), $wrestler->fresh()->injuries()->latest()->first()->ended_at);
+
+        $response->assertRedirect(route('wrestlers.index'));
+        tap($wrestler->fresh(), function ($wrestler) use ($now) {
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+            $this->assertCount(1, $wrestler->injuries);
+            $this->assertEquals($now->toDateTimeString(), $wrestler->injuries->first()->ended_at->toDateTimeString());
+        });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            ClearInjuryController::class,
+            '__invoke',
+            ClearInjuryRequest::class
+        );
     }
 
     /** @test */
@@ -51,5 +71,101 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler = WrestlerFactory::new()->injured()->create();
 
         $this->clearInjuryRequest($wrestler)->assertRedirect(route('login'));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injury_from_an_unemployed_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeClearedFromInjuryException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->unemployed()->create();
+
+        $this->clearInjuryRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injury_from_a_bookable_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeClearedFromInjuryException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->bookable()->create();
+
+        $this->clearInjuryRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injury_from_a_future_employed_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeClearedFromInjuryException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+
+        $this->clearInjuryRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injury_from_a_suspended_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeClearedFromInjuryException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->suspended()->create();
+
+        $this->clearInjuryRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injury_from_a_retired_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeClearedFromInjuryException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->retired()->create();
+
+        $this->clearInjuryRequest($wrestler);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injury_from_a_released_wrestler_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeClearedFromInjuryException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $wrestler = WrestlerFactory::new()->released()->create();
+
+        $this->clearInjuryRequest($wrestler);
     }
 }

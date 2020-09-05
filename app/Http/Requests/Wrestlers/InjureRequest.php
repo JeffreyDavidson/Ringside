@@ -14,17 +14,10 @@ class InjureRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Wrestler */
         $wrestler = $this->route('wrestler');
 
-        if (! $this->user()->can('injure', $wrestler)) {
-            return false;
-        }
-
-        if (! $wrestler->canBeInjured()) {
-            throw new CannotBeInjuredException();
-        }
-
-        return true;
+        return $this->user()->can('injure', $wrestler);
     }
 
     /**

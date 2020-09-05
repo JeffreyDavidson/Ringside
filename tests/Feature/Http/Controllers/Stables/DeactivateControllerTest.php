@@ -25,21 +25,21 @@ class DeactivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_deactivates_a_stable($administrators)
+    public function invoke_deactivates_a_stable_and_its_members($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $stable = StableFactory::new()->activate()->create();
+        $stable = StableFactory::new()->active()->withMembers()->create();
 
         $response = $this->deactivateRequest($stable);
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::INACTIVE, $stable->status);
-            $this->assertCount(1, $stable->activations);
-            $this->assertEquals($now->toDateTimeString(), $stable->activations->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString(), $stable->activations->last()->ended_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString(), $stable->members->each->left_at->toDateTimeString());
         });
     }
 
