@@ -9,29 +9,25 @@
     "license": "MIT",
     "require": {
         "php": "^7.3",
-        "christophrumpel/laravel-factories-reloaded": "^1.0",
         "fideloper/proxy": "^4.0",
-        "illuminatech/validation-composite": "^1.1",
-        "laravel/framework": "^7.0",
+        "illuminatech/validation-composite": "*",
+        "laravel/framework": "^8.0",
         "laravel/telescope": "^4",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.0",
-        "livewire/livewire": "^1.0",
-        "mad-web/laravel-enum": "^2.0"
+        "livewire/livewire": "^2.0",
+        "mad-web/laravel-enum": "dev-master"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2",
-        "beyondcode/laravel-dump-server": "^1.0",
         "doctrine/dbal": "^2.9",
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",
         "jasonmccreary/laravel-test-assertions": "master",
         "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^4.1",
+        "nunomaduro/collision": "^5.0",
         "nunomaduro/laravel-mojito": "^0.2.4",
-        "phpunit/phpunit": "^9",
-        "rawr/cross-data-providers": "^2.1",
-        "squizlabs/php_codesniffer": "*"
+        "phpunit/phpunit": "^9"
     },
     "config": {
         "optimize-autoloader": true,
@@ -60,6 +56,12 @@
             "Tests\\": "tests/"
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/JeffreyDavidson/laravel-enum"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
