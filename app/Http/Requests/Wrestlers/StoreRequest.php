@@ -4,7 +4,6 @@ namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Validator;
 
 class StoreRequest extends FormRequest
@@ -16,10 +15,6 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
-        if (! Auth::check()) {
-            return false;
-        }
-
         return $this->user()->can('create', Wrestler::class);
     }
 
@@ -31,39 +26,13 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [
-                'required',
-                'string',
-                'min:3',
-            ],
-            'feet' => [
-                'required',
-                'integer',
-                'min:5',
-                'max:7',
-            ],
-            'inches' => [
-                'required',
-                'integer',
-                'max:11',
-            ],
-            'weight' => [
-                'required',
-                'integer',
-            ],
-            'hometown' => [
-                'required',
-                'string',
-            ],
-            'signature_move' => [
-                'nullable',
-                'string',
-            ],
-            'started_at' => [
-                'nullable',
-                'string',
-                'date_format:Y-m-d H:i:s',
-            ],
+            'name' => ['required', 'string', 'min:3'],
+            'feet' => ['required', 'integer', 'min:5', 'max:7'],
+            'inches' => ['required', 'integer', 'max:11'],
+            'weight' => ['required', 'integer'],
+            'hometown' => ['required', 'string'],
+            'signature_move' => ['nullable', 'string'],
+            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
         ];
     }
 

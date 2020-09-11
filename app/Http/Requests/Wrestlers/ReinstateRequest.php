@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Wrestlers;
 
-use App\Exceptions\CannotBeReinstatedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ReinstateRequest extends FormRequest

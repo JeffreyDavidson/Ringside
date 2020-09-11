@@ -3,10 +3,9 @@
 namespace App\Http\Requests\Titles;
 
 use App\Models\Title;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use App\Rules\ConditionalActivationStartDateRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -17,15 +16,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (! Auth::check()) {
-            return false;
-        }
-
-        if ($this->user()->can('update', Title::class)) {
-            return true;
-        }
-
-        return false;
+        return $this->user()->can('update', Title::class);
     }
 
     /**
@@ -40,10 +31,10 @@ class UpdateRequest extends FormRequest
                 'required',
                 'min:3',
                 'ends_with:Title,Titles',
-                Rule::unique('titles')->ignore($this->title->id)
+                Rule::unique('titles')->ignore($this->title->id),
             ],
             'activated_at' => [
-                new ConditionalActivationStartDateRule($this->route('title'))
+                new ConditionalActivationStartDateRule($this->route('title')),
             ],
         ];
     }

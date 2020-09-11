@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Wrestlers;
 
-use App\Exceptions\CannotBeReleasedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ReleaseRequest extends FormRequest

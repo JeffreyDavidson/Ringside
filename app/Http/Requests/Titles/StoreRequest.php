@@ -4,17 +4,12 @@ namespace App\Http\Requests\Titles;
 
 use App\Models\Title;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
     public function authorize()
     {
-        if (! Auth::check()) {
-            return false;
-        }
-
         return $this->user()->can('create', Title::class);
     }
 
