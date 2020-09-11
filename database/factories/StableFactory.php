@@ -1,43 +1,31 @@
 <?php
 
-namespace Tests\Factories;
+namespace Database\Factories;
 
 use App\Enums\StableStatus;
 use App\Models\Stable;
 use Carbon\Carbon;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-class StableFactory extends BaseFactory
+class StableFactory extends Factory
 {
-    /** @var */
-    public $softDeleted = false;
-
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected string $modelClass = Stable::class;
 
-    public function create(array $extra = []): Stable
-    {
-        $stable = parent::build($extra);
-
-        $this->withMembers();
-
-        if ($this->softDeleted) {
-            $stable->delete();
-        }
-
-        return $stable;
-    }
-
-    public function make(array $extra = []): Stable
-    {
-        return parent::build($extra, 'make');
-    }
-
-    public function getDefaults(Faker $faker): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
     {
         return [
-            'name' => Str::title($faker->words(2, true)),
+            'name' => Str::title($this->faker->words(2, true)),
             'status' => StableStatus::__default,
         ];
     }

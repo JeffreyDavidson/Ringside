@@ -1,18 +1,29 @@
 <?php
 
-namespace Tests\Factories;
+namespace Database\Factories;
 
-use Carbon\Carbon;
-use App\Models\Title;
-use App\Models\Stable;
 use App\Models\Activation;
-use Faker\Generator as Faker;
-use Illuminate\Support\Collection;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ActivationFactory extends BaseFactory
+class ActivationFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected string $modelClass = Activation::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
+    {
+        return [];
+    }
 
     /**
      * @param string|Carbon $startDate
@@ -32,20 +43,5 @@ class ActivationFactory extends BaseFactory
         return tap(clone $this)->overwriteDefaults([
             'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
         ]);
-    }
-
-    public function create(array $extra = []): Activation
-    {
-        return parent::build($extra);
-    }
-
-    public function make(array $extra = []): Activation
-    {
-        return parent::build($extra, 'make');
-    }
-
-    public function getDefaults(Faker $faker): array
-    {
-        return [];
     }
 }

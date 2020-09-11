@@ -1,45 +1,35 @@
 <?php
 
-namespace Tests\Factories;
+namespace Database\Factories;
 
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Models\Venue;
 use Carbon\Carbon;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
-use Faker\Generator as Faker;
-use Tests\Factories\VenueFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class EventFactory extends BaseFactory
+class EventFactory extends Factory
 {
-    /** @var */
-    public $softDeleted = false;
-
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected string $modelClass = Event::class;
 
-    public function create(array $extra = []): Event
-    {
-        $event = parent::build($extra);
-
-        if ($this->softDeleted) {
-            $event->delete();
-        }
-
-        return $event;
-    }
-
-    public function make(array $extra = []): Event
-    {
-        return parent::build($extra, 'make');
-    }
-
-    public function getDefaults(Faker $faker): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
     {
         return [
-            'name' => $faker->words(2, true),
+            'name' => $this->faker->words(2, true),
             'status' => EventStatus::__default,
-            'date' => $faker->dateTime(),
-            'venue_id' => VenueFactory::new()->create()->id,
-            'preview' => $faker->paragraph(),
+            'date' => $this->faker->dateTime(),
+            'venue_id' => Venue::factory()->create()->id,
+            'preview' => $this->faker->paragraph(),
         ];
     }
 

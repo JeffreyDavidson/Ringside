@@ -1,15 +1,30 @@
 <?php
 
-namespace Tests\Factories;
+namespace Database\Factories;
 
 use App\Models\Injury;
 use Carbon\Carbon;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InjuryFactory extends BaseFactory
+class InjuryFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected string $modelClass = Injury::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
+    {
+        return [
+        ];
+    }
 
     /**
      * @param string|Carbon $startDate
@@ -29,20 +44,5 @@ class InjuryFactory extends BaseFactory
         return tap(clone $this)->overwriteDefaults([
             'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
         ]);
-    }
-
-    public function create(array $extra = []): Injury
-    {
-        return parent::build($extra);
-    }
-
-    public function make(array $extra = []): Injury
-    {
-        return parent::build($extra, 'make');
-    }
-
-    public function getDefaults(Faker $faker): array
-    {
-        return [];
     }
 }
