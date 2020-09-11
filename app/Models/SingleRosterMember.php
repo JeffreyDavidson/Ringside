@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Exceptions\CannotBeInjuredException;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeSuspendedException;
 use App\Traits\HasCachedAttributes;
 use Illuminate\Database\Eloquent\Model;
-use App\Exceptions\CannotBeInjuredException;
-use App\Exceptions\CannotBeSuspendedException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeClearedFromInjuryException;
 
 abstract class SingleRosterMember extends Model
 {

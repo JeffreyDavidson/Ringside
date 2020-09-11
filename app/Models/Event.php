@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Enums\EventStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
     use SoftDeletes,
+        HasFactory,
         Concerns\Unguarded;
 
     /**
@@ -53,7 +55,7 @@ class Event extends Model
     /**
      * Checks to see if the event is scheduled for a future date.
      *
-     * @return boolean
+     * @return bool
      */
     public function isScheduled()
     {
@@ -63,7 +65,7 @@ class Event extends Model
     /**
      * Checks to see if the event has taken place.
      *
-     * @return boolean
+     * @return bool
      */
     public function isPast()
     {
@@ -73,7 +75,7 @@ class Event extends Model
     /**
      * Checks to see if the event is does not have a scheduled date.
      *
-     * @return boolean
+     * @return bool
      */
     public function isUnScheduled()
     {

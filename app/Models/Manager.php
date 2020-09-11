@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use App\Eloquent\Concerns\HasCustomRelationships;
 use App\Enums\ManagerStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Manager extends SingleRosterMember
 {
     use SoftDeletes,
-        HasCustomRelationships,
+        HasFactory,
         Concerns\HasFullName,
         Concerns\CanBeStableMember,
         Concerns\Unguarded;

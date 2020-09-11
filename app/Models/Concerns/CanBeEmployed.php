@@ -4,21 +4,9 @@ namespace App\Models\Concerns;
 
 use App\Exceptions\CannotBeEmployedException;
 use App\Models\Employment;
-use App\Traits\HasCachedAttributes;
 
 trait CanBeEmployed
 {
-    public static function bootCanBeEmployed()
-    {
-        if (config('app.debug')) {
-            $traits = class_uses_recursive(static::class);
-
-            if (! in_array(HasCachedAttributes::class, $traits)) {
-                throw new \LogicException('CanBeRetired trait used without HasCachedAttributes trait');
-            }
-        }
-    }
-
     /**
      * Get all of the employments of the model.
      *
@@ -36,7 +24,13 @@ trait CanBeEmployed
      */
     public function currentEmployment()
     {
-        return $this->morphOne(Employment::class, 'employable')
+        \Event::listen('Illuminate\Database\Events\QueryExecuted', function ($query) {
+            //            dump($query->sql, $query->bindings, $query->time);
+            \Illuminate\Support\Facades\Log::info(\Illuminate\Support\Str::replaceArray('?', $query->bindings,
+                                                                                        $query->sql));
+        });
+
+        return $this->employments()
                     ->where('started_at', '<=', now())
                     ->whereNull('ended_at')
                     ->limit(1);
@@ -49,7 +43,7 @@ trait CanBeEmployed
      */
     public function futureEmployment()
     {
-        return $this->morphOne(Employment::class, 'employable')
+        return $this->employments()
                     ->where('started_at', '>', now())
                     ->whereNull('ended_at')
                     ->limit(1);
@@ -264,7 +258,6 @@ trait CanBeEmployed
             throw new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.');
         }
 
-        // dd($this);
         if ($this->isRetired()) {
             throw new CannotBeEmployedException('Entity cannot be employed. This entity does not have an active employment.');
         }
@@ -279,7 +272,7 @@ trait CanBeEmployed
      */
     public function canBeReleased()
     {
-        if ($this->isUnemployed() || $this->hasFutureEmployment() || $this->isReleased() || $this->isRetired()) {
+        if (! $this->isCurrentlyEmployed() || $this->hasFutureEmployment() || $this->isReleased() || $this->isRetired()) {
             throw new CannotBeEmployedException('Entity cannot be released. This entity does not have an active employment.');
         }
 
@@ -294,47 +287,5 @@ trait CanBeEmployed
     public function getStartedAtAttribute()
     {
         return optional($this->employments->last())->started_at;
-    }
-
-    /**
-     * Get the current employment of the model.
-     *
-     * @return App\Models\Employment
-     */
-    public function getCurrentEmploymentAttribute()
-    {
-        if (! $this->relationLoaded('currentEmployment')) {
-            $this->setRelation('currentEmployment', $this->currentEmployment()->get());
-        }
-
-        return $this->getRelation('currentEmployment')->first();
-    }
-
-    /**
-     * Get the previous employment of the model.
-     *
-     * @return App\Models\Employment
-     */
-    public function getPreviousEmploymentAttribute()
-    {
-        if (! $this->relationLoaded('previousEmployment')) {
-            $this->setRelation('previousEmployment', $this->previousEmployment()->get());
-        }
-
-        return $this->getRelation('previousEmployment')->first();
-    }
-
-    /**
-     * Get the previous employment of the model.
-     *
-     * @return App\Models\Employment
-     */
-    public function getFutureEmploymentAttribute()
-    {
-        if (! $this->relationLoaded('futureEmployment')) {
-            $this->setRelation('futureEmployment', $this->futureEmployment()->get());
-        }
-
-        return $this->getRelation('futureEmployment')->first();
     }
 }

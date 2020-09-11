@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 class Suspension extends MorphPivot
 {
-    use Concerns\Unguarded;
+    use HasFactory,
+        Concerns\Unguarded;
 
     /**
      * The table associated with the model.

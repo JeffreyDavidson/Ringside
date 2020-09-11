@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmploymentStartDateCanBeChanged implements Rule
 {
-    /** @var $model */
+    /** @var */
     protected $model;
 
     /**
@@ -26,11 +26,11 @@ class EmploymentStartDateCanBeChanged implements Rule
      *
      * @param [type] $attribute
      * @param [type] $value
-     * @return void
+     * @return bool
      */
     public function passes($attribute, $value = null)
     {
-        /**
+        /*
          *  Times when employment date can/cannot be changed.
          *
          * * If model has a current employment then it cannot be changed.
@@ -38,6 +38,11 @@ class EmploymentStartDateCanBeChanged implements Rule
          * * If model has a future employment and value is before future employment
          * *   start date then start date can be changed.
          */
+
+        if ($this->model->isUnemployed()) {
+            return true;
+        }
+
         $currentEmployment = $this->model->currentEmployment;
         $futureEmployment = $this->model->futureEmployment;
         $formDate = Carbon::parse($value);

@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\TagTeamStatus;
 use App\Traits\HasCachedAttributes;
 use Exception;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TagTeam extends Model
 {
     use SoftDeletes,
+        HasFactory,
         HasCachedAttributes,
         Concerns\CanBeBooked,
         Concerns\Unguarded;

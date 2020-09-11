@@ -2,24 +2,12 @@
 
 namespace App\Models\Concerns;
 
-use App\Models\Activation;
-use App\Traits\HasCachedAttributes;
 use App\Exceptions\CannotBeActivatedException;
 use App\Exceptions\CannotBeDeactivatedException;
+use App\Models\Activation;
 
 trait CanBeActivated
 {
-    public static function bootCanBeActivated()
-    {
-        if (config('app.debug')) {
-            $traits = class_uses_recursive(static::class);
-
-            if (!in_array(HasCachedAttributes::class, $traits)) {
-                throw new \LogicException('CanBeActivated trait used without HasCachedAttributes trait');
-            }
-        }
-    }
-
     /**
      * Get all of the activations of the model.
      *
@@ -144,7 +132,7 @@ trait CanBeActivated
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
             ->where('activatable_type', $this->getMorphClass())
             ->oldest('started_at')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['first_activated_at' => 'datetime']);
     }
 
@@ -159,7 +147,7 @@ trait CanBeActivated
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
             ->where('activatable_type', $this->getMorphClass())
             ->orderBy('ended_at', 'desc')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['current_deactivated_at' => 'datetime']);
     }
 
@@ -191,15 +179,13 @@ trait CanBeActivated
      */
     public function activate($startedAt = null)
     {
-        if (!$this->canBeActivated()) {
-            throw new CannotBeActivatedException();
+        if ($this->canBeActivated()) {
+            $startDate = $startedAt ?? now();
+
+            $this->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+
+            return $this->touch();
         }
-
-        $startDate = $startedAt ?? now();
-
-        $this->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-
-        return $this->touch();
     }
 
     /**
@@ -210,15 +196,13 @@ trait CanBeActivated
      */
     public function deactivate($deactivatedAt = null)
     {
-        if (!$this->canBeDeactivated()) {
-            throw new CannotBeDeactivatedException();
+        if ($this->canBeDeactivated()) {
+            $deactivatedDate = $deactivatedAt ?? now();
+
+            $this->currentActivation()->update(['ended_at' => $deactivatedDate]);
+
+            return $this->touch();
         }
-
-        $deactivatedDate = $deactivatedAt ?? now();
-
-        $this->currentActivation()->update(['ended_at' => $deactivatedDate]);
-
-        return $this->touch();
     }
 
     /**
@@ -291,11 +275,11 @@ trait CanBeActivated
     public function canBeActivated()
     {
         if ($this->isActive()) {
-            return false;
+            throw new CannotBeActivatedException('Entity cannot be activated. This entity is active.');
         }
 
         if ($this->isRetired()) {
-            return false;
+            throw new CannotBeActivatedException('Entity cannot be activated. This entity is retired.');
         }
 
         return true;
@@ -308,20 +292,16 @@ trait CanBeActivated
      */
     public function canBeDeactivated()
     {
-        if ($this->isUnactivated()) {
-            return false;
-        }
-
-        if ($this->hasFutureActivation()) {
-            return false;
+        if ($this->isUnactivated() || $this->hasFutureActivation()) {
+            throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity has not been activated.');
         }
 
         if ($this->isDeactivated()) {
-            return false;
+            throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is deactivated.');
         }
 
         if ($this->isRetired()) {
-            return false;
+            throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity has not been retired.');
         }
 
         return true;
@@ -338,10 +318,10 @@ trait CanBeActivated
     }
 
     /**
-    * Get the current activation of the model.
-    *
-    * @return App\Models\Activation
-    */
+     * Get the current activation of the model.
+     *
+     * @return App\Models\Activation
+     */
     public function getCurrentActivationAttribute()
     {
         if (! $this->relationLoaded('currentActivation')) {
