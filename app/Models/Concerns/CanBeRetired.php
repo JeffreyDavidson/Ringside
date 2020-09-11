@@ -5,21 +5,9 @@ namespace App\Models\Concerns;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Retirement;
-use App\Traits\HasCachedAttributes;
 
 trait CanBeRetired
 {
-    public static function bootCanBeRetired()
-    {
-        if (config('app.debug')) {
-            $traits = class_uses_recursive(static::class);
-
-            if (! in_array(HasCachedAttributes::class, $traits)) {
-                throw new \LogicException('CanBeRetired trait used without HasCachedAttributes trait');
-            }
-        }
-    }
-
     /**
      * Get the retirements of the model.
      *
@@ -37,13 +25,8 @@ trait CanBeRetired
      */
     public function currentRetirement()
     {
-        \Event::listen('Illuminate\Database\Events\QueryExecuted', function ($query) {
-            //            dump($query->sql, $query->bindings, $query->time);
-            \Illuminate\Support\Facades\Log::info(\Illuminate\Support\Str::replaceArray('?', $query->bindings,
-                                                                                        $query->sql));
-        });
-        return $this->morphOne(Retirement::class, 'retiree')
-                    ->wherePivot('started_at', '<=', now())
+        return $this->retirements()
+                    ->where('started_at', '<=', now())
                     ->whereNull('ended_at')
                     ->limit(1);
     }
@@ -149,7 +132,7 @@ trait CanBeRetired
      */
     public function isRetired()
     {
-        return $this->currentRetirement()->exists();
+        return $this->whereHas('currentRetirement')->exists();
     }
 
     /**
@@ -182,33 +165,5 @@ trait CanBeRetired
         }
 
         return true;
-    }
-
-    /**
-     * Get the current retirement of the model.
-     *
-     * @return App\Models\Retirement
-     */
-    public function getCurrentRetirementAttribute()
-    {
-        if (! $this->relationLoaded('currentRetirement')) {
-            $this->setRelation('currentRetirement', $this->currentRetirement()->get());
-        }
-
-        return $this->getRelation('currentRetirement')->first();
-    }
-
-    /**
-     * Get the previous retirement of the model.
-     *
-     * @return App\Models\Retirement
-     */
-    public function getPreviousRetirementAttribute()
-    {
-        if (! $this->relationLoaded('previousRetirement')) {
-            $this->setRelation('previousRetirement', $this->previousRetirement()->get());
-        }
-
-        return $this->getRelation('previousRetirement')->first();
     }
 }

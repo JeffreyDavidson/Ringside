@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Enums\StableStatus;
 use App\Traits\HasCachedAttributes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stable extends Model
 {
     use SoftDeletes,
+        HasFactory,
         HasCachedAttributes,
         Concerns\CanBeActivated,
         Concerns\Unguarded;
@@ -129,7 +131,7 @@ class Stable extends Model
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return void
      */
@@ -207,7 +209,7 @@ class Stable extends Model
             ->whereColumn('retiree_id', $this->getTable().'.id')
             ->where('retiree_type', $this->getMorphClass())
             ->oldest('started_at')
-            ->limit(1)
+            ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
     }
 

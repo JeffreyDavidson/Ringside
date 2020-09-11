@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 class Employment extends MorphPivot
 {
-    use Concerns\Unguarded;
+    use HasFactory,
+        Concerns\Unguarded;
 
     /**
      * The table associated with the model.
@@ -36,7 +38,7 @@ class Employment extends MorphPivot
      * Retrieve an employment started before a given date.
      *
      * @param  string $date
-     * @return boolean
+     * @return bool
      */
     public function startedBefore($date)
     {
