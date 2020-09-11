@@ -3,10 +3,10 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
+use App\Models\TagTeam;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Factories\TagTeamFactory;
 
 /**ss
  * @group tagteams
@@ -28,7 +28,7 @@ class UnretireControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->retired()->create();
+        $tagTeam = TagTeam::factory()->retired()->create();
 
         $response = $this->unretireRequest($tagTeam);
 
@@ -40,7 +40,7 @@ class UnretireControllerTest extends TestCase
     public function a_basic_user_cannot_unretire_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->unretireRequest($tagTeam)->assertForbidden();
     }
@@ -48,7 +48,7 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_unretire_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->unretireRequest($tagTeam)->assertRedirect(route('login'));
     }

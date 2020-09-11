@@ -4,9 +4,9 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Enums\StableStatus;
+use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\StableFactory;
 use Tests\TestCase;
 
 /**
@@ -29,7 +29,7 @@ class UnretireControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $stable = StableFactory::new()->retired()->create();
+        $stable = Stable::factory()->retired()->create();
 
         $response = $this->unretireRequest($stable);
 
@@ -45,7 +45,7 @@ class UnretireControllerTest extends TestCase
     public function a_basic_user_cannot_unretire_a_stable()
     {
         $this->actAs(Role::BASIC);
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->retireRequest($stable)->assertForbidden();
     }
@@ -53,7 +53,7 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_unretire_a_stable()
     {
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->retireRequest($stable)->assertRedirect(route('login'));
     }

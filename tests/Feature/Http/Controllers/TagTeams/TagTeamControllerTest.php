@@ -7,10 +7,8 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\TagTeamFactory;
-use Tests\Factories\UserFactory;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
@@ -31,7 +29,7 @@ class TagTeamControllerTest extends TestCase
      */
     private function validParams($overrides = [])
     {
-        $wrestlers = WrestlerFactory::new()->bookable()->times(2)->create();
+        $wrestlers = Wrestler::factory()->bookable()->times(2)->create();
 
         return array_replace_recursive([
             'name' => 'Example Tag Team Name',
@@ -185,7 +183,7 @@ class TagTeamControllerTest extends TestCase
     public function show_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $response = $this->showRequest($tagTeam);
 
@@ -197,7 +195,7 @@ class TagTeamControllerTest extends TestCase
     public function a_basic_user_can_view_their_tag_team_profile()
     {
         $signedInUser = $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create(['user_id' => $signedInUser->id]);
+        $tagTeam = TagTeam::factory()->create(['user_id' => $signedInUser->id]);
 
         $this->showRequest($tagTeam)->assertOk();
     }
@@ -206,8 +204,8 @@ class TagTeamControllerTest extends TestCase
     public function a_basic_user_cannot_view_another_users_tag_team_profile()
     {
         $this->actAs(Role::BASIC);
-        $otherUser = UserFactory::new()->create();
-        $tagTeam = TagTeamFactory::new()->create(['user_id' => $otherUser->id]);
+        $otherUser = User::factory()->create();
+        $tagTeam = TagTeam::factory()->create(['user_id' => $otherUser->id]);
 
         $this->showRequest($tagTeam)->assertForbidden();
     }
@@ -215,7 +213,7 @@ class TagTeamControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_a_tag_team_profile()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->showRequest($tagTeam)->assertRedirect(route('login'));
     }
@@ -227,7 +225,7 @@ class TagTeamControllerTest extends TestCase
     public function edit_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $response = $this->editRequest($tagTeam);
 
@@ -242,7 +240,7 @@ class TagTeamControllerTest extends TestCase
     public function updates_a_tag_team_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $response = $this->updateRequest($tagTeam, $this->validParams());
 
@@ -256,10 +254,9 @@ class TagTeamControllerTest extends TestCase
     public function wrestlers_of_tag_team_are_synced_when_tag_team_is_updated()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $tagTeam = TagTeamFactory::new()->bookable()->create();
-        $wrestlers = WrestlerFactory::new()->count(2)->bookable()->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
 
-        // $this->updateRequest($tagTeam, $this->validParams([
         $response = $this->updateRequest($tagTeam, $this->validParams([
             'wrestlers' => $wrestlers->modelKeys(),
         ]));
@@ -276,7 +273,7 @@ class TagTeamControllerTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->editRequest($tagTeam)->assertForbidden();
     }
@@ -285,7 +282,7 @@ class TagTeamControllerTest extends TestCase
     public function a_basic_user_cannot_update_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->updateRequest($tagTeam, $this->validParams())->assertForbidden();
     }
@@ -293,7 +290,7 @@ class TagTeamControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->editRequest($tagTeam)->assertRedirect(route('login'));
     }
@@ -301,7 +298,7 @@ class TagTeamControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->updateRequest($tagTeam, $this->validParams())->assertRedirect(route('login'));
     }
@@ -323,7 +320,7 @@ class TagTeamControllerTest extends TestCase
     public function deletes_a_tag_team_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $response = $this->deleteRequest($tagTeam);
 
@@ -335,7 +332,7 @@ class TagTeamControllerTest extends TestCase
     public function a_basic_user_cannot_delete_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->deleteRequest($tagTeam)->assertForbidden();
     }
@@ -343,7 +340,7 @@ class TagTeamControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_delete_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->deleteRequest($tagTeam)->assertRedirect(route('login'));
     }

@@ -3,8 +3,8 @@
 namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
+use App\Models\Stable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\StableFactory;
 use Tests\TestCase;
 
 /**
@@ -21,7 +21,7 @@ class RetireControllerTest extends TestCase
     public function a_basic_user_cannot_retire_a_stable()
     {
         $this->actAs(Role::BASIC);
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->retireRequest($stable)->assertForbidden();
     }
@@ -29,7 +29,7 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_retire_a_stable()
     {
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->retireRequest($stable)->assertRedirect(route('login'));
     }

@@ -3,9 +3,9 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
+use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Factories\TagTeamFactory;
 
 /**
  * @group tagteams
@@ -21,7 +21,7 @@ class RestoreControllerTest extends TestCase
     public function invoke_restores_a_deleted_tag_team_and_redirects()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $tagTeam = TagTeamFactory::new()->softDeleted()->create();
+        $tagTeam = TagTeam::factory()->softDeleted()->create();
 
         $response = $this->restoreRequest($tagTeam);
 
@@ -33,7 +33,7 @@ class RestoreControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->softDeleted()->create();
+        $tagTeam = TagTeam::factory()->softDeleted()->create();
 
         $this->restoreRequest($tagTeam)->assertForbidden();
     }
@@ -41,7 +41,7 @@ class RestoreControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_restore_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->softDeleted()->create();
+        $tagTeam = TagTeam::factory()->softDeleted()->create();
 
         $this->restoreRequest($tagTeam)->assertRedirect(route('login'));
     }

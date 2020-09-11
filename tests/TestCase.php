@@ -3,11 +3,11 @@
 namespace Tests;
 
 use App\Enums\Role;
-use Tests\Factories\UserFactory;
+use App\Models\User;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Collection;
 use Illuminate\Testing\TestResponse;
 use JMac\Testing\Traits\AdditionalAssertions;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -31,7 +31,7 @@ abstract class TestCase extends BaseTestCase
 
     public function actAs($role = Role::BASIC, $attributes = [])
     {
-        $user = UserFactory::new()->withRole($role)->create($attributes);
+        $user = User::factory()->withRole($role)->create($attributes);
 
         $this->actingAs($user);
 
@@ -52,8 +52,8 @@ abstract class TestCase extends BaseTestCase
 
     public function assertCollectionHas($collection, $entity)
     {
-        if(is_array($entity) || $entity instanceOf Collection) {
-            foreach($entity as $test) {
+        if (is_array($entity) || $entity instanceof Collection) {
+            foreach ($entity as $test) {
                 $this->assertContains($collection, $test);
             }
 
@@ -61,6 +61,7 @@ abstract class TestCase extends BaseTestCase
         }
 
         $this->assertTrue($collection->contains($entity));
+
         return $this;
     }
 

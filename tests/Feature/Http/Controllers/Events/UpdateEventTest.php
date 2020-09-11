@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Http\Controllers\Events;
 
-use Carbon\Carbon;
 use App\Enums\Role;
-use Tests\TestCase;
-use Tests\Factories\EventFactory;
-use Tests\Factories\VenueFactory;
-use App\Http\Requests\Events\UpdateRequest;
 use App\Http\Controllers\Events\EventsController;
+use App\Http\Requests\Events\UpdateRequest;
+use App\Models\Event;
+use App\Models\Venue;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group events
@@ -29,7 +29,7 @@ class UpdateEventTest extends TestCase
         return array_replace([
             'name' => 'Example Event Name',
             'date' => now()->toDateTimeString(),
-            'venue_id' => VenueFactory::new()->create()->id,
+            'venue_id' => Venue::factory()->create()->id,
             'preview' => 'This is an event preview.',
         ], $overrides);
     }
@@ -38,7 +38,7 @@ class UpdateEventTest extends TestCase
     public function an_administrator_can_view_the_form_for_editing_a_scheduled_event()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
+        $event = Event::factory()->scheduled()->create();
 
         $response = $this->get(route('events.edit', $event));
 
@@ -53,7 +53,7 @@ class UpdateEventTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
+        $event = Event::factory()->scheduled()->create();
 
         $response = $this->patch(route('events.update', $event), $this->validParams());
 
@@ -69,7 +69,7 @@ class UpdateEventTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_an_event()
     {
         $this->actAs(Role::BASIC);
-        $event = EventFactory::new()->create();
+        $event = Event::factory()->create();
 
         $response = $this->editRequest($event);
 
@@ -80,7 +80,7 @@ class UpdateEventTest extends TestCase
     public function a_basic_user_cannot_update_an_event()
     {
         $this->actAs(Role::BASIC);
-        $event = EventFactory::new()->create();
+        $event = Event::factory()->create();
 
         $response = $this->updateRequest($event, $this->validParams());
 
@@ -90,7 +90,7 @@ class UpdateEventTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_an_event()
     {
-        $event = EventFactory::new()->create();
+        $event = Event::factory()->create();
 
         $response = $this->get(route('events.edit', $event));
 
@@ -100,7 +100,7 @@ class UpdateEventTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_an_event()
     {
-        $event = EventFactory::new()->create();
+        $event = Event::factory()->create();
 
         $response = $this->patch(route('events.update', $event), $this->validParams());
 
@@ -111,7 +111,7 @@ class UpdateEventTest extends TestCase
     public function a_past_event_cannot_be_edited()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->past()->create();
+        $event = Event::factory()->past()->create();
 
         $response = $this->get(route('events.edit', $event));
 
@@ -122,7 +122,7 @@ class UpdateEventTest extends TestCase
     public function a_past_event_cannot_be_updated()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->past()->create();
+        $event = Event::factory()->past()->create();
 
         $response = $this->patch(route('events.update', $event), $this->validParams());
 

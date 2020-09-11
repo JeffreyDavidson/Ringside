@@ -3,9 +3,9 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
+use App\Models\TagTeam;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\TagTeamFactory;
 use Tests\TestCase;
 
 /**
@@ -28,7 +28,7 @@ class ReinstateControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->suspended()->create();
+        $tagTeam = TagTeam::factory()->suspended()->create();
 
         $response = $this->reinstateRequest($tagTeam);
 
@@ -40,7 +40,7 @@ class ReinstateControllerTest extends TestCase
     public function a_basic_user_cannot_reinstate_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->reinstateRequest($tagTeam)->assertForbidden();
     }
@@ -48,7 +48,7 @@ class ReinstateControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_reinstate_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->reinstateRequest($tagTeam)->assertRedirect(route('login'));
     }

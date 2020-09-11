@@ -2,15 +2,21 @@
 
 namespace Tests\Feature\Http\Controllers\Managers;
 
+use App\Enums\ManagerStatus;
 use App\Enums\Role;
+use App\Exceptions\CannotBeSuspendedException;
+use App\Http\Controllers\Managers\SuspendController;
+use App\Http\Requests\Managers\SuspendRequest;
+use App\Models\Manager;
 use Carbon\Carbon;
-use Tests\Factories\ManagerFactory;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group managers
  * @group feature-managers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -22,27 +28,39 @@ class SuspendControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_suspends_a_manager_and_redirects($administrators)
+    public function invoke_suspends_an_available_manager_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $manager = ManagerFactory::new()->available()->create();
+        $manager = Manager::factory()->available()->create();
 
         $response = $this->suspendRequest($manager);
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
-            $this->assertEquals($now->toDateTimeString(), $manager->fresh()->suspensions()->first()->started_at);
+            $this->assertEquals(ManagerStatus::SUSPENDED, $manager->status);
+            $this->assertCount(1, $manager->suspensions);
+            $this->assertEquals($now->toDateTimeString(), $manager->suspensions->first()->started_at->toDateTimeString());
         });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            SuspendController::class,
+            '__invoke',
+            SuspendRequest::class
+        );
     }
 
     /** @test */
     public function a_basic_user_cannot_suspend_a_manager()
     {
         $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->suspendRequest($manager)->assertForbidden();
     }
@@ -50,8 +68,104 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_suspend_a_manager()
     {
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->suspendRequest($manager)->assertRedirect(route('login'));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_an_unemployed_manager_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeSuspendedException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $manager = Manager::factory()->unemployed()->create();
+
+        $this->suspendRequest($manager);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_a_future_employed_manager_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeSuspendedException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $manager = Manager::factory()->withFutureEmployment()->create();
+
+        $this->suspendRequest($manager);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_an_injured_manager_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeSuspendedException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $manager = Manager::factory()->injured()->create();
+
+        $this->suspendRequest($manager);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_a_released_manager_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeSuspendedException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $manager = Manager::factory()->released()->create();
+
+        $this->suspendRequest($manager);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_a_retired_manager_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeSuspendedException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $manager = Manager::factory()->retired()->create();
+
+        $this->suspendRequest($manager);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_a_suspended_manager_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeSuspendedException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $manager = Manager::factory()->suspended()->create();
+
+        $this->suspendRequest($manager);
     }
 }

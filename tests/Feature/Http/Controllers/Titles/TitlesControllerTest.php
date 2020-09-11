@@ -9,7 +9,6 @@ use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use JMac\Testing\Traits\AdditionalAssertions;
-use Tests\Factories\TitleFactory;
 use Tests\TestCase;
 
 /**
@@ -173,7 +172,7 @@ class TitlesControllerTest extends TestCase
     public function edit_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $response = $this->editRequest($title);
 
@@ -188,7 +187,7 @@ class TitlesControllerTest extends TestCase
     public function update_a_title($administrators)
     {
         $this->actAs($administrators);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $response = $this->updateRequest($title, $this->validParams());
 
@@ -202,7 +201,7 @@ class TitlesControllerTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_a_title()
     {
         $this->actAs(Role::BASIC);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->editRequest($title)->assertForbidden();
     }
@@ -211,7 +210,7 @@ class TitlesControllerTest extends TestCase
     public function a_basic_user_cannot_update_a_title()
     {
         $this->actAs(Role::BASIC);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->updateRequest($title, $this->validParams())->assertForbidden();
     }
@@ -219,7 +218,7 @@ class TitlesControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_title()
     {
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->editRequest($title)->assertRedirect(route('login'));
     }
@@ -227,7 +226,7 @@ class TitlesControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_a_title()
     {
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->updateRequest($title, $this->validParams())->assertRedirect(route('login'));
     }
@@ -249,7 +248,7 @@ class TitlesControllerTest extends TestCase
     public function a_title_can_be_viewed($administrators)
     {
         $this->actAs($administrators);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $response = $this->showRequest($title);
 
@@ -261,7 +260,7 @@ class TitlesControllerTest extends TestCase
     public function a_basic_user_can_view_a_title()
     {
         $this->actAs(Role::BASIC);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->showRequest($title)->assertForbidden();
     }
@@ -269,7 +268,7 @@ class TitlesControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_a_title()
     {
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->showRequest($title)->assertRedirect(route('login'));
     }
@@ -281,7 +280,7 @@ class TitlesControllerTest extends TestCase
     public function delete_a_title($administrators)
     {
         $this->actAs($administrators);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $response = $this->delete(route('titles.destroy', $title));
 
@@ -293,7 +292,7 @@ class TitlesControllerTest extends TestCase
     public function a_basic_user_cannot_delete_a_title()
     {
         $this->actAs(Role::BASIC);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->deleteRequest($title)->assertForbidden();
     }
@@ -301,7 +300,7 @@ class TitlesControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_delete_a_title()
     {
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->deleteRequest($title)->assertRedirect(route('login'));
     }
@@ -313,7 +312,7 @@ class TitlesControllerTest extends TestCase
     public function restore_a_title_a_redirects($administrators)
     {
         $this->actAs($administrators);
-        $title = TitleFactory::new()->softDeleted()->create();
+        $title = Title::factory()->softDeleted()->create();
 
         $response = $this->restoreRequest($title);
 
@@ -325,7 +324,7 @@ class TitlesControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_title()
     {
         $this->actAs(Role::BASIC);
-        $title = TitleFactory::new()->softDeleted()->create();
+        $title = Title::factory()->softDeleted()->create();
 
         $this->restoreRequest($title)->assertForbidden();
     }
@@ -333,7 +332,7 @@ class TitlesControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_restore_a_title()
     {
-        $title = TitleFactory::new()->softDeleted()->create();
+        $title = Title::factory()->softDeleted()->create();
 
         $this->restoreRequest($title)->assertRedirect(route('login'));
     }
@@ -345,7 +344,7 @@ class TitlesControllerTest extends TestCase
     public function restore_returns_a_404_when_title_is_not_deleted($administrators)
     {
         $this->actAs($administrators);
-        $title = TitleFactory::new()->create();
+        $title = Title::factory()->create();
 
         $this->restoreRequest($title)->assertNotFound();
     }

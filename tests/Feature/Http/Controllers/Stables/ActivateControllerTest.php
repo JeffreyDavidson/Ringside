@@ -6,9 +6,9 @@ use App\Enums\Role;
 use App\Enums\StableStatus;
 use App\Http\Controllers\Stables\ActivateController;
 use App\Http\Requests\Stables\ActivateRequest;
+use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\StableFactory;
 use Tests\TestCase;
 
 /**
@@ -31,7 +31,7 @@ class ActivateControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $stable = StableFactory::new()->unactivated()->create();
+        $stable = Stable::factory()->unactivated()->create();
 
         $response = $this->activateRequest($stable);
 
@@ -47,7 +47,7 @@ class ActivateControllerTest extends TestCase
     public function a_basic_user_cannot_activate_a_stable()
     {
         $this->actAs(Role::BASIC);
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->activateRequest($stable)->assertForbidden();
     }
@@ -55,7 +55,7 @@ class ActivateControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_activate_a_stable()
     {
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->activateRequest($stable)->assertRedirect(route('login'));
     }

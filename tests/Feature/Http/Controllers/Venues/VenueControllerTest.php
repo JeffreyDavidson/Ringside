@@ -3,13 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Venues;
 
 use App\Enums\Role;
-use App\Models\Venue;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
+use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Factories\VenueFactory;
 
 /**
  * @group venues
@@ -145,7 +144,7 @@ class VenueControllerTest extends TestCase
     public function show_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $response = $this->showRequest($venue);
 
@@ -157,7 +156,7 @@ class VenueControllerTest extends TestCase
     public function a_basic_user_cannot_view_a_venue()
     {
         $this->actAs(Role::BASIC);
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $this->showRequest($venue)->assertStatus(403);
     }
@@ -165,7 +164,7 @@ class VenueControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_a_venue()
     {
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $this->showRequest($venue)->assertRedirect(route('login'));
     }
@@ -177,7 +176,7 @@ class VenueControllerTest extends TestCase
     public function edit_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $response = $this->editRequest($venue);
 
@@ -189,7 +188,7 @@ class VenueControllerTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_a_venue()
     {
         $this->actAs(Role::BASIC);
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $this->editRequest($venue)->assertStatus(403);
     }
@@ -197,7 +196,7 @@ class VenueControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_venue()
     {
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $this->editRequest($venue)->assertRedirect(route('login'));
     }
@@ -209,7 +208,7 @@ class VenueControllerTest extends TestCase
     public function updates_a_venue_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $response = $this->updateRequest($venue, $this->validParams());
 
@@ -228,7 +227,7 @@ class VenueControllerTest extends TestCase
     public function a_basic_user_cannot_update_a_venue()
     {
         $this->actAs(Role::BASIC);
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $this->updateRequest($venue, $this->validParams())->assertStatus(403);
     }
@@ -236,7 +235,7 @@ class VenueControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_a_venue()
     {
-        $venue = VenueFactory::new()->create();
+        $venue = Venue::factory()->create();
 
         $this->updateRequest($venue, $this->validParams())->assertRedirect(route('login'));
     }

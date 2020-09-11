@@ -4,17 +4,18 @@ namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Models\Wrestler;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
+use App\Models\User;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\UserFactory;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -189,7 +190,7 @@ class WrestlerControllerTest extends TestCase
     public function show_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $response = $this->showRequest($wrestler);
 
@@ -201,7 +202,7 @@ class WrestlerControllerTest extends TestCase
     public function a_basic_user_can_view_their_wrestler_profile()
     {
         $signedInUser = $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->create(['user_id' => $signedInUser->id]);
+        $wrestler = Wrestler::factory()->create(['user_id' => $signedInUser->id]);
 
         $this->showRequest($wrestler)->assertOk();
     }
@@ -210,8 +211,8 @@ class WrestlerControllerTest extends TestCase
     public function a_basic_user_cannot_view_another_users_wrestler_profile()
     {
         $this->actAs(Role::BASIC);
-        $otherUser = UserFactory::new()->create();
-        $wrestler = WrestlerFactory::new()->create(['user_id' => $otherUser->id]);
+        $otherUser = User::factory()->create();
+        $wrestler = Wrestler::factory()->create(['user_id' => $otherUser->id]);
 
         $this->showRequest($wrestler)->assertForbidden();
     }
@@ -219,7 +220,7 @@ class WrestlerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_a_wrestler_profile()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->showRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -231,7 +232,7 @@ class WrestlerControllerTest extends TestCase
     public function edit_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $response = $this->editRequest($wrestler);
 
@@ -246,7 +247,7 @@ class WrestlerControllerTest extends TestCase
     public function updates_a_wrestler_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $response = $this->updateRequest($wrestler, $this->validParams());
 
@@ -264,7 +265,7 @@ class WrestlerControllerTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->editRequest($wrestler)->assertForbidden();
     }
@@ -273,7 +274,7 @@ class WrestlerControllerTest extends TestCase
     public function a_basic_user_cannot_update_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->updateRequest($wrestler, $this->validParams())->assertForbidden();
     }
@@ -281,7 +282,7 @@ class WrestlerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->editRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -289,7 +290,7 @@ class WrestlerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->updateRequest($wrestler, $this->validParams())->assertRedirect(route('login'));
     }
@@ -311,7 +312,7 @@ class WrestlerControllerTest extends TestCase
     public function deletes_a_wrestler_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $response = $this->deleteRequest($wrestler);
 
@@ -323,7 +324,7 @@ class WrestlerControllerTest extends TestCase
     public function a_basic_user_cannot_delete_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->deleteRequest($wrestler)->assertForbidden();
     }
@@ -331,7 +332,7 @@ class WrestlerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_delete_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->deleteRequest($wrestler)->assertRedirect(route('login'));
     }
