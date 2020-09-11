@@ -1,15 +1,29 @@
 <?php
 
-namespace Tests\Factories;
+namespace Database\Factories;
 
 use App\Models\Employment;
 use Carbon\Carbon;
-use Christophrumpel\LaravelFactoriesReloaded\BaseFactory;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class EmploymentFactory extends BaseFactory
+class EmploymentFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected string $modelClass = Employment::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
+    {
+        return [];
+    }
 
     /**
      * @param string|Carbon $startDate
@@ -29,20 +43,5 @@ class EmploymentFactory extends BaseFactory
         return tap(clone $this)->overwriteDefaults([
             'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
         ]);
-    }
-
-    public function create(array $extra = [])
-    {
-        return parent::build($extra);
-    }
-
-    public function make(array $extra = []): Employment
-    {
-        return parent::build($extra, 'make');
-    }
-
-    public function getDefaults(Faker $faker): array
-    {
-        return [];
     }
 }
