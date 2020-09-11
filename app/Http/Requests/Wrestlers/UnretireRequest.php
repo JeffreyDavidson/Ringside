@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Wrestlers;
 
-use App\Exceptions\CannotBeUnretiredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UnretireRequest extends FormRequest

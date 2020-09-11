@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Wrestlers;
 
-use App\Exceptions\CannotBeEmployedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmployRequest extends FormRequest

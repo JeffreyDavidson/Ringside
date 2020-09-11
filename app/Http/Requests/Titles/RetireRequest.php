@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Titles;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class RetireRequest extends FormRequest
 {
@@ -14,17 +13,10 @@ class RetireRequest extends FormRequest
      */
     public function authorize()
     {
-        if (! Auth::check()) {
-            return false;
-        }
-
+        /** @var \App\Models\Title */
         $title = $this->route('title');
 
-        if ($this->user()->can('retire', $title)) {
-            return true;
-        }
-
-        return false;
+        return $this->user()->can('retire', $title);
     }
 
     /**

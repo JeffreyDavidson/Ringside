@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Wrestlers;
 
-use App\Exceptions\CannotBeInjuredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InjureRequest extends FormRequest

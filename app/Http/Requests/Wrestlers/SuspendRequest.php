@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Wrestlers;
 
-use App\Exceptions\CannotBeSuspendedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SuspendRequest extends FormRequest
