@@ -3,13 +3,15 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Factories\WrestlerFactory;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -21,7 +23,7 @@ class RestoreControllerTest extends TestCase
     public function invoke_restores_a_deleted_wrestler_and_redirects()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $wrestler = WrestlerFactory::new()->softDeleted()->create();
+        $wrestler = Wrestler::factory()->softDeleted()->create();
 
         $response = $this->restoreRequest($wrestler);
 
@@ -33,7 +35,7 @@ class RestoreControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->softDeleted()->create();
+        $wrestler = Wrestler::factory()->softDeleted()->create();
 
         $this->restoreRequest($wrestler)->assertForbidden();
     }
@@ -41,7 +43,7 @@ class RestoreControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_restore_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->softDeleted()->create();
+        $wrestler = Wrestler::factory()->softDeleted()->create();
 
         $this->restoreRequest($wrestler)->assertRedirect(route('login'));
     }

@@ -4,9 +4,9 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Enums\StableStatus;
+use App\Models\Stable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Tests\Factories\StableFactory;
 
 /**
  * @group stables
@@ -26,7 +26,7 @@ class RestoreControllerTest extends TestCase
     {
         $this->markTestIncomplete();
         $this->actAs($administrators);
-        $stable = StableFactory::new()->softDeleted()->create();
+        $stable = Stable::factory()->softDeleted()->create();
 
         $response = $this->restoreRequest($stable);
 
@@ -42,7 +42,7 @@ class RestoreControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_stable()
     {
         $this->actAs(Role::BASIC);
-        $stable = StableFactory::new()->softDeleted()->create();
+        $stable = Stable::factory()->softDeleted()->create();
 
         $this->restoreRequest($stable)->assertForbidden();
     }
@@ -50,7 +50,7 @@ class RestoreControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_restore_a_stable()
     {
-        $stable = StableFactory::new()->softDeleted()->create();
+        $stable = Stable::factory()->softDeleted()->create();
 
         $this->restoreRequest($stable)->assertRedirect(route('login'));
     }

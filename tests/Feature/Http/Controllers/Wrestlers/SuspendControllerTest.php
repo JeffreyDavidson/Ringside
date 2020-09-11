@@ -2,19 +2,21 @@
 
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
-use Carbon\Carbon;
 use App\Enums\Role;
-use Tests\TestCase;
 use App\Enums\WrestlerStatus;
-use Tests\Factories\WrestlerFactory;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Requests\Wrestlers\SuspendRequest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Http\Controllers\Wrestlers\SuspendController;
+use App\Http\Requests\Wrestlers\SuspendRequest;
+use App\Models\Wrestler;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-rosters
  */
@@ -32,7 +34,7 @@ class SuspendControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->bookable()->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
 
         $response = $this->suspendRequest($wrestler);
 
@@ -58,7 +60,7 @@ class SuspendControllerTest extends TestCase
     public function a_basic_user_cannot_suspend_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->suspendRequest($wrestler)->assertForbidden();
     }
@@ -66,7 +68,7 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_suspend_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->suspendRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -82,7 +84,7 @@ class SuspendControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->unemployed()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->suspendRequest($wrestler);
     }
@@ -98,7 +100,7 @@ class SuspendControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->suspendRequest($wrestler);
     }
@@ -114,7 +116,7 @@ class SuspendControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->suspendRequest($wrestler);
     }
@@ -130,7 +132,7 @@ class SuspendControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->released()->create();
+        $wrestler = Wrestler::factory()->released()->create();
 
         $this->suspendRequest($wrestler);
     }
@@ -146,7 +148,7 @@ class SuspendControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->retired()->create();
+        $wrestler = Wrestler::factory()->retired()->create();
 
         $this->suspendRequest($wrestler);
     }
@@ -162,7 +164,7 @@ class SuspendControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->suspended()->create();
+        $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->suspendRequest($wrestler);
     }

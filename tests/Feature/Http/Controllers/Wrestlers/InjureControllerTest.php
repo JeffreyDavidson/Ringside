@@ -7,14 +7,16 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Wrestlers\InjureController;
 use App\Http\Requests\Wrestlers\InjureRequest;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -32,7 +34,7 @@ class InjureControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->bookable()->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
 
         $response = $this->injureRequest($wrestler);
 
@@ -58,7 +60,7 @@ class InjureControllerTest extends TestCase
     public function a_basic_user_cannot_injure_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->employRequest($wrestler)->assertForbidden();
     }
@@ -66,7 +68,7 @@ class InjureControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_injure_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->injureRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -82,7 +84,7 @@ class InjureControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->unemployed()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->injureRequest($wrestler);
     }
@@ -98,7 +100,7 @@ class InjureControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->suspended()->create();
+        $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->injureRequest($wrestler);
     }
@@ -114,7 +116,7 @@ class InjureControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->released()->create();
+        $wrestler = Wrestler::factory()->released()->create();
 
         $this->injureRequest($wrestler);
     }
@@ -130,7 +132,7 @@ class InjureControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->injureRequest($wrestler);
     }
@@ -146,7 +148,7 @@ class InjureControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->retired()->create();
+        $wrestler = Wrestler::factory()->retired()->create();
 
         $this->injureRequest($wrestler);
     }
@@ -162,7 +164,7 @@ class InjureControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->injureRequest($wrestler);
     }

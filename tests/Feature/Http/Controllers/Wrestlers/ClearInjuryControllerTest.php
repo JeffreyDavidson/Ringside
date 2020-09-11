@@ -7,14 +7,17 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Requests\Wrestlers\ClearInjuryRequest;
+use App\Models\Wrestler;
 use Carbon\Carbon;
+use Database\Factories\WrestlerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -32,16 +35,17 @@ class ClearInjuryControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->injured()->create();
+
+        $wrestler = Wrestler::factory()->injured()->create();
+
+        $this->assertCount(1, $wrestler->injuries);
+        $this->assertEquals(WrestlerStatus::INJURED, $wrestler->fresh()->status);
 
         $response = $this->clearInjuryRequest($wrestler);
 
         $response->assertRedirect(route('wrestlers.index'));
-
-        $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            $this->assertCount(1, $wrestler->injuries);
             $this->assertEquals($now->toDateTimeString(), $wrestler->injuries->first()->ended_at->toDateTimeString());
         });
     }
@@ -60,7 +64,7 @@ class ClearInjuryControllerTest extends TestCase
     public function a_basic_user_cannot_mark_an_injured_wrestler_as_recovered()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->clearInjuryRequest($wrestler)->assertForbidden();
     }
@@ -68,7 +72,7 @@ class ClearInjuryControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_mark_an_injured_wrestler_as_recovered()
     {
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->clearInjuryRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -84,7 +88,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->unemployed()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->clearInjuryRequest($wrestler);
     }
@@ -100,7 +104,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->bookable()->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->clearInjuryRequest($wrestler);
     }
@@ -116,7 +120,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->clearInjuryRequest($wrestler);
     }
@@ -132,7 +136,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->suspended()->create();
+        $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->clearInjuryRequest($wrestler);
     }
@@ -148,7 +152,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->retired()->create();
+        $wrestler = Wrestler::factory()->retired()->create();
 
         $this->clearInjuryRequest($wrestler);
     }
@@ -164,7 +168,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->released()->create();
+        $wrestler = Wrestler::factory()->released()->create();
 
         $this->clearInjuryRequest($wrestler);
     }

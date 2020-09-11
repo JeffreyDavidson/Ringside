@@ -6,9 +6,9 @@ use App\Enums\Role;
 use App\Enums\StableStatus;
 use App\Http\Controllers\Stables\DeactivateController;
 use App\Http\Requests\Stables\DeactivateRequest;
+use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\StableFactory;
 use Tests\TestCase;
 
 /**
@@ -31,7 +31,7 @@ class DeactivateControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $stable = StableFactory::new()->active()->withMembers()->create();
+        $stable = Stable::factory()->active()->withMembers()->create();
 
         $response = $this->deactivateRequest($stable);
 
@@ -47,7 +47,7 @@ class DeactivateControllerTest extends TestCase
     public function a_basic_user_cannot_deactivates_a_stable()
     {
         $this->actAs(Role::BASIC);
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->deactivateRequest($stable)->assertForbidden();
     }
@@ -55,7 +55,7 @@ class DeactivateControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_deactivates_a_stable()
     {
-        $stable = StableFactory::new()->create();
+        $stable = Stable::factory()->create();
 
         $this->deactivateRequest($stable)->assertRedirect(route('login'));
     }

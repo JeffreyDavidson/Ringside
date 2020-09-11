@@ -2,20 +2,21 @@
 
 namespace Tests\Feature\Http\Controllers\Managers;
 
-use Carbon\Carbon;
 use App\Enums\Role;
-use Tests\TestCase;
-use App\Models\Manager;
-use Tests\Factories\UserFactory;
-use Tests\Factories\ManagerFactory;
-use App\Http\Requests\Managers\StoreRequest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Http\Controllers\Managers\ManagersController;
+use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
+use App\Models\Manager;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group managers
  * @group feature-managers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -184,7 +185,7 @@ class ManagerControllerTest extends TestCase
     public function show_can_view_a_manager_profile($administrators)
     {
         $this->actAs($administrators);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $response = $this->showRequest($manager);
 
@@ -196,17 +197,17 @@ class ManagerControllerTest extends TestCase
     public function a_basic_user_can_view_their_manager_profile()
     {
         $signedInUser = $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->create(['user_id' => $signedInUser->id]);
+        $manager = Manager::factory()->create(['user_id' => $signedInUser->id]);
 
-        $this->showRequest($manager)->assertOk();;
+        $this->showRequest($manager)->assertOk();
     }
 
     /** @test */
     public function a_basic_user_cannot_view_another_users_manager_profile()
     {
         $this->actAs(Role::BASIC);
-        $otherUser = UserFactory::new()->create();
-        $manager = ManagerFactory::new()->create(['user_id' => $otherUser->id]);
+        $otherUser = User::factory()->create();
+        $manager = Manager::factory()->create(['user_id' => $otherUser->id]);
 
         $response = $this->showRequest($manager);
 
@@ -216,7 +217,7 @@ class ManagerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_a_manager_profile()
     {
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->showRequest($manager)->assertRedirect(route('login'));
     }
@@ -228,7 +229,7 @@ class ManagerControllerTest extends TestCase
     public function edit_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $response = $this->editRequest($manager);
 
@@ -243,7 +244,7 @@ class ManagerControllerTest extends TestCase
     public function update_a_manage_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $response = $this->updateRequest($manager, $this->validParams());
 
@@ -258,7 +259,7 @@ class ManagerControllerTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_a_manager()
     {
         $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->editRequest($manager)->assertForbidden();
     }
@@ -267,7 +268,7 @@ class ManagerControllerTest extends TestCase
     public function a_basic_user_cannot_update_a_manager()
     {
         $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->updateRequest($manager, $this->validParams())->assertForbidden();
     }
@@ -275,7 +276,7 @@ class ManagerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_manager()
     {
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->editRequest($manager)->assertRedirect(route('login'));
     }
@@ -283,7 +284,7 @@ class ManagerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_a_manager()
     {
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->updateRequest($manager, $this->validParams())->assertRedirect(route('login'));
     }
@@ -305,7 +306,7 @@ class ManagerControllerTest extends TestCase
     public function delete_a_manager_and_redirects($administrators)
     {
         $this->actAs($administrators);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $response = $this->deleteRequest($manager);
 
@@ -317,7 +318,7 @@ class ManagerControllerTest extends TestCase
     public function a_basic_user_cannot_delete_a_manager()
     {
         $this->actAs(Role::BASIC);
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->deleteRequest($manager)->assertForbidden();
     }
@@ -325,7 +326,7 @@ class ManagerControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_delete_a_manager()
     {
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->create();
 
         $this->deleteRequest($manager)->assertRedirect(route('login'));
     }

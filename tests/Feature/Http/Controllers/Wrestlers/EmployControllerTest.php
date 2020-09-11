@@ -7,14 +7,16 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Wrestlers\EmployController;
 use App\Http\Requests\Wrestlers\EmployRequest;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -32,7 +34,7 @@ class EmployControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $response = $this->employRequest($wrestler);
 
@@ -54,7 +56,7 @@ class EmployControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->unemployed()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $response = $this->employRequest($wrestler);
 
@@ -76,7 +78,7 @@ class EmployControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->released()->create();
+        $wrestler = Wrestler::factory()->released()->create();
 
         $response = $this->employRequest($wrestler);
 
@@ -102,7 +104,7 @@ class EmployControllerTest extends TestCase
     public function a_basic_user_cannot_employ_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->employRequest($wrestler)->assertForbidden();
     }
@@ -110,7 +112,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_employ_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->employRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -126,7 +128,7 @@ class EmployControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->bookable()->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->employRequest($wrestler);
     }
@@ -137,13 +139,12 @@ class EmployControllerTest extends TestCase
      */
     public function employing_a_retired_wrestler_throws_an_exception($administrators)
     {
-        $this->markTestIncomplete();
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->retired()->create();
+        $wrestler = Wrestler::factory()->retired()->create();
 
         $this->employRequest($wrestler);
     }
@@ -159,7 +160,7 @@ class EmployControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->suspended()->create();
+        $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->employRequest($wrestler);
     }
@@ -175,7 +176,7 @@ class EmployControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->employRequest($wrestler);
     }

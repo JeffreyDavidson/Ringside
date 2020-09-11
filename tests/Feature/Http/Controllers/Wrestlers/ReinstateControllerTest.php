@@ -2,19 +2,21 @@
 
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
-use Carbon\Carbon;
 use App\Enums\Role;
-use Tests\TestCase;
 use App\Enums\WrestlerStatus;
-use Tests\Factories\WrestlerFactory;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Requests\Wrestlers\ReinstateRequest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Http\Controllers\Wrestlers\ReinstateController;
+use App\Http\Requests\Wrestlers\ReinstateRequest;
+use App\Models\Wrestler;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group wrestlers
  * @group feature-wrestlers
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -32,7 +34,7 @@ class ReinstateControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $wrestler = WrestlerFactory::new()->suspended()->create();
+        $wrestler = Wrestler::factory()->suspended()->create();
 
         $response = $this->reinstateRequest($wrestler);
 
@@ -60,7 +62,7 @@ class ReinstateControllerTest extends TestCase
     public function a_basic_user_cannot_reinstate_a_wrestler()
     {
         $this->actAs(Role::BASIC);
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->reinstateRequest($wrestler)->assertForbidden();
     }
@@ -68,7 +70,7 @@ class ReinstateControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_reinstate_a_wrestler()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
 
         $this->reinstateRequest($wrestler)->assertRedirect(route('login'));
     }
@@ -84,7 +86,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->bookable()->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->reinstateRequest($wrestler);
     }
@@ -100,7 +102,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->unemployed()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->reinstateRequest($wrestler);
     }
@@ -116,7 +118,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->reinstateRequest($wrestler);
     }
@@ -132,7 +134,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->released()->create();
+        $wrestler = Wrestler::factory()->released()->create();
 
         $this->reinstateRequest($wrestler);
     }
@@ -148,7 +150,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->withFutureEmployment()->create();
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->reinstateRequest($wrestler);
     }
@@ -164,7 +166,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = WrestlerFactory::new()->retired()->create();
+        $wrestler = Wrestler::factory()->retired()->create();
 
         $this->reinstateRequest($wrestler);
     }

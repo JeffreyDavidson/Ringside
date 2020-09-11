@@ -3,8 +3,8 @@
 namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;
+use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\EventFactory;
 use Tests\TestCase;
 
 /**
@@ -18,7 +18,7 @@ class DeleteEventTest extends TestCase
     public function an_administrator_can_delete_a_scheduled_event()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->scheduled()->create();
+        $event = Event::factory()->scheduled()->create();
 
         $this->deleteRequest($event);
 
@@ -29,7 +29,7 @@ class DeleteEventTest extends TestCase
     public function an_administrator_can_delete_a_past_event()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $event = EventFactory::new()->past()->create();
+        $event = Event::factory()->past()->create();
 
         $this->deleteRequest($event);
 
@@ -40,7 +40,7 @@ class DeleteEventTest extends TestCase
     public function a_basic_user_cannot_delete_an_event()
     {
         $this->actAs(Role::BASIC);
-        $event = EventFactory::new()->create();
+        $event = Event::factory()->create();
 
         $response = $this->deleteRequest($event);
 
@@ -50,7 +50,7 @@ class DeleteEventTest extends TestCase
     /** @test */
     public function a_guest_cannot_delete_an_event()
     {
-        $event = EventFactory::new()->create();
+        $event = Event::factory()->create();
 
         $response = $this->deleteRequest($event);
 

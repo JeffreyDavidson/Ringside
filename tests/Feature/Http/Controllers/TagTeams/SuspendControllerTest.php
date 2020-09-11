@@ -3,9 +3,9 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\TagTeam;
 use Carbon\Carbon;
-use Tests\Factories\TagTeamFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -28,7 +28,7 @@ class SuspendControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $tagTeam = TagTeamFactory::new()->bookable()->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
         $response = $this->suspendRequest($tagTeam);
 
@@ -40,7 +40,7 @@ class SuspendControllerTest extends TestCase
     public function a_basic_user_cannot_suspend_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->suspendRequest($tagTeam)->assertForbidden();
     }
@@ -48,7 +48,7 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_suspend_a_tag_team()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->suspendRequest($tagTeam)->assertRedirect(route('login'));
     }

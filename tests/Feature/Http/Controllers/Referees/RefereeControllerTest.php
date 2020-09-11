@@ -4,16 +4,17 @@ namespace Tests\Feature\Http\Controllers\Referees;
 
 use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
-use App\Models\Referee;
 use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
+use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\RefereeFactory;
 use Tests\TestCase;
 
 /**
  * @group referees
  * @group feature-referees
+ * @group srm
+ * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -181,7 +182,7 @@ class RefereeControllerTest extends TestCase
     public function show_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $response = $this->showRequest($referee);
 
@@ -193,7 +194,7 @@ class RefereeControllerTest extends TestCase
     public function a_basic_user_cannot_view_a_referee_profile()
     {
         $this->actAs(Role::BASIC);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->showRequest($referee)->assertForbidden();
     }
@@ -201,7 +202,7 @@ class RefereeControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_a_referee_profile()
     {
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->showRequest($referee)->assertRedirect(route('login'));
     }
@@ -213,7 +214,7 @@ class RefereeControllerTest extends TestCase
     public function edit_returns_a_view($administrators)
     {
         $this->actAs($administrators);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $response = $this->editRequest($referee);
 
@@ -228,7 +229,7 @@ class RefereeControllerTest extends TestCase
     public function update_a_referee($administrators)
     {
         $this->actAs($administrators);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $response = $this->updateRequest($referee, $this->validParams());
 
@@ -243,7 +244,7 @@ class RefereeControllerTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_editing_a_referee()
     {
         $this->actAs(Role::BASIC);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->editRequest($referee)->assertForbidden();
     }
@@ -252,7 +253,7 @@ class RefereeControllerTest extends TestCase
     public function a_basic_user_cannot_update_a_referee()
     {
         $this->actAs(Role::BASIC);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->updateRequest($referee, $this->validParams())->assertForbidden();
     }
@@ -260,7 +261,7 @@ class RefereeControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_the_form_for_editing_a_referee()
     {
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->editRequest($referee)->assertRedirect(route('login'));
     }
@@ -268,7 +269,7 @@ class RefereeControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_update_a_referee()
     {
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->updateRequest($referee, $this->validParams())->assertRedirect(route('login'));
     }
@@ -290,7 +291,7 @@ class RefereeControllerTest extends TestCase
     public function an_administrator_can_delete_a_referee($administrators)
     {
         $this->actAs($administrators);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $response = $this->deleteRequest($referee);
 
@@ -302,7 +303,7 @@ class RefereeControllerTest extends TestCase
     public function a_basic_user_cannot_delete_a_referee()
     {
         $this->actAs(Role::BASIC);
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->deleteRequest($referee)->assertForbidden();
     }
@@ -310,7 +311,7 @@ class RefereeControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_delete_a_referee()
     {
-        $referee = RefereeFactory::new()->create();
+        $referee = Referee::factory()->create();
 
         $this->deleteRequest($referee)->assertRedirect(route('login'));
     }
