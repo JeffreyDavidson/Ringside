@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Enums\StableStatus;
 use App\Models\Stable;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -60,17 +62,6 @@ class StableFactory extends Factory
         return $clone;
     }
 
-    public function withMembers(): self
-    {
-        $clone = tap(clone $this);
-
-        $clone = $clone->withFactory(WrestlerFactory::new()->bookable(), 'members', 1);
-        $clone = $clone->withFactory(TagTeamFactory::new()->bookable(), 'members', 1);
-        $clone = $clone->withFactory(ManagerFactory::new()->available(), 'members', 1);
-
-        return $clone;
-    }
-
     public function inactive(): self
     {
         $clone = tap(clone $this)->overwriteDefaults([
@@ -88,99 +79,37 @@ class StableFactory extends Factory
 
     public function retired(): self
     {
-        $clone = tap(clone $this)->overwriteDefaults([
-            'status' => StableStatus::RETIRED,
-        ]);
-
         $now = now();
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->withFactory(ActivationFactory::new()->started($start)->ended($end), 'activations', 1);
-        $clone = $clone->withFactory(RetirementFactory::new()->started($end), 'retirements', 1);
-        $clone = $this->withMembers();
-
-        return $clone;
-    }
-
-    public function withWrestlers(WrestlerFactory $wrestlerFactory = null)
-    {
-        $clone = clone $this;
-        $clone->wrestlerFactory = $wrestlerFactory ?? WrestlerFactory::new()->bookable();
-
-        return $clone;
-    }
-
-    public function withTagTeams(TagTeamFactory $tagTeamFactory = null)
-    {
-        $clone = clone $this;
-        $clone->tagTeamFactory = $tagTeamFactory ?? TagTeamFactory::new()->bookable();
-
-        return $clone;
-    }
-
-    public function withExistingWrestlers($wrestlers)
-    {
-        $clone = clone $this;
-
-        $clone->existingWrestlers = collect($wrestlers);
-
-        return $clone;
-    }
-
-    public function withExistingTagTeams($tagTeams)
-    {
-        $clone = clone $this;
-
-        $clone->existingTagTeams = collect($tagTeams);
-
-        return $clone;
-    }
-
-    private function generateMembers($stable)
-    {
-        $existingWrestlersCount = $this->existingWrestlers ? count($this->existingWrestlers) : 0;
-        $wrestlersFactoriesCount = $this->wrestlerFactory ? count($this->wrestlerFactory->getFactories()) : 0;
-        $possibleWrestlersCount = $existingWrestlersCount + $wrestlersFactoriesCount;
-
-        $existingTagTeamsCount = $this->existingTagTeams ? count($this->existingTagTeams) : 0;
-        $tagTeamFactoriesCount = $this->tagTeamFactory ? count($this->tagTeamFactory->getFactories()) : 0;
-        $possibleTagTeamsCount = $existingTagTeamsCount + $tagTeamFactoriesCount;
-
-        $totalPossibleMembersCount = $possibleWrestlersCount + $possibleTagTeamsCount * 2;
-
-        if ($totalPossibleMembersCount >= 3) {
-            // There are the minimum requirements for members of a stable.
-            dd('enough members');
-        } else {
-            $wrestlersToAddToStable = collect();
-            // We know by hitting the else that there isn't enough members for this stable so we know we need to create them and add them to the stable or if they already exist then just add them.
-            if ($existingWrestlersCount >= 1) {
-                $wrestlersToAddToStable[] = $this->existingWrestlers;
-            } elseif ($wrestlersFactoriesCount >= 1) {
-                foreach ($this->wrestlerFactory->getFactories() as $wrestlerFactory) {
-                    $wrestlersToAddToStable[] = $wrestlerFactory->create();
-                }
-            } else {
-                $createdWrestlers = WrestlerFactory::new()->times(3)->create();
-                // dd($createdWrestlers);
-                $newCollection = $wrestlersToAddToStable->concat($createdWrestlers);
-            }
-
-            foreach ($newCollection as $wrestler) {
-                // $wrestler->stables()->save($stable, ['joined_at' => now()]);
-                $wrestler->stables()->attach($stable, ['joined_at' => now()]);
-            }
-        }
-
-        return $this;
+        return $this->state([
+            'status' => StableStatus::RETIRED,
+        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+        ->hasRetirements(1, ['started_at' => $end])
+        ->hasAttached(
+            Wrestler::factory()->count(1)
+                ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+                ->hasRetirements(1, ['started_at' => $end]),
+            ['joined_at' => $start]
+        )
+        ->hasAttached(
+            TagTeam::factory()->count(1)
+                ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+                ->hasRetirements(1, ['started_at' => $end]),
+            ['joined_at' => $start]
+        )
+        ->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
     }
 
     public function softDeleted($delete = true)
     {
-        $clone = clone $this;
-        $clone->softDeleted = $delete;
-
-        return $clone;
+        return $this->state([
+            'deleted_at' => now(),
+        ])->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
     }
 }

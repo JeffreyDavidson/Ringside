@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Managers;
 
-use App\Exceptions\CannotBeClearedFromInjuryException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ClearInjuryRequest extends FormRequest
@@ -14,17 +13,10 @@ class ClearInjuryRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Manager */
         $manager = $this->route('manager');
 
-        if (! $this->user()->can('clearFromInjury', $manager)) {
-            return false;
-        }
-
-        if (! $manager->canBeClearedFromInjury()) {
-            throw new CannotBeClearedFromInjuryException();
-        }
-
-        return true;
+        return $this->user()->can('clearFromInjury', $manager);
     }
 
     /**

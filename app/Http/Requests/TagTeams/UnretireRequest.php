@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TagTeams;
 
-use App\Exceptions\CannotBeUnretiredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UnretireRequest extends FormRequest
@@ -14,17 +13,10 @@ class UnretireRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\TagTeam */
         $tagTeam = $this->route('tag_team');
 
-        if (! $this->user()->can('unretire', $tagTeam)) {
-            return false;
-        }
-
-        if (! $tagTeam->canBeUnretired()) {
-            throw new CannotBeUnretiredException();
-        }
-
-        return true;
+        return $this->user()->can('unretire', $tagTeam);
     }
 
     /**

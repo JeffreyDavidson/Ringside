@@ -24,7 +24,7 @@ class CannotBeEmployedAfterDate implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->startedAt === null || !is_string($this->startedAt)) {
+        if ($this->startedAt === null || ! is_string($this->startedAt)) {
             return true;
         }
 

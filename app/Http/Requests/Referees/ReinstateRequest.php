@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Referees;
 
-use App\Exceptions\CannotBeReinstatedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ReinstateRequest extends FormRequest
@@ -14,17 +13,10 @@ class ReinstateRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Referee */
         $referee = $this->route('referee');
 
-        if (! $this->user()->can('reinstate', $referee)) {
-            return false;
-        }
-
-        if (! $referee->canBeReinstated()) {
-            throw new CannotBeReinstatedException();
-        }
-
-        return true;
+        return $this->user()->can('reinstate', $referee);
     }
 
     /**

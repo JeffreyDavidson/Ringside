@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Referees;
 
-use App\Exceptions\CannotBeClearedFromInjuryException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ClearInjuryRequest extends FormRequest
@@ -14,17 +13,10 @@ class ClearInjuryRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Referee */
         $referee = $this->route('referee');
 
-        if (! $this->user()->can('clearFromInjury', $referee)) {
-            return false;
-        }
-
-        if (! $referee->canBeClearedFromInjury()) {
-            throw new CannotBeClearedFromInjuryException();
-        }
-
-        return true;
+        return $this->user()->can('clearFromInjury', $referee);
     }
 
     /**

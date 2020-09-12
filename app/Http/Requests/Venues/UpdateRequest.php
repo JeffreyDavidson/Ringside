@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends FormRequest
@@ -15,10 +14,6 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (! Auth::check()) {
-            return false;
-        }
-
         return $this->user()->can('update', Venue::class);
     }
 

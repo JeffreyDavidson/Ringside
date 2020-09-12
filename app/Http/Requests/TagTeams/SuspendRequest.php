@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TagTeams;
 
-use App\Exceptions\CannotBeSuspendedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SuspendRequest extends FormRequest
@@ -14,17 +13,10 @@ class SuspendRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\TagTeam */
         $tagTeam = $this->route('tag_team');
 
-        if (! $this->user()->can('suspend', $tagTeam)) {
-            return false;
-        }
-
-        if (! $tagTeam->canBeSuspended()) {
-            throw new CannotBeSuspendedException();
-        }
-
-        return true;
+        return $this->user()->can('suspend', $tagTeam);
     }
 
     /**

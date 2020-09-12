@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Referees;
 
-use App\Exceptions\CannotBeEmployedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmployRequest extends FormRequest
@@ -14,17 +13,10 @@ class EmployRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Referee */
         $referee = $this->route('referee');
 
-        if (! $this->user()->can('employ', $referee)) {
-            return false;
-        }
-
-        if (! $referee->canBeEmployed()) {
-            throw new CannotBeEmployedException();
-        }
-
-        return true;
+        return $this->user()->can('employ', $referee);
     }
 
     /**

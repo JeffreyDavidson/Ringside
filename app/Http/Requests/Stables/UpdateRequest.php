@@ -16,6 +16,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Stable */
         $stable = $this->route('stable');
 
         return $this->user()->can('update', $stable);
@@ -29,39 +30,19 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [
-                'filled',
-                Rule::unique('stables')->ignore($this->route('stable')->id)
-            ],
-            'started_at' => [
-                'sometimes',
-                'string',
-                'date_format:Y-m-d H:i:s',
+            'name' => ['filled', Rule::unique('stables')->ignore($this->route('stable')->id)],
+            'started_at' => ['sometimes', 'string', 'date_format:Y-m-d H:i:s',
                 function ($attribute, $value, $fail) {
                     $currentEmployment = $this->route('stable')->currentEmployment ?? null;
                     if ($currentEmployment && optional($currentEmployment->started_at)->isBefore($value)) {
                         $fail(__('validation.before_or_equal', ['attribute' => $attribute, 'date' => $currentEmployment->started_at->toDateTimeString()]));
                     }
-                }
+                },
             ],
-            'wrestlers' => [
-                'array'
-            ],
-            'wrestlers.*' => [
-                'bail ',
-                'integer',
-                Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinStable($this->route('stable'))
-            ],
-            'tagteams' => [
-                'array'
-            ],
-            'tagteams.*' => [
-                'bail',
-                'integer',
-                Rule::exists('tag_teams', 'id'),
-                new TagTeamCanJoinStable($this->route('stable'))
-            ],
+            'wrestlers' => ['array'],
+            'wrestlers.*' => ['bail ', 'integer', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinStable($this->route('stable'))],
+            'tagteams' => ['array'],
+            'tagteams.*' => ['bail', 'integer', Rule::exists('tag_teams', 'id'), new TagTeamCanJoinStable($this->route('stable'))],
         ];
     }
 

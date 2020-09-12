@@ -65,7 +65,7 @@ class EmployControllerTest extends TestCase
 
         $response = $this->employRequest($tagTeam);
 
-        $response->assertRedirect(route('tagteams.index'));
+        $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagteamStatus::BOOKABLE, $tagTeam->status);
             $this->assertCount(1, $tagTeam->employments);
@@ -87,7 +87,7 @@ class EmployControllerTest extends TestCase
 
         $response = $this->employRequest($tagTeam);
 
-        $response->assertRedirect(route('tagteams.index'));
+        $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagteamStatus::BOOKABLE, $tagTeam->status);
             $this->assertCount(2, $tagTeam->employments);
@@ -109,7 +109,7 @@ class EmployControllerTest extends TestCase
     public function a_basic_user_cannot_employ_a_tag_team()
     {
         $this->actAs(Role::BASIC);
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->employRequest($tagTeam)->assertForbidden();
     }
@@ -117,7 +117,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_guest_cannot_employ_a_tag_team()
     {
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+        $tagTeam = TagTeam::factory()->create();
 
         $this->employRequest($tagTeam)->assertRedirect(route('login'));
     }
@@ -133,9 +133,9 @@ class EmployControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = TagTeam::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this->employRequest($wrestler);
+        $this->employRequest($tagTeam);
     }
 
     /**
@@ -144,15 +144,14 @@ class EmployControllerTest extends TestCase
      */
     public function employing_a_retired_tag_team_throws_an_exception($administrators)
     {
-        $this->markTestIncomplete();
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $this->actAs($administrators);
 
-        $wrestler = TagTeam::factory()->retired()->create();
+        $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->employRequest($wrestler);
+        $this->employRequest($tagTeam);
     }
 
     /**
@@ -166,9 +165,9 @@ class EmployControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = TagTeam::factory()->suspended()->create();
+        $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $this->employRequest($wrestler);
+        $this->employRequest($tagTeam);
     }
 
     /**
@@ -182,8 +181,8 @@ class EmployControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = TagTeam::factory()->withoutWrestlers()->create();
+        $tagTeam = TagTeam::factory()->withoutWrestlers()->create();
 
-        $this->employRequest($wrestler);
+        $this->employRequest($tagTeam);
     }
 }

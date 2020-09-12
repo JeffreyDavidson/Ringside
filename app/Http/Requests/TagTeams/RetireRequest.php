@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TagTeams;
 
-use App\Exceptions\CannotBeRetiredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RetireRequest extends FormRequest
@@ -14,17 +13,10 @@ class RetireRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\TagTeam */
         $tagTeam = $this->route('tag_team');
 
-        if (! $this->user()->can('retire', $tagTeam)) {
-            return false;
-        }
-
-        if (! $tagTeam->canBeRetired()) {
-            throw new CannotBeRetiredException();
-        }
-
-        return true;
+        return $this->user()->can('retire', $tagTeam);
     }
 
     /**
