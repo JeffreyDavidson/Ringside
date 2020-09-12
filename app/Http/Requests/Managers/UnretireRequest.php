@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Managers;
 
-use App\Exceptions\CannotBeUnretiredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UnretireRequest extends FormRequest
@@ -14,17 +13,10 @@ class UnretireRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Manager */
         $manager = $this->route('manager');
 
-        if (! $this->user()->can('unretire', $manager)) {
-            return false;
-        }
-
-        if (! $manager->canBeUnretired()) {
-            throw new CannotBeUnretiredException();
-        }
-
-        return true;
+        return $this->user()->can('unretire', $manager);
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TagTeams;
 
-use App\Exceptions\CannotBeReinstatedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ReinstateRequest extends FormRequest
@@ -14,17 +13,10 @@ class ReinstateRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\TagTeam */
         $tagTeam = $this->route('tag_team');
 
-        if (! $this->user()->can('reinstate', $tagTeam)) {
-            return false;
-        }
-
-        if (! $tagTeam->canBeReinstated()) {
-            throw new CannotBeReinstatedException();
-        }
-
-        return true;
+        return $this->user()->can('reinstate', $tagTeam);
     }
 
     /**

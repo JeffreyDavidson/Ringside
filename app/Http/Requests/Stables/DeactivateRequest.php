@@ -13,13 +13,10 @@ class DeactivateRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Stable */
         $stable = $this->route('stable');
 
-        if ($this->user()->can('deactivate', $stable)) {
-            return true;
-        }
-
-        return false;
+        return $this->user()->can('deactivate', $stable);
     }
 
     /**

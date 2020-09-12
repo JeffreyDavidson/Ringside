@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Referees;
 
-use App\Exceptions\CannotBeSuspendedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SuspendRequest extends FormRequest
@@ -14,17 +13,10 @@ class SuspendRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Referee */
         $referee = $this->route('referee');
 
-        if (! $this->user()->can('suspend', $referee)) {
-            return false;
-        }
-
-        if (! $referee->canBeSuspended()) {
-            throw new CannotBeSuspendedException();
-        }
-
-        return true;
+        return $this->user()->can('suspend', $referee);
     }
 
     /**

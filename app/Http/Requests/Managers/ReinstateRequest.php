@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Managers;
 
-use App\Exceptions\CannotBeReinstatedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ReinstateRequest extends FormRequest
@@ -14,17 +13,10 @@ class ReinstateRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Manager */
         $manager = $this->route('manager');
 
-        if (! $this->user()->can('reinstate', $manager)) {
-            return false;
-        }
-
-        if (! $manager->canBeReinstated()) {
-            throw new CannotBeReinstatedException();
-        }
-
-        return true;
+        return $this->user()->can('reinstate', $manager);
     }
 
     /**

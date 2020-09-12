@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Referees;
 
-use App\Exceptions\CannotBeRetiredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RetireRequest extends FormRequest
@@ -14,17 +13,10 @@ class RetireRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Referee */
         $referee = $this->route('referee');
 
-        if (! $this->user()->can('retire', $referee)) {
-            return false;
-        }
-
-        if (! $referee->canBeRetired()) {
-            throw new CannotBeRetiredException();
-        }
-
-        return true;
+        return $this->user()->can('retire', $referee);
     }
 
     /**

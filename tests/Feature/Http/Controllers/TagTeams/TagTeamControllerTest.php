@@ -7,6 +7,7 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\TagTeam;
+use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,13 +30,14 @@ class TagTeamControllerTest extends TestCase
      */
     private function validParams($overrides = [])
     {
-        $wrestlers = Wrestler::factory()->bookable()->times(2)->create();
+        $wrestlers = Wrestler::factory()->bookable()->count(2)->create();
 
         return array_replace_recursive([
             'name' => 'Example Tag Team Name',
             'signature_move' => 'The Finisher',
             'started_at' => now()->toDateTimeString(),
-            'wrestlers' => $overrides['wrestlers'] ?? $wrestlers->pluck('id'),
+            'wrestler1' => $overrides['wrestlers'][0] ?? $wrestlers->first()->id,
+            'wrestler2' => $overrides['wrestlers'][1] ?? $wrestlers->last()->id,
         ], $overrides);
     }
 
@@ -128,7 +130,7 @@ class TagTeamControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $this->storeRequest('tag-teams', $this->validParams(['started_at' => $startedAt]));
+        $response = $this->storeRequest('tag-teams', $this->validParams(['started_at' => $startedAt]));
 
         tap(TagTeam::first(), function ($tagTeam) use ($startedAt) {
             $this->assertCount(1, $tagTeam->employments);

@@ -13,13 +13,10 @@ class UnretireRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Stable */
         $stable = $this->route('stable');
 
-        if ($this->user()->can('unretire', $stable)) {
-            return true;
-        }
-
-        return false;
+        return $this->user()->can('unretire', $stable);
     }
 
     /**

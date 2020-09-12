@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Events;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
@@ -15,10 +14,7 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (! Auth::check()) {
-            return false;
-        }
-
+        /** @var \App\Models\Event */
         $event = $this->route('event');
 
         return $this->user()->can('update', $event);

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Referees;
 
-use App\Exceptions\CannotBeInjuredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InjureRequest extends FormRequest
@@ -14,17 +13,10 @@ class InjureRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Referee */
         $referee = $this->route('referee');
 
-        if (! $this->user()->can('injure', $referee)) {
-            return false;
-        }
-
-        if (! $referee->canBeInjured()) {
-            throw new CannotBeInjuredException();
-        }
-
-        return true;
+        return $this->user()->can('injure', $referee);
     }
 
     /**

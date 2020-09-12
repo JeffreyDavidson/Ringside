@@ -3,7 +3,11 @@
 namespace App\Models;
 
 use App\Enums\TagTeamStatus;
-use App\Traits\HasCachedAttributes;
+use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeSuspendedException;
+use App\Exceptions\CannotBeUnretiredException;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +17,6 @@ class TagTeam extends Model
 {
     use SoftDeletes,
         HasFactory,
-        HasCachedAttributes,
         Concerns\CanBeBooked,
         Concerns\Unguarded;
 
@@ -45,7 +48,7 @@ class TagTeam extends Model
      */
     public function wrestlers()
     {
-        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler', 'tag_team_id', 'wrestler_id')
+        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
                     ->withTimestamps();
     }
 
@@ -57,6 +60,7 @@ class TagTeam extends Model
     public function currentWrestlers()
     {
         return $this->wrestlers()
+                    ->where('started_at', '<=', now())
                     ->whereNull('left_at')
                     ->limit(2);
     }
@@ -128,7 +132,7 @@ class TagTeam extends Model
     public function addWrestlers($wrestlerIds, $dateJoined = null)
     {
         if (count($wrestlerIds) !== self::MAX_WRESTLERS_COUNT) {
-            throw new Exception('The required number of wrestlers to join a tag team  must be two.');
+            throw new Exception('The required number of wrestlers to join a tag team must be two.');
         }
 
         $dateJoined ?? now();
@@ -159,11 +163,11 @@ class TagTeam extends Model
     public function canBeEmployed()
     {
         if ($this->isCurrentlyEmployed()) {
-            return false;
+            throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have an active employment.');
         }
 
         if ($this->currentWrestlers->count() != 2) {
-            return false;
+            throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have two wrestlers.');
         }
 
         return true;
@@ -186,12 +190,14 @@ class TagTeam extends Model
      */
     public function employ($startAtDate = null)
     {
-        $startAtDate = $startAtDate ?? now();
+        if ($this->canBeEmployed()) {
+            $startAtDate = $startAtDate ?? now();
 
-        $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
-        $this->currentWrestlers->each->employ($startAtDate);
+            $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
+            $this->currentWrestlers->each->employ($startAtDate);
 
-        return $this->touch();
+            return $this->touch();
+        }
     }
 
     /**
@@ -201,12 +207,12 @@ class TagTeam extends Model
      */
     public function canBeRetired()
     {
-        if (! $this->isCurrentlyEmployed()) {
-            return false;
+        if ($this->isUnemployed() || $this->hasFutureEmployment() || $this->isReleased()) {
+            throw new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team does not have an active employment.');
         }
 
         if ($this->isRetired()) {
-            return false;
+            throw new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team is retired.');
         }
 
         return true;
@@ -219,22 +225,24 @@ class TagTeam extends Model
      */
     public function retire($retiredAt = null)
     {
-        $retiredDate = $retiredAt ?: now();
+        if ($this->canBeRetired()) {
+            $retiredDate = $retiredAt ?: now();
 
-        if ($this->is_suspended) {
-            $this->reinstate($retiredAt);
-            $this->currentWrestlers->each->reinstate($retiredAt);
+            if ($this->is_suspended) {
+                $this->reinstate($retiredAt);
+                $this->currentWrestlers->each->reinstate($retiredAt);
+            }
+
+            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
+            $this->currentWrestlers()->each(function ($wrestler) use ($retiredDate) {
+                $wrestler->currentEmployment()->update(['ended_at' => $retiredDate]);
+            });
+
+            $this->retirements()->create(['started_at' => $retiredDate]);
+            $this->currentWrestlers->each->retire($retiredDate);
+
+            return $this->touch();
         }
-
-        $this->currentEmployment()->update(['ended_at' => $retiredDate]);
-        $this->currentWrestlers()->each(function ($wrestler) use ($retiredDate) {
-            $wrestler->currentEmployment()->update(['ended_at' => $retiredDate]);
-        });
-
-        $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->currentWrestlers->each->retire($retiredDate);
-
-        return $this->touch();
     }
 
     /**
@@ -244,11 +252,12 @@ class TagTeam extends Model
      */
     public function unretire()
     {
-        $dateRetired = $this->currentRetirement->started_at;
+        if ($this->canBeUnretired()) {
+            $dateRetired = $this->currentRetirement->started_at;
 
-        $this->currentRetirement()->update(['ended_at' => now()]);
+            $this->currentRetirement()->update(['ended_at' => now()]);
 
-        $this->currentWrestlers()
+            $this->currentWrestlers()
             ->whereHas('currentRetirement', function ($query) use ($dateRetired) {
                 $query->whereDate('started_at', $dateRetired);
             })
@@ -256,7 +265,8 @@ class TagTeam extends Model
             ->each
             ->unretire();
 
-        return $this->touch();
+            return $this->touch();
+        }
     }
 
     /**
@@ -267,7 +277,7 @@ class TagTeam extends Model
     public function canBeUnretired()
     {
         if (! $this->isRetired()) {
-            return false;
+            throw new CannotBeUnretiredException('Tag Team cannot be unretired. This Tag Team is not retired.');
         }
 
         return true;
@@ -301,12 +311,16 @@ class TagTeam extends Model
      */
     public function canBeSuspended()
     {
-        if (! $this->isCurrentlyEmployed()) {
-            return false;
+        if ($this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment()) {
+            throw new CannotBeSuspendedException('Tag Team cannot be suspended. This Tag Team does not have an active employment.');
         }
 
         if ($this->isSuspended()) {
-            return false;
+            throw new CannotBeSuspendedException('Tag Team cannot be suspended. This Tag Team is currently suspended.');
+        }
+
+        if ($this->isRetired()) {
+            throw new CannotBeSuspendedException('Tag Team cannot be suspended. This Tag Team is currently retired.');
         }
 
         return true;
@@ -319,12 +333,14 @@ class TagTeam extends Model
      */
     public function suspend($suspendedAt = null)
     {
-        $suspendedDate = $suspendedAt ?: now();
+        if ($this->canBeSuspended()) {
+            $suspendedDate = $suspendedAt ?: now();
 
-        $this->suspensions()->create(['started_at' => $suspendedDate]);
-        $this->currentWrestlers->each->suspend($suspendedDate);
+            $this->suspensions()->create(['started_at' => $suspendedDate]);
+            $this->currentWrestlers->each->suspend($suspendedDate);
 
-        return $this->touch();
+            return $this->touch();
+        }
     }
 
     /**
@@ -334,12 +350,12 @@ class TagTeam extends Model
      */
     public function canBeReinstated()
     {
-        if (! $this->isCurrentlyEmployed()) {
-            return false;
+        if (! $this->isSuspended()) {
+            throw new CannotBeReinstatedException('Tag Team cannot be reinstated. This Tag Team is not suspended.');
         }
 
-        if (! $this->isSuspended()) {
-            return false;
+        if ($this->currentWrestlers->count() != 2 || ! $this->currentWrestlers->each->canBeReinstated()) {
+            throw new CannotBeReinstatedException('Tag Team cannot be reinstated. This Tag Team does not have two suspended wrestlers.');
         }
 
         return true;
@@ -352,12 +368,14 @@ class TagTeam extends Model
      */
     public function reinstate($reinstatedAt = null)
     {
-        $reinstatedDate = $reinstatedAt ?: now();
+        if ($this->canBeReinstated()) {
+            $reinstatedDate = $reinstatedAt ?: now();
 
-        $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $this->currentWrestlers->each->reinstate($reinstatedDate);
+            $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+            $this->currentWrestlers->each->reinstate($reinstatedDate);
 
-        return $this->touch();
+            return $this->touch();
+        }
     }
 
     /**

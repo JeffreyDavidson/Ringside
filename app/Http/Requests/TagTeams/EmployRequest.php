@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\TagTeams;
 
-use App\Exceptions\CannotBeEmployedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EmployRequest extends FormRequest
@@ -14,13 +13,10 @@ class EmployRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\TagTeam */
         $tagTeam = $this->route('tag_team');
 
-        if ($this->user()->can('employ', $tagTeam)) {
-            return true;
-        }
-
-        return false;
+        return $this->user()->can('employ', $tagTeam);
     }
 
     /**

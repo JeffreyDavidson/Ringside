@@ -3,7 +3,10 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,8 +25,9 @@ class RetireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_retires_a_tag_team_and_redirects($administrators)
+    public function invoke_retires_a_bookable_tag_team_and_redirects($administrators)
     {
+        $this->withoutExceptionHandling();
         $now = now();
         Carbon::setTestNow($now);
 
@@ -33,7 +37,17 @@ class RetireControllerTest extends TestCase
         $response = $this->retireRequest($tagTeam);
 
         $response->assertRedirect(route('tag-teams.index'));
-        $this->assertEquals($now->toDateTimeString(), $tagTeam->fresh()->currentRetirement->started_at);
+        tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
+            $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
+            $this->assertEquals(
+                $now->toDateTimeString(),
+                $tagTeam->fresh()->retirements->first()->started_at->toDateTimeString()
+            );
+
+            $tagTeam->currentWrestlers->each(
+                fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status)
+            );
+        });
     }
 
     /** @test */

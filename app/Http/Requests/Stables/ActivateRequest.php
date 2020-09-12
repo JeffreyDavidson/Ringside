@@ -13,13 +13,10 @@ class ActivateRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Stable */
         $stable = $this->route('stable');
 
-        if ($this->user()->can('activate', $stable)) {
-            return true;
-        }
-
-        return false;
+        return $this->user()->can('activate', $stable);
     }
 
     /**

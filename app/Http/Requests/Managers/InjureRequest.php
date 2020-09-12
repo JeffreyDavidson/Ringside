@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Managers;
 
-use App\Exceptions\CannotBeInjuredException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InjureRequest extends FormRequest
@@ -14,17 +13,10 @@ class InjureRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Manager */
         $manager = $this->route('manager');
 
-        if (! $this->user()->can('injure', $manager)) {
-            return false;
-        }
-
-        if (! $manager->canBeInjured()) {
-            throw new CannotBeInjuredException();
-        }
-
-        return true;
+        return $this->user()->can('injure', $manager);
     }
 
     /**

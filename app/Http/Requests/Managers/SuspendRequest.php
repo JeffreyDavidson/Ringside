@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Managers;
 
-use App\Exceptions\CannotBeSuspendedException;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SuspendRequest extends FormRequest
@@ -14,17 +13,10 @@ class SuspendRequest extends FormRequest
      */
     public function authorize()
     {
+        /** @var \App\Models\Manager */
         $manager = $this->route('manager');
 
-        if (! $this->user()->can('suspend', $manager)) {
-            return false;
-        }
-
-        if (! $manager->canBeSuspended()) {
-            throw new CannotBeSuspendedException();
-        }
-
-        return true;
+        return $this->user()->can('suspend', $manager);
     }
 
     /**

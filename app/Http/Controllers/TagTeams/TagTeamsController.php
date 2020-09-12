@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\TagTeams;
 
-use App\Models\TagTeam;
-use App\Models\Wrestler;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 
 class TagTeamsController extends Controller
 {
@@ -53,7 +53,6 @@ class TagTeamsController extends Controller
                 [$request->input('wrestler1'), $request->input('wrestler2')],
                 $request->input('started_at')
             );
-
         } else {
             $tagTeam->addWrestlers(
                 [$request->input('wrestler1'), $request->input('wrestler2')]
