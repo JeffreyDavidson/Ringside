@@ -23,10 +23,12 @@ class FutureEmployedAndUnemployedTagTeams extends Component
             ->futureEmployment()
             ->orWhere
             ->unemployed()
+            ->withFirstEmployedAtDate()
+            ->orderByNullsLast('first_employed_at')
             ->paginate();
 
         return view('livewire.tagteams.future-employed-and-unemployed-tagteams', [
-            'futureEmployedAndUnemployedTagTeams' => $futureEmployedAndUnemployedTagTeams
+            'futureEmployedAndUnemployedTagTeams' => $futureEmployedAndUnemployedTagTeams,
         ]);
     }
 }

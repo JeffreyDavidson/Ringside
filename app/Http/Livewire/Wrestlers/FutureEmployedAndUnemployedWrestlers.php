@@ -23,7 +23,7 @@ class FutureEmployedAndUnemployedWrestlers extends Component
             ->paginate();
 
         return view('livewire.wrestlers.future-employed-and-unemployed-wrestlers', [
-            'futureEmployedAndUnemployedWrestlers' => $futureEmploymentAndUnemployedWrestlers
+            'futureEmployedAndUnemployedWrestlers' => $futureEmploymentAndUnemployedWrestlers,
         ]);
     }
 }

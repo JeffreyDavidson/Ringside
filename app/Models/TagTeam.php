@@ -467,7 +467,7 @@ class TagTeam extends Model
      */
     public function previousEmployment()
     {
-        return $this->previousEmployments()
+        return $this->morphOne(Employment::class, 'employable')
                     ->latest('ended_at')
                     ->limit(1);
     }
@@ -497,7 +497,7 @@ class TagTeam extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
-    public function scopePendingEmployment($query)
+    public function scopeFutureEmployment($query)
     {
         return $query->whereHas('futureEmployment');
     }
