@@ -31,7 +31,6 @@ class TagTeamControllerTest extends TestCase
     private function validParams($overrides = [])
     {
         $wrestlers = Wrestler::factory()->bookable()->count(2)->create();
-        dd($wrestlers);
 
         return array_replace_recursive([
             'name' => 'Example Tag Team Name',
@@ -98,7 +97,6 @@ class TagTeamControllerTest extends TestCase
         $this->actAs($administrators);
 
         $response = $this->storeRequest('tag-teams', $this->validParams());
-        dd($response);
 
         $response->assertRedirect(route('tag-teams.index'));
         tap(TagTeam::first(), function ($tagTeam) {
