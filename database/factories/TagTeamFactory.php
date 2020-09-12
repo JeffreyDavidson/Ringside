@@ -39,9 +39,9 @@ class TagTeamFactory extends Factory
         ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
         ->hasAttached(
             Wrestler::factory()
-                ->bookable()
+                // ->bookable()
                 ->count(2)
-                ->hasEmployments(1, ['started_at' => Carbon::yesterday()]
+                ->hasEmployments(1, ['started_at' => Carbon::now()->subMonths(1)]
             ),
             ['joined_at' => Carbon::yesterday()]
         )
@@ -82,7 +82,7 @@ class TagTeamFactory extends Factory
         ->hasSuspensions(1, ['started_at' => $end])
         ->hasAttached(
             Wrestler::factory()
-                // ->suspended()
+                ->suspended()
                 ->count(2)
                 ->hasEmployments(1, ['started_at' => $start])
                 ->hasSuspensions(1, ['started_at' => $end]),

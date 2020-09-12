@@ -43,7 +43,7 @@ abstract class SingleRosterMember extends Model
      */
     public function futureEmployment()
     {
-        return $this->employments()
+        return $this->morphOne(Employment::class, 'employable')
                     ->where('started_at', '>', now())
                     ->whereNull('ended_at')
                     ->limit(1);
@@ -67,7 +67,7 @@ abstract class SingleRosterMember extends Model
      */
     public function previousEmployment()
     {
-        return $this->previousEmployments()
+        return $this->morphOne(Employment::class, 'employable')
                     ->latest('ended_at')
                     ->limit(1);
     }

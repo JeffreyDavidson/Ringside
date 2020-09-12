@@ -1,4 +1,4 @@
-<x-datatable :collection="$pendingAndUnemployedTagTeams">
+<x-datatable :collection="$futureEmployedAndUnemployedTagTeams">
     <thead>
         <th>Id</th>
         <th>Tag Team Name</th>
@@ -6,7 +6,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($pendingAndUnemployedTagTeams as $tagTeam)
+        @forelse($futureEmployedAndUnemployedTagTeams as $tagTeam)
             <tr>
                 <td>{{ $tagTeam->id }}</td>
                 <td>{{ $tagTeam->name }}</td>
@@ -21,12 +21,6 @@
                     @endif
                 </td>
                 <td>
-                    <!-- @include('tagTeams.partials.action-cell', [
-                        'tagTeam' => $tagTeam,
-                        'actions' => collect([
-                            'retire', 'release', 'suspend', 'reinstate',
-                        ])
-                    ]) -->
                     <x-actions-dropdown>
                         <x-buttons.view :route="route('tag-teams.show', $tagTeam)" />
                         <x-buttons.edit :route="route('tag-teams.edit', $tagTeam)" />
@@ -44,4 +38,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

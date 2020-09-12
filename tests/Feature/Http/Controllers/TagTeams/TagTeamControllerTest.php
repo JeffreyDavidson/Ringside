@@ -31,6 +31,7 @@ class TagTeamControllerTest extends TestCase
     private function validParams($overrides = [])
     {
         $wrestlers = Wrestler::factory()->bookable()->count(2)->create();
+        dd($wrestlers);
 
         return array_replace_recursive([
             'name' => 'Example Tag Team Name',
@@ -54,7 +55,7 @@ class TagTeamControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('tagteams.index');
         $response->assertSeeLivewire('tag-teams.employed-tag-teams');
-        $response->assertSeeLivewire('tag-teams.pending-and-unemployed-tag-teams');
+        $response->assertSeeLivewire('tag-teams.future-employed-and-unemployed-tag-teams');
         $response->assertSeeLivewire('tag-teams.released-tag-teams');
         $response->assertSeeLivewire('tag-teams.suspended-tag-teams');
         $response->assertSeeLivewire('tag-teams.retired-tag-teams');
@@ -97,6 +98,7 @@ class TagTeamControllerTest extends TestCase
         $this->actAs($administrators);
 
         $response = $this->storeRequest('tag-teams', $this->validParams());
+        dd($response);
 
         $response->assertRedirect(route('tag-teams.index'));
         tap(TagTeam::first(), function ($tagTeam) {
