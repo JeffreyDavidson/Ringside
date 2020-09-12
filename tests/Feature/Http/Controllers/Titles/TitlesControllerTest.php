@@ -8,7 +8,6 @@ use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use JMac\Testing\Traits\AdditionalAssertions;
 use Tests\TestCase;
 
 /**
@@ -17,7 +16,7 @@ use Tests\TestCase;
  */
 class TitlesControllerTest extends TestCase
 {
-    use RefreshDatabase, AdditionalAssertions;
+    use RefreshDatabase;
 
     /**
      * Valid parameters for request.

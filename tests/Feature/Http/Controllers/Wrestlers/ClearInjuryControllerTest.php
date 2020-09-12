@@ -9,7 +9,6 @@ use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Requests\Wrestlers\ClearInjuryRequest;
 use App\Models\Wrestler;
 use Carbon\Carbon;
-use Database\Factories\WrestlerFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
