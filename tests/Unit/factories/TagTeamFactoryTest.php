@@ -46,7 +46,6 @@ class TagTeamFactoryTest extends TestCase
     public function a_future_employed_tag_team_has_an_mployment()
     {
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-        dd($tagTeam);
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
