@@ -96,7 +96,7 @@ class WrestlerFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_retired_wrestler_has_an_previous_employment_and_active_retirement()
+    public function a_retired_wrestler_has_a_previous_employment_and_active_retirement()
     {
         $wrestler = Wrestler::factory()->retired()->create();
 
