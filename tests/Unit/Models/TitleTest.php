@@ -60,10 +60,4 @@ class TitleTest extends TestCase
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeRetired', Title::class);
     }
-
-    /** @test */
-    public function a_title_uses_has_cached_attributes_trait()
-    {
-        $this->assertUsesTrait('App\Traits\HasCachedAttributes', Title::class);
-    }
 }

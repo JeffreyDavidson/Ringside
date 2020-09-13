@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Traits\HasCachedAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +13,6 @@ class Title extends Model
 {
     use SoftDeletes,
         HasFactory,
-        HasCachedAttributes,
         Concerns\CanBeCompeted,
         Concerns\CanBeActivated,
         Concerns\Unguarded;

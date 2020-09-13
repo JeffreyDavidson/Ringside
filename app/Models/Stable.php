@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\StableStatus;
-use App\Traits\HasCachedAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +11,6 @@ class Stable extends Model
 {
     use SoftDeletes,
         HasFactory,
-        HasCachedAttributes,
         Concerns\CanBeActivated,
         Concerns\Unguarded;
 
