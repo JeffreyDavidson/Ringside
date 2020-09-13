@@ -65,8 +65,13 @@ class TagTeamFactory extends Factory
             ['joined_at' => Carbon::tomorrow()]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
+    public function withFutureEmploymentWithoutWrestlers()
+    {
+        return $this->state([
+            'status' => TagTeamStatus::FUTURE_EMPLOYMENT,
+        ])->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
+        ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
-            $tagTeam->currentWrestlers->each->save();
         });
     }
 
