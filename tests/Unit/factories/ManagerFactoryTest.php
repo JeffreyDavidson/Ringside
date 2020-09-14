@@ -59,7 +59,7 @@ class ManagerFactoryTest extends TestCase
     }
 
     /** @test */
-    public function a_available_manager_has_an_active_employment()
+    public function an_available_manager_has_an_active_employment()
     {
         $manager = Manager::factory()->available()->create();
 
