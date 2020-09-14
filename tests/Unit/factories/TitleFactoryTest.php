@@ -5,6 +5,10 @@ use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group titles
+ * @group factories
+ */
 class TitleFactoryTest extends TestCase
 {
     use RefreshDatabase;

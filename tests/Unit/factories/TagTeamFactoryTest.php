@@ -5,6 +5,11 @@ use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group tagteams
+ * @group roster
+ * @group factories
+ */
 class TagTeamFactoryTest extends TestCase
 {
     use RefreshDatabase;
