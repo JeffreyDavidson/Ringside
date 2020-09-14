@@ -66,7 +66,9 @@ class TagTeamFactory extends Factory
         )
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
-            $tagTeam->wrestlers->each()->save();
+            $tagTeam->wrestlers->each(function ($wrestler) {
+                $wrestler->save();
+            });
         });
     }
 
