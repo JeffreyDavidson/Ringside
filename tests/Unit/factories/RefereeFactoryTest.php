@@ -5,6 +5,12 @@ use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group referees
+ * @group srm
+ * @group roster
+ * @group factories
+ */
 class RefereeFactoryTest extends TestCase
 {
     use RefreshDatabase;

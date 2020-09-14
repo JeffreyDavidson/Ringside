@@ -5,6 +5,12 @@ use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group managers
+ * @group srm
+ * @group roster
+ * @group factories
+ */
 class ManagerFactoryTest extends TestCase
 {
     use RefreshDatabase;

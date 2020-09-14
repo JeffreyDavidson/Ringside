@@ -5,6 +5,12 @@ use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group wrestlers
+ * @group srm
+ * @group roster
+ * @group factories
+ */
 class WrestlerFactoryTest extends TestCase
 {
     use RefreshDatabase;

@@ -5,6 +5,11 @@ use App\Models\Stable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * @group stables
+ * @group roster
+ * @group factories
+ */
 class StableFactoryTest extends TestCase
 {
     use RefreshDatabase;
