@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\TagTeam;
 use App\Enums\TagTeamStatus;
+use App\Models\TagTeam;
 
 class TagTeamObserver
 {
@@ -21,10 +21,10 @@ class TagTeamObserver
             $tagTeam->status = TagTeamStatus::SUSPENDED;
         } elseif ($tagTeam->isBookable()) {
             $tagTeam->status = TagTeamStatus::BOOKABLE;
-        } elseif ($tagTeam->isReleased()) {
-            $tagTeam->status = TagTeamStatus::RELEASED;
         } elseif ($tagTeam->hasFutureEmployment()) {
             $tagTeam->status = TagTeamStatus::FUTURE_EMPLOYMENT;
+        } elseif ($tagTeam->isReleased()) {
+            $tagTeam->status = TagTeamStatus::RELEASED;
         } else {
             $tagTeam->status = TagTeamStatus::UNEMPLOYED;
         }

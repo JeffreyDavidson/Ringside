@@ -19,10 +19,10 @@ class StableObserver
             $stable->status = StableStatus::RETIRED;
         } elseif ($stable->isActive()) {
             $stable->status = StableStatus::ACTIVE;
-        } elseif ($stable->isDeactivated()) {
-            $stable->status = StableStatus::INACTIVE;
         } elseif ($stable->hasFutureActivation()) {
             $stable->status = StableStatus::FUTURE_ACTIVATION;
+        } elseif ($stable->isDeactivated()) {
+            $stable->status = StableStatus::INACTIVE;
         } else {
             $stable->status = StableStatus::UNACTIVATED;
         }
