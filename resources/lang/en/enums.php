@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\Role;
 use App\Enums\EventStatus;
-use App\Enums\TitleStatus;
-use App\Enums\StableStatus;
 use App\Enums\ManagerStatus;
 use App\Enums\RefereeStatus;
+use App\Enums\Role;
+use App\Enums\StableStatus;
 use App\Enums\TagTeamStatus;
+use App\Enums\TitleStatus;
 use App\Enums\WrestlerStatus;
 
 return [
@@ -18,7 +18,7 @@ return [
     TitleStatus::class => [
         TitleStatus::ACTIVE => 'Active',
         TitleStatus::INACTIVE => 'Inactive',
-        TitleStatus::PENDING_ACTIVATION => 'Pending Activation',
+        TitleStatus::FUTURE_ACTIVATION => 'Future Activation',
         TitleStatus::RETIRED => 'Retired',
     ],
     WrestlerStatus::class => [
@@ -52,11 +52,12 @@ return [
     StableStatus::class => [
         StableStatus::ACTIVE => 'Active',
         StableStatus::INACTIVE => 'Inactive',
-        StableStatus::PENDING_ACTIVATION => 'Pending Activation',
+        StableStatus::FUTURE_ACTIVATION => 'Future Activation',
         StableStatus::RETIRED => 'Retired',
     ],
     EventStatus::class => [
-        EventStatus::SCHEDULED => 'Scheduled',
         EventStatus::PAST => 'Past',
+        EventStatus::SCHEDULED => 'Scheduled',
+        EventStatus::UNSCHEDULED => 'Unscheduled',
     ],
 ];
