@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Event;
 use App\Enums\EventStatus;
+use App\Models\Event;
 
 class EventObserver
 {
@@ -20,7 +20,7 @@ class EventObserver
         } elseif ($event->isPast()) {
             $event->status = EventStatus::PAST;
         } else {
-            $event->status = EventStatus::PENDING;
+            $event->status = EventStatus::UNSCHEDULED;
         }
     }
 }

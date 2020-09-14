@@ -27,40 +27,51 @@ class EventFactory extends Factory
         return [
             'name' => $this->faker->words(2, true),
             'status' => EventStatus::__default,
-            'date' => $this->faker->dateTime(),
             'venue_id' => Venue::factory()->create()->id,
             'preview' => $this->faker->paragraph(),
         ];
     }
 
+    public function unscheduled(): self
+    {
+        return $this->state([
+            'status' => EventStatus::UNSCHEDULED,
+        ])->afterCreating(function (Event $event) {
+            $event->save();
+        });
+    }
+
     public function scheduled(): self
     {
-        return tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'status' => EventStatus::SCHEDULED,
-            'date' => Carbon::tomorrow()->toDateTimeString(),
-        ]);
+            'date' => Carbon::tomorrow(),
+        ])->afterCreating(function (Event $event) {
+            $event->save();
+        });
     }
 
     public function past(): self
     {
-        return tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'status' => EventStatus::PAST,
-            'date' => Carbon::yesterday()->toDateTimeString(),
-        ]);
+            'date' => Carbon::yesterday(),
+        ])->afterCreating(function (Event $event) {
+            $event->save();
+        });
     }
 
     public function atVenue($venue)
     {
-        return tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'venue_id' => $venue->id,
         ]);
     }
 
     public function softDeleted(): self
     {
-        $clone = clone $this;
-        $clone->softDeleted = true;
-
-        return $clone;
+        return $this->state([
+            'deleted_at' => now(),
+        ]);
     }
 }
