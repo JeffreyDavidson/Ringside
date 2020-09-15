@@ -41,6 +41,7 @@ class WrestlerFactory extends Factory
         ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
+            $wrestler->load('employments');
         });
     }
 
@@ -51,6 +52,7 @@ class WrestlerFactory extends Factory
         ])->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
+            $wrestler->load('employments');
         });
     }
 
@@ -75,6 +77,8 @@ class WrestlerFactory extends Factory
         ->hasRetirements(1, ['started_at' => $end])
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
+            $wrestler->load('employments');
+            $wrestler->load('retirements');
         });
     }
 
@@ -89,6 +93,7 @@ class WrestlerFactory extends Factory
         ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
+            $wrestler->load('employments');
         });
     }
 
@@ -104,6 +109,8 @@ class WrestlerFactory extends Factory
         ->hasSuspensions(1, ['started_at' => $end])
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
+            $wrestler->load('employments');
+            $wrestler->load('suspensions');
         });
     }
 
@@ -118,6 +125,8 @@ class WrestlerFactory extends Factory
         ->hasInjuries(1, ['started_at' => $now])
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
+            $wrestler->load('employments');
+            $wrestler->load('injuries');
         });
     }
 
