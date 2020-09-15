@@ -37,15 +37,13 @@ class WrestlerFactoryTest extends TestCase
     {
         $wrestler = Wrestler::factory()->released()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertCount(1, $wrestler->employments);
+        $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
+        $this->assertCount(1, $wrestler->employments);
 
-            $employment = $wrestler->employments->first();
+        $employment = $wrestler->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -53,15 +51,13 @@ class WrestlerFactoryTest extends TestCase
     {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
-            $this->assertCount(1, $wrestler->employments);
+        $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
+        $this->assertCount(1, $wrestler->employments);
 
-            $employment = $wrestler->employments->first();
+        $employment = $wrestler->employments->first();
 
-            $this->assertTrue($employment->started_at->isFuture());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isFuture());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -69,15 +65,13 @@ class WrestlerFactoryTest extends TestCase
     {
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            $this->assertCount(1, $wrestler->employments);
+        $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+        $this->assertCount(1, $wrestler->employments);
 
-            $employment = $wrestler->employments->first();
+        $employment = $wrestler->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -85,20 +79,18 @@ class WrestlerFactoryTest extends TestCase
     {
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
-            $this->assertCount(1, $wrestler->employments);
-            $this->assertCount(1, $wrestler->suspensions);
+        $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
+        $this->assertCount(1, $wrestler->employments);
+        $this->assertCount(1, $wrestler->suspensions);
 
-            $employment = $wrestler->employments->first();
-            $suspension = $wrestler->suspensions->first();
+        $employment = $wrestler->employments->first();
+        $suspension = $wrestler->suspensions->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($suspension->started_at->isPast());
-            $this->assertNull($suspension->ended_at);
-            $this->assertTrue($suspension->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($suspension->started_at->isPast());
+        $this->assertNull($suspension->ended_at);
+        $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -106,21 +98,19 @@ class WrestlerFactoryTest extends TestCase
     {
         $wrestler = Wrestler::factory()->retired()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
-            $this->assertCount(1, $wrestler->employments);
-            $this->assertCount(1, $wrestler->retirements);
+        $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
+        $this->assertCount(1, $wrestler->employments);
+        $this->assertCount(1, $wrestler->retirements);
 
-            $employment = $wrestler->employments->first();
-            $retirement = $wrestler->retirements->first();
+        $employment = $wrestler->employments->first();
+        $retirement = $wrestler->retirements->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->isPast());
-            $this->assertTrue($employment->started_at->lt($employment->ended_at));
-            $this->assertTrue($retirement->started_at->isPast());
-            $this->assertNull($retirement->ended_at);
-            $this->assertTrue($retirement->started_at->eq($employment->ended_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->isPast());
+        $this->assertTrue($employment->started_at->lt($employment->ended_at));
+        $this->assertTrue($retirement->started_at->isPast());
+        $this->assertNull($retirement->ended_at);
+        $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 
     /** @test */
@@ -128,19 +118,17 @@ class WrestlerFactoryTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
-            $this->assertCount(1, $wrestler->employments);
-            $this->assertCount(1, $wrestler->injuries);
+        $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
+        $this->assertCount(1, $wrestler->employments);
+        $this->assertCount(1, $wrestler->injuries);
 
-            $employment = $wrestler->employments->first();
-            $injury = $wrestler->injuries->first();
+        $employment = $wrestler->employments->first();
+        $injury = $wrestler->injuries->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($injury->started_at->isPast());
-            $this->assertNull($injury->ended_at);
-            $this->assertTrue($injury->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($injury->started_at->isPast());
+        $this->assertNull($injury->ended_at);
+        $this->assertTrue($injury->started_at->gt($employment->started_at));
     }
 }

@@ -37,15 +37,13 @@ class RefereeFactoryTest extends TestCase
     {
         $referee = Referee::factory()->released()->create();
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
-            $this->assertCount(1, $referee->employments);
+        $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
+        $this->assertCount(1, $referee->employments);
 
-            $employment = $referee->employments->first();
+        $employment = $referee->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -53,15 +51,13 @@ class RefereeFactoryTest extends TestCase
     {
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals(RefereeStatus::FUTURE_EMPLOYMENT, $referee->status);
-            $this->assertCount(1, $referee->employments);
+        $this->assertEquals(RefereeStatus::FUTURE_EMPLOYMENT, $referee->status);
+        $this->assertCount(1, $referee->employments);
 
-            $employment = $referee->employments->first();
+        $employment = $referee->employments->first();
 
-            $this->assertTrue($employment->started_at->isFuture());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isFuture());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -69,15 +65,13 @@ class RefereeFactoryTest extends TestCase
     {
         $referee = Referee::factory()->bookable()->create();
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
-            $this->assertCount(1, $referee->employments);
+        $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
+        $this->assertCount(1, $referee->employments);
 
-            $employment = $referee->employments->first();
+        $employment = $referee->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -85,20 +79,18 @@ class RefereeFactoryTest extends TestCase
     {
         $referee = Referee::factory()->suspended()->create();
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals(RefereeStatus::SUSPENDED, $referee->status);
-            $this->assertCount(1, $referee->employments);
-            $this->assertCount(1, $referee->suspensions);
+        $this->assertEquals(RefereeStatus::SUSPENDED, $referee->status);
+        $this->assertCount(1, $referee->employments);
+        $this->assertCount(1, $referee->suspensions);
 
-            $employment = $referee->employments->first();
-            $suspension = $referee->suspensions->first();
+        $employment = $referee->employments->first();
+        $suspension = $referee->suspensions->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($suspension->started_at->isPast());
-            $this->assertNull($suspension->ended_at);
-            $this->assertTrue($suspension->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($suspension->started_at->isPast());
+        $this->assertNull($suspension->ended_at);
+        $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -106,21 +98,19 @@ class RefereeFactoryTest extends TestCase
     {
         $referee = Referee::factory()->retired()->create();
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
-            $this->assertCount(1, $referee->employments);
-            $this->assertCount(1, $referee->retirements);
+        $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
+        $this->assertCount(1, $referee->employments);
+        $this->assertCount(1, $referee->retirements);
 
-            $employment = $referee->employments->first();
-            $retirement = $referee->retirements->first();
+        $employment = $referee->employments->first();
+        $retirement = $referee->retirements->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->isPast());
-            $this->assertTrue($employment->started_at->lt($employment->ended_at));
-            $this->assertTrue($retirement->started_at->isPast());
-            $this->assertNull($retirement->ended_at);
-            $this->assertTrue($retirement->started_at->eq($employment->ended_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->isPast());
+        $this->assertTrue($employment->started_at->lt($employment->ended_at));
+        $this->assertTrue($retirement->started_at->isPast());
+        $this->assertNull($retirement->ended_at);
+        $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 
     /** @test */
@@ -128,19 +118,17 @@ class RefereeFactoryTest extends TestCase
     {
         $referee = Referee::factory()->injured()->create();
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals(RefereeStatus::INJURED, $referee->status);
-            $this->assertCount(1, $referee->employments);
-            $this->assertCount(1, $referee->injuries);
+        $this->assertEquals(RefereeStatus::INJURED, $referee->status);
+        $this->assertCount(1, $referee->employments);
+        $this->assertCount(1, $referee->injuries);
 
-            $employment = $referee->employments->first();
-            $injury = $referee->injuries->first();
+        $employment = $referee->employments->first();
+        $injury = $referee->injuries->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($injury->started_at->isPast());
-            $this->assertNull($injury->ended_at);
-            $this->assertTrue($injury->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($injury->started_at->isPast());
+        $this->assertNull($injury->ended_at);
+        $this->assertTrue($injury->started_at->gt($employment->started_at));
     }
 }

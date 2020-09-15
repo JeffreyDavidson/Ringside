@@ -45,15 +45,13 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->inactive()->create();
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertEquals(StableStatus::INACTIVE, $stable->status);
-            $this->assertCount(1, $stable->activations);
+        $this->assertEquals(StableStatus::INACTIVE, $stable->status);
+        $this->assertCount(1, $stable->activations);
 
-            $activation = $stable->activations->first();
+        $activation = $stable->activations->first();
 
-            $this->assertTrue($activation->started_at->isPast());
-            $this->assertTrue($activation->ended_at->gt($activation->started_at));
-        });
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertTrue($activation->ended_at->gt($activation->started_at));
     }
 
     /** @test */
@@ -61,10 +59,8 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->inactive()->create();
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertTrue($stable->wrestlers->left_at);
-            $this->assertTrue($stable->tagTeams->left_at);
-        });
+        $this->assertTrue($stable->wrestlers->left_at);
+        $this->assertTrue($stable->tagTeams->left_at);
     }
 
     /** @test */
@@ -72,15 +68,13 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertEquals(StableStatus::FUTURE_ACTIVATION, $stable->status);
-            $this->assertCount(1, $stable->activations);
+        $this->assertEquals(StableStatus::FUTURE_ACTIVATION, $stable->status);
+        $this->assertCount(1, $stable->activations);
 
-            $activation = $stable->activations->first();
+        $activation = $stable->activations->first();
 
-            $this->assertTrue($activation->started_at->isFuture());
-            $this->assertNull($activation->ended_at);
-        });
+        $this->assertTrue($activation->started_at->isFuture());
+        $this->assertNull($activation->ended_at);
     }
 
     /** @test */
@@ -88,15 +82,13 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->active()->create();
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
-            $this->assertCount(1, $stable->activations);
+        $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+        $this->assertCount(1, $stable->activations);
 
-            $activation = $stable->activations->first();
+        $activation = $stable->activations->first();
 
-            $this->assertTrue($activation->started_at->isPast());
-            $this->assertNull($activation->ended_at);
-        });
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertNull($activation->ended_at);
     }
 
     /** @test */
@@ -104,20 +96,18 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->retired()->create();
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertEquals(StableStatus::RETIRED, $stable->status);
-            $this->assertCount(1, $stable->activations);
-            $this->assertCount(1, $stable->retirements);
+        $this->assertEquals(StableStatus::RETIRED, $stable->status);
+        $this->assertCount(1, $stable->activations);
+        $this->assertCount(1, $stable->retirements);
 
-            $activation = $stable->activations->first();
-            $retirement = $stable->retirements->first();
+        $activation = $stable->activations->first();
+        $retirement = $stable->retirements->first();
 
-            $this->assertTrue($activation->started_at->isPast());
-            $this->assertTrue($activation->ended_at->isPast());
-            $this->assertTrue($activation->started_at->lt($activation->ended_at));
-            $this->assertTrue($retirement->started_at->isPast());
-            $this->assertNull($retirement->ended_at);
-            $this->assertTrue($retirement->started_at->eq($activation->ended_at));
-        });
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertTrue($activation->ended_at->isPast());
+        $this->assertTrue($activation->started_at->lt($activation->ended_at));
+        $this->assertTrue($retirement->started_at->isPast());
+        $this->assertNull($retirement->ended_at);
+        $this->assertTrue($retirement->started_at->eq($activation->ended_at));
     }
 }
