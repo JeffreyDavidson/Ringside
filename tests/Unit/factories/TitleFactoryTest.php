@@ -35,15 +35,13 @@ class TitleFactoryTest extends TestCase
     {
         $title = Title::factory()->inactive()->create();
 
-        tap($title->fresh(), function ($title) {
-            $this->assertEquals(TitleStatus::INACTIVE, $title->status);
-            $this->assertCount(1, $title->activations);
+        $this->assertEquals(TitleStatus::INACTIVE, $title->status);
+        $this->assertCount(1, $title->activations);
 
-            $activation = $title->activations->first();
+        $activation = $title->activations->first();
 
-            $this->assertTrue($activation->started_at->isPast());
-            $this->assertTrue($activation->ended_at->gt($activation->started_at));
-        });
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertTrue($activation->ended_at->gt($activation->started_at));
     }
 
     /** @test */
@@ -51,15 +49,13 @@ class TitleFactoryTest extends TestCase
     {
         $title = Title::factory()->withFutureActivation()->create();
 
-        tap($title->fresh(), function ($title) {
-            $this->assertEquals(TitleStatus::FUTURE_ACTIVATION, $title->status);
-            $this->assertCount(1, $title->activations);
+        $this->assertEquals(TitleStatus::FUTURE_ACTIVATION, $title->status);
+        $this->assertCount(1, $title->activations);
 
-            $activation = $title->activations->first();
+        $activation = $title->activations->first();
 
-            $this->assertTrue($activation->started_at->isFuture());
-            $this->assertNull($activation->ended_at);
-        });
+        $this->assertTrue($activation->started_at->isFuture());
+        $this->assertNull($activation->ended_at);
     }
 
     /** @test */
@@ -67,15 +63,13 @@ class TitleFactoryTest extends TestCase
     {
         $title = Title::factory()->active()->create();
 
-        tap($title->fresh(), function ($title) {
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-            $this->assertCount(1, $title->activations);
+        $this->assertEquals(TitleStatus::ACTIVE, $title->status);
+        $this->assertCount(1, $title->activations);
 
-            $activation = $title->activations->first();
+        $activation = $title->activations->first();
 
-            $this->assertTrue($activation->started_at->isPast());
-            $this->assertNull($activation->ended_at);
-        });
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertNull($activation->ended_at);
     }
 
     /** @test */
@@ -83,20 +77,18 @@ class TitleFactoryTest extends TestCase
     {
         $title = Title::factory()->retired()->create();
 
-        tap($title->fresh(), function ($title) {
-            $this->assertEquals(TitleStatus::RETIRED, $title->status);
-            $this->assertCount(1, $title->activations);
-            $this->assertCount(1, $title->retirements);
+        $this->assertEquals(TitleStatus::RETIRED, $title->status);
+        $this->assertCount(1, $title->activations);
+        $this->assertCount(1, $title->retirements);
 
-            $activation = $title->activations->first();
-            $retirement = $title->retirements->first();
+        $activation = $title->activations->first();
+        $retirement = $title->retirements->first();
 
-            $this->assertTrue($activation->started_at->isPast());
-            $this->assertTrue($activation->ended_at->isPast());
-            $this->assertTrue($activation->started_at->lt($activation->ended_at));
-            $this->assertTrue($retirement->started_at->isPast());
-            $this->assertNull($retirement->ended_at);
-            $this->assertTrue($retirement->started_at->eq($activation->ended_at));
-        });
+        $this->assertTrue($activation->started_at->isPast());
+        $this->assertTrue($activation->ended_at->isPast());
+        $this->assertTrue($activation->started_at->lt($activation->ended_at));
+        $this->assertTrue($retirement->started_at->isPast());
+        $this->assertNull($retirement->ended_at);
+        $this->assertTrue($retirement->started_at->eq($activation->ended_at));
     }
 }

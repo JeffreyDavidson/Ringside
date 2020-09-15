@@ -35,10 +35,8 @@ class EventFactoryTest extends TestCase
     {
         $event = Event::factory()->past()->create();
 
-        tap($event->fresh(), function ($event) {
-            $this->assertEquals(EventStatus::PAST, $event->status);
-            $this->assertTrue($event->date->isPast());
-        });
+        $this->assertEquals(EventStatus::PAST, $event->status);
+        $this->assertTrue($event->date->isPast());
     }
 
     /** @test */
@@ -46,9 +44,7 @@ class EventFactoryTest extends TestCase
     {
         $event = Event::factory()->scheduled()->create();
 
-        tap($event->fresh(), function ($event) {
-            $this->assertEquals(EventStatus::SCHEDULED, $event->status);
-            $this->assertTrue($event->date->isFuture());
-        });
+        $this->assertEquals(EventStatus::SCHEDULED, $event->status);
+        $this->assertTrue($event->date->isFuture());
     }
 }

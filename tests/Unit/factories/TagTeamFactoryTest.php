@@ -36,15 +36,13 @@ class TagTeamFactoryTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->released()->create();
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
+        $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
+        $this->assertCount(1, $tagTeam->employments);
 
-            $employment = $tagTeam->employments->first();
+        $employment = $tagTeam->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -52,15 +50,13 @@ class TagTeamFactoryTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
+        $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
+        $this->assertCount(1, $tagTeam->employments);
 
-            $employment = $tagTeam->employments->first();
+        $employment = $tagTeam->employments->first();
 
-            $this->assertTrue($employment->started_at->isFuture());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isFuture());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -68,17 +64,15 @@ class TagTeamFactoryTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->withFutureEmploymentWithoutWrestlers()->create();
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
+        $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
+        $this->assertCount(1, $tagTeam->employments);
 
-            $employment = $tagTeam->employments->first();
+        $employment = $tagTeam->employments->first();
 
-            $this->assertTrue($employment->started_at->isFuture());
-            $this->assertNull($employment->ended_at);
+        $this->assertTrue($employment->started_at->isFuture());
+        $this->assertNull($employment->ended_at);
 
-            $this->assertEmpty($tagTeam->wrestlers);
-        });
+        $this->assertEmpty($tagTeam->wrestlers);
     }
 
     /** @test */
@@ -86,15 +80,13 @@ class TagTeamFactoryTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+        $this->assertCount(1, $tagTeam->employments);
 
-            $employment = $tagTeam->employments->first();
+        $employment = $tagTeam->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -102,20 +94,18 @@ class TagTeamFactoryTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::SUSPENDED, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
-            $this->assertCount(1, $tagTeam->suspensions);
+        $this->assertEquals(TagTeamStatus::SUSPENDED, $tagTeam->status);
+        $this->assertCount(1, $tagTeam->employments);
+        $this->assertCount(1, $tagTeam->suspensions);
 
-            $employment = $tagTeam->employments->first();
-            $suspension = $tagTeam->suspensions->first();
+        $employment = $tagTeam->employments->first();
+        $suspension = $tagTeam->suspensions->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($suspension->started_at->isPast());
-            $this->assertNull($suspension->ended_at);
-            $this->assertTrue($suspension->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($suspension->started_at->isPast());
+        $this->assertNull($suspension->ended_at);
+        $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -123,20 +113,18 @@ class TagTeamFactoryTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
-            $this->assertCount(1, $tagTeam->retirements);
+        $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
+        $this->assertCount(1, $tagTeam->employments);
+        $this->assertCount(1, $tagTeam->retirements);
 
-            $employment = $tagTeam->employments->first();
-            $retirement = $tagTeam->retirements->first();
+        $employment = $tagTeam->employments->first();
+        $retirement = $tagTeam->retirements->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->isPast());
-            $this->assertTrue($employment->started_at->lt($employment->ended_at));
-            $this->assertTrue($retirement->started_at->isPast());
-            $this->assertNull($retirement->ended_at);
-            $this->assertTrue($retirement->started_at->eq($employment->ended_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->isPast());
+        $this->assertTrue($employment->started_at->lt($employment->ended_at));
+        $this->assertTrue($retirement->started_at->isPast());
+        $this->assertNull($retirement->ended_at);
+        $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 }

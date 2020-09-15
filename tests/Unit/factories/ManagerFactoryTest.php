@@ -37,15 +37,13 @@ class ManagerFactoryTest extends TestCase
     {
         $manager = Manager::factory()->released()->create();
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
-            $this->assertCount(1, $manager->employments);
+        $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
+        $this->assertCount(1, $manager->employments);
 
-            $employment = $manager->employments->first();
+        $employment = $manager->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -53,15 +51,13 @@ class ManagerFactoryTest extends TestCase
     {
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertEquals(ManagerStatus::FUTURE_EMPLOYMENT, $manager->status);
-            $this->assertCount(1, $manager->employments);
+        $this->assertEquals(ManagerStatus::FUTURE_EMPLOYMENT, $manager->status);
+        $this->assertCount(1, $manager->employments);
 
-            $employment = $manager->employments->first();
+        $employment = $manager->employments->first();
 
-            $this->assertTrue($employment->started_at->isFuture());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isFuture());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -69,15 +65,13 @@ class ManagerFactoryTest extends TestCase
     {
         $manager = Manager::factory()->available()->create();
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-            $this->assertCount(1, $manager->employments);
+        $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+        $this->assertCount(1, $manager->employments);
 
-            $employment = $manager->employments->first();
+        $employment = $manager->employments->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
     }
 
     /** @test */
@@ -85,20 +79,18 @@ class ManagerFactoryTest extends TestCase
     {
         $manager = Manager::factory()->suspended()->create();
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertEquals(ManagerStatus::SUSPENDED, $manager->status);
-            $this->assertCount(1, $manager->employments);
-            $this->assertCount(1, $manager->suspensions);
+        $this->assertEquals(ManagerStatus::SUSPENDED, $manager->status);
+        $this->assertCount(1, $manager->employments);
+        $this->assertCount(1, $manager->suspensions);
 
-            $employment = $manager->employments->first();
-            $suspension = $manager->suspensions->first();
+        $employment = $manager->employments->first();
+        $suspension = $manager->suspensions->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($suspension->started_at->isPast());
-            $this->assertNull($suspension->ended_at);
-            $this->assertTrue($suspension->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($suspension->started_at->isPast());
+        $this->assertNull($suspension->ended_at);
+        $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
     /** @test */
@@ -106,21 +98,19 @@ class ManagerFactoryTest extends TestCase
     {
         $manager = Manager::factory()->retired()->create();
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertEquals(ManagerStatus::RETIRED, $manager->status);
-            $this->assertCount(1, $manager->employments);
-            $this->assertCount(1, $manager->retirements);
+        $this->assertEquals(ManagerStatus::RETIRED, $manager->status);
+        $this->assertCount(1, $manager->employments);
+        $this->assertCount(1, $manager->retirements);
 
-            $employment = $manager->employments->first();
-            $retirement = $manager->retirements->first();
+        $employment = $manager->employments->first();
+        $retirement = $manager->retirements->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertTrue($employment->ended_at->isPast());
-            $this->assertTrue($employment->started_at->lt($employment->ended_at));
-            $this->assertTrue($retirement->started_at->isPast());
-            $this->assertNull($retirement->ended_at);
-            $this->assertTrue($retirement->started_at->eq($employment->ended_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertTrue($employment->ended_at->isPast());
+        $this->assertTrue($employment->started_at->lt($employment->ended_at));
+        $this->assertTrue($retirement->started_at->isPast());
+        $this->assertNull($retirement->ended_at);
+        $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 
     /** @test */
@@ -128,19 +118,17 @@ class ManagerFactoryTest extends TestCase
     {
         $manager = Manager::factory()->injured()->create();
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertEquals(ManagerStatus::INJURED, $manager->status);
-            $this->assertCount(1, $manager->employments);
-            $this->assertCount(1, $manager->injuries);
+        $this->assertEquals(ManagerStatus::INJURED, $manager->status);
+        $this->assertCount(1, $manager->employments);
+        $this->assertCount(1, $manager->injuries);
 
-            $employment = $manager->employments->first();
-            $injury = $manager->injuries->first();
+        $employment = $manager->employments->first();
+        $injury = $manager->injuries->first();
 
-            $this->assertTrue($employment->started_at->isPast());
-            $this->assertNull($employment->ended_at);
-            $this->assertTrue($injury->started_at->isPast());
-            $this->assertNull($injury->ended_at);
-            $this->assertTrue($injury->started_at->gt($employment->started_at));
-        });
+        $this->assertTrue($employment->started_at->isPast());
+        $this->assertNull($employment->ended_at);
+        $this->assertTrue($injury->started_at->isPast());
+        $this->assertNull($injury->ended_at);
+        $this->assertTrue($injury->started_at->gt($employment->started_at));
     }
 }
