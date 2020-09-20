@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 /**
  * @group events
+ * @group feature-events
  */
 class RestoreEventTest extends TestCase
 {

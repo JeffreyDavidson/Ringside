@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 /**
  * @group events
+ * @group feature-events
  */
 class ViewEventTest extends TestCase
 {
@@ -16,11 +17,11 @@ class ViewEventTest extends TestCase
 
     /**
      * @test
-     * @dataProvider adminRoles
+     * @dataProvider administrators
      */
-    public function administrators_can_view_an_event_page($adminRoles)
+    public function administrators_can_view_an_event_page($administrators)
     {
-        $this->actAs($adminRoles);
+        $this->actAs($administrators);
         $event = Event::factory()->create();
 
         $response = $this->showRequest($event);

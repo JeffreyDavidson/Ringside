@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Title;
 use App\Enums\TitleStatus;
+use App\Models\Title;
 
 class TitleObserver
 {
@@ -11,7 +11,7 @@ class TitleObserver
     {
         if ($title->isRetired()) {
             $title->status = TitleStatus::RETIRED;
-        } elseif ($title->isActive()) {
+        } elseif ($title->isCurrentlyActive()) {
             $title->status = TitleStatus::ACTIVE;
         } elseif ($title->isDeactivated()) {
             $title->status = TitleStatus::INACTIVE;

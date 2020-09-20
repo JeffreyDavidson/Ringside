@@ -5,52 +5,41 @@ namespace App\Models\Concerns;
 use App\Models\Member;
 use App\Models\Stable;
 
-/**
- * @mixin \App\Models\Concerns\HasCustomRelationships
- */
 trait CanBeStableMember
 {
     /**
-     * Get the stable history the member has belonged to.
+     * Get the stables the model has been belonged to.
      *
-     * @return App\Eloquent\Relationships\LeaveableMorphToMany
+     * @return App\Eloquent\Relationships\MorphMany
      */
     public function stables()
     {
-        return $this->morphToMany(Stable::class, 'member')->using(Member::class);
+        return $this->morphToMany(Stable::class, 'member')
+                    ->using(Member::class);
     }
 
     /**
      * Get the current stable the member belongs to.
      *
-     * @return App\Eloquent\Relationships\LeaveableMorphToMany
+     * @return App\Eloquent\Relationships\MorphOne
      */
     public function currentStable()
     {
-        return $this->stableHistory()->where('status', 'active')->current()->latest();
+        return $this->morphOne(Stable::class, 'members')
+                    ->wherePivot('joined_at', '<=', now())
+                    ->wherePivot('left_at', '=', null)
+                    ->limit(1);
     }
 
     /**
      * Get the previous stables the member has belonged to.
      *
-     * @return App\Eloquent\Relationships\LeaveableMorphToMany
+     * @return App\Eloquent\Relationships\MorphToMany
      */
     public function previousStables()
     {
-        return $this->stableHistory()->detached();
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function getCurrentStableAttribute()
-    {
-        if (!$this->relationLoaded('currentStable')) {
-            $this->setRelation('currentStable', $this->currentStable()->get());
-        }
-
-        return $this->getRelation('currentStable')->first();
+        return $this->morphMany(Stable::class, 'members')
+                    ->wherePivot('joined_at', '<', now())
+                    ->wherePivot('left_at', '!=', null);
     }
 }

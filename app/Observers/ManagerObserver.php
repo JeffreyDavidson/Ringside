@@ -17,6 +17,8 @@ class ManagerObserver
     {
         if ($manager->isRetired()) {
             $manager->status = ManagerStatus::RETIRED;
+        } elseif ($manager->isReleased()) {
+            $manager->status = ManagerStatus::RELEASED;
         } elseif ($manager->isInjured()) {
             $manager->status = ManagerStatus::INJURED;
         } elseif ($manager->isSuspended()) {
@@ -25,8 +27,6 @@ class ManagerObserver
             $manager->status = ManagerStatus::AVAILABLE;
         } elseif ($manager->hasFutureEmployment()) {
             $manager->status = ManagerStatus::FUTURE_EMPLOYMENT;
-        } elseif ($manager->isReleased()) {
-            $manager->status = ManagerStatus::RELEASED;
         } else {
             $manager->status = ManagerStatus::UNEMPLOYED;
         }

@@ -11,7 +11,6 @@ class Referee extends SingleRosterMember
     use SoftDeletes,
         HasFactory,
         Concerns\HasFullName,
-        Concerns\CanBeBooked,
         Concerns\Unguarded;
 
     /**
@@ -22,4 +21,29 @@ class Referee extends SingleRosterMember
     protected $casts = [
         'status' => RefereeStatus::class,
     ];
+
+    /**
+     * Scope a query to only include bookable referees.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBookable($query)
+    {
+        return $query->where('status', RefereeStatus::BOOKABLE);
+    }
+
+    /**
+     * Check to see if the referee is bookable.
+     *
+     * @return bool
+     */
+    public function isBookable()
+    {
+        if ($this->isUnemployed() || $this->isSuspended() || $this->isInjured() || $this->isRetired() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
 }

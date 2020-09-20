@@ -39,7 +39,7 @@ class TagTeamFactory extends Factory
         ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
         ->hasAttached(
             Wrestler::factory()
-                // ->bookable()
+                ->bookable()
                 ->count(2)
                 ->hasEmployments(1, ['started_at' => Carbon::now()->subMonths(1)]
             ),
@@ -48,6 +48,8 @@ class TagTeamFactory extends Factory
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
             $tagTeam->currentWrestlers->each->save();
+            $tagTeam->load('employments');
+            $tagTeam->load('currentWrestlers');
         });
     }
 
@@ -62,13 +64,15 @@ class TagTeamFactory extends Factory
                 ->count(2)
                 ->hasEmployments(1, ['started_at' => Carbon::tomorrow()]
             ),
-            ['joined_at' => Carbon::tomorrow()]
+            ['joined_at' => Carbon::now()]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
             $tagTeam->wrestlers->each(function ($wrestler) {
                 $wrestler->save();
             });
+            $tagTeam->load('employments');
+            $tagTeam->load('currentWrestlers');
         });
     }
 

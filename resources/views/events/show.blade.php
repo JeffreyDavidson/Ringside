@@ -49,15 +49,17 @@
                             </div>
                             <div class="kt-widget__body">
                                 <div class="kt-widget__content">
-                                    <div class="kt-widget__info">
-                                        <span class="kt-widget__label"
-                                            >Date:</span
-                                        >
-                                        <span
-                                            class="kt-widget__data"
-                                            >{{ $event->date->toDateString() }}</span
-                                        >
-                                    </div>
+                                    @if($event->isScheduled() || $event->isPast())
+                                        <div class="kt-widget__info">
+                                            <span class="kt-widget__label"
+                                                >Date:</span
+                                            >
+                                            <span
+                                                class="kt-widget__data"
+                                                >{{ $event->date->toDateString() }}</span
+                                            >
+                                        </div>
+                                    @endif
                                     <div class="kt-widget__info">
                                         <span class="kt-widget__label"
                                             >Venue:</span

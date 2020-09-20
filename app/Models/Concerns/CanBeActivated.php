@@ -70,19 +70,20 @@ trait CanBeActivated
     /**
      * Get the previous activation of the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousActivation()
     {
-        return $this->previousActivations()
+        return $this->morphOne(Activation::class, 'activatable')
                     ->latest('ended_at')
                     ->limit(1);
     }
 
     /**
-     * Scope a query to only include pending activation models.
+     * Scope a query to only include future activated models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFutureActivation($query)
     {
@@ -93,6 +94,7 @@ trait CanBeActivated
      * Scope a query to only include activated models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query)
     {
@@ -100,9 +102,10 @@ trait CanBeActivated
     }
 
     /**
-     * Scope a query to only include deactivated models.
+     * Scope a query to only include inactive models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeInactive($query)
     {
@@ -115,16 +118,19 @@ trait CanBeActivated
      * Scope a query to only include unactivated models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUnactivated($query)
     {
-        return $query->whereDoesntHave('activations');
+        return $query->whereDoesntHave('currentActivation')
+                    ->orWhereDoesntHave('previousActivations');
     }
 
     /**
-     * Scope a query to only include unactivated models.
+     * Scope a query to include current activation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithFirstActivatedAtDate($query)
     {
@@ -137,9 +143,10 @@ trait CanBeActivated
     }
 
     /**
-     * Scope a query to only include unactivated models.
+     * Scope a query to include current deactivation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCurrentDeactivatedAtDate($query)
     {
@@ -155,6 +162,8 @@ trait CanBeActivated
      * Scope a query to order by the models first activation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByFirstActivatedAtDate($query, $direction = 'asc')
     {
@@ -165,6 +174,8 @@ trait CanBeActivated
      * Scope a query to order by the models current deactivation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByCurrentDeactivatedAtDate($query, $direction = 'asc')
     {
@@ -174,8 +185,8 @@ trait CanBeActivated
     /**
      * Activate a model.
      *
-     * @param  Carbon|string $startedAt
-     * @return bool
+     * @param  string|null $startedAt
+     * @return $this
      */
     public function activate($startedAt = null)
     {
@@ -191,8 +202,8 @@ trait CanBeActivated
     /**
      * Deactivate a model.
      *
-     * @param  Carbon|string $deactivatedAt
-     * @return bool
+     * @param  string|null $deactivatedAt
+     * @return $this
      */
     public function deactivate($deactivatedAt = null)
     {
@@ -206,47 +217,27 @@ trait CanBeActivated
     }
 
     /**
-     * Check to see if the model is activated.
+     * Check to see if the model is active.
      *
      * @return bool
      */
-    public function isActive()
+    public function isCurrentlyActive()
     {
         return $this->currentActivation()->exists();
     }
 
     /**
-     * Determine if a model is retired.
-     *
-     * @return bool
-     */
-    public function getIsActiveCachedAttribute()
-    {
-        return $this->status === 'active';
-    }
-
-    /**
-     * Check to see if the model is activated.
+     * Check to see if the model is unactivated.
      *
      * @return bool
      */
     public function isUnactivated()
     {
-        return $this->activations->isEmpty();
+        return $this->activations()->count() === 0;
     }
 
     /**
-     * Check to see if the model is activated.
-     *
-     * @return bool
-     */
-    public function hasPreviouslyBeenActivated()
-    {
-        return $this->activations->isNotEmpty();
-    }
-
-    /**
-     * Check to see if the model has a future scheduled activation.
+     * Check to see if the model has a future activation.
      *
      * @return bool
      */
@@ -256,7 +247,7 @@ trait CanBeActivated
     }
 
     /**
-     * Check to see if the model has been deactivated.
+     * Check to see if the model is deactivated.
      *
      * @return bool
      */
@@ -274,7 +265,7 @@ trait CanBeActivated
      */
     public function canBeActivated()
     {
-        if ($this->isActive()) {
+        if ($this->isCurrentlyActive()) {
             throw new CannotBeActivatedException('Entity cannot be activated. This entity is active.');
         }
 
@@ -308,54 +299,12 @@ trait CanBeActivated
     }
 
     /**
-     * Retrieve a introduced at date timestamp.
+     * Retrieve an activation date.
      *
-     * @return string
+     * @return string|null
      */
     public function getActivatedAtAttribute()
     {
         return optional($this->activations->first())->started_at;
-    }
-
-    /**
-     * Get the current activation of the model.
-     *
-     * @return App\Models\Activation
-     */
-    public function getCurrentActivationAttribute()
-    {
-        if (! $this->relationLoaded('currentActivation')) {
-            $this->setRelation('currentActivation', $this->currentActivation()->get());
-        }
-
-        return $this->getRelation('currentActivation')->first();
-    }
-
-    /**
-     * Get the previous activation of the model.
-     *
-     * @return App\Models\Activation
-     */
-    public function getPreviousActivationAttribute()
-    {
-        if (! $this->relationLoaded('previousActivation')) {
-            $this->setRelation('previousActivation', $this->previousActivation()->get());
-        }
-
-        return $this->getRelation('previousActivation')->first();
-    }
-
-    /**
-     * Get the previous activation of the model.
-     *
-     * @return App\Models\Activation
-     */
-    public function getFutureActivationAttribute()
-    {
-        if (! $this->relationLoaded('futureActivation')) {
-            $this->setRelation('futureActivation', $this->futureActivation()->get());
-        }
-
-        return $this->getRelation('futureActivation')->first();
     }
 }

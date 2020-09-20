@@ -17,6 +17,8 @@ class RefereeObserver
     {
         if ($referee->isRetired()) {
             $referee->status = RefereeStatus::RETIRED;
+        } elseif ($referee->isReleased()) {
+            $referee->status = RefereeStatus::RELEASED;
         } elseif ($referee->isInjured()) {
             $referee->status = RefereeStatus::INJURED;
         } elseif ($referee->isSuspended()) {
@@ -25,8 +27,6 @@ class RefereeObserver
             $referee->status = RefereeStatus::BOOKABLE;
         } elseif ($referee->hasFutureEmployment()) {
             $referee->status = RefereeStatus::FUTURE_EMPLOYMENT;
-        } elseif ($referee->isReleased()) {
-            $referee->status = RefereeStatus::RELEASED;
         } else {
             $referee->status = RefereeStatus::UNEMPLOYED;
         }
