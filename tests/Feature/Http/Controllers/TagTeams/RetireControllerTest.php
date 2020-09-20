@@ -25,9 +25,8 @@ class RetireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_retires_a_bookable_tag_team_and_redirects($administrators)
+    public function invoke_retires_a_bookable_tag_team_and_its_wrestlers_and_redirects($administrators)
     {
-        $this->withoutExceptionHandling();
         $now = now();
         Carbon::setTestNow($now);
 
@@ -37,16 +36,21 @@ class RetireControllerTest extends TestCase
         $response = $this->retireRequest($tagTeam);
 
         $response->assertRedirect(route('tag-teams.index'));
+
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
             $this->assertEquals(
                 $now->toDateTimeString(),
-                $tagTeam->fresh()->retirements->first()->started_at->toDateTimeString()
+                $tagTeam->retirements->first()->started_at->toDateTimeString()
             );
 
-            $tagTeam->currentWrestlers->each(
-                fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status)
-            );
+            $tagTeam->currentWrestlers->each(function ($wrestler) use ($now) {
+                $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
+                $this->assertEquals(
+                    $now->toDateTimeString(),
+                    $wrestler->retirements->first()->started_at->toDateTimeString()
+                );
+            });
         });
     }
 

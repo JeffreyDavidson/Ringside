@@ -41,11 +41,11 @@ class Manager extends SingleRosterMember
      */
     public function scopeAvailable($query)
     {
-        return $query->where('status', 'available');
+        return $query->where('status', ManagerStatus::AVAILABLE);
     }
 
     /**
-     * Check to see if the model is available.
+     * Check to see if the manager is available.
      *
      * @return bool
      */

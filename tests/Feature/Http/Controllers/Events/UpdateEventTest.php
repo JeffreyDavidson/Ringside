@@ -13,6 +13,7 @@ use Tests\TestCase;
 
 /**
  * @group events
+ * @group feature-events
  */
 class UpdateEventTest extends TestCase
 {

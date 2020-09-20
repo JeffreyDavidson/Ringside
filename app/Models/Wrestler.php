@@ -8,13 +8,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends SingleRosterMember
 {
-    use SoftDeletes;
-    use HasFactory,
-    Concerns\HasAHeight,
-    Concerns\CanBeStableMember,
-    Concerns\CanBeTagTeamPartner,
-    Concerns\CanBeBooked,
-    Concerns\Unguarded;
+    use SoftDeletes,
+        HasFactory,
+        Concerns\CanBeStableMember,
+        Concerns\Unguarded;
 
     /**
      * The attributes that should be cast to native types.
@@ -26,6 +23,40 @@ class Wrestler extends SingleRosterMember
     ];
 
     /**
+     * Get the tag team history the wrestler has belonged to.
+     *
+     * @return App\Eloquent\Relationships\BelongsToMany
+     */
+    public function tagTeams()
+    {
+        return $this->belongsToMany(TagTeam::class, 'tag_team_wrestler');
+    }
+
+    /**
+     * Get the current tag team of the wrestler.
+     *
+     * @return App\Eloquent\Relationships\BelongsToMany
+     */
+    public function currentTagTeam()
+    {
+        return $this->belongsTo(TagTeam::class, 'tag_team_wrestler')
+                ->where('started_at', '<=', now())
+                ->whereNull('ended_at')
+                ->limit(1);
+    }
+
+    /**
+     * Get the previous tag teams the wrestler has belonged to.
+     *
+     * @return App\Eloquent\Relationships\BelongsToMany
+     */
+    public function previousTagTeams()
+    {
+        return $this->tagTeams()
+                    ->whereNotNull('ended_at');
+    }
+
+    /**
      * Get the user assigned to the wrestler.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -33,5 +64,60 @@ class Wrestler extends SingleRosterMember
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope a query to only include bookable wrestlers.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBookable($query)
+    {
+        return $query->where('status', WrestlerStatus::BOOKABLE);
+    }
+
+    /**
+     * Check to see if the wrestler is bookable.
+     *
+     * @return bool
+     */
+    public function isBookable()
+    {
+        if ($this->isUnemployed() || $this->isSuspended() || $this->isInjured() || $this->isRetired() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Return the model's height formatted.
+     *
+     * @return string
+     */
+    public function getFormattedHeightAttribute()
+    {
+        return "{$this->feet}'{$this->inches}\"";
+    }
+
+    /**
+     * Return the model's height in feet.
+     *
+     * @return string
+     */
+    public function getFeetAttribute()
+    {
+        return floor($this->height / 12);
+    }
+
+    /**
+     * Return the model's height in inches.
+     *
+     * @return string
+     */
+    public function getInchesAttribute()
+    {
+        return $this->height % 12;
     }
 }

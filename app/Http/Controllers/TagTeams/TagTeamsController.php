@@ -101,7 +101,9 @@ class TagTeamsController extends Controller
     {
         $tagTeam->update($request->validatedExcept(['wrestler1', 'wrestler2', 'started_at']));
 
-        $tagTeam->employ($request->input('started_at'));
+        if ($request->filled('started_at')) {
+            $tagTeam->employ($request->input('started_at'));
+        }
 
         $tagTeam->currentWrestlers()->sync(
             [$request->input('wrestler1'), $request->input('wrestler2')],

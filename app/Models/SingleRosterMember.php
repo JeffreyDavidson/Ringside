@@ -63,7 +63,7 @@ abstract class SingleRosterMember extends Model
     /**
      * Get the previous employment of the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousEmployment()
     {
@@ -73,7 +73,7 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Scope a query to only include future employment models.
+     * Scope a query to only include future employed models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      */
@@ -86,6 +86,7 @@ abstract class SingleRosterMember extends Model
      * Scope a query to only include employed models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeEmployed($query)
     {
@@ -98,6 +99,7 @@ abstract class SingleRosterMember extends Model
      * Scope a query to only include released models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeReleased($query)
     {
@@ -110,16 +112,19 @@ abstract class SingleRosterMember extends Model
      * Scope a query to only include unemployed models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUnemployed($query)
     {
-        return $query->whereDoesntHave('currentEmployment');
+        return $query->whereDoesntHave('currentEmployment')
+                    ->orWhereDoesntHave('previousEmployments');
     }
 
     /**
-     * Scope a query to only include unemployed models.
+     * Scope a query to include first employment date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithFirstEmployedAtDate($query)
     {
@@ -132,9 +137,11 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Scope a query to order by the models first activation date.
+     * Scope a query to order by the models first employment date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByFirstEmployedAtDate($query, $direction = 'asc')
     {
@@ -142,19 +149,10 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Scope a query to order by the models current deactivation date.
+     * Scope a query to include released date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeOrderByCurrentDeactivatedAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(current_released_at) $direction");
-    }
-
-    /**
-     * Scope a query to only include released models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithReleasedAtDate($query)
     {
@@ -167,10 +165,22 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
+     * Scope a query to order by the models current released date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentReleasedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_released_at) $direction");
+    }
+
+    /**
      * Employ a model.
      *
-     * @param  Carbon|string $startedAt
-     * @return bool
+     * @param  string|null $startedAt
+     * @return $this
      */
     public function employ($startedAt = null)
     {
@@ -179,15 +189,17 @@ abstract class SingleRosterMember extends Model
 
             $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
 
-            return $this->touch();
+            $this->save();
+
+            return $this;
         }
     }
 
     /**
      * Release a model.
      *
-     * @param  Carbon|string $releasedAt
-     * @return bool
+     * @param  string|null $releasedAt
+     * @return $this
      */
     public function release($releasedAt = null)
     {
@@ -202,7 +214,9 @@ abstract class SingleRosterMember extends Model
         $releaseDate = $releasedAt ?? now();
         $this->currentEmployment()->update(['ended_at' => $releaseDate]);
 
-        return $this->touch();
+        $this->save();
+
+        return $this;
     }
 
     /**
@@ -216,17 +230,17 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Check to see if the model is employed.
+     * Check to see if the model is unemployed.
      *
      * @return bool
      */
     public function isUnemployed()
     {
-        return $this->employments->isEmpty();
+        return $this->employments()->count() === 0;
     }
 
     /**
-     * Check to see if the model has a future scheduled employment.
+     * Check to see if the model has a future employment.
      *
      * @return bool
      */
@@ -243,6 +257,7 @@ abstract class SingleRosterMember extends Model
     public function isReleased()
     {
         return $this->previousEmployment()->exists() &&
+                $this->futureEmployment()->doesntExist() &&
                 $this->currentEmployment()->doesntExist() &&
                 $this->currentRetirement()->doesntExist();
     }
@@ -289,26 +304,6 @@ abstract class SingleRosterMember extends Model
         return optional($this->employments->last())->started_at;
     }
 
-    public function retire($retiredAt = null)
-    {
-        if ($this->canBeRetired()) {
-            if ($this->isSuspended()) {
-                $this->reinstate();
-            }
-
-            if ($this->isInjured()) {
-                $this->clearFromInjury();
-            }
-
-            $retiredDate = $retiredAt ?: now();
-            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
-
-            $this->retirements()->create(['started_at' => $retiredDate]);
-
-            return $this->touch();
-        }
-    }
-
     /**
      * Get the retirements of the model.
      *
@@ -326,7 +321,7 @@ abstract class SingleRosterMember extends Model
      */
     public function currentRetirement()
     {
-        return $this->retirements()
+        return $this->morphOne(Retirement::class, 'retiree')
                     ->where('started_at', '<=', now())
                     ->whereNull('ended_at')
                     ->limit(1);
@@ -344,13 +339,13 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Get the previous employment of the model.
+     * Get the previous retirement of the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousRetirement()
     {
-        return $this->previousRetirements()
+        return $this->morphOne(Retirement::class, 'retiree')
                     ->latest('ended_at')
                     ->limit(1);
     }
@@ -367,9 +362,10 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Scope a query to only include unemployed models.
+     * Scope a query to include current retirement date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCurrentRetiredAtDate($query)
     {
@@ -385,6 +381,7 @@ abstract class SingleRosterMember extends Model
      * Scope a query to order by the models current retirement date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
     {
@@ -392,10 +389,40 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
+     * Retire a model.
+     *
+     * @param  string|null $retiredAt
+     * @return $this
+     */
+    public function retire($retiredAt = null)
+    {
+        if ($this->canBeRetired()) {
+            if ($this->isSuspended()) {
+                $this->reinstate();
+            }
+
+            if ($this->isInjured()) {
+                $this->clearFromInjury();
+            }
+
+            $retiredDate = $retiredAt ?: now();
+            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
+
+            $this->save();
+
+            $this->retirements()->create(['started_at' => $retiredDate]);
+
+            $this->save();
+
+            return $this;
+        }
+    }
+
+    /**
      * Unretire a model.
      *
      * @param  string|null $unretiredAt
-     * @return bool
+     * @return $this
      */
     public function unretire($unretiredAt = null)
     {
@@ -403,9 +430,14 @@ abstract class SingleRosterMember extends Model
             $unretiredDate = $unretiredAt ?: now();
 
             $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-            $this->employ($unretiredAt);
 
-            return $this->touch();
+            $this->save();
+
+            $this->employments()->create(['started_at' => $unretiredDate]);
+
+            $this->save();
+
+            return $this;
         }
     }
 
@@ -416,7 +448,7 @@ abstract class SingleRosterMember extends Model
      */
     public function isRetired()
     {
-        return $this->whereHas('currentRetirement')->exists();
+        return $this->currentRetirement()->exists();
     }
 
     /**
@@ -438,7 +470,7 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Determine if the model can be retired.
+     * Determine if the model can be unretired.
      *
      * @return bool
      */
@@ -469,11 +501,12 @@ abstract class SingleRosterMember extends Model
     public function currentSuspension()
     {
         return $this->morphOne(Suspension::class, 'suspendable')
-                    ->whereNull('ended_at');
+                    ->whereNull('ended_at')
+                    ->limit(1);
     }
 
     /**
-     * Get the previous retirements of the model.
+     * Get the previous suspensions of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -484,13 +517,13 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Get the previous employment of the model.
+     * Get the previous suspension of the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousSuspension()
     {
-        return $this->previousSuspensions()
+        return $this->morphOne(Suspension::class, 'suspendable')
                     ->latest('ended_at')
                     ->limit(1);
     }
@@ -507,9 +540,10 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Scope a query to include current suspended at dates.
+     * Scope a query to include current suspension date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCurrentSuspendedAtDate($query)
     {
@@ -525,6 +559,8 @@ abstract class SingleRosterMember extends Model
      * Scope a query to order by the models current suspension date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
     {
@@ -535,7 +571,7 @@ abstract class SingleRosterMember extends Model
      * Suspend a model.
      *
      * @param  string|null $suspendedAt
-     * @return \App\Models\Suspension
+     * @return $this
      */
     public function suspend($suspendedAt = null)
     {
@@ -544,7 +580,9 @@ abstract class SingleRosterMember extends Model
 
             $this->suspensions()->create(['started_at' => $suspensionDate]);
 
-            return $this->touch();
+            $this->save();
+
+            return $this;
         }
     }
 
@@ -561,11 +599,15 @@ abstract class SingleRosterMember extends Model
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
 
-            return $this->touch();
+            $this->save();
+
+            return $this;
         }
     }
 
     /**
+     * Check to see if the model is suspended.
+     *
      * @return bool
      */
     public function isSuspended()
@@ -574,7 +616,7 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Determine if the model can be retired.
+     * Determine if the model can be suspended.
      *
      * @return bool
      */
@@ -614,34 +656,6 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Get the current suspension of the model.
-     *
-     * @return App\Models\Suspension
-     */
-    public function getCurrentSuspensionAttribute()
-    {
-        if (! $this->relationLoaded('currentSuspension')) {
-            $this->setRelation('currentSuspension', $this->currentSuspension()->get());
-        }
-
-        return $this->getRelation('currentSuspension')->first();
-    }
-
-    /**
-     * Get the previous suspension of the model.
-     *
-     * @return App\Models\Suspension
-     */
-    public function getPreviousSuspensionAttribute()
-    {
-        if (! $this->relationLoaded('previousSuspension')) {
-            $this->setRelation('previousSuspension', $this->previousSuspension()->get());
-        }
-
-        return $this->getRelation('previousSuspension')->first();
-    }
-
-    /**
      * Get the injuries of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -659,7 +673,8 @@ abstract class SingleRosterMember extends Model
     public function currentInjury()
     {
         return $this->morphOne(Injury::class, 'injurable')
-                    ->whereNull('ended_at');
+                    ->whereNull('ended_at')
+                    ->limit(1);
     }
 
     /**
@@ -674,13 +689,13 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Get the previous employment of the model.
+     * Get the previous injury of the model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousInjury()
     {
-        return $this->previousInjuries()
+        return $this->morphOne(Injury::class, 'injurable')
                     ->latest('ended_at')
                     ->limit(1);
     }
@@ -697,9 +712,10 @@ abstract class SingleRosterMember extends Model
     }
 
     /**
-     * Scope a query to include current injured at dates.
+     * Scope a query to include current injured date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCurrentInjuredAtDate($query)
     {
@@ -715,6 +731,8 @@ abstract class SingleRosterMember extends Model
      * Scope a query to order by the models current injured date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string|null $direction
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByCurrentInjuredAtDate($query, $direction = 'asc')
     {
@@ -725,7 +743,7 @@ abstract class SingleRosterMember extends Model
      * Injure a model.
      *
      * @param  string|null $injuredAt
-     * @return \App\Models\Injury
+     * @return $this
      */
     public function injure($injuredAt = null)
     {
@@ -734,15 +752,17 @@ abstract class SingleRosterMember extends Model
 
             $this->injuries()->create(['started_at' => $injuredDate]);
 
-            return $this->touch();
+            $this->save();
+
+            return $this;
         }
     }
 
     /**
-     * Recover a model.
+     * Mark a model from cleared from an injury.
      *
      * @param  string|null $recoveredAt
-     * @return bool
+     * @return $this
      */
     public function clearFromInjury($recoveredAt = null)
     {
@@ -751,12 +771,14 @@ abstract class SingleRosterMember extends Model
 
             $this->currentInjury()->update(['ended_at' => $recoveryDate]);
 
-            return $this->touch();
+            $this->save();
+
+            return $this;
         }
     }
 
     /**
-     * Check to see if the currently model is injured.
+     * Check to see if the model is injured.
      *
      * @return bool
      */
@@ -799,33 +821,5 @@ abstract class SingleRosterMember extends Model
         }
 
         return true;
-    }
-
-    /**
-     * Get the current injury of the model.
-     *
-     * @return App\Models\Injury
-     */
-    public function getCurrentInjuryAttribute()
-    {
-        if (! $this->relationLoaded('currentInjury')) {
-            $this->setRelation('currentInjury', $this->currentInjury()->get());
-        }
-
-        return $this->getRelation('currentInjury')->first();
-    }
-
-    /**
-     * Get the previous injury of the model.
-     *
-     * @return App\Models\Injury
-     */
-    public function getPreviousInjuryAttribute()
-    {
-        if (! $this->relationLoaded('previousInjury')) {
-            $this->setRelation('previousInjury', $this->previousInjury()->get());
-        }
-
-        return $this->getRelation('previousInjury')->first();
     }
 }

@@ -17,9 +17,13 @@ class TagTeam extends Model
 {
     use SoftDeletes,
         HasFactory,
-        Concerns\CanBeBooked,
         Concerns\Unguarded;
 
+    /**
+     * The number of the wrestlers allowed on a tag team.
+     *
+     * @var int
+     */
     const MAX_WRESTLERS_COUNT = 2;
 
     /**
@@ -42,31 +46,30 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the wrestlers belonging to the tag team.
+     * Get the wrestlers that have been tag team partners of the tag team.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function wrestlers()
     {
-        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
-                    ->withTimestamps();
+        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')->withPivot('joined_at', 'left_at');
     }
 
     /**
-     * Get all current wrestlers that are members of the tag team.
+     * Get current tag team partners of the tag team.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function currentWrestlers()
     {
         return $this->wrestlers()
-                    ->where('started_at', '<=', now())
-                    ->whereNull('left_at')
+                    ->wherePivot('joined_at', '<=', now())
+                    ->wherePivot('left_at', '=', null)
                     ->limit(2);
     }
 
     /**
-     * Get all current wrestlers that are members of the tag team.
+     * Get previous tag team partners of the tag team.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -77,7 +80,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the stables the tag team are members of.
+     * Get the stables the tag team have been members of.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
@@ -87,7 +90,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the current stable of the tag team.
+     * Get the current stable the tag team is a member of.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
@@ -99,7 +102,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the previous stables the tag team has been a part of.
+     * Get the previous stables the tag team has been a member of.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
@@ -110,7 +113,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the combined weight of both wrestlers in a tag team.
+     * Get the combined weight of both tag team partners in a tag team.
      *
      * @return int
      */
@@ -126,7 +129,7 @@ class TagTeam extends Model
      * @param  string|null $dateJoined
      *
      * @throws Exception
-
+     *
      * @return $this
      */
     public function addWrestlers($wrestlerIds, $dateJoined = null)
@@ -146,7 +149,201 @@ class TagTeam extends Model
     }
 
     /**
-     * Check to see if the model is employed.
+     * Get all of the employments of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function employments()
+    {
+        return $this->morphMany(Employment::class, 'employable');
+    }
+
+    /**
+     * Get the current employment of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function currentEmployment()
+    {
+        return $this->morphOne(Employment::class, 'employable')
+                    ->where('started_at', '<=', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Get the future employment of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function futureEmployment()
+    {
+        return $this->morphOne(Employment::class, 'employable')
+                    ->where('started_at', '>', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Get the previous employments of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function previousEmployments()
+    {
+        return $this->employments()
+                    ->whereNotNull('ended_at');
+    }
+
+    /**
+     * Get the previous employment of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function previousEmployment()
+    {
+        return $this->morphOne(Employment::class, 'employable')
+                    ->latest('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Scope a query to only include future employmed tag teams.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFutureEmployment($query)
+    {
+        return $query->whereHas('futureEmployment');
+    }
+
+    /**
+     * Scope a query to only include employed tag teams.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeEmployed($query)
+    {
+        return $query->whereHas('currentEmployment')
+                    ->whereDoesntHave('currentSuspension');
+    }
+
+    /**
+     * Scope a query to only include released tag teams.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeReleased($query)
+    {
+        return $query->whereHas('previousEmployment')
+                    ->whereDoesntHave('currentEmployment')
+                    ->whereDoesntHave('currentRetirement');
+    }
+
+    /**
+     * Scope a query to only include unemployed tag teams.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeUnemployed($query)
+    {
+        return $query->whereDoesntHave('currentEmployment');
+    }
+
+    /**
+     * Scope a query to include first employment date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithFirstEmployedAtDate($query)
+    {
+        return $query->addSelect(['first_employed_at' => Employment::select('started_at')
+            ->whereColumn('employable_id', $query->qualifyColumn('id'))
+            ->where('employable_type', $this->getMorphClass())
+            ->orderBy('started_at', 'desc')
+            ->limit(1),
+        ])->withCasts(['first_employed_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the tag team's first employment date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByFirstEmployedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(first_employed_at) $direction");
+    }
+
+    /**
+     * Scope a query to include released date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithReleasedAtDate($query)
+    {
+        return $query->addSelect(['released_at' => Employment::select('ended_at')
+            ->whereColumn('employable_id', $this->getTable().'.id')
+            ->where('employable_type', $this->getMorphClass())
+            ->orderBy('ended_at', 'desc')
+            ->limit(1),
+        ])->withCasts(['released_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the tag team's current released date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentReleasedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_released_at) $direction");
+    }
+
+    /**
+     * Employ a tag team.
+     *
+     * @param  string|null $startAtDate
+     * @return $this
+     */
+    public function employ($startAtDate = null)
+    {
+        if ($this->canBeEmployed()) {
+            $startAtDate = $startAtDate ?? now();
+
+            $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
+
+            if ($this->currentWrestlers->every->isUnemployed() || $this->currentWrestlers->every->hasFutureEmployment() || $this->currentWrestlers->every->isRetired()) {
+                $this->currentWrestlers->each->employ($startAtDate);
+            }
+
+            return $this->touch();
+        }
+    }
+
+    /**
+     * Release a tag team.
+     *
+     * @param  string|null $releasedAt
+     * @return $this
+     */
+    public function release($releasedAt = null)
+    {
+        return $this;
+    }
+
+    /**
+     * Check to see if the tag team is employed.
      *
      * @return bool
      */
@@ -156,7 +353,39 @@ class TagTeam extends Model
     }
 
     /**
-     * Determine if the model can be reinstated.
+     * Check to see if the tag team is unemployed.
+     *
+     * @return bool
+     */
+    public function isUnemployed()
+    {
+        return $this->employments()->count() === 0;
+    }
+
+    /**
+     * Check to see if the tag team has a future employment set.
+     *
+     * @return bool
+     */
+    public function hasFutureEmployment()
+    {
+        return $this->futureEmployment()->exists();
+    }
+
+    /**
+     * Check to see if the tag team has been released.
+     *
+     * @return bool
+     */
+    public function isReleased()
+    {
+        return $this->previousEmployment()->exists() &&
+                $this->currentEmployment()->doesntExist() &&
+                $this->currentRetirement()->doesntExist();
+    }
+
+    /**
+     * Determine if the tag team can be employed.
      *
      * @return bool
      */
@@ -174,54 +403,119 @@ class TagTeam extends Model
     }
 
     /**
-     * Check to see if the model is employed.
+     * Determine if the tag team can be released.
      *
      * @return bool
      */
-    public function isUnemployed()
+    public function canBeReleased()
     {
-        return $this->employments->isEmpty();
-    }
-
-    /**
-     * Employ a tag team.
-     *
-     * @return bool
-     */
-    public function employ($startAtDate = null)
-    {
-        if ($this->canBeEmployed()) {
-            $startAtDate = $startAtDate ?? now();
-
-            $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
-            $this->currentWrestlers->each->employ($startAtDate);
-
-            return $this->touch();
-        }
-    }
-
-    /**
-     * Determine if the model can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired()
-    {
-        if ($this->isUnemployed() || $this->hasFutureEmployment() || $this->isReleased()) {
-            throw new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team does not have an active employment.');
-        }
-
-        if ($this->isRetired()) {
-            throw new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team is retired.');
+        if (! $this->isCurrentlyEmployed() || $this->hasFutureEmployment() || $this->isReleased() || $this->isRetired()) {
+            throw new CannotBeEmployedException('Entity cannot be released. This entity does not have an active employment.');
         }
 
         return true;
     }
 
     /**
+     * Get the tag team's first employment date.
+     *
+     * @return string|null
+     */
+    public function getStartedAtAttribute()
+    {
+        return optional($this->employments->last())->started_at;
+    }
+
+    /**
+     * Get the retirements of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function retirements()
+    {
+        return $this->morphMany(Retirement::class, 'retiree');
+    }
+
+    /**
+     * Get the current retirement of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function currentRetirement()
+    {
+        return $this->morphOne(Retirement::class, 'retiree')
+                    ->where('started_at', '<=', now())
+                    ->whereNull('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Get the previous retirements of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function previousRetirements()
+    {
+        return $this->retirements()
+                    ->whereNotNull('ended_at');
+    }
+
+    /**
+     * Get the previous retirement of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function previousRetirement()
+    {
+        return $this->morphOne(Retirement::class, 'retiree')
+                    ->latest('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Scope a query to only include retired tag teams.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeRetired($query)
+    {
+        return $this->whereHas('currentRetirement');
+    }
+
+    /**
+     * Scope a query to include current retirement date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithCurrentRetiredAtDate($query)
+    {
+        return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
+            ->whereColumn('retiree_id', $this->getTable().'.id')
+            ->where('retiree_type', $this->getMorphClass())
+            ->oldest('started_at')
+            ->limit(1),
+        ])->withCasts(['current_retired_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the tag team's current retirement date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string|null $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_retired_at) $direction");
+    }
+
+    /**
      * Retire a tag team.
      *
-     * @return \App\Models\Retirement
+     * @param  string|null $retiredAt
+     * @return $this
      */
     public function retire($retiredAt = null)
     {
@@ -248,9 +542,10 @@ class TagTeam extends Model
     /**
      * Unretire a tag team.
      *
-     * @return bool
+     * @param  string|null $unretiredAt
+     * @return $this
      */
-    public function unretire()
+    public function unretire($unretiredAt = null)
     {
         if ($this->canBeUnretired()) {
             $dateRetired = $this->currentRetirement->started_at;
@@ -258,19 +553,47 @@ class TagTeam extends Model
             $this->currentRetirement()->update(['ended_at' => now()]);
 
             $this->currentWrestlers()
-            ->whereHas('currentRetirement', function ($query) use ($dateRetired) {
-                $query->whereDate('started_at', $dateRetired);
-            })
-            ->get()
-            ->each
-            ->unretire();
+                ->whereHas('currentRetirement', function ($query) use ($dateRetired) {
+                    $query->whereDate('started_at', $dateRetired);
+                })
+                ->get()
+                ->each
+                ->unretire();
 
             return $this->touch();
         }
     }
 
     /**
-     * Determine if the model can be retired.
+     * Check to see if the tag team is retired.
+     *
+     * @return bool
+     */
+    public function isRetired()
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    /**
+     * Determine if the tag team can be retired.
+     *
+     * @return bool
+     */
+    public function canBeRetired()
+    {
+        if ($this->isUnemployed() || $this->hasFutureEmployment() || $this->isReleased()) {
+            throw new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team does not have an active employment.');
+        }
+
+        if ($this->isRetired()) {
+            throw new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team is retired.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if the tag team can be unretired.
      *
      * @return bool
      */
@@ -284,7 +607,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the suspensions of the model.
+     * Get the suspensions of the tag team.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -294,18 +617,127 @@ class TagTeam extends Model
     }
 
     /**
-     * Get the current suspension of the model.
+     * Get the current suspension of the tag team.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentSuspension()
     {
         return $this->morphOne(Suspension::class, 'suspendable')
-                    ->whereNull('ended_at');
+                    ->whereNull('ended_at')
+                    ->limit(1);
     }
 
     /**
-     * Determine if the model can be reinstated.
+     * Get the previous suspensions of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function previousSuspensions()
+    {
+        return $this->suspensions()
+                    ->whereNotNull('ended_at');
+    }
+
+    /**
+     * Get the previous suspension of the tag team.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function previousSuspension()
+    {
+        return $this->morphOne(Suspension::class, 'suspendable')
+                    ->latest('ended_at')
+                    ->limit(1);
+    }
+
+    /**
+     * Scope a query to only include suspended tag teams.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSuspended($query)
+    {
+        return $this->whereHas('currentSuspension');
+    }
+
+    /**
+     * Scope a query to include tag team's current suspension date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithCurrentSuspendedAtDate($query)
+    {
+        return $query->addSelect(['current_suspended_at' => Suspension::select('started_at')
+            ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
+            ->where('suspendable_type', $this->getMorphClass())
+            ->orderBy('started_at', 'desc')
+            ->limit(1),
+        ])->withCasts(['current_suspended_at' => 'datetime']);
+    }
+
+    /**
+     * Scope a query to order by the tag team's current suspension date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("DATE(current_suspended_at) $direction");
+    }
+
+    /**
+     * Suspend a tag team.
+     *
+     * @param  string|null $suspendedAt
+     * @return $this
+     */
+    public function suspend($suspendedAt = null)
+    {
+        if ($this->canBeSuspended()) {
+            $suspendedDate = $suspendedAt ?: now();
+
+            $this->suspensions()->create(['started_at' => $suspendedDate]);
+            $this->currentWrestlers->each->suspend($suspendedDate);
+
+            return $this->touch();
+        }
+    }
+
+    /**
+     * Reinstate a tag team.
+     *
+     * @param  string|null $reinstatedAt
+     * @return $this
+     */
+    public function reinstate($reinstatedAt = null)
+    {
+        if ($this->canBeReinstated()) {
+            $reinstatedDate = $reinstatedAt ?: now();
+
+            $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+            $this->currentWrestlers->every->reinstate($reinstatedDate);
+
+            return $this->touch();
+        }
+    }
+
+    /**
+     * Check to see if the tag team is suspended.
+     *
+     * @return bool
+     */
+    public function isSuspended()
+    {
+        return $this->currentSuspension()->exists();
+    }
+
+    /**
+     * Determine if the tag team can be suspended.
      *
      * @return bool
      */
@@ -327,24 +759,7 @@ class TagTeam extends Model
     }
 
     /**
-     * Suspend a tag team.
-     *
-     * @return \App\Models\Suspension
-     */
-    public function suspend($suspendedAt = null)
-    {
-        if ($this->canBeSuspended()) {
-            $suspendedDate = $suspendedAt ?: now();
-
-            $this->suspensions()->create(['started_at' => $suspendedDate]);
-            $this->currentWrestlers->each->suspend($suspendedDate);
-
-            return $this->touch();
-        }
-    }
-
-    /**
-     * Determine if the model can be reinstated.
+     * Determine if the tag team can be reinstated.
      *
      * @return bool
      */
@@ -362,36 +777,24 @@ class TagTeam extends Model
     }
 
     /**
-     * Reinstate a tag team.
+     * Scope a query to only include bookable tag teams.
      *
-     * @return bool
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function reinstate($reinstatedAt = null)
+    public function scopeBookable($query)
     {
-        if ($this->canBeReinstated()) {
-            $reinstatedDate = $reinstatedAt ?: now();
-
-            $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-            $this->currentWrestlers->each->reinstate($reinstatedDate);
-
-            return $this->touch();
-        }
+        return $query->where('status', 'bookable');
     }
 
     /**
+     * Check to see if the tag team is bookable.
+     *
      * @return bool
      */
     public function isBookable()
     {
-        if ($this->currentEmployment()->doesntExist()) {
-            return false;
-        }
-
-        if ($this->currentSuspension()->exists()) {
-            return false;
-        }
-
-        if ($this->currentRetirement()->exists()) {
+        if ($this->isUnemployed() || $this->isSuspended() || $this->isRetired() || $this->hasFutureEmployment()) {
             return false;
         }
 
@@ -400,280 +803,5 @@ class TagTeam extends Model
         }
 
         return true;
-    }
-
-    /**
-     * Get all of the employments of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function employments()
-    {
-        return $this->morphMany(Employment::class, 'employable');
-    }
-
-    /**
-     * Scope a query to only include employed models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeEmployed($query)
-    {
-        return $query->whereHas('currentEmployment')
-                    ->whereDoesntHave('currentSuspension');
-    }
-
-    /**
-     * Get the current employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
-    public function currentEmployment()
-    {
-        return $this->morphOne(Employment::class, 'employable')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
-    }
-
-    /**
-     * Get the future employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
-    public function futureEmployment()
-    {
-        return $this->morphOne(Employment::class, 'employable')
-                    ->where('started_at', '>', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
-    }
-
-    /**
-     * Get the previous employments of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function previousEmployments()
-    {
-        return $this->employments()
-                    ->whereNotNull('ended_at');
-    }
-
-    /**
-     * Get the previous employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function previousEmployment()
-    {
-        return $this->morphOne(Employment::class, 'employable')
-                    ->latest('ended_at')
-                    ->limit(1);
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasFutureEmployment()
-    {
-        return $this->futureEmployment()->exists();
-    }
-
-    /**
-     * Check to see if the model has been released.
-     *
-     * @return bool
-     */
-    public function isReleased()
-    {
-        return $this->previousEmployment()->exists() &&
-                $this->currentEmployment()->doesntExist() &&
-                $this->currentRetirement()->doesntExist();
-    }
-
-    /**
-     * Scope a query to only include future employment models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeFutureEmployment($query)
-    {
-        return $query->whereHas('futureEmployment');
-    }
-
-    /**
-     * Scope a query to only include released models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeReleased($query)
-    {
-        return $query->whereHas('previousEmployment')
-                    ->whereDoesntHave('currentEmployment')
-                    ->whereDoesntHave('currentRetirement');
-    }
-
-    /**
-     * Scope a query to only include unemployed models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeUnemployed($query)
-    {
-        return $query->whereDoesntHave('currentEmployment');
-    }
-
-    /**
-     * Scope a query to only include unemployed models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeWithFirstEmployedAtDate($query)
-    {
-        return $query->addSelect(['first_employed_at' => Employment::select('started_at')
-            ->whereColumn('employable_id', $query->qualifyColumn('id'))
-            ->where('employable_type', $this->getMorphClass())
-            ->orderBy('started_at', 'desc')
-            ->limit(1),
-        ])->withCasts(['first_employed_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the models first activation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeOrderByFirstEmployedAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(first_employed_at) $direction");
-    }
-
-    /**
-     * Scope a query to only include released models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeWithReleasedAtDate($query)
-    {
-        return $query->addSelect(['released_at' => Employment::select('ended_at')
-            ->whereColumn('employable_id', $this->getTable().'.id')
-            ->where('employable_type', $this->getMorphClass())
-            ->orderBy('ended_at', 'desc')
-            ->limit(1),
-        ])->withCasts(['released_at' => 'datetime']);
-    }
-
-    /**
-     * Get the retirements of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function retirements()
-    {
-        return $this->morphMany(Retirement::class, 'retiree');
-    }
-
-    /**
-     * Get the current retirement of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
-    public function currentRetirement()
-    {
-        return $this->morphOne(Retirement::class, 'retiree')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
-    }
-
-    /**
-     * Scope a query to only include retired models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeRetired($query)
-    {
-        return $this->whereHas('currentRetirement');
-    }
-
-    /**
-     * Scope a query to only include unemployed models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeWithCurrentRetiredAtDate($query)
-    {
-        return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
-            ->whereColumn('retiree_id', $this->getTable().'.id')
-            ->where('retiree_type', $this->getMorphClass())
-            ->oldest('started_at')
-            ->limit(1),
-        ])->withCasts(['current_retired_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the models current retirement date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(current_retired_at) $direction");
-    }
-
-    /**
-     * Check to see if the model is retired.
-     *
-     * @return bool
-     */
-    public function isRetired()
-    {
-        return $this->currentRetirement()->exists();
-    }
-
-    /**
-     * Scope a query to only include suspended models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSuspended($query)
-    {
-        return $this->whereHas('currentSuspension');
-    }
-
-    /**
-     * Scope a query to include current suspended at dates.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeWithCurrentSuspendedAtDate($query)
-    {
-        return $query->addSelect(['current_suspended_at' => Suspension::select('started_at')
-            ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
-            ->where('suspendable_type', $this->getMorphClass())
-            ->orderBy('started_at', 'desc')
-            ->limit(1),
-        ])->withCasts(['current_suspended_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the models current suspension date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     */
-    public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(current_suspended_at) $direction");
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSuspended()
-    {
-        return $this->currentSuspension()->exists();
     }
 }

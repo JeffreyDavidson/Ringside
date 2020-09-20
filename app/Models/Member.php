@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Models\Concerns\Unguarded;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Model;
 
-class Member extends MorphPivot
+class Member extends Model
 {
     use Unguarded;
 

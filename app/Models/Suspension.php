@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Model;
 
-class Suspension extends MorphPivot
+class Suspension extends Model
 {
     use HasFactory,
         Concerns\Unguarded;

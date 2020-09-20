@@ -16,7 +16,7 @@ class Activation extends Model
     protected $dates = ['started_at', 'ended_at'];
 
     /**
-     * Get the owning employed model.
+     * Get the owning activated model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
@@ -26,10 +26,10 @@ class Activation extends Model
     }
 
     /**
-     * Retrieve an employment started before a given date.
+     * Retrieve an activation started before a given date.
      *
      * @param  string $date
-     * @return boolean
+     * @return bool
      */
     public function startedBefore($date)
     {

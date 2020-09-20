@@ -17,6 +17,8 @@ class WrestlerObserver
     {
         if ($wrestler->isRetired()) {
             $wrestler->status = WrestlerStatus::RETIRED;
+        } elseif ($wrestler->isReleased()) {
+            $wrestler->status = WrestlerStatus::RELEASED;
         } elseif ($wrestler->isInjured()) {
             $wrestler->status = WrestlerStatus::INJURED;
         } elseif ($wrestler->isSuspended()) {
@@ -25,8 +27,6 @@ class WrestlerObserver
             $wrestler->status = WrestlerStatus::BOOKABLE;
         } elseif ($wrestler->hasFutureEmployment()) {
             $wrestler->status = WrestlerStatus::FUTURE_EMPLOYMENT;
-        } elseif ($wrestler->isReleased()) {
-            $wrestler->status = WrestlerStatus::RELEASED;
         } else {
             $wrestler->status = WrestlerStatus::UNEMPLOYED;
         }
