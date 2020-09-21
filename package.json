@@ -26,8 +26,6 @@
     "dependencies": {
         "block-ui": "^2.70.1",
         "bootstrap-select": "^1.13.10",
-        "datatables.net": "^1.10.19",
-        "datatables.net-bs4": "^1.10.19",
         "flatpickr": "^4.6.1",
         "js-cookie": "^2.2.0",
         "lodash.endswith": "^4.2.1",
