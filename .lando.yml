@@ -31,4 +31,4 @@ tooling:
   phpunit:
     service: appserver
     description: "Run PHP Unit tests: lando phpunit"
-    cmd: /app/vendor/bin/phpunit --testsuite Feature --coverage-html tests/coverage
+    cmd: vendor/bin/phpunit --testsuite Feature --coverage-html tests/coverage
