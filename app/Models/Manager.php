@@ -37,7 +37,7 @@ class Manager extends SingleRosterMember
      * Scope a query to only include available managers.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  \Illuminate\Database\Eloquent\Builder
+     * @return  \Illuminate\Database\Eloquent\Builder
      */
     public function scopeAvailable($query)
     {

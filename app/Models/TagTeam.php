@@ -52,7 +52,8 @@ class TagTeam extends Model
      */
     public function wrestlers()
     {
-        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')->withPivot('joined_at', 'left_at');
+        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
+                    ->withPivot('joined_at', 'left_at');
     }
 
     /**

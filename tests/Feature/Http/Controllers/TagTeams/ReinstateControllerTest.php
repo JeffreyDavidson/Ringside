@@ -44,7 +44,6 @@ class ReinstateControllerTest extends TestCase
                 $tagTeam->fresh()->suspensions()->latest()->first()->ended_at->toDateTimeString()
             );
 
-            dd($tagTeam->currentWrestlers);
             $tagTeam->currentWrestlers->each(
                 fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status)
             );

@@ -76,6 +76,7 @@ abstract class SingleRosterMember extends Model
      * Scope a query to only include future employed models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFutureEmployment($query)
     {
@@ -381,6 +382,7 @@ abstract class SingleRosterMember extends Model
      * Scope a query to order by the models current retirement date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
@@ -599,7 +601,7 @@ abstract class SingleRosterMember extends Model
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
 
-            $this->save();
+            $this->touch();
 
             return $this;
         }

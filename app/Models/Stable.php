@@ -145,7 +145,7 @@ class Stable extends Model
     /**
      * Retire a tag team.
      *
-     * @return \App\Models\Retirement
+     * @return $this
      */
     public function retire()
     {
@@ -200,6 +200,7 @@ class Stable extends Model
      * Scope a query to only include unemployed models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithCurrentRetiredAtDate($query)
     {
@@ -215,6 +216,7 @@ class Stable extends Model
      * Scope a query to order by the models current retirement date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
     {
