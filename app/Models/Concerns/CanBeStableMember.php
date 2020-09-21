@@ -10,7 +10,7 @@ trait CanBeStableMember
     /**
      * Get the stables the model has been belonged to.
      *
-     * @return App\Eloquent\Relationships\MorphMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function stables()
     {
@@ -21,7 +21,7 @@ trait CanBeStableMember
     /**
      * Get the current stable the member belongs to.
      *
-     * @return App\Eloquent\Relationships\MorphOne
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentStable()
     {
@@ -34,7 +34,7 @@ trait CanBeStableMember
     /**
      * Get the previous stables the member has belonged to.
      *
-     * @return App\Eloquent\Relationships\MorphToMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
     public function previousStables()
     {

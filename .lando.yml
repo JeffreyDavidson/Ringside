@@ -28,3 +28,7 @@ tooling:
     service: appserver
     description: "Quick migrate"
     cmd: "php artisan migrate"
+  phpunit:
+    service: appserver
+    description: "Run PHP Unit tests: lando phpunit"
+    cmd: /app/vendor/bin/phpunit --testsuite Feature --coverage-html tests/coverage

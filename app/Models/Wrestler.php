@@ -25,7 +25,7 @@ class Wrestler extends SingleRosterMember
     /**
      * Get the tag team history the wrestler has belonged to.
      *
-     * @return App\Eloquent\Relationships\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function tagTeams()
     {
@@ -35,7 +35,7 @@ class Wrestler extends SingleRosterMember
     /**
      * Get the current tag team of the wrestler.
      *
-     * @return App\Eloquent\Relationships\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function currentTagTeam()
     {
@@ -48,7 +48,7 @@ class Wrestler extends SingleRosterMember
     /**
      * Get the previous tag teams the wrestler has belonged to.
      *
-     * @return App\Eloquent\Relationships\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function previousTagTeams()
     {

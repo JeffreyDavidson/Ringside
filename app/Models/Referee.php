@@ -26,7 +26,7 @@ class Referee extends SingleRosterMember
      * Scope a query to only include bookable referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  \Illuminate\Database\Eloquent\Builder
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeBookable($query)
     {
