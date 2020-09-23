@@ -1,4 +1,4 @@
-<x-datatable :collection="$pastEvents">
+<x-data-table :collection="$pastEvents">
     <thead>
         <th>Id</th>
         <th>Event Name</th>

@@ -196,6 +196,82 @@ class TitlesControllerTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_activate_an_unactivated_title_when_activated_at_is_filled($administrators)
+    {
+        $this->actAs($administrators);
+        $title = Title::factory()->unactivated()->create();
+
+        $response = $this->updateRequest($title, $this->validParams(['activated_at' => now()->toDateTimeString()]));
+
+        $response->assertRedirect(route('titles.index'));
+        tap($title->fresh(), function ($title) {
+            $this->assertCount(1, $title->activations);
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_activate_a_future_activated_title_when_activated_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+
+        $title = Title::factory()->withFutureActivation()->create();
+
+        $this->actAs($administrators);
+
+        $response = $this->updateRequest($title, $this->validParams(['activated_at' => $now]));
+
+        $response->assertRedirect(route('titles.index'));
+        tap($title->fresh(), function ($title) use ($now) {
+            $this->assertCount(1, $title->activations);
+            $this->assertEquals($now, $title->activations()->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_activate_an_inactive_title_when_activated_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+
+        $title = Title::factory()->inactive()->create();
+
+        $this->actAs($administrators);
+
+        $response = $this->updateRequest($title, $this->validParams(['activated_at' => $now]));
+
+        $response->assertRedirect(route('titles.index'));
+        tap($title->fresh(), function ($title) use ($now) {
+            $this->assertCount(2, $title->activations);
+            $this->assertEquals($now, $title->activations->last()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function updating_cannot_activate_an_active_title_when_activated_at_is_filled($administrators)
+    {
+        $this->actAs($administrators);
+        $title = Title::factory()->active()->create();
+
+        $response = $this->updateRequest($title, $this->validParams(['activated_at' => $title->activations()->first()->started_at->toDateTimeString()]));
+
+        $response->assertRedirect(route('titles.index'));
+        tap($title->fresh(), function ($title) {
+            $this->assertCount(1, $title->activations);
+        });
+    }
+
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_title()
     {

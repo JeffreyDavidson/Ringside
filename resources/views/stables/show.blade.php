@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader :title="$stable->name">
+    <x-sub-header :title="$stable->name">
         <x-slot name="actions">
             <a href="{{ route('stables.index') }}" class="btn btn-label-brand btn-bold">
                 Back To Stables

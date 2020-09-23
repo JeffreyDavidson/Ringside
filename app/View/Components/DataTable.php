@@ -25,6 +25,6 @@ class DataTable extends Component
      */
     public function render()
     {
-        return view('components.datatable');
+        return view('components.data-table');
     }
 }

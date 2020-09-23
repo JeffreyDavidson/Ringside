@@ -1,4 +1,4 @@
-<x-datatable :collection="$inactiveTitles">
+<x-data-table :collection="$inactiveTitles">
     <thead>
         <th>Id</th>
         <th>Title Name</th>

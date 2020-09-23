@@ -255,6 +255,80 @@ class ManagerControllerTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_an_unemployed_manager_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $manager = Manager::factory()->unemployed()->create();
+
+        $response = $this->updateRequest($manager, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('managers.index'));
+        tap($manager->fresh(), function ($manager) use ($now) {
+            $this->assertCount(1, $manager->employments);
+            $this->assertEquals($now, $manager->employments->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_a_future_employed_manager_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $manager = Manager::factory()->withFutureEmployment()->create();
+
+        $response = $this->updateRequest($manager, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('managers.index'));
+        tap($manager->fresh(), function ($manager) use ($now) {
+            $this->assertCount(1, $manager->employments);
+            $this->assertEquals($now, $manager->employments()->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_a_released_manager_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $manager = Manager::factory()->released()->create();
+
+        $response = $this->updateRequest($manager, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('managers.index'));
+        tap($manager->fresh(), function ($manager) use ($now) {
+            $this->assertCount(2, $manager->employments);
+            $this->assertEquals($now, $manager->employments->last()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function updating_cannot_employ_an_available_manager_when_started_at_is_filled($administrators)
+    {
+        $this->actAs($administrators);
+        $manager = Manager::factory()->available()->create();
+
+        $response = $this->updateRequest($manager, $this->validParams(['started_at' => $manager->employments()->first()->started_at->toDateTimeString()]));
+
+        $response->assertRedirect(route('managers.index'));
+        tap($manager->fresh(), function ($manager) {
+            $this->assertCount(1, $manager->employments);
+        });
+    }
+
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_manager()
     {

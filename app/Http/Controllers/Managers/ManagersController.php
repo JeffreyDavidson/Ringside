@@ -87,7 +87,7 @@ class ManagersController extends Controller
     {
         $manager->update($request->except('started_at'));
 
-        if ($request->filled('started_at')) {
+        if ($request->filled('started_at') && ! $manager->isCurrentlyEmployed()) {
             $manager->employ($request->input('started_at'));
         }
 

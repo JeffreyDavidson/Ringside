@@ -1,4 +1,4 @@
-<x-datatable :collection="$suspendedTagTeams">
+<x-data-table :collection="$suspendedTagTeams">
     <thead>
         <th>Id</th>
         <th>tagTeam Name</th>
@@ -29,4 +29,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

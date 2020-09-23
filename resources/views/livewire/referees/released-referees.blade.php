@@ -1,4 +1,4 @@
-<x-datatable :collection="$releasedReferees">
+<x-data-table :collection="$releasedReferees">
     <thead>
         <th>Id</th>
         <th>Referee Name</th>

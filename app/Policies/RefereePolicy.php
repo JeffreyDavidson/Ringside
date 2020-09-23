@@ -131,6 +131,17 @@ class RefereePolicy
     }
 
     /**
+     * Determine whether the user can release a referee.
+     *
+     * @param  App\Models\User  $user
+     * @return bool
+     */
+    public function release(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
      * Determine whether the user can view a list of referees.
      *
      * @param  App\Models\User  $user
@@ -143,7 +154,7 @@ class RefereePolicy
 
     /**
      * Determine whether the user can view a profile for a referee.
-     *ååå
+     *ååå.
      * @param  App\Models\User  $user
      * @return bool
      */

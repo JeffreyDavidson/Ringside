@@ -17,7 +17,7 @@ class ActivationStartDateCanBeChanged implements Rule
 
     public function passes($attribute, $value = null)
     {
-        /**
+        /*
          *  Times when activation date can/cannot be changed.
          *
          * * If model has a current activation then it cannot be changed.
@@ -29,6 +29,7 @@ class ActivationStartDateCanBeChanged implements Rule
         $futureActivation = $this->model->futureActivation;
         $formDate = Carbon::parse($value);
 
+        // dd($currentActivation);
         if ($currentActivation) {
             if ($formDate === null) {
                 return false;

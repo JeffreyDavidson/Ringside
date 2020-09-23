@@ -86,7 +86,7 @@ class TitlesController extends Controller
     {
         $title->update($request->validatedExcept('activated_at'));
 
-        if ($request->filled('activated_at')) {
+        if ($request->filled('activated_at') && ! $title->isCurrentlyActive()) {
             $title->activate($request->input('activated_at'));
         }
 

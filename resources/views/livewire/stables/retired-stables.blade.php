@@ -1,4 +1,4 @@
-<x-datatable :collection="$retiredStables">
+<x-data-table :collection="$retiredStables">
     <thead>
         <th>Id</th>
         <th>Stable Name</th>

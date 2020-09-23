@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader :title="$tagTeam->name">
+    <x-sub-header :title="$tagTeam->name">
         <x-slot name="actions">
             <a href="{{ route('tag-teams.index') }}" class="btn btn-label-brand btn-bold">
                 Back To Tag Teams

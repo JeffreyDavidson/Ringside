@@ -87,7 +87,7 @@ class WrestlersController extends Controller
     {
         $wrestler->update($request->validatedExcept('started_at'));
 
-        if ($request->filled('started_at')) {
+        if ($request->filled('started_at') && ! $wrestler->isCurrentlyEmployed()) {
             $wrestler->employ($request->input('started_at'));
         }
 

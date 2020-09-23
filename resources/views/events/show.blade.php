@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader :title="$event->name">
+    <x-sub-header :title="$event->name">
         <x-slot name="actions">
             <a
                 href="{{ route('events.index') }}"

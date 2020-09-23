@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader title="Managers">
+    <x-sub-header title="Managers">
         <x-slot name="actions">
             <a href="{{ route('managers.create') }}" class="btn btn-label-brand btn-bold">
                 Create Managers

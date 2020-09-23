@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader title="Wrestlers">
+    <x-sub-header title="Wrestlers">
         <x-slot name="actions">
             <a href="{{ route('wrestlers.create') }}" class="btn btn-label-brand btn-bold">
                 Create Wrestlers

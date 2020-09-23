@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader title="Titles">
+    <x-sub-header title="Titles">
         <x-slot name="actions">
             <a href="{{ route('titles.index') }}" class="btn btn-label-brand btn-bold">
                 Back To Titles

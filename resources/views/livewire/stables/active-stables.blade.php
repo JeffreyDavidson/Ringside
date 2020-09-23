@@ -1,4 +1,4 @@
-<x-datatable :collection="$activeStables">
+<x-data-table :collection="$activeStables">
     <thead>
         <th>Id</th>
         <th>Stable Name</th>
@@ -29,4 +29,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

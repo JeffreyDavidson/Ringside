@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader :title="$venue->name">
+    <x-sub-header :title="$venue->name">
         <x-slot name="actions">
             <a href="{{ route('venues.index') }}" class="btn btn-label-brand btn-bold">
                 Back To Venues
