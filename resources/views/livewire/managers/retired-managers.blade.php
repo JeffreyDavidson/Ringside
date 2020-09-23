@@ -1,4 +1,4 @@
-<x-datatable :collection="$retiredManagers">
+<x-data-table :collection="$retiredManagers">
     <thead>
         <th>Id</th>
         <th>Manager Name</th>

@@ -1,4 +1,4 @@
-<x-datatable :collection="$injuredManagers">
+<x-data-table :collection="$injuredManagers">
     <thead>
         <th>Id</th>
         <th>Manager Name</th>
@@ -28,4 +28,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

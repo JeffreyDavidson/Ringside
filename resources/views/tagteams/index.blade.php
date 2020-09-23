@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader title="Tag Teams">
+    <x-sub-header title="Tag Teams">
         <x-slot name="actions">
             <a href="{{ route('tag-teams.create') }}" class="btn btn-label-brand btn-bold">
                 Create Tag Teams

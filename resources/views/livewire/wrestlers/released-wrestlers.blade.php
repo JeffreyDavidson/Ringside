@@ -1,4 +1,4 @@
-<x-datatable :collection="$releasedWrestlers">
+<x-data-table :collection="$releasedWrestlers">
     <thead>
         <th>Id</th>
         <th>Wrestler Name</th>

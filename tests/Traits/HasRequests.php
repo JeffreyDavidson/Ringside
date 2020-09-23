@@ -2,8 +2,8 @@
 
 namespace Tests\Traits;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 trait HasRequests
 {
@@ -185,6 +185,17 @@ trait HasRequests
         $entityName = Str::replaceFirst('_', '-', $entity->getTable());
 
         return $this->put(route("{$entityName}.deactivate", $entity));
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model  $entity
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    public function releaseRequest(Model $entity)
+    {
+        $entityName = Str::replaceFirst('_', '-', $entity->getTable());
+
+        return $this->put(route("{$entityName}.release", $entity));
     }
 
     /**

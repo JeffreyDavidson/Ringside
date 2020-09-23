@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader title="Events">
+    <x-sub-header title="Events">
         <x-slot name="actions">
             <a href="{{ route('events.index') }}" class="btn btn-label-brand btn-bold">
                 Back To Events

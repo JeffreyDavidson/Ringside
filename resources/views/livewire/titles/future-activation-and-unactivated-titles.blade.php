@@ -1,4 +1,4 @@
-<x-datatable :collection="$futureActivationAndUnactivatedTitles">
+<x-data-table :collection="$futureActivationAndUnactivatedTitles">
     <thead>
         <th>Id</th>
         <th>Title Name</th>
@@ -31,4 +31,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

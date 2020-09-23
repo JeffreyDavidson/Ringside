@@ -261,6 +261,80 @@ class WrestlerControllerTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_an_unemployed_wrestler_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $wrestler = Wrestler::factory()->unemployed()->create();
+
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('wrestlers.index'));
+        tap($wrestler->fresh(), function ($wrestler) use ($now) {
+            $this->assertCount(1, $wrestler->employments);
+            $this->assertEquals($now, $wrestler->employments->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_a_future_employed_wrestler_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('wrestlers.index'));
+        tap($wrestler->fresh(), function ($wrestler) use ($now) {
+            $this->assertCount(1, $wrestler->employments);
+            $this->assertEquals($now, $wrestler->employments()->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_a_released_wrestler_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $wrestler = Wrestler::factory()->released()->create();
+
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('wrestlers.index'));
+        tap($wrestler->fresh(), function ($wrestler) use ($now) {
+            $this->assertCount(2, $wrestler->employments);
+            $this->assertEquals($now, $wrestler->employments->last()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function updating_cannot_employ_a_bookable_wrestler_when_started_at_is_filled($administrators)
+    {
+        $this->actAs($administrators);
+        $wrestler = Wrestler::factory()->bookable()->create();
+
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $wrestler->employments()->first()->started_at->toDateTimeString()]));
+
+        $response->assertRedirect(route('wrestlers.index'));
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertCount(1, $wrestler->employments);
+        });
+    }
+
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
     {

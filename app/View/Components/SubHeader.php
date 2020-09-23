@@ -25,6 +25,6 @@ class SubHeader extends Component
      */
     public function render()
     {
-        return view('components.subheader');
+        return view('components.sub-header');
     }
 }

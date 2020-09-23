@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Manager;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ManagerPolicy
@@ -132,6 +132,17 @@ class ManagerPolicy
     }
 
     /**
+     * Determine whether the user can release a manager.
+     *
+     * @param  App\Models\User  $user
+     * @return bool
+     */
+    public function release(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
      * Determine whether the user can view a list of managers.
      *
      * @param  App\Models\User  $user
@@ -151,10 +162,10 @@ class ManagerPolicy
      */
     public function view(User $user, Manager $manager)
     {
-        if (!is_null($manager->user) && $manager->user->is($user)) {
+        if (! is_null($manager->user) && $manager->user->is($user)) {
             return true;
         }
 
-        return $user->isSuperAdministrator() ||  $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }

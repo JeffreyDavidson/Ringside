@@ -1,4 +1,4 @@
-<x-datatable :collection="$scheduledEvents">
+<x-data-table :collection="$scheduledEvents">
     <thead>
         <th>Id</th>
         <th>Event Name</th>
@@ -27,4 +27,3 @@
         @endforelse
     </tbody>
 </x-datatable>
-

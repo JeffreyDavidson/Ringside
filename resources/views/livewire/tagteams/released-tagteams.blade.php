@@ -1,4 +1,4 @@
-<x-datatable :collection="$releasedTagTeams">
+<x-data-table :collection="$releasedTagTeams">
     <thead>
         <th>Id</th>
         <th>Tag Team Name</th>

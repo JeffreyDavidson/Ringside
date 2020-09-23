@@ -240,6 +240,80 @@ class RefereeControllerTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_an_unemployed_referee_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $referee = Referee::factory()->unemployed()->create();
+
+        $response = $this->updateRequest($referee, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('referees.index'));
+        tap($referee->fresh(), function ($referee) use ($now) {
+            $this->assertCount(1, $referee->employments);
+            $this->assertEquals($now, $referee->employments->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_a_future_employed_referee_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $referee = Referee::factory()->withFutureEmployment()->create();
+
+        $response = $this->updateRequest($referee, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('referees.index'));
+        tap($referee->fresh(), function ($referee) use ($now) {
+            $this->assertCount(1, $referee->employments);
+            $this->assertEquals($now, $referee->employments()->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function update_can_employ_a_released_referee_when_started_at_is_filled($administrators)
+    {
+        $now = now()->toDateTimeString();
+        $this->actAs($administrators);
+        $referee = Referee::factory()->released()->create();
+
+        $response = $this->updateRequest($referee, $this->validParams(['started_at' => $now]));
+
+        $response->assertRedirect(route('referees.index'));
+        tap($referee->fresh(), function ($referee) use ($now) {
+            $this->assertCount(2, $referee->employments);
+            $this->assertEquals($now, $referee->employments->last()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function updating_cannot_employ_a_bookable_referee_when_started_at_is_filled($administrators)
+    {
+        $this->actAs($administrators);
+        $referee = Referee::factory()->bookable()->create();
+
+        $response = $this->updateRequest($referee, $this->validParams(['started_at' => $referee->employments()->first()->started_at->toDateTimeString()]));
+
+        $response->assertRedirect(route('referees.index'));
+        tap($referee->fresh(), function ($referee) {
+            $this->assertCount(1, $referee->employments);
+        });
+    }
+
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_referee()
     {

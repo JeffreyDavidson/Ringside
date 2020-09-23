@@ -87,7 +87,7 @@ class RefereesController extends Controller
     {
         $referee->update($request->except('started_at'));
 
-        if ($request->filled('started_at')) {
+        if ($request->filled('started_at') && ! $referee->isCurrentlyEmployed()) {
             $referee->employ($request->input('started_at'));
         }
 

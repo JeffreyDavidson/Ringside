@@ -6,6 +6,7 @@ use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Exceptions\CannotBeEmployedException;
 use App\Exceptions\CannotBeInjuredException;
 use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeReleasedException;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
@@ -204,20 +205,22 @@ abstract class SingleRosterMember extends Model
      */
     public function release($releasedAt = null)
     {
-        if ($this->isSuspended()) {
-            $this->reinstate();
+        if ($this->canBeReleased()) {
+            if ($this->isSuspended()) {
+                $this->reinstate();
+            }
+
+            if ($this->isInjured()) {
+                $this->clearFromInjury();
+            }
+
+            $releaseDate = $releasedAt ?? now();
+            $this->currentEmployment()->update(['ended_at' => $releaseDate]);
+
+            $this->save();
+
+            return $this;
         }
-
-        if ($this->isInjured()) {
-            $this->clearFromInjury();
-        }
-
-        $releaseDate = $releasedAt ?? now();
-        $this->currentEmployment()->update(['ended_at' => $releaseDate]);
-
-        $this->save();
-
-        return $this;
     }
 
     /**
@@ -289,7 +292,7 @@ abstract class SingleRosterMember extends Model
     public function canBeReleased()
     {
         if (! $this->isCurrentlyEmployed() || $this->hasFutureEmployment() || $this->isReleased() || $this->isRetired()) {
-            throw new CannotBeEmployedException('Entity cannot be released. This entity does not have an active employment.');
+            throw new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.');
         }
 
         return true;

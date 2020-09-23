@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-subheader :title="$manager->full_name">
+    <x-sub-header :title="$manager->full_name">
         <x-slot name="actions">
             <a href="{{ route('managers.index') }}" class="btn btn-label-brand btn-bold">
                 Back To Managers
