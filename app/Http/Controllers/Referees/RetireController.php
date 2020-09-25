@@ -11,8 +11,8 @@ class RetireController extends Controller
     /**
      * Retire a referee.
      *
-     * @param  App\Models\Referee  $referee
-     * @param  App\Http\Requests\Referees\RetireRequest  $request
+     * @param  \App\Models\Referee  $referee
+     * @param  \App\Http\Requests\Referees\RetireRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Referee $referee, RetireRequest $request)

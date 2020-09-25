@@ -11,7 +11,7 @@ class RestoreController extends Controller
      * Restore a manager.
      *
      * @param  int  $managerId
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke($managerId)
     {

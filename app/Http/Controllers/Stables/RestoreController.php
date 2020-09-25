@@ -11,7 +11,7 @@ class RestoreController extends Controller
      * Restore a stable.
      *
      * @param  int  $stableId
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke($stableId)
     {

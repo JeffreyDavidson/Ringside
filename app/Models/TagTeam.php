@@ -396,10 +396,6 @@ class TagTeam extends Model
             throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have an active employment.');
         }
 
-        if ($this->currentWrestlers->count() != 2) {
-            throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have two wrestlers.');
-        }
-
         return true;
     }
 

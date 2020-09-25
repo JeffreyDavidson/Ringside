@@ -11,8 +11,8 @@ class SuspendController extends Controller
     /**
      * Suspend a referee.
      *
-     * @param  App\Models\Referee  $referee
-     * @param  App\Http\Requests\Referees\SuspendRequest  $request
+     * @param  \App\Models\Referee  $referee
+     * @param  \App\Http\Requests\Referees\SuspendRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Referee $referee, SuspendRequest $request)

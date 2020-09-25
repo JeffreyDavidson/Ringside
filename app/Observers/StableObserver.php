@@ -17,7 +17,7 @@ class StableObserver
     {
         if ($stable->isRetired()) {
             $stable->status = StableStatus::RETIRED;
-        } elseif ($stable->isActive()) {
+        } elseif ($stable->isCurrentlyActive()) {
             $stable->status = StableStatus::ACTIVE;
         } elseif ($stable->hasFutureActivation()) {
             $stable->status = StableStatus::FUTURE_ACTIVATION;

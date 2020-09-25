@@ -11,8 +11,8 @@ class ReinstateController extends Controller
     /**
      * Reinstate a manager.
      *
-     * @param  App\Models\Manager  $manager
-     * @param  App\Http\Requests\Managers\ReinstateRequest  $request
+     * @param  \App\Models\Manager  $manager
+     * @param  \App\Http\Requests\Managers\ReinstateRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Manager $manager, ReinstateRequest $request)

@@ -65,6 +65,21 @@ abstract class TestCase extends BaseTestCase
         return $this;
     }
 
+    public function assertCollectionDoesntHave($collection, $entity)
+    {
+        if (is_array($entity) || $entity instanceof Collection) {
+            foreach ($entity as $test) {
+                $this->assertNotContains($collection, $test);
+            }
+
+            return $this;
+        }
+
+        $this->assertFalse($collection->contains($entity));
+
+        return $this;
+    }
+
     public function administrators()
     {
         return [

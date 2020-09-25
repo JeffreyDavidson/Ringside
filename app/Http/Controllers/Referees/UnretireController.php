@@ -11,8 +11,8 @@ class UnretireController extends Controller
     /**
      * Unretire a referee.
      *
-     * @param  App\Models\Referee  $referee
-     * @param  App\Http\Requests\Referees\UnretireRequest  $request
+     * @param  \App\Models\Referee  $referee
+     * @param  \App\Http\Requests\Referees\UnretireRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Referee $referee, UnretireRequest $request)

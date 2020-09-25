@@ -23,15 +23,6 @@ class StableFactoryTest extends TestCase
     }
 
     /** @test */
-    public function default_stable_is_has_one_wrestler_and_one_tag_team()
-    {
-        $stable = Stable::factory()->create();
-
-        $this->assertCount(1, $stable->wrestlers);
-        $this->assertCount(1, $stable->tagTeams);
-    }
-
-    /** @test */
     public function an_unactivated_stable_has_zero_activations()
     {
         $stable = Stable::factory()->unactivated()->create();
@@ -59,8 +50,12 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->inactive()->create();
 
-        $this->assertTrue($stable->wrestlers->left_at);
-        $this->assertTrue($stable->tagTeams->left_at);
+        $this->assertTrue($stable->wrestlers->every(function ($wrestler, $key) {
+            return $wrestler->pivot->left_at->isPast();
+        }));
+        $this->assertTrue($stable->tagTeams->every(function ($tagTeam, $key) {
+            return $tagTeam->pivot->left_at->isPast();
+        }));
     }
 
     /** @test */

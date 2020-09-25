@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Events;
 
-use App\Models\Event;
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 
 class RestoreController extends Controller
 {
@@ -11,7 +11,7 @@ class RestoreController extends Controller
      * Restore a deleted scheduled event.
      *
      * @param  int  $eventId
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke($eventId)
     {

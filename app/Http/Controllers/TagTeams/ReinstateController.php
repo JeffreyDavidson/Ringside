@@ -11,9 +11,9 @@ class ReinstateController extends Controller
     /**
      * Reinstate a tag team.
      *
-     * @param  App\Models\TagTeam  $tagTeam
-     * @param  App\Http\Requests\TagTeams\ReinstateRequest  $request
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Http\Requests\TagTeams\ReinstateRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(TagTeam $tagTeam, ReinstateRequest $request)
     {

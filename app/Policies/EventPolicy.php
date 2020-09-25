@@ -13,7 +13,7 @@ class EventPolicy
     /**
      * Determine whether the user can create an event.
      *
-     * @param  App\Models\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function create(User $user)
@@ -24,8 +24,8 @@ class EventPolicy
     /**
      * Determine whether the user can update an event.
      *
-     * @param  App\Models\User  $user
-     * @param  App\Models\Event  $event
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Event  $event
      * @return bool
      */
     public function update(User $user, Event $event)
@@ -40,8 +40,8 @@ class EventPolicy
     /**
      * Determine whether the user can delete an event.
      *
-     * @param  App\Models\User  $user
-     * @param  App\Models\Event  $event
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Event  $event
      * @return bool
      */
     public function delete(User $user, Event $event)

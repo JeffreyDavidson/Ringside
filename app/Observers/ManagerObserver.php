@@ -10,7 +10,7 @@ class ManagerObserver
     /**
      * Handle the Manager "saving" event.
      *
-     * @param  App\Models\Manager  $manager
+     * @param  \App\Models\Manager  $manager
      * @return void
      */
     public function saving(Manager $manager)

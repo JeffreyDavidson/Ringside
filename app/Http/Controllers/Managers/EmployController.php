@@ -11,8 +11,8 @@ class EmployController extends Controller
     /**
      * Employ a manager.
      *
-     * @param  App\Models\Manager  $manager
-     * @param  App\Http\Requests\Managers\EmployRequest  $request
+     * @param  \App\Models\Manager  $manager
+     * @param  \App\Http\Requests\Managers\EmployRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Manager $manager, EmployRequest $request)

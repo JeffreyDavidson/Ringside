@@ -11,9 +11,9 @@ class RetireController extends Controller
     /**
      * Retire a tag team.
      *
-     * @param  App\Models\TagTeam  $tagTeam
-     * @param  App\Http\Requests\TagTeams\RetireRequest  $request
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Http\Requests\TagTeams\RetireRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(TagTeam $tagTeam, RetireRequest $request)
     {

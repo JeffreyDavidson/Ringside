@@ -11,8 +11,8 @@ class ClearInjuryController extends Controller
     /**
      * Clear a referee.
      *
-     * @param  App\Models\Referee  $referee
-     * @param  App\Http\Requests\Referees\ClearInjuryRequest  $request
+     * @param  \App\Models\Referee  $referee
+     * @param  \App\Http\Requests\Referees\ClearInjuryRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Referee $referee, ClearInjuryRequest $request)

@@ -7,6 +7,7 @@ use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use App\Services\TagTeamService;
 
 class TagTeamsController extends Controller
 {
@@ -44,19 +45,14 @@ class TagTeamsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $tagTeam = TagTeam::create($request->validatedExcept(['wrestler1', 'wrestler2', 'started_at']));
+        $tagTeam = TagTeam::create($request->validatedExcept(['wrestlers', 'started_at']));
+
+        if ($request->filled('wrestlers')) {
+            $tagTeam->addWrestlers($request->input('wrestlers'), now());
+        }
 
         if ($request->filled('started_at')) {
-            $tagTeam->addWrestlers(
-                [$request->input('wrestler1'), $request->input('wrestler2')],
-                $request->input('started_at')
-            );
-
             $tagTeam->employ($request->input('started_at'));
-        } else {
-            $tagTeam->addWrestlers(
-                [$request->input('wrestler1'), $request->input('wrestler2')]
-            );
         }
 
         return redirect()->route('tag-teams.index');
@@ -79,7 +75,7 @@ class TagTeamsController extends Controller
      * Show the form for editing a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @return \lluminate\Http\Response
+     * @return \Illuminate\Http\Response
      */
     public function edit(TagTeam $tagTeam)
     {
@@ -95,20 +91,18 @@ class TagTeamsController extends Controller
      *
      * @param  \App\Http\Requests\TagTeams\UpdateRequest  $request
      * @param  \App\Models\TagTeam  $tagTeam
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Services\TagTeamService  $tagTeamService
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, TagTeam $tagTeam)
+    public function update(UpdateRequest $request, TagTeam $tagTeam, TagTeamService $tagTeamService)
     {
-        $tagTeam->update($request->validatedExcept(['wrestler1', 'wrestler2', 'started_at']));
+        $tagTeam->update($request->validatedExcept(['wrestlers', 'started_at']));
 
-        if ($request->filled('started_at')) {
+        $tagTeamService->updateTagTeamPartners($tagTeam, $request->input('wrestlers'));
+
+        if ($request->filled('started_at') && ! $tagTeam->isCurrentlyEmployed()) {
             $tagTeam->employ($request->input('started_at'));
         }
-
-        $tagTeam->currentWrestlers()->sync(
-            [$request->input('wrestler1'), $request->input('wrestler2')],
-            ['joined_at' => $request->input('started_at')]
-        );
 
         return redirect()->route('tag-teams.index');
     }
@@ -117,7 +111,7 @@ class TagTeamsController extends Controller
      * Delete a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(TagTeam $tagTeam)
     {

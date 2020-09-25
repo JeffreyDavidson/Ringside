@@ -11,8 +11,8 @@ class ReleaseController extends Controller
     /**
      * Fire a wrestler.
      *
-     * @param  App\Models\Wrestler  $wrestler
-     * @param  App\Http\Requests\Wrestlers\ReleaseRequest  $request
+     * @param  \App\Models\Wrestler  $wrestler
+     * @param  \App\Http\Requests\Wrestlers\ReleaseRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Wrestler $wrestler, ReleaseRequest $request)
