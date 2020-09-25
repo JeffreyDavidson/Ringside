@@ -4,8 +4,9 @@ namespace App\Models;
 
 use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
-class Member extends Model
+class Member extends MorphPivot
 {
     use Unguarded;
 

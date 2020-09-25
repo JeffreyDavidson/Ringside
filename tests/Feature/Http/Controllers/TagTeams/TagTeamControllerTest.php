@@ -36,8 +36,7 @@ class TagTeamControllerTest extends TestCase
             'name' => 'Example Tag Team Name',
             'signature_move' => 'The Finisher',
             'started_at' => now()->toDateTimeString(),
-            'wrestler1' => $overrides['wrestlers'][0] ?? $wrestlers->first()->id,
-            'wrestler2' => $overrides['wrestlers'][1] ?? $wrestlers->last()->id,
+            'wrestlers' => $overrides['wrestlers'] ?? $wrestlers->pluck('id')->toArray(),
         ], $overrides);
     }
 
@@ -253,21 +252,32 @@ class TagTeamControllerTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @dataProvider administrators
+     */
     public function wrestlers_of_tag_team_are_synced_when_tag_team_is_updated()
     {
         $this->actAs(Role::ADMINISTRATOR);
         $tagTeam = TagTeam::factory()->bookable()->create();
-        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+        $formerTagTeamPartners = $tagTeam->currentWrestlers;
+
+        $newTagTeamPartners = Wrestler::factory()->count(2)->bookable()->create();
+
+        $this->assertCount(4, Wrestler::all());
 
         $response = $this->updateRequest($tagTeam, $this->validParams([
-            'wrestlers' => $wrestlers->modelKeys(),
+            'wrestlers' => $newTagTeamPartners->pluck('id')->toArray(),
         ]));
 
         $response->assertRedirect(route('tag-teams.index'));
-
-        tap($tagTeam->currentWrestlers->fresh(), function ($tagTeamWrestlers) use ($wrestlers) {
-            $this->assertCount(2, $tagTeamWrestlers);
-            $this->assertEquals($tagTeamWrestlers->modelKeys(), $wrestlers->modelKeys());
+        tap($tagTeam->fresh(), function ($tagTeam) use ($formerTagTeamPartners, $newTagTeamPartners) {
+            $this->assertCount(4, $tagTeam->wrestlers);
+            $this->assertCount(2, $tagTeam->currentWrestlers);
+            $this->assertCollectionHas($tagTeam->currentWrestlers, $newTagTeamPartners[0]);
+            $this->assertCollectionHas($tagTeam->currentWrestlers, $newTagTeamPartners[1]);
+            $this->assertCollectionDoesntHave($tagTeam->currentWrestlers, $formerTagTeamPartners[0]);
+            $this->assertCollectionDoesntHave($tagTeam->currentWrestlers, $formerTagTeamPartners[1]);
         });
     }
 

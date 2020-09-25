@@ -36,7 +36,7 @@ class WrestlersController extends Controller
     /**
      * Create a new wrestler.
      *
-     * @param  App\Http\Requests\Wrestlers\StoreRequest  $request
+     * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
@@ -53,7 +53,7 @@ class WrestlersController extends Controller
     /**
      * Show the profile of a wrestler.
      *
-     * @param  App\Models\Wrestler  $wrestler
+     * @param  \App\Models\Wrestler  $wrestler
      * @return \Illuminate\View\View
      */
     public function show(Wrestler $wrestler)
@@ -66,7 +66,7 @@ class WrestlersController extends Controller
     /**
      * Show the form for editing a wrestler.
      *
-     * @param  App\Models\Wrestler  $wrestler
+     * @param  \App\Models\Wrestler  $wrestler
      * @return \Illuminate\View\View
      */
     public function edit(Wrestler $wrestler)
@@ -79,8 +79,8 @@ class WrestlersController extends Controller
     /**
      * Update a given wrestler.
      *
-     * @param  App\Http\Requests\Wrestlers\UpdateRequest  $request
-     * @param  App\Models\Wrestler  $wrestler
+     * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
+     * @param  \App\Models\Wrestler  $wrestler
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Wrestler $wrestler)
@@ -97,7 +97,7 @@ class WrestlersController extends Controller
     /**
      * Delete a wrestler.
      *
-     * @param  App\Models\Wrestler  $wrestler
+     * @param  \App\Models\Wrestler  $wrestler
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Wrestler $wrestler)

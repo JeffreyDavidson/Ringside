@@ -11,8 +11,8 @@ class ReinstateController extends Controller
     /**
      * Reinstate a referee.
      *
-     * @param  App\Models\Referee  $referee
-     * @param  App\Http\Requests\Referees\ReinstateRequest  $request
+     * @param  \App\Models\Referee  $referee
+     * @param  \App\Http\Requests\Referees\ReinstateRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Referee $referee, ReinstateRequest $request)

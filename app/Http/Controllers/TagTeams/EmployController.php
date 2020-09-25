@@ -11,9 +11,9 @@ class EmployController extends Controller
     /**
      * Employ a tag team.
      *
-     * @param  App\Models\TagTeam  $tagTeam
-     * @param  App\Http\Requests\TagTeams\EmployReqeust  $request
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Http\Requests\TagTeams\EmployReqeust  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(TagTeam $tagTeam, EmployRequest $request)
     {

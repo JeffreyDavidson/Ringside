@@ -21,9 +21,10 @@ class ConditionalEmploymentStartDateRule extends CompositeRule
 
     protected function rules($startedAt = null): array
     {
-        return array_merge($startedAt ? ['string', 'date_format:Y-m-d H:i:s'] : [], [
-            new EmploymentStartDateCanBeChanged($this->model),
-        ]);
+        return ['string', 'date_format:Y-m-d H:i:s'];
+        // return array_merge($startedAt ? ['string', 'date_format:Y-m-d H:i:s'] : [], [
+        //     new EmploymentStartDateCanBeChanged($this->model),
+        // ]);
     }
 
     /**

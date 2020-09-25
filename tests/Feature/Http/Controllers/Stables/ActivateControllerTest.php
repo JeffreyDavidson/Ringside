@@ -25,13 +25,57 @@ class ActivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_activates_a_stable($administrators)
+    public function invoke_activates_an_unactivated_stable_with_members($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
 
         $this->actAs($administrators);
-        $stable = Stable::factory()->unactivated()->create();
+        $stable = Stable::factory()->unactivated()->withMembers()->create();
+
+        $response = $this->activateRequest($stable);
+
+        $response->assertRedirect(route('stables.index'));
+        tap($stable->fresh(), function ($stable) use ($now) {
+            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+            $this->assertCount(1, $stable->activations);
+            $this->assertEquals($now->toDateTimeString(), $stable->activations->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_activates_a_future_activated_stable_with_members($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->actAs($administrators);
+        $stable = Stable::factory()->withFutureActivation()->withMembers()->create();
+
+        $response = $this->activateRequest($stable);
+
+        $response->assertRedirect(route('stables.index'));
+        tap($stable->fresh(), function ($stable) use ($now) {
+            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+            $this->assertCount(1, $stable->activations);
+            $this->assertEquals($now->toDateTimeString(), $stable->activations->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_activates_an_inactive_stable($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->actAs($administrators);
+        $stable = Stable::factory()->inactive()->create();
 
         $response = $this->activateRequest($stable);
 

@@ -34,47 +34,79 @@ class StableFactory extends Factory
 
     public function withFutureActivation(): self
     {
-        $clone = tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'status' => StableStatus::FUTURE_ACTIVATION,
-        ]);
-
-        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::tomorrow()), 'activations', 1);
-
-        return $clone;
+        ])->hasActivations(1, ['started_at' => Carbon::tomorrow()])
+        ->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
     }
 
     public function unactivated()
     {
-        return tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'status' => StableStatus::UNACTIVATED,
-        ]);
+        ])->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
     }
 
     public function active(): self
     {
-        $clone = tap(clone $this)->overwriteDefaults([
+        $start = Carbon::yesterday();
+
+        return $this->state([
             'status' => StableStatus::ACTIVE,
-        ]);
-
-        $clone = $clone->withFactory(ActivationFactory::new()->started(Carbon::yesterday()), 'activations', 1);
-        $clone->withMembers();
-
-        return $clone;
+        ])->hasActivations(1, ['started_at' => $start])
+        ->hasAttached(
+            Wrestler::factory()
+                ->bookable()
+                ->count(1)
+                ->hasEmployments(1, ['started_at' => $start]
+            ),
+            ['joined_at' => $start]
+        )
+        ->hasAttached(
+            TagTeam::factory()
+                ->bookable()
+                ->count(1)
+                ->hasEmployments(1, ['started_at' => $start]
+            ),
+            ['joined_at' => $start]
+        )
+        ->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
     }
 
     public function inactive(): self
     {
-        $clone = tap(clone $this)->overwriteDefaults([
-            'status' => StableStatus::INACTIVE,
-        ]);
-
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        $clone = $clone->withFactory(ActivationFactory::new()->started($start)->ended($end), 'activations', 1);
-
-        return $clone;
+        return $this->state([
+            'status' => StableStatus::INACTIVE,
+        ])->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
+        ->hasAttached(
+            Wrestler::factory()
+                ->bookable()
+                ->count(1)
+                ->hasEmployments(1, ['started_at' => $start]
+            ),
+            ['joined_at' => $start, 'left_at' => $end]
+        )
+        ->hasAttached(
+            TagTeam::factory()
+                ->bookable()
+                ->count(1)
+                ->hasEmployments(1, ['started_at' => $start]
+            ),
+            ['joined_at' => $start, 'left_at' => $end]
+        )
+        ->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
     }
 
     public function retired(): self
@@ -85,16 +117,18 @@ class StableFactory extends Factory
 
         return $this->state([
             'status' => StableStatus::RETIRED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+        ])->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
         ->hasRetirements(1, ['started_at' => $end])
         ->hasAttached(
-            Wrestler::factory()->count(1)
+            Wrestler::factory()
+                ->count(1)
                 ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
                 ->hasRetirements(1, ['started_at' => $end]),
             ['joined_at' => $start]
         )
         ->hasAttached(
-            TagTeam::factory()->count(1)
+            TagTeam::factory()
+                ->count(1)
                 ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
                 ->hasRetirements(1, ['started_at' => $end]),
             ['joined_at' => $start]

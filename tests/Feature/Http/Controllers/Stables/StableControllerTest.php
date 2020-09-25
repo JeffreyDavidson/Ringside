@@ -98,6 +98,7 @@ class StableControllerTest extends TestCase
         $this->actAs($administrators);
 
         $response = $this->storeRequest('stables', $this->validParams());
+        dd($response);
 
         $response->assertRedirect(route('stables.index'));
         tap(Stable::first(), function ($stable) {

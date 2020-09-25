@@ -40,7 +40,9 @@ class Stable extends Model
      */
     public function wrestlers()
     {
-        return $this->morphedByMany(Wrestler::class, 'member', 'stable_members');
+        return $this->morphedByMany(Wrestler::class, 'member', 'stable_members')
+                    ->using(Member::class)
+                    ->withPivot(['joined_at', 'left_at']);
     }
 
     /**
@@ -70,7 +72,9 @@ class Stable extends Model
      */
     public function tagTeams()
     {
-        return $this->morphedByMany(TagTeam::class, 'member', 'stable_members');
+        return $this->morphedByMany(TagTeam::class, 'member', 'stable_members')
+                    ->using(Member::class)
+                    ->withPivot(['joined_at', 'left_at']);
     }
 
     /**
@@ -140,6 +144,16 @@ class Stable extends Model
         $this->touch();
 
         return $this;
+    }
+
+    /**
+     * Get the retirements of the stable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function retirements()
+    {
+        return $this->morphMany(Retirement::class, 'retiree');
     }
 
     /**

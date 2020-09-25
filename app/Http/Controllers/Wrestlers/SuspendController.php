@@ -11,8 +11,8 @@ class SuspendController extends Controller
     /**
      * Suspend a wrestler.
      *
-     * @param  App\Models\Wrestler  $wrestler
-     * @param  App\Http\Requests\Wrestlers\SuspendRequest  $request
+     * @param  \App\Models\Wrestler  $wrestler
+     * @param  \App\Http\Requests\Wrestlers\SuspendRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Wrestler $wrestler, SuspendRequest $request)

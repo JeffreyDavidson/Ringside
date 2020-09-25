@@ -13,7 +13,7 @@ class VenuePolicy
     /**
      * Determine whether the user can create venues.
      *
-     * @param  App\Models\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function create(User $user)
@@ -24,7 +24,7 @@ class VenuePolicy
     /**
      * Determine whether the user can update a venue.
      *
-     * @param  App\Models\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function update(User $user)

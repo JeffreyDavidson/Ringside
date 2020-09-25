@@ -44,7 +44,7 @@ class StablesController extends Controller
         $stable = Stable::create($request->validatedExcept(['wrestlers', 'tagteams', 'started_at']));
 
         if ($request->filled('started_at')) {
-            $stable->employments()->create($request->only('started_at'));
+            $stable->activations()->create($request->only('started_at'));
         }
 
         if ($request->filled('wrestlers')) {
@@ -61,7 +61,7 @@ class StablesController extends Controller
     /**
      * Show the profile of a tag team.
      *
-     * @param  App\Models\Stable  $stable
+     * @param  \App\Models\Stable  $stable
      * @return \Illuminate\Http\Response
      */
     public function show(Stable $stable)
@@ -98,7 +98,7 @@ class StablesController extends Controller
         if ($request->filled('started_at')) {
             if ($stable->currentEmployment && $stable->currentEmployment->started_at != $request->input('started_at')) {
                 $stable->currentEmployment()->update($request->only('started_at'));
-            } elseif (!$stable->currentEmployment) {
+            } elseif (! $stable->currentEmployment) {
                 $stable->employments()->create($request->only('started_at'));
             }
         }

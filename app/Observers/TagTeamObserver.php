@@ -10,7 +10,7 @@ class TagTeamObserver
     /**
      * Handle the Tag Team "saving" event.
      *
-     * @param  App\Models\TagTeam  $tagTeam
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return void
      */
     public function saving(TagTeam $tagTeam)

@@ -13,7 +13,7 @@ class UnretireController extends Controller
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \App\Http\Requests\TagTeams\UnretireRequest  $request
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(TagTeam $tagTeam, UnretireRequest $request)
     {

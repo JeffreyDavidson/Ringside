@@ -11,9 +11,9 @@ class SuspendController extends Controller
     /**
      * Suspend a tag team.
      *
-     * @param  App\Models\TagTeam  $tagTeam
-     * @param  App\Http\Requests\TagTeams\SuspendRequest  $request
-     * @return \lluminate\Http\RedirectResponse
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Http\Requests\TagTeams\SuspendRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(TagTeam $tagTeam, SuspendRequest $request)
     {

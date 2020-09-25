@@ -49,7 +49,7 @@ class TagTeamFactory extends Factory
             $tagTeam->save();
             $tagTeam->currentWrestlers->each->save();
             $tagTeam->load('employments');
-            $tagTeam->load('currentWrestlers');
+            $tagTeam->load('wrestlers');
         });
     }
 

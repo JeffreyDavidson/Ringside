@@ -11,8 +11,8 @@ class UnretireController extends Controller
     /**
      * Unretire a manager.
      *
-     * @param  App\Models\Manager  $manager
-     * @param  App\Http\Requests\Managers\UnretireRequest  $request
+     * @param  \App\Models\Manager  $manager
+     * @param  \App\Http\Requests\Managers\UnretireRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Manager $manager, UnretireRequest $request)

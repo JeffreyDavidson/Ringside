@@ -78,7 +78,7 @@ class VenuesController extends Controller
      *
      * @param  \App\Http\Requests\Venues\UpdateRequest  $request
      * @param  \App\Models\Venue  $venue
-     * @return \lluminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Venue $venue)
     {
