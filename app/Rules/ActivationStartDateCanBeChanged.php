@@ -29,7 +29,6 @@ class ActivationStartDateCanBeChanged implements Rule
         $futureActivation = $this->model->futureActivation;
         $formDate = Carbon::parse($value);
 
-        // dd($currentActivation);
         if ($currentActivation) {
             if ($formDate === null) {
                 return false;

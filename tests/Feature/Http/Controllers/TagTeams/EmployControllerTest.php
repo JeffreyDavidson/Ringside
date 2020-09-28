@@ -184,20 +184,4 @@ class EmployControllerTest extends TestCase
 
         $this->employRequest($tagTeam);
     }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function employing_a_tag_team_without_two_wrestlers_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $this->actAs($administrators);
-
-        $tagTeam = TagTeam::factory()->withoutWrestlers()->create();
-
-        $this->employRequest($tagTeam);
-    }
 }

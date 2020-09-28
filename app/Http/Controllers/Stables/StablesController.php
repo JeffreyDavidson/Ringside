@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
 use App\Models\Stable;
+use App\Services\StableService;
 
 class StablesController extends Controller
 {
@@ -37,23 +38,12 @@ class StablesController extends Controller
      * Create a new stable.
      *
      * @param  \App\Http\Requests\Stables\StoreRequest  $request
+     * @param  \App\Services\StableService $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, StableService $stableService)
     {
-        $stable = Stable::create($request->validatedExcept(['wrestlers', 'tagteams', 'started_at']));
-
-        if ($request->filled('started_at')) {
-            $stable->activations()->create($request->only('started_at'));
-        }
-
-        if ($request->filled('wrestlers')) {
-            $stable->addWrestlers($request->input('wrestlers'), $request->input('started_at'));
-        }
-
-        if ($request->filled('tagteams')) {
-            $stable->addTagTeams($request->input('tagteams'), $request->input('started_at'));
-        }
+        $stableService->create($request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
 
         return redirect()->route('stables.index');
     }
@@ -89,22 +79,12 @@ class StablesController extends Controller
      *
      * @param  \App\Http\Requests\UpdateStableRequest  $request
      * @param  \App\Models\Stable  $stable
+     * @param  \App\Services\StableService  $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Stable $stable)
+    public function update(UpdateRequest $request, Stable $stable, StableService $stableService)
     {
-        $stable->update($request->except('wrestlers', 'tagteams', 'started_at'));
-
-        if ($request->filled('started_at')) {
-            if ($stable->currentEmployment && $stable->currentEmployment->started_at != $request->input('started_at')) {
-                $stable->currentEmployment()->update($request->only('started_at'));
-            } elseif (! $stable->currentEmployment) {
-                $stable->employments()->create($request->only('started_at'));
-            }
-        }
-
-        $stable->wrestlerHistory()->sync($request->input('wrestlers'));
-        $stable->tagTeamHistory()->sync($request->input('tagteams'));
+        $stableService->update($stable, $request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
 
         return redirect()->route('stables.index');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
+use App\Services\WrestlerService;
 
 class WrestlersController extends Controller
 {
@@ -37,15 +38,12 @@ class WrestlersController extends Controller
      * Create a new wrestler.
      *
      * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
+     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, WrestlerService $wrestlerService)
     {
-        $wrestler = Wrestler::create($request->validatedExcept('started_at'));
-
-        if ($request->filled('started_at')) {
-            $wrestler->employ($request->input('started_at'));
-        }
+        $wrestlerService->create($request->only('name', 'height', 'weight', 'hometown', 'signature_move', 'started_at'));
 
         return redirect()->route('wrestlers.index');
     }
@@ -81,15 +79,12 @@ class WrestlersController extends Controller
      *
      * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
      * @param  \App\Models\Wrestler  $wrestler
+     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Wrestler $wrestler)
+    public function update(UpdateRequest $request, Wrestler $wrestler, WrestlerService $wrestlerService)
     {
-        $wrestler->update($request->validatedExcept('started_at'));
-
-        if ($request->filled('started_at') && ! $wrestler->isCurrentlyEmployed()) {
-            $wrestler->employ($request->input('started_at'));
-        }
+        $wrestlerService->update($wrestler, $request->only('name', 'height', 'weight', 'hometown', 'signature_move', 'started_at'));
 
         return redirect()->route('wrestlers.index');
     }

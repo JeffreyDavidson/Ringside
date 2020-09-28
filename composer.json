@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.3",
         "fideloper/proxy": "^4.0",
+        "fidum/laravel-eloquent-morph-to-one": "^2.0",
         "illuminatech/validation-composite": "*",
         "laravel/framework": "^8.0",
         "laravel/telescope": "^4",

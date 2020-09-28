@@ -153,7 +153,7 @@ class RetireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function retiring_an_released_wrestler_throws_an_exception($administrators)
+    public function retiring_a_released_wrestler_throws_an_exception($administrators)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
@@ -176,7 +176,7 @@ class RetireControllerTest extends TestCase
 
         $this->actAs($administrators);
 
-        $wrestler = Wrestler::factory()->retired()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->retireRequest($wrestler);
     }

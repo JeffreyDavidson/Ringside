@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\WrestlerStatus;
+use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -10,8 +11,17 @@ class Wrestler extends SingleRosterMember
 {
     use SoftDeletes,
         HasFactory,
+        HasMorphToOne,
         Concerns\CanBeStableMember,
         Concerns\Unguarded;
+
+    public static function boot()
+    {
+        parent::boot();
+        self::saved(function ($model) {
+            dump('testing');
+        });
+    }
 
     /**
      * The attributes that should be cast to native types.

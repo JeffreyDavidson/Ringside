@@ -4,6 +4,8 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Enums\StableStatus;
+use App\Http\Controllers\Stables\UnretireController;
+use App\Http\Requests\Stables\UnretireRequest;
 use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,6 +41,16 @@ class UnretireControllerTest extends TestCase
             $this->assertCount(1, $stable->retirements);
             $this->assertEquals($now->toDateTimeString(), $stable->fresh()->retirements()->latest()->first()->ended_at);
         });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            UnretireController::class,
+            '__invoke',
+            UnretireRequest::class
+        );
     }
 
     /** @test */

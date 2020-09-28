@@ -5,6 +5,9 @@ namespace Tests\Feature\Http\Controllers\TagTeams;
 use App\Enums\Role;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
+use App\Exceptions\CannotBeRetiredException;
+use App\Http\Controllers\TagTeams\RetireController;
+use App\Http\Requests\TagTeams\RetireRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
@@ -55,6 +58,16 @@ class RetireControllerTest extends TestCase
     }
 
     /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            RetireController::class,
+            '__invoke',
+            RetireRequest::class
+        );
+    }
+
+    /** @test */
     public function a_basic_user_cannot_retire_a_tag_team()
     {
         $this->actAs(Role::BASIC);
@@ -69,5 +82,69 @@ class RetireControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this->retireRequest($tagTeam)->assertRedirect(route('login'));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function retiring_a_retired_tag_team_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeRetiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->retired()->create();
+
+        $this->retireRequest($tagTeam);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function retiring_a_future_employed_tag_team_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeRetiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+
+        $this->retireRequest($tagTeam);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function retiring_a_released_tag_team_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeRetiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->released()->create();
+
+        $this->retireRequest($tagTeam);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function retiring_an_unemployed_tag_team_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeRetiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->unemployed()->create();
+
+        $this->retireRequest($tagTeam);
     }
 }

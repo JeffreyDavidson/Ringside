@@ -30,7 +30,7 @@ class TagTeamCanJoinStable implements Rule
             return false;
         }
 
-        if (!data_get($tagTeam, 'currentEmployment.started_at')) {
+        if (! data_get($tagTeam, 'currentEmployment.started_at')) {
             return false;
         }
 
@@ -38,11 +38,11 @@ class TagTeamCanJoinStable implements Rule
             return false;
         }
 
-        if (!$tagTeam->is_bookable) {
+        if (! $tagTeam->isBookable()) {
             return false;
         }
 
-        if ($tagTeam->stables()->bookable()->whereKeyNot($this->stable->id)->exists()) {
+        if ($tagTeam->currentStable) {
             return false;
         }
 

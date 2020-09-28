@@ -39,8 +39,8 @@ class TagTeamFactory extends Factory
         ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
         ->hasAttached(
             Wrestler::factory()
-                ->bookable()
                 ->count(2)
+                ->bookable()
                 ->hasEmployments(1, ['started_at' => Carbon::now()->subMonths(1)]
             ),
             ['joined_at' => Carbon::yesterday()]
@@ -60,8 +60,8 @@ class TagTeamFactory extends Factory
         ])->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
         ->hasAttached(
             Wrestler::factory()
-                ->withFutureEmployment()
                 ->count(2)
+                ->withFutureEmployment()
                 ->hasEmployments(1, ['started_at' => Carbon::tomorrow()]
             ),
             ['joined_at' => Carbon::now()]
@@ -98,15 +98,17 @@ class TagTeamFactory extends Factory
         ->hasSuspensions(1, ['started_at' => $end])
         ->hasAttached(
             Wrestler::factory()
-                ->suspended()
                 ->count(2)
+                ->suspended()
                 ->hasEmployments(1, ['started_at' => $start])
                 ->hasSuspensions(1, ['started_at' => $end]),
             ['joined_at' => $start]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
-            $tagTeam->currentWrestlers->each->save();
+            $tagTeam->load('employments');
+            $tagTeam->load('suspensions');
+            $tagTeam->load('currentWrestlers');
         });
     }
 
@@ -121,7 +123,8 @@ class TagTeamFactory extends Factory
         ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
         ->hasRetirements(1, ['started_at' => $end])
         ->hasAttached(
-            Wrestler::factory()->count(2)
+            Wrestler::factory()
+                ->count(2)
                 ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
                 ->hasRetirements(1, ['started_at' => $end]),
             ['joined_at' => $start]
@@ -137,7 +140,8 @@ class TagTeamFactory extends Factory
         return $this->state([
             'status' => TagTeamStatus::UNEMPLOYED,
         ])->hasAttached(
-            Wrestler::factory()->count(2),
+            Wrestler::factory()
+            ->count(2),
             ['joined_at' => Carbon::now()]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
@@ -155,23 +159,15 @@ class TagTeamFactory extends Factory
         return $this->state([
             'status' => TagTeamStatus::RELEASED,
         ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasAttached(
-            Wrestler::factory()->count(2)
+            ->hasAttached(
+                Wrestler::factory()
+                ->count(2)
                 ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end]),
             ['joined_at' => $start]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
             $tagTeam->currentWrestlers->each->save();
-        });
-    }
-
-    public function withoutWrestlers(): self
-    {
-        return $this->state([
-            'status' => TagTeamStatus::UNEMPLOYED,
-        ])->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
         });
     }
 

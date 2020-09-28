@@ -6,6 +6,8 @@ use App\Enums\Role;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReinstatedException;
+use App\Http\Controllers\TagTeams\ReinstateController;
+use App\Http\Requests\TagTeams\ReinstateRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
@@ -26,7 +28,7 @@ class ReinstateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_reinstates_a_tag_team_and_redirects($administrators)
+    public function invoke_reinstates_a_suspended_tag_team_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -43,11 +45,20 @@ class ReinstateControllerTest extends TestCase
                 $now->toDateTimeString(),
                 $tagTeam->fresh()->suspensions()->latest()->first()->ended_at->toDateTimeString()
             );
-
             $tagTeam->currentWrestlers->each(
                 fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status)
             );
         });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            ReinstateController::class,
+            '__invoke',
+            ReinstateRequest::class
+        );
     }
 
     /** @test */
@@ -159,8 +170,11 @@ class ReinstateControllerTest extends TestCase
         $this->actAs($administrators);
 
         $tagTeam = TagTeam::factory()->suspended()->create();
-        $tagTeam->currentWrestlers->first()->reinstate();
-
+        $firstWrestler = $tagTeam->currentWrestlers->first();
+        $firstWrestler->reinstate();
+        $firstWrestler->save();
+        dd($firstWrestler);
+        dd($tagTeam->currentWrestlers->fresh());
         $this->reinstateRequest($tagTeam);
     }
 }
