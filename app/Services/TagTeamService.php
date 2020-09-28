@@ -2,8 +2,65 @@
 
 namespace App\Services;
 
+use App\Models\TagTeam;
+
 class TagTeamService
 {
+    /**
+     * Creates a new tag team.
+     *
+     * @param  array $data
+     * @return \App\Models\TagTeam
+     */
+    public function create(array $data): TagTeam
+    {
+        $tagTeam = TagTeam::create(['name' => $data['name'], 'signature_move' => $data['signature_move']]);
+
+        $this->addTagTeamPartners($tagTeam, $data['wrestlers']);
+
+        if ($data['started_at']) {
+            $tagTeam->employ($data['started_at']);
+        }
+
+        return $tagTeam;
+    }
+
+    /**
+     * Updates a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @param  array $data
+     * @return \App\Models\TagTeam
+     */
+    public function update(TagTeam $tagTeam, array $data): TagTeam
+    {
+        $tagTeam->update(['name' => $data['name'], 'signature_move' => $data['signature_move']]);
+
+        $this->updateTagTeamPartners($tagTeam, $data['wrestlers']);
+
+        if ($data['started_at'] && ! $tagTeam->isCurrentlyEmployed()) {
+            $tagTeam->employ($data['started_at']);
+        }
+
+        return $tagTeam;
+    }
+
+    /**
+     * Add tag team partners to a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @param  array $wrestlerIds
+     * @return \App\Models\TagTeam
+     */
+    public function addTagTeamPartners(TagTeam $tagTeam, array $wrestlerIds): TagTeam
+    {
+        if ($wrestlerIds) {
+            $tagTeam->addWrestlers($wrestlerIds, now());
+        }
+
+        return $tagTeam;
+    }
+
     /**
      * Update a tag team with tag team partners.
      *
@@ -11,7 +68,7 @@ class TagTeamService
      * @param  array $wrestlerIds
      * @return \App\Models\TagTeam
      */
-    public function updateTagTeamPartners($tagTeam, $wrestlerIds)
+    public function updateTagTeamPartners(TagTeam $tagTeam, array $wrestlerIds): TagTeam
     {
         if ($tagTeam->currentWrestlers->isEmpty()) {
             if ($wrestlerIds) {

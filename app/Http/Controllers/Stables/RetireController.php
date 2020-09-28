@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Stables;
 
-use App\Models\Stable;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Stables\RetireRequest;
+use App\Models\Stable;
 
 class RetireController extends Controller
 {
@@ -11,12 +12,11 @@ class RetireController extends Controller
      * Retire a stable.
      *
      * @param  \App\Models\Stable  $stable
+     * @param  \App\Http\Requests\Stables\RetireRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Stable $stable)
+    public function __invoke(Stable $stable, RetireRequest $request)
     {
-        $this->authorize('retire', $stable);
-
         $stable->retire();
 
         return redirect()->route('stables.index');

@@ -24,7 +24,6 @@ class RestoreControllerTest extends TestCase
      */
     public function invoke_restores_a_stable_and_redirects($administrators)
     {
-        $this->markTestIncomplete();
         $this->actAs($administrators);
         $stable = Stable::factory()->softDeleted()->create();
 
@@ -34,7 +33,6 @@ class RestoreControllerTest extends TestCase
         tap($stable->fresh(), function ($stable) {
             $this->assertEquals(StableStatus::UNACTIVATED, $stable->status);
             $this->assertNull($stable->fresh()->deleted_at);
-            $this->assertTrue($stable->previousMembers->every->is_bookable);
         });
     }
 

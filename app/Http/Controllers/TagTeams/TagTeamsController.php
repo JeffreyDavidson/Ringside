@@ -41,19 +41,12 @@ class TagTeamsController extends Controller
      * Create a new tag team.
      *
      * @param  \App\Http\Requests\TagTeams\StoreRequest  $request
+     * @param  \App\Services\TagTeamService  $tagTeamService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, TagTeamService $tagTeamService)
     {
-        $tagTeam = TagTeam::create($request->validatedExcept(['wrestlers', 'started_at']));
-
-        if ($request->filled('wrestlers')) {
-            $tagTeam->addWrestlers($request->input('wrestlers'), now());
-        }
-
-        if ($request->filled('started_at')) {
-            $tagTeam->employ($request->input('started_at'));
-        }
+        $tagTeamService->create($request->only(['name', 'signature_move', 'started_at', 'wrestlers']));
 
         return redirect()->route('tag-teams.index');
     }
@@ -96,13 +89,7 @@ class TagTeamsController extends Controller
      */
     public function update(UpdateRequest $request, TagTeam $tagTeam, TagTeamService $tagTeamService)
     {
-        $tagTeam->update($request->validatedExcept(['wrestlers', 'started_at']));
-
-        $tagTeamService->updateTagTeamPartners($tagTeam, $request->input('wrestlers'));
-
-        if ($request->filled('started_at') && ! $tagTeam->isCurrentlyEmployed()) {
-            $tagTeam->employ($request->input('started_at'));
-        }
+        $tagTeamService->update($tagTeam, $request->only(['name', 'signature_move', 'started_at', 'wrestlers']));
 
         return redirect()->route('tag-teams.index');
     }

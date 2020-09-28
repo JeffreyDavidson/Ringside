@@ -8,7 +8,9 @@ use App\Exceptions\CannotBeReinstatedException;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Concerns\CanBeStableMember;
 use Exception;
+use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,6 +19,8 @@ class TagTeam extends Model
 {
     use SoftDeletes,
         HasFactory,
+        HasMorphToOne,
+        CanBeStableMember,
         Concerns\Unguarded;
 
     /**
@@ -34,6 +38,13 @@ class TagTeam extends Model
     protected $casts = [
         'status' => TagTeamStatus::class,
     ];
+
+    /**
+     * All of the relationships to be touched.
+     *
+     * @var array
+     */
+    protected $touches = ['currentWrestlers'];
 
     /**
      * Get the user belonging to the tag team.
@@ -77,39 +88,6 @@ class TagTeam extends Model
     public function previousWrestlers()
     {
         return $this->wrestlers()
-                    ->whereNotNull('left_at');
-    }
-
-    /**
-     * Get the stables the tag team have been members of.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
-     */
-    public function stables()
-    {
-        return $this->morphToMany(Stable::class, 'member');
-    }
-
-    /**
-     * Get the current stable the tag team is a member of.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
-     */
-    public function currentStable()
-    {
-        return $this->stables()
-                    ->whereNull('left_at')
-                    ->limit(1);
-    }
-
-    /**
-     * Get the previous stables the tag team has been a member of.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
-     */
-    public function previousStables()
-    {
-        return $this->stalbes()
                     ->whereNotNull('left_at');
     }
 
@@ -396,6 +374,10 @@ class TagTeam extends Model
             throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have an active employment.');
         }
 
+        if ($this->hasFutureEmployment() && $this->currentWrestlers->count() !== self::MAX_WRESTLERS_COUNT) {
+            throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have 2 tag team partners.');
+        }
+
         return true;
     }
 
@@ -519,7 +501,7 @@ class TagTeam extends Model
         if ($this->canBeRetired()) {
             $retiredDate = $retiredAt ?: now();
 
-            if ($this->is_suspended) {
+            if ($this->isSuspended()) {
                 $this->reinstate($retiredAt);
                 $this->currentWrestlers->each->reinstate($retiredAt);
             }
@@ -717,9 +699,10 @@ class TagTeam extends Model
             $reinstatedDate = $reinstatedAt ?: now();
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-            $this->currentWrestlers->every->reinstate($reinstatedDate);
+            $this->currentWrestlers->each->reinstate($reinstatedDate);
+            $this->touch();
 
-            return $this->touch();
+            return $this;
         }
     }
 

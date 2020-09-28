@@ -14,7 +14,7 @@ class WrestlerCanJoinStable implements Rule
     protected $stable;
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @param \App\Models\Stable $stable
      */
@@ -33,12 +33,13 @@ class WrestlerCanJoinStable implements Rule
     public function passes($attribute, $value)
     {
         $wrestler = Wrestler::find($value);
+        // dd($wrestler);
 
         if (! $wrestler) {
             return false;
         }
 
-        if (!data_get($wrestler, 'currentEmployment.started_at')) {
+        if (! data_get($wrestler, 'currentEmployment.started_at')) {
             return false;
         }
 
@@ -46,13 +47,13 @@ class WrestlerCanJoinStable implements Rule
             return false;
         }
 
-        if (!$wrestler->is_bookable) {
+        if (! $wrestler->isBookable()) {
             return false;
         }
 
         // We need to to make sure the wrestler isn't in any
         // bookable stables excluding the current stable.
-        if ($wrestler->stables()->bookable()->whereKeyNot($this->stable->id)->exists()) {
+        if ($wrestler->currentStable) {
             return false;
         }
 

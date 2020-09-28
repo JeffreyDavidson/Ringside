@@ -27,8 +27,6 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
-        // dd($this->all());
-
         return [
             'name' => ['required', 'string', Rule::unique('tag_teams')->ignore($this->tag_team->id)],
             'signature_move' => ['nullable', 'string'],

@@ -134,6 +134,10 @@ class StablePolicy
      */
     public function view(User $user, Stable $stable)
     {
+        if (! is_null($stable->user) && $stable->user->is($user)) {
+            return true;
+        }
+
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }

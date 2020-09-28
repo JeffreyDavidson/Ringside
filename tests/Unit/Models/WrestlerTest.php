@@ -5,6 +5,7 @@ namespace Tests\Unit\Models;
 use App\Enums\WrestlerStatus;
 use App\Models\SingleRosterMember;
 use App\Models\Wrestler;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -14,6 +15,8 @@ use Tests\TestCase;
  */
 class WrestlerTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test */
     public function a_wrestler_has_a_name()
     {
@@ -72,27 +75,9 @@ class WrestlerTest extends TestCase
     }
 
     /** @test */
-    public function a_wrestler_uses_has_a_height_trait()
-    {
-        $this->assertUsesTrait('App\Models\Concerns\HasAHeight', Wrestler::class);
-    }
-
-    /** @test */
     public function a_wrestler_uses_can_be_stable_member_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeStableMember', Wrestler::class);
-    }
-
-    /** @test */
-    public function a_wrestler_uses_can_be_tag_team_partner_trait()
-    {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeTagTeamPartner', Wrestler::class);
-    }
-
-    /** @test */
-    public function a_wrestler_uses_can_be_booked_trait()
-    {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeBooked', Wrestler::class);
     }
 
     /** @test */
@@ -105,5 +90,15 @@ class WrestlerTest extends TestCase
     public function a_wrestler_is_a_single_roster_member()
     {
         $this->assertEquals(SingleRosterMember::class, get_parent_class(Wrestler::class));
+    }
+
+    /** @test */
+    public function a_suspended_wrestler_can_be_reinstated()
+    {
+        $wrestler = Wrestler::factory()->suspended()->create();
+
+        $wrestler->reinstate();
+
+        dd($wrestler->fresh()->load('employments', 'suspensions'));
     }
 }

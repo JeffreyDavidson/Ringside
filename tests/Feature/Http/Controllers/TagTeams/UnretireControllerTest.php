@@ -45,6 +45,16 @@ class UnretireControllerTest extends TestCase
     }
 
     /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            UnretireController::class,
+            '__invoke',
+            UnretireRequest::class
+        );
+    }
+
+    /** @test */
     public function a_basic_user_cannot_unretire_a_tag_team()
     {
         $this->actAs(Role::BASIC);
@@ -59,16 +69,6 @@ class UnretireControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this->unretireRequest($tagTeam)->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(
-            UnretireController::class,
-            '__invoke',
-            UnretireRequest::class
-        );
     }
 
     /**

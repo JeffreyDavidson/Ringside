@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StableStatus;
+use App\Exceptions\CannotBeRetiredException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -97,6 +98,20 @@ class Stable extends Model
         return $this->tagTeams()->whereNotNull('left_at');
     }
 
+    public function addWrestlers($wrestlerIds, $joinedDate)
+    {
+        foreach ($wrestlerIds as $wrestlerId) {
+            $this->wrestlers()->attach($wrestlerId, ['joined_at' => $joinedDate]);
+        }
+    }
+
+    public function addTagTeams($tagTeamIds, $joinedDate)
+    {
+        foreach ($tagTeamIds as $tagTeamId) {
+            $this->tagTeams()->attach($tagTeamId, ['joined_at' => $joinedDate]);
+        }
+    }
+
     /**
      * Get the members belonging to the stable.
      *
@@ -163,17 +178,19 @@ class Stable extends Model
      */
     public function retire()
     {
-        if ($this->is_suspended) {
-            $this->reinstate();
+        if ($this->canBeRetired()) {
+            if ($this->is_suspended) {
+                $this->reinstate();
+            }
+
+            $this->retirements()->create(['started_at' => now()]);
+
+            $this->currentWrestlers->each->retire();
+
+            $this->currentTagTeams->each->retire();
+
+            return $this->touch();
         }
-
-        $this->retirements()->create(['started_at' => now()]);
-
-        $this->currentWrestlers->each->retire();
-
-        $this->currentTagTeams->each->retire();
-
-        return $this->touch();
     }
 
     /**
@@ -235,5 +252,23 @@ class Stable extends Model
     public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
     {
         return $query->orderByRaw("DATE(current_retired_at) $direction");
+    }
+
+    /**
+     * Determine if the tag team can be retired.
+     *
+     * @return bool
+     */
+    public function canBeRetired()
+    {
+        if ($this->isUnactivated() || $this->hasFutureActivation()) {
+            throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
+        }
+
+        if ($this->isRetired()) {
+            throw new CannotBeRetiredException('Stable cannot be retired. This Stable is retired.');
+        }
+
+        return true;
     }
 }

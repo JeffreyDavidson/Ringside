@@ -27,13 +27,15 @@ class StoreRequest extends FormRequest
      */
     public function rules()
     {
+        // dd($this->all());
+
         return [
             'name' => ['required', 'string', Rule::unique('stables', 'name')],
             'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
-            'wrestlers' => ['array', Rule::requiredIf(fn () => count($this->tagteams) <= 1)],
-            'tagteams' => ['array', Rule::requiredIf(fn () => count($this->wrestlers) <= 2)],
+            'wrestlers' => ['array', Rule::requiredIf(fn () => count($this->tag_teams) <= 1)],
+            'tag_teams' => ['array', Rule::requiredIf(fn () => count($this->wrestlers) <= 2)],
             'wrestlers.*' => ['bail', 'integer', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinStable(new Stable)],
-            'tagteams.*' => ['bail', 'integer', Rule::exists('tag_teams', 'id'), new TagTeamCanJoinStable(new Stable)],
+            'tag_teams.*' => ['bail', 'integer', Rule::exists('tag_teams', 'id'), new TagTeamCanJoinStable(new Stable)],
         ];
     }
 

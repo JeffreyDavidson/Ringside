@@ -14,8 +14,7 @@ trait CanBeStableMember
      */
     public function stables()
     {
-        return $this->morphToMany(Stable::class, 'member')
-                    ->using(Member::class);
+        return $this->morphToMany(Stable::class, 'member', 'stable_members');
     }
 
     /**
@@ -25,7 +24,7 @@ trait CanBeStableMember
      */
     public function currentStable()
     {
-        return $this->morphOne(Stable::class, 'members')
+        return $this->morphToOne(Stable::class, 'member', 'stable_members')
                     ->wherePivot('joined_at', '<=', now())
                     ->wherePivot('left_at', '=', null)
                     ->limit(1);

@@ -32,14 +32,14 @@ class StableControllerTest extends TestCase
      */
     private function validParams($overrides = [])
     {
-        $wrestlers = Wrestler::factory()->bookable()->times(1)->create();
-        $tagTeam = TagTeam::factory()->bookable()->times(1)->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
         return array_replace([
             'name' => 'Example Stable Name',
             'started_at' => now()->toDateTimeString(),
-            'wrestlers' => [$wrestlers->pluck('id')],
-            'tagteams' => [$tagTeam->pluck('id')],
+            'wrestlers' => $overrides['wrestlers'] ?? [$wrestler->id],
+            'tag_teams' => $overrides['tag_teams'] ?? $tagTeam->pluck('id')->toArray(),
         ], $overrides);
     }
 
@@ -98,12 +98,10 @@ class StableControllerTest extends TestCase
         $this->actAs($administrators);
 
         $response = $this->storeRequest('stables', $this->validParams());
-        dd($response);
 
         $response->assertRedirect(route('stables.index'));
         tap(Stable::first(), function ($stable) {
-            $this->assertEquals('Example Tag Team Name', $stable->name);
-            $this->assertEquals('The Finisher', $stable->signature_move);
+            $this->assertEquals('Example Stable Name', $stable->name);
         });
     }
 
@@ -111,14 +109,14 @@ class StableControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function an_employment_is_not_created_for_the_stable_if_started_at_is_filled_in_request($administrators)
+    public function an_activation_is_not_created_for_the_stable_if_started_at_is_not_filled_in_request($administrators)
     {
         $this->actAs($administrators);
 
         $this->storeRequest('stables', $this->validParams(['started_at' => null]));
 
         tap(Stable::first(), function ($stable) {
-            $this->assertCount(0, $stable->employments);
+            $this->assertCount(0, $stable->activations);
         });
     }
 
@@ -126,7 +124,7 @@ class StableControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function an_employment_is_created_for_the_stable_if_started_at_is_filled_in_request($administrators)
+    public function an_activation_is_created_for_the_stable_if_started_at_is_filled_in_request($administrators)
     {
         $startedAt = now()->toDateTimeString();
 
@@ -135,8 +133,8 @@ class StableControllerTest extends TestCase
         $this->storeRequest('stables', $this->validParams(['started_at' => $startedAt]));
 
         tap(Stable::first(), function ($stable) use ($startedAt) {
-            $this->assertCount(1, $stable->employments);
-            $this->assertEquals($startedAt, $stable->employments->first()->started_at->toDateTimeString());
+            $this->assertCount(1, $stable->activations);
+            $this->assertEquals($startedAt, $stable->activations->first()->started_at->toDateTimeString());
         });
     }
 
@@ -147,7 +145,7 @@ class StableControllerTest extends TestCase
         Carbon::setTestNow($now);
 
         $this->actAs(Role::ADMINISTRATOR);
-        $createdWrestlers = Wrestler::factory()->bookable()->times(3)->create();
+        $createdWrestlers = Wrestler::factory()->count(3)->bookable()->create();
 
         $this->post(route('stables.store'), $this->validParams([
             'started_at' => $now->toDateTimeString(),
@@ -164,15 +162,15 @@ class StableControllerTest extends TestCase
     public function tag_teams_are_added_to_stable_if_present()
     {
         $this->actAs(Role::ADMINISTRATOR);
-        $createdTagTeams = TagTeam::factory()->bookable()->times(3)->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
         $this->post(route('stables.store'), $this->validParams([
-            'tagteams' => $createdTagTeams->modelKeys(),
+            'tag_teams' => [$tagTeam->getKey()],
         ]));
 
-        tap(Stable::first()->currentTagTeams, function ($tagTeams) use ($createdTagTeams) {
-            $this->assertCount(3, $tagTeams);
-            $this->assertEquals($tagTeams->modelKeys(), $createdTagTeams->modelKeys());
+        tap(Stable::first()->currentTagTeams, function ($tagTeams) use ($tagTeam) {
+            $this->assertCount(1, $tagTeams);
+            $this->assertTrue($tagTeams->contains($tagTeam));
         });
     }
 
@@ -346,8 +344,7 @@ class StableControllerTest extends TestCase
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) {
-            $this->assertEquals('Example Tag Team Name', $stable->name);
-            $this->assertEquals('The Finisher', $stable->signature_move);
+            $this->assertEquals('Example Stable Name', $stable->name);
         });
     }
 
