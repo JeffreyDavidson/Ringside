@@ -778,10 +778,30 @@ class TagTeam extends Model
             return false;
         }
 
-        if (! $this->currentWrestlers->each->isBookable()) {
+        if (! $this->partnersAreBookable()) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Check to see if the tag team is unbookable.
+     *
+     * @return bool
+     */
+    public function isUnbookable()
+    {
+        return ! $this->isBookable();
+    }
+
+    /**
+     * Find out if both tag team partners are bookable.
+     *
+     * @return bool
+     */
+    public function partnersAreBookable()
+    {
+        return $this->currentWrestlers->every->isBookable();
     }
 }

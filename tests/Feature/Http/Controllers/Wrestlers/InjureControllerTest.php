@@ -3,10 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Wrestlers\InjureController;
 use App\Http\Requests\Wrestlers\InjureRequest;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,6 +46,24 @@ class InjureControllerTest extends TestCase
             $this->assertCount(1, $wrestler->injuries);
             $this->assertEquals($now->toDateTimeString(), $wrestler->injuries->first()->started_at->toDateTimeString());
         });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function injuring_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    {
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestler = $tagTeam->currentWrestlers()->first();
+
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
+
+        $response = $this->injureRequest($wrestler);
+
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
 
     /** @test */
