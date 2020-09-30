@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\WrestlerStatus;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,6 +26,8 @@ class WrestlerFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => null,
+            'current_tag_team_id' => null,
             'name' => $this->faker->name,
             'height' => $this->faker->numberBetween(60, 95),
             'weight' => $this->faker->numberBetween(180, 500),

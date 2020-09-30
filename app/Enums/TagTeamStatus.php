@@ -6,6 +6,7 @@ use MadWeb\Enum\Enum;
 
 /**
  * @method static TagTeamStatus BOOKABLE()
+ * @method static TagTeamStatus UNBOOKABLE()
  * @method static TagTeamStatus FUTURE_EMPLOYMENT()
  * @method static TagTeamStatus RELEASED()
  * @method static TagTeamStatus RETIRED()
@@ -17,6 +18,7 @@ final class TagTeamStatus extends Enum
     const __default = self::UNEMPLOYED;
 
     const BOOKABLE = 'bookable';
+    const UNBOOKABLE = 'unbookable';
     const FUTURE_EMPLOYMENT = 'future-employment';
     const RELEASED = 'released';
     const RETIRED = 'retired';

@@ -4,9 +4,10 @@ namespace App\Models;
 
 use App\Enums\ManagerStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manager extends SingleRosterMember
+class Manager extends Model
 {
     use SoftDeletes,
         HasFactory,

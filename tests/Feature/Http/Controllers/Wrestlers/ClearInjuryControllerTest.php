@@ -3,10 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Requests\Wrestlers\ClearInjuryRequest;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,6 +49,25 @@ class ClearInjuryControllerTest extends TestCase
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertEquals($now->toDateTimeString(), $wrestler->injuries->first()->ended_at->toDateTimeString());
         });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function clearing_an_injured_wrestler_on_an_unbookable_tag_team_makes_tag_team_bookable($administrators)
+    {
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestler = $tagTeam->currentWrestlers()->first();
+        $wrestler->injure();
+
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
+
+        $response = $this->clearInjuryRequest($wrestler);
+
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
     }
 
     /** @test */
