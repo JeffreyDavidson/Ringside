@@ -3,12 +3,14 @@ recipe: laravel
 services:
   database:
     portforward: 3306
+  appserver:
+    webroot: webroot
+    xdebug: true
+    config:
+      php: .vscode/php.ini
 config:
   webroot: public
-  php: '7.4'
   database: mysql:5.7
-  cache: redis
-  xdebug: true
 tooling:
   reseed:
     service: appserver
@@ -32,3 +34,6 @@ tooling:
     service: appserver
     description: "Run PHP Unit tests: lando phpunit"
     cmd: "vendor/bin/phpunit --testsuite Feature --coverage-html tests/coverage"
+  phpunitdebug:
+    service: appserver
+    cmd: php -d xdebug.remote_port=9000 vendor/bin/phpunit
