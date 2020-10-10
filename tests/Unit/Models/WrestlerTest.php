@@ -98,7 +98,5 @@ class WrestlerTest extends TestCase
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $wrestler->reinstate();
-
-        dd($wrestler->fresh()->load('employments', 'suspensions'));
     }
 }

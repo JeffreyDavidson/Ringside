@@ -903,7 +903,6 @@ class Wrestler extends Model
             $this->save();
 
             if ($this->currentTagTeam && $this->currentTagTeam->isUnBookable()) {
-                dd('testing');
                 $this->currentTagTeam->save();
             }
 

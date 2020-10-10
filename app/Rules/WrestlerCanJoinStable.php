@@ -33,7 +33,6 @@ class WrestlerCanJoinStable implements Rule
     public function passes($attribute, $value)
     {
         $wrestler = Wrestler::find($value);
-        // dd($wrestler);
 
         if (! $wrestler) {
             return false;
