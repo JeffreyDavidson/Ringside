@@ -13,7 +13,7 @@ class SuspensionFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Suspension::class;
+    protected $modelClass = Suspension::class;
 
     /**
      * Define the model's default state.

@@ -1,16 +1,12 @@
 name: Ringside
 recipe: laravel
-services:
-  database:
-    portforward: 3306
-  appserver:
-    webroot: webroot
-    xdebug: true
-    config:
-      php: .vscode/php.ini
 config:
+  php: '7.3'
   webroot: public
   database: mysql:5.7
+  xdebug: true
+  config:
+    php: .vscode/php.ini
 tooling:
   reseed:
     service: appserver

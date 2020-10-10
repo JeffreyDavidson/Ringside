@@ -16,7 +16,7 @@ class WrestlerFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Wrestler::class;
+    protected $modelClass = Wrestler::class;
 
     /**
      * Define the model's default state.

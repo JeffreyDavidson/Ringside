@@ -15,7 +15,7 @@ class TitleFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Title::class;
+    protected $modelClass = Title::class;
 
     /**
      * Define the model's default state.

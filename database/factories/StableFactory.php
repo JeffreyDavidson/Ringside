@@ -17,7 +17,7 @@ class StableFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Stable::class;
+    protected $modelClass = Stable::class;
 
     /**
      * Define the model's default state.

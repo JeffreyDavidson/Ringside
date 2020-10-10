@@ -13,7 +13,7 @@ class VenueFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Venue::class;
+    protected $modelClass = Venue::class;
 
     /**
      * Define the model's default state.

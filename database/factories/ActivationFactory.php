@@ -13,7 +13,7 @@ class ActivationFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Activation::class;
+    protected $modelClass = Activation::class;
 
     /**
      * Define the model's default state.
