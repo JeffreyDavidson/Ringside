@@ -27,8 +27,6 @@ class StoreRequest extends FormRequest
      */
     public function rules()
     {
-        // dd($this->all());
-
         return [
             'name' => ['required', 'string', Rule::unique('stables', 'name')],
             'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
