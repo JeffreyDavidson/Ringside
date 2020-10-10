@@ -16,7 +16,7 @@ class TagTeamFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = TagTeam::class;
+    protected $modelClass = TagTeam::class;
 
     /**
      * Define the model's default state.

@@ -5,22 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Listen for XDebug",
-            "type": "php",
-            "request": "launch",
-            "port": 9000,
-            "log": true,
-            "pathMappings": {
-                "/app/": "${workspaceFolder}/",
-            }
+          "name": "Listen for XDebug",
+          "type": "php",
+          "request": "launch",
+          "port": 9000,
+          "log": false,
+          "pathMappings": {
+            "/app/": "${workspaceFolder}/",
+          }
         },
         {
-            "name": "Launch currently open script",
+            "name": "PhpUnit dummy",
             "type": "php",
             "request": "launch",
-            "program": "${file}",
-            "cwd": "${fileDirname}",
-            "port": 9003
+            "port": 9001,
         },
+    ],
+    "compounds": [
+        {
+            "name": "PhpUnit",
+            "configurations": ["Listen for XDebug", "PhpUnit dummy"]
+        }
     ]
 }

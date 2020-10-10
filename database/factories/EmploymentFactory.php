@@ -13,7 +13,7 @@ class EmploymentFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Employment::class;
+    protected $modelClass = Employment::class;
 
     /**
      * Define the model's default state.

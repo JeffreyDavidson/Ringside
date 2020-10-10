@@ -14,7 +14,7 @@ class ManagerFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Manager::class;
+    protected $modelClass = Manager::class;
 
     /**
      * Define the model's default state.

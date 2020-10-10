@@ -13,7 +13,7 @@ class RetirementFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Retirement::class;
+    protected $modelClass = Retirement::class;
 
     /**
      * Define the model's default state.

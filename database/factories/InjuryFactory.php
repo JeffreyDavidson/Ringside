@@ -13,7 +13,7 @@ class InjuryFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Injury::class;
+    protected $modelClass = Injury::class;
 
     /**
      * Define the model's default state.

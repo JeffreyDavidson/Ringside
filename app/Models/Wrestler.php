@@ -16,6 +16,7 @@ use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class Wrestler extends Model
 {
@@ -874,11 +875,12 @@ class Wrestler extends Model
             $this->injuries()->create(['started_at' => $injuredDate]);
             $this->save();
 
-            // dd($this->currentTagTeam->isBookable());
+            Log::info('Wrestler status is', [$this->status]);
             if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
-                // dd($this->currentTagTeam->wrestlers);
                 $this->currentTagTeam->save();
-                // dd($this->currentTagTeam);
+
+                $this->currentTagTeam->refresh();
+                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;

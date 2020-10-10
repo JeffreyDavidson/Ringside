@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\TagTeamStatus;
 use App\Models\TagTeam;
+use Illuminate\Support\Facades\Log;
 
 class TagTeamObserver
 {

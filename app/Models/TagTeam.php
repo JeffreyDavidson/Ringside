@@ -14,6 +14,7 @@ use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class TagTeam extends Model
 {
@@ -802,6 +803,8 @@ class TagTeam extends Model
      */
     public function partnersAreBookable()
     {
+        Log::info('Tag Team partners are bookable', [$this->currentWrestlers->every->isBookable()]);
+
         return $this->currentWrestlers->every->isBookable();
     }
 }

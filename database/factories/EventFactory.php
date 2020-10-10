@@ -15,7 +15,7 @@ class EventFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Event::class;
+    protected $modelClass = Event::class;
 
     /**
      * Define the model's default state.

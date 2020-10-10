@@ -45,9 +45,9 @@ class ReinstateControllerTest extends TestCase
                 $now->toDateTimeString(),
                 $tagTeam->fresh()->suspensions()->latest()->first()->ended_at->toDateTimeString()
             );
-            $tagTeam->currentWrestlers->each(
-                fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status)
-            );
+            // $tagTeam->currentWrestlers->each(
+            //     fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status)
+            // );
         });
     }
 
@@ -173,8 +173,7 @@ class ReinstateControllerTest extends TestCase
         $firstWrestler = $tagTeam->currentWrestlers->first();
         $firstWrestler->reinstate();
         $firstWrestler->save();
-        dd($firstWrestler);
-        dd($tagTeam->currentWrestlers->fresh());
+
         $this->reinstateRequest($tagTeam);
     }
 }

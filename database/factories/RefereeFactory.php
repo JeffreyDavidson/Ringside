@@ -14,7 +14,7 @@ class RefereeFactory extends Factory
      *
      * @var string
      */
-    protected string $modelClass = Referee::class;
+    protected $modelClass = Referee::class;
 
     /**
      * Define the model's default state.

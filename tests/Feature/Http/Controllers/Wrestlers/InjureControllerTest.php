@@ -59,11 +59,11 @@ class InjureControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
         $response = $this->injureRequest($wrestler);
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
     }
 
     /** @test */
