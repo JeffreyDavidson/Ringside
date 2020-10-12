@@ -3,10 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Wrestlers\ReinstateController;
 use App\Http\Requests\Wrestlers\ReinstateRequest;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,6 +48,25 @@ class ReinstateControllerTest extends TestCase
             $this->assertCount(1, $wrestler->suspensions);
             $this->assertEquals($now->toDateTimeString(), $wrestler->suspensions->first()->ended_at->toDateTimeString());
         });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function reinstating_a_suspended_wrestler_on_an_unbookable_tag_team_makes_tag_team_bookable($administrators)
+    {
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestler = $tagTeam->currentWrestlers()->first();
+        $wrestler->suspend();
+
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
+
+        $response = $this->reinstateRequest($wrestler);
+
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
     }
 
     /** @test */
