@@ -3,10 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Wrestlers\SuspendController;
 use App\Http\Requests\Wrestlers\SuspendRequest;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,6 +46,24 @@ class SuspendControllerTest extends TestCase
             $this->assertCount(1, $wrestler->suspensions);
             $this->assertEquals($now->toDateTimeString(), $wrestler->suspensions->first()->started_at->toDateTimeString());
         });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function suspending_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    {
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestler = $tagTeam->currentWrestlers()->first();
+
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+
+        $response = $this->suspendRequest($wrestler);
+
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
     }
 
     /** @test */

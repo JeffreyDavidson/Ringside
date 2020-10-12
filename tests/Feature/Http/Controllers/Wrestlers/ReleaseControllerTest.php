@@ -3,10 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Wrestlers\ReleaseController;
 use App\Http\Requests\Wrestlers\ReleaseRequest;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -90,6 +92,24 @@ class ReleaseControllerTest extends TestCase
             $this->assertEquals($now->toDateTimeString(), $wrestler->employments->first()->ended_at->toDateTimeString());
             $this->assertEquals($now->toDateTimeString(), $wrestler->suspensions->first()->ended_at->toDateTimeString());
         });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function releasing_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    {
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestler = $tagTeam->currentWrestlers()->first();
+
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+
+        $response = $this->releaseRequest($wrestler);
+
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
     }
 
     /** @test */

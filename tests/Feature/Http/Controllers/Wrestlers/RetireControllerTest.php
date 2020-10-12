@@ -3,10 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Wrestlers\RetireController;
 use App\Http\Requests\Wrestlers\RetireRequest;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -88,6 +90,24 @@ class RetireControllerTest extends TestCase
             $this->assertCount(1, $wrestler->retirements);
             $this->assertEquals($now->toDateTimeString(), $wrestler->retirements->first()->started_at->toDateTimeString());
         });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function retiring_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    {
+        $this->actAs($administrators);
+
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $wrestler = $tagTeam->currentWrestlers()->first();
+
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+
+        $response = $this->retireRequest($wrestler);
+
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
     }
 
     /** @test */

@@ -336,6 +336,14 @@ class Wrestler extends Model
 
             $this->save();
 
+            Log::info('Wrestler status is', [$this->status]);
+            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+                $this->currentTagTeam->save();
+
+                $this->currentTagTeam->refresh();
+                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
+            }
+
             return $this;
         }
     }
@@ -348,6 +356,11 @@ class Wrestler extends Model
     public function isCurrentlyEmployed()
     {
         return $this->currentEmployment()->exists();
+    }
+
+    public function isNotInEmployment()
+    {
+        return $this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment() || $this->isRetired();
     }
 
     /**
@@ -408,7 +421,7 @@ class Wrestler extends Model
      */
     public function canBeReleased()
     {
-        if (! $this->isCurrentlyEmployed() || $this->hasFutureEmployment() || $this->isReleased() || $this->isRetired()) {
+        if ($this->isNotInEmployment()) {
             throw new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.');
         }
 
@@ -536,6 +549,14 @@ class Wrestler extends Model
 
             $this->save();
 
+            Log::info('Wrestler status is', [$this->status]);
+            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+                $this->currentTagTeam->save();
+
+                $this->currentTagTeam->refresh();
+                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
+            }
+
             return $this;
         }
     }
@@ -580,12 +601,8 @@ class Wrestler extends Model
      */
     public function canBeRetired()
     {
-        if ($this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment()) {
+        if ($this->isNotInEmployment()) {
             throw new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active employment.');
-        }
-
-        if ($this->isRetired()) {
-            throw new CannotBeRetiredException('Entity cannot be retired. This entity is retired.');
         }
 
         return true;
@@ -704,6 +721,14 @@ class Wrestler extends Model
 
             $this->save();
 
+            Log::info('Wrestler status is', [$this->status]);
+            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+                $this->currentTagTeam->save();
+
+                $this->currentTagTeam->refresh();
+                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
+            }
+
             return $this;
         }
     }
@@ -721,7 +746,13 @@ class Wrestler extends Model
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
 
-            $this->touch();
+            Log::info('Wrestler status is', [$this->status]);
+            if (optional($this->currentTagTeam)->isBookable()) {
+                $this->currentTagTeam->touch();
+
+                $this->currentTagTeam->refresh();
+                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
+            }
 
             return $this;
         }
@@ -744,16 +775,12 @@ class Wrestler extends Model
      */
     public function canBeSuspended()
     {
-        if ($this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment()) {
+        if ($this->isNotInEmployment()) {
             throw new CannotBeSuspendedException('Entity cannot be suspended. This entity does not have an active employment.');
         }
 
         if ($this->isSuspended()) {
             throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently suspended.');
-        }
-
-        if ($this->isRetired()) {
-            throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently retired.');
         }
 
         if ($this->isInjured()) {
@@ -876,8 +903,8 @@ class Wrestler extends Model
             $this->save();
 
             Log::info('Wrestler status is', [$this->status]);
-            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
-                $this->currentTagTeam->save();
+            if (optional($this->currentTagTeam)->isBookable()) {
+                $this->currentTagTeam->touch();
 
                 $this->currentTagTeam->refresh();
                 Log::info('Tag Team status is', [$this->currentTagTeam->status]);
@@ -902,8 +929,12 @@ class Wrestler extends Model
 
             $this->save();
 
-            if ($this->currentTagTeam && $this->currentTagTeam->isUnBookable()) {
+            Log::info('Wrestler status is', [$this->status]);
+            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
                 $this->currentTagTeam->save();
+
+                $this->currentTagTeam->refresh();
+                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -927,7 +958,7 @@ class Wrestler extends Model
      */
     public function canBeInjured()
     {
-        if ($this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment() || $this->isRetired()) {
+        if ($this->isNotInEmployment()) {
             throw new CannotBeInjuredException('Entity cannot be injured. This entity does not have an active employment.');
         }
 
