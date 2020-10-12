@@ -32,6 +32,13 @@ class TagTeam extends Model
     const MAX_WRESTLERS_COUNT = 2;
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['currentWrestlers'];
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -39,13 +46,6 @@ class TagTeam extends Model
     protected $casts = [
         'status' => TagTeamStatus::class,
     ];
-
-    /**
-     * All of the relationships to be touched.
-     *
-     * @var array
-     */
-    protected $touches = ['currentWrestlers'];
 
     /**
      * Get the user belonging to the tag team.
@@ -332,6 +332,11 @@ class TagTeam extends Model
         return $this->currentEmployment()->exists();
     }
 
+    public function isNotInEmployment()
+    {
+        return $this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment() || $this->isRetired();
+    }
+
     /**
      * Check to see if the tag team is unemployed.
      *
@@ -389,7 +394,7 @@ class TagTeam extends Model
      */
     public function canBeReleased()
     {
-        if (! $this->isCurrentlyEmployed() || $this->hasFutureEmployment() || $this->isReleased() || $this->isRetired()) {
+        if ($this->isNotInEmployment()) {
             throw new CannotBeEmployedException('Entity cannot be released. This entity does not have an active employment.');
         }
 
@@ -775,7 +780,7 @@ class TagTeam extends Model
      */
     public function isBookable()
     {
-        if ($this->isUnemployed() || $this->isSuspended() || $this->isRetired() || $this->hasFutureEmployment()) {
+        if ($this->isNotInEmployment()) {
             return false;
         }
 
@@ -804,7 +809,8 @@ class TagTeam extends Model
     public function partnersAreBookable()
     {
         Log::info('Tag Team partners are bookable', [$this->currentWrestlers->every->isBookable()]);
+        // dd($this->currentWrestlers->every->isBookable());
 
-        return $this->currentWrestlers->every->isBookable();
+        return $this->currentWrestlers->each->isBookable();
     }
 }

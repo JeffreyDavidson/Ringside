@@ -902,11 +902,14 @@ class Wrestler extends Model
             $this->injuries()->create(['started_at' => $injuredDate]);
             $this->save();
 
-            Log::info('Wrestler status is', [$this->status]);
+            // dd($this->currentTagTeam->isBookable());
+            // dd($this->currentTagTeam->currentWrestlers);
             if (optional($this->currentTagTeam)->isBookable()) {
                 $this->currentTagTeam->touch();
 
                 $this->currentTagTeam->refresh();
+                // dd($this->currentTagTeam);
+                // dd($this->currentTagTeam);
                 Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
