@@ -40,16 +40,13 @@ class TagTeamFactory extends Factory
         ->hasAttached(
             Wrestler::factory()
                 ->count(2)
-                ->bookable()
-                ->hasEmployments(1, ['started_at' => Carbon::now()->subMonths(1)]
-            ),
+                ->bookable(),
             ['joined_at' => Carbon::yesterday()]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
             $tagTeam->wrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
             $tagTeam->load('employments');
-            $tagTeam->load('wrestlers');
             $tagTeam->load('currentWrestlers');
         });
     }

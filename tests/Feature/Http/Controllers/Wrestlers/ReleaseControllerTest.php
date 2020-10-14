@@ -109,7 +109,7 @@ class ReleaseControllerTest extends TestCase
 
         $response = $this->releaseRequest($wrestler);
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
 
     /** @test */

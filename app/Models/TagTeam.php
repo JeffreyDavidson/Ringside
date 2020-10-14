@@ -808,9 +808,12 @@ class TagTeam extends Model
      */
     public function partnersAreBookable()
     {
-        Log::info('Tag Team partners are bookable', [$this->currentWrestlers->every->isBookable()]);
-        // dd($this->currentWrestlers->every->isBookable());
+        foreach ($this->currentWrestlers as $wrestler) {
+            if (! $wrestler->isBookable()) {
+                return false;
+            }
+        }
 
-        return $this->currentWrestlers->each->isBookable();
+        return true;
     }
 }
