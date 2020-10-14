@@ -336,7 +336,6 @@ class Wrestler extends Model
 
             if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
-
                 $this->currentTagTeam->refresh();
             }
 
@@ -542,17 +541,15 @@ class Wrestler extends Model
             }
 
             $retiredDate = $retiredAt ?: now();
-            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
 
+            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
             $this->save();
 
             $this->retirements()->create(['started_at' => $retiredDate]);
-
             $this->save();
 
             if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
-
                 $this->currentTagTeam->refresh();
             }
 
@@ -572,11 +569,9 @@ class Wrestler extends Model
             $unretiredDate = $unretiredAt ?: now();
 
             $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-
             $this->save();
 
             $this->employments()->create(['started_at' => $unretiredDate]);
-
             $this->save();
 
             return $this;
@@ -717,12 +712,10 @@ class Wrestler extends Model
             $suspensionDate = $suspendedAt ?? now();
 
             $this->suspensions()->create(['started_at' => $suspensionDate]);
-
             $this->save();
 
             if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
-
                 $this->currentTagTeam->refresh();
             }
 
@@ -746,7 +739,6 @@ class Wrestler extends Model
 
             if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
-
                 $this->currentTagTeam->refresh();
             }
 
@@ -900,7 +892,6 @@ class Wrestler extends Model
 
             if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
-
                 $this->currentTagTeam->refresh();
             }
 
@@ -920,12 +911,10 @@ class Wrestler extends Model
             $recoveryDate = $recoveredAt ?? now();
 
             $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-
             $this->save();
 
             if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
-
                 $this->currentTagTeam->refresh();
             }
 

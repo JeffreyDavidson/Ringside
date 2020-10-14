@@ -9,7 +9,6 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\TagTeams\RetireController;
 use App\Http\Requests\TagTeams\RetireRequest;
 use App\Models\TagTeam;
-use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -35,6 +34,73 @@ class RetireControllerTest extends TestCase
 
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->bookable()->create();
+        // dd($tagTeam->first()->employments);
+
+        $response = $this->retireRequest($tagTeam);
+        dd($response);
+
+        $response->assertRedirect(route('tag-teams.index'));
+        tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
+            $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
+            $this->assertEquals(
+                $now->toDateTimeString(),
+                $tagTeam->retirements->first()->started_at->toDateTimeString()
+            );
+
+            $tagTeam->currentWrestlers->each(function ($wrestler) use ($now) {
+                $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
+                $this->assertEquals(
+                    $now->toDateTimeString(),
+                    $wrestler->retirements->first()->started_at->toDateTimeString()
+                );
+            });
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_retires_a_suspended_tag_team_and_its_wrestlers_and_redirects($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->actAs($administrators);
+        $tagTeam = TagTeam::factory()->suspended()->create();
+
+        $response = $this->retireRequest($tagTeam);
+
+        $response->assertRedirect(route('tag-teams.index'));
+
+        tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
+            $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
+            $this->assertEquals(
+                $now->toDateTimeString(),
+                $tagTeam->retirements->first()->started_at->toDateTimeString()
+            );
+
+            $tagTeam->currentWrestlers->each(function ($wrestler) use ($now) {
+                $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
+                $this->assertEquals(
+                    $now->toDateTimeString(),
+                    $wrestler->retirements->first()->started_at->toDateTimeString()
+                );
+            });
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_retires_an_unbookable_tag_team_and_its_wrestlers_and_redirects($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->actAs($administrators);
+        $tagTeam = TagTeam::factory()->unbookable()->create();
 
         $response = $this->retireRequest($tagTeam);
 

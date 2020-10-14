@@ -14,7 +14,6 @@ use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Log;
 
 class TagTeam extends Model
 {
@@ -518,9 +517,11 @@ class TagTeam extends Model
             });
 
             $this->retirements()->create(['started_at' => $retiredDate]);
+            $this->save();
+
             $this->currentWrestlers->each->retire($retiredDate);
 
-            return $this->touch();
+            return $this;
         }
     }
 
@@ -536,6 +537,7 @@ class TagTeam extends Model
             $dateRetired = $this->currentRetirement->started_at;
 
             $this->currentRetirement()->update(['ended_at' => now()]);
+            $this->save();
 
             $this->currentWrestlers()
                 ->whereHas('currentRetirement', function ($query) use ($dateRetired) {
@@ -687,6 +689,8 @@ class TagTeam extends Model
             $suspendedDate = $suspendedAt ?: now();
 
             $this->suspensions()->create(['started_at' => $suspendedDate]);
+            $this->save();
+
             $this->currentWrestlers->each->suspend($suspendedDate);
 
             return $this->touch();
@@ -705,8 +709,9 @@ class TagTeam extends Model
             $reinstatedDate = $reinstatedAt ?: now();
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+            $this->save();
+
             $this->currentWrestlers->each->reinstate($reinstatedDate);
-            $this->touch();
 
             return $this;
         }
