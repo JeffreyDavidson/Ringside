@@ -46,7 +46,6 @@ class TagTeamFactory extends Factory
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
             $tagTeam->wrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
-            $tagTeam->load('employments');
             $tagTeam->load('currentWrestlers');
         });
     }

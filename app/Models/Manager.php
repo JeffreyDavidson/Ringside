@@ -272,12 +272,6 @@ class Manager extends Model
             $this->currentEmployment()->update(['ended_at' => $releaseDate]);
             $this->save();
 
-            if ($this->currentTagTeam) {
-                $this->currentTagTeam->save();
-
-                $this->currentTagTeam->refresh();
-            }
-
             return $this;
         }
     }
@@ -480,19 +474,12 @@ class Manager extends Model
             }
 
             $retiredDate = $retiredAt ?: now();
-            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
 
+            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
             $this->save();
 
             $this->retirements()->create(['started_at' => $retiredDate]);
-
             $this->save();
-
-            if ($this->currentTagTeam) {
-                $this->currentTagTeam->save();
-
-                $this->currentTagTeam->refresh();
-            }
 
             return $this;
         }
@@ -510,11 +497,9 @@ class Manager extends Model
             $unretiredDate = $unretiredAt ?: now();
 
             $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-
             $this->save();
 
             $this->employments()->create(['started_at' => $unretiredDate]);
-
             $this->save();
 
             return $this;
@@ -655,14 +640,7 @@ class Manager extends Model
             $suspensionDate = $suspendedAt ?? now();
 
             $this->suspensions()->create(['started_at' => $suspensionDate]);
-
             $this->save();
-
-            if ($this->currentTagTeam) {
-                $this->currentTagTeam->save();
-
-                $this->currentTagTeam->refresh();
-            }
 
             return $this;
         }
@@ -681,12 +659,6 @@ class Manager extends Model
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
             $this->save();
-
-            if ($this->currentTagTeam) {
-                $this->currentTagTeam->save();
-
-                $this->currentTagTeam->refresh();
-            }
 
             return $this;
         }
@@ -836,12 +808,6 @@ class Manager extends Model
             $this->injuries()->create(['started_at' => $injuredDate]);
             $this->save();
 
-            if ($this->currentTagTeam) {
-                $this->currentTagTeam->save();
-
-                $this->currentTagTeam->refresh();
-            }
-
             return $this;
         }
     }
@@ -858,14 +824,7 @@ class Manager extends Model
             $recoveryDate = $recoveredAt ?? now();
 
             $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-
             $this->save();
-
-            if ($this->currentTagTeam) {
-                $this->currentTagTeam->save();
-
-                $this->currentTagTeam->refresh();
-            }
 
             return $this;
         }

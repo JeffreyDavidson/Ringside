@@ -99,4 +99,60 @@ class WrestlerTest extends TestCase
 
         $wrestler->reinstate();
     }
+
+    /** @test */
+    public function a_bookable_wrestler_is_not_released()
+    {
+        $wrestler = Wrestler::factory()->bookable()->create();
+
+        $this->assertFalse($wrestler->isReleased());
+    }
+
+    /** @test */
+    public function an_injured_wrestler_is_not_released()
+    {
+        $wrestler = Wrestler::factory()->injured()->create();
+
+        $this->assertFalse($wrestler->isReleased());
+    }
+
+    /** @test */
+    public function a_suspended_wrestler_is_not_released()
+    {
+        $wrestler = Wrestler::factory()->injured()->create();
+
+        $this->assertFalse($wrestler->isReleased());
+    }
+
+    /** @test */
+    public function a_unemployed_wrestler_is_not_released()
+    {
+        $wrestler = Wrestler::factory()->unemployed()->create();
+
+        $this->assertFalse($wrestler->isReleased());
+    }
+
+    /** @test */
+    public function a_retired_wrestler_is_not_released()
+    {
+        $wrestler = Wrestler::factory()->unemployed()->create();
+
+        $this->assertFalse($wrestler->isReleased());
+    }
+
+    /** @test */
+    public function a_future_employed_wrestler_is_not_released()
+    {
+        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+
+        $this->assertFalse($wrestler->isReleased());
+    }
+
+    /** @test */
+    public function a_released_wrestler_is_released()
+    {
+        $wrestler = Wrestler::factory()->released()->create();
+
+        $this->assertTrue($wrestler->isReleased());
+    }
 }
