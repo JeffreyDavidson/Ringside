@@ -16,7 +16,6 @@ use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Log;
 
 class Wrestler extends Model
 {
@@ -94,7 +93,7 @@ class Wrestler extends Model
      */
     public function isBookable()
     {
-        if ($this->isUnemployed() || $this->isSuspended() || $this->isInjured() || $this->isRetired() || $this->hasFutureEmployment()) {
+        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured()) {
             return false;
         }
 
@@ -150,7 +149,7 @@ class Wrestler extends Model
     {
         return $this->morphOne(Employment::class, 'employable')
                     ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
+                    ->where('ended_at', '=', null)
                     ->limit(1);
     }
 
@@ -307,7 +306,6 @@ class Wrestler extends Model
             $startDate = $startedAt ?? now();
 
             $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-
             $this->save();
 
             return $this;
@@ -332,16 +330,14 @@ class Wrestler extends Model
             }
 
             $releaseDate = $releasedAt ?? now();
-            $this->currentEmployment()->update(['ended_at' => $releaseDate]);
 
+            $this->currentEmployment()->update(['ended_at' => $releaseDate]);
             $this->save();
 
-            Log::info('Wrestler status is', [$this->status]);
-            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+            if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
 
                 $this->currentTagTeam->refresh();
-                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -358,6 +354,11 @@ class Wrestler extends Model
         return $this->currentEmployment()->exists();
     }
 
+    /**
+     * Check to see if the model is not in employment.
+     *
+     * @return bool
+     */
     public function isNotInEmployment()
     {
         return $this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment() || $this->isRetired();
@@ -549,12 +550,10 @@ class Wrestler extends Model
 
             $this->save();
 
-            Log::info('Wrestler status is', [$this->status]);
-            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+            if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
 
                 $this->currentTagTeam->refresh();
-                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -721,12 +720,10 @@ class Wrestler extends Model
 
             $this->save();
 
-            Log::info('Wrestler status is', [$this->status]);
-            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+            if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
 
                 $this->currentTagTeam->refresh();
-                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -745,13 +742,12 @@ class Wrestler extends Model
             $reinstatedDate = $reinstatedAt ?: now();
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+            $this->save();
 
-            Log::info('Wrestler status is', [$this->status]);
-            if (optional($this->currentTagTeam)->isBookable()) {
-                $this->currentTagTeam->touch();
+            if ($this->currentTagTeam) {
+                $this->currentTagTeam->save();
 
                 $this->currentTagTeam->refresh();
-                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -902,15 +898,10 @@ class Wrestler extends Model
             $this->injuries()->create(['started_at' => $injuredDate]);
             $this->save();
 
-            // dd($this->currentTagTeam->isBookable());
-            // dd($this->currentTagTeam->currentWrestlers);
-            if (optional($this->currentTagTeam)->isBookable()) {
-                $this->currentTagTeam->touch();
+            if ($this->currentTagTeam) {
+                $this->currentTagTeam->save();
 
                 $this->currentTagTeam->refresh();
-                // dd($this->currentTagTeam);
-                // dd($this->currentTagTeam);
-                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -932,12 +923,10 @@ class Wrestler extends Model
 
             $this->save();
 
-            Log::info('Wrestler status is', [$this->status]);
-            if ($this->currentTagTeam && $this->currentTagTeam->isBookable()) {
+            if ($this->currentTagTeam) {
                 $this->currentTagTeam->save();
 
                 $this->currentTagTeam->refresh();
-                Log::info('Tag Team status is', [$this->currentTagTeam->status]);
             }
 
             return $this;
@@ -970,7 +959,7 @@ class Wrestler extends Model
         }
 
         if ($this->isSuspended()) {
-            throw new CannotBeInjuredException('Entity cannot be injured. This entity is currently suspended.');
+            throw new CannotBeInjuredException('Entity cannot be injured. Thokis entity is currently suspended.');
         }
 
         return true;

@@ -63,7 +63,7 @@ class InjureControllerTest extends TestCase
 
         $response = $this->injureRequest($wrestler);
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
 
     /** @test */
