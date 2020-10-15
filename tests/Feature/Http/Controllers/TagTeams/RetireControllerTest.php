@@ -34,25 +34,17 @@ class RetireControllerTest extends TestCase
 
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->bookable()->create();
-        // dd($tagTeam->first()->employments);
 
         $response = $this->retireRequest($tagTeam);
-        dd($response);
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
-            $this->assertEquals(
-                $now->toDateTimeString(),
-                $tagTeam->retirements->first()->started_at->toDateTimeString()
-            );
+            $this->assertEquals($now->toDateTimeString(), $tagTeam->retirements->first()->started_at->toDateTimeString());
 
             $tagTeam->currentWrestlers->each(function ($wrestler) use ($now) {
                 $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
-                $this->assertEquals(
-                    $now->toDateTimeString(),
-                    $wrestler->retirements->first()->started_at->toDateTimeString()
-                );
+                $this->assertEquals($now->toDateTimeString(), $wrestler->retirements->first()->started_at->toDateTimeString());
             });
         });
     }
@@ -72,13 +64,9 @@ class RetireControllerTest extends TestCase
         $response = $this->retireRequest($tagTeam);
 
         $response->assertRedirect(route('tag-teams.index'));
-
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
-            $this->assertEquals(
-                $now->toDateTimeString(),
-                $tagTeam->retirements->first()->started_at->toDateTimeString()
-            );
+            $this->assertEquals($now->toDateTimeString(), $tagTeam->retirements->first()->started_at->toDateTimeString());
 
             $tagTeam->currentWrestlers->each(function ($wrestler) use ($now) {
                 $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
@@ -108,10 +96,7 @@ class RetireControllerTest extends TestCase
 
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
-            $this->assertEquals(
-                $now->toDateTimeString(),
-                $tagTeam->retirements->first()->started_at->toDateTimeString()
-            );
+            $this->assertEquals($now->toDateTimeString(), $tagTeam->retirements->first()->started_at->toDateTimeString());
 
             $tagTeam->currentWrestlers->each(function ($wrestler) use ($now) {
                 $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);

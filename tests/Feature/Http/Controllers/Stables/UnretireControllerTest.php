@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Enums\StableStatus;
+use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Stables\UnretireController;
 use App\Http\Requests\Stables\UnretireRequest;
 use App\Models\Stable;
@@ -13,9 +14,9 @@ use Tests\TestCase;
 
 /**
  * @group stables
- * @group feature-sstables
+ * @group feature-stables
  * @group roster
- * @group feature-sroster
+ * @group feature-roster
  */
 class UnretireControllerTest extends TestCase
 {
@@ -25,7 +26,7 @@ class UnretireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_unretires_a_title($administrators)
+    public function invoke_unretires_a_stable_and_its_members($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -68,5 +69,69 @@ class UnretireControllerTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this->retireRequest($stable)->assertRedirect(route('login'));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_active_stable_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $stable = Stable::factory()->active()->create();
+
+        $this->unretireRequest($stable);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_a_future_activated_stable_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $stable = Stable::factory()->withFutureActivation()->create();
+
+        $this->unretireRequest($stable);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_inactive_stable_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $stable = Stable::factory()->inactive()->create();
+
+        $this->unretireRequest($stable);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_unactivated_stable_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $stable = Stable::factory()->unactivated()->create();
+
+        $this->unretireRequest($stable);
     }
 }

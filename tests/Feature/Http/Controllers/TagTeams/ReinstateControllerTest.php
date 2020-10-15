@@ -41,13 +41,10 @@ class ReinstateControllerTest extends TestCase
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-            $this->assertEquals(
-                $now->toDateTimeString(),
-                $tagTeam->fresh()->suspensions()->latest()->first()->ended_at->toDateTimeString()
+            $this->assertEquals($now->toDateTimeString(), $tagTeam->fresh()->suspensions()->latest()->first()->ended_at->toDateTimeString());
+            $tagTeam->currentWrestlers->each(
+                fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status)
             );
-            // $tagTeam->currentWrestlers->each(
-            //     fn (Wrestler $wrestler) => $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status)
-            // );
         });
     }
 

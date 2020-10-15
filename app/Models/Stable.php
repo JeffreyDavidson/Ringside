@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\StableStatus;
 use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeUnretiredException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -194,6 +195,27 @@ class Stable extends Model
     }
 
     /**
+     * Unretire a stable.
+     *
+     * @param  string|null $unretiredAt
+     * @return $this
+     */
+    public function unretire($unretiredAt = null)
+    {
+        if ($this->canBeUnretired()) {
+            $unretiredDate = $unretiredAt ?: now();
+
+            $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
+            $this->save();
+
+            $this->activate($unretiredDate);
+            $this->save();
+
+            return $this;
+        }
+    }
+
+    /**
      * Check to see if the model is retired.
      *
      * @return bool
@@ -267,6 +289,20 @@ class Stable extends Model
 
         if ($this->isRetired()) {
             throw new CannotBeRetiredException('Stable cannot be retired. This Stable is retired.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if the stable can be unretired.
+     *
+     * @return bool
+     */
+    public function canBeUnretired()
+    {
+        if (! $this->isRetired()) {
+            throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
         }
 
         return true;
