@@ -15,18 +15,20 @@ class RefereeObserver
      */
     public function saving(Referee $referee)
     {
-        if ($referee->isRetired()) {
-            $referee->status = RefereeStatus::RETIRED;
-        } elseif ($referee->isReleased()) {
-            $referee->status = RefereeStatus::RELEASED;
-        } elseif ($referee->isInjured()) {
-            $referee->status = RefereeStatus::INJURED;
-        } elseif ($referee->isSuspended()) {
-            $referee->status = RefereeStatus::SUSPENDED;
-        } elseif ($referee->isBookable()) {
-            $referee->status = RefereeStatus::BOOKABLE;
+        if ($referee->isCurrentlyEmployed()) {
+            if ($referee->isInjured()) {
+                $referee->status = RefereeStatus::INJURED;
+            } elseif ($referee->isSuspended()) {
+                $referee->status = RefereeStatus::SUSPENDED;
+            } elseif ($referee->isBookable()) {
+                $referee->status = RefereeStatus::BOOKABLE;
+            }
         } elseif ($referee->hasFutureEmployment()) {
             $referee->status = RefereeStatus::FUTURE_EMPLOYMENT;
+        } elseif ($referee->isReleased()) {
+            $referee->status = RefereeStatus::RELEASED;
+        } elseif ($referee->isRetired()) {
+            $referee->status = RefereeStatus::RETIRED;
         } else {
             $referee->status = RefereeStatus::UNEMPLOYED;
         }

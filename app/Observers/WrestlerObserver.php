@@ -23,10 +23,10 @@ class WrestlerObserver
             } elseif ($wrestler->isBookable()) {
                 $wrestler->status = WrestlerStatus::BOOKABLE;
             }
-        } elseif ($wrestler->isReleased()) {
-            $wrestler->status = WrestlerStatus::RELEASED;
         } elseif ($wrestler->hasFutureEmployment()) {
             $wrestler->status = WrestlerStatus::FUTURE_EMPLOYMENT;
+        } elseif ($wrestler->isReleased()) {
+            $wrestler->status = WrestlerStatus::RELEASED;
         } elseif ($wrestler->isRetired()) {
             $wrestler->status = WrestlerStatus::RETIRED;
         } else {

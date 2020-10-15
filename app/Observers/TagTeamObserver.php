@@ -24,10 +24,10 @@ class TagTeamObserver
             } elseif ($tagTeam->isUnbookable()) {
                 $tagTeam->status = TagTeamStatus::UNBOOKABLE;
             }
-        } elseif ($tagTeam->isReleased()) {
-            $tagTeam->status = TagTeamStatus::RELEASED;
         } elseif ($tagTeam->hasFutureEmployment()) {
             $tagTeam->status = TagTeamStatus::FUTURE_EMPLOYMENT;
+        } elseif ($tagTeam->isReleased()) {
+            $tagTeam->status = TagTeamStatus::RELEASED;
         } elseif ($tagTeam->isRetired()) {
             $tagTeam->status = TagTeamStatus::RETIRED;
         } else {

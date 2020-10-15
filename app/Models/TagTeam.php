@@ -302,11 +302,13 @@ class TagTeam extends Model
 
             $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
 
-            if ($this->currentWrestlers->every->isUnemployed() || $this->currentWrestlers->every->hasFutureEmployment() || $this->currentWrestlers->every->isRetired()) {
+            if ($this->currentWrestlers->every->isNotInEmployment()) {
                 $this->currentWrestlers->each->employ($startAtDate);
             }
 
-            return $this->touch();
+            $this->save();
+
+            return $this;
         }
     }
 
@@ -508,18 +510,13 @@ class TagTeam extends Model
 
             if ($this->isSuspended()) {
                 $this->reinstate($retiredAt);
-                $this->currentWrestlers->each->reinstate($retiredAt);
+                $this->save();
             }
 
             $this->currentEmployment()->update(['ended_at' => $retiredDate]);
-            $this->currentWrestlers()->each(function ($wrestler) use ($retiredDate) {
-                $wrestler->currentEmployment()->update(['ended_at' => $retiredDate]);
-            });
-
             $this->retirements()->create(['started_at' => $retiredDate]);
-            $this->save();
-
             $this->currentWrestlers->each->retire($retiredDate);
+            $this->save();
 
             return $this;
         }
@@ -534,20 +531,15 @@ class TagTeam extends Model
     public function unretire($unretiredAt = null)
     {
         if ($this->canBeUnretired()) {
-            $dateRetired = $this->currentRetirement->started_at;
+            $unretiredDate = $unretiredAt ?: now();
 
-            $this->currentRetirement()->update(['ended_at' => now()]);
+            $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
+            $this->currentWrestlers->each->unretire($unretiredDate);
             $this->save();
 
-            $this->currentWrestlers()
-                ->whereHas('currentRetirement', function ($query) use ($dateRetired) {
-                    $query->whereDate('started_at', $dateRetired);
-                })
-                ->get()
-                ->each
-                ->unretire();
+            $this->employ($unretiredDate);
 
-            return $this->touch();
+            return $this;
         }
     }
 
@@ -689,9 +681,10 @@ class TagTeam extends Model
             $suspendedDate = $suspendedAt ?: now();
 
             $this->suspensions()->create(['started_at' => $suspendedDate]);
-            $this->save();
 
             $this->currentWrestlers->each->suspend($suspendedDate);
+
+            $this->save();
 
             return $this->touch();
         }
@@ -709,9 +702,8 @@ class TagTeam extends Model
             $reinstatedDate = $reinstatedAt ?: now();
 
             $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-            $this->save();
-
             $this->currentWrestlers->each->reinstate($reinstatedDate);
+            $this->save();
 
             return $this;
         }

@@ -45,9 +45,9 @@ class EmployControllerTest extends TestCase
                 $now->toDateTimeString(),
                 $tagTeam->employments->first()->started_at->toDateTimeString()
             );
-            // $tagTeam->currentWrestlers->each(
-            //     fn (Wrestler $wrestler) => $this->assertTrue($wrestler->isCurrentlyEmployed())
-            // );
+            $tagTeam->currentWrestlers->each(
+                fn (Wrestler $wrestler) => $this->assertTrue($wrestler->isCurrentlyEmployed())
+            );
         });
     }
 
@@ -120,21 +120,6 @@ class EmployControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this->employRequest($tagTeam)->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function employing_a_future_employed_tag_team_without_wrestlers_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $this->actAs($administrators);
-        $tagTeam = TagTeam::factory()->withFutureEmploymentWithoutWrestlers()->create();
-
-        $this->employRequest($tagTeam);
     }
 
     /**
