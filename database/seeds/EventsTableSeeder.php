@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Event;
 use Illuminate\Database\Seeder;
 use Tests\Factories\EventFactory;
 
@@ -15,17 +16,17 @@ class EventsTableSeeder extends Seeder
         $eNum = 1;
 
         for ($w = 1; $w <= 5; $w++) {
-            EventFactory::new()->scheduled()->create([
+            Event::factory()->scheduled()->create([
                 'name' => 'Event '.$eNum,
             ]);
 
-            $eNum ++;
+            $eNum++;
         }
 
         EventFactory::new()->past()->create([
-            'name' => 'Title '. $eNum,
+            'name' => 'Title '.$eNum,
         ]);
 
-        $eNum ++;
+        $eNum++;
     }
 }

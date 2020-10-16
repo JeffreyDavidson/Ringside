@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Rules;
 
+use App\Models\Wrestler;
 use App\Rules\CannotBeHindered;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
@@ -17,7 +17,7 @@ class CannotBeHinderedTest extends TestCase
     /** @test */
     public function a_suspended_wrestler_cannot_join_a_tag_team()
     {
-        $wrestler = WrestlerFactory::new()->suspended()->create();
+        $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
     }
@@ -25,7 +25,7 @@ class CannotBeHinderedTest extends TestCase
     /** @test */
     public function an_injured_wrestler_cannot_join_a_tag_team()
     {
-        $wrestler = WrestlerFactory::new()->injured()->create();
+        $wrestler = Wrestler::factory()->injured()->create();
 
         $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
     }
@@ -33,7 +33,7 @@ class CannotBeHinderedTest extends TestCase
     /** @test */
     public function a_retired_wrestler_cannot_join_a_tag_team()
     {
-        $wrestler = WrestlerFactory::new()->retired()->create();
+        $wrestler = Wrestler::factory()->retired()->create();
 
         $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
     }

@@ -31,7 +31,7 @@ class CannotBeEmployedAfterDate implements Rule
         $this->wrestler = Wrestler::find($value);
 
         if ($this->wrestler->isUnemployed()) {
-            return false;
+            return true;
         }
 
         if ($this->wrestler->isCurrentlyEmployed()) {

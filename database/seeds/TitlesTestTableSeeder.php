@@ -1,7 +1,7 @@
 <?php
 
+use App\Models\Title;
 use Illuminate\Database\Seeder;
-use Tests\Factories\TitleFactory;
 
 class TitlesTestTableSeeder extends Seeder
 {
@@ -12,10 +12,10 @@ class TitlesTestTableSeeder extends Seeder
      */
     public function run()
     {
-        TitleFactory::new()->active()->times(3)->create();
-        TitleFactory::new()->futureActivation()->times(3)->create();
-        TitleFactory::new()->unactivated()->times(3)->create();
-        TitleFactory::new()->inactive()->times(3)->create();
-        TitleFactory::new()->retired()->times(3)->create();
+        Title::factory()->active()->times(3)->create();
+        Title::factory()->futureActivation()->times(3)->create();
+        Title::factory()->unactivated()->times(3)->create();
+        Title::factory()->inactive()->times(3)->create();
+        Title::factory()->retired()->times(3)->create();
     }
 }

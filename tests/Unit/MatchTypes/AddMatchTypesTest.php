@@ -2,9 +2,8 @@
 
 namespace Tests\Unit\MatchTypes;
 
-use Tests\TestCase;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AddMatchTypesTest extends TestCase
 {
@@ -14,7 +13,7 @@ class AddMatchTypesTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']);
+        $this->seed(MatchTypesTableSeeder::class);
     }
 
     /** @test */

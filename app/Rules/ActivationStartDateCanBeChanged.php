@@ -15,7 +15,7 @@ class ActivationStartDateCanBeChanged implements Rule
         $this->model = $activatable;
     }
 
-    public function passes($attribute, $value = null)
+    public function passes($attribute, $value)
     {
         /*
          *  Times when activation date can/cannot be changed.
