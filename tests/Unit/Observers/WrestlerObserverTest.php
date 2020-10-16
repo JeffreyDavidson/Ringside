@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Observers;
 
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\WrestlerFactory;
 use Tests\TestCase;
 
 /**
@@ -19,7 +19,7 @@ class WrestlerObserverTest extends TestCase
     /** @test */
     public function a_wrestlers_status_is_calculated_correctly()
     {
-        $wrestler = WrestlerFactory::new()->create();
+        $wrestler = Wrestler::factory()->create();
         $this->assertEquals('unemployed', $wrestler->status);
 
         $wrestler->employ(Carbon::tomorrow()->toDateTimeString());

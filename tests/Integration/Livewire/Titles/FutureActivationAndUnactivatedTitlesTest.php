@@ -26,10 +26,7 @@ class FutureActivationAndUnactivatedTitlesTest extends TestCase
     {
         $component = Livewire::test(FutureActivationAndUnactivatedTitles::class);
 
-        $this->assertEquals(
-            'livewire.titles.future-activation-and-unactivated-titles',
-            $component->lastRenderedView->getName()
-        );
+        $this->assertEquals('livewire.titles.future-activation-and-unactivated-titles', $component->lastRenderedView->getName());
     }
 
     /** @test */
@@ -41,7 +38,6 @@ class FutureActivationAndUnactivatedTitlesTest extends TestCase
             ->unactivated()
             ->get();
 
-        Livewire::test(FutureActivationAndUnactivatedTitles::class)
-                ->assertSet('futureActivationAndUnactivatedTitles', $futureActivationAndUnactivatedTitles);
+        Livewire::test(FutureActivationAndUnactivatedTitles::class)->assertSet('futureActivationAndUnactivatedTitles', $futureActivationAndUnactivatedTitles);
     }
 }

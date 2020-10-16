@@ -28,7 +28,7 @@ class EmploymentStartDateCanBeChanged implements Rule
      * @param [type] $value
      * @return bool
      */
-    public function passes($attribute, $value = null)
+    public function passes($attribute, $value)
     {
         /*
          *  Times when employment date can/cannot be changed.

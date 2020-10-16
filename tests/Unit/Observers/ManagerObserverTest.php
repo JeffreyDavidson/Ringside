@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Observers;
 
+use App\Models\Manager;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\ManagerFactory;
 use Tests\TestCase;
 
 /**
@@ -19,7 +19,7 @@ class ManagerObserverTest extends TestCase
     /** @test */
     public function a_managers_status_is_calculated_correctly()
     {
-        $manager = ManagerFactory::new()->create();
+        $manager = Manager::factory()->unemployed()->create();
         $this->assertEquals('unemployed', $manager->status);
 
         $manager->employ(Carbon::tomorrow()->toDateTimeString());

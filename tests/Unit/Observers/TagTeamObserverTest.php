@@ -2,9 +2,10 @@
 
 namespace Tests\Unit\Observers;
 
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\TagTeamFactory;
 use Tests\TestCase;
 
 /**
@@ -19,7 +20,7 @@ class TagTeamObserverTest extends TestCase
     /** @test */
     public function a_tag_team_status_is_calculated_correctly()
     {
-        $tagTeam = TagTeamFactory::new()->create();
+        $tagTeam = TagTeam::factory()->unemployed()->create();
         $this->assertEquals('unemployed', $tagTeam->status);
 
         $tagTeam->employ(Carbon::tomorrow()->toDateTimeString());
@@ -28,10 +29,16 @@ class TagTeamObserverTest extends TestCase
         $tagTeam->employ(Carbon::today()->toDateTimeString());
         $this->assertEquals('bookable', $tagTeam->status);
 
-        $tagTeam = TagTeamFactory::new()->suspended()->create();
+        $tagTeam->suspend();
         $this->assertEquals('suspended', $tagTeam->status);
 
-        $tagTeam = TagTeamFactory::new()->retired->create();
+        $tagTeam->reinstate();
+        $this->assertEquals('bookable', $tagTeam->status);
+
+        $tagTeam->retire();
         $this->assertEquals('retired', $tagTeam->status);
+
+        $tagTeam->unretire();
+        $this->assertEquals('bookable', $tagTeam->status);
     }
 }
