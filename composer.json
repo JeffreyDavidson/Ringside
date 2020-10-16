@@ -12,12 +12,13 @@
         "fideloper/proxy": "^4.0",
         "fidum/laravel-eloquent-morph-to-one": "^2.0",
         "illuminatech/validation-composite": "*",
-        "laravel/framework": "^8.0",
+        "laravel/framework": "8.10",
         "laravel/telescope": "^4",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.0",
         "livewire/livewire": "^2.0",
-        "mad-web/laravel-enum": "dev-master"
+        "mad-web/laravel-enum": "^2.0",
+        "vlucas/phpdotenv": "^5.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2",
@@ -57,12 +58,6 @@
             "Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/JeffreyDavidson/laravel-enum"
-        }
-    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
