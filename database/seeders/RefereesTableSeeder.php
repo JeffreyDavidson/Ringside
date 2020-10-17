@@ -1,12 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Tests\Factories\EmploymentFactory;
+use Tests\Factories\RefereeFactory;
 use Tests\Factories\RetirementFactory;
-use Tests\Factories\TagTeamFactory;
 
-class TagTeamsTableSeeder extends Seeder
+class RefereesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -24,17 +26,17 @@ class TagTeamsTableSeeder extends Seeder
 
         $startDate = $dateToStart;
         $diffInYears = $startDate->diffInYears(now());
-        $minYears = ceil($diffInYears*.25);
-        $maxYears = floor($diffInYears*.75);
+        $minYears = ceil($diffInYears * .25);
+        $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
-        /**
-         * We need to create 15 tag teams at this time X years ago but since by
-         * the time we reach the current date these tag teams should be
+        /*
+         * We need to create 30 referees at this time X years ago but since by
+         * the time we reach the current date these referees should be
          * released so we need to make them released and figure out
          * their started and ended employment date.
          */
-        for ($j = $eNum; $j <= 10; $j++) {
+        for ($j = $eNum; $j <= 30; $j++) {
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
@@ -44,15 +46,15 @@ class TagTeamsTableSeeder extends Seeder
                 $employment = $employment->ended($end);
             }
 
-            TagTeamFactory::new()
+            RefereeFactory::new()
                 ->released($employment)
-                ->create(['name' => 'Tag Team '.$eNum]);
+                ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
-         * We need to create 10 tag teams that have been retired. We need to
+        /*
+         * We need to create 10 referees that have been retired. We need to
          * make sure that their employment end date is the same as their
          * start of their retirement date.
          */
@@ -62,22 +64,22 @@ class TagTeamsTableSeeder extends Seeder
 
             $employment = EmploymentFactory::new()->started($start)->ended($end);
             $retirement = RetirementFactory::new()->started($end);
-            TagTeamFactory::new()
+            RefereeFactory::new()
                 ->retired($employment, $retirement)
-                ->create(['name' => 'Tag Team '.$eNum]);
+                ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
-         * We need to create 5 tag teams at this time x years ago for each
+        /*
+         * We need to create 5 referees at this time x years ago for each
          * additional month but since by the time we reach the current
-         * date these tag teams should be released so we need to
+         * date these referees should be released so we need to
          * make them released and figure out their started
          * and ended employment date.
          */
         while ($startDate->lessThan($now)) {
-            for ($i = 0; $i < 1; $i++) {
+            for ($i = 0; $i < 5; $i++) {
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
@@ -87,9 +89,9 @@ class TagTeamsTableSeeder extends Seeder
                     $employment = $employment->ended($end);
                 }
 
-                TagTeamFactory::new()
+                RefereeFactory::new()
                     ->released($employment)
-                    ->create(['name' => 'Tag Team '.$eNum]);
+                    ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
                 $eNum++;
             }
@@ -97,33 +99,33 @@ class TagTeamsTableSeeder extends Seeder
             $startDate->addMonth();
         }
 
-        /**
-         * We need to create 3 tag teams for the next 3 months and all
-         * tag teams should be Future Employment and should NOT
+        /*
+         * We need to create 5 referees for the next 3 months and all
+         * referees should be Future Employment and should NOT
          * have an ended employment date.
          */
-        for ($j = 1; $j <= 3; $j++) {
+        for ($j = 1; $j <= 5; $j++) {
             $start = $now->copy()->addMonths(3);
 
             $employment = EmploymentFactory::new()->started($start);
 
-            TagTeamFactory::new()
+            RefereeFactory::new()
                 ->pendingEmployment($employment)
-                ->create(['name' => 'Tag Team '.$eNum]);
+                ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
-         * We need to create 3 tag teams that do not have an employment date.
-         * These tag teams should be marked as being Unemployed.
+        /*
+         * We need to create 5 referees that do not have an employment date.
+         * These referees should be marked as being Unemployed.
          */
-        for ($i = 1; $i <= 3; $i++) {
-            TagTeamFactory::new()
+        for ($i = 1; $i <= 5; $i++) {
+            RefereeFactory::new()
                 ->unemployed()
-                ->create(['name' => 'Tag Team '.$eNum]);
+                ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
     }
 }

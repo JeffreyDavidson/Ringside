@@ -1,12 +1,14 @@
 <?php
 
+namespace Database\Seeders;
+
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\WrestlerFactory;
 use Tests\Factories\EmploymentFactory;
+use Tests\Factories\ManagerFactory;
 use Tests\Factories\RetirementFactory;
 
-class WrestlersTableSeeder extends Seeder
+class ManagersTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -24,13 +26,13 @@ class WrestlersTableSeeder extends Seeder
 
         $startDate = $dateToStart;
         $diffInYears = $startDate->diffInYears(now());
-        $minYears = ceil($diffInYears*.25);
-        $maxYears = floor($diffInYears*.75);
+        $minYears = ceil($diffInYears * .25);
+        $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
-        /**
-         * We need to create 30 wrestlers at this time X years ago but since by
-         * the time we reach the current date these wrestlers should be
+        /*
+         * We need to create 30 managers at this time X years ago but since by
+         * the time we reach the current date these managers should be
          * released so we need to make them released and figure out
          * their started and ended employment date.
          */
@@ -44,15 +46,15 @@ class WrestlersTableSeeder extends Seeder
                 $employment = $employment->ended($end);
             }
 
-            WrestlerFactory::new()
+            ManagerFactory::new()
                 ->released($employment)
-                ->create(['name' => 'Wrestler '.$eNum]);
+                ->create(['first_name' => 'Manager', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
-         * We need to create 10 wrestlers that have been retired. We need to
+        /*
+         * We need to create 10 managers that have been retired. We need to
          * make sure that their employment end date is the same as their
          * start of their retirement date.
          */
@@ -62,17 +64,17 @@ class WrestlersTableSeeder extends Seeder
 
             $employment = EmploymentFactory::new()->started($start)->ended($end);
             $retirement = RetirementFactory::new()->started($end);
-            WrestlerFactory::new()
+            ManagerFactory::new()
                 ->retired($employment, $retirement)
-                ->create(['name' => 'Wrestler '.$eNum]);
+                ->create(['first_name' => 'Manager', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
-         * We need to create 5 wrestlers at this time x years ago for each
+        /*
+         * We need to create 5 managers at this time x years ago for each
          * additional month but since by the time we reach the current
-         * date these wrestlers should be released so we need to
+         * date these managers should be released so we need to
          * make them released and figure out their started
          * and ended employment date.
          */
@@ -87,9 +89,9 @@ class WrestlersTableSeeder extends Seeder
                     $employment = $employment->ended($end);
                 }
 
-                WrestlerFactory::new()
+                ManagerFactory::new()
                     ->released($employment)
-                    ->create(['name' => 'Wrestler '.$eNum]);
+                    ->create(['first_name' => 'Manager', 'last_name' => $eNum]);
 
                 $eNum++;
             }
@@ -97,9 +99,9 @@ class WrestlersTableSeeder extends Seeder
             $startDate->addMonth();
         }
 
-        /**
-         * We need to create 5 wrestlers for the next 3 months and all
-         * wrestlers should be Future Employment and should NOT
+        /*
+         * We need to create 5 managers for the next 3 months and all
+         * managers should be Future Employment and should NOT
          * have an ended employment date.
          */
         for ($j = 1; $j <= 5; $j++) {
@@ -107,23 +109,23 @@ class WrestlersTableSeeder extends Seeder
 
             $employment = EmploymentFactory::new()->started($start);
 
-            WrestlerFactory::new()
+            ManagerFactory::new()
                 ->pendingEmployment($employment)
-                ->create(['name' => 'Wrestler '.$eNum]);
+                ->create(['first_name' => 'Manager', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
-         * We need to create 5 wrestlers that do not have an employment date.
-         * These wrestlers should be marked as being Unemployed.
+        /*
+         * We need to create 5 managers that do not have an employment date.
+         * These managers should be marked as being Unemployed.
          */
         for ($i = 1; $i <= 5; $i++) {
-            WrestlerFactory::new()
+            ManagerFactory::new()
                 ->unemployed()
-                ->create(['name' => 'Wrestler '.$eNum]);
+                ->create(['first_name' => 'Manager', 'last_name' => $eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
     }
 }
