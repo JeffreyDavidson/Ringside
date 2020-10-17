@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Unit\MatchTypes;
+namespace Tests\Unit\Models;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use MatchTypesTableSeeder;
 use Tests\TestCase;
 
-class AddMatchTypesTest extends TestCase
+class MatchTypeTest extends TestCase
 {
     use RefreshDatabase;
 
