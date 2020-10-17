@@ -1,10 +1,12 @@
 <?php
 
+namespace Database\Seeders;
+
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\StableFactory;
 use Tests\Factories\ActivationFactory;
 use Tests\Factories\RetirementFactory;
+use Tests\Factories\StableFactory;
 
 class StablesTableSeeder extends Seeder
 {
@@ -24,11 +26,11 @@ class StablesTableSeeder extends Seeder
 
         $startDate = $dateToStart;
         $diffInYears = $startDate->diffInYears(now());
-        $minYears = ceil($diffInYears*.25);
-        $maxYears = floor($diffInYears*.75);
+        $minYears = ceil($diffInYears * .25);
+        $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
-        /**
+        /*
          * We need to create 3 stables at this time X years ago but since by
          * the time we reach the current date these stables should be
          * inactive so we need to make them inactive and figure out
@@ -48,10 +50,10 @@ class StablesTableSeeder extends Seeder
                 ->inactive($activation)
                 ->create(['name' => 'Stable '.$eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
+        /*
          * We need to create 2 stables that have been retired. We need to
          * make sure that their activation end date is the same as their
          * start of their retirement date.
@@ -66,10 +68,10 @@ class StablesTableSeeder extends Seeder
                 ->retired($activation, $retirement)
                 ->create(['name' => 'Stable '.$eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
+        /*
          * We need to create 1 stable at this time x years ago for each
          * 6 months but since by the time we reach the current
          * date these stables should be inactive so we need to
@@ -97,7 +99,7 @@ class StablesTableSeeder extends Seeder
             $startDate->addMonth();
         }
 
-        /**
+        /*
          * We need to create 1 stables for the next 3 months and
          * should be pending activation and should NOT
          * have an ended activation date.
@@ -111,10 +113,10 @@ class StablesTableSeeder extends Seeder
                 ->pendingActivation($activation)
                 ->create(['name' => 'Stable '.$eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
+        /*
          * We need to create 1 stable that does not have an activation date.
          * This stables should be marked as being unactivated.
          */
@@ -123,7 +125,7 @@ class StablesTableSeeder extends Seeder
                 ->unactivated()
                 ->create(['name' => 'Stable '.$eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
     }
 }

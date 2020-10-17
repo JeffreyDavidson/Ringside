@@ -1,10 +1,12 @@
 <?php
 
+namespace Database\Seeders;
+
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\TitleFactory;
 use Tests\Factories\ActivationFactory;
 use Tests\Factories\RetirementFactory;
+use Tests\Factories\TitleFactory;
 
 class TitlesTableSeeder extends Seeder
 {
@@ -24,11 +26,11 @@ class TitlesTableSeeder extends Seeder
 
         $startDate = $dateToStart;
         $diffInYears = $startDate->diffInYears(now());
-        $minYears = ceil($diffInYears*.25);
-        $maxYears = floor($diffInYears*.75);
+        $minYears = ceil($diffInYears * .25);
+        $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsActivated = rand($minYears, $maxYears);
 
-        /**
+        /*
          * We need to create 5 titles at this time X years ago but since by
          * the time we reach the current date these titles should be
          * released so we need to make them released and figure out
@@ -44,7 +46,7 @@ class TitlesTableSeeder extends Seeder
                 ->active($activation)
                 ->create(['name' => 'Title '.$eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
         /**
@@ -66,10 +68,9 @@ class TitlesTableSeeder extends Seeder
             ->active($activation)
             ->create(['name' => 'Title '.$eNum]);
 
-        $eNum ++;
+        $eNum++;
 
-
-        /**
+        /*
          * We need to create 2 titles that have been retired. We need to
          * make sure that their activation end date is the same as their
          * start of their retirement date.
@@ -84,19 +85,19 @@ class TitlesTableSeeder extends Seeder
                 ->retired($activation, $retirement)
                 ->create(['name' => 'Title '.$eNum]);
 
-            $eNum ++;
+            $eNum++;
         }
 
-        /**
+        /*
          * We need to create 1 title for the the future activation.
          */
         TitleFactory::new()
             ->futureActivation()
             ->create(['name' => 'Title '.$eNum]);
 
-        $eNum ++;
+        $eNum++;
 
-        /**
+        /*
          * We need to create 1 title that does not have an activation date.
          * This title should be marked as being unactivated.
          */
