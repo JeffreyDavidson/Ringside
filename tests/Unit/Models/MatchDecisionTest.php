@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Unit\MatchDecisions;
+namespace Tests\Unit\Models;
 
-use Tests\TestCase;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use Tests\TestCase;
 
-class AddMatchDecisionsTest extends TestCase
+class MatchDecisionTest extends TestCase
 {
     use RefreshDatabase;
 
