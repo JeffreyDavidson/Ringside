@@ -113,7 +113,7 @@ class RefereeFactory extends Factory
         ])->hasEmployments(1, ['started_at' => $start])
         ->hasInjuries(1, ['started_at' => $now])
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus();
         });
     }
 

@@ -255,7 +255,7 @@ class Manager extends Model
         $startDate = $startedAt ?? now();
 
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -279,7 +279,7 @@ class Manager extends Model
         $releaseDate = $releasedAt ?? now();
 
         $this->currentEmployment()->update(['ended_at' => $releaseDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -487,7 +487,7 @@ class Manager extends Model
 
         $this->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -504,7 +504,7 @@ class Manager extends Model
 
         $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
         $this->employments()->create(['started_at' => $unretiredDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -642,7 +642,7 @@ class Manager extends Model
         $suspensionDate = $suspendedAt ?? now();
 
         $this->suspensions()->create(['started_at' => $suspensionDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -658,7 +658,7 @@ class Manager extends Model
         $reinstatedDate = $reinstatedAt ?: now();
 
         $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -808,7 +808,7 @@ class Manager extends Model
         $injuredDate = $injuredAt ?? now();
 
         $this->injuries()->create(['started_at' => $injuredDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
@@ -824,7 +824,7 @@ class Manager extends Model
         $recoveryDate = $recoveredAt ?? now();
 
         $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-        $this->save();
+        $this->updateStatus();
     }
 
     /**
