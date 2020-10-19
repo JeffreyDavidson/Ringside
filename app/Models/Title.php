@@ -17,6 +17,18 @@ class Title extends Model
         Concerns\Unguarded;
 
     /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::saving(function ($title) {
+            $title->updateStatus();
+        });
+    }
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -114,40 +126,34 @@ class Title extends Model
      * Retire a title.
      *
      * @param  string|null $retiredAt
-     * @return $this
+     * @return void
      */
     public function retire($retiredAt = null)
     {
-        if ($this->canBeRetired()) {
-            $retiredDate = $retiredAt ?: now();
+        throw_unless($this->canBeRetired(), new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active activation.'));
 
-            $this->currentActivation()->update(['ended_at' => $retiredDate]);
-            $this->retirements()->create(['started_at' => $retiredDate]);
+        $retiredDate = $retiredAt ?: now();
 
-            $this->touch();
-
-            return $this;
-        }
+        $this->currentActivation()->update(['ended_at' => $retiredDate]);
+        $this->retirements()->create(['started_at' => $retiredDate]);
+        $this->updateStatusAndSave();
     }
 
     /**
      * Unretire a title.
      *
      * @param  string|null $startedAt
-     * @return $this
+     * @return void
      */
     public function unretire($unretiredAt = null)
     {
-        if ($this->canBeUnretired()) {
-            $unretiredDate = $unretiredAt ?: now();
+        throw_unless($this->canBeUnretired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
 
-            $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-            $this->activate($unretiredDate);
+        $unretiredDate = $unretiredAt ?: now();
 
-            $this->touch();
-
-            return $this;
-        }
+        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        $this->activate($unretiredDate);
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -168,11 +174,13 @@ class Title extends Model
     public function canBeRetired()
     {
         if ($this->isUnactivated() || $this->isDeactivated() || $this->hasFutureActivation()) {
-            throw new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active activation.');
+            // throw new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active activation.');
+            return false;
         }
 
         if ($this->isRetired()) {
-            throw new CannotBeRetiredException('Entity cannot be retired. This entity is retired.');
+            // throw new CannotBeRetiredException('Entity cannot be retired. This entity is retired.');
+            return false;
         }
 
         return true;
@@ -186,7 +194,8 @@ class Title extends Model
     public function canBeUnretired()
     {
         if (! $this->isRetired()) {
-            throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
+            // throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
+            return false;
         }
 
         return true;
@@ -215,5 +224,36 @@ class Title extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Update the status for the title.
+     *
+     * @return void
+     */
+    public function updateStatus()
+    {
+        if ($this->isCurrentlyActivated()) {
+            $this->status = TitleStatus::ACTIVE;
+        } elseif ($this->hasFutureActivation()) {
+            $this->status = TitleStatus::FUTURE_ACTIVATION;
+        } elseif ($this->isDeactivated()) {
+            $this->status = TitleStatus::INACTIVE;
+        } elseif ($this->isRetired()) {
+            $this->status = TitleStatus::RETIRED;
+        } else {
+            $this->status = TitleStatus::UNACTIVATED;
+        }
+    }
+
+    /**
+     * Updates a title's status and saves.
+     *
+     * @return void
+     */
+    public function updateStatusAndSave()
+    {
+        $this->updateStatus();
+        $this->save();
     }
 }

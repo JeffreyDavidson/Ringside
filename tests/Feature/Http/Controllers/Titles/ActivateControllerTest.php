@@ -24,7 +24,7 @@ class ActivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_activates_a_title($administrators)
+    public function invoke_activates_an_unactivated_title_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -42,6 +42,60 @@ class ActivateControllerTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_activates_a_future_activated_title_and_redirects($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->actAs($administrators);
+        $title = Title::factory()->withFutureActivation()->create();
+
+        $response = $this->activateRequest($title);
+
+        $response->assertRedirect(route('titles.index'));
+        tap($title->fresh(), function ($title) use ($now) {
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
+            $this->assertCount(1, $title->activations);
+            $this->assertEquals($now->toDateTimeString(), $title->activations->first()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_activates_an_inactive_title_and_redirects($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $this->actAs($administrators);
+        $title = Title::factory()->inactive()->create();
+
+        $response = $this->activateRequest($title);
+
+        $response->assertRedirect(route('titles.index'));
+        tap($title->fresh(), function ($title) use ($now) {
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
+            $this->assertCount(2, $title->activations);
+            $this->assertEquals($now->toDateTimeString(), $title->activations->last()->started_at->toDateTimeString());
+        });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            ActivateController::class,
+            '__invoke',
+            ActivateRequest::class
+        );
+    }
+
     /** @test */
     public function a_basic_user_cannot_activate_a_title()
     {
@@ -57,16 +111,6 @@ class ActivateControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this->activateRequest($title)->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(
-            ActivateController::class,
-            '__invoke',
-            ActivateRequest::class
-        );
     }
 
     /**

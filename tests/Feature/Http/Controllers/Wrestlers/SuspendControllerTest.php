@@ -63,7 +63,7 @@ class SuspendControllerTest extends TestCase
 
         $response = $this->suspendRequest($wrestler);
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
 
     /** @test */

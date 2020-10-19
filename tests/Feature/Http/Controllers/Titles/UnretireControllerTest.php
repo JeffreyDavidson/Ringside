@@ -24,7 +24,7 @@ class UnretireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_unretires_a_title($administrators)
+    public function invoke_unretires_a_retired_title_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -40,6 +40,16 @@ class UnretireControllerTest extends TestCase
             $this->assertCount(1, $title->retirements);
             $this->assertEquals($now->toDateTimeString(), $title->fresh()->retirements()->latest()->first()->ended_at);
         });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            UnretireController::class,
+            '__invoke',
+            UnretireRequest::class
+        );
     }
 
     /** @test */
@@ -61,16 +71,6 @@ class UnretireControllerTest extends TestCase
         $this->unretireRequest($title)->assertRedirect(route('login'));
     }
 
-    /** @test */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(
-            UnretireController::class,
-            '__invoke',
-            UnretireRequest::class
-        );
-    }
-
     /**
      * @test
      * @dataProvider administrators
@@ -83,6 +83,54 @@ class UnretireControllerTest extends TestCase
         $this->actAs($administrators);
 
         $title = Title::factory()->active()->create();
+
+        $this->unretireRequest($title);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_inactive_title_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $title = Title::factory()->inactive()->create();
+
+        $this->unretireRequest($title);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_a_future_activated_title_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $title = Title::factory()->withFutureActivation()->create();
+
+        $this->unretireRequest($title);
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function unretiring_an_unactivated_title_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeUnretiredException::class);
+        $this->withoutExceptionHandling();
+
+        $this->actAs($administrators);
+
+        $title = Title::factory()->unactivated()->create();
 
         $this->unretireRequest($title);
     }

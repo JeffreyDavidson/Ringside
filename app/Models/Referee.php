@@ -249,7 +249,7 @@ class Referee extends Model
         $startDate = $startedAt ?? now();
 
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -273,7 +273,7 @@ class Referee extends Model
         $releaseDate = $releasedAt ?? now();
 
         $this->currentEmployment()->update(['ended_at' => $releaseDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -481,7 +481,7 @@ class Referee extends Model
 
         $this->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -498,7 +498,7 @@ class Referee extends Model
 
         $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
         $this->employments()->create(['started_at' => $unretiredDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -636,7 +636,7 @@ class Referee extends Model
         $suspensionDate = $suspendedAt ?? now();
 
         $this->suspensions()->create(['started_at' => $suspensionDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -652,7 +652,7 @@ class Referee extends Model
         $reinstatedDate = $reinstatedAt ?: now();
 
         $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -802,7 +802,7 @@ class Referee extends Model
         $injuredDate = $injuredAt ?? now();
 
         $this->injuries()->create(['started_at' => $injuredDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -818,7 +818,7 @@ class Referee extends Model
         $recoveryDate = $recoveredAt ?? now();
 
         $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -895,5 +895,16 @@ class Referee extends Model
         } else {
             $this->status = RefereeStatus::UNEMPLOYED;
         }
+    }
+
+    /**
+     * Updates a referee's status and saves.
+     *
+     * @return void
+     */
+    public function updateStatusAndSave()
+    {
+        $this->updateStatus();
+        $this->save();
     }
 }

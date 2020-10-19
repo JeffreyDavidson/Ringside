@@ -96,7 +96,7 @@ trait CanBeActivated
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query)
+    public function scopeActivated($query)
     {
         return $query->whereHas('currentActivation');
     }
@@ -186,34 +186,32 @@ trait CanBeActivated
      * Activate a model.
      *
      * @param  string|null $startedAt
-     * @return $this
+     * @return void
      */
     public function activate($startedAt = null)
     {
-        if ($this->canBeActivated()) {
-            $startDate = $startedAt ?? now();
+        throw_unless($this->canBeActivated(), new CannotBeActivatedException('Entity cannot be employed. This entity is currently employed.'));
 
-            $this->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+        $startDate = $startedAt ?? now();
 
-            return $this->touch();
-        }
+        $this->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+        $this->updateStatusAndSave();
     }
 
     /**
      * Deactivate a model.
      *
      * @param  string|null $deactivatedAt
-     * @return $this
+     * @return void
      */
     public function deactivate($deactivatedAt = null)
     {
-        if ($this->canBeDeactivated()) {
-            $deactivatedDate = $deactivatedAt ?? now();
+        throw_unless($this->canBeDeactivated(), new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is not currently activated.'));
 
-            $this->currentActivation()->update(['ended_at' => $deactivatedDate]);
+        $deactivatedDate = $deactivatedAt ?? now();
 
-            return $this->touch();
-        }
+        $this->currentActivation()->update(['ended_at' => $deactivatedDate]);
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -221,7 +219,7 @@ trait CanBeActivated
      *
      * @return bool
      */
-    public function isCurrentlyActive()
+    public function isCurrentlyActivated()
     {
         return $this->currentActivation()->exists();
     }
@@ -265,12 +263,14 @@ trait CanBeActivated
      */
     public function canBeActivated()
     {
-        if ($this->isCurrentlyActive()) {
-            throw new CannotBeActivatedException('Entity cannot be activated. This entity is active.');
+        if ($this->isCurrentlyActivated()) {
+            // throw new CannotBeActivatedException('Entity cannot be activated. This entity is active.');
+            return false;
         }
 
         if ($this->isRetired()) {
-            throw new CannotBeActivatedException('Entity cannot be activated. This entity is retired.');
+            // throw new CannotBeActivatedException('Entity cannot be activated. This entity is retired.');
+            return false;
         }
 
         return true;
@@ -283,16 +283,9 @@ trait CanBeActivated
      */
     public function canBeDeactivated()
     {
-        if ($this->isUnactivated() || $this->hasFutureActivation()) {
-            throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity has not been activated.');
-        }
-
-        if ($this->isDeactivated()) {
-            throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is deactivated.');
-        }
-
-        if ($this->isRetired()) {
-            throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity has not been retired.');
+        if ($this->isNotInActivation()) {
+            // throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity has not been activated.');
+            return false;
         }
 
         return true;
@@ -306,5 +299,15 @@ trait CanBeActivated
     public function getActivatedAtAttribute()
     {
         return optional($this->activations->first())->started_at;
+    }
+
+    /**
+     * Check to see if the model is not in activation.
+     *
+     * @return bool
+     */
+    public function isNotInActivation()
+    {
+        return $this->isUnactivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 }

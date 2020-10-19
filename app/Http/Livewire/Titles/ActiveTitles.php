@@ -20,14 +20,14 @@ class ActiveTitles extends Component
     public function render()
     {
         $activeTitles = Title::query()
-            ->active()
+            ->activated()
             ->withFirstActivatedAtDate()
             ->orderByFirstActivatedAtDate()
             ->orderBy('name')
             ->paginate($this->perPage);
 
         return view('livewire.titles.active-titles', [
-            'activeTitles' => $activeTitles
+            'activeTitles' => $activeTitles,
         ]);
     }
 }
