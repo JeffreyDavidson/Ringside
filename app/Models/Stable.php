@@ -17,6 +17,18 @@ class Stable extends Model
         Concerns\Unguarded;
 
     /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::saving(function ($stable) {
+            $stable->updateStatus();
+        });
+    }
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -157,9 +169,7 @@ class Stable extends Model
     {
         $this->currentWrestlers()->detach();
         $this->currentTagTeams()->detach();
-        $this->touch();
-
-        return $this;
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -173,25 +183,22 @@ class Stable extends Model
     }
 
     /**
-     * Retire a tag team.
+     * Retire a stable and its members.
      *
-     * @return $this
+     * @param  string|null $retiredAt
+     * @return void
      */
-    public function retire()
+    public function retire($retiredAt = null)
     {
-        if ($this->canBeRetired()) {
-            if ($this->is_suspended) {
-                $this->reinstate();
-            }
+        throw_unless($this->canBeRetired(), new CannotBeRetiredException('Entity cannot be unretired. This entity is not retired.'));
 
-            $this->retirements()->create(['started_at' => now()]);
+        $retiredDate = $retiredAt ?: now();
 
-            $this->currentWrestlers->each->retire();
-
-            $this->currentTagTeams->each->retire();
-
-            return $this->touch();
-        }
+        $this->currentActivation()->update(['ended_at' => $retiredDate]);
+        $this->retirements()->create(['started_at' => now()]);
+        $this->currentWrestlers->each->retire($retiredDate);
+        $this->currentTagTeams->each->retire();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -202,17 +209,13 @@ class Stable extends Model
      */
     public function unretire($unretiredAt = null)
     {
-        if ($this->canBeUnretired()) {
-            $unretiredDate = $unretiredAt ?: now();
+        throw_unless($this->canBeUnretired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
 
-            $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-            $this->save();
+        $unretiredDate = $unretiredAt ?: now();
 
-            $this->activate($unretiredDate);
-            $this->save();
-
-            return $this;
-        }
+        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        $this->activate($unretiredDate);
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -226,7 +229,7 @@ class Stable extends Model
     }
 
     /**
-     * Get the current retirement of the model.
+     * Get the current retirement of the stable.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -239,7 +242,7 @@ class Stable extends Model
     }
 
     /**
-     * Scope a query to only include retired models.
+     * Scope a query to only include retired stables.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -250,7 +253,7 @@ class Stable extends Model
     }
 
     /**
-     * Scope a query to only include unemployed models.
+     * Scope a query to only include.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -284,11 +287,13 @@ class Stable extends Model
     public function canBeRetired()
     {
         if ($this->isUnactivated() || $this->hasFutureActivation()) {
-            throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
+            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
+            return false;
         }
 
         if ($this->isRetired()) {
-            throw new CannotBeRetiredException('Stable cannot be retired. This Stable is retired.');
+            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable is retired.');
+            return false;
         }
 
         return true;
@@ -302,9 +307,41 @@ class Stable extends Model
     public function canBeUnretired()
     {
         if (! $this->isRetired()) {
-            throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
+            // throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * Update the status for the stable.
+     *
+     * @return void
+     */
+    public function updateStatus()
+    {
+        if ($this->isCurrentlyActivated()) {
+            $this->status = StableStatus::ACTIVE;
+        } elseif ($this->hasFutureActivation()) {
+            $this->status = StableStatus::FUTURE_ACTIVATION;
+        } elseif ($this->isDeactivated()) {
+            $this->status = StableStatus::INACTIVE;
+        } elseif ($this->isRetired()) {
+            $this->status = StableStatus::RETIRED;
+        } else {
+            $this->status = StableStatus::UNACTIVATED;
+        }
+    }
+
+    /**
+     * Updates a stable's status and saves.
+     *
+     * @return void
+     */
+    public function updateStatusAndSave()
+    {
+        $this->updateStatus();
+        $this->save();
     }
 }

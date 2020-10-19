@@ -26,7 +26,7 @@ class DeactivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_deactivates_an_active_stable_and_its_members($administrators)
+    public function invoke_deactivates_an_active_stable_and_its_members_and_redirectsP($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);

@@ -24,7 +24,7 @@ class RetireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_retires_a_title($administrators)
+    public function invoke_retires_an_active_title_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -40,6 +40,16 @@ class RetireControllerTest extends TestCase
             $this->assertCount(1, $title->retirements);
             $this->assertEquals($now->toDateTimeString(), $title->retirements->first()->started_at->toDateTimeString());
         });
+    }
+
+    /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            RetireController::class,
+            '__invoke',
+            RetireRequest::class
+        );
     }
 
     /** @test */
@@ -59,16 +69,6 @@ class RetireControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this->retireRequest($title)->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(
-            RetireController::class,
-            '__invoke',
-            RetireRequest::class
-        );
     }
 
     /**

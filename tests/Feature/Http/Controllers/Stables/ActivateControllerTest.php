@@ -26,7 +26,7 @@ class ActivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_activates_an_unactivated_stable_with_members($administrators)
+    public function invoke_activates_an_unactivated_stable_with_members_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -48,7 +48,7 @@ class ActivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_activates_a_future_activated_stable_with_members($administrators)
+    public function invoke_activates_a_future_activated_stable_with_members_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -70,7 +70,7 @@ class ActivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_activates_an_inactive_stable($administrators)
+    public function invoke_activates_an_inactive_stable_with_members_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);

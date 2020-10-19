@@ -24,7 +24,7 @@ class DeactivateControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_deactivates_a_title($administrators)
+    public function invoke_deactivates_an_active_title_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -43,6 +43,16 @@ class DeactivateControllerTest extends TestCase
     }
 
     /** @test */
+    public function invoke_validates_using_a_form_request()
+    {
+        $this->assertActionUsesFormRequest(
+            DeactivateController::class,
+            '__invoke',
+            DeactivateRequest::class
+        );
+    }
+
+    /** @test */
     public function a_basic_user_cannot_deactivates_a_title()
     {
         $this->actAs(Role::BASIC);
@@ -57,16 +67,6 @@ class DeactivateControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this->deactivateRequest($title)->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(
-            DeactivateController::class,
-            '__invoke',
-            DeactivateRequest::class
-        );
     }
 
     /**

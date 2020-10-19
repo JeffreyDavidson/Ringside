@@ -36,7 +36,7 @@ class TitleFactory extends Factory
             'status' => TitleStatus::ACTIVE,
         ])->hasActivations(1, ['started_at' => Carbon::yesterday()])
         ->afterCreating(function (Title $title) {
-            $title->save();
+            $title->updateStatusAndSave();
         });
     }
 
@@ -50,7 +50,7 @@ class TitleFactory extends Factory
             'status' => TitleStatus::INACTIVE,
         ])->hasActivations(1, ['started_at' => Carbon::yesterday(), 'ended_at' => $end])
         ->afterCreating(function (Title $title) {
-            $title->save();
+            $title->updateStatusAndSave();
         });
     }
 
@@ -60,7 +60,7 @@ class TitleFactory extends Factory
             'status' => TitleStatus::FUTURE_ACTIVATION,
         ])->hasActivations(1, ['started_at' => Carbon::tomorrow()])
         ->afterCreating(function (Title $title) {
-            $title->save();
+            $title->updateStatusAndSave();
         });
     }
 
@@ -75,7 +75,7 @@ class TitleFactory extends Factory
         ])->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
         ->hasRetirements(1, ['started_at' => $end])
         ->afterCreating(function (Title $title) {
-            $title->save();
+            $title->updateStatusAndSave();
         });
     }
 
@@ -84,7 +84,7 @@ class TitleFactory extends Factory
         return $this->state([
             'status' => TitleStatus::UNACTIVATED,
         ])->afterCreating(function (Title $title) {
-            $title->save();
+            $title->updateStatusAndSave();
         });
     }
 
@@ -93,7 +93,7 @@ class TitleFactory extends Factory
         return $this->state([
             'deleted_at' => now(),
         ])->afterCreating(function (Title $title) {
-            $title->save();
+            $title->updateStatusAndSave();
         });
     }
 }

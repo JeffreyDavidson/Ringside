@@ -26,7 +26,7 @@ class RetireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_retires_an_active_stable_and_redirects($administrators)
+    public function invoke_retires_an_active_stable_and_its_members_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -48,7 +48,7 @@ class RetireControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_retires_an_inactive_stable_and_redirects($administrators)
+    public function invoke_retires_an_inactive_stable_and_its_members_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);

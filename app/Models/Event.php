@@ -14,6 +14,18 @@ class Event extends Model
         Concerns\Unguarded;
 
     /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::saving(function ($evemt) {
+            $evemt->updateStatus();
+        });
+    }
+
+    /**
      * The attributes that should be mutated to dates.
      *
      * @var array
@@ -93,5 +105,32 @@ class Event extends Model
     public function getFormattedDateAttribute()
     {
         return $this->date->format('F j, Y');
+    }
+
+    /**
+     * Update the status for the wrestler.
+     *
+     * @return void
+     */
+    public function updateStatus()
+    {
+        if ($this->isScheduled()) {
+            $this->status = EventStatus::SCHEDULED;
+        } elseif ($this->isPast()) {
+            $this->status = EventStatus::PAST;
+        } else {
+            $this->status = EventStatus::UNSCHEDULED;
+        }
+    }
+
+    /**
+     * Updates a wrestler's status and saves.
+     *
+     * @return void
+     */
+    public function updateStatusAndSave()
+    {
+        $this->updateStatus();
+        $this->save();
     }
 }

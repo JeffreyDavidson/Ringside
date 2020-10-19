@@ -317,7 +317,7 @@ class Wrestler extends Model
         $startDate = $startedAt ?? now();
 
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -341,11 +341,10 @@ class Wrestler extends Model
         $releaseDate = $releasedAt ?? now();
 
         $this->currentEmployment()->update(['ended_at' => $releaseDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
-            $this->currentTagTeam->save();
-            $this->currentTagTeam->refresh();
+            $this->currentTagTeam->updateStatusAndSave();
         }
     }
 
@@ -554,11 +553,10 @@ class Wrestler extends Model
 
         $this->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
-            $this->currentTagTeam->save();
-            $this->currentTagTeam->refresh();
+            $this->currentTagTeam->updateStatusAndSave();
         }
     }
 
@@ -576,7 +574,7 @@ class Wrestler extends Model
 
         $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
         $this->employments()->create(['started_at' => $unretiredDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
     }
 
     /**
@@ -716,11 +714,10 @@ class Wrestler extends Model
         $suspensionDate = $suspendedAt ?? now();
 
         $this->suspensions()->create(['started_at' => $suspensionDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
-            $this->currentTagTeam->save();
-            $this->currentTagTeam->refresh();
+            $this->currentTagTeam->updateStatusAndSave();
         }
     }
 
@@ -737,11 +734,10 @@ class Wrestler extends Model
         $reinstatedDate = $reinstatedAt ?: now();
 
         $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
-            $this->currentTagTeam->save();
-            $this->currentTagTeam->refresh();
+            $this->currentTagTeam->updateStatusAndSave();
         }
     }
 
@@ -892,11 +888,10 @@ class Wrestler extends Model
         $injuredDate = $injuredAt ?? now();
 
         $this->injuries()->create(['started_at' => $injuredDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
-            $this->currentTagTeam->save();
-            $this->currentTagTeam->refresh();
+            $this->currentTagTeam->updateStatusAndSave();
         }
     }
 
@@ -913,11 +908,10 @@ class Wrestler extends Model
         $recoveryDate = $recoveredAt ?? now();
 
         $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-        $this->updateStatus();
+        $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
-            $this->currentTagTeam->save();
-            $this->currentTagTeam->refresh();
+            $this->currentTagTeam->updateStatusAndSave();
         }
     }
 
@@ -995,5 +989,16 @@ class Wrestler extends Model
         } else {
             $this->status = WrestlerStatus::UNEMPLOYED;
         }
+    }
+
+    /**
+     * Updates a wrestler's status and saves.
+     *
+     * @return void
+     */
+    public function updateStatusAndSave()
+    {
+        $this->updateStatus();
+        $this->save();
     }
 }
