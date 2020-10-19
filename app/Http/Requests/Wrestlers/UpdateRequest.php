@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
-use App\Rules\ConditionalEmploymentStartDateRule;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class UpdateRequest extends FormRequest
@@ -27,13 +28,13 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3'],
+            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($this->route('wrestler')->id)],
             'feet' => ['required', 'integer', 'min:5', 'max:7'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer'],
             'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => [new ConditionalEmploymentStartDateRule($this->route('wrestler'))],
+            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new EmploymentStartDateCanBeChanged($this->route('wrestler'))],
         ];
     }
 
@@ -61,8 +62,6 @@ class UpdateRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             if ($validator->errors()->isEmpty()) {
                 $this->merge(['height' => ($this->input('feet') * 12) + $this->input('inches')]);
-                $this->offsetUnset('feet');
-                $this->offsetUnset('inches');
             }
         });
     }

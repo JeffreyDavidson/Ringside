@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Stables;
 
+use App\Rules\ActivationStartDateCanBeChanged;
 use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,14 +32,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => ['filled', Rule::unique('stables')->ignore($this->route('stable')->id)],
-            'started_at' => ['sometimes', 'string', 'date_format:Y-m-d H:i:s',
-                function ($attribute, $value, $fail) {
-                    $currentEmployment = $this->route('stable')->currentEmployment ?? null;
-                    if ($currentEmployment && optional($currentEmployment->started_at)->isBefore($value)) {
-                        $fail(__('validation.before_or_equal', ['attribute' => $attribute, 'date' => $currentEmployment->started_at->toDateTimeString()]));
-                    }
-                },
-            ],
+            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new ActivationStartDateCanBeChanged($this->route('stable'))],
             'wrestlers' => ['array'],
             'wrestlers.*' => ['bail ', 'integer', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinStable($this->route('stable'))],
             'tagteams' => ['array'],

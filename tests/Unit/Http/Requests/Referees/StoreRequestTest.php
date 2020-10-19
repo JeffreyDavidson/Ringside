@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Unit\Http\Requests\Managers;
+namespace Tests\Unit\Http\Requests\Referees;
 
-use App\Http\Requests\Managers\StoreRequest;
+use App\Http\Requests\Referees\StoreRequest;
 use Tests\TestCase;
 
 /**
- * @group managers
+ * @group referees
  * @group roster
  * @group requests
  */
@@ -18,10 +18,10 @@ class StoreRequestTest extends TestCase
         $subject = $this->createFormRequest(StoreRequest::class);
         $rules = $subject->rules();
 
-        $this->assertValidationRules(
+        $this->assertExactValidationRules(
             [
-                'first_name' => ['required', 'string', 'min:3'],
-                'last_name' => ['required', 'string', 'min:3'],
+                'first_name' => ['required', 'string'],
+                'last_name' => ['required', 'string'],
                 'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
             ],
             $rules

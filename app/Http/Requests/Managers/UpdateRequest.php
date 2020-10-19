@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Managers;
 
 use App\Models\Manager;
-use App\Rules\ConditionalEmploymentStartDateRule;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends FormRequest
@@ -28,7 +28,7 @@ class UpdateRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3'],
             'last_name' => ['required', 'string', 'min:3'],
-            'started_at' => [new ConditionalEmploymentStartDateRule($this->route('manager'))],
+            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new EmploymentStartDateCanBeChanged($this->route('manager'))],
         ];
     }
 

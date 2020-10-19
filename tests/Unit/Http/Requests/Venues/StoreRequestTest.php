@@ -12,14 +12,6 @@ use Tests\TestCase;
 class StoreRequestTest extends TestCase
 {
     /** @test */
-    public function authorized_users_can_save_a_venue()
-    {
-        $subject = new StoreRequest;
-
-        $this->assertFalse($subject->authorize());
-    }
-
-    /** @test */
     public function rules_returns_validation_requirements()
     {
         $subject = $this->createFormRequest(StoreRequest::class);
