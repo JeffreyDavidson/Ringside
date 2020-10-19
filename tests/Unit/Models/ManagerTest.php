@@ -6,6 +6,7 @@ use App\Enums\ManagerStatus;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Exceptions\CannotBeInjuredException;
 use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeReleasedException;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
@@ -181,25 +182,6 @@ class ManagerTest extends TestCase
         $manager = Manager::factory()->suspended()->create();
 
         $this->assertTrue($manager->isSuspended());
-    }
-
-    /** @test */
-    public function it_can_get_suspended_models()
-    {
-        $suspendedmanagers = Manager::factory()->suspended()->create();
-        $futureEmploymentManagers = Manager::factory()->withFutureEmployment()->create();
-        $availbleManagers = Manager::factory()->available()->create();
-        $injuredManagers = Manager::factory()->injured()->create();
-        $retiredManagers = Manager::factory()->retired()->create();
-
-        $suspendedModels = Manager::suspended()->get();
-
-        $this->assertCount(1, $suspendedModels);
-        $this->assertTrue($suspendedModels->contains($suspendedmanagers));
-        $this->assertFalse($suspendedModels->contains($futureEmploymentManagers));
-        $this->assertFalse($suspendedModels->contains($availbleManagers));
-        $this->assertFalse($suspendedModels->contains($injuredManagers));
-        $this->assertFalse($suspendedModels->contains($retiredManagers));
     }
 
     /** @test */
@@ -488,25 +470,6 @@ class ManagerTest extends TestCase
     }
 
     /** @test */
-    public function it_can_get_injured_models()
-    {
-        $injuredManager = Manager::factory()->injured()->create();
-        $pendingEmploymentManager = Manager::factory()->withFutureEmployment()->create();
-        $availableManager = Manager::factory()->available()->create();
-        $suspendedManager = Manager::factory()->suspended()->create();
-        $retiredManager = Manager::factory()->retired()->create();
-
-        $injuredManagers = Manager::injured()->get();
-
-        $this->assertCount(1, $injuredManagers);
-        $this->assertTrue($injuredManagers->contains($injuredManager));
-        $this->assertFalse($injuredManagers->contains($pendingEmploymentManager));
-        $this->assertFalse($injuredManagers->contains($availableManager));
-        $this->assertFalse($injuredManagers->contains($suspendedManager));
-        $this->assertFalse($injuredManagers->contains($retiredManager));
-    }
-
-    /** @test */
     public function a_manager_can_be_injured_multiple_times()
     {
         $manager = Manager::factory()->injured()->create();
@@ -559,32 +522,32 @@ class ManagerTest extends TestCase
     }
 
     /** @test */
-    public function a_bookable_single_roster_member_can_be_fired_default_to_now()
+    public function a_available_single_roster_member_can_be_fired_default_to_now()
     {
         $now = Carbon::now();
         Carbon::setTestNow($now);
 
-        $manager = Manager::factory()->bookable()->create();
+        $manager = Manager::factory()->available()->create();
 
         $this->assertNull($manager->currentEmployment->ended_at);
 
-        $manager->fire();
+        $manager->release();
 
         $this->assertCount(1, $manager->previousEmployments);
         $this->assertEquals($now->toDateTimeString(), $manager->previousEmployment->ended_at);
     }
 
     /** @test */
-    public function a_bookable_single_roster_member_can_be_fired_at_start_date()
+    public function a_available_single_roster_member_can_be_fired_at_start_date()
     {
         $yesterday = Carbon::yesterday();
         Carbon::setTestNow($yesterday);
 
-        $manager = Manager::factory()->bookable()->create();
+        $manager = Manager::factory()->available()->create();
 
         $this->assertNull($manager->currentEmployment->ended_at);
 
-        $manager->fire($yesterday);
+        $manager->release($yesterday);
 
         $this->assertCount(1, $manager->previousEmployments);
         $this->assertEquals($yesterday->toDateTimeString(), $manager->previousEmployment->ended_at);
@@ -600,7 +563,7 @@ class ManagerTest extends TestCase
 
         $this->assertNull($manager->currentInjury->ended_at);
 
-        $manager->fire();
+        $manager->release();
 
         $this->assertCount(1, $manager->previousEmployments);
         $this->assertEquals($now->toDateTimeString(), $manager->previousEmployment->ended_at);
@@ -617,7 +580,7 @@ class ManagerTest extends TestCase
 
         $this->assertNull($manager->currentSuspension->ended_at);
 
-        $manager->fire();
+        $manager->release();
 
         $this->assertCount(1, $manager->previousEmployments);
         $this->assertEquals($now->toDateTimeString(), $manager->previousEmployment->ended_at);
@@ -631,7 +594,7 @@ class ManagerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $manager->fire();
+        $manager->release();
     }
 
     /** @test */
@@ -641,68 +604,158 @@ class ManagerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $manager->fire();
+        $manager->release();
     }
 
     /** @test */
-    public function a_single_roster_member_with_an_employment_now_or_in_the_past_is_employed()
+    public function a_manager_with_an_employment_now_or_in_the_past_is_employed()
     {
         $manager = Manager::factory()->create();
-        $manager->currentEmployment()->create(['started_at' => Carbon::now()]);
+        $manager->employments()->create(['started_at' => Carbon::now()]);
 
-        $this->assertTrue($manager->checkIsEmployed());
+        $this->assertTrue($manager->isCurrentlyEmployed());
     }
 
     /** @test */
-    public function it_can_get_future_employment_models()
+    public function it_can_get_available_managers()
     {
-        $pendingEmploymentManager = Manager::factory()->withFutureEmployment()->create();
-        $bookableManager = Manager::factory()->bookable()->create();
+        $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+        $availableManager = Manager::factory()->available()->create();
         $injuredManager = Manager::factory()->injured()->create();
         $suspendedManager = Manager::factory()->suspended()->create();
         $retiredManager = Manager::factory()->retired()->create();
+        $releasedManager = Manager::factory()->released()->create();
 
-        $pendingEmploymentManagers = Manager::pendingEmployment()->get();
+        $availableManagers = Manager::available()->get();
 
-        $this->assertCount(1, $pendingEmploymentManagers);
-        $this->assertTrue($pendingEmploymentManagers->contains($pendingEmploymentManager));
-        $this->assertFalse($pendingEmploymentManagers->contains($bookableManager));
-        $this->assertFalse($pendingEmploymentManagers->contains($injuredManager));
-        $this->assertFalse($pendingEmploymentManagers->contains($suspendedManager));
-        $this->assertFalse($pendingEmploymentManagers->contains($retiredManager));
+        $this->assertCount(1, $availableManagers);
+        $this->assertTrue($availableManagers->contains($availableManager));
+        $this->assertFalse($availableManagers->contains($futureEmployedManager));
+        $this->assertFalse($availableManagers->contains($injuredManager));
+        $this->assertFalse($availableManagers->contains($suspendedManager));
+        $this->assertFalse($availableManagers->contains($retiredManager));
+        $this->assertFalse($availableManagers->contains($releasedManager));
     }
 
     /** @test */
-    public function it_can_get_employed_models()
+    public function it_can_get_future_employmed_managers()
     {
-        $pendingEmploymentManager = Manager::factory()->withFutureEmployment()->create();
-        $bookableManager = Manager::factory()->bookable()->create();
+        $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+        $availableManager = Manager::factory()->available()->create();
         $injuredManager = Manager::factory()->injured()->create();
         $suspendedManager = Manager::factory()->suspended()->create();
         $retiredManager = Manager::factory()->retired()->create();
+        $releasedManager = Manager::factory()->released()->create();
+
+        $futureEmployedManagers = Manager::futureEmployed()->get();
+
+        $this->assertCount(1, $futureEmployedManagers);
+        $this->assertTrue($futureEmployedManagers->contains($futureEmployedManager));
+        $this->assertFalse($futureEmployedManagers->contains($availableManager));
+        $this->assertFalse($futureEmployedManagers->contains($injuredManager));
+        $this->assertFalse($futureEmployedManagers->contains($suspendedManager));
+        $this->assertFalse($futureEmployedManagers->contains($retiredManager));
+        $this->assertFalse($futureEmployedManagers->contains($releasedManager));
+    }
+
+    /** @test */
+    public function it_can_get_employed_managers()
+    {
+        $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+        $availableManager = Manager::factory()->available()->create();
+        $injuredManager = Manager::factory()->injured()->create();
+        $suspendedManager = Manager::factory()->suspended()->create();
+        $retiredManager = Manager::factory()->retired()->create();
+        $releasedManager = Manager::factory()->released()->create();
 
         $employedManagers = Manager::employed()->get();
 
-        $this->assertCount(4, $employedManagers);
-        $this->assertFalse($employedManagers->contains($pendingEmploymentManager));
-        $this->assertTrue($employedManagers->contains($bookableManager));
+        $this->assertCount(3, $employedManagers);
         $this->assertTrue($employedManagers->contains($injuredManager));
+        $this->assertTrue($employedManagers->contains($availableManager));
         $this->assertTrue($employedManagers->contains($suspendedManager));
-        $this->assertTrue($employedManagers->contains($retiredManager));
+        $this->assertFalse($employedManagers->contains($futureEmployedManager));
+        $this->assertFalse($employedManagers->contains($retiredManager));
+        $this->assertFalse($employedManagers->contains($releasedManager));
     }
 
     /** @test */
-    public function a_single_roster_member_without_an_employment_is_future_employment()
+    public function it_can_get_released_managers()
     {
-        $manager = Manager::factory()->create();
+        $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+        $availableManager = Manager::factory()->available()->create();
+        $injuredManager = Manager::factory()->injured()->create();
+        $suspendedManager = Manager::factory()->suspended()->create();
+        $retiredManager = Manager::factory()->retired()->create();
+        $releasedManager = Manager::factory()->released()->create();
 
-        $this->assertTrue($manager->hasFutureEmployment());
+        $releasedManagers = Manager::released()->get();
+
+        $this->assertCount(3, $releasedManagers);
+        $this->assertTrue($releasedManagers->contains($releasedManager));
+        $this->assertFalse($releasedManagers->contains($futureEmployedManager));
+        $this->assertFalse($releasedManagers->contains($availableManager));
+        $this->assertFalse($releasedManagers->contains($injuredManager));
+        $this->assertFalse($releasedManagers->contains($suspendedManager));
+        $this->assertFalse($releasedManagers->contains($retiredManager));
     }
 
     /** @test */
-    public function a_single_roster_member_without_a_suspension_or_injury_or_retirement_and_employed_in_the_future_is_future_employment()
+    public function it_can_get_injured_managers()
+    {
+        $injuredManager = Manager::factory()->injured()->create();
+        $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+        $availableManager = Manager::factory()->available()->create();
+        $suspendedManager = Manager::factory()->suspended()->create();
+        $retiredManager = Manager::factory()->retired()->create();
+        $releasedManager = Manager::factory()->released()->create();
+
+        $injuredManagers = Manager::injured()->get();
+
+        $this->assertCount(1, $injuredManagers);
+        $this->assertTrue($injuredManagers->contains($injuredManager));
+        $this->assertFalse($injuredManagers->contains($futureEmployedManager));
+        $this->assertFalse($injuredManagers->contains($availableManager));
+        $this->assertFalse($injuredManagers->contains($suspendedManager));
+        $this->assertFalse($injuredManagers->contains($retiredManager));
+        $this->assertFalse($injuredManagers->contains($releasedManager));
+    }
+
+    /** @test */
+    public function it_can_get_suspended_managers()
+    {
+        $suspendedManager = Manager::factory()->suspended()->create();
+        $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
+        $availbleManager = Manager::factory()->available()->create();
+        $injuredManager = Manager::factory()->injured()->create();
+        $retiredManager = Manager::factory()->retired()->create();
+        $releasedManager = Manager::factory()->released()->create();
+
+        $suspendedManagers = Manager::suspended()->get();
+
+        $this->assertCount(1, $suspendedManagers);
+        $this->assertTrue($suspendedManagers->contains($suspendedManager));
+        $this->assertFalse($suspendedManagers->contains($futureEmployedManager));
+        $this->assertFalse($suspendedManagers->contains($availbleManager));
+        $this->assertFalse($suspendedManagers->contains($injuredManager));
+        $this->assertFalse($suspendedManagers->contains($retiredManager));
+        $this->assertFalse($suspendedManagers->contains($releasedManager));
+    }
+
+    /** @test */
+    public function a_manager_without_an_employment_is_unemployed()
     {
         $manager = Manager::factory()->create();
+
+        $this->assertTrue($manager->isUnemployed());
+    }
+
+    /** @test */
+    public function a_manager_employed_in_the_future_has_future_employment()
+    {
+        /** @var \App\Models\Manager $manager */
+        $manager = Manager::factory()->create();
+
         $manager->employ(Carbon::tomorrow());
 
         $this->assertTrue($manager->hasFutureEmployment());

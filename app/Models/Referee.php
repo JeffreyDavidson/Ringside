@@ -27,6 +27,18 @@ class Referee extends Model
         Concerns\Unguarded;
 
     /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::saving(function ($referee) {
+            $referee->updateStatus();
+        });
+    }
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -61,7 +73,7 @@ class Referee extends Model
     }
 
     /**
-     * Get all of the employments of the model.
+     * Get all of the employments of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -71,7 +83,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the current employment of the model.
+     * Get the current employment of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -84,7 +96,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the future employment of the model.
+     * Get the future employment of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -97,7 +109,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous employments of the model.
+     * Get the previous employments of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -108,7 +120,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous employment of the model.
+     * Get the previous employment of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -120,18 +132,18 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to only include future employed models.
+     * Scope a query to only include future employed referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFutureEmployment($query)
+    public function scopeFutureEmployed($query)
     {
         return $query->whereHas('futureEmployment');
     }
 
     /**
-     * Scope a query to only include employed models.
+     * Scope a query to only include employed referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -144,7 +156,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to only include released models.
+     * Scope a query to only include released referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -157,7 +169,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to only include unemployed models.
+     * Scope a query to only include unemployed referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -185,7 +197,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to order by the models first employment date.
+     * Scope a query to order by the referee's first employment date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @param  string $direction
@@ -213,7 +225,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to order by the models current released date.
+     * Scope a query to order by the referee's current released date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @param  string $direction
@@ -225,51 +237,47 @@ class Referee extends Model
     }
 
     /**
-     * Employ a model.
+     * Employ a referee.
      *
      * @param  string|null $startedAt
-     * @return $this
+     * @return void
      */
     public function employ($startedAt = null)
     {
-        if ($this->canBeEmployed()) {
-            $startDate = $startedAt ?? now();
+        throw_unless($this->canBeEmployed(), new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.'));
 
-            $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-            $this->save();
+        $startDate = $startedAt ?? now();
 
-            return $this;
-        }
+        $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+        $this->save();
     }
 
     /**
-     * Release a model.
+     * Release a referee.
      *
      * @param  string|null $releasedAt
-     * @return $this
+     * @return void
      */
     public function release($releasedAt = null)
     {
-        if ($this->canBeReleased()) {
-            if ($this->isSuspended()) {
-                $this->reinstate();
-            }
+        throw_unless($this->canBeReleased(), new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.'));
 
-            if ($this->isInjured()) {
-                $this->clearFromInjury();
-            }
-
-            $releaseDate = $releasedAt ?? now();
-
-            $this->currentEmployment()->update(['ended_at' => $releaseDate]);
-            $this->save();
-
-            return $this;
+        if ($this->isSuspended()) {
+            $this->reinstate();
         }
+
+        if ($this->isInjured()) {
+            $this->clearFromInjury();
+        }
+
+        $releaseDate = $releasedAt ?? now();
+
+        $this->currentEmployment()->update(['ended_at' => $releaseDate]);
+        $this->save();
     }
 
     /**
-     * Check to see if the model is employed.
+     * Check to see if the referee is employed.
      *
      * @return bool
      */
@@ -279,7 +287,7 @@ class Referee extends Model
     }
 
     /**
-     * Check to see if the model is not in employment.
+     * Check to see if the referee is not in employment.
      *
      * @return bool
      */
@@ -289,7 +297,7 @@ class Referee extends Model
     }
 
     /**
-     * Check to see if the model is unemployed.
+     * Check to see if the referee is unemployed.
      *
      * @return bool
      */
@@ -299,7 +307,7 @@ class Referee extends Model
     }
 
     /**
-     * Check to see if the model has a future employment.
+     * Check to see if the referee has a future employment.
      *
      * @return bool
      */
@@ -309,7 +317,7 @@ class Referee extends Model
     }
 
     /**
-     * Check to see if the model has been released.
+     * Check to see if the referee has been released.
      *
      * @return bool
      */
@@ -322,39 +330,42 @@ class Referee extends Model
     }
 
     /**
-     * Determine if the model can be employed.
+     * Determine if the referee can be employed.
      *
      * @return bool
      */
     public function canBeEmployed()
     {
         if ($this->isCurrentlyEmployed()) {
-            throw new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.');
+            // throw new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.');
+            return false;
         }
 
         if ($this->isRetired()) {
-            throw new CannotBeEmployedException('Entity cannot be employed. This entity does not have an active employment.');
+            // throw new CannotBeEmployedException('Entity cannot be employed. This entity does not have an active employment.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Determine if the model can be released.
+     * Determine if the referee can be released.
      *
      * @return bool
      */
     public function canBeReleased()
     {
         if ($this->isNotInEmployment()) {
-            throw new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.');
+            // throw new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Get the model's first employment date.
+     * Get the referee's first employment date.
      *
      * @return string|null
      */
@@ -364,7 +375,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the retirements of the model.
+     * Get the retirements of the referee'.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -374,7 +385,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the current retirement of the model.
+     * Get the current retirement of the referee'.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -387,7 +398,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous retirements of the model.
+     * Get the previous retirements of the referee'.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -398,7 +409,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous retirement of the model.
+     * Get the previous retirement of the referee'.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -410,14 +421,14 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to only include retired models.
+     * Scope a query to only include retired referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeRetired($query)
     {
-        return $this->whereHas('currentRetirement');
+        return $query->whereHas('currentRetirement');
     }
 
     /**
@@ -437,7 +448,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to order by the models current retirement date.
+     * Scope a query to order by the referee's current retirement date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @param  string $direction
@@ -449,57 +460,49 @@ class Referee extends Model
     }
 
     /**
-     * Retire a model.
+     * Retire a referee.
      *
      * @param  string|null $retiredAt
-     * @return $this
+     * @return void
      */
     public function retire($retiredAt = null)
     {
-        if ($this->canBeRetired()) {
-            if ($this->isSuspended()) {
-                $this->reinstate();
-            }
+        throw_unless($this->canBeRetired(), new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active employment.'));
 
-            if ($this->isInjured()) {
-                $this->clearFromInjury();
-            }
-
-            $retiredDate = $retiredAt ?: now();
-
-            $this->currentEmployment()->update(['ended_at' => $retiredDate]);
-            $this->save();
-
-            $this->retirements()->create(['started_at' => $retiredDate]);
-            $this->save();
-
-            return $this;
+        if ($this->isSuspended()) {
+            $this->reinstate();
         }
+
+        if ($this->isInjured()) {
+            $this->clearFromInjury();
+        }
+
+        $retiredDate = $retiredAt ?: now();
+
+        $this->currentEmployment()->update(['ended_at' => $retiredDate]);
+        $this->retirements()->create(['started_at' => $retiredDate]);
+        $this->save();
     }
 
     /**
-     * Unretire a model.
+     * Unretire a referee.
      *
      * @param  string|null $unretiredAt
-     * @return $this
+     * @return void
      */
     public function unretire($unretiredAt = null)
     {
-        if ($this->canBeUnretired()) {
-            $unretiredDate = $unretiredAt ?: now();
+        throw_unless($this->canBeUnRetired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
 
-            $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-            $this->save();
+        $unretiredDate = $unretiredAt ?: now();
 
-            $this->employments()->create(['started_at' => $unretiredDate]);
-            $this->save();
-
-            return $this;
-        }
+        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        $this->employments()->create(['started_at' => $unretiredDate]);
+        $this->save();
     }
 
     /**
-     * Check to see if the model is retired.
+     * Check to see if the referee is retired.
      *
      * @return bool
      */
@@ -509,35 +512,35 @@ class Referee extends Model
     }
 
     /**
-     * Determine if the model can be retired.
+     * Determine if the referee can be retired.
      *
      * @return bool
      */
     public function canBeRetired()
     {
         if ($this->isNotInEmployment()) {
-            throw new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active employment.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Determine if the model can be unretired.
+     * Determine if the referee can be unretired.
      *
      * @return bool
      */
     public function canBeUnretired()
     {
         if (! $this->isRetired()) {
-            throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Get the suspensions of the model.
+     * Get the suspensions of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -547,7 +550,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the current suspension of the model.
+     * Get the current suspension of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -559,7 +562,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous suspensions of the model.
+     * Get the previous suspensions of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -570,7 +573,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous suspension of the model.
+     * Get the previous suspension of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -582,14 +585,14 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to only include suspended models.
+     * Scope a query to only include suspended referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeSuspended($query)
     {
-        return $this->whereHas('currentSuspension');
+        return $query->whereHas('currentSuspension');
     }
 
     /**
@@ -609,7 +612,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to order by the models current suspension date.
+     * Scope a query to order by the referee's current suspension date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @param  string $direction
@@ -621,43 +624,39 @@ class Referee extends Model
     }
 
     /**
-     * Suspend a model.
+     * Suspend a referee.
      *
      * @param  string|null $suspendedAt
-     * @return $this
+     * @return void
      */
     public function suspend($suspendedAt = null)
     {
-        if ($this->canBeSuspended()) {
-            $suspensionDate = $suspendedAt ?? now();
+        throw_unless($this->canBeSuspended(), new CannotBeSuspendedException('Entity cannot be suspended. This entity does not have an active employment.'));
 
-            $this->suspensions()->create(['started_at' => $suspensionDate]);
-            $this->save();
+        $suspensionDate = $suspendedAt ?? now();
 
-            return $this;
-        }
+        $this->suspensions()->create(['started_at' => $suspensionDate]);
+        $this->save();
     }
 
     /**
-     * Reinstate a model.
+     * Reinstate a referee.
      *
      * @param  string|null $reinstatedAt
-     * @return bool
+     * @return void
      */
     public function reinstate($reinstatedAt = null)
     {
-        if ($this->canBeReinstated()) {
-            $reinstatedDate = $reinstatedAt ?: now();
+        throw_unless($this->canBeReinstated(), new CannotBeReinstatedException('Entity cannot be reinstated. This entity is not suspended.'));
 
-            $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-            $this->save();
+        $reinstatedDate = $reinstatedAt ?: now();
 
-            return $this;
-        }
+        $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+        $this->save();
     }
 
     /**
-     * Check to see if the model is suspended.
+     * Check to see if the referee is suspended.
      *
      * @return bool
      */
@@ -667,43 +666,47 @@ class Referee extends Model
     }
 
     /**
-     * Determine if the model can be suspended.
+     * Determine if the referee can be suspended.
      *
      * @return bool
      */
     public function canBeSuspended()
     {
         if ($this->isNotInEmployment()) {
-            throw new CannotBeSuspendedException('Entity cannot be suspended. This entity does not have an active employment.');
+            // throw new CannotBeSuspendedException('Entity cannot be suspended. This entity does not have an active employment.');
+            return false;
         }
 
         if ($this->isSuspended()) {
-            throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently suspended.');
+            // throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently suspended.');
+            return false;
         }
 
         if ($this->isInjured()) {
-            throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently injured.');
+            // throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently injured.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Determine if the model can be reinstated.
+     * Determine if the referee can be reinstated.
      *
      * @return bool
      */
     public function canBeReinstated()
     {
         if (! $this->isSuspended()) {
-            throw new CannotBeReinstatedException('Entity cannot be reinstated. This entity is not suspended.');
+            // throw new CannotBeReinstatedException('Entity cannot be reinstated. This entity is not suspended.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Get the injuries of the wrestler.
+     * Get the injuries of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -713,7 +716,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the current injury of the wrestler.
+     * Get the current injury of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -725,7 +728,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous injuries of the wrestler.
+     * Get the previous injuries of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -736,7 +739,7 @@ class Referee extends Model
     }
 
     /**
-     * Get the previous injury of the wrestler.
+     * Get the previous injury of the referee.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
@@ -748,7 +751,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to only include injured wrestlers.
+     * Scope a query to only include injured referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -775,7 +778,7 @@ class Referee extends Model
     }
 
     /**
-     * Scope a query to order by the wrestlers current injured date.
+     * Scope a query to order by the referee's current injured date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @param  string|null $direction
@@ -787,43 +790,39 @@ class Referee extends Model
     }
 
     /**
-     * Injure a wrestler.
+     * Injure a referee.
      *
      * @param  string|null $injuredAt
-     * @return $this
+     * @return void
      */
     public function injure($injuredAt = null)
     {
-        if ($this->canBeInjured()) {
-            $injuredDate = $injuredAt ?? now();
+        throw_unless($this->canBeInjured(), new CannotBeInjuredException('Entity cannot be injured. This entity does not have an active employment.'));
 
-            $this->injuries()->create(['started_at' => $injuredDate]);
-            $this->save();
+        $injuredDate = $injuredAt ?? now();
 
-            return $this;
-        }
+        $this->injuries()->create(['started_at' => $injuredDate]);
+        $this->save();
     }
 
     /**
-     * Mark a wrestler cleared from an injury.
+     * Mark a referee cleared from an injury.
      *
      * @param  string|null $recoveredAt
-     * @return $this
+     * @return void
      */
     public function clearFromInjury($recoveredAt = null)
     {
-        if ($this->canBeClearedFromInjury()) {
-            $recoveryDate = $recoveredAt ?? now();
+        throw_unless($this->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException('Entity cannot be cleared from an injury. This entity is not injured.'));
 
-            $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-            $this->save();
+        $recoveryDate = $recoveredAt ?? now();
 
-            return $this;
-        }
+        $this->currentInjury()->update(['ended_at' => $recoveryDate]);
+        $this->save();
     }
 
     /**
-     * Check to see if the wrestler is injured.
+     * Check to see if the referee is injured.
      *
      * @return bool
      */
@@ -833,38 +832,68 @@ class Referee extends Model
     }
 
     /**
-     * Determine if the wrestler can be injured.
+     * Determine if the referee can be injured.
      *
      * @return bool
      */
     public function canBeInjured()
     {
         if ($this->isNotInEmployment()) {
-            throw new CannotBeInjuredException('Entity cannot be injured. This entity does not have an active employment.');
+            // throw new CannotBeInjuredException('Entity cannot be injured. This entity does not have an active employment.');
+            return false;
         }
 
         if ($this->isInjured()) {
-            throw new CannotBeInjuredException('Entity cannot be injured. This entity is currently injured.');
+            // throw new CannotBeInjuredException('Entity cannot be injured. This entity is currently injured.');
+            return false;
         }
 
         if ($this->isSuspended()) {
-            throw new CannotBeInjuredException('Entity cannot be injured. Thokis entity is currently suspended.');
+            // throw new CannotBeInjuredException('Entity cannot be injured. Thokis entity is currently suspended.');
+            return false;
         }
 
         return true;
     }
 
     /**
-     * Determine if the wrestler can be cleared from an injury.
+     * Determine if the referee can be cleared from an injury.
      *
      * @return bool
      */
     public function canBeClearedFromInjury()
     {
         if (! $this->isInjured()) {
-            throw new CannotBeClearedFromInjuryException('Entity cannot be marked as being recovered from an injury. This entity is not injured.');
+            // throw new CannotBeClearedFromInjuryException('Entity cannot be marked as being recovered from an injury. This entity is not injured.');
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * Update the status for the referee.
+     *
+     * @return void
+     */
+    public function updateStatus()
+    {
+        if ($this->isCurrentlyEmployed()) {
+            if ($this->isInjured()) {
+                $this->status = RefereeStatus::INJURED;
+            } elseif ($this->isSuspended()) {
+                $this->status = RefereeStatus::SUSPENDED;
+            } elseif ($this->isBookable()) {
+                $this->status = RefereeStatus::BOOKABLE;
+            }
+        } elseif ($this->hasFutureEmployment()) {
+            $this->status = RefereeStatus::FUTURE_EMPLOYMENT;
+        } elseif ($this->isReleased()) {
+            $this->status = RefereeStatus::RELEASED;
+        } elseif ($this->isRetired()) {
+            $this->status = RefereeStatus::RETIRED;
+        } else {
+            $this->status = RefereeStatus::UNEMPLOYED;
+        }
     }
 }
