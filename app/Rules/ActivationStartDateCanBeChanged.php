@@ -17,7 +17,7 @@ class ActivationStartDateCanBeChanged implements Rule
 
     public function passes($attribute, $value)
     {
-        /*
+        /**
          *  Times when activation date can/cannot be changed.
          *
          * * If model has a current activation then it cannot be changed.

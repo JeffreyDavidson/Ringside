@@ -1,13 +1,14 @@
 <?php
 
-namespace Tests\Unit\Http\Requests\Titles;
+namespace Tests\Unit\Http\Requests\Referees;
 
-use App\Http\Requests\Titles\UpdateRequest;
-use Illuminate\Validation\Rules\Unique;
+use App\Http\Requests\Referees\UpdateRequest;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Tests\TestCase;
 
 /**
- * @group titles
+ * @group referees
+ * @group roster
  * @group requests
  */
 class UpdateRequestTest extends TestCase
@@ -20,13 +21,13 @@ class UpdateRequestTest extends TestCase
 
         $this->assertValidationRules(
             [
-                'name' => ['required', 'min:3', 'ends_with:Title,Titles'],
+                'first_name' => ['required', 'string'],
+                'last_name' => ['required', 'string'],
                 'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
             ],
             $rules
         );
 
-        $this->assertValidationRuleContains($rules['name'], Unique::class);
-        // $this->assertValidationRuleContains($rules['activated_at'], ActivationStartDateCanBeChanged::class);
+        // $this->assertValidationRuleContains($rules['started_at'], EmploymentStartDateCanBeChanged::class);
     }
 }

@@ -13,14 +13,6 @@ use Tests\TestCase;
 class StoreRequestTest extends TestCase
 {
     /** @test */
-    public function authorize_returns_false_when_unauthenticated()
-    {
-        $subject = new StoreRequest();
-
-        $this->assertFalse($subject->authorize());
-    }
-
-    /** @test */
     public function rules_returns_validation_requirements()
     {
         $subject = $this->createFormRequest(StoreRequest::class);
