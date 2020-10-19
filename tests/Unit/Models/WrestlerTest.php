@@ -3,7 +3,6 @@
 namespace Tests\Unit\Models;
 
 use App\Enums\WrestlerStatus;
-use App\Models\SingleRosterMember;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -84,11 +83,5 @@ class WrestlerTest extends TestCase
     public function a_wrestler_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Wrestler::class);
-    }
-
-    /** @test */
-    public function a_wrestler_is_a_single_roster_member()
-    {
-        $this->assertEquals(SingleRosterMember::class, get_parent_class(Wrestler::class));
     }
 }

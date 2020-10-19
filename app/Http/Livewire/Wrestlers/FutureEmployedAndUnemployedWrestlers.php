@@ -15,7 +15,7 @@ class FutureEmployedAndUnemployedWrestlers extends Component
     public function render()
     {
         $futureEmploymentAndUnemployedWrestlers = Wrestler::query()
-            ->futureEmployment()
+            ->futureEmployed()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()

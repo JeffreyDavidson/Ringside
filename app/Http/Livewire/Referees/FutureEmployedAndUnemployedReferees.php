@@ -15,7 +15,7 @@ class FutureEmployedAndUnemployedReferees extends Component
     public function render()
     {
         $futureEmployedAndUnemployedReferees = Referee::query()
-            ->futureEmployment()
+            ->futureEmployed()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()
@@ -24,7 +24,7 @@ class FutureEmployedAndUnemployedReferees extends Component
             ->paginate();
 
         return view('livewire.referees.future-employed-and-unemployed-referees', [
-            'futureEmployedAndUnemployedReferees' => $futureEmployedAndUnemployedReferees
+            'futureEmployedAndUnemployedReferees' => $futureEmployedAndUnemployedReferees,
         ]);
     }
 }

@@ -15,7 +15,7 @@ class FutureEmployedAndUnemployedManagers extends Component
     public function render()
     {
         $futureEmployedAndUnemployedManagers = Manager::query()
-            ->futureEmployment()
+            ->futureEmployed()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()
@@ -24,7 +24,7 @@ class FutureEmployedAndUnemployedManagers extends Component
             ->paginate();
 
         return view('livewire.managers.future-employed-and-unemployed-managers', [
-            'futureEmployedAndUnemployedManagers' => $futureEmployedAndUnemployedManagers
+            'futureEmployedAndUnemployedManagers' => $futureEmployedAndUnemployedManagers,
         ]);
     }
 }
