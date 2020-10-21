@@ -3,6 +3,10 @@
 namespace Tests\Unit\Http\Requests\Managers;
 
 use App\Http\Requests\Managers\UpdateRequest;
+use App\Models\Manager;
+use App\Rules\EmploymentStartDateCanBeChanged;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Route;
 use Tests\TestCase;
 
 /**
@@ -12,10 +16,22 @@ use Tests\TestCase;
  */
 class UpdateRequestTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test */
     public function rules_returns_validation_requirements()
     {
+        $manager = Manager::factory()->create();
+
         $subject = $this->createFormRequest(UpdateRequest::class);
+        $subject->setRouteResolver(function () use ($manager) {
+            $stub = $this->createStub(Route::class);
+            $stub->expects($this->any())->method('hasParameter')->with('manager')->willReturn(true);
+            $stub->expects($this->any())->method('parameter')->with('manager')->willReturn($manager);
+
+            return $stub;
+        });
+
         $rules = $subject->rules();
 
         $this->assertValidationRules(
@@ -27,6 +43,6 @@ class UpdateRequestTest extends TestCase
             $rules
         );
 
-        // $this->assertValidationRuleContains('started_at', EmploymentStartDateCanBeChanged::class);
+        $this->assertValidationRuleContains($rules['started_at'], EmploymentStartDateCanBeChanged::class);
     }
 }

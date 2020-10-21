@@ -35,8 +35,8 @@ class UpdateRequest extends FormRequest
             'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new ActivationStartDateCanBeChanged($this->route('stable'))],
             'wrestlers' => ['array'],
             'wrestlers.*' => ['bail ', 'integer', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinStable($this->route('stable'))],
-            'tagteams' => ['array'],
-            'tagteams.*' => ['bail', 'integer', Rule::exists('tag_teams', 'id'), new TagTeamCanJoinStable($this->route('stable'))],
+            'tag_teams' => ['array'],
+            'tag_teams.*' => ['bail', 'integer', Rule::exists('tag_teams', 'id'), new TagTeamCanJoinStable($this->route('stable'))],
         ];
     }
 

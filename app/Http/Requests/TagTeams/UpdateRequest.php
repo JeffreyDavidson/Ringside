@@ -3,8 +3,11 @@
 namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
+use App\Rules\CannotBeEmployedAfterDate;
+use App\Rules\CannotBeHindered;
+use App\Rules\CannotBelongToMultipleEmployedTagTeams;
+use App\Rules\CannotBelongToTagTeam;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use App\Rules\WrestlerCanJoinTagTeamRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,11 +31,19 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', Rule::unique('tag_teams')->ignore($this->tag_team->id)],
+            'name' => ['required', 'string', Rule::unique('tag_teams')->ignore($this->route('tag_team')->id)],
             'signature_move' => ['nullable', 'string'],
             'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new EmploymentStartDateCanBeChanged($this->route('tag_team'))],
-            'wrestlers' => ['nullable', 'array'],
-            'wrestlers.*', [new WrestlerCanJoinTagTeamRule($this->input('started_at'))],
+            'wrestlers' => ['array'],
+            'wrestlers.*', [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('wrestlers', 'id'),
+                new CannotBeEmployedAfterDate(request('started_at')),
+                new CannotBeHindered,
+                new CannotBelongToMultipleEmployedTagTeams($this->route('tag_team')),
+            ],
         ];
     }
 }

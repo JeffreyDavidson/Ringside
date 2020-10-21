@@ -38,21 +38,19 @@ class WrestlerCanJoinStable implements Rule
             return false;
         }
 
-        if (! data_get($wrestler, 'currentEmployment.started_at')) {
-            return false;
+        if (($wrestler->isUnemployed() || $wrestler->hasFutureEmployment()) && $this->stable->isUnactivated()) {
+            return true;
         }
 
         if ($wrestler->currentEmployment->started_at->isFuture()) {
             return false;
         }
 
-        if (! $wrestler->isBookable()) {
+        if ($wrestler->currentStable->doesntExist()) {
             return false;
         }
 
-        // We need to to make sure the wrestler isn't in any
-        // bookable stables excluding the current stable.
-        if ($wrestler->currentStable) {
+        if ($wrestler->currentStable->isNot($this->stable)) {
             return false;
         }
 

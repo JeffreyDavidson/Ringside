@@ -20,14 +20,11 @@ trait CanBeStableMember
     /**
      * Get the current stable the member belongs to.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function currentStable()
     {
-        return $this->morphToOne(Stable::class, 'member', 'stable_members')
-                    ->wherePivot('joined_at', '<=', now())
-                    ->wherePivot('left_at', '=', null)
-                    ->limit(1);
+        return $this->belongsTo(Stable::class, 'current_stable_id');
     }
 
     /**
