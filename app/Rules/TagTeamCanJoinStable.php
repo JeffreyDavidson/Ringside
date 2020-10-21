@@ -33,19 +33,11 @@ class TagTeamCanJoinStable implements Rule
             return false;
         }
 
-        if (($tagTeam->isUnemployed() || $tagTeam->hasFutureEmployment()) && $this->stable->isUnactivated()) {
-            return true;
-        }
-
-        if ($tagTeam->currentEmployment->started_at->isFuture()) {
+        if ($tagTeam->currentStable()->exists() && $tagTeam->currentStable->isNot($this->stable)) {
             return false;
         }
 
-        if ($tagTeam->currentStable->doesntExist()) {
-            return false;
-        }
-
-        if ($tagTeam->currentStable->isNot($this->stable)) {
+        if ($tagTeam->futureEmployment()->exists() && $tagTeam->futureEmployment->started_at->gt(request()->input('started_at'))) {
             return false;
         }
 

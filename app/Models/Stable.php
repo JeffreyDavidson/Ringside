@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\StableStatus;
+use App\Exceptions\CannotBeDisassembledException;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeUnretiredException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -165,11 +166,31 @@ class Stable extends Model
      *
      * @return void
      */
-    public function disassemble()
+    public function disassemble($deactivatedAt = null)
     {
+        throw_unless($this->canBeDisassembled(), new CannotBeDisassembledException('Entity cannot be disassembled. This stable does not have an active activation.'));
+
+        $deactivationDate = $deactivatedAt ?: now();
+
+        $this->currentActivation()->update(['ended_at' => $deactivationDate]);
         $this->currentWrestlers()->detach();
         $this->currentTagTeams()->detach();
         $this->updateStatusAndSave();
+    }
+
+    /**
+     * Determine if the tag team can be disassembled.
+     *
+     * @return bool
+     */
+    public function canBeDisassembled()
+    {
+        if ($this->isNotInActivation()) {
+            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
+            return false;
+        }
+
+        return true;
     }
 
     /**

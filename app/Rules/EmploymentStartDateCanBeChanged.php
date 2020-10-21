@@ -22,62 +22,19 @@ class EmploymentStartDateCanBeChanged implements Rule
     }
 
     /**
-     * Undocumented function.
+     * Determine if the validation rule passes.
      *
-     * @param [type] $attribute
-     * @param [type] $value
+     * @param  string $attribute
+     * @param  string $value
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        /*
-         *  Times when employment date can/cannot be changed.
-         *
-         * * If model has a current employment then it cannot be changed.
-         * * If model has a future employment then the value can be changed.
-         * * If model is unemployed then value skip.
-         *
-         */
-
-        if ($this->model->isUnemployed()) {
-            return true;
-        }
-
-        $currentEmployment = $this->model->currentEmployment;
-        $futureEmployment = $this->model->futureEmployment;
-        $formDate = Carbon::parse($value);
-
-        if ($currentEmployment) {
-            if ($formDate === null) {
-                return false;
-            }
-
-            if ($formDate->lte($currentEmployment->started_at)) {
-                return true;
-            }
-
+        if ($this->model->currentEmployment()->exists() && $this->model->currentEmployment->started_at->gt(Carbon::parse($value))) {
             return false;
         }
 
-        if ($futureEmployment) {
-            if ($formDate === null) {
-                return true;
-            }
-
-            if ($formDate->isFuture()) {
-                return true;
-            }
-
-            if ($formDate->lte($futureEmployment->started_at)) {
-                return true;
-            }
-        }
-
-        if ((! $futureEmployment) && (! $currentEmployment)) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     public function message()

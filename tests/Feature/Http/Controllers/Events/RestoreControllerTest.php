@@ -11,14 +11,17 @@ use Tests\TestCase;
  * @group events
  * @group feature-events
  */
-class RestoreEventTest extends TestCase
+class RestoreControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function an_administrator_can_restore_a_deleted_event()
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_restores_a_soft_deleted_event_and_redirects($administrators)
     {
-        $this->actAs(Role::ADMINISTRATOR);
+        $this->actAs($administrators);
         $event = Event::factory()->softDeleted()->create();
 
         $response = $this->restoreRequest($event);
@@ -46,16 +49,5 @@ class RestoreEventTest extends TestCase
         $response = $this->restoreRequest($event);
 
         $response->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function a_non_soft_deleted_event_cannot_be_restored()
-    {
-        $this->actAs(Role::ADMINISTRATOR);
-        $event = Event::factory()->create(['deleted_at' => null]);
-
-        $response = $this->restoreRequest($event);
-
-        $response->assertNotFound();
     }
 }
