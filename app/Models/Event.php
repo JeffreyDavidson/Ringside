@@ -54,6 +54,17 @@ class Event extends Model
     }
 
     /**
+     * Scope a query to only include scheduled events.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeUnscheduled($query)
+    {
+        return $query->where('status', EventStatus::UNSCHEDULED);
+    }
+
+    /**
      * Scope a query to only include past events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query

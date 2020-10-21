@@ -13,6 +13,12 @@
             </div>
         </x-portlet>
 
+        <x-portlet title="Unscheduled Events">
+            <div class="kt-portlet__body">
+                <livewire:events.unscheduled-events>
+            </div>
+        </x-portlet>
+
         <x-portlet title="Past Events">
             <div class="kt-portlet__body">
                 <livewire:events.past-events>

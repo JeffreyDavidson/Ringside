@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Events;
 
-use App\Models\Event;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
+use App\Models\Event;
 
 class EventsController extends Controller
 {
@@ -98,23 +98,6 @@ class EventsController extends Controller
         $this->authorize('delete', $event);
 
         $event->delete();
-
-        return redirect()->route('events.index');
-    }
-
-    /**
-     * Restore a deleted scheduled event.
-     *
-     * @param  int  $eventId
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function restore(int $eventId)
-    {
-        $event = Event::onlyTrashed()->findOrFail($eventId);
-
-        $this->authorize('restore', $event);
-
-        $event->restore();
 
         return redirect()->route('events.index');
     }

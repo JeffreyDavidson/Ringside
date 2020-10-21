@@ -38,19 +38,11 @@ class WrestlerCanJoinStable implements Rule
             return false;
         }
 
-        if (($wrestler->isUnemployed() || $wrestler->hasFutureEmployment()) && $this->stable->isUnactivated()) {
-            return true;
-        }
-
-        if ($wrestler->currentEmployment->started_at->isFuture()) {
+        if ($wrestler->currentStable()->exists() && $wrestler->currentStable->isNot($this->stable)) {
             return false;
         }
 
-        if ($wrestler->currentStable->doesntExist()) {
-            return false;
-        }
-
-        if ($wrestler->currentStable->isNot($this->stable)) {
+        if ($wrestler->futureEmployment()->exists() && $wrestler->futureEmployment->started_at->gt(request()->input('started_at'))) {
             return false;
         }
 

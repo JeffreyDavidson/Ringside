@@ -209,6 +209,17 @@ trait HasRequests
         return $this->get(route("{$entityName}.index"));
     }
 
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model  $entity
+     * @return \Illuminate\Foundation\Testing\TestResponse
+     */
+    public function disassembleRequest(Model $entity)
+    {
+        $entityName = Str::replaceFirst('_', '-', $entity->getTable());
+
+        return $this->put(route("{$entityName}.disassemble", $entity));
+    }
+
     protected function ajaxJson($url)
     {
         return $this->getJson($url, ['X-Requested-With' => 'XMLHttpRequest']);
