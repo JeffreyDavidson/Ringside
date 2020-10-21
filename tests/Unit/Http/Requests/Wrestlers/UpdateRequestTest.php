@@ -3,7 +3,10 @@
 namespace Tests\Unit\Http\Requests\Wrestlers;
 
 use App\Http\Requests\Wrestlers\UpdateRequest;
+use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Route;
 use Tests\TestCase;
 
 /**
@@ -13,10 +16,22 @@ use Tests\TestCase;
  */
 class UpdateRequestTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test */
     public function rules_returns_validation_requirements()
     {
+        $wrestler = Wrestler::factory()->create();
+
         $subject = $this->createFormRequest(UpdateRequest::class);
+        $subject->setRouteResolver(function () use ($wrestler) {
+            $stub = $this->createStub(Route::class);
+            $stub->expects($this->any())->method('hasParameter')->with('wrestler')->willReturn(true);
+            $stub->expects($this->any())->method('parameter')->with('wrestler')->willReturn($wrestler);
+
+            return $stub;
+        });
+
         $rules = $subject->rules();
 
         $this->assertValidationRules(
@@ -32,6 +47,6 @@ class UpdateRequestTest extends TestCase
             $rules
         );
 
-        // $this->assertValidationRuleContains($rules['started_at'], EmploymentStartDateCanBeChanged::class);
+        $this->assertValidationRuleContains($rules['started_at'], EmploymentStartDateCanBeChanged::class);
     }
 }

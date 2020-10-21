@@ -75,7 +75,9 @@ class StableFactory extends Factory
             ['joined_at' => $start]
         )
         ->afterCreating(function (Stable $stable) {
-            $stable->save();
+            $stable->currentTagTeams->each->update(['current_stable_id' => $stable->id]);
+            $stable->currentWrestlers->each->update(['current_stable_id' => $stable->id]);
+            $stable->updateStatusAndSave();
         });
     }
 

@@ -34,9 +34,9 @@ class EmploymentStartDateCanBeChanged implements Rule
          *  Times when employment date can/cannot be changed.
          *
          * * If model has a current employment then it cannot be changed.
-         * * If model has a future employment and the value is null then it can be changed.
-         * * If model has a future employment and value is before future employment
-         * *   start date then start date can be changed.
+         * * If model has a future employment then the value can be changed.
+         * * If model is unemployed then value skip.
+         *
          */
 
         if ($this->model->isUnemployed()) {

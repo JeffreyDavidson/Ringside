@@ -3,7 +3,9 @@
 namespace Tests\Unit\Http\Requests\TagTeams;
 
 use App\Http\Requests\TagTeams\StoreRequest;
-use App\Rules\WrestlerCanJoinTagTeamRule;
+use App\Rules\CannotBeEmployedAfterDate;
+use App\Rules\CannotBeHindered;
+use App\Rules\CannotBelongToMultipleEmployedTagTeams;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
@@ -31,6 +33,8 @@ class StoreRequestTest extends TestCase
 
         $this->assertValidationRuleContains($rules['name'], Unique::class);
         $this->assertValidationRuleContains($rules['wrestlers.*'], Exists::class);
-        // $this->assertValidationRuleContains($rules['wrestlers.*'], WrestlerCanJoinTagTeamRule::class);
+        $this->assertValidationRuleContains($rules['wrestlers.*'], CannotBeEmployedAfterDate::class);
+        $this->assertValidationRuleContains($rules['wrestlers.*'], CannotBeHindered::class);
+        $this->assertValidationRuleContains($rules['wrestlers.*'], CannotBelongToMultipleEmployedTagTeams::class);
     }
 }

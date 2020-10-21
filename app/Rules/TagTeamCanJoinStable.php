@@ -8,6 +8,9 @@ use Illuminate\Contracts\Validation\Rule;
 
 class TagTeamCanJoinStable implements Rule
 {
+    /**
+     * @var \App\Models\Stable
+     */
     protected $stable;
 
     public function __construct(Stable $stable)
@@ -30,19 +33,19 @@ class TagTeamCanJoinStable implements Rule
             return false;
         }
 
-        if (! data_get($tagTeam, 'currentEmployment.started_at')) {
-            return false;
+        if (($tagTeam->isUnemployed() || $tagTeam->hasFutureEmployment()) && $this->stable->isUnactivated()) {
+            return true;
         }
 
         if ($tagTeam->currentEmployment->started_at->isFuture()) {
             return false;
         }
 
-        if (! $tagTeam->isBookable()) {
+        if ($tagTeam->currentStable->doesntExist()) {
             return false;
         }
 
-        if ($tagTeam->currentStable) {
+        if ($tagTeam->currentStable->isNot($this->stable)) {
             return false;
         }
 

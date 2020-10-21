@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Rules;
 
-use App\Models\Employment;
 use App\Models\Wrestler;
 use App\Rules\CannotBeEmployedAfterDate;
 use Carbon\Carbon;
@@ -19,7 +18,7 @@ class CannotBeEmployedAfterDateTest extends TestCase
     /** @test */
     public function an_wrestler_without_a_start_date_can_join_a_tag_team()
     {
-        $wrestler = Wrestler::factory()->create();
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->assertTrue((new CannotBeEmployedAfterDate(null))->passes(null, $wrestler->id));
     }
@@ -43,21 +42,19 @@ class CannotBeEmployedAfterDateTest extends TestCase
     /** @test */
     public function a_wrestler_cannot_have_a_current_employment_date_after_the_tag_team_start_date()
     {
-        $dateStarted = Carbon::now()->subDays(2)->toDateTimeString();
+        $dateStarted = Carbon::now()->subDays(2);
 
-        $wrestler = Wrestler::factory()->hasEmployment(['started_at' => $dateStarted]);
+        $wrestler = Wrestler::factory()->hasEmployments(['started_at' => $dateStarted->copy()->addDay()->toDateTimeString()])->create();
 
-        $this->assertFalse((new CannotBeEmployedAfterDate())->passes(null, $wrestler->id));
+        $this->assertFalse((new CannotBeEmployedAfterDate($dateStarted->toDateTimeString()))->passes(null, $wrestler->id));
     }
 
     /** @test */
     public function a_wrestler_can_have_a_future_employment_date_before_the_tag_team_start_date()
     {
-        $wrestler = Wrestler::factory()
-            ->employed(
-                Employment::factory()->started(now()->addDay()->toDateTimeString())
-            )
-            ->create();
+        $dateStarted = now()->addDay()->toDateTimeString();
+
+        $wrestler = Wrestler::factory()->hasEmployments(['started_at' => $dateStarted])->create();
 
         $this->assertTrue((new CannotBeEmployedAfterDate(now()->addWeek()->toDateTimeString()))->passes(null, $wrestler->id));
     }
@@ -65,11 +62,9 @@ class CannotBeEmployedAfterDateTest extends TestCase
     /** @test */
     public function a_wrestler_cannot_have_a_future_employment_date_after_the_tag_team_start_date()
     {
-        $wrestler = Wrestler::factory()
-            ->employed(
-                Employment::factory()->started(now()->addDays(4)->toDateTimeString())
-            )
-            ->create();
+        $dateStarted = now()->addDays(4)->toDateTimeString();
+
+        $wrestler = Wrestler::factory()->hasEmployments(['started_at' => $dateStarted])->create();
 
         $this->assertFalse((new CannotBeEmployedAfterDate(now()->addDays(3)->toDateTimeString()))->passes(null, $wrestler->id));
     }
