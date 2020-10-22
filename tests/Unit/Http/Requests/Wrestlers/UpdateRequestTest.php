@@ -7,6 +7,7 @@ use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
+use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
 /**
@@ -47,6 +48,7 @@ class UpdateRequestTest extends TestCase
             $rules
         );
 
+        $this->assertValidationRuleContains($rules['name'], Unique::class);
         $this->assertValidationRuleContains($rules['started_at'], EmploymentStartDateCanBeChanged::class);
     }
 }

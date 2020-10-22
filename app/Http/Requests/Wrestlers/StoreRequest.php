@@ -4,6 +4,7 @@ namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreRequest extends FormRequest
@@ -26,7 +27,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3'],
+            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')],
             'feet' => ['required', 'integer', 'min:5', 'max:7'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer'],
