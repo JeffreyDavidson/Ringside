@@ -19,6 +19,10 @@ class ReinstateController extends Controller
     {
         $wrestler->reinstate();
 
+        if ($wrestler->currentTagTeam) {
+            $wrestler->currentTagTeam->updateStatusAndSave();
+        }
+
         return redirect()->route('wrestlers.index');
     }
 }

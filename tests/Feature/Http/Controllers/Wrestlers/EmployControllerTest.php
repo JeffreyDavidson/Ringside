@@ -42,7 +42,7 @@ class EmployControllerTest extends TestCase
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->employments->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->started_at->toDateTimeString('minute'));
         });
     }
 
@@ -64,7 +64,7 @@ class EmployControllerTest extends TestCase
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->employments->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->started_at->toDateTimeString('minute'));
         });
     }
 
@@ -86,7 +86,7 @@ class EmployControllerTest extends TestCase
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(2, $wrestler->employments);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->employments->last()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->last()->started_at->toDateTimeString('minute'));
         });
     }
 

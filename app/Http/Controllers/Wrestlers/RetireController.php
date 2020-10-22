@@ -19,6 +19,10 @@ class RetireController extends Controller
     {
         $wrestler->retire();
 
+        if ($wrestler->currentTagTeam) {
+            $wrestler->currentTagTeam->updateStatusAndSave();
+        }
+
         return redirect()->route('wrestlers.index');
     }
 }

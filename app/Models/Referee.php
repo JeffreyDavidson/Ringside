@@ -15,6 +15,7 @@ use App\Models\Employment;
 use App\Models\Injury;
 use App\Models\Retirement;
 use App\Models\Suspension;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,17 +47,6 @@ class Referee extends Model
     protected $casts = [
         'status' => RefereeStatus::class,
     ];
-
-    /**
-     * Scope a query to only include bookable referees.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeBookable($query)
-    {
-        return $query->where('status', RefereeStatus::BOOKABLE);
-    }
 
     /**
      * Check to see if the referee is bookable.
@@ -127,6 +117,7 @@ class Referee extends Model
     public function previousEmployment()
     {
         return $this->morphOne(Employment::class, 'employable')
+                    ->whereNotNull('ended_at')
                     ->latest('ended_at')
                     ->limit(1);
     }
@@ -149,6 +140,19 @@ class Referee extends Model
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeEmployed($query)
+    {
+        return $query->whereHas('currentEmployment')
+                    ->whereDoesntHave('currentSuspension')
+                    ->whereDoesntHave('currentInjury');
+    }
+
+    /**
+     * Scope a query to only include bookable referees.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBookable($query)
     {
         return $query->whereHas('currentEmployment')
                     ->whereDoesntHave('currentSuspension')
@@ -191,7 +195,7 @@ class Referee extends Model
         return $query->addSelect(['first_employed_at' => Employment::select('started_at')
             ->whereColumn('employable_id', $query->qualifyColumn('id'))
             ->where('employable_type', $this->getMorphClass())
-            ->orderBy('started_at', 'desc')
+            ->oldest('started_at')
             ->limit(1),
         ])->withCasts(['first_employed_at' => 'datetime']);
     }
@@ -219,7 +223,7 @@ class Referee extends Model
         return $query->addSelect(['released_at' => Employment::select('ended_at')
             ->whereColumn('employable_id', $this->getTable().'.id')
             ->where('employable_type', $this->getMorphClass())
-            ->orderBy('ended_at', 'desc')
+            ->latest('ended_at')
             ->limit(1),
         ])->withCasts(['released_at' => 'datetime']);
     }
@@ -246,7 +250,7 @@ class Referee extends Model
     {
         throw_unless($this->canBeEmployed(), new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.'));
 
-        $startDate = $startedAt ?? now();
+        $startDate = Carbon::parse($startedAt)->toDayDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
         $this->updateStatusAndSave();
@@ -270,9 +274,9 @@ class Referee extends Model
             $this->clearFromInjury();
         }
 
-        $releaseDate = $releasedAt ?? now();
+        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
-        $this->currentEmployment()->update(['ended_at' => $releaseDate]);
+        $this->currentEmployment->update(['ended_at' => $releaseDate]);
         $this->updateStatusAndSave();
     }
 
@@ -337,12 +341,10 @@ class Referee extends Model
     public function canBeEmployed()
     {
         if ($this->isCurrentlyEmployed()) {
-            // throw new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.');
             return false;
         }
 
         if ($this->isRetired()) {
-            // throw new CannotBeEmployedException('Entity cannot be employed. This entity does not have an active employment.');
             return false;
         }
 
@@ -357,7 +359,6 @@ class Referee extends Model
     public function canBeReleased()
     {
         if ($this->isNotInEmployment()) {
-            // throw new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.');
             return false;
         }
 
@@ -371,7 +372,7 @@ class Referee extends Model
      */
     public function getStartedAtAttribute()
     {
-        return optional($this->employments->last())->started_at;
+        return optional($this->employments->first())->started_at;
     }
 
     /**
@@ -442,7 +443,7 @@ class Referee extends Model
         return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
             ->whereColumn('retiree_id', $this->getTable().'.id')
             ->where('retiree_type', $this->getMorphClass())
-            ->oldest('started_at')
+            ->latest('started_at')
             ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
     }
@@ -477,7 +478,7 @@ class Referee extends Model
             $this->clearFromInjury();
         }
 
-        $retiredDate = $retiredAt ?: now();
+        $retiredDate = Carbon::parse($retiredAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
 
         $this->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirements()->create(['started_at' => $retiredDate]);
@@ -494,7 +495,7 @@ class Referee extends Model
     {
         throw_unless($this->canBeUnRetired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
 
-        $unretiredDate = $unretiredAt ?: now();
+        $unretiredDate = Carbon::parse($unretiredAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
 
         $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
         $this->employments()->create(['started_at' => $unretiredDate]);

@@ -44,7 +44,7 @@ class SuspendControllerTest extends TestCase
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
             $this->assertCount(1, $wrestler->suspensions);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->suspensions->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->suspensions->first()->started_at->toDateTimeString('minute'));
         });
     }
 

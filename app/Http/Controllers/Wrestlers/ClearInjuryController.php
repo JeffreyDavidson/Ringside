@@ -19,6 +19,10 @@ class ClearInjuryController extends Controller
     {
         $wrestler->clearFromInjury();
 
+        if ($wrestler->currentTagTeam) {
+            $wrestler->currentTagTeam->updateStatusAndSave();
+        }
+
         return redirect()->route('wrestlers.index');
     }
 }
