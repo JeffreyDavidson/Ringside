@@ -13,8 +13,8 @@
                 <td>{{ $wrestler->name }}</td>
                 <td>{{ $wrestler->hometown }}</td>
                 <td>
-                    @isset($title->first_employed_at)
-                        {{ $title->first_employed_at->toDateString() }}
+                    @isset($wrestler->first_employed_at)
+                        {{ $wrestler->first_employed_at->toDateString() }}
                     @else
                         TBD
                     @endisset

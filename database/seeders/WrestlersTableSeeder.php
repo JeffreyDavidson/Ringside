@@ -2,11 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employment;
+use App\Models\Retirement;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Tests\Factories\EmploymentFactory;
 use Tests\Factories\RetirementFactory;
-use Tests\Factories\WrestlerFactory;
 
 class WrestlersTableSeeder extends Seeder
 {
@@ -46,7 +48,7 @@ class WrestlersTableSeeder extends Seeder
                 $employment = $employment->ended($end);
             }
 
-            WrestlerFactory::new()
+            Wrestler::factory()
                 ->released($employment)
                 ->create(['name' => 'Wrestler '.$eNum]);
 
@@ -62,9 +64,9 @@ class WrestlersTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $employment = EmploymentFactory::new()->started($start)->ended($end);
-            $retirement = RetirementFactory::new()->started($end);
-            WrestlerFactory::new()
+            $employment = Employment::factory()->started($start)->ended($end);
+            $retirement = Retirement::factory()->started($end);
+            Wrestler::factory()
                 ->retired($employment, $retirement)
                 ->create(['name' => 'Wrestler '.$eNum]);
 
@@ -89,7 +91,7 @@ class WrestlersTableSeeder extends Seeder
                     $employment = $employment->ended($end);
                 }
 
-                WrestlerFactory::new()
+                Wrestler::factory()
                     ->released($employment)
                     ->create(['name' => 'Wrestler '.$eNum]);
 
@@ -109,8 +111,8 @@ class WrestlersTableSeeder extends Seeder
 
             $employment = EmploymentFactory::new()->started($start);
 
-            WrestlerFactory::new()
-                ->pendingEmployment($employment)
+            Wrestler::factory()
+                ->withFutureEmployment($employment)
                 ->create(['name' => 'Wrestler '.$eNum]);
 
             $eNum++;
@@ -121,7 +123,7 @@ class WrestlersTableSeeder extends Seeder
          * These wrestlers should be marked as being Unemployed.
          */
         for ($i = 1; $i <= 5; $i++) {
-            WrestlerFactory::new()
+            Wrestler::factory()
                 ->unemployed()
                 ->create(['name' => 'Wrestler '.$eNum]);
 

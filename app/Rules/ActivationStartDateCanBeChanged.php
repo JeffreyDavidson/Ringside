@@ -17,7 +17,7 @@ class ActivationStartDateCanBeChanged implements Rule
 
     public function passes($attribute, $value)
     {
-        if ($this->model->currentActivation()->exists() && $this->model->currentActivation->started_at->gt(Carbon::parse($value))) {
+        if ($this->model->currentActivation()->exists() || $this->model->currentActivation->started_at->gt(Carbon::parse($value))) {
             return false;
         }
 

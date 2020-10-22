@@ -7,9 +7,9 @@
         </x-slot>
     </x-subheader>
     <x-content>
-        <x-portlet title="Employed Wrestlers">
+        <x-portlet title="Bookable Wrestlers">
             <div class="kt-portlet__body">
-                <livewire:wrestlers.employed-wrestlers>
+                <livewire:wrestlers.bookable-wrestlers>
             </div>
         </x-portlet>
 
