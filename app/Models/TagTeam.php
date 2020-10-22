@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Enums\TagTeamStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeReleasedException;
 use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Concerns\CanBeStableMember;
+use Carbon\Carbon;
 use Exception;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -311,7 +313,7 @@ class TagTeam extends Model
     {
         throw_unless($this->canBeEmployed(), new CannotBeEmployedException('Tag Team cannot be employed. Tag Team is already employed.'));
 
-        $startAtDate = $startAtDate ?? now();
+        $startAtDate = Carbon::parse($startAtDate)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
 
@@ -330,7 +332,7 @@ class TagTeam extends Model
      */
     public function release($releasedAt = null)
     {
-        return $this;
+        throw_unless($this->canBeReleased(), new CannotBeReleasedException('Tag Team cannot be released. Tag Team does not have an active employment.'));
     }
 
     /**

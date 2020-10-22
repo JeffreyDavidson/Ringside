@@ -12,13 +12,11 @@
                 <td>{{ $tagTeam->name }}</td>
                 <td>{{ $tagTeam->employed_at->toDateString() }}</td>
                 <td>
-                    @if($tagTeam->hasFutureEmployment())
-                        @if($tagTeam->employed_at)
-                        {{ $tagTeam->employed_at->toDateString() }}
-                        @endif
+                    @isset($tagTeam->first_employed_at)
+                        {{ $tagTeam->first_employed_at->toDateString() }}
                     @else
                         TBD
-                    @endif
+                    @endisset
                 </td>
                 <td>
                     <x-actions-dropdown>

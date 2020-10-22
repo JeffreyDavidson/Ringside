@@ -12,6 +12,7 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Employment;
+use Carbon\Carbon;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -85,17 +86,6 @@ class Wrestler extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Scope a query to only include bookable wrestlers.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeBookable($query)
-    {
-        return $query->where('status', WrestlerStatus::BOOKABLE);
     }
 
     /**
@@ -197,6 +187,7 @@ class Wrestler extends Model
     public function previousEmployment()
     {
         return $this->morphOne(Employment::class, 'employable')
+                    ->whereNotNull('ended_at')
                     ->latest('ended_at')
                     ->limit(1);
     }
@@ -224,6 +215,19 @@ class Wrestler extends Model
     }
 
     /**
+     * Scope a query to only include bookable wrestlers.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBookable($query)
+    {
+        return $query->whereHas('currentEmployment')
+                    ->whereDoesntHave('currentSuspension')
+                    ->whereDoesntHave('currentInjury');
+    }
+
+    /**
      * Scope a query to only include released wrestlers.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
@@ -245,7 +249,7 @@ class Wrestler extends Model
     public function scopeUnemployed($query)
     {
         return $query->whereDoesntHave('currentEmployment')
-                    ->orWhereDoesntHave('previousEmployments');
+                    ->whereDoesntHave('previousEmployments');
     }
 
     /**
@@ -314,7 +318,7 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeEmployed(), new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.'));
 
-        $startDate = $startedAt ?? now();
+        $startDate = Carbon::parse($startedAt)->toDayDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
         $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
         $this->updateStatusAndSave();
@@ -338,9 +342,9 @@ class Wrestler extends Model
             $this->clearFromInjury();
         }
 
-        $releaseDate = $releasedAt ?? now();
+        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
-        $this->currentEmployment()->update(['ended_at' => $releaseDate]);
+        $this->currentEmployment->update(['ended_at' => $releaseDate]);
         $this->updateStatusAndSave();
 
         if ($this->currentTagTeam) {
@@ -549,7 +553,7 @@ class Wrestler extends Model
             $this->clearFromInjury();
         }
 
-        $retiredDate = $retiredAt ?: now();
+        $retiredDate = Carbon::parse($retiredAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
 
         $this->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirements()->create(['started_at' => $retiredDate]);
@@ -570,7 +574,7 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeUnretired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
 
-        $unretiredDate = $unretiredAt ?: now();
+        $unretiredDate = Carbon::parse($unretiredAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
 
         $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
         $this->employments()->create(['started_at' => $unretiredDate]);
@@ -711,7 +715,7 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeSuspended(), new CannotBeSuspendedException('Entity cannot be unretired. This entity is not retired.'));
 
-        $suspensionDate = $suspendedAt ?? now();
+        $suspensionDate = Carbon::parse($suspendedAt)->toDateTimeSTring('minute') ?? now()->toDateTimeSTring('minute');
 
         $this->suspensions()->create(['started_at' => $suspensionDate]);
         $this->updateStatusAndSave();
@@ -731,7 +735,7 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeReinstated(), new CannotBeReinstatedException('Entity cannot be reinstated. This entity is not suspended.'));
 
-        $reinstatedDate = $reinstatedAt ?: now();
+        $reinstatedDate = Carbon::parse($reinstatedAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
 
         $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
         $this->updateStatusAndSave();
@@ -885,7 +889,7 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeInjured(), new CannotBeInjuredException('Entity cannot be reinstated. This entity is not suspended.'));
 
-        $injuredDate = $injuredAt ?? now();
+        $injuredDate = Carbon::parse($injuredAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
         $this->injuries()->create(['started_at' => $injuredDate]);
         $this->updateStatusAndSave();
@@ -905,7 +909,7 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException('Entity cannot be cleared from an injury. This entity is not injured.'));
 
-        $recoveryDate = $recoveredAt ?? now();
+        $recoveryDate = Carbon::parse($recoveredAt)->toDateTImeString('minute') ?? now()->toDateTimeString('minute');
 
         $this->currentInjury()->update(['ended_at' => $recoveryDate]);
         $this->updateStatusAndSave();
@@ -933,17 +937,14 @@ class Wrestler extends Model
     public function canBeInjured()
     {
         if ($this->isNotInEmployment()) {
-            // throw new CannotBeInjuredException('Entity cannot be injured. This entity does not have an active employment.');
             return false;
         }
 
         if ($this->isInjured()) {
-            // throw new CannotBeInjuredException('Entity cannot be injured. This entity is currently injured.');
             return false;
         }
 
         if ($this->isSuspended()) {
-            // throw new CannotBeInjuredException('Entity cannot be injured. Thokis entity is currently suspended.');
             return false;
         }
 
@@ -958,7 +959,6 @@ class Wrestler extends Model
     public function canBeClearedFromInjury()
     {
         if (! $this->isInjured()) {
-            // throw new CannotBeClearedFromInjuryException('Entity cannot be marked as being recovered from an injury. This entity is not injured.');
             return false;
         }
 

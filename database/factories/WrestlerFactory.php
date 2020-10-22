@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\WrestlerStatus;
-use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;

@@ -11,8 +11,8 @@
                 <td>{{ $referee->id }}</td>
                 <td>{{ $referee->full_name }}</td>
                 <td>
-                    @isset($title->first_employed_at)
-                        {{ $title->first_employed_at->toDateString() }}
+                    @isset($referee->first_employed_at)
+                        {{ $referee->first_employed_at->toDateString() }}
                     @else
                         TBD
                     @endisset

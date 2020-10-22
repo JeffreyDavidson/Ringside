@@ -30,7 +30,7 @@ class EmploymentFactory extends Factory
      */
     public function started($startDate = 'now')
     {
-        return tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
         ]);
     }
@@ -40,7 +40,7 @@ class EmploymentFactory extends Factory
      */
     public function ended($endDate = 'now')
     {
-        return tap(clone $this)->overwriteDefaults([
+        return $this->state([
             'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
         ]);
     }

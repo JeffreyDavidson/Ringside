@@ -11,8 +11,8 @@
                 <td>{{ $manager->id }}</td>
                 <td>{{ $manager->full_name }}</td>
                 <td>
-                    @isset($title->first_employed_at)
-                        {{ $title->first_employed_at->toDateString() }}
+                    @isset($manager->first_employed_at)
+                        {{ $manager->first_employed_at->toDateString() }}
                     @else
                         TBD
                     @endisset

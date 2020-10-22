@@ -20,7 +20,7 @@ class ReleasedWrestlers extends Component
                 ->paginate($this->perPage);
 
         return view('livewire.wrestlers.released-wrestlers', [
-            'releasedWrestlers' => $releasedWrestlers
+            'releasedWrestlers' => $releasedWrestlers,
         ]);
     }
 }
