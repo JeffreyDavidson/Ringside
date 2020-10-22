@@ -15,6 +15,7 @@ class Stable extends Model
     use SoftDeletes,
         HasFactory,
         Concerns\CanBeActivated,
+        Concerns\Retirable,
         Concerns\Unguarded;
 
     /**
@@ -194,16 +195,6 @@ class Stable extends Model
     }
 
     /**
-     * Get the retirements of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
-    public function retirements()
-    {
-        return $this->morphMany(Retirement::class, 'retiree');
-    }
-
-    /**
      * Retire a stable and its members.
      *
      * @param  string|null $retiredAt
@@ -211,7 +202,7 @@ class Stable extends Model
      */
     public function retire($retiredAt = null)
     {
-        throw_unless($this->canBeRetired(), new CannotBeRetiredException('Entity cannot be unretired. This entity is not retired.'));
+        throw_unless($this->canBeRetired(), new CannotBeRetiredException);
 
         $retiredDate = $retiredAt ?: now();
 
@@ -237,102 +228,6 @@ class Stable extends Model
         $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
         $this->activate($unretiredDate);
         $this->updateStatusAndSave();
-    }
-
-    /**
-     * Check to see if the model is retired.
-     *
-     * @return bool
-     */
-    public function isRetired()
-    {
-        return $this->currentRetirement()->exists();
-    }
-
-    /**
-     * Get the current retirement of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
-     */
-    public function currentRetirement()
-    {
-        return $this->morphOne(Retirement::class, 'retiree')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
-    }
-
-    /**
-     * Scope a query to only include retired stables.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeRetired($query)
-    {
-        return $this->whereHas('currentRetirement');
-    }
-
-    /**
-     * Scope a query to only include.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithCurrentRetiredAtDate($query)
-    {
-        return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
-            ->whereColumn('retiree_id', $this->getTable().'.id')
-            ->where('retiree_type', $this->getMorphClass())
-            ->oldest('started_at')
-            ->limit(1),
-        ])->withCasts(['current_retired_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the models current retirement date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(current_retired_at) $direction");
-    }
-
-    /**
-     * Determine if the tag team can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired()
-    {
-        if ($this->isUnactivated() || $this->hasFutureActivation()) {
-            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
-            return false;
-        }
-
-        if ($this->isRetired()) {
-            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable is retired.');
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Determine if the stable can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired()
-    {
-        if (! $this->isRetired()) {
-            // throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
-            return false;
-        }
-
-        return true;
     }
 
     /**
