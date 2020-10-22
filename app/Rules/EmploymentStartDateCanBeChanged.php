@@ -30,7 +30,6 @@ class EmploymentStartDateCanBeChanged implements Rule
      */
     public function passes($attribute, $value)
     {
-        dd($this->model->currentEmployment->started_at, Carbon::parse($value));
         if ($this->model->currentEmployment()->doesntExist() || $this->model->currentEmployment->started_at->eq(Carbon::parse($value))) {
             return true;
         }
