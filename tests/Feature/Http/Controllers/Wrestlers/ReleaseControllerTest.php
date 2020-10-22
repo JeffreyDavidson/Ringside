@@ -44,7 +44,7 @@ class ReleaseControllerTest extends TestCase
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->employments->first()->ended_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->ended_at->toDateTimeString('minute'));
         });
     }
 
@@ -66,8 +66,8 @@ class ReleaseControllerTest extends TestCase
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->employments->first()->ended_at->toDateTimeString());
-            $this->assertEquals($now->toDateTimeString(), $wrestler->injuries->first()->ended_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->ended_at->toDateTimeString('minute'));
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->injuries->first()->ended_at->toDateTimeString('minute'));
         });
     }
 
@@ -89,8 +89,8 @@ class ReleaseControllerTest extends TestCase
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->employments->first()->ended_at->toDateTimeString());
-            $this->assertEquals($now->toDateTimeString(), $wrestler->suspensions->first()->ended_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->ended_at->toDateTimeString('minute'));
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->suspensions->first()->ended_at->toDateTimeString('minute'));
         });
     }
 

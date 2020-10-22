@@ -19,6 +19,10 @@ class SuspendController extends Controller
     {
         $wrestler->suspend();
 
+        if ($wrestler->currentTagTeam) {
+            $wrestler->currentTagTeam->updateStatusAndSave();
+        }
+
         return redirect()->route('wrestlers.index');
     }
 }

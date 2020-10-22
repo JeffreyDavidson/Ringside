@@ -54,7 +54,7 @@ class WrestlerControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('wrestlers.index');
-        $response->assertSeeLivewire('wrestlers.employed-wrestlers');
+        $response->assertSeeLivewire('wrestlers.bookable-wrestlers');
         $response->assertSeeLivewire('wrestlers.future-employed-and-unemployed-wrestlers');
         $response->assertSeeLivewire('wrestlers.released-wrestlers');
         $response->assertSeeLivewire('wrestlers.suspended-wrestlers');
@@ -131,15 +131,15 @@ class WrestlerControllerTest extends TestCase
      */
     public function an_employment_is_created_for_the_wrestler_if_started_at_is_filled_in_request($administrators)
     {
-        $startedAt = now()->toDateTimeString();
+        $startedAt = now();
 
         $this->actAs($administrators);
 
-        $this->storeRequest('wrestlers', $this->validParams(['started_at' => $startedAt]));
+        $response = $this->storeRequest('wrestlers', $this->validParams(['started_at' => $startedAt->toDateTimeString()]));
 
         tap(Wrestler::first(), function ($wrestler) use ($startedAt) {
             $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals($startedAt, $wrestler->employments->first()->started_at->toDateTimeString());
+            $this->assertEquals($startedAt->toDateTimeString('minute'), $wrestler->employments->first()->started_at->toDateTimeString('minute'));
         });
     }
 
@@ -267,16 +267,16 @@ class WrestlerControllerTest extends TestCase
      */
     public function update_can_employ_an_unemployed_wrestler_when_started_at_is_filled($administrators)
     {
-        $now = now()->toDateTimeString();
+        $now = now();
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now]));
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now->toDateTimeString()]));
 
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals($now, $wrestler->employments->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->started_at->toDateTimeString('minute'));
         });
     }
 
@@ -286,16 +286,16 @@ class WrestlerControllerTest extends TestCase
      */
     public function update_can_employ_a_future_employed_wrestler_when_started_at_is_filled($administrators)
     {
-        $now = now()->toDateTimeString();
+        $now = now();
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now]));
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now->toDateTimeString()]));
 
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals($now, $wrestler->employments()->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments()->first()->started_at->toDateTimeString('minute'));
         });
     }
 
@@ -303,18 +303,17 @@ class WrestlerControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function update_can_employ_a_released_wrestler_when_started_at_is_filled($administrators)
+    public function update_cannot_employ_a_released_wrestler_when_started_at_is_filled($administrators)
     {
-        $now = now()->toDateTimeString();
+        $now = now();
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->released()->create();
 
-        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $now]));
+        $response = $this->updateRequest($wrestler, $this->validParams(['started_at' => $wrestler->employments()->first()->started_at->toDateTimeString()]));
 
         $response->assertRedirect(route('wrestlers.index'));
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertCount(2, $wrestler->employments);
-            $this->assertEquals($now, $wrestler->employments->last()->started_at->toDateTimeString());
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertCount(1, $wrestler->employments);
         });
     }
 

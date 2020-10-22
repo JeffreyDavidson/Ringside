@@ -13,7 +13,6 @@ use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Employment;
 use Carbon\Carbon;
-use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,7 +21,6 @@ class Wrestler extends Model
 {
     use SoftDeletes,
         HasFactory,
-        HasMorphToOne,
         Concerns\CanBeStableMember,
         Concerns\Unguarded;
 
@@ -204,14 +202,16 @@ class Wrestler extends Model
     }
 
     /**
-     * Scope a query to only include employed wrestlers.
+     * Scope a query to only include employed referees.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeEmployed($query)
     {
-        return $query->whereHas('currentEmployment');
+        return $query->whereHas('currentEmployment')
+                    ->whereDoesntHave('currentSuspension')
+                    ->whereDoesntHave('currentInjury');
     }
 
     /**
@@ -249,7 +249,7 @@ class Wrestler extends Model
     public function scopeUnemployed($query)
     {
         return $query->whereDoesntHave('currentEmployment')
-                    ->whereDoesntHave('previousEmployments');
+                    ->orWhereDoesntHave('previousEmployments');
     }
 
     /**
@@ -263,7 +263,7 @@ class Wrestler extends Model
         return $query->addSelect(['first_employed_at' => Employment::select('started_at')
             ->whereColumn('employable_id', $query->qualifyColumn('id'))
             ->where('employable_type', $this->getMorphClass())
-            ->orderBy('started_at', 'desc')
+            ->oldest('started_at')
             ->limit(1),
         ])->withCasts(['first_employed_at' => 'datetime']);
     }
@@ -291,7 +291,7 @@ class Wrestler extends Model
         return $query->addSelect(['released_at' => Employment::select('ended_at')
             ->whereColumn('employable_id', $this->getTable().'.id')
             ->where('employable_type', $this->getMorphClass())
-            ->orderBy('ended_at', 'desc')
+            ->latest('ended_at')
             ->limit(1),
         ])->withCasts(['released_at' => 'datetime']);
     }
@@ -346,10 +346,6 @@ class Wrestler extends Model
 
         $this->currentEmployment->update(['ended_at' => $releaseDate]);
         $this->updateStatusAndSave();
-
-        if ($this->currentTagTeam) {
-            $this->currentTagTeam->updateStatusAndSave();
-        }
     }
 
     /**
@@ -413,12 +409,10 @@ class Wrestler extends Model
     public function canBeEmployed()
     {
         if ($this->isCurrentlyEmployed()) {
-            // throw new CannotBeEmployedException('Entity cannot be employed. This entity is currently employed.');
             return false;
         }
 
         if ($this->isRetired()) {
-            // throw new CannotBeEmployedException('Entity cannot be employed. This entity does not have an active employment.');
             return false;
         }
 
@@ -433,7 +427,6 @@ class Wrestler extends Model
     public function canBeReleased()
     {
         if ($this->isNotInEmployment()) {
-            // throw new CannotBeReleasedException('Entity cannot be released. This entity does not have an active employment.');
             return false;
         }
 
@@ -447,7 +440,7 @@ class Wrestler extends Model
      */
     public function getStartedAtAttribute()
     {
-        return optional($this->employments->last())->started_at;
+        return optional($this->employments->first())->started_at;
     }
 
     /**
@@ -518,7 +511,7 @@ class Wrestler extends Model
         return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
             ->whereColumn('retiree_id', $this->getTable().'.id')
             ->where('retiree_type', $this->getMorphClass())
-            ->oldest('started_at')
+            ->latest('started_at')
             ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
     }
@@ -558,10 +551,6 @@ class Wrestler extends Model
         $this->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirements()->create(['started_at' => $retiredDate]);
         $this->updateStatusAndSave();
-
-        if ($this->currentTagTeam) {
-            $this->currentTagTeam->updateStatusAndSave();
-        }
     }
 
     /**
@@ -599,7 +588,6 @@ class Wrestler extends Model
     public function canBeRetired()
     {
         if ($this->isNotInEmployment()) {
-            // throw new CannotBeRetiredException('Entity cannot be retired. This entity does not have an active employment.');
             return false;
         }
 
@@ -614,7 +602,6 @@ class Wrestler extends Model
     public function canBeUnretired()
     {
         if (! $this->isRetired()) {
-            // throw new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.');
             return false;
         }
 
@@ -688,7 +675,7 @@ class Wrestler extends Model
         return $query->addSelect(['current_suspended_at' => Suspension::select('started_at')
             ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
             ->where('suspendable_type', $this->getMorphClass())
-            ->orderBy('started_at', 'desc')
+            ->latest('started_at')
             ->limit(1),
         ])->withCasts(['current_suspended_at' => 'datetime']);
     }
@@ -715,14 +702,10 @@ class Wrestler extends Model
     {
         throw_unless($this->canBeSuspended(), new CannotBeSuspendedException('Entity cannot be unretired. This entity is not retired.'));
 
-        $suspensionDate = Carbon::parse($suspendedAt)->toDateTimeSTring('minute') ?? now()->toDateTimeSTring('minute');
+        $suspensionDate = Carbon::parse($suspendedAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
         $this->suspensions()->create(['started_at' => $suspensionDate]);
         $this->updateStatusAndSave();
-
-        if ($this->currentTagTeam) {
-            $this->currentTagTeam->updateStatusAndSave();
-        }
     }
 
     /**
@@ -739,10 +722,6 @@ class Wrestler extends Model
 
         $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
         $this->updateStatusAndSave();
-
-        if ($this->currentTagTeam) {
-            $this->currentTagTeam->updateStatusAndSave();
-        }
     }
 
     /**
@@ -763,17 +742,14 @@ class Wrestler extends Model
     public function canBeSuspended()
     {
         if ($this->isNotInEmployment()) {
-            // throw new CannotBeSuspendedException('Entity cannot be suspended. This entity does not have an active employment.');
             return false;
         }
 
         if ($this->isSuspended()) {
-            // throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently suspended.');
             return false;
         }
 
         if ($this->isInjured()) {
-            // throw new CannotBeSuspendedException('Entity cannot be suspended. This entity is currently injured.');
             return false;
         }
 
@@ -788,7 +764,6 @@ class Wrestler extends Model
     public function canBeReinstated()
     {
         if (! $this->isSuspended()) {
-            // throw new CannotBeReinstatedException('Entity cannot be reinstated. This entity is not suspended.');
             return false;
         }
 
@@ -862,7 +837,7 @@ class Wrestler extends Model
         return $query->addSelect(['current_injured_at' => Injury::select('started_at')
             ->whereColumn('injurable_id', $query->qualifyColumn('id'))
             ->where('injurable_type', $this->getMorphClass())
-            ->orderBy('started_at', 'desc')
+            ->latest('started_at')
             ->limit(1),
         ])->withCasts(['current_injured_at' => 'datetime']);
     }
@@ -893,10 +868,6 @@ class Wrestler extends Model
 
         $this->injuries()->create(['started_at' => $injuredDate]);
         $this->updateStatusAndSave();
-
-        if ($this->currentTagTeam) {
-            $this->currentTagTeam->updateStatusAndSave();
-        }
     }
 
     /**
@@ -913,10 +884,6 @@ class Wrestler extends Model
 
         $this->currentInjury()->update(['ended_at' => $recoveryDate]);
         $this->updateStatusAndSave();
-
-        if ($this->currentTagTeam) {
-            $this->currentTagTeam->updateStatusAndSave();
-        }
     }
 
     /**

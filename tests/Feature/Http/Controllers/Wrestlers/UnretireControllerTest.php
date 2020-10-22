@@ -42,7 +42,7 @@ class UnretireControllerTest extends TestCase
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(1, $wrestler->retirements);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->retirements->first()->ended_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->retirements->first()->ended_at->toDateTimeString('minute'));
         });
     }
 

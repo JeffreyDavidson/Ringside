@@ -44,7 +44,7 @@ class InjureControllerTest extends TestCase
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
             $this->assertCount(1, $wrestler->injuries);
-            $this->assertEquals($now->toDateTimeString(), $wrestler->injuries->first()->started_at->toDateTimeString());
+            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->injuries->first()->started_at->toDateTimeString('minute'));
         });
     }
 
