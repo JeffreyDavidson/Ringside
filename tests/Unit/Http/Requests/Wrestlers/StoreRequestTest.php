@@ -3,6 +3,8 @@
 namespace Tests\Unit\Http\Requests\Wrestlers;
 
 use App\Http\Requests\Wrestlers\StoreRequest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
 /**
@@ -12,13 +14,15 @@ use Tests\TestCase;
  */
 class StoreRequestTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test */
     public function rules_returns_validation_requirements()
     {
         $subject = $this->createFormRequest(StoreRequest::class);
         $rules = $subject->rules();
 
-        $this->assertExactValidationRules(
+        $this->assertValidationRules(
             [
                 'name' => ['required', 'string', 'min:3'],
                 'feet' => ['required', 'integer', 'min:5', 'max:7'],
@@ -30,5 +34,7 @@ class StoreRequestTest extends TestCase
             ],
             $rules
         );
+
+        $this->assertValidationRuleContains($rules['name'], Unique::class);
     }
 }
