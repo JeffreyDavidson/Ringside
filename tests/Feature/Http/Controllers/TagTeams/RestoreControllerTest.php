@@ -23,7 +23,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::ADMINISTRATOR);
         $tagTeam = TagTeam::factory()->softDeleted()->create();
 
-        $response = $this->restoreRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.restore', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         $this->assertNull($tagTeam->fresh()->deleted_at);
@@ -35,7 +35,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->softDeleted()->create();
 
-        $this->restoreRequest($tagTeam)->assertForbidden();
+        $this->patch(route('tag-teams.restore', $tagTeam))->assertForbidden();
     }
 
     /** @test */
@@ -43,6 +43,6 @@ class RestoreControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->softDeleted()->create();
 
-        $this->restoreRequest($tagTeam)->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.restore', $tagTeam))->assertRedirect(route('login'));
     }
 }

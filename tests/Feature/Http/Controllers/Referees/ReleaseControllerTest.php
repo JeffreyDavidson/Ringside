@@ -37,7 +37,7 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->bookable()->create();
 
-        $response = $this->releaseRequest($referee);
+        $response = $this->patch(route('referees.release', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -59,7 +59,7 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->injured()->create();
 
-        $response = $this->releaseRequest($referee);
+        $response = $this->patch(route('referees.release', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -82,7 +82,7 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->suspended()->create();
 
-        $response = $this->releaseRequest($referee);
+        $response = $this->patch(route('referees.release', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -95,11 +95,7 @@ class ReleaseControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ReleaseController::class,
-            '__invoke',
-            ReleaseRequest::class
-        );
+        $this->assertActionUsesFormRequest(ReleaseController::class, '__invoke', ReleaseRequest::class);
     }
 
     /** @test */
@@ -108,7 +104,7 @@ class ReleaseControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->releaseRequest($referee)->assertForbidden();
+        $this->patch(route('referees.release', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -116,7 +112,7 @@ class ReleaseControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->releaseRequest($referee)->assertRedirect(route('login'));
+        $this->patch(route('referees.release', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -132,7 +128,7 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->releaseRequest($referee);
+        $this->patch(route('referees.release', $referee));
     }
 
     /**
@@ -148,7 +144,7 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->releaseRequest($referee);
+        $this->patch(route('referees.release', $referee));
     }
 
     /**
@@ -164,7 +160,7 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->releaseRequest($referee);
+        $this->patch(route('referees.release', $referee));
     }
 
     /**
@@ -180,6 +176,6 @@ class ReleaseControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->releaseRequest($referee);
+        $this->patch(route('referees.release', $referee));
     }
 }

@@ -32,7 +32,7 @@ class UnretireControllerTest extends TestCase
         $this->actAs($administrators);
         $title = Title::factory()->retired()->create();
 
-        $response = $this->unretireRequest($title);
+        $response = $this->patch(route('titles.unretire', $title));
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
@@ -45,11 +45,7 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            UnretireController::class,
-            '__invoke',
-            UnretireRequest::class
-        );
+        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /** @test */
@@ -58,7 +54,7 @@ class UnretireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $title = Title::factory()->create();
 
-        $response = $this->unretireRequest($title);
+        $response = $this->patch(route('titles.unretire', $title));
 
         $response->assertForbidden();
     }
@@ -68,7 +64,7 @@ class UnretireControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->unretireRequest($title)->assertRedirect(route('login'));
+        $this->patch(route('titles.unretire', $title))->assertRedirect(route('login'));
     }
 
     /**
@@ -84,7 +80,7 @@ class UnretireControllerTest extends TestCase
 
         $title = Title::factory()->active()->create();
 
-        $this->unretireRequest($title);
+        $this->patch(route('titles.unretire', $title));
     }
 
     /**
@@ -100,7 +96,7 @@ class UnretireControllerTest extends TestCase
 
         $title = Title::factory()->inactive()->create();
 
-        $this->unretireRequest($title);
+        $this->patch(route('titles.unretire', $title));
     }
 
     /**
@@ -116,7 +112,7 @@ class UnretireControllerTest extends TestCase
 
         $title = Title::factory()->withFutureActivation()->create();
 
-        $this->unretireRequest($title);
+        $this->patch(route('titles.unretire', $title));
     }
 
     /**
@@ -132,6 +128,6 @@ class UnretireControllerTest extends TestCase
 
         $title = Title::factory()->unactivated()->create();
 
-        $this->unretireRequest($title);
+        $this->patch(route('titles.unretire', $title));
     }
 }

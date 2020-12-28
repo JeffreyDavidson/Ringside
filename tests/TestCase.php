@@ -12,8 +12,7 @@ use JMac\Testing\Traits\AdditionalAssertions;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication,
-        AdditionalAssertions,
-        Traits\HasRequests;
+        AdditionalAssertions;
 
     /**
      * Setup the test environment.

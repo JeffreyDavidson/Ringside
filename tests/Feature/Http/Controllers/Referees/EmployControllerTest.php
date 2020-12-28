@@ -36,7 +36,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $response = $this->employRequest($referee);
+        $response = $this->put(route('referees.employ', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -58,7 +58,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->unemployed()->create();
 
-        $response = $this->employRequest($referee);
+        $response = $this->put(route('referees.employ', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -80,7 +80,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->released()->create();
 
-        $response = $this->employRequest($referee);
+        $response = $this->put(route('referees.employ', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -93,11 +93,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            EmployController::class,
-            '__invoke',
-            EmployRequest::class
-        );
+        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /** @test */
@@ -106,7 +102,7 @@ class EmployControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($referee)->assertForbidden();
+        $this->put(route('referees.employ', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -114,7 +110,7 @@ class EmployControllerTest extends TestCase
     {
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($referee)->assertRedirect(route('login'));
+        $this->put(route('referees.employ', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -130,7 +126,7 @@ class EmployControllerTest extends TestCase
 
         $referee = Referee::factory()->bookable()->create();
 
-        $this->employRequest($referee);
+        $this->put(route('referees.employ', $referee));
     }
 
     /**
@@ -146,7 +142,7 @@ class EmployControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->employRequest($referee);
+        $this->put(route('referees.employ', $referee));
     }
 
     /**
@@ -162,7 +158,7 @@ class EmployControllerTest extends TestCase
 
         $referee = Referee::factory()->suspended()->create();
 
-        $this->employRequest($referee);
+        $this->put(route('referees.employ', $referee));
     }
 
     /**
@@ -178,6 +174,6 @@ class EmployControllerTest extends TestCase
 
         $referee = Referee::factory()->injured()->create();
 
-        $this->employRequest($referee);
+        $this->put(route('referees.employ', $referee));
     }
 }

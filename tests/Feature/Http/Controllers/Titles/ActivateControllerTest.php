@@ -32,7 +32,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $title = Title::factory()->unactivated()->create();
 
-        $response = $this->activateRequest($title);
+        $response = $this->patch(route('titles.activate', $title));
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
@@ -54,7 +54,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $title = Title::factory()->withFutureActivation()->create();
 
-        $response = $this->activateRequest($title);
+        $response = $this->patch(route('titles.activate', $title));
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
@@ -76,7 +76,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $title = Title::factory()->inactive()->create();
 
-        $response = $this->activateRequest($title);
+        $response = $this->patch(route('titles.activate', $title));
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
@@ -89,11 +89,7 @@ class ActivateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ActivateController::class,
-            '__invoke',
-            ActivateRequest::class
-        );
+        $this->assertActionUsesFormRequest(ActivateController::class, '__invoke', ActivateRequest::class);
     }
 
     /** @test */
@@ -102,7 +98,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $title = Title::factory()->create();
 
-        $this->activateRequest($title)->assertForbidden();
+        $this->patch(route('titles.activate', $title))->assertForbidden();
     }
 
     /** @test */
@@ -110,7 +106,7 @@ class ActivateControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->activateRequest($title)->assertRedirect(route('login'));
+        $this->patch(route('titles.activate', $title))->assertRedirect(route('login'));
     }
 
     /**
@@ -126,7 +122,7 @@ class ActivateControllerTest extends TestCase
 
         $title = Title::factory()->active()->create();
 
-        $this->activateRequest($title);
+        $this->patch(route('titles.activate', $title));
     }
 
     /**
@@ -142,6 +138,6 @@ class ActivateControllerTest extends TestCase
 
         $title = Title::factory()->retired()->create();
 
-        $this->activateRequest($title);
+        $this->patch(route('titles.activate', $title));
     }
 }

@@ -25,7 +25,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::ADMINISTRATOR);
         $referee = Referee::factory()->softDeleted()->create();
 
-        $response = $this->restoreRequest($referee);
+        $response = $this->patch(route('referees.restore', $referee));
 
         $response->assertRedirect(route('referees.index'));
         $this->assertNull($referee->fresh()->deleted_at);
@@ -37,7 +37,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->softDeleted()->create();
 
-        $this->restoreRequest($referee)->assertForbidden();
+        $this->patch(route('referees.restore', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -45,6 +45,6 @@ class RestoreControllerTest extends TestCase
     {
         $referee = Referee::factory()->softDeleted()->create();
 
-        $this->restoreRequest($referee)->assertRedirect(route('login'));
+        $this->patch(route('referees.restore', $referee))->assertRedirect(route('login'));
     }
 }

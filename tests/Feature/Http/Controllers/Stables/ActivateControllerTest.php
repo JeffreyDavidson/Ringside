@@ -34,7 +34,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->unactivated()->create();
 
-        $response = $this->activateRequest($stable);
+        $response = $this->patch(route('stables.activate', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -56,7 +56,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $response = $this->activateRequest($stable);
+        $response = $this->patch(route('stables.activate', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -78,7 +78,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->inactive()->create();
 
-        $response = $this->activateRequest($stable);
+        $response = $this->patch(route('stables.activate', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -91,11 +91,7 @@ class ActivateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ActivateController::class,
-            '__invoke',
-            ActivateRequest::class
-        );
+        $this->assertActionUsesFormRequest(ActivateController::class, '__invoke', ActivateRequest::class);
     }
 
     /** @test */
@@ -104,7 +100,7 @@ class ActivateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->activateRequest($stable)->assertForbidden();
+        $this->patch(route('stables.activate', $stable))->assertForbidden();
     }
 
     /** @test */
@@ -112,7 +108,7 @@ class ActivateControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->activateRequest($stable)->assertRedirect(route('login'));
+        $this->patch(route('stables.activate', $stable))->assertRedirect(route('login'));
     }
 
     /**
@@ -128,7 +124,7 @@ class ActivateControllerTest extends TestCase
 
         $stable = Stable::factory()->retired()->create();
 
-        $this->activateRequest($stable);
+        $this->patch(route('stables.activate', $stable));
     }
 
     /**
@@ -144,6 +140,6 @@ class ActivateControllerTest extends TestCase
 
         $stable = Stable::factory()->active()->create();
 
-        $this->activateRequest($stable);
+        $this->patch(route('stables.activate', $stable));
     }
 }

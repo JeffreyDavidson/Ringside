@@ -36,7 +36,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $response = $this->employRequest($wrestler);
+        $response = $this->patch(route('wrestlers.employ', $wrestler));
 
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
@@ -58,7 +58,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $response = $this->employRequest($wrestler);
+        $response = $this->patch(route('wrestlers.employ', $wrestler));
 
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
@@ -80,7 +80,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->released()->create();
 
-        $response = $this->employRequest($wrestler);
+        $response = $this->patch(route('wrestlers.employ', $wrestler));
 
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
@@ -93,11 +93,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            EmployController::class,
-            '__invoke',
-            EmployRequest::class
-        );
+        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /** @test */
@@ -106,7 +102,7 @@ class EmployControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($wrestler)->assertForbidden();
+        $this->patch(route('wrestlers.employ', $wrestler))->assertForbidden();
     }
 
     /** @test */
@@ -114,7 +110,7 @@ class EmployControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($wrestler)->assertRedirect(route('login'));
+        $this->patch(route('wrestlers.employ', $wrestler))->assertRedirect(route('login'));
     }
 
     /**
@@ -130,7 +126,7 @@ class EmployControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->employRequest($wrestler);
+        $this->patch(route('wrestlers.employ', $wrestler));
     }
 
     /**
@@ -146,7 +142,7 @@ class EmployControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->employRequest($wrestler);
+        $this->patch(route('wrestlers.employ', $wrestler));
     }
 
     /**
@@ -162,7 +158,7 @@ class EmployControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->employRequest($wrestler);
+        $this->patch(route('wrestlers.employ', $wrestler));
     }
 
     /**
@@ -178,6 +174,6 @@ class EmployControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->employRequest($wrestler);
+        $this->patch(route('wrestlers.employ', $wrestler));
     }
 }

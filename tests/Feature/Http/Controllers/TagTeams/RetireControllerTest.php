@@ -35,7 +35,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $response = $this->retireRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.retire', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
@@ -61,7 +61,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $response = $this->retireRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.retire', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
@@ -90,7 +90,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->unbookable()->create();
 
-        $response = $this->retireRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.retire', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
 
@@ -111,11 +111,7 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            RetireController::class,
-            '__invoke',
-            RetireRequest::class
-        );
+        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /** @test */
@@ -124,7 +120,7 @@ class RetireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->retireRequest($tagTeam)->assertForbidden();
+        $this->patch(route('tag-teams.retire', $tagTeam))->assertForbidden();
     }
 
     /** @test */
@@ -132,7 +128,7 @@ class RetireControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->retireRequest($tagTeam)->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.retire', $tagTeam))->assertRedirect(route('login'));
     }
 
     /**
@@ -148,7 +144,7 @@ class RetireControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->retireRequest($tagTeam);
+        $this->patch(route('tag-teams.retire', $tagTeam));
     }
 
     /**
@@ -164,7 +160,7 @@ class RetireControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $this->retireRequest($tagTeam);
+        $this->patch(route('tag-teams.retire', $tagTeam));
     }
 
     /**
@@ -180,7 +176,7 @@ class RetireControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->released()->create();
 
-        $this->retireRequest($tagTeam);
+        $this->patch(route('tag-teams.retire', $tagTeam));
     }
 
     /**
@@ -196,6 +192,6 @@ class RetireControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $this->retireRequest($tagTeam);
+        $this->patch(route('tag-teams.retire', $tagTeam));
     }
 }

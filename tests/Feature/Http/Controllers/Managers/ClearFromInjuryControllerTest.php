@@ -36,7 +36,7 @@ class ClearFromInjuryControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->injured()->create();
 
-        $response = $this->clearInjuryRequest($manager);
+        $response = $this->patch(route('managers.clear-from-injury', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -49,11 +49,7 @@ class ClearFromInjuryControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ClearInjuryController::class,
-            '__invoke',
-            ClearInjuryRequest::class
-        );
+        $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class ClearFromInjuryControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->injured()->create();
 
-        $this->clearInjuryRequest($manager)->assertForbidden();
+        $this->patch(route('managers.clear-from-injury', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class ClearFromInjuryControllerTest extends TestCase
     {
         $manager = Manager::factory()->injured()->create();
 
-        $this->clearInjuryRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.clear-from-injury', $manager))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class ClearFromInjuryControllerTest extends TestCase
 
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->clearInjuryRequest($manager);
+        $this->patch(route('managers.clear-from-injury', $manager));
     }
 
     /**
@@ -102,7 +98,7 @@ class ClearFromInjuryControllerTest extends TestCase
 
         $manager = Manager::factory()->available()->create();
 
-        $this->clearInjuryRequest($manager);
+        $this->patch(route('managers.clear-from-injury', $manager));
     }
 
     /**
@@ -118,7 +114,7 @@ class ClearFromInjuryControllerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->clearInjuryRequest($manager);
+        $this->patch(route('managers.clear-from-injury', $manager));
     }
 
     /**
@@ -134,7 +130,7 @@ class ClearFromInjuryControllerTest extends TestCase
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->clearInjuryRequest($manager);
+        $this->patch(route('managers.clear-from-injury', $manager));
     }
 
     /**
@@ -150,7 +146,7 @@ class ClearFromInjuryControllerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->clearInjuryRequest($manager);
+        $this->patch(route('managers.clear-from-injury', $manager));
     }
 
     /**
@@ -166,6 +162,6 @@ class ClearFromInjuryControllerTest extends TestCase
 
         $manager = Manager::factory()->released()->create();
 
-        $this->clearInjuryRequest($manager);
+        $this->patch(route('managers.clear-from-injury', $manager));
     }
 }

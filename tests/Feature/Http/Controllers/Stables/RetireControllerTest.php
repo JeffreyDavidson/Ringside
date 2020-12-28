@@ -34,7 +34,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->active()->create();
 
-        $response = $this->retireRequest($stable);
+        $response = $this->patch(route('stables.retire', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -56,7 +56,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->inactive()->create();
 
-        $response = $this->retireRequest($stable);
+        $response = $this->patch(route('stables.retire', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -69,11 +69,7 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            RetireController::class,
-            '__invoke',
-            RetireRequest::class
-        );
+        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /** @test */
@@ -82,7 +78,7 @@ class RetireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->retireRequest($stable)->assertForbidden();
+        $this->patch(route('stables.retire', $stable))->assertForbidden();
     }
 
     /** @test */
@@ -90,7 +86,7 @@ class RetireControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->retireRequest($stable)->assertRedirect(route('login'));
+        $this->patch(route('stables.retire', $stable))->assertRedirect(route('login'));
     }
 
     /**
@@ -106,7 +102,7 @@ class RetireControllerTest extends TestCase
 
         $stable = Stable::factory()->retired()->create();
 
-        $this->retireRequest($stable);
+        $this->patch(route('stables.retire', $stable));
     }
 
     /**
@@ -122,7 +118,7 @@ class RetireControllerTest extends TestCase
 
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $this->retireRequest($stable);
+        $this->patch(route('stables.retire', $stable));
     }
 
     /**
@@ -138,6 +134,6 @@ class RetireControllerTest extends TestCase
 
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->retireRequest($stable);
+        $this->patch(route('stables.retire', $stable));
     }
 }

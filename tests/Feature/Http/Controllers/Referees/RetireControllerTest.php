@@ -36,7 +36,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->bookable()->create();
 
-        $response = $this->retireRequest($referee);
+        $response = $this->patch(route('referees.retire', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -58,7 +58,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->injured()->create();
 
-        $response = $this->retireRequest($referee);
+        $response = $this->patch(route('referees.retire', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -80,7 +80,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->suspended()->create();
 
-        $response = $this->retireRequest($referee);
+        $response = $this->patch(route('referees.retire', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -93,11 +93,7 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            RetireController::class,
-            '__invoke',
-            RetireRequest::class
-        );
+        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /** @test */
@@ -106,7 +102,7 @@ class RetireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->retireRequest($referee)->assertForbidden();
+        $this->patch(route('referees.retire', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -114,7 +110,7 @@ class RetireControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->retireRequest($referee)->assertRedirect(route('login'));
+        $this->patch(route('referees.retire', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -130,7 +126,7 @@ class RetireControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->retireRequest($referee);
+        $this->patch(route('referees.retire', $referee));
     }
 
     /**
@@ -146,7 +142,7 @@ class RetireControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->retireRequest($referee);
+        $this->patch(route('referees.retire', $referee));
     }
 
     /**
@@ -162,7 +158,7 @@ class RetireControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->retireRequest($referee);
+        $this->patch(route('referees.retire', $referee));
     }
 
     /**
@@ -178,6 +174,6 @@ class RetireControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->retireRequest($referee);
+        $this->patch(route('referees.retire', $referee));
     }
 }

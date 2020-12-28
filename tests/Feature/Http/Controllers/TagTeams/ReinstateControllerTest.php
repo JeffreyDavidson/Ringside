@@ -36,7 +36,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $response = $this->reinstateRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.reinstate', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
@@ -51,11 +51,7 @@ class ReinstateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ReinstateController::class,
-            '__invoke',
-            ReinstateRequest::class
-        );
+        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /** @test */
@@ -64,7 +60,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->reinstateRequest($tagTeam)->assertForbidden();
+        $this->patch(route('tag-teams.reinstate', $tagTeam))->assertForbidden();
     }
 
     /** @test */
@@ -72,7 +68,7 @@ class ReinstateControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->reinstateRequest($tagTeam)->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.reinstate', $tagTeam))->assertRedirect(route('login'));
     }
 
     /**
@@ -88,7 +84,7 @@ class ReinstateControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this->reinstateRequest($tagTeam);
+        $this->patch(route('tag-teams.reinstate', $tagTeam));
     }
 
     /**
@@ -104,7 +100,7 @@ class ReinstateControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $this->reinstateRequest($tagTeam);
+        $this->patch(route('tag-teams.reinstate', $tagTeam));
     }
 
     /**
@@ -120,7 +116,7 @@ class ReinstateControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $this->reinstateRequest($tagTeam);
+        $this->patch(route('tag-teams.reinstate', $tagTeam));
     }
 
     /**
@@ -136,7 +132,7 @@ class ReinstateControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->released()->create();
 
-        $this->reinstateRequest($tagTeam);
+        $this->patch(route('tag-teams.reinstate', $tagTeam));
     }
 
     /**
@@ -152,7 +148,7 @@ class ReinstateControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->reinstateRequest($tagTeam);
+        $this->patch(route('tag-teams.reinstate', $tagTeam));
     }
 
     /**
@@ -171,6 +167,6 @@ class ReinstateControllerTest extends TestCase
         $firstWrestler->reinstate();
         $firstWrestler->save();
 
-        $this->reinstateRequest($tagTeam);
+        $this->patch(route('tag-teams.reinstate', $tagTeam));
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\RestoreController;
+use Illuminate\Support\Facades\Route;
 
 Route::resource('events', EventsController::class);
-Route::put('/events/{event}/restore', RestoreController::class)->name('events.restore');
+Route::patch('/events/{event}/restore', RestoreController::class)->name('events.restore');

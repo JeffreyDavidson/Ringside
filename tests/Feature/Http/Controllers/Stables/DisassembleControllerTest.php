@@ -34,7 +34,7 @@ class DisassembleControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->active()->create();
 
-        $response = $this->disassembleRequest($stable);
+        $response = $this->patch(route('stables.disassemble', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -46,11 +46,7 @@ class DisassembleControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            DisassembleController::class,
-            '__invoke',
-            DisassembleRequest::class
-        );
+        $this->assertActionUsesFormRequest(DisassembleController::class, '__invoke', DisassembleRequest::class);
     }
 
     /** @test */
@@ -59,7 +55,7 @@ class DisassembleControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->disassembleRequest($stable)->assertForbidden();
+        $this->patch(route('stables.disassemble', $stable))->assertForbidden();
     }
 
     /** @test */
@@ -67,7 +63,7 @@ class DisassembleControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->disassembleRequest($stable)->assertRedirect(route('login'));
+        $this->patch(route('stables.disassemble', $stable))->assertRedirect(route('login'));
     }
 
     /**
@@ -83,7 +79,7 @@ class DisassembleControllerTest extends TestCase
 
         $stable = Stable::factory()->inactive()->create();
 
-        $this->disassembleRequest($stable);
+        $this->patch(route('stables.disassemble', $stable));
     }
 
     /**
@@ -99,7 +95,7 @@ class DisassembleControllerTest extends TestCase
 
         $stable = Stable::factory()->retired()->create();
 
-        $this->disassembleRequest($stable);
+        $this->patch(route('stables.disassemble', $stable));
     }
 
     /**
@@ -115,7 +111,7 @@ class DisassembleControllerTest extends TestCase
 
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->disassembleRequest($stable);
+        $this->patch(route('stables.disassemble', $stable));
     }
 
     /**
@@ -131,6 +127,6 @@ class DisassembleControllerTest extends TestCase
 
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $this->disassembleRequest($stable);
+        $this->patch(route('stables.disassemble', $stable));
     }
 }

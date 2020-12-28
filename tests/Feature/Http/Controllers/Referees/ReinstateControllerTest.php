@@ -36,7 +36,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->suspended()->create();
 
-        $response = $this->reinstateRequest($referee);
+        $response = $this->patch(route('referees.reinstate', $referee));
 
         $this->assertEquals($now->toDateTimeString(), $referee->fresh()->suspensions()->latest()->first()->ended_at);
 
@@ -51,11 +51,7 @@ class ReinstateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ReinstateController::class,
-            '__invoke',
-            ReinstateRequest::class
-        );
+        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /** @test */
@@ -64,7 +60,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->reinstateRequest($referee)->assertForbidden();
+        $this->patch(route('referees.reinstate', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -72,7 +68,7 @@ class ReinstateControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->reinstateRequest($referee)->assertRedirect(route('login'));
+        $this->patch(route('referees.reinstate', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -88,7 +84,7 @@ class ReinstateControllerTest extends TestCase
 
         $referee = Referee::factory()->bookable()->create();
 
-        $this->reinstateRequest($referee);
+        $this->patch(route('referees.reinstate', $referee));
     }
 
     /**
@@ -104,7 +100,7 @@ class ReinstateControllerTest extends TestCase
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->reinstateRequest($referee);
+        $this->patch(route('referees.reinstate', $referee));
     }
 
     /**
@@ -120,7 +116,7 @@ class ReinstateControllerTest extends TestCase
 
         $referee = Referee::factory()->injured()->create();
 
-        $this->reinstateRequest($referee);
+        $this->patch(route('referees.reinstate', $referee));
     }
 
     /**
@@ -136,7 +132,7 @@ class ReinstateControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->reinstateRequest($referee);
+        $this->patch(route('referees.reinstate', $referee));
     }
 
     /**
@@ -152,7 +148,7 @@ class ReinstateControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->reinstateRequest($referee);
+        $this->patch(route('referees.reinstate', $referee));
     }
 
     /**
@@ -168,6 +164,6 @@ class ReinstateControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->reinstateRequest($referee);
+        $this->patch(route('referees.reinstate', $referee));
     }
 }
