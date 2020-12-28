@@ -36,7 +36,7 @@ class SuspendControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->bookable()->create();
 
-        $response = $this->suspendRequest($referee);
+        $response = $this->patch(route('referees.suspend', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -49,11 +49,7 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            SuspendController::class,
-            '__invoke',
-            SuspendRequest::class
-        );
+        $this->assertActionUsesFormRequest(SuspendController::class, '__invoke', SuspendRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class SuspendControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->suspendRequest($referee)->assertForbidden();
+        $this->patch(route('referees.suspend', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class SuspendControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->suspendRequest($referee)->assertRedirect(route('login'));
+        $this->patch(route('referees.suspend', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class SuspendControllerTest extends TestCase
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->suspendRequest($referee);
+        $this->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -102,7 +98,7 @@ class SuspendControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->suspendRequest($referee);
+        $this->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -118,7 +114,7 @@ class SuspendControllerTest extends TestCase
 
         $referee = Referee::factory()->injured()->create();
 
-        $this->suspendRequest($referee);
+        $this->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -134,7 +130,7 @@ class SuspendControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->suspendRequest($referee);
+        $this->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -150,7 +146,7 @@ class SuspendControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->suspendRequest($referee);
+        $this->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -166,6 +162,6 @@ class SuspendControllerTest extends TestCase
 
         $referee = Referee::factory()->suspended()->create();
 
-        $this->suspendRequest($referee);
+        $this->patch(route('referees.suspend', $referee));
     }
 }

@@ -36,7 +36,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->suspended()->create();
 
-        $response = $this->reinstateRequest($manager);
+        $response = $this->patch(route('managers.reinstate', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -49,11 +49,7 @@ class ReinstateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ReinstateController::class,
-            '__invoke',
-            ReinstateRequest::class
-        );
+        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->create();
 
-        $this->reinstateRequest($manager)->assertForbidden();
+        $this->patch(route('managers.reinstate', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class ReinstateControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->reinstateRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.reinstate', $manager))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class ReinstateControllerTest extends TestCase
 
         $manager = Manager::factory()->available()->create();
 
-        $this->reinstateRequest($manager);
+        $this->patch(route('managers.reinstate', $manager));
     }
 
     /**
@@ -102,7 +98,7 @@ class ReinstateControllerTest extends TestCase
 
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->reinstateRequest($manager);
+        $this->patch(route('managers.reinstate', $manager));
     }
 
     /**
@@ -118,7 +114,7 @@ class ReinstateControllerTest extends TestCase
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->reinstateRequest($manager);
+        $this->patch(route('managers.reinstate', $manager));
     }
 
     /**
@@ -134,7 +130,7 @@ class ReinstateControllerTest extends TestCase
 
         $manager = Manager::factory()->released()->create();
 
-        $this->reinstateRequest($manager);
+        $this->patch(route('managers.reinstate', $manager));
     }
 
     /**
@@ -150,7 +146,7 @@ class ReinstateControllerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->reinstateRequest($manager);
+        $this->patch(route('managers.reinstate', $manager));
     }
 
     /**
@@ -166,6 +162,6 @@ class ReinstateControllerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->reinstateRequest($manager);
+        $this->patch(route('managers.reinstate', $manager));
     }
 }

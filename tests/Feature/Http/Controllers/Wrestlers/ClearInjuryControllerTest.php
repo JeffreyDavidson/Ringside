@@ -42,7 +42,7 @@ class ClearInjuryControllerTest extends TestCase
         $this->assertCount(1, $wrestler->injuries);
         $this->assertEquals(WrestlerStatus::INJURED, $wrestler->fresh()->status);
 
-        $response = $this->clearInjuryRequest($wrestler);
+        $response = $this->patch(route('wrestlers.clear-from-injury', $wrestler));
 
         $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
@@ -66,7 +66,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
 
-        $response = $this->clearInjuryRequest($wrestler);
+        $response = $this->patch(route('wrestlers.clear-from-injury', $wrestler));
 
         $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
     }
@@ -74,11 +74,7 @@ class ClearInjuryControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ClearInjuryController::class,
-            '__invoke',
-            ClearInjuryRequest::class
-        );
+        $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
     /** @test */
@@ -87,7 +83,7 @@ class ClearInjuryControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->clearInjuryRequest($wrestler)->assertForbidden();
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler))->assertForbidden();
     }
 
     /** @test */
@@ -95,7 +91,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->clearInjuryRequest($wrestler)->assertRedirect(route('login'));
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler))->assertRedirect(route('login'));
     }
 
     /**
@@ -111,7 +107,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->clearInjuryRequest($wrestler);
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler));
     }
 
     /**
@@ -127,7 +123,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->clearInjuryRequest($wrestler);
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler));
     }
 
     /**
@@ -143,7 +139,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->clearInjuryRequest($wrestler);
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler));
     }
 
     /**
@@ -159,7 +155,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->clearInjuryRequest($wrestler);
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler));
     }
 
     /**
@@ -175,7 +171,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->clearInjuryRequest($wrestler);
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler));
     }
 
     /**
@@ -191,6 +187,6 @@ class ClearInjuryControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->clearInjuryRequest($wrestler);
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler));
     }
 }

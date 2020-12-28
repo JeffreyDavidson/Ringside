@@ -36,7 +36,7 @@ class UnretireControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->retired()->create();
 
-        $response = $this->unretireRequest($manager);
+        $response = $this->patch(route('managers.unretire', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -49,11 +49,7 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            UnretireController::class,
-            '__invoke',
-            UnretireRequest::class
-        );
+        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class UnretireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->create();
 
-        $this->unretireRequest($manager)->assertForbidden();
+        $this->patch(route('managers.unretire', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class UnretireControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->unretireRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.unretire', $manager))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->available()->create();
 
-        $this->unretireRequest($manager);
+        $this->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -102,7 +98,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->unretireRequest($manager);
+        $this->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -118,7 +114,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->unretireRequest($manager);
+        $this->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -134,7 +130,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->released()->create();
 
-        $this->unretireRequest($manager);
+        $this->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -150,7 +146,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->unretireRequest($manager);
+        $this->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -166,6 +162,6 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->unretireRequest($manager);
+        $this->patch(route('managers.unretire', $manager));
     }
 }

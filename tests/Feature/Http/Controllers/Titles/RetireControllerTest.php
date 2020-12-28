@@ -32,7 +32,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $title = Title::factory()->active()->create();
 
-        $response = $this->retireRequest($title);
+        $response = $this->patch(route('titles.retire', $title));
 
         $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
@@ -45,11 +45,7 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            RetireController::class,
-            '__invoke',
-            RetireRequest::class
-        );
+        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /** @test */
@@ -58,7 +54,7 @@ class RetireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $title = Title::factory()->create();
 
-        $response = $this->retireRequest($title);
+        $response = $this->patch(route('titles.retire', $title));
 
         $response->assertForbidden();
     }
@@ -68,7 +64,7 @@ class RetireControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->retireRequest($title)->assertRedirect(route('login'));
+        $this->patch(route('titles.retire', $title))->assertRedirect(route('login'));
     }
 
     /**
@@ -84,7 +80,7 @@ class RetireControllerTest extends TestCase
 
         $title = Title::factory()->retired()->create();
 
-        $this->retireRequest($title);
+        $this->patch(route('titles.retire', $title));
     }
 
     /**
@@ -100,7 +96,7 @@ class RetireControllerTest extends TestCase
 
         $title = Title::factory()->withFutureActivation()->create();
 
-        $this->retireRequest($title);
+        $this->patch(route('titles.retire', $title));
     }
 
     /**
@@ -116,7 +112,7 @@ class RetireControllerTest extends TestCase
 
         $title = Title::factory()->unactivated()->create();
 
-        $this->retireRequest($title);
+        $this->patch(route('titles.retire', $title));
     }
 
     /**
@@ -132,6 +128,6 @@ class RetireControllerTest extends TestCase
 
         $title = Title::factory()->inactive()->create();
 
-        $this->retireRequest($title);
+        $this->patch(route('titles.retire', $title));
     }
 }

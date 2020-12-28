@@ -35,7 +35,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $response = $this->employRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.employ', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
@@ -63,7 +63,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = Tagteam::factory()->unemployed()->create();
 
-        $response = $this->employRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.employ', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
@@ -85,7 +85,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = Tagteam::factory()->released()->create();
 
-        $response = $this->employRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.employ', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
@@ -98,11 +98,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            EmployController::class,
-            '__invoke',
-            EmployRequest::class
-        );
+        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /** @test */
@@ -111,7 +107,7 @@ class EmployControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->employRequest($tagTeam)->assertForbidden();
+        $this->patch(route('tag-teams.employ', $tagTeam))->assertForbidden();
     }
 
     /** @test */
@@ -119,7 +115,7 @@ class EmployControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->employRequest($tagTeam)->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.employ', $tagTeam))->assertRedirect(route('login'));
     }
 
     /**
@@ -135,7 +131,7 @@ class EmployControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this->employRequest($tagTeam);
+        $this->patch(route('tag-teams.employ', $tagTeam));
     }
 
     /**
@@ -151,7 +147,7 @@ class EmployControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->employRequest($tagTeam);
+        $this->patch(route('tag-teams.employ', $tagTeam));
     }
 
     /**
@@ -167,6 +163,6 @@ class EmployControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $this->employRequest($tagTeam);
+        $this->patch(route('tag-teams.employ', $tagTeam));
     }
 }

@@ -36,7 +36,7 @@ class UnretireControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->retired()->create();
 
-        $response = $this->unretireRequest($referee);
+        $response = $this->patch(route('referees.unretire', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -49,11 +49,7 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            UnretireController::class,
-            '__invoke',
-            UnretireRequest::class
-        );
+        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class UnretireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->unretireRequest($referee)->assertForbidden();
+        $this->patch(route('referees.unretire', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class UnretireControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->unretireRequest($referee)->assertRedirect(route('login'));
+        $this->patch(route('referees.unretire', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class UnretireControllerTest extends TestCase
 
         $referee = Referee::factory()->bookable()->create();
 
-        $this->unretireRequest($referee);
+        $this->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -102,7 +98,7 @@ class UnretireControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->unretireRequest($referee);
+        $this->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -118,7 +114,7 @@ class UnretireControllerTest extends TestCase
 
         $referee = Referee::factory()->injured()->create();
 
-        $this->unretireRequest($referee);
+        $this->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -134,7 +130,7 @@ class UnretireControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->unretireRequest($referee);
+        $this->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -150,7 +146,7 @@ class UnretireControllerTest extends TestCase
 
         $referee = Referee::factory()->suspended()->create();
 
-        $this->unretireRequest($referee);
+        $this->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -166,6 +162,6 @@ class UnretireControllerTest extends TestCase
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->unretireRequest($referee);
+        $this->patch(route('referees.unretire', $referee));
     }
 }

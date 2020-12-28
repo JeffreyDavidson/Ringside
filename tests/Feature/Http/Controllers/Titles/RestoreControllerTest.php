@@ -21,7 +21,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::ADMINISTRATOR);
         $title = Title::factory()->softDeleted()->create();
 
-        $response = $this->restoreRequest($title);
+        $response = $this->patch(route('titles.restore', $title));
 
         $response->assertRedirect(route('titles.index'));
         $this->assertNull($title->fresh()->deleted_at);
@@ -33,7 +33,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $title = Title::factory()->softDeleted()->create();
 
-        $this->restoreRequest($title)->assertForbidden();
+        $this->patch(route('titles.restore', $title))->assertForbidden();
     }
 
     /** @test */
@@ -41,6 +41,6 @@ class RestoreControllerTest extends TestCase
     {
         $title = Title::factory()->softDeleted()->create();
 
-        $this->restoreRequest($title)->assertRedirect(route('login'));
+        $this->patch(route('titles.restore', $title))->assertRedirect(route('login'));
     }
 }

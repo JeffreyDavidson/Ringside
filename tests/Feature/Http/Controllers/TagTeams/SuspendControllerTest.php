@@ -33,7 +33,7 @@ class SuspendControllerTest extends TestCase
         $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $response = $this->suspendRequest($tagTeam);
+        $response = $this->patch(route('tag-teams.suspend', $tagTeam));
 
         $response->assertRedirect(route('tag-teams.index'));
         $this->assertEquals($now->toDateTimeString(), $tagTeam->fresh()->currentSuspension->started_at);
@@ -42,11 +42,7 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            SuspendController::class,
-            '__invoke',
-            SuspendRequest::class
-        );
+        $this->assertActionUsesFormRequest(SuspendController::class, '__invoke', SuspendRequest::class);
     }
 
     /** @test */
@@ -55,7 +51,7 @@ class SuspendControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->suspendRequest($tagTeam)->assertForbidden();
+        $this->patch(route('tag-teams.suspend', $tagTeam))->assertForbidden();
     }
 
     /** @test */
@@ -63,7 +59,7 @@ class SuspendControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->suspendRequest($tagTeam)->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.suspend', $tagTeam))->assertRedirect(route('login'));
     }
 
     /**
@@ -79,7 +75,7 @@ class SuspendControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $this->suspendRequest($tagTeam);
+        $this->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -95,7 +91,7 @@ class SuspendControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $this->suspendRequest($tagTeam);
+        $this->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -111,7 +107,7 @@ class SuspendControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->released()->create();
 
-        $this->suspendRequest($tagTeam);
+        $this->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -127,7 +123,7 @@ class SuspendControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $this->suspendRequest($tagTeam);
+        $this->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -143,6 +139,6 @@ class SuspendControllerTest extends TestCase
 
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->suspendRequest($tagTeam);
+        $this->patch(route('tag-teams.suspend', $tagTeam));
     }
 }

@@ -44,7 +44,7 @@ class VenueControllerTest extends TestCase
     {
         $this->actAs($administrators);
 
-        $response = $this->indexRequest('venues');
+        $response = $this->get(route('venues.index'));
 
         $response->assertOk();
         $response->assertViewIs('venues.index');
@@ -55,13 +55,13 @@ class VenueControllerTest extends TestCase
     {
         $this->actAs(Role::BASIC);
 
-        $this->indexRequest('venues')->assertForbidden();
+        $this->get(route('venues.index'))->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_venues_index_page()
     {
-        $this->indexRequest('venues')->assertRedirect(route('login'));
+        $this->get(route('venues.index'))->assertRedirect(route('login'));
     }
 
     /**
@@ -72,10 +72,24 @@ class VenueControllerTest extends TestCase
     {
         $this->actAs($administrators);
 
-        $response = $this->createRequest('venues');
+        $response = $this->get(route('venues.create'));
 
         $response->assertViewIs('venues.create');
         $response->assertViewHas('venue', new Venue);
+    }
+
+    /** @test */
+    public function a_basic_user_cannot_view_the_form_for_creating_a_venue()
+    {
+        $this->actAs(Role::BASIC);
+
+        $this->get(route('venues.create'))->assertForbidden();
+    }
+
+    /** @test */
+    public function a_guest_cannot_view_the_form_for_creating_a_venue()
+    {
+        $this->get(route('venues.create'))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +100,7 @@ class VenueControllerTest extends TestCase
     {
         $this->actAs($administrators);
 
-        $response = $this->storeRequest('venues', $this->validParams());
+        $response = $this->from(route('venues.create'))->post(route('venues.store'), $this->validParams());
 
         $response->assertRedirect(route('venues.index'));
         tap(Venue::first(), function ($venue) {
@@ -100,41 +114,23 @@ class VenueControllerTest extends TestCase
     }
 
     /** @test */
-    public function a_basic_user_cannot_view_the_form_for_creating_a_venue()
-    {
-        $this->actAs(Role::BASIC);
-
-        $this->createRequest('venue')->assertForbidden();
-    }
-
-    /** @test */
     public function a_basic_user_cannot_create_a_venue()
     {
         $this->actAs(Role::BASIC);
 
-        $this->storeRequest('venue', $this->validParams())->assertForbidden();
-    }
-
-    /** @test */
-    public function a_guest_cannot_view_the_form_for_creating_a_venue()
-    {
-        $this->createRequest('venue')->assertRedirect(route('login'));
+        $this->from(route('venues.create'))->post(route('venues.store'), $this->validParams())->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_create_a_venue()
     {
-        $this->storeRequest('venue', $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('venues.create'))->post(route('venues.store'), $this->validParams())->assertRedirect(route('login'));
     }
 
     /** @test */
     public function store_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            VenuesController::class,
-            'store',
-            StoreRequest::class
-        );
+        $this->assertActionUsesFormRequest(VenuesController::class, 'store', StoreRequest::class);
     }
 
     /**
@@ -146,7 +142,7 @@ class VenueControllerTest extends TestCase
         $this->actAs($administrators);
         $venue = Venue::factory()->create();
 
-        $response = $this->showRequest($venue);
+        $response = $this->get(route('venues.show', $venue));
 
         $response->assertViewIs('venues.show');
         $this->assertTrue($response->data('venue')->is($venue));
@@ -158,7 +154,7 @@ class VenueControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $venue = Venue::factory()->create();
 
-        $this->showRequest($venue)->assertStatus(403);
+        $this->get(route('venues.show', $venue))->assertStatus(403);
     }
 
     /** @test */
@@ -166,7 +162,7 @@ class VenueControllerTest extends TestCase
     {
         $venue = Venue::factory()->create();
 
-        $this->showRequest($venue)->assertRedirect(route('login'));
+        $this->get(route('venues.show', $venue))->assertRedirect(route('login'));
     }
 
     /**
@@ -178,7 +174,7 @@ class VenueControllerTest extends TestCase
         $this->actAs($administrators);
         $venue = Venue::factory()->create();
 
-        $response = $this->editRequest($venue);
+        $response = $this->get(route('venues.edit', $venue));
 
         $response->assertViewIs('venues.edit');
         $this->assertTrue($response->data('venue')->is($venue));
@@ -190,7 +186,7 @@ class VenueControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $venue = Venue::factory()->create();
 
-        $this->editRequest($venue)->assertStatus(403);
+        $this->get(route('venues.edit', $venue))->assertStatus(403);
     }
 
     /** @test */
@@ -198,7 +194,7 @@ class VenueControllerTest extends TestCase
     {
         $venue = Venue::factory()->create();
 
-        $this->editRequest($venue)->assertRedirect(route('login'));
+        $this->get(route('venues.edit', $venue))->assertRedirect(route('login'));
     }
 
     /**
@@ -210,7 +206,7 @@ class VenueControllerTest extends TestCase
         $this->actAs($administrators);
         $venue = Venue::factory()->create();
 
-        $response = $this->updateRequest($venue, $this->validParams());
+        $response = $this->from(route('venues.edit', $venue))->put(route('venues.update', $venue), $this->validParams());
 
         $response->assertRedirect(route('venues.index'));
         tap(Venue::first(), function ($venue) {
@@ -229,7 +225,7 @@ class VenueControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $venue = Venue::factory()->create();
 
-        $this->updateRequest($venue, $this->validParams())->assertStatus(403);
+        $this->from(route('venues.edit', $venue))->put(route('venues.update', $venue), $this->validParams())->assertForbidden();
     }
 
     /** @test */
@@ -237,16 +233,12 @@ class VenueControllerTest extends TestCase
     {
         $venue = Venue::factory()->create();
 
-        $this->updateRequest($venue, $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('venues.edit', $venue))->put(route('venues.update', $venue), $this->validParams())->assertRedirect(route('login'));
     }
 
     /** @test */
     public function update_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            VenuesController::class,
-            'update',
-            UpdateRequest::class
-        );
+        $this->assertActionUsesFormRequest(VenuesController::class, 'update', UpdateRequest::class);
     }
 }

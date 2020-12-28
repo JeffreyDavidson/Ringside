@@ -36,7 +36,7 @@ class InjureControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->bookable()->create();
 
-        $response = $this->injureRequest($referee);
+        $response = $this->put(route('referees.injure', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -49,11 +49,7 @@ class InjureControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            InjureController::class,
-            '__invoke',
-            InjureRequest::class
-        );
+        $this->assertActionUsesFormRequest(InjureController::class, '__invoke', InjureRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class InjureControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($referee)->assertForbidden();
+        $this->put(route('referees.injure', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class InjureControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->injureRequest($referee)->assertRedirect(route('login'));
+        $this->put(route('referees.injure', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class InjureControllerTest extends TestCase
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->injureRequest($referee);
+        $this->put(route('referees.injure', $referee));
     }
 
     /**
@@ -102,7 +98,7 @@ class InjureControllerTest extends TestCase
 
         $referee = Referee::factory()->suspended()->create();
 
-        $this->injureRequest($referee);
+        $this->put(route('referees.injure', $referee));
     }
 
     /**
@@ -118,7 +114,7 @@ class InjureControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->injureRequest($referee);
+        $this->put(route('referees.injure', $referee));
     }
 
     /**
@@ -134,7 +130,7 @@ class InjureControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->injureRequest($referee);
+        $this->put(route('referees.injure', $referee));
     }
 
     /**
@@ -150,7 +146,7 @@ class InjureControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->injureRequest($referee);
+        $this->put(route('referees.injure', $referee));
     }
 
     /**
@@ -166,6 +162,6 @@ class InjureControllerTest extends TestCase
 
         $referee = Referee::factory()->injured()->create();
 
-        $this->injureRequest($referee);
+        $this->put(route('referees.injure', $referee));
     }
 }

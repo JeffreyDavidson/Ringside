@@ -36,7 +36,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $response = $this->employRequest($manager);
+        $response = $this->patch(route('managers.employ', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -58,7 +58,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->unemployed()->create();
 
-        $response = $this->employRequest($manager);
+        $response = $this->patch(route('managers.employ', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -80,7 +80,7 @@ class EmployControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->released()->create();
 
-        $response = $this->employRequest($manager);
+        $response = $this->patch(route('managers.employ', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -93,11 +93,7 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            EmployController::class,
-            '__invoke',
-            EmployRequest::class
-        );
+        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /** @test */
@@ -106,7 +102,7 @@ class EmployControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($manager)->assertForbidden();
+        $this->patch(route('managers.employ', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -114,7 +110,7 @@ class EmployControllerTest extends TestCase
     {
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.employ', $manager))->assertRedirect(route('login'));
     }
 
     /**
@@ -130,7 +126,7 @@ class EmployControllerTest extends TestCase
 
         $manager = Manager::factory()->available()->create();
 
-        $this->employRequest($manager);
+        $this->patch(route('managers.employ', $manager));
     }
 
     /**
@@ -146,7 +142,7 @@ class EmployControllerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->employRequest($manager);
+        $this->patch(route('managers.employ', $manager));
     }
 
     /**
@@ -162,7 +158,7 @@ class EmployControllerTest extends TestCase
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->employRequest($manager);
+        $this->patch(route('managers.employ', $manager));
     }
 
     /**
@@ -178,6 +174,6 @@ class EmployControllerTest extends TestCase
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->employRequest($manager);
+        $this->patch(route('managers.employ', $manager));
     }
 }

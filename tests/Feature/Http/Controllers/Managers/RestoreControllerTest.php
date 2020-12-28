@@ -25,7 +25,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::ADMINISTRATOR);
         $manager = Manager::factory()->softDeleted()->create();
 
-        $response = $this->restoreRequest($manager);
+        $response = $this->patch(route('managers.restore', $manager));
 
         $response->assertRedirect(route('managers.index'));
         $this->assertNull($manager->fresh()->deleted_at);
@@ -37,7 +37,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->softDeleted()->create();
 
-        $this->restoreRequest($manager)->assertForbidden();
+        $this->patch(route('managers.restore', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -45,6 +45,6 @@ class RestoreControllerTest extends TestCase
     {
         $manager = Manager::factory()->softDeleted()->create();
 
-        $this->restoreRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.restore', $manager))->assertRedirect(route('login'));
     }
 }

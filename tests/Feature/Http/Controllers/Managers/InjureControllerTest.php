@@ -36,7 +36,7 @@ class InjureControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->available()->create();
 
-        $response = $this->injureRequest($manager);
+        $response = $this->patch(route('managers.injure', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -49,11 +49,7 @@ class InjureControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            InjureController::class,
-            '__invoke',
-            InjureRequest::class
-        );
+        $this->assertActionUsesFormRequest(InjureController::class, '__invoke', InjureRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class InjureControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->employRequest($manager)->assertForbidden();
+        $this->patch(route('managers.injure', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class InjureControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->injureRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.injure', $manager))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class InjureControllerTest extends TestCase
 
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->injureRequest($manager);
+        $this->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -102,7 +98,7 @@ class InjureControllerTest extends TestCase
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->injureRequest($manager);
+        $this->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -118,7 +114,7 @@ class InjureControllerTest extends TestCase
 
         $manager = Manager::factory()->released()->create();
 
-        $this->injureRequest($manager);
+        $this->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -134,7 +130,7 @@ class InjureControllerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->injureRequest($manager);
+        $this->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -150,7 +146,7 @@ class InjureControllerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->injureRequest($manager);
+        $this->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -166,6 +162,6 @@ class InjureControllerTest extends TestCase
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->injureRequest($manager);
+        $this->patch(route('managers.injure', $manager));
     }
 }

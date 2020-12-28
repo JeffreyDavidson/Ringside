@@ -27,7 +27,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->softDeleted()->create();
 
-        $response = $this->restoreRequest($stable);
+        $response = $this->patch(route('stables.restore', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) {
@@ -42,7 +42,7 @@ class RestoreControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $stable = Stable::factory()->softDeleted()->create();
 
-        $this->restoreRequest($stable)->assertForbidden();
+        $this->patch(route('stables.restore', $stable))->assertForbidden();
     }
 
     /** @test */
@@ -50,6 +50,6 @@ class RestoreControllerTest extends TestCase
     {
         $stable = Stable::factory()->softDeleted()->create();
 
-        $this->restoreRequest($stable)->assertRedirect(route('login'));
+        $this->patch(route('stables.restore', $stable))->assertRedirect(route('login'));
     }
 }

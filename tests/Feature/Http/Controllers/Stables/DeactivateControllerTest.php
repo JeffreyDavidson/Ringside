@@ -34,7 +34,7 @@ class DeactivateControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->active()->create();
 
-        $response = $this->deactivateRequest($stable);
+        $response = $this->patch(route('stables.deactivate', $stable));
 
         $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -46,11 +46,7 @@ class DeactivateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            DeactivateController::class,
-            '__invoke',
-            DeactivateRequest::class
-        );
+        $this->assertActionUsesFormRequest(DeactivateController::class, '__invoke', DeactivateRequest::class);
     }
 
     /** @test */
@@ -59,7 +55,7 @@ class DeactivateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->deactivateRequest($stable)->assertForbidden();
+        $this->patch(route('stables.deactivate', $stable))->assertForbidden();
     }
 
     /** @test */
@@ -67,7 +63,7 @@ class DeactivateControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->deactivateRequest($stable)->assertRedirect(route('login'));
+        $this->patch(route('stables.deactivate', $stable))->assertRedirect(route('login'));
     }
 
     /**
@@ -83,7 +79,7 @@ class DeactivateControllerTest extends TestCase
 
         $stable = Stable::factory()->inactive()->create();
 
-        $this->deactivateRequest($stable);
+        $this->patch(route('stables.deactivate', $stable));
     }
 
     /**
@@ -99,7 +95,7 @@ class DeactivateControllerTest extends TestCase
 
         $stable = Stable::factory()->retired()->create();
 
-        $this->deactivateRequest($stable);
+        $this->patch(route('stables.deactivate', $stable));
     }
 
     /**
@@ -115,7 +111,7 @@ class DeactivateControllerTest extends TestCase
 
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->deactivateRequest($stable);
+        $this->patch(route('stables.deactivate', $stable));
     }
 
     /**
@@ -131,6 +127,6 @@ class DeactivateControllerTest extends TestCase
 
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $this->deactivateRequest($stable);
+        $this->patch(route('stables.deactivate', $stable));
     }
 }

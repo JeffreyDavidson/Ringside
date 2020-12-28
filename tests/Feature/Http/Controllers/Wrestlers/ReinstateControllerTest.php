@@ -38,7 +38,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs($administrators);
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $response = $this->reinstateRequest($wrestler);
+        $response = $this->patch(route('wrestlers.reinstate', $wrestler));
 
         $this->assertEquals($now->toDateTimeString('minute'), $wrestler->fresh()->suspensions()->latest()->first()->ended_at->toDateTimeString('minute'));
 
@@ -65,7 +65,7 @@ class ReinstateControllerTest extends TestCase
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
 
-        $response = $this->reinstateRequest($wrestler);
+        $response = $this->patch(route('wrestlers.reinstate', $wrestler));
 
         $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
     }
@@ -73,11 +73,7 @@ class ReinstateControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ReinstateController::class,
-            '__invoke',
-            ReinstateRequest::class
-        );
+        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /** @test */
@@ -86,7 +82,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $wrestler = Wrestler::factory()->create();
 
-        $this->reinstateRequest($wrestler)->assertForbidden();
+        $this->patch(route('wrestlers.reinstate', $wrestler))->assertForbidden();
     }
 
     /** @test */
@@ -94,7 +90,7 @@ class ReinstateControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->reinstateRequest($wrestler)->assertRedirect(route('login'));
+        $this->patch(route('wrestlers.reinstate', $wrestler))->assertRedirect(route('login'));
     }
 
     /**
@@ -110,7 +106,7 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->reinstateRequest($wrestler);
+        $this->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -126,7 +122,7 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->reinstateRequest($wrestler);
+        $this->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -142,7 +138,7 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->reinstateRequest($wrestler);
+        $this->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -158,7 +154,7 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->reinstateRequest($wrestler);
+        $this->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -174,7 +170,7 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->reinstateRequest($wrestler);
+        $this->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -190,6 +186,6 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->reinstateRequest($wrestler);
+        $this->patch(route('wrestlers.reinstate', $wrestler));
     }
 }

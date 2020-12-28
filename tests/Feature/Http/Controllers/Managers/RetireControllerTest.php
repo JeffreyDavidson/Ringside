@@ -36,7 +36,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->available()->create();
 
-        $response = $this->retireRequest($manager);
+        $response = $this->patch(route('managers.retire', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -58,7 +58,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->injured()->create();
 
-        $response = $this->retireRequest($manager);
+        $response = $this->patch(route('managers.retire', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -80,7 +80,7 @@ class RetireControllerTest extends TestCase
         $this->actAs($administrators);
         $manager = Manager::factory()->suspended()->create();
 
-        $response = $this->retireRequest($manager);
+        $response = $this->patch(route('managers.retire', $manager));
 
         $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
@@ -93,11 +93,7 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            RetireController::class,
-            '__invoke',
-            RetireRequest::class
-        );
+        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /** @test */
@@ -106,7 +102,7 @@ class RetireControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $manager = Manager::factory()->create();
 
-        $this->retireRequest($manager)->assertForbidden();
+        $this->patch(route('managers.retire', $manager))->assertForbidden();
     }
 
     /** @test */
@@ -114,7 +110,7 @@ class RetireControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->retireRequest($manager)->assertRedirect(route('login'));
+        $this->patch(route('managers.retire', $manager))->assertRedirect(route('login'));
     }
 
     /**
@@ -130,7 +126,7 @@ class RetireControllerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->retireRequest($manager);
+        $this->patch(route('managers.retire', $manager));
     }
 
     /**
@@ -146,7 +142,7 @@ class RetireControllerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->retireRequest($manager);
+        $this->patch(route('managers.retire', $manager));
     }
 
     /**
@@ -162,7 +158,7 @@ class RetireControllerTest extends TestCase
 
         $manager = Manager::factory()->released()->create();
 
-        $this->retireRequest($manager);
+        $this->patch(route('managers.retire', $manager));
     }
 
     /**
@@ -178,6 +174,6 @@ class RetireControllerTest extends TestCase
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->retireRequest($manager);
+        $this->patch(route('managers.retire', $manager));
     }
 }

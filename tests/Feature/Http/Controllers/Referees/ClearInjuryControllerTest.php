@@ -36,7 +36,7 @@ class ClearInjuryControllerTest extends TestCase
         $this->actAs($administrators);
         $referee = Referee::factory()->injured()->create();
 
-        $response = $this->clearInjuryRequest($referee);
+        $response = $this->put(route('referees.clear-from-injury', $referee));
 
         $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
@@ -49,11 +49,7 @@ class ClearInjuryControllerTest extends TestCase
     /** @test */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(
-            ClearInjuryController::class,
-            '__invoke',
-            ClearInjuryRequest::class
-        );
+        $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
     /** @test */
@@ -62,7 +58,7 @@ class ClearInjuryControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->injured()->create();
 
-        $this->clearInjuryRequest($referee)->assertForbidden();
+        $this->put(route('referees.clear-from-injury', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -70,7 +66,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $referee = Referee::factory()->injured()->create();
 
-        $this->clearInjuryRequest($referee)->assertRedirect(route('login'));
+        $this->put(route('referees.clear-from-injury', $referee))->assertRedirect(route('login'));
     }
 
     /**
@@ -86,7 +82,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->clearInjuryRequest($referee);
+        $this->put(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -102,7 +98,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $referee = Referee::factory()->bookable()->create();
 
-        $this->clearInjuryRequest($referee);
+        $this->put(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -118,7 +114,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->clearInjuryRequest($referee);
+        $this->put(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -134,7 +130,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $referee = Referee::factory()->suspended()->create();
 
-        $this->clearInjuryRequest($referee);
+        $this->put(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -150,7 +146,7 @@ class ClearInjuryControllerTest extends TestCase
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->clearInjuryRequest($referee);
+        $this->put(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -166,6 +162,6 @@ class ClearInjuryControllerTest extends TestCase
 
         $referee = Referee::factory()->released()->create();
 
-        $this->clearInjuryRequest($referee);
+        $this->put(route('referees.clear-from-injury', $referee));
     }
 }
