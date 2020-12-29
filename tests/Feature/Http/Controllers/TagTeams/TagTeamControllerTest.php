@@ -341,10 +341,11 @@ class TagTeamControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_delete_a_tag_team()
     {
-        $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->delete(route('tag-teams.destroy', $tagTeam))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->delete(route('tag-teams.destroy', $tagTeam))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -352,6 +353,7 @@ class TagTeamControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->delete(route('tag-teams.destroy', $tagTeam))->assertRedirect(route('login'));
+        $this->delete(route('tag-teams.destroy', $tagTeam))
+            ->assertRedirect(route('login'));
     }
 }
