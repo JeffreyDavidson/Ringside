@@ -22,22 +22,23 @@ class RestoreControllerTest extends TestCase
     /** @test */
     public function invoke_restores_a_deleted_referee_and_redirects()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $referee = Referee::factory()->softDeleted()->create();
 
-        $response = $this->patch(route('referees.restore', $referee));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->patch(route('referees.restore', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         $this->assertNull($referee->fresh()->deleted_at);
     }
 
     /** @test */
     public function a_basic_user_cannot_restore_a_referee()
     {
-        $this->actAs(Role::BASIC);
         $referee = Referee::factory()->softDeleted()->create();
 
-        $this->patch(route('referees.restore', $referee))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('referees.restore', $referee))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -45,6 +46,7 @@ class RestoreControllerTest extends TestCase
     {
         $referee = Referee::factory()->softDeleted()->create();
 
-        $this->patch(route('referees.restore', $referee))->assertRedirect(route('login'));
+        $this->patch(route('referees.restore', $referee))
+            ->assertRedirect(route('login'));
     }
 }

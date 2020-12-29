@@ -33,12 +33,12 @@ class EmployControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $response = $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
             $this->assertCount(1, $referee->employments);
@@ -55,12 +55,12 @@ class EmployControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->unemployed()->create();
 
-        $response = $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
             $this->assertCount(1, $referee->employments);
@@ -77,12 +77,12 @@ class EmployControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->released()->create();
 
-        $response = $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
             $this->assertCount(2, $referee->employments);
@@ -99,10 +99,10 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_employ_a_referee()
     {
-        $this->actAs(Role::BASIC);
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->put(route('referees.employ', $referee))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('referees.employ', $referee))->assertForbidden();
     }
 
     /** @test */
@@ -110,7 +110,8 @@ class EmployControllerTest extends TestCase
     {
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->put(route('referees.employ', $referee))->assertRedirect(route('login'));
+        $this->patch(route('referees.employ', $referee))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -122,11 +123,10 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->bookable()->create();
 
-        $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
     }
 
     /**
@@ -138,11 +138,10 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->retired()->create();
 
-        $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
     }
 
     /**
@@ -154,11 +153,10 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->suspended()->create();
 
-        $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
     }
 
     /**
@@ -170,10 +168,9 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->injured()->create();
 
-        $this->put(route('referees.employ', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
     }
 }

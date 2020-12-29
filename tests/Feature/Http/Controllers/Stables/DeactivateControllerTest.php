@@ -31,12 +31,12 @@ class DeactivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $stable = Stable::factory()->active()->create();
 
-        $response = $this->patch(route('stables.deactivate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.deactivate', $stable))
+            ->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::INACTIVE, $stable->status);
             $this->assertEquals($now->toDateTimeString(), $stable->activations->last()->ended_at->toDateTimeString());
@@ -52,10 +52,11 @@ class DeactivateControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_deactivates_a_stable()
     {
-        $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->patch(route('stables.deactivate', $stable))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('stables.deactivate', $stable))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -63,7 +64,8 @@ class DeactivateControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->patch(route('stables.deactivate', $stable))->assertRedirect(route('login'));
+        $this->patch(route('stables.deactivate', $stable))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -75,11 +77,10 @@ class DeactivateControllerTest extends TestCase
         $this->expectException(CannotBeDeactivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $stable = Stable::factory()->inactive()->create();
 
-        $this->patch(route('stables.deactivate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.deactivate', $stable));
     }
 
     /**
@@ -91,11 +92,10 @@ class DeactivateControllerTest extends TestCase
         $this->expectException(CannotBeDeactivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $stable = Stable::factory()->retired()->create();
 
-        $this->patch(route('stables.deactivate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.deactivate', $stable));
     }
 
     /**
@@ -107,11 +107,10 @@ class DeactivateControllerTest extends TestCase
         $this->expectException(CannotBeDeactivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->patch(route('stables.deactivate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.deactivate', $stable));
     }
 
     /**
@@ -123,10 +122,9 @@ class DeactivateControllerTest extends TestCase
         $this->expectException(CannotBeDeactivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $this->patch(route('stables.deactivate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.deactivate', $stable));
     }
 }

@@ -21,24 +21,23 @@ class RestoreControllerTest extends TestCase
      */
     public function invoke_restores_a_soft_deleted_event_and_redirects($administrators)
     {
-        $this->actAs($administrators);
         $event = Event::factory()->softDeleted()->create();
 
-        $response = $this->patch(route('events.restore', $event));
+        $this->actAs($administrators)
+            ->patch(route('events.restore', $event))
+            ->assertRedirect(route('events.index'));
 
-        $response->assertRedirect(route('events.index'));
         $this->assertNull($event->fresh()->deleted_at);
     }
 
     /** @test */
     public function a_basic_user_cannot_restore_a_deleted_event()
     {
-        $this->actAs(Role::BASIC);
         $event = Event::factory()->softDeleted()->create();
 
-        $response = $this->patch(route('events.restore', $event));
-
-        $response->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('events.restore', $event))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -46,8 +45,7 @@ class RestoreControllerTest extends TestCase
     {
         $event = Event::factory()->softDeleted()->create();
 
-        $response = $this->patch(route('events.restore', $event));
-
-        $response->assertRedirect(route('login'));
+        $this->patch(route('events.restore', $event))
+            ->assertRedirect(route('login'));
     }
 }

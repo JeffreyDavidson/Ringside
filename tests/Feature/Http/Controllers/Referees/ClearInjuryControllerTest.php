@@ -33,12 +33,12 @@ class ClearInjuryControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->injured()->create();
 
-        $response = $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
             $this->assertCount(1, $referee->injuries);
@@ -55,10 +55,11 @@ class ClearInjuryControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_mark_an_injured_referee_as_recovered()
     {
-        $this->actAs(Role::BASIC);
         $referee = Referee::factory()->injured()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('referees.clear-from-injury', $referee))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -66,7 +67,8 @@ class ClearInjuryControllerTest extends TestCase
     {
         $referee = Referee::factory()->injured()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee))->assertRedirect(route('login'));
+        $this->patch(route('referees.clear-from-injury', $referee))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -78,11 +80,10 @@ class ClearInjuryControllerTest extends TestCase
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -94,11 +95,10 @@ class ClearInjuryControllerTest extends TestCase
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->bookable()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -110,11 +110,10 @@ class ClearInjuryControllerTest extends TestCase
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -126,11 +125,10 @@ class ClearInjuryControllerTest extends TestCase
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->suspended()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -142,11 +140,10 @@ class ClearInjuryControllerTest extends TestCase
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->retired()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee));
     }
 
     /**
@@ -158,10 +155,9 @@ class ClearInjuryControllerTest extends TestCase
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->released()->create();
 
-        $this->put(route('referees.clear-from-injury', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.clear-from-injury', $referee));
     }
 }

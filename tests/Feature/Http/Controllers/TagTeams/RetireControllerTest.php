@@ -32,12 +32,12 @@ class RetireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $response = $this->patch(route('tag-teams.retire', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam))
+            ->assertRedirect(route('tag-teams.index'));
 
-        $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
             $this->assertEquals($now->toDateTimeString(), $tagTeam->retirements->first()->started_at->toDateTimeString());
@@ -58,12 +58,12 @@ class RetireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $response = $this->patch(route('tag-teams.retire', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam))
+            ->assertRedirect(route('tag-teams.index'));
 
-        $response->assertRedirect(route('tag-teams.index'));
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
             $this->assertEquals($now->toDateTimeString(), $tagTeam->retirements->first()->started_at->toDateTimeString());
@@ -87,12 +87,11 @@ class RetireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->unbookable()->create();
 
-        $response = $this->patch(route('tag-teams.retire', $tagTeam));
-
-        $response->assertRedirect(route('tag-teams.index'));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam))
+            ->assertRedirect(route('tag-teams.index'));
 
         tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
             $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
@@ -117,10 +116,11 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_retire_a_tag_team()
     {
-        $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->patch(route('tag-teams.retire', $tagTeam))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('tag-teams.retire', $tagTeam))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -128,7 +128,8 @@ class RetireControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->patch(route('tag-teams.retire', $tagTeam))->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.retire', $tagTeam))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -140,11 +141,10 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->patch(route('tag-teams.retire', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam));
     }
 
     /**
@@ -156,11 +156,10 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('tag-teams.retire', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam));
     }
 
     /**
@@ -172,11 +171,10 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->released()->create();
 
-        $this->patch(route('tag-teams.retire', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam));
     }
 
     /**
@@ -188,10 +186,9 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $this->patch(route('tag-teams.retire', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.retire', $tagTeam));
     }
 }

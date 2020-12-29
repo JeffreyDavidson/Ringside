@@ -33,13 +33,12 @@ class ReleaseControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->available()->create();
 
-        $response = $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager))
+            ->assertRedirect(route('managers.index'));
 
-        $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
             $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
             $this->assertEquals($now->toDateTimeString(), $manager->employments->first()->ended_at->toDateTimeString());
@@ -55,13 +54,12 @@ class ReleaseControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->injured()->create();
 
-        $response = $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager))
+            ->assertRedirect(route('managers.index'));
 
-        $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
             $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
             $this->assertEquals($now->toDateTimeString(), $manager->employments->first()->ended_at->toDateTimeString());
@@ -78,13 +76,12 @@ class ReleaseControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->suspended()->create();
 
-        $response = $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager))
+            ->assertRedirect(route('managers.index'));
 
-        $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
             $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
             $this->assertEquals($now->toDateTimeString(), $manager->employments->first()->ended_at->toDateTimeString());
@@ -101,10 +98,11 @@ class ReleaseControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_suspend_a_manager()
     {
-        $this->actAs(Role::BASIC);
         $manager = Manager::factory()->create();
 
-        $this->patch(route('managers.release', $manager))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('managers.release', $manager))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -112,7 +110,8 @@ class ReleaseControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->patch(route('managers.release', $manager))->assertRedirect(route('login'));
+        $this->patch(route('managers.release', $manager))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -124,11 +123,10 @@ class ReleaseControllerTest extends TestCase
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager));
     }
 
     /**
@@ -140,11 +138,10 @@ class ReleaseControllerTest extends TestCase
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager));
     }
 
     /**
@@ -156,11 +153,10 @@ class ReleaseControllerTest extends TestCase
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->released()->create();
 
-        $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager));
     }
 
     /**
@@ -172,10 +168,9 @@ class ReleaseControllerTest extends TestCase
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->retired()->create();
 
-        $this->patch(route('managers.release', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.release', $manager));
     }
 }

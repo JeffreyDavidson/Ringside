@@ -42,29 +42,28 @@ class EventControllerTest extends TestCase
      */
     public function index_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $response = $this->get(route('events.index'));
-
-        $response->assertOk();
-        $response->assertViewIs('events.index');
-        $response->assertSeeLivewire('events.scheduled-events');
-        $response->assertSeeLivewire('events.unscheduled-events');
-        $response->assertSeeLivewire('events.past-events');
+        $this->actAs($administrators)
+            ->get(route('events.index'))
+            ->assertOk()
+            ->assertViewIs('events.index')
+            ->assertSeeLivewire('events.scheduled-events')
+            ->assertSeeLivewire('events.unscheduled-events')
+            ->assertSeeLivewire('events.past-events');
     }
 
     /** @test */
     public function a_basic_user_cannot_view_events_index_page()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->get(route('events.index'))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('events.index'))
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_events_index_page()
     {
-        $this->get(route('events.index'))->assertRedirect(route('login'));
+        $this->get(route('events.index'))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -73,26 +72,25 @@ class EventControllerTest extends TestCase
      */
     public function create_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $response = $this->get(route('events.create'));
-
-        $response->assertViewIs('events.create');
-        $response->assertViewHas('event', new Event);
+        $this->actAs($administrators)
+            ->get(route('events.create'))
+            ->assertViewIs('events.create')
+            ->assertViewHas('event', new Event);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_creating_an_event()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->get(route('events.create'))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('events.create'))
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_the_form_for_creating_an_event()
     {
-        $this->get(route('events.create'))->assertRedirect(route('login'));
+        $this->get(route('events.create'))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -101,11 +99,11 @@ class EventControllerTest extends TestCase
      */
     public function store_creates_an_event_and_redirects($administrators)
     {
-        $this->actAs($administrators);
+        $this->actAs($administrators)
+            ->from(route('events.create'))
+            ->post(route('events.store'), $this->validParams())
+            ->assertRedirect(route('events.index'));
 
-        $response = $this->from(route('events.create'))->post(route('events.store'), $this->validParams());
-
-        $response->assertRedirect(route('events.index'));
         tap(Event::first(), function ($event) {
             $this->assertEquals('Example Event Name', $event->name);
             $this->assertEquals('2020-10-21 19:00:00', $event->date);
@@ -117,15 +115,18 @@ class EventControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_create_an_event()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->from(route('events.create'))->post(route('events.store'), $this->validParams())->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->from(route('events.create'))
+            ->post(route('events.store'), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_create_a_event()
     {
-        $this->from(route('events.create'))->post(route('events.store'), $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('events.create'))
+            ->post(route('events.store'), $this->validParams())
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
@@ -140,24 +141,22 @@ class EventControllerTest extends TestCase
      */
     public function show_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
         $event = Event::factory()->create();
 
-        $response = $this->get(route('events.show', $event));
-
-        $response->assertViewIs('events.show');
-        $this->assertTrue($response->data('event')->is($event));
+        $this->actAs($administrators)
+            ->get(route('events.show', $event))
+            ->assertViewIs('events.show')
+            ->assertViewHas('event', $event);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_an_event_page()
     {
-        $this->actAs(Role::BASIC);
         $event = Event::factory()->create();
 
-        $response = $this->get(route('events.show', $event));
-
-        $response->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('events.show', $event))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -165,30 +164,29 @@ class EventControllerTest extends TestCase
     {
         $event = Event::factory()->create();
 
-        $response = $this->get(route('events.show', $event));
-
-        $response->assertRedirect(route('login'));
+        $this->get(route('events.show', $event))
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
     public function an_administrator_can_view_the_form_for_editing_a_scheduled_event()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $event = Event::factory()->scheduled()->create();
 
-        $response = $this->get(route('events.edit', $event));
-
-        $response->assertViewIs('events.edit');
-        $this->assertTrue($response->data('event')->is($event));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->get(route('events.edit', $event))
+            ->assertViewIs('events.edit')
+            ->assertViewHas('event', $event);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_an_event()
     {
-        $this->actAs(Role::BASIC);
         $event = Event::factory()->create();
 
-        $this->get(route('events.edit', $event))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('events.edit', $event))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -196,16 +194,18 @@ class EventControllerTest extends TestCase
     {
         $event = Event::factory()->create();
 
-        $this->get(route('events.edit', $event))->assertRedirect(route('login'));
+        $this->get(route('events.edit', $event))
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
     public function a_past_event_cannot_be_edited()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $event = Event::factory()->past()->create();
 
-        $this->get(route('events.edit', $event))->assertForbidden();
+        $this->actAs(Role::ADMINISTRATOR)
+            ->get(route('events.edit', $event))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -214,12 +214,13 @@ class EventControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs(Role::ADMINISTRATOR);
         $event = Event::factory()->scheduled()->create();
 
-        $response = $this->from(route('events.edit', $event))->put(route('events.update', $event), $this->validParams());
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from(route('events.edit', $event))
+            ->put(route('events.update', $event), $this->validParams())
+            ->assertRedirect(route('events.index'));
 
-        $response->assertRedirect(route('events.index'));
         tap($event->fresh(), function ($event) use ($now) {
             $this->assertEquals('Example Event Name', $event->name);
             $this->assertEquals('2020-10-21 19:00:00', $event->date);
@@ -230,10 +231,12 @@ class EventControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_update_an_event()
     {
-        $this->actAs(Role::BASIC);
         $event = Event::factory()->create();
 
-        $this->from(route('events.edit', $event))->put(route('events.update', $event), $this->validParams())->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->from(route('events.edit', $event))
+            ->put(route('events.update', $event), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
@@ -241,16 +244,20 @@ class EventControllerTest extends TestCase
     {
         $event = Event::factory()->create();
 
-        $this->from(route('events.edit', $event))->put(route('events.update', $event), $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('events.edit', $event))
+            ->put(route('events.update', $event), $this->validParams())
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
     public function a_past_event_cannot_be_updated()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $event = Event::factory()->past()->create();
 
-        $this->from(route('events.edit', $event))->put(route('events.update', $event), $this->validParams())->assertForbidden();
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from(route('events.edit', $event))
+            ->put(route('events.update', $event), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
@@ -265,10 +272,10 @@ class EventControllerTest extends TestCase
      */
     public function deletes_an_event_and_redirects($administrators)
     {
-        $this->actAs($administrators);
         $event = Event::factory()->create();
 
-        $this->delete(route('events.destroy', $event));
+        $this->actAs($administrators)
+            ->delete(route('events.destroy', $event));
 
         $this->assertSoftDeleted($event);
     }
@@ -276,12 +283,11 @@ class EventControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_delete_an_event()
     {
-        $this->actAs(Role::BASIC);
         $event = Event::factory()->create();
 
-        $response = $this->delete(route('events.destroy', $event));
-
-        $response->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->delete(route('events.destroy', $event))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -289,8 +295,7 @@ class EventControllerTest extends TestCase
     {
         $event = Event::factory()->create();
 
-        $response = $this->delete(route('events.destroy', $event));
-
-        $response->assertRedirect(route('login'));
+        $this->delete(route('events.destroy', $event))
+            ->assertRedirect(route('login'));
     }
 }

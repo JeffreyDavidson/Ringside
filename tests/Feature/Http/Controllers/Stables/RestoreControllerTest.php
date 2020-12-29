@@ -24,12 +24,12 @@ class RestoreControllerTest extends TestCase
      */
     public function invoke_restores_a_stable_and_redirects($administrators)
     {
-        $this->actAs($administrators);
         $stable = Stable::factory()->softDeleted()->create();
 
-        $response = $this->patch(route('stables.restore', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.restore', $stable))
+            ->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) {
             $this->assertEquals(StableStatus::UNACTIVATED, $stable->status);
             $this->assertNull($stable->fresh()->deleted_at);
@@ -39,10 +39,11 @@ class RestoreControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_restore_a_stable()
     {
-        $this->actAs(Role::BASIC);
         $stable = Stable::factory()->softDeleted()->create();
 
-        $this->patch(route('stables.restore', $stable))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('stables.restore', $stable))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -50,6 +51,7 @@ class RestoreControllerTest extends TestCase
     {
         $stable = Stable::factory()->softDeleted()->create();
 
-        $this->patch(route('stables.restore', $stable))->assertRedirect(route('login'));
+        $this->patch(route('stables.restore', $stable))
+            ->assertRedirect(route('login'));
     }
 }

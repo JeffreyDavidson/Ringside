@@ -33,12 +33,12 @@ class InjureControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->bookable()->create();
 
-        $response = $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.injure', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::INJURED, $referee->status);
             $this->assertCount(1, $referee->injuries);
@@ -55,10 +55,11 @@ class InjureControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_injure_a_referee()
     {
-        $this->actAs(Role::BASIC);
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->put(route('referees.injure', $referee))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('referees.injure', $referee))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -66,7 +67,8 @@ class InjureControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->put(route('referees.injure', $referee))->assertRedirect(route('login'));
+        $this->patch(route('referees.injure', $referee))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -78,11 +80,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.injure', $referee));
     }
 
     /**
@@ -94,11 +95,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->suspended()->create();
 
-        $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.injure', $referee));
     }
 
     /**
@@ -110,11 +110,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->released()->create();
 
-        $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.injure', $referee));
     }
 
     /**
@@ -126,11 +125,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.injure', $referee));
     }
 
     /**
@@ -142,11 +140,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->retired()->create();
 
-        $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.injure', $referee));
     }
 
     /**
@@ -158,10 +155,9 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->injured()->create();
 
-        $this->put(route('referees.injure', $referee));
+        $this->actAs($administrators)
+            ->put(route('referees.injure', $referee));
     }
 }
