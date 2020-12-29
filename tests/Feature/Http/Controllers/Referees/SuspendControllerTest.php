@@ -33,12 +33,12 @@ class SuspendControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->bookable()->create();
 
-        $response = $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::SUSPENDED, $referee->status);
             $this->assertCount(1, $referee->suspensions);
@@ -55,10 +55,11 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_suspend_a_referee()
     {
-        $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->patch(route('referees.suspend', $referee))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('referees.suspend', $referee))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -66,7 +67,8 @@ class SuspendControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->patch(route('referees.suspend', $referee))->assertRedirect(route('login'));
+        $this->patch(route('referees.suspend', $referee))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -78,11 +80,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -94,11 +95,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -110,11 +110,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->injured()->create();
 
-        $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -126,11 +125,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->released()->create();
 
-        $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -142,11 +140,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->retired()->create();
 
-        $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee));
     }
 
     /**
@@ -158,10 +155,9 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->suspended()->create();
 
-        $this->patch(route('referees.suspend', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.suspend', $referee));
     }
 }

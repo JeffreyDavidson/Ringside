@@ -33,12 +33,12 @@ class UnretireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $referee = Referee::factory()->retired()->create();
 
-        $response = $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee))
+            ->assertRedirect(route('referees.index'));
 
-        $response->assertRedirect(route('referees.index'));
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
             $this->assertCount(1, $referee->retirements);
@@ -55,10 +55,11 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_unretire_a_referee()
     {
-        $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->patch(route('referees.unretire', $referee))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('referees.unretire', $referee))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -66,7 +67,8 @@ class UnretireControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->patch(route('referees.unretire', $referee))->assertRedirect(route('login'));
+        $this->patch(route('referees.unretire', $referee))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -78,11 +80,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->bookable()->create();
 
-        $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -94,11 +95,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -110,11 +110,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->injured()->create();
 
-        $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -126,11 +125,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->released()->create();
 
-        $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -142,11 +140,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->suspended()->create();
 
-        $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee));
     }
 
     /**
@@ -158,10 +155,9 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->patch(route('referees.unretire', $referee));
+        $this->actAs($administrators)
+            ->patch(route('referees.unretire', $referee));
     }
 }

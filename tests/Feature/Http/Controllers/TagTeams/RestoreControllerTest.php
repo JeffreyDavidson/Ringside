@@ -20,22 +20,23 @@ class RestoreControllerTest extends TestCase
     /** @test */
     public function invoke_restores_a_deleted_tag_team_and_redirects()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $tagTeam = TagTeam::factory()->softDeleted()->create();
 
-        $response = $this->patch(route('tag-teams.restore', $tagTeam));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->patch(route('tag-teams.restore', $tagTeam))
+            ->assertRedirect(route('tag-teams.index'));
 
-        $response->assertRedirect(route('tag-teams.index'));
         $this->assertNull($tagTeam->fresh()->deleted_at);
     }
 
     /** @test */
     public function a_basic_user_cannot_restore_a_tag_team()
     {
-        $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->softDeleted()->create();
 
-        $this->patch(route('tag-teams.restore', $tagTeam))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('tag-teams.restore', $tagTeam))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -43,6 +44,7 @@ class RestoreControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->softDeleted()->create();
 
-        $this->patch(route('tag-teams.restore', $tagTeam))->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.restore', $tagTeam))
+            ->assertRedirect(route('login'));
     }
 }

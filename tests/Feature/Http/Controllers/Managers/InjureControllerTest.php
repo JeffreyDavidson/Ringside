@@ -33,12 +33,12 @@ class InjureControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $manager = Manager::factory()->available()->create();
 
-        $response = $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager))
+            ->assertRedirect(route('managers.index'));
 
-        $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
             $this->assertEquals(ManagerStatus::INJURED, $manager->status);
             $this->assertCount(1, $manager->injuries);
@@ -55,10 +55,11 @@ class InjureControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_injure_a_manager()
     {
-        $this->actAs(Role::BASIC);
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('managers.injure', $manager))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('managers.injure', $manager))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -66,7 +67,8 @@ class InjureControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->patch(route('managers.injure', $manager))->assertRedirect(route('login'));
+        $this->patch(route('managers.injure', $manager))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -78,11 +80,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -94,11 +95,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->suspended()->create();
 
-        $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -110,11 +110,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->released()->create();
 
-        $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -126,11 +125,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -142,11 +140,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->retired()->create();
 
-        $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager));
     }
 
     /**
@@ -158,10 +155,9 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->injured()->create();
 
-        $this->patch(route('managers.injure', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.injure', $manager));
     }
 }

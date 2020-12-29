@@ -31,10 +31,11 @@ class ActivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->patch(route('stables.activate', $stable))->assertRedirect(route('stables.index'));
+        $this->actAs($administrators)
+            ->patch(route('stables.activate', $stable))
+            ->assertRedirect(route('stables.index'));
 
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::ACTIVE, $stable->status);
@@ -52,12 +53,12 @@ class ActivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $response = $this->patch(route('stables.activate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.activate', $stable))
+            ->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::ACTIVE, $stable->status);
             $this->assertCount(1, $stable->activations);
@@ -74,12 +75,12 @@ class ActivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $stable = Stable::factory()->inactive()->create();
 
-        $response = $this->patch(route('stables.activate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.activate', $stable))
+            ->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::ACTIVE, $stable->status);
             $this->assertCount(2, $stable->activations);
@@ -96,10 +97,11 @@ class ActivateControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_activate_a_stable()
     {
-        $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->patch(route('stables.activate', $stable))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('stables.activate', $stable))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -107,7 +109,8 @@ class ActivateControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->patch(route('stables.activate', $stable))->assertRedirect(route('login'));
+        $this->patch(route('stables.activate', $stable))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -119,11 +122,10 @@ class ActivateControllerTest extends TestCase
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $stable = Stable::factory()->retired()->create();
 
-        $this->patch(route('stables.activate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.activate', $stable));
     }
 
     /**
@@ -135,10 +137,9 @@ class ActivateControllerTest extends TestCase
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $stable = Stable::factory()->active()->create();
 
-        $this->patch(route('stables.activate', $stable));
+        $this->actAs($administrators)
+            ->patch(route('stables.activate', $stable));
     }
 }

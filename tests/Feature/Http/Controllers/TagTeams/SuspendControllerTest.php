@@ -30,12 +30,12 @@ class SuspendControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $response = $this->patch(route('tag-teams.suspend', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.suspend', $tagTeam))
+            ->assertRedirect(route('tag-teams.index'));
 
-        $response->assertRedirect(route('tag-teams.index'));
         $this->assertEquals($now->toDateTimeString(), $tagTeam->fresh()->currentSuspension->started_at);
     }
 
@@ -48,10 +48,11 @@ class SuspendControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_suspend_a_tag_team()
     {
-        $this->actAs(Role::BASIC);
         $tagTeam = TagTeam::factory()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('tag-teams.suspend', $tagTeam))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -59,7 +60,8 @@ class SuspendControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam))->assertRedirect(route('login'));
+        $this->patch(route('tag-teams.suspend', $tagTeam))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -71,11 +73,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -87,11 +88,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -103,11 +103,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->released()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -119,11 +118,10 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.suspend', $tagTeam));
     }
 
     /**
@@ -135,10 +133,9 @@ class SuspendControllerTest extends TestCase
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam));
+        $this->actAs($administrators)
+            ->patch(route('tag-teams.suspend', $tagTeam));
     }
 }

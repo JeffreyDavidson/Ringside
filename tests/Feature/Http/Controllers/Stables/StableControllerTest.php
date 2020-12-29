@@ -49,30 +49,29 @@ class StableControllerTest extends TestCase
      */
     public function index_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $response = $this->get(route('stables.index'));
-
-        $response->assertOk();
-        $response->assertViewIs('stables.index');
-        $response->assertSeeLivewire('stables.active-stables');
-        $response->assertSeeLivewire('stables.future-activation-and-unactivated-stables');
-        $response->assertSeeLivewire('stables.inactive-stables');
-        $response->assertSeeLivewire('stables.retired-stables');
+        $this->actAs($administrators)
+            ->get(route('stables.index'))
+            ->assertOk()
+            ->assertViewIs('stables.index')
+            ->assertSeeLivewire('stables.active-stables')
+            ->assertSeeLivewire('stables.future-activation-and-unactivated-stables')
+            ->assertSeeLivewire('stables.inactive-stables')
+            ->assertSeeLivewire('stables.retired-stables');
     }
 
     /** @test */
     public function a_basic_user_cannot_view_stables_index_page()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->get(route('stables.index'))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('stables.index'))
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_stables_index_page()
     {
-        $this->get(route('stables.index'))->assertRedirect(route('login'));
+        $this->get(route('stables.index'))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -81,26 +80,25 @@ class StableControllerTest extends TestCase
      */
     public function create_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $response = $this->get(route('stables.create'));
-
-        $response->assertViewIs('stables.create');
-        $response->assertViewHas('stable', new Stable);
+        $this->actAs($administrators)
+            ->get(route('stables.create'))
+            ->assertViewIs('stables.create')
+            ->assertViewHas('stable', new Stable);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_creating_a_stable()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->get(route('stables.create'))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('stables.create'))
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_the_form_for_creating_a_stable()
     {
-        $this->get(route('stables.create'))->assertRedirect(route('login'));
+        $this->get(route('stables.create'))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -109,11 +107,11 @@ class StableControllerTest extends TestCase
      */
     public function store_creates_a_stable_and_redirects($administrators)
     {
-        $this->actAs($administrators);
+        $this->actAs($administrators)
+            ->from(route('stables.create'))
+            ->post(route('stables.store'), $this->validParams())
+            ->assertRedirect(route('stables.index'));
 
-        $response = $this->from(route('stables.create'))->post(route('stables.store'), $this->validParams());
-
-        $response->assertRedirect(route('stables.index'));
         tap(Stable::first(), function ($stable) {
             $this->assertEquals('Example Stable Name', $stable->name);
         });
@@ -125,9 +123,9 @@ class StableControllerTest extends TestCase
      */
     public function an_activation_is_not_created_for_the_stable_if_started_at_is_not_filled_in_request($administrators)
     {
-        $this->actAs($administrators);
-
-        $this->from(route('stables.create'))->post(route('stables.store'), $this->validParams(['started_at' => null]));
+        $this->actAs($administrators)
+            ->from(route('stables.create'))
+            ->post(route('stables.store'), $this->validParams(['started_at' => null]));
 
         tap(Stable::first(), function ($stable) {
             $this->assertCount(0, $stable->activations);
@@ -142,9 +140,9 @@ class StableControllerTest extends TestCase
     {
         $startedAt = now()->toDateTimeString();
 
-        $this->actAs($administrators);
-
-        $this->from(route('stables.create'))->post(route('stables.store'), $this->validParams(['started_at' => $startedAt]));
+        $this->actAs($administrators)
+            ->from(route('stables.create'))
+            ->post(route('stables.store'), $this->validParams(['started_at' => $startedAt]));
 
         tap(Stable::first(), function ($stable) use ($startedAt) {
             $this->assertCount(1, $stable->activations);
@@ -158,13 +156,14 @@ class StableControllerTest extends TestCase
         $now = now()->subDays(3);
         Carbon::setTestNow($now);
 
-        $this->actAs(Role::ADMINISTRATOR);
         $createdWrestlers = Wrestler::factory()->count(3)->bookable()->create();
 
-        $this->from('stables.create')->post(route('stables.store'), $this->validParams([
-            'started_at' => $now->toDateTimeString(),
-            'wrestlers' => $createdWrestlers->modelKeys(),
-        ]));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from('stables.create')
+            ->post(route('stables.store'), $this->validParams([
+                'started_at' => $now->toDateTimeString(),
+                'wrestlers' => $createdWrestlers->modelKeys(),
+            ]));
 
         tap(Stable::first()->currentWrestlers, function ($wrestlers) use ($createdWrestlers) {
             $this->assertCount(3, $wrestlers);
@@ -175,12 +174,11 @@ class StableControllerTest extends TestCase
     /** @test */
     public function tag_teams_are_added_to_stable_if_present()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this->from('stables.create')->post(route('stables.store'), $this->validParams([
-            'tag_teams' => [$tagTeam->getKey()],
-        ]));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from('stables.create')
+            ->post(route('stables.store'), $this->validParams(['tag_teams' => [$tagTeam->getKey()]]));
 
         tap(Stable::first()->currentTagTeams, function ($tagTeams) use ($tagTeam) {
             $this->assertCount(1, $tagTeams);
@@ -194,11 +192,9 @@ class StableControllerTest extends TestCase
         $now = now()->subDays(3);
         Carbon::setTestNow($now);
 
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $this->from('stables.create')->post(route('stables.store'), $this->validParams([
-            'started_at' => $now->toDateTimeString(),
-        ]));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from('stables.create')
+            ->post(route('stables.store'), $this->validParams(['started_at' => $now->toDateTimeString()]));
 
         tap(Stable::first(), function ($stable) use ($now) {
             $wrestlers = $stable->currentWrestlers()->get();
@@ -224,11 +220,9 @@ class StableControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs(Role::ADMINISTRATOR);
-
-        $this->from('stables.create')->post(route('stables.store'), $this->validParams([
-            'started_at' => '',
-        ]));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from('stables.create')
+            ->post(route('stables.store'), $this->validParams(['started_at' => '']));
 
         tap(Stable::first(), function ($stable) use ($now) {
             $wrestlers = $stable->currentWrestlers()->get();
@@ -251,15 +245,18 @@ class StableControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_create_a_stable()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->from('stables.create')->post(route('stables.store'), $this->validParams())->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->from('stables.create')
+            ->post(route('stables.store'), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_create_a_stable()
     {
-        $this->from('stables.create')->post(route('stables.store'), $this->validParams())->assertRedirect(route('login'));
+        $this->from('stables.create')
+            ->post(route('stables.store'), $this->validParams())
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
@@ -274,13 +271,12 @@ class StableControllerTest extends TestCase
      */
     public function show_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
         $stable = Stable::factory()->create();
 
-        $response = $this->get(route('stables.show', $stable));
-
-        $response->assertViewIs('stables.show');
-        $this->assertTrue($response->data('stable')->is($stable));
+        $this->actAs($administrators)
+            ->get(route('stables.show', $stable))
+            ->assertViewIs('stables.show')
+            ->assertViewHas('stable', $stable);
     }
 
     /** @test */
@@ -289,17 +285,19 @@ class StableControllerTest extends TestCase
         $signedInUser = $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create(['user_id' => $signedInUser->id]);
 
-        $this->get(route('stables.show', $stable))->assertOk();
+        $this->get(route('stables.show', $stable))
+            ->assertOk();
     }
 
     /** @test */
     public function a_basic_user_cannot_view_another_users_stable_profile()
     {
-        $this->actAs(Role::BASIC);
         $otherUser = User::factory()->create();
         $stable = Stable::factory()->create(['user_id' => $otherUser->id]);
 
-        $this->get(route('stables.show', $stable))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('stables.show', $stable))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -307,7 +305,8 @@ class StableControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->get(route('stables.show', $stable))->assertRedirect(route('login'));
+        $this->get(route('stables.show', $stable))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -316,22 +315,22 @@ class StableControllerTest extends TestCase
      */
     public function edit_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
         $stable = Stable::factory()->create();
 
-        $response = $this->get(route('stables.edit', $stable));
-
-        $response->assertViewIs('stables.edit');
-        $this->assertTrue($response->data('stable')->is($stable));
+        $this->actAs($administrators)
+            ->get(route('stables.edit', $stable))
+            ->assertViewIs('stables.edit')
+            ->assertViewHas('stable', $stable);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_stable()
     {
-        $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->get(route('stables.edit', $stable))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('stables.edit', $stable))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -339,7 +338,8 @@ class StableControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->get(route('stables.edit', $stable))->assertRedirect(route('login'));
+        $this->get(route('stables.edit', $stable))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -349,12 +349,13 @@ class StableControllerTest extends TestCase
     public function updates_a_stable_and_redirects($administrators)
     {
         $this->withoutExceptionHandling();
-        $this->actAs($administrators);
         $stable = Stable::factory()->create();
 
-        $response = $this->from(route('stables.edit', $stable))->put(route('stables.update', $stable), $this->validParams());
+        $this->actAs($administrators)
+            ->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams())
+            ->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) {
             $this->assertEquals('Example Stable Name', $stable->name);
         });
@@ -362,15 +363,13 @@ class StableControllerTest extends TestCase
 
     public function wrestlers_of_stable_are_synced_when_stable_is_updated()
     {
-        $this->actAs(Role::ADMINISTRATOR);
         $stable = Stable::factory()->active()->create();
         $wrestlers = Wrestler::factory()->bookable()->times(2)->create();
 
-        $response = $this->from(route('stables.edit', $stable))->put(route('stables.update', $stable), $this->validParams([
-            'wrestlers' => $wrestlers->modelKeys(),
-        ]));
-
-        $response->assertRedirect(route('stables.index'));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams(['wrestlers' => $wrestlers->modelKeys()]))
+            ->assertRedirect(route('stables.index'));
 
         tap($stable->currentWrestlers->fresh(), function ($stableWrestlers) use ($wrestlers) {
             $this->assertCount(2, $stableWrestlers);
@@ -381,10 +380,12 @@ class StableControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_update_a_stable()
     {
-        $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->from(route('stables.edit', $stable))->put(route('stables.update', $stable), $this->validParams())->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
@@ -392,7 +393,9 @@ class StableControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->from(route('stables.edit', $stable))->put(route('stables.update', $stable), $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('stables.edit', $stable))
+            ->put(route('stables.update', $stable), $this->validParams())
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
@@ -407,22 +410,23 @@ class StableControllerTest extends TestCase
      */
     public function deletes_a_stable_and_redirects($administrators)
     {
-        $this->actAs($administrators);
         $stable = Stable::factory()->create();
 
-        $response = $this->delete(route('stables.destroy', $stable));
+        $this->actAs($administrators)
+            ->delete(route('stables.destroy', $stable))
+            ->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         $this->assertSoftDeleted($stable);
     }
 
     /** @test */
     public function a_basic_user_cannot_delete_a_stable()
     {
-        $this->actAs(Role::BASIC);
         $stable = Stable::factory()->create();
 
-        $this->delete(route('stables.destroy', $stable))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->delete(route('stables.destroy', $stable))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -430,6 +434,7 @@ class StableControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->delete(route('stables.destroy', $stable))->assertRedirect(route('login'));
+        $this->delete(route('stables.destroy', $stable))
+            ->assertRedirect(route('login'));
     }
 }

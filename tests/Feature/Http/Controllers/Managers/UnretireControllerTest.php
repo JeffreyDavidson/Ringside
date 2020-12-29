@@ -33,12 +33,12 @@ class UnretireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $manager = Manager::factory()->retired()->create();
 
-        $response = $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager))
+            ->assertRedirect(route('managers.index'));
 
-        $response->assertRedirect(route('managers.index'));
         tap($manager->fresh(), function ($manager) use ($now) {
             $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
             $this->assertCount(1, $manager->retirements);
@@ -55,10 +55,11 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_unretire_a_manager()
     {
-        $this->actAs(Role::BASIC);
         $manager = Manager::factory()->create();
 
-        $this->patch(route('managers.unretire', $manager))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('managers.unretire', $manager))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -66,7 +67,8 @@ class UnretireControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->patch(route('managers.unretire', $manager))->assertRedirect(route('login'));
+        $this->patch(route('managers.unretire', $manager))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -78,11 +80,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->available()->create();
 
-        $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -94,11 +95,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -110,11 +110,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->injured()->create();
 
-        $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -126,11 +125,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->released()->create();
 
-        $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -142,11 +140,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->suspended()->create();
 
-        $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager));
     }
 
     /**
@@ -158,10 +155,9 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->patch(route('managers.unretire', $manager));
+        $this->actAs($administrators)
+            ->patch(route('managers.unretire', $manager));
     }
 }
