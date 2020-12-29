@@ -34,9 +34,8 @@ class ActivateControllerTest extends TestCase
         $this->actAs($administrators);
         $stable = Stable::factory()->unactivated()->create();
 
-        $response = $this->patch(route('stables.activate', $stable));
+        $this->patch(route('stables.activate', $stable))->assertRedirect(route('stables.index'));
 
-        $response->assertRedirect(route('stables.index'));
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::ACTIVE, $stable->status);
             $this->assertCount(1, $stable->activations);

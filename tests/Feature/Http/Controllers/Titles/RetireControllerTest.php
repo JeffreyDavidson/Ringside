@@ -29,12 +29,12 @@ class RetireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $title = Title::factory()->active()->create();
 
-        $response = $this->patch(route('titles.retire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.retire', $title))
+            ->assertRedirect(route('titles.index'));
 
-        $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
             $this->assertEquals(TitleStatus::RETIRED, $title->status);
             $this->assertCount(1, $title->retirements);
@@ -51,12 +51,11 @@ class RetireControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_retire_a_title()
     {
-        $this->actAs(Role::BASIC);
         $title = Title::factory()->create();
 
-        $response = $this->patch(route('titles.retire', $title));
-
-        $response->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('titles.retire', $title))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -64,7 +63,8 @@ class RetireControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->patch(route('titles.retire', $title))->assertRedirect(route('login'));
+        $this->patch(route('titles.retire', $title))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -76,11 +76,10 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->retired()->create();
 
-        $this->patch(route('titles.retire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.retire', $title));
     }
 
     /**
@@ -92,11 +91,10 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->withFutureActivation()->create();
 
-        $this->patch(route('titles.retire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.retire', $title));
     }
 
     /**
@@ -108,11 +106,10 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->unactivated()->create();
 
-        $this->patch(route('titles.retire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.retire', $title));
     }
 
     /**
@@ -124,10 +121,9 @@ class RetireControllerTest extends TestCase
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->inactive()->create();
 
-        $this->patch(route('titles.retire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.retire', $title));
     }
 }

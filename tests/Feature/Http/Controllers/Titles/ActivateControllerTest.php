@@ -29,12 +29,12 @@ class ActivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $title = Title::factory()->unactivated()->create();
 
-        $response = $this->patch(route('titles.activate', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.activate', $title))
+            ->assertRedirect(route('titles.index'));
 
-        $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
             $this->assertEquals(TitleStatus::ACTIVE, $title->status);
             $this->assertCount(1, $title->activations);
@@ -51,12 +51,12 @@ class ActivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $title = Title::factory()->withFutureActivation()->create();
 
-        $response = $this->patch(route('titles.activate', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.activate', $title))
+            ->assertRedirect(route('titles.index'));
 
-        $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
             $this->assertEquals(TitleStatus::ACTIVE, $title->status);
             $this->assertCount(1, $title->activations);
@@ -73,12 +73,12 @@ class ActivateControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $title = Title::factory()->inactive()->create();
 
-        $response = $this->patch(route('titles.activate', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.activate', $title))
+            ->assertRedirect(route('titles.index'));
 
-        $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
             $this->assertEquals(TitleStatus::ACTIVE, $title->status);
             $this->assertCount(2, $title->activations);
@@ -95,10 +95,11 @@ class ActivateControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_activate_a_title()
     {
-        $this->actAs(Role::BASIC);
         $title = Title::factory()->create();
 
-        $this->patch(route('titles.activate', $title))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('titles.activate', $title))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -106,7 +107,8 @@ class ActivateControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->patch(route('titles.activate', $title))->assertRedirect(route('login'));
+        $this->patch(route('titles.activate', $title))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -118,11 +120,10 @@ class ActivateControllerTest extends TestCase
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->active()->create();
 
-        $this->patch(route('titles.activate', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.activate', $title));
     }
 
     /**
@@ -134,10 +135,9 @@ class ActivateControllerTest extends TestCase
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->retired()->create();
 
-        $this->patch(route('titles.activate', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.activate', $title));
     }
 }

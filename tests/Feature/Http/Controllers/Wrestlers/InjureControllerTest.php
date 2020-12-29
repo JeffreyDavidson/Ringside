@@ -35,12 +35,12 @@ class InjureControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $response = $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler))
+            ->assertRedirect(route('wrestlers.index'));
 
-        $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
             $this->assertCount(1, $wrestler->injuries);
@@ -54,14 +54,13 @@ class InjureControllerTest extends TestCase
      */
     public function injuring_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
     {
-        $this->actAs($administrators);
-
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
         $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
-        $response = $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
@@ -75,10 +74,11 @@ class InjureControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_injure_a_wrestler()
     {
-        $this->actAs(Role::BASIC);
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('wrestlers.injure', $wrestler))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -86,7 +86,8 @@ class InjureControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler))->assertRedirect(route('login'));
+        $this->patch(route('wrestlers.injure', $wrestler))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -98,11 +99,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -114,11 +114,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -130,11 +129,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -146,11 +144,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -162,11 +159,10 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -178,10 +174,9 @@ class InjureControllerTest extends TestCase
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.injure', $wrestler));
     }
 }
