@@ -33,12 +33,12 @@ class EmployControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $response = $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler))
+            ->assertRedirect(route('wrestlers.index'));
 
-        $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(1, $wrestler->employments);
@@ -55,12 +55,12 @@ class EmployControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $response = $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler))
+            ->assertRedirect(route('wrestlers.index'));
 
-        $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(1, $wrestler->employments);
@@ -77,12 +77,12 @@ class EmployControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $wrestler = Wrestler::factory()->released()->create();
 
-        $response = $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler))
+            ->assertRedirect(route('wrestlers.index'));
 
-        $response->assertRedirect(route('wrestlers.index'));
         tap($wrestler->fresh(), function ($wrestler) use ($now) {
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             $this->assertCount(2, $wrestler->employments);
@@ -99,10 +99,11 @@ class EmployControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_employ_a_wrestler()
     {
-        $this->actAs(Role::BASIC);
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('wrestlers.employ', $wrestler))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('wrestlers.employ', $wrestler))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -110,7 +111,8 @@ class EmployControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('wrestlers.employ', $wrestler))->assertRedirect(route('login'));
+        $this->patch(route('wrestlers.employ', $wrestler))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -122,11 +124,10 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler));
     }
 
     /**
@@ -138,11 +139,10 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler));
     }
 
     /**
@@ -154,11 +154,10 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler));
     }
 
     /**
@@ -170,10 +169,9 @@ class EmployControllerTest extends TestCase
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->patch(route('wrestlers.employ', $wrestler));
+        $this->actAs($administrators)
+            ->patch(route('wrestlers.employ', $wrestler));
     }
 }

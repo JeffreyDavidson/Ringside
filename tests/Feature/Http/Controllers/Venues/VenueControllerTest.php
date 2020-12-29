@@ -42,26 +42,25 @@ class VenueControllerTest extends TestCase
      */
     public function index_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $response = $this->get(route('venues.index'));
-
-        $response->assertOk();
-        $response->assertViewIs('venues.index');
+        $this->actAs($administrators)
+            ->get(route('venues.index'))
+            ->assertOk()
+            ->assertViewIs('venues.index');
     }
 
     /** @test */
     public function a_basic_user_cannot_view_venues_index_page()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->get(route('venues.index'))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('venues.index'))
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_venues_index_page()
     {
-        $this->get(route('venues.index'))->assertRedirect(route('login'));
+        $this->get(route('venues.index'))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -70,26 +69,25 @@ class VenueControllerTest extends TestCase
      */
     public function create_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $response = $this->get(route('venues.create'));
-
-        $response->assertViewIs('venues.create');
-        $response->assertViewHas('venue', new Venue);
+        $this->actAs($administrators)
+            ->get(route('venues.create'))
+            ->assertViewIs('venues.create')
+            ->assertViewHas('venue', new Venue);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_creating_a_venue()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->get(route('venues.create'))->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->get(route('venues.create'))
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_view_the_form_for_creating_a_venue()
     {
-        $this->get(route('venues.create'))->assertRedirect(route('login'));
+        $this->get(route('venues.create'))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -98,11 +96,11 @@ class VenueControllerTest extends TestCase
      */
     public function store_creates_a_venue_and_redirects($administrators)
     {
-        $this->actAs($administrators);
+        $this->actAs($administrators)
+            ->from(route('venues.create'))
+            ->post(route('venues.store'), $this->validParams())
+            ->assertRedirect(route('venues.index'));
 
-        $response = $this->from(route('venues.create'))->post(route('venues.store'), $this->validParams());
-
-        $response->assertRedirect(route('venues.index'));
         tap(Venue::first(), function ($venue) {
             $this->assertEquals('Example Venue', $venue->name);
             $this->assertEquals('123 Main Street', $venue->address1);
@@ -116,15 +114,18 @@ class VenueControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_create_a_venue()
     {
-        $this->actAs(Role::BASIC);
-
-        $this->from(route('venues.create'))->post(route('venues.store'), $this->validParams())->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->from(route('venues.create'))
+            ->post(route('venues.store'), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
     public function a_guest_cannot_create_a_venue()
     {
-        $this->from(route('venues.create'))->post(route('venues.store'), $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('venues.create'))
+            ->post(route('venues.store'), $this->validParams())
+            ->assertRedirect(route('login'));
     }
 
     /** @test */
@@ -139,22 +140,22 @@ class VenueControllerTest extends TestCase
      */
     public function show_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
         $venue = Venue::factory()->create();
 
-        $response = $this->get(route('venues.show', $venue));
-
-        $response->assertViewIs('venues.show');
-        $this->assertTrue($response->data('venue')->is($venue));
+        $this->actAs($administrators)
+            ->get(route('venues.show', $venue))
+            ->assertViewIs('venues.show')
+            ->assertViewHas('venue', $venue);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_a_venue()
     {
-        $this->actAs(Role::BASIC);
         $venue = Venue::factory()->create();
 
-        $this->get(route('venues.show', $venue))->assertStatus(403);
+        $this->actAs(Role::BASIC)
+            ->get(route('venues.show', $venue))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -162,7 +163,8 @@ class VenueControllerTest extends TestCase
     {
         $venue = Venue::factory()->create();
 
-        $this->get(route('venues.show', $venue))->assertRedirect(route('login'));
+        $this->get(route('venues.show', $venue))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -171,22 +173,22 @@ class VenueControllerTest extends TestCase
      */
     public function edit_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
         $venue = Venue::factory()->create();
 
-        $response = $this->get(route('venues.edit', $venue));
-
-        $response->assertViewIs('venues.edit');
-        $this->assertTrue($response->data('venue')->is($venue));
+        $this->actAs($administrators)
+            ->get(route('venues.edit', $venue))
+            ->assertViewIs('venues.edit')
+            ->assertViewHas('venue', $venue);
     }
 
     /** @test */
     public function a_basic_user_cannot_view_the_form_for_editing_a_venue()
     {
-        $this->actAs(Role::BASIC);
         $venue = Venue::factory()->create();
 
-        $this->get(route('venues.edit', $venue))->assertStatus(403);
+        $this->actAs(Role::BASIC)
+            ->get(route('venues.edit', $venue))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -194,7 +196,8 @@ class VenueControllerTest extends TestCase
     {
         $venue = Venue::factory()->create();
 
-        $this->get(route('venues.edit', $venue))->assertRedirect(route('login'));
+        $this->get(route('venues.edit', $venue))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -203,12 +206,13 @@ class VenueControllerTest extends TestCase
      */
     public function updates_a_venue_and_redirects($administrators)
     {
-        $this->actAs($administrators);
         $venue = Venue::factory()->create();
 
-        $response = $this->from(route('venues.edit', $venue))->put(route('venues.update', $venue), $this->validParams());
+        $this->actAs($administrators)
+            ->from(route('venues.edit', $venue))
+            ->put(route('venues.update', $venue), $this->validParams())
+            ->assertRedirect(route('venues.index'));
 
-        $response->assertRedirect(route('venues.index'));
         tap(Venue::first(), function ($venue) {
             $this->assertEquals('Example Venue', $venue->name);
             $this->assertEquals('123 Main Street', $venue->address1);
@@ -222,10 +226,12 @@ class VenueControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_update_a_venue()
     {
-        $this->actAs(Role::BASIC);
         $venue = Venue::factory()->create();
 
-        $this->from(route('venues.edit', $venue))->put(route('venues.update', $venue), $this->validParams())->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->from(route('venues.edit', $venue))
+            ->put(route('venues.update', $venue), $this->validParams())
+            ->assertForbidden();
     }
 
     /** @test */
@@ -233,7 +239,9 @@ class VenueControllerTest extends TestCase
     {
         $venue = Venue::factory()->create();
 
-        $this->from(route('venues.edit', $venue))->put(route('venues.update', $venue), $this->validParams())->assertRedirect(route('login'));
+        $this->from(route('venues.edit', $venue))
+            ->put(route('venues.update', $venue), $this->validParams())
+            ->assertRedirect(route('login'));
     }
 
     /** @test */

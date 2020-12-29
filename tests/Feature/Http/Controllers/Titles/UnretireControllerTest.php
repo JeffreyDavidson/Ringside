@@ -29,12 +29,12 @@ class UnretireControllerTest extends TestCase
         $now = now();
         Carbon::setTestNow($now);
 
-        $this->actAs($administrators);
         $title = Title::factory()->retired()->create();
 
-        $response = $this->patch(route('titles.unretire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.unretire', $title))
+            ->assertRedirect(route('titles.index'));
 
-        $response->assertRedirect(route('titles.index'));
         tap($title->fresh(), function ($title) use ($now) {
             $this->assertEquals(TitleStatus::ACTIVE, $title->status);
             $this->assertCount(1, $title->retirements);
@@ -51,12 +51,11 @@ class UnretireControllerTest extends TestCase
     /** @test */
     public function a_basic_user_cannot_unretire_a_title()
     {
-        $this->actAs(Role::BASIC);
         $title = Title::factory()->create();
 
-        $response = $this->patch(route('titles.unretire', $title));
-
-        $response->assertForbidden();
+        $this->actAs(Role::BASIC)
+            ->patch(route('titles.unretire', $title))
+            ->assertForbidden();
     }
 
     /** @test */
@@ -64,7 +63,8 @@ class UnretireControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->patch(route('titles.unretire', $title))->assertRedirect(route('login'));
+        $this->patch(route('titles.unretire', $title))
+            ->assertRedirect(route('login'));
     }
 
     /**
@@ -76,11 +76,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->active()->create();
 
-        $this->patch(route('titles.unretire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.unretire', $title));
     }
 
     /**
@@ -92,11 +91,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->inactive()->create();
 
-        $this->patch(route('titles.unretire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.unretire', $title));
     }
 
     /**
@@ -108,11 +106,10 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->withFutureActivation()->create();
 
-        $this->patch(route('titles.unretire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.unretire', $title));
     }
 
     /**
@@ -124,10 +121,9 @@ class UnretireControllerTest extends TestCase
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $this->actAs($administrators);
-
         $title = Title::factory()->unactivated()->create();
 
-        $this->patch(route('titles.unretire', $title));
+        $this->actAs($administrators)
+            ->patch(route('titles.unretire', $title));
     }
 }
