@@ -196,8 +196,8 @@ class WrestlerControllerTest extends TestCase
     /** @test */
     public function a_basic_user_can_view_their_wrestler_profile()
     {
-        $signedInUser = $this->actAs(Role::BASIC);
-        $wrestler = Wrestler::factory()->create(['user_id' => $signedInUser->id]);
+        $this->actAs(Role::BASIC);
+        $wrestler = Wrestler::factory()->create(['user_id' => auth()->user()]);
 
         $this->get(route('wrestlers.show', $wrestler))
             ->assertOk();
