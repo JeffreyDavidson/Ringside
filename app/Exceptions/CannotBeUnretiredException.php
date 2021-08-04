@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeUnretiredException extends Exception
 {
+    protected $message = 'This entity cannot be unretired. This entity has a current employment.';
+
     /**
      * Render the exception into an HTTP response.
      *

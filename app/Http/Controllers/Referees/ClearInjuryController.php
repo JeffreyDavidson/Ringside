@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Referees;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\ClearInjuryRequest;
 use App\Models\Referee;
+use App\Services\RefereeService;
 
 class ClearInjuryController extends Controller
 {
@@ -13,11 +14,12 @@ class ClearInjuryController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\ClearInjuryRequest  $request
+     * @param  \App\Services\RefereeService $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, ClearInjuryRequest $request)
+    public function __invoke(Referee $referee, ClearInjuryRequest $request, RefereeService $refereeService)
     {
-        $referee->clearFromInjury();
+        $refereeService->clearFromInjury($referee);
 
         return redirect()->route('referees.index');
     }

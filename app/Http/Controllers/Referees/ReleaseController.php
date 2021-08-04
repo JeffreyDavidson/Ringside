@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Referees;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\ReleaseRequest;
 use App\Models\Referee;
+use App\Services\RefereeService;
 
 class ReleaseController extends Controller
 {
@@ -13,11 +14,12 @@ class ReleaseController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\ReleaseRequest  $request
+     * @param  \App\Services\RefereeService $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, ReleaseRequest $request)
+    public function __invoke(Referee $referee, ReleaseRequest $request, RefereeService $refereeService)
     {
-        $referee->release();
+        $refereeService->release($referee);
 
         return redirect()->route('referees.index');
     }

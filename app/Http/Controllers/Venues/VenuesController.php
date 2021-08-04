@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
-use App\ViewModels\VenueViewModel;
+use App\Services\VenueService;
 
 class VenuesController extends Controller
 {
@@ -40,9 +40,9 @@ class VenuesController extends Controller
      * @param  \App\Http\Requests\Venues\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, VenueService $venueService)
     {
-        Venue::create($request->validated());
+        $venueService->create($request->validated());
 
         return redirect()->route('venues.index');
     }

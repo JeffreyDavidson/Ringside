@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeReinstatedException extends Exception
 {
+    protected $message = 'This entity cannot be reinstated. This entity is currently employed.';
+
     /**
      * Render the exception into an HTTP response.
      *

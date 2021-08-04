@@ -2,13 +2,39 @@
 
 namespace App\Services;
 
-use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeActivatedException;
-use App\Exceptions\CannotBeUnretiredException;
 use App\Exceptions\CannotBeDeactivatedException;
+use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeUnretiredException;
+use App\Repositories\TitleRepository;
 
 class TitleService
 {
+    protected $titleRepository;
+
+    public function __construct(TitleRepository $titleRepository)
+    {
+        $this->titleRepository = $titleRepository;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $title
+     * @param [type] $startedAt
+     * @return void
+     */
+    public function create($data)
+    {
+        $title = $this->titleRepository->create($data);
+
+        if ($request->filled('activated_at')) {
+            $title->activate($request->input('activated_at'));
+        }
+
+        return $title;
+    }
+
     /**
      * Activate a model.
      *
@@ -19,7 +45,7 @@ class TitleService
      */
     public function activate($title, $startedAt = null)
     {
-        throw_unless($title->canBeActivated(), new CannotBeActivatedException('Entity cannot be employed. This entity is currently employed.'));
+        throw_unless($title->canBeActivated(), new CannotBeActivatedException);
 
         $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
         $title->updateStatusAndSave();
@@ -34,7 +60,7 @@ class TitleService
      */
     public function deactivate($title, $deactivatedAt = null)
     {
-        throw_unless($title->canBeDeactivated(), new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is not currently activated.'));
+        throw_unless($title->canBeDeactivated(), new CannotBeDeactivatedException);
 
         $title->currentActivation()->update(['ended_at' => $deactivatedAt ?? now()]);
         $title->updateStatusAndSave();

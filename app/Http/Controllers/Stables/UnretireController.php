@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Stables;
 use App\Models\Stable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\UnretireRequest;
+use App\Services\StableService;
 
 class UnretireController extends Controller
 {
@@ -13,11 +14,12 @@ class UnretireController extends Controller
      *
      * @param  \App\Models\Stable  $stable
      * @param  \App\Http\Requests\Stables\UnretireRequest  $request
+     * @param  \App\Services\StableService $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Stable $stable, UnretireRequest $request)
+    public function __invoke(Stable $stable, UnretireRequest $request, StableService $stableService)
     {
-        $stable->unretire();
+        $stableService->unretire($stable);
 
         return redirect()->route('stables.index');
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\EmployRequest;
 use App\Models\Manager;
+use App\Services\ManagerService;
 
 class EmployController extends Controller
 {
@@ -13,11 +14,12 @@ class EmployController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\EmployRequest  $request
+     * @param  \App\Services\ManagerService $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, EmployRequest $request)
+    public function __invoke(Manager $manager, EmployRequest $request, ManagerService $managerService)
     {
-        $manager->employ();
+        $managerService->employ($manager);
 
         return redirect()->route('managers.index');
     }

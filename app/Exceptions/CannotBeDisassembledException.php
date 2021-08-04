@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeDisassembledException extends Exception
 {
+    protected $message = 'Entity cannot be disassembled. This entity does not have an active activation.';
+
     /**
      * Render the exception into an HTTP response.
      *

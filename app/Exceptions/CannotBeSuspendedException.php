@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeSuspendedException extends Exception
 {
+    protected $message = 'This entity cannot be suspended. This entity is currently suspended.';
+
     /**
      * Render the exception into an HTTP response.
      *

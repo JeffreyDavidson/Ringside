@@ -41,7 +41,7 @@ class EventsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        Event::create($request->all());
+        $this->eventService->create($request->validated());
 
         return redirect()->route('events.index');
     }

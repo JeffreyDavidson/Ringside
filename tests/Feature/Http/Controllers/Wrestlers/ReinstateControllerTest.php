@@ -3,14 +3,14 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
-use Tests\TestCase;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Http\Controllers\Wrestlers\ReinstateController;
+use App\Http\Requests\Wrestlers\ReinstateRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Services\WrestlerService;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Requests\Wrestlers\ReinstateRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Http\Controllers\Wrestlers\ReinstateController;
+use Tests\TestCase;
 
 /**
  * @group wrestlers
@@ -33,7 +33,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler))
+            ->patch(route('wrestlers.reinstate', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
         tap($wrestler->fresh(), function ($wrestler) {
@@ -53,7 +53,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler->currentTagTeam->updateStatusAndSave();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler));
+            ->patch(route('wrestlers.reinstate', $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertTrue($tagTeam->isBookable());
@@ -72,7 +72,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this->actAs(Role::BASIC)
-            ->put(route('wrestlers.reinstate', $wrestler))
+            ->patch(route('wrestlers.reinstate', $wrestler))
             ->assertForbidden();
     }
 
@@ -81,7 +81,7 @@ class ReinstateControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->put(route('wrestlers.reinstate', $wrestler))
+        $this->patch(route('wrestlers.reinstate', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -97,7 +97,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler));
+            ->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -112,7 +112,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler));
+            ->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -126,7 +126,7 @@ class ReinstateControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->actAs($administrators)->put(route('wrestlers.reinstate', $wrestler));
+        $this->actAs($administrators)->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -141,7 +141,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->released()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler));
+            ->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -156,7 +156,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler));
+            ->patch(route('wrestlers.reinstate', $wrestler));
     }
 
     /**
@@ -171,6 +171,6 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->retired()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.reinstate', $wrestler));
+            ->patch(route('wrestlers.reinstate', $wrestler));
     }
 }

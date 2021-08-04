@@ -41,11 +41,7 @@ class TitlesController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $title = Title::create($request->validatedExcept('activated_at'));
-
-        if ($request->filled('activated_at')) {
-            $title->activate($request->input('activated_at'));
-        }
+        $this->titleService->create();
 
         return redirect()->route('titles.index');
     }

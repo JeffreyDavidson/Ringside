@@ -31,7 +31,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
         $response = $this->actAs($administrators)
-            ->put(route('wrestlers.clear-from-injury', $wrestler))
+            ->patch(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
     }
 
@@ -47,7 +47,7 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler->currentTagTeam->updateStatusAndSave();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.clear-from-injury', $wrestler));
+            ->patch(route('wrestlers.clear-from-injury', $wrestler));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertTrue($wrestler->isBookable());
@@ -66,7 +66,7 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs(Role::BASIC)
-            ->put(route('wrestlers.clear-from-injury', $wrestler))
+            ->patch(route('wrestlers.clear-from-injury', $wrestler))
             ->assertForbidden();
     }
 
@@ -75,7 +75,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->put(route('wrestlers.clear-from-injury', $wrestler))
+        $this->patch(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -88,7 +88,7 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.clear-from-injury', $wrestler))
+            ->patch(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect()
             ->assertSessionHasErrors('message');
     }

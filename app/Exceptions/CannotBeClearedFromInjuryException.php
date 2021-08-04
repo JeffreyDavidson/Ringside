@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeClearedFromInjuryException extends Exception
 {
+    protected $message = 'This entity could not be cleared from an injury.';
+
     /**
      * Render the exception into an HTTP response.
      *

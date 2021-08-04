@@ -2,18 +2,27 @@
 
 namespace App\Services;
 
-use Exception;
-use Carbon\Carbon;
-use App\Models\TagTeam;
-use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeReleasedException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\NotEnoughMembersException;
+use App\Models\TagTeam;
+use App\Repositories\TagTeamRepository;
+use Carbon\Carbon;
+use Exception;
 
 class TagTeamService
 {
+    protected $tagTeamRepository;
+
+    public function __construct(TagTeamRepository $tagTeamRepository)
+    {
+        $this->tagTeamRepository = $tagTeamRepository;
+    }
+
     /**
      * Creates a new tag team.
      *
@@ -22,7 +31,7 @@ class TagTeamService
      */
     public function create(array $data): TagTeam
     {
-        $tagTeam = TagTeam::create(['name' => $data['name'], 'signature_move' => $data['signature_move']]);
+        $tagTeam = $this->tagTeamRepository->create($data);
 
         $this->addTagTeamPartners($tagTeam, $data['wrestlers']);
 
@@ -83,7 +92,7 @@ class TagTeamService
     public function addWrestlers($tagTeam, $wrestlerIds, $dateJoined = null)
     {
         if (count($wrestlerIds) !== self::MAX_WRESTLERS_COUNT) {
-            throw new Exception('The required number of wrestlers to join a tag team must be two.');
+            throw NotEnoughMembersException::forTagTeam();
         }
 
         $dateJoined ?? now();
@@ -143,7 +152,7 @@ class TagTeamService
      */
     public function employ($tagTeam, $startAtDate = null)
     {
-        throw_unless($tagTeam->canBeEmployed(), new CannotBeEmployedException('Tag Team cannot be employed. Tag Team is already employed.'));
+        throw_unless($tagTeam->canBeEmployed(), new CannotBeEmployedException);
 
         $startAtDate = Carbon::parse($startAtDate)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
@@ -164,7 +173,7 @@ class TagTeamService
      */
     public function release($tagTeam, $releasedAt = null)
     {
-        throw_unless($tagTeam->canBeReleased(), new CannotBeReleasedException('Tag Team cannot be released. Tag Team does not have an active employment.'));
+        throw_unless($tagTeam->canBeReleased(), new CannotBeReleasedException);
     }
 
     /**
@@ -176,7 +185,7 @@ class TagTeamService
      */
     public function retire($tagTeam, $retiredAt = null)
     {
-        throw_unless($tagTeam->canBeRetired(), new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team does not have an active employment.'));
+        throw_unless($tagTeam->canBeRetired(), new CannotBeRetiredException);
 
         $retiredDate = $retiredAt ?: now();
 
@@ -199,7 +208,7 @@ class TagTeamService
      */
     public function unretire($tagTeam, $unretiredAt = null)
     {
-        throw_unless($tagTeam->canBeUnretired(), new CannotBeUnretiredException('Tag Team cannot be unretired. This Tag Team is not retired.'));
+        throw_unless($tagTeam->canBeUnretired(), new CannotBeUnretiredException);
 
         $unretiredDate = $unretiredAt ?: now();
 
@@ -220,7 +229,7 @@ class TagTeamService
      */
     public function suspend($tagTeam, $suspendedAt = null)
     {
-        throw_unless($tagTeam->canBeSuspended(), new CannotBeSuspendedException('Tag Team cannot be reinstated. This Tag Team is not suspended.'));
+        throw_unless($tagTeam->canBeSuspended(), new CannotBeSuspendedException);
 
         $suspendedDate = $suspendedAt ?: now();
 
@@ -238,7 +247,7 @@ class TagTeamService
      */
     public function reinstate($tagTeam, $reinstatedAt = null)
     {
-        throw_unless($tagTeam->canBeReinstated(), new CannotBeReinstatedException('Tag Team cannot be reinstated. This Tag Team is not suspended.'));
+        throw_unless($tagTeam->canBeReinstated(), new CannotBeReinstatedException);
 
         $reinstatedDate = $reinstatedAt ?: now();
 

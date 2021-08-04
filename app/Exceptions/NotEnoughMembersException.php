@@ -4,9 +4,12 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeRetiredException extends Exception
+class NotEnoughMembersException extends Exception
 {
-    protected $message = 'This entity cannot be retired. This entity does not have an active employment';
+    public static function forTagTeam()
+    {
+        return new static('Tag team does not contain enough wrestlers.');
+    }
 
     /**
      * Render the exception into an HTTP response.

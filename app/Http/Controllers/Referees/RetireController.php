@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Referees;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\RetireRequest;
 use App\Models\Referee;
+use App\Services\RefereeService;
 
 class RetireController extends Controller
 {
@@ -13,11 +14,12 @@ class RetireController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\RetireRequest  $request
+     * @param  \App\Services\RefereeService $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, RetireRequest $request)
+    public function __invoke(Referee $referee, RetireRequest $request, RefereeService $refereeService)
     {
-        $referee->retire();
+        $refereeService->retire($referee);
 
         return redirect()->route('referees.index');
     }

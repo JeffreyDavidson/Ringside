@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeReleasedException extends Exception
 {
+    protected $message = 'This entity cannot be released. This entity does not have an active employment.';
+
     /**
      * Render the exception into an HTTP response.
      *
