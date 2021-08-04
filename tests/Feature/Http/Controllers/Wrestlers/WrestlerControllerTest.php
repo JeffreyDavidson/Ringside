@@ -48,9 +48,8 @@ class WrestlerControllerTest extends TestCase
      */
     public function index_returns_a_view($administrators)
     {
-        $this->actAs($administrators);
-
-        $this->get(route('wrestlers.index'))
+        $this->actAs($administrators)
+            ->get(route('wrestlers.index'))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
             ->assertSeeLivewire('wrestlers.bookable-wrestlers')

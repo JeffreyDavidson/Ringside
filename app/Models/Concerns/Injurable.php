@@ -2,10 +2,7 @@
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Exceptions\CannotBeInjuredException;
 use App\Models\Injury;
-use Carbon\Carbon;
 
 trait Injurable
 {
@@ -94,38 +91,6 @@ trait Injurable
     }
 
     /**
-     * Injure a model.
-     *
-     * @param  string|null $injuredAt
-     * @return void
-     */
-    public function injure($injuredAt = null)
-    {
-        throw_unless($this->canBeInjured(), new CannotBeInjuredException);
-
-        $injuredDate = Carbon::parse($injuredAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
-
-        $this->injuries()->create(['started_at' => $injuredDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Clear a model from an injury.
-     *
-     * @param  string|null $recoveredAt
-     * @return void
-     */
-    public function clearFromInjury($recoveredAt = null)
-    {
-        throw_unless($this->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
-
-        $recoveryDate = Carbon::parse($recoveredAt)->toDateTImeString('minute') ?? now()->toDateTimeString('minute');
-
-        $this->currentInjury()->update(['ended_at' => $recoveryDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
      * Check to see if the model is injured.
      *
      * @return bool
@@ -133,6 +98,16 @@ trait Injurable
     public function isInjured()
     {
         return $this->currentInjury()->exists();
+    }
+
+    /**
+     * Check to see if the model has been employed.
+     *
+     * @return bool
+     */
+    public function hasInjuries()
+    {
+        return $this->injuries()->count() > 0;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wrestlers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\ReinstateRequest;
 use App\Models\Wrestler;
+use App\Services\WrestlerService;
 
 class ReinstateController extends Controller
 {
@@ -13,15 +14,12 @@ class ReinstateController extends Controller
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \App\Http\Requests\Wrestlers\ReinstateRequest  $request
+     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler, ReinstateRequest $request)
+    public function __invoke(Wrestler $wrestler, ReinstateRequest $request, WrestlerService $wrestlerService)
     {
-        $wrestler->reinstate();
-
-        if ($wrestler->currentTagTeam) {
-            $wrestler->currentTagTeam->updateStatusAndSave();
-        }
+        $wrestlerService->reinstate($wrestler);
 
         return redirect()->route('wrestlers.index');
     }

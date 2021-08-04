@@ -2,11 +2,9 @@
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\CannotBeActivatedException;
-use App\Exceptions\CannotBeDeactivatedException;
 use App\Models\Activation;
 
-trait CanBeActivated
+trait Activatable
 {
     /**
      * Get all of the activations of the model.
@@ -26,9 +24,9 @@ trait CanBeActivated
     public function currentActivation()
     {
         return $this->morphOne(Activation::class, 'activatable')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
+                        ->where('started_at', '<=', now())
+                        ->whereNull('ended_at')
+                        ->latestOfMany();
     }
 
     /**
@@ -39,8 +37,7 @@ trait CanBeActivated
     public function firstActivation()
     {
         return $this->morphOne(Activation::class, 'activatable')
-                    ->oldest('started_at')
-                    ->limit(1);
+                    ->oldestOfMany('started_at');
     }
 
     /**
@@ -53,7 +50,19 @@ trait CanBeActivated
         return $this->morphOne(Activation::class, 'activatable')
                     ->where('started_at', '>', now())
                     ->whereNull('ended_at')
-                    ->limit(1);
+                    ->latestOfMany();
+    }
+
+    /**
+     * Get the previous activation of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function previousActivation()
+    {
+        return $this->morphOne(Activation::class, 'activatable')
+                    ->latest('ended_at')
+                    ->oldestOfMany();
     }
 
     /**
@@ -68,15 +77,14 @@ trait CanBeActivated
     }
 
     /**
-     * Get the previous activation of the model.
+     * Scope a query to only include activated models.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function previousActivation()
+    public function scopeActivated($query)
     {
-        return $this->morphOne(Activation::class, 'activatable')
-                    ->latest('ended_at')
-                    ->limit(1);
+        return $query->whereHas('currentActivation');
     }
 
     /**
@@ -88,17 +96,6 @@ trait CanBeActivated
     public function scopeFutureActivation($query)
     {
         return $query->whereHas('futureActivation');
-    }
-
-    /**
-     * Scope a query to only include activated models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeActivated($query)
-    {
-        return $query->whereHas('currentActivation');
     }
 
     /**
@@ -120,7 +117,7 @@ trait CanBeActivated
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeUnactivated($query)
+    public function scopeDeactivated($query)
     {
         return $query->whereDoesntHave('currentActivation')
                     ->orWhereDoesntHave('previousActivations');
@@ -148,14 +145,14 @@ trait CanBeActivated
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithCurrentDeactivatedAtDate($query)
+    public function scopeWithLastDeactivatedAtDate($query)
     {
-        return $query->addSelect(['current_deactivated_at' => Activation::select('ended_at')
+        return $query->addSelect(['last_deactivated_at' => Activation::select('ended_at')
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
             ->where('activatable_type', $this->getMorphClass())
             ->orderBy('ended_at', 'desc')
             ->limit(1),
-        ])->withCasts(['current_deactivated_at' => 'datetime']);
+        ])->withCasts(['last_deactivated_at' => 'datetime']);
     }
 
     /**
@@ -177,41 +174,9 @@ trait CanBeActivated
      * @param  string $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByCurrentDeactivatedAtDate($query, $direction = 'asc')
+    public function scopeOrderByLastDeactivatedAtDate($query, $direction = 'asc')
     {
-        return $query->orderByRaw("DATE(current_deactivated_at) $direction");
-    }
-
-    /**
-     * Activate a model.
-     *
-     * @param  string|null $startedAt
-     * @return void
-     */
-    public function activate($startedAt = null)
-    {
-        throw_unless($this->canBeActivated(), new CannotBeActivatedException('Entity cannot be employed. This entity is currently employed.'));
-
-        $startDate = $startedAt ?? now();
-
-        $this->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Deactivate a model.
-     *
-     * @param  string|null $deactivatedAt
-     * @return void
-     */
-    public function deactivate($deactivatedAt = null)
-    {
-        throw_unless($this->canBeDeactivated(), new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is not currently activated.'));
-
-        $deactivatedDate = $deactivatedAt ?? now();
-
-        $this->currentActivation()->update(['ended_at' => $deactivatedDate]);
-        $this->updateStatusAndSave();
+        return $query->orderByRaw("DATE(last_deactivated_at) $direction");
     }
 
     /**
@@ -225,11 +190,21 @@ trait CanBeActivated
     }
 
     /**
+     * Check to see if the model has been activated.
+     *
+     * @return bool
+     */
+    public function hasActivations()
+    {
+        return $this->activations()->count() > 0;
+    }
+
+    /**
      * Check to see if the model is unactivated.
      *
      * @return bool
      */
-    public function isUnactivated()
+    public function isNotActivated()
     {
         return $this->activations()->count() === 0;
     }

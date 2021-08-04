@@ -3,14 +3,11 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
-use App\Enums\TagTeamStatus;
-use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Wrestlers\InjureController;
 use App\Http\Requests\Wrestlers\InjureRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,19 +29,15 @@ class InjureControllerTest extends TestCase
      */
     public function invoke_injures_a_bookable_wrestler_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler))
+            ->put(route('wrestlers.injure', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
-            $this->assertCount(1, $wrestler->injuries);
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->injuries->first()->started_at->toDateTimeString('minute'));
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertTrue($wrestler->hasInjuries());
+            $this->assertTrue($wrestler->isInjured());
         });
     }
 
@@ -57,12 +50,12 @@ class InjureControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
+        tap($tagTeam->fresh(), function ($tagTeam) {
+            $this->assertTrue($tagTeam->isUnbookable());
+        });
     }
 
     /** @test */
@@ -77,7 +70,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.injure', $wrestler))
+            ->put(route('wrestlers.injure', $wrestler))
             ->assertForbidden();
     }
 
@@ -86,7 +79,7 @@ class InjureControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler))
+        $this->put(route('wrestlers.injure', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -102,7 +95,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -117,7 +110,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -132,7 +125,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->released()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -147,7 +140,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -162,7 +155,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->retired()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
     }
 
     /**
@@ -177,6 +170,6 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+            ->put(route('wrestlers.injure', $wrestler));
     }
 }

@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
-use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Titles\DeactivateController;
 use App\Http\Requests\Titles\DeactivateRequest;
@@ -26,8 +25,7 @@ class DeactivateControllerTest extends TestCase
      */
     public function invoke_deactivates_an_active_title_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        Carbon::setTestNow($now = now());
 
         $title = Title::factory()->active()->create();
 
@@ -36,7 +34,7 @@ class DeactivateControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) use ($now) {
-            $this->assertEquals(TitleStatus::INACTIVE, $title->status);
+            $this->assertTrue($title->isDeactivated());
             $this->assertCount(1, $title->activations);
             $this->assertEquals($now->toDateTimeString(), $title->activations->first()->ended_at->toDateTimeString());
         });

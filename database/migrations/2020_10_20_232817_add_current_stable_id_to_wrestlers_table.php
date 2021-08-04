@@ -28,7 +28,8 @@ class AddCurrentStableIdToWrestlersTable extends Migration
     public function down()
     {
         Schema::table('wrestlers', function (Blueprint $table) {
-            //
+            $table->dropForeign('wrestlers_current_stable_id_foreign');
+            $table->dropColumn('current_stable_id');
         });
     }
 }

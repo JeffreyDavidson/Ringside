@@ -41,6 +41,8 @@ class EmploymentStartDateCanBeChanged implements Rule
         if ($this->model->started_at->eq($value)) {
             return true;
         }
+
+        return false;
     }
 
     public function message()

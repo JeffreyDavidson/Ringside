@@ -2,10 +2,7 @@
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\CannotBeReleasedException;
 use App\Models\Employment;
-use Carbon\Carbon;
 
 trait Employable
 {
@@ -20,6 +17,17 @@ trait Employable
     }
 
     /**
+     * Get the first activation of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function firstEmployment()
+    {
+        return $this->morphOne(Employment::class, 'activatable')
+                    ->oldestOfMany('started_at');
+    }
+
+    /**
      * Get the current employment of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
@@ -29,7 +37,7 @@ trait Employable
         return $this->morphOne(Employment::class, 'employable')
                     ->where('started_at', '<=', now())
                     ->where('ended_at', '=', null)
-                    ->limit(1);
+                    ->latestOfMany();
     }
 
     /**
@@ -42,7 +50,7 @@ trait Employable
         return $this->morphOne(Employment::class, 'employable')
                     ->where('started_at', '>', now())
                     ->whereNull('ended_at')
-                    ->limit(1);
+                    ->latestOfMany();
     }
 
     /**
@@ -66,7 +74,7 @@ trait Employable
         return $this->morphOne(Employment::class, 'employable')
                     ->whereNotNull('ended_at')
                     ->latest('ended_at')
-                    ->limit(1);
+                    ->latestOfMany();
     }
 
     /**
@@ -175,46 +183,6 @@ trait Employable
     }
 
     /**
-     * Employ a model.
-     *
-     * @param  string|null $startedAt
-     * @return void
-     */
-    public function employ($startedAt = null)
-    {
-        throw_unless($this->canBeEmployed(), new CannotBeEmployedException);
-
-        $startDate = Carbon::parse($startedAt)->toDayDateTimeString('minute') ?? now()->toDateTimeString('minute');
-
-        $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Release a model.
-     *
-     * @param  string|null $releasedAt
-     * @return void
-     */
-    public function release($releasedAt = null)
-    {
-        throw_unless($this->canBeReleased(), new CannotBeReleasedException);
-
-        if ($this->isSuspended()) {
-            $this->reinstate();
-        }
-
-        if ($this->isInjured()) {
-            $this->clearFromInjury();
-        }
-
-        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
-
-        $this->currentEmployment->update(['ended_at' => $releaseDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
      * Check to see if the model is employed.
      *
      * @return bool
@@ -222,6 +190,16 @@ trait Employable
     public function isCurrentlyEmployed()
     {
         return $this->currentEmployment()->exists();
+    }
+
+    /**
+     * Check to see if the model has been employed.
+     *
+     * @return bool
+     */
+    public function hasEmployments()
+    {
+        return $this->employments()->count() > 0;
     }
 
     /**

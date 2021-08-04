@@ -3,21 +3,17 @@
 namespace App\Models;
 
 use App\Enums\ManagerStatus;
+use App\Models\Contracts\CanJoinStable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manager extends Model
+class Manager extends SingleRosterMember implements CanJoinStable
 {
     use SoftDeletes,
         HasFactory,
         Concerns\HasFullName,
-        Concerns\CanBeStableMember,
-        Concerns\Employable,
-        Concerns\Injurable,
-        Concerns\Suspendable,
-        Concerns\Retirable,
+        Concerns\CanJoinStable,
         Concerns\Unguarded;
 
     /**

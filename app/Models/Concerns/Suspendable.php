@@ -2,10 +2,7 @@
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Suspension;
-use Carbon\Carbon;
 
 trait Suspendable
 {
@@ -94,38 +91,6 @@ trait Suspendable
     }
 
     /**
-     * Suspend a model.
-     *
-     * @param  string|null $suspendedAt
-     * @return void
-     */
-    public function suspend($suspendedAt = null)
-    {
-        throw_unless($this->canBeSuspended(), new CannotBeSuspendedException);
-
-        $suspensionDate = Carbon::parse($suspendedAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
-
-        $this->suspensions()->create(['started_at' => $suspensionDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Reinstate a model.
-     *
-     * @param  string|null $reinstatedAt
-     * @return void
-     */
-    public function reinstate($reinstatedAt = null)
-    {
-        throw_unless($this->canBeReinstated(), new CannotBeReinstatedException);
-
-        $reinstatedDate = Carbon::parse($reinstatedAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
-
-        $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
      * Check to see if the model is suspended.
      *
      * @return bool
@@ -133,6 +98,16 @@ trait Suspendable
     public function isSuspended()
     {
         return $this->currentSuspension()->exists();
+    }
+
+    /**
+     * Check to see if the model has been activated.
+     *
+     * @return bool
+     */
+    public function hasSuspensions()
+    {
+        return $this->suspensions()->count() > 0;
     }
 
     /**

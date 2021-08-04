@@ -10,7 +10,6 @@ use App\Http\Controllers\Wrestlers\SuspendController;
 use App\Http\Requests\Wrestlers\SuspendRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,19 +31,15 @@ class SuspendControllerTest extends TestCase
      */
     public function invoke_suspends_a_bookable_wrestler_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler))
+            ->put(route('wrestlers.suspend', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
+        tap($wrestler->fresh(), function ($wrestler) {
             $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
             $this->assertCount(1, $wrestler->suspensions);
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->suspensions->first()->started_at->toDateTimeString('minute'));
         });
     }
 
@@ -60,7 +55,7 @@ class SuspendControllerTest extends TestCase
         $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
@@ -77,7 +72,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.suspend', $wrestler))
+            ->put(route('wrestlers.suspend', $wrestler))
             ->assertForbidden();
     }
 
@@ -86,7 +81,7 @@ class SuspendControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.suspend', $wrestler))
+        $this->put(route('wrestlers.suspend', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -102,7 +97,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
     }
 
     /**
@@ -117,7 +112,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
     }
 
     /**
@@ -132,7 +127,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
     }
 
     /**
@@ -147,7 +142,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->released()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
     }
 
     /**
@@ -162,7 +157,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->retired()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
     }
 
     /**
@@ -177,6 +172,6 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+            ->put(route('wrestlers.suspend', $wrestler));
     }
 }

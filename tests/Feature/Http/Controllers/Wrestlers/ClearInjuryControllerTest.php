@@ -3,16 +3,13 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
-use App\Enums\TagTeamStatus;
-use App\Enums\WrestlerStatus;
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Http\Controllers\Wrestlers\ClearInjuryController;
-use App\Http\Requests\Wrestlers\ClearInjuryRequest;
+use Tests\TestCase;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use App\Services\WrestlerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Http\Requests\Wrestlers\ClearInjuryRequest;
+use App\Http\Controllers\Wrestlers\ClearInjuryController;
 
 /**
  * @group wrestlers
@@ -32,22 +29,10 @@ class ClearInjuryControllerTest extends TestCase
      */
     public function invoke_marks_an_injured_wrestler_as_being_recovered_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $wrestler = Wrestler::factory()->injured()->create();
-
-        $this->assertCount(1, $wrestler->injuries);
-        $this->assertEquals(WrestlerStatus::INJURED, $wrestler->fresh()->status);
-
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler))
+        $response = $this->actAs($administrators)
+            ->put(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
-
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->injuries->first()->ended_at->toDateTimeString('minute'));
-        });
     }
 
     /**
@@ -58,15 +43,15 @@ class ClearInjuryControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
-        $wrestler->injure();
+        app(WrestlerService::class)->injure($wrestler);
         $wrestler->currentTagTeam->updateStatusAndSave();
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
-
         $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
+            ->put(route('wrestlers.clear-from-injury', $wrestler));
 
-        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->fresh()->status);
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertTrue($wrestler->isBookable());
+        });
     }
 
     /** @test */
@@ -81,7 +66,7 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler))
+            ->put(route('wrestlers.clear-from-injury', $wrestler))
             ->assertForbidden();
     }
 
@@ -90,7 +75,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->patch(route('wrestlers.clear-from-injury', $wrestler))
+        $this->put(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -100,87 +85,11 @@ class ClearInjuryControllerTest extends TestCase
      */
     public function clearing_an_injury_from_an_unemployed_wrestler_throws_an_exception($administrators)
     {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function clearing_an_injury_from_a_bookable_wrestler_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->bookable()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function clearing_an_injury_from_a_future_employed_wrestler_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function clearing_an_injury_from_a_suspended_wrestler_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->suspended()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function clearing_an_injury_from_a_retired_wrestler_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->retired()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function clearing_an_injury_from_a_released_wrestler_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.clear-from-injury', $wrestler));
+            ->put(route('wrestlers.clear-from-injury', $wrestler))
+            ->assertRedirect()
+            ->assertSessionHasErrors('message');
     }
 }

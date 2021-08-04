@@ -40,7 +40,7 @@ class TitlesTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsActivated)->addMonths(rand(1, 11));
 
-            $activation = ActivationFactory::new()->started($start);
+            $activation = Activation::factory()->started($start);
 
             TitleFactory::new()
                 ->active($activation)
@@ -58,7 +58,7 @@ class TitlesTableSeeder extends Seeder
         $start = $startDate;
         $end = $start->copy()->addYears($randomNumberOfYearsActivated)->addMonths(rand(1, 11));
 
-        $activation = ActivationFactory::new()->started($start);
+        $activation = Activation::factory()->started($start);
 
         if ($end->lessThan($now)) {
             $activation = $activation->ended($end);
@@ -79,8 +79,8 @@ class TitlesTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsActivated)->addMonth(rand(1, 11));
 
-            $activation = ActivationFactory::new()->started($start)->ended($end);
-            $retirement = RetirementFactory::new()->started($end);
+            $activation = Activation::factory()->started($start)->ended($end);
+            $retirement = Retirement::factory()->started($end);
             TitleFactory::new()
                 ->retired($activation, $retirement)
                 ->create(['name' => 'Title '.$eNum]);

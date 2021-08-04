@@ -26,8 +26,7 @@ class UnretireControllerTest extends TestCase
      */
     public function invoke_unretires_a_retired_title_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        Carbon::setTestNow($now = now());
 
         $title = Title::factory()->retired()->create();
 
@@ -36,8 +35,7 @@ class UnretireControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) use ($now) {
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-            $this->assertCount(1, $title->retirements);
+            $this->assertTrue($title->isCurrentlyActivated());
             $this->assertEquals($now->toDateTimeString(), $title->fresh()->retirements()->latest()->first()->ended_at);
         });
     }

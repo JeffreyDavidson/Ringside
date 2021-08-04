@@ -18,6 +18,6 @@ class CannotBeClearedFromInjuryException extends Exception
             return response()->json(['message' => $this->message], 400);
         }
 
-        return back()->withError($this->message);
+        return back()->withErrors(['message' => $this->message]);
     }
 }
