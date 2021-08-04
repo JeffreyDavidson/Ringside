@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\RetireRequest;
 use App\Models\Manager;
+use App\Services\ManagerService;
 
 class RetireController extends Controller
 {
@@ -13,11 +14,12 @@ class RetireController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\RetireRequest  $request
+     * @param  \App\Services\ManagerService $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, RetireRequest $request)
+    public function __invoke(Manager $manager, RetireRequest $request, ManagerService $managerService)
     {
-        $manager->retire();
+        $managerService->retire($manager);
 
         return redirect()->route('managers.index');
     }

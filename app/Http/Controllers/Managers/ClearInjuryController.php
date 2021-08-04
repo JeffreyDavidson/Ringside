@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Managers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\ClearInjuryRequest;
 use App\Models\Manager;
-use Tests\TestCase;
+use App\Services\ManagerService;
 
 class ClearInjuryController extends Controller
 {
@@ -14,11 +14,12 @@ class ClearInjuryController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\ClearInjuryRequest  $request
+     * @param  \App\Services\ManagerService $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, ClearInjuryRequest $request)
+    public function __invoke(Manager $manager, ClearInjuryRequest $request, ManagerService $managerService)
     {
-        $manager->clearFromInjury();
+        $managerService->clearFromInjury($manager);
 
         return redirect()->route('managers.index');
     }

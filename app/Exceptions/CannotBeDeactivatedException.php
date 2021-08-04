@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeDeactivatedException extends Exception
 {
+    protected $message = 'Entity cannot be deactivated. This entity is not currently activated.';
+
     /**
      * Render the exception into an HTTP response.
      *

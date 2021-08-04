@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\InjureRequest;
 use App\Models\Manager;
+use App\Services\ManagerService;
 
 class InjureController extends Controller
 {
@@ -13,11 +14,12 @@ class InjureController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\InjureRequest  $request
+     * @param  \App\Services\ManagerService $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, InjureRequest $request)
+    public function __invoke(Manager $manager, InjureRequest $request, ManagerService $managerService)
     {
-        $manager->injure();
+        $managerService->injure($manager);
 
         return redirect()->route('managers.index');
     }

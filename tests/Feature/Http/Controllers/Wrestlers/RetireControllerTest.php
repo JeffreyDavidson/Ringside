@@ -34,7 +34,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler))
+            ->patch(route('wrestlers.retire', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
         $wrestler->refresh();
@@ -53,7 +53,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler))
+            ->patch(route('wrestlers.retire', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
         $wrestler->refresh();
@@ -71,7 +71,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler))
+            ->patch(route('wrestlers.retire', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
         $wrestler->refresh();
@@ -92,7 +92,7 @@ class RetireControllerTest extends TestCase
         $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler));
+            ->patch(route('wrestlers.retire', $wrestler));
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->refresh()->status);
     }
@@ -109,7 +109,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this->actAs(Role::BASIC)
-            ->put(route('wrestlers.retire', $wrestler))
+            ->patch(route('wrestlers.retire', $wrestler))
             ->assertForbidden();
     }
 
@@ -118,7 +118,7 @@ class RetireControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->put(route('wrestlers.retire', $wrestler))
+        $this->patch(route('wrestlers.retire', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -134,7 +134,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->retired()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler));
+            ->patch(route('wrestlers.retire', $wrestler));
     }
 
     /**
@@ -149,7 +149,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler));
+            ->patch(route('wrestlers.retire', $wrestler));
     }
 
     /**
@@ -164,7 +164,7 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->released()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler));
+            ->patch(route('wrestlers.retire', $wrestler));
     }
 
     /**
@@ -179,6 +179,6 @@ class RetireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.retire', $wrestler));
+            ->patch(route('wrestlers.retire', $wrestler));
     }
 }

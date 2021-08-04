@@ -2,19 +2,27 @@
 
 namespace App\Services;
 
-use App\Models\Wrestler;
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Exceptions\CannotBeEmployedException;
 use App\Exceptions\CannotBeInjuredException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeReleasedException;
 use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\CannotBeReleasedException;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
 use Carbon\Carbon;
 
 class WrestlerService
 {
+    protected $wrestlerRepository;
+
+    public function __construct(WrestlerRepository $wrestlerRepository)
+    {
+        $this->wrestlerRepository = $wrestlerRepository;
+    }
+
     /**
      * Creates a new tag team.
      *
@@ -23,7 +31,7 @@ class WrestlerService
      */
     public function create(array $data): Wrestler
     {
-        $wrestler = Wrestler::create(['name' => $data['name'], 'height' => $data['height'], 'weight' => $data['weight'], 'hometown' => $data['hometown'], 'signature_move' => $data['signature_move']]);
+        $wrestler = $this->wrestlerRepository->create($data);
 
         if ($data['started_at']) {
             $this->employ($wrestler, $data['started_at']);
@@ -143,7 +151,7 @@ class WrestlerService
      */
     public function clearFromInjury($wrestler, $recoveredAt = null)
     {
-        throw_unless($wrestler->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException('This entity could not be cleared from an injury.'));
+        throw_unless($wrestler->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
 
         $recoveryDate = Carbon::parse($recoveredAt)->toDateTImeString('minute') ?? now()->toDateTimeString('minute');
 

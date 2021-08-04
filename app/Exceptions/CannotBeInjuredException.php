@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeInjuredException extends Exception
 {
+    protected $message = 'This entity cannot be injured. This entity has a current injury.';
+
     /**
      * Render the exception into an HTTP response.
      *

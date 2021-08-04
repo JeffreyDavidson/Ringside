@@ -32,7 +32,7 @@ class EmployControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->put(route('wrestlers.employ', $wrestler))
+            ->patch(route('wrestlers.employ', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
     }
 
@@ -48,7 +48,7 @@ class EmployControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this->actAs(Role::BASIC)
-            ->put(route('wrestlers.employ', $wrestler))
+            ->patch(route('wrestlers.employ', $wrestler))
             ->assertForbidden();
     }
 
@@ -57,7 +57,7 @@ class EmployControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->put(route('wrestlers.employ', $wrestler))
+        $this->patch(route('wrestlers.employ', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -73,6 +73,6 @@ class EmployControllerTest extends TestCase
         $wrestler = Wrestler::factory()->employed()->create();
 
         $respons = $this->actAs($administrators)
-            ->put(route('wrestlers.employ', $wrestler));
+            ->patch(route('wrestlers.employ', $wrestler));
     }
 }

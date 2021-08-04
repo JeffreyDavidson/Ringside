@@ -2,15 +2,23 @@
 
 namespace App\Services;
 
-use App\Models\Stable;
-use App\Exceptions\CannotBeRetiredException;
 use App\Exceptions\CannotBeActivatedException;
-use App\Exceptions\CannotBeUnretiredException;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Exceptions\CannotBeDisassembledException;
+use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Stable;
+use App\Repositories\StableRepository;
 
 class StableService
 {
+    protected $stableRepository;
+
+    public function __construct(StableRepository $stableRepository)
+    {
+        $this->stableRepository = $stableRepository;
+    }
+
     /**
      * Creates a new stable.
      *
@@ -19,7 +27,7 @@ class StableService
      */
     public function create(array $data): Stable
     {
-        $stable = Stable::create(['name' => $data['name']]);
+        $stable = $this->stableRepository->create($data);
 
         if ($data['started_at']) {
             $stable->activations()->create(['started_at' => $data['started_at']]);
@@ -161,7 +169,7 @@ class StableService
      */
     public function activate($stable, $startedAt = null)
     {
-        throw_unless($stable->canBeActivated(), new CannotBeActivatedException('Entity cannot be employed. This entity is currently employed.'));
+        throw_unless($stable->canBeActivated(), new CannotBeActivatedException);
 
         $stable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
         $stable->updateStatusAndSave();
@@ -176,7 +184,7 @@ class StableService
      */
     public function deactivate($stable, $deactivatedAt = null)
     {
-        throw_unless($stable->canBeDeactivated(), new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is not currently activated.'));
+        throw_unless($stable->canBeDeactivated(), new CannotBeDeactivatedException);
 
         $stable->currentActivation()->update(['ended_at' => $deactivatedAt ?? now()]);
         $stable->updateStatusAndSave();
@@ -191,7 +199,7 @@ class StableService
      */
     public function disassemble($stable, $deactivatedAt = null)
     {
-        throw_unless($stable->canBeDisassembled(), new CannotBeDisassembledException('Entity cannot be disassembled. This stable does not have an active activation.'));
+        throw_unless($stable->canBeDisassembled(), new CannotBeDisassembledException);
 
         $deactivationDate = $deactivatedAt ?: now();
 
@@ -245,7 +253,7 @@ class StableService
      */
     public function unretire($stable, $unretiredAt = null)
     {
-        throw_unless($stable->canBeUnretired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
+        throw_unless($stable->canBeUnretired(), new CannotBeUnretiredException);
 
         $unretiredDate = $unretiredAt ?: now();
 

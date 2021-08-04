@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\TagTeamStatus;
+use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\NotEnoughMembersException;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanJoinStable;
 use App\Models\Contracts\Employable;
@@ -122,13 +124,11 @@ class TagTeam extends Model implements Bookable, CanJoinStable, Employable, Reti
     public function canBeEmployed()
     {
         if ($this->isCurrentlyEmployed()) {
-            // throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have an active employment.');
-            return false;
+            throw new CannotBeEmployedException;
         }
 
-        if ($this->hasFutureEmployment() && $this->currentWrestlers->count() !== self::MAX_WRESTLERS_COUNT) {
-            // throw new CannotBeEmployedException('Tag Team cannot be employed. This Tag Team does not have 2 tag team partners.');
-            return false;
+        if ($this->currentWrestlers->count() !== self::MAX_WRESTLERS_COUNT) {
+            throw NotEnoughMembersException::forTagTeam();
         }
 
         return true;
@@ -142,8 +142,7 @@ class TagTeam extends Model implements Bookable, CanJoinStable, Employable, Reti
     public function canBeReleased()
     {
         if ($this->isNotInEmployment()) {
-            // throw new CannotBeEmployedException('Entity cannot be released. This entity does not have an active employment.');
-            return false;
+            throw new CannotBeEmployedException;
         }
 
         return true;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Titles;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\UnretireRequest;
 use App\Models\Title;
+use App\Services\TitleService;
 
 class UnretireController extends Controller
 {
@@ -13,11 +14,12 @@ class UnretireController extends Controller
      *
      * @param  \App\Models\Title $title
      * @param  \App\Http\Requests\Titles\UnretireRequest $request
+     * @param  \App\Services\TitleService $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title, UnretireRequest $request)
+    public function __invoke(Title $title, UnretireRequest $request, TitleService $titleService)
     {
-        $title->unretire();
+        $titleService->unretire($title);
 
         return redirect()->route('titles.index');
     }

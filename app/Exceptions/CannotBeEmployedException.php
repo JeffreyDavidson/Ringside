@@ -6,6 +6,8 @@ use Exception;
 
 class CannotBeEmployedException extends Exception
 {
+    protected $message = 'This entity cannot be employed. This entity does have a start date.';
+
     /**
      * Render the exception into an HTTP response.
      *
