@@ -2,10 +2,7 @@
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Retirement;
-use Carbon\Carbon;
 
 trait Retirable
 {
@@ -95,48 +92,6 @@ trait Retirable
     }
 
     /**
-     * Retire a model.
-     *
-     * @param  string|null $retiredAt
-     * @return void
-     */
-    public function retire($retiredAt = null)
-    {
-        throw_unless($this->canBeReleased(), new CannotBeRetiredException);
-
-        if ($this->isSuspended()) {
-            $this->reinstate();
-        }
-
-        if ($this->isInjured()) {
-            $this->clearFromInjury();
-        }
-
-        $retiredDate = Carbon::parse($retiredAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
-
-        $this->currentEmployment()->update(['ended_at' => $retiredDate]);
-        $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Unretire a model.
-     *
-     * @param  string|null $unretiredAt
-     * @return void
-     */
-    public function unretire($unretiredAt = null)
-    {
-        throw_unless($this->canBeUnretired(), new CannotBeUnretiredException);
-
-        $unretiredDate = Carbon::parse($unretiredAt)->toDateTimeString('minute') ?: now()->toDateTimeString('minute');
-
-        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->employments()->create(['started_at' => $unretiredDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
      * Check to see if the model is retired.
      *
      * @return bool
@@ -144,6 +99,16 @@ trait Retirable
     public function isRetired()
     {
         return $this->currentRetirement()->exists();
+    }
+
+    /**
+     * Check to see if the model has been activated.
+     *
+     * @return bool
+     */
+    public function hasRetirements()
+    {
+        return $this->retirements()->count() > 0;
     }
 
     /**

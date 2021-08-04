@@ -3,6 +3,11 @@
 namespace App\Services;
 
 use App\Models\Stable;
+use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\CannotBeActivatedException;
+use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\CannotBeDeactivatedException;
+use App\Exceptions\CannotBeDisassembledException;
 
 class StableService
 {
@@ -144,5 +149,122 @@ class StableService
         }
 
         return $stable;
+    }
+
+    /**
+     * Activate a model.
+     *
+     *
+     * @param \App\Models\Stable $stable
+     * @param  string|null $startedAt
+     * @return void
+     */
+    public function activate($stable, $startedAt = null)
+    {
+        throw_unless($stable->canBeActivated(), new CannotBeActivatedException('Entity cannot be employed. This entity is currently employed.'));
+
+        $stable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+        $stable->updateStatusAndSave();
+    }
+
+    /**
+     * Deactivate a model.
+     *
+     * @param \App\Models\Stable $stable
+     * @param  string|null $deactivatedAt
+     * @return void
+     */
+    public function deactivate($stable, $deactivatedAt = null)
+    {
+        throw_unless($stable->canBeDeactivated(), new CannotBeDeactivatedException('Entity cannot be deactivated. This entity is not currently activated.'));
+
+        $stable->currentActivation()->update(['ended_at' => $deactivatedAt ?? now()]);
+        $stable->updateStatusAndSave();
+    }
+
+    /**
+     * Undocumented function.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  string|null $deactivatedAt
+     * @return void
+     */
+    public function disassemble($stable, $deactivatedAt = null)
+    {
+        throw_unless($stable->canBeDisassembled(), new CannotBeDisassembledException('Entity cannot be disassembled. This stable does not have an active activation.'));
+
+        $deactivationDate = $deactivatedAt ?: now();
+
+        $stable->currentActivation()->update(['ended_at' => $deactivationDate]);
+        $stable->currentWrestlers()->detach();
+        $stable->currentTagTeams()->detach();
+        $stable->updateStatusAndSave();
+    }
+
+    /**
+     * Determine if the tag team can be disassembled.
+     *
+     * @return bool
+     */
+    public function canBeDisassembled()
+    {
+        if ($this->isNotInActivation()) {
+            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Retire a stable and its members.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  string|null $retiredAt
+     * @return void
+     */
+    public function retire($stable, $retiredAt = null)
+    {
+        throw_unless($stable->canBeRetired(), new CannotBeRetiredException);
+
+        $retiredDate = $retiredAt ?: now();
+
+        $stable->currentActivation()->update(['ended_at' => $retiredDate]);
+        $stable->retirements()->create(['started_at' => now()]);
+        $stable->currentWrestlers->each->retire($retiredDate);
+        $stable->currentTagTeams->each->retire();
+        $stable->updateStatusAndSave();
+    }
+
+    /**
+     * Unretire a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  string|null $unretiredAt
+     * @return $this
+     */
+    public function unretire($stable, $unretiredAt = null)
+    {
+        throw_unless($stable->canBeUnretired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
+
+        $unretiredDate = $unretiredAt ?: now();
+
+        $stable->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        $stable->activate($unretiredDate);
+        $stable->updateStatusAndSave();
+    }
+
+    public function addWrestlers($stable, $wrestlerIds, $joinedDate)
+    {
+        foreach ($wrestlerIds as $wrestlerId) {
+            $stable->wrestlers()->attach($wrestlerId, ['joined_at' => $joinedDate]);
+        }
+    }
+
+    public function addTagTeams($stable, $tagTeamIds, $joinedDate)
+    {
+        foreach ($tagTeamIds as $tagTeamId) {
+            $stable->tagTeams()->attach($tagTeamId, ['joined_at' => $joinedDate]);
+        }
     }
 }

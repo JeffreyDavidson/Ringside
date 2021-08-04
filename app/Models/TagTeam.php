@@ -3,29 +3,25 @@
 namespace App\Models;
 
 use App\Enums\TagTeamStatus;
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeReleasedException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeSuspendedException;
-use App\Exceptions\CannotBeUnretiredException;
-use App\Models\Concerns\CanBeStableMember;
-use Carbon\Carbon;
-use Exception;
+use App\Models\Contracts\Bookable;
+use App\Models\Contracts\CanJoinStable;
+use App\Models\Contracts\Employable;
+use App\Models\Contracts\Retirable;
+use App\Models\Contracts\Suspendable;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TagTeam extends Model
+class TagTeam extends Model implements Bookable, CanJoinStable, Employable, Retirable, Suspendable
 {
     use SoftDeletes,
         HasFactory,
         HasMorphToOne,
-        CanBeStableMember,
-        Concerns\Suspendable,
-        Concerns\Retirable,
+        Concerns\CanJoinStable,
         Concerns\Employable,
+        Concerns\Retirable,
+        Concerns\Suspendable,
         Concerns\Unguarded;
 
     /**
@@ -119,64 +115,6 @@ class TagTeam extends Model
     }
 
     /**
-     * Add wrestlers to a tag team.
-     *
-     * @param  array  $wrestlers
-     * @param  string|null $dateJoined
-     *
-     * @throws Exception
-     *
-     * @return $this
-     */
-    public function addWrestlers($wrestlerIds, $dateJoined = null)
-    {
-        if (count($wrestlerIds) !== self::MAX_WRESTLERS_COUNT) {
-            throw new Exception('The required number of wrestlers to join a tag team must be two.');
-        }
-
-        $dateJoined ?? now();
-
-        $this->wrestlers()->sync([
-            $wrestlerIds[0] => ['joined_at' => $dateJoined],
-            $wrestlerIds[1] => ['joined_at' => $dateJoined],
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * Employ a tag team.
-     *
-     * @param  string|null $startAtDate
-     * @return $this
-     */
-    public function employ($startAtDate = null)
-    {
-        throw_unless($this->canBeEmployed(), new CannotBeEmployedException('Tag Team cannot be employed. Tag Team is already employed.'));
-
-        $startAtDate = Carbon::parse($startAtDate)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
-
-        $this->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
-
-        if ($this->currentWrestlers->every->isNotInEmployment()) {
-            $this->currentWrestlers->each->employ($startAtDate);
-        }
-
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Release a tag team.
-     *
-     * @param  string|null $releasedAt
-     * @return $this
-     */
-    public function release($releasedAt = null)
-    {
-        throw_unless($this->canBeReleased(), new CannotBeReleasedException('Tag Team cannot be released. Tag Team does not have an active employment.'));
-    }
-
-    /**
      * Determine if the tag team can be employed.
      *
      * @return bool
@@ -209,82 +147,6 @@ class TagTeam extends Model
         }
 
         return true;
-    }
-
-    /**
-     * Retire a tag team.
-     *
-     * @param  string|null $retiredAt
-     * @return $this
-     */
-    public function retire($retiredAt = null)
-    {
-        throw_unless($this->canBeRetired(), new CannotBeRetiredException('Tag Team cannot be retired. This Tag Team does not have an active employment.'));
-
-        $retiredDate = $retiredAt ?: now();
-
-        if ($this->isSuspended()) {
-            $this->reinstate($retiredAt);
-        }
-
-        $this->currentEmployment()->update(['ended_at' => $retiredDate]);
-        $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->currentWrestlers->each->retire($retiredDate);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Unretire a tag team.
-     *
-     * @param  string|null $unretiredAt
-     * @return void
-     */
-    public function unretire($unretiredAt = null)
-    {
-        throw_unless($this->canBeUnretired(), new CannotBeUnretiredException('Tag Team cannot be unretired. This Tag Team is not retired.'));
-
-        $unretiredDate = $unretiredAt ?: now();
-
-        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->currentWrestlers->each->unretire($unretiredDate);
-        $this->updateStatusAndSave();
-
-        $this->employ($unretiredDate);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Suspend a tag team.
-     *
-     * @param  string|null $suspendedAt
-     * @return void
-     */
-    public function suspend($suspendedAt = null)
-    {
-        throw_unless($this->canBeSuspended(), new CannotBeSuspendedException('Tag Team cannot be reinstated. This Tag Team is not suspended.'));
-
-        $suspendedDate = $suspendedAt ?: now();
-
-        $this->suspensions()->create(['started_at' => $suspendedDate]);
-        $this->currentWrestlers->each->suspend($suspendedDate);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Reinstate a tag team.
-     *
-     * @param  string|null $reinstatedAt
-     * @return void
-     */
-    public function reinstate($reinstatedAt = null)
-    {
-        throw_unless($this->canBeReinstated(), new CannotBeReinstatedException('Tag Team cannot be reinstated. This Tag Team is not suspended.'));
-
-        $reinstatedDate = $reinstatedAt ?: now();
-
-        $this->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $this->currentWrestlers->each->reinstate($reinstatedDate);
-        $this->updateStatusAndSave();
     }
 
     /**

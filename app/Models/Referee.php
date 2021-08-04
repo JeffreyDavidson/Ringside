@@ -4,18 +4,13 @@ namespace App\Models;
 
 use App\Enums\RefereeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Referee extends Model
+class Referee extends SingleRosterMember
 {
     use SoftDeletes,
         HasFactory,
         Concerns\HasFullName,
-        Concerns\Employable,
-        Concerns\Retirable,
-        Concerns\Injurable,
-        Concerns\Suspendable,
         Concerns\Unguarded;
 
     /**

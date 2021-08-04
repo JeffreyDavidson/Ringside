@@ -15,16 +15,21 @@ class RestoreControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function invoke_restores_a_deleted_title_and_redirects()
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function invoke_restores_a_deleted_title_and_redirects($administrators)
     {
         $title = Title::factory()->softDeleted()->create();
 
-        $this->actAs(Role::ADMINISTRATOR)
+        $this->actAs($administrators)
             ->patch(route('titles.restore', $title))
             ->assertRedirect(route('titles.index'));
 
-        $this->assertNull($title->fresh()->deleted_at);
+        tap($title->fresh(), function ($title) {
+            $this->assertNull($title->deleted_at);
+        });
     }
 
     /** @test */

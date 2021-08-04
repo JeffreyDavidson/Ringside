@@ -27,8 +27,9 @@ class AddCurrentStableIdToTagTeamsTable extends Migration
      */
     public function down()
     {
-        Schema::table('tagteams', function (Blueprint $table) {
-            //
+        Schema::table('tag_teams', function (Blueprint $table) {
+            $table->dropForeign('tag_teams_current_stable_id_foreign');
+            $table->dropColumn(['current_stable_id']);
         });
     }
 }

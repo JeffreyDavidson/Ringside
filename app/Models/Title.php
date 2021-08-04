@@ -3,17 +3,16 @@
 namespace App\Models;
 
 use App\Enums\TitleStatus;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Contracts\Activatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Title extends Model
+class Title extends Model implements Activatable
 {
     use SoftDeletes,
         HasFactory,
-        Concerns\CanBeActivated,
+        Concerns\Activatable,
         Concerns\Retirable,
         Concerns\Unguarded;
 
@@ -39,37 +38,17 @@ class Title extends Model
     ];
 
     /**
-     * Retire a title.
+     * Determine if the model can be retired.
      *
-     * @param  string|null $retiredAt
-     * @return void
+     * @return bool
      */
-    public function retire($retiredAt = null)
+    public function canBeRetired()
     {
-        throw_unless($this->canBeRetired(), new CannotBeRetiredException);
+        if ($this->isNotInActivation()) {
+            return false;
+        }
 
-        $retiredDate = $retiredAt ?: now();
-
-        $this->currentActivation()->update(['ended_at' => $retiredDate]);
-        $this->retirements()->create(['started_at' => $retiredDate]);
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Unretire a title.
-     *
-     * @param  string|null $startedAt
-     * @return void
-     */
-    public function unretire($unretiredAt = null)
-    {
-        throw_unless($this->canBeUnretired(), new CannotBeUnretiredException);
-
-        $unretiredDate = $unretiredAt ?: now();
-
-        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->activate($unretiredDate);
-        $this->updateStatusAndSave();
+        return true;
     }
 
     /**

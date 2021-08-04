@@ -3,18 +3,16 @@
 namespace App\Models;
 
 use App\Enums\StableStatus;
-use App\Exceptions\CannotBeDisassembledException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Contracts\Activatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Stable extends Model
+class Stable extends Model implements Activatable
 {
     use SoftDeletes,
         HasFactory,
-        Concerns\CanBeActivated,
+        Concerns\Activatable,
         Concerns\Retirable,
         Concerns\Unguarded;
 
@@ -113,20 +111,6 @@ class Stable extends Model
         return $this->tagTeams()->whereNotNull('left_at');
     }
 
-    public function addWrestlers($wrestlerIds, $joinedDate)
-    {
-        foreach ($wrestlerIds as $wrestlerId) {
-            $this->wrestlers()->attach($wrestlerId, ['joined_at' => $joinedDate]);
-        }
-    }
-
-    public function addTagTeams($tagTeamIds, $joinedDate)
-    {
-        foreach ($tagTeamIds as $tagTeamId) {
-            $this->tagTeams()->attach($tagTeamId, ['joined_at' => $joinedDate]);
-        }
-    }
-
     /**
      * Get the members belonging to the stable.
      *
@@ -160,74 +144,6 @@ class Stable extends Model
     public function previousMembers()
     {
         return $this->previousTagTeams()->previousWrestlers();
-    }
-
-    /**
-     * Undocumented function.
-     *
-     * @return void
-     */
-    public function disassemble($deactivatedAt = null)
-    {
-        throw_unless($this->canBeDisassembled(), new CannotBeDisassembledException('Entity cannot be disassembled. This stable does not have an active activation.'));
-
-        $deactivationDate = $deactivatedAt ?: now();
-
-        $this->currentActivation()->update(['ended_at' => $deactivationDate]);
-        $this->currentWrestlers()->detach();
-        $this->currentTagTeams()->detach();
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Determine if the tag team can be disassembled.
-     *
-     * @return bool
-     */
-    public function canBeDisassembled()
-    {
-        if ($this->isNotInActivation()) {
-            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Retire a stable and its members.
-     *
-     * @param  string|null $retiredAt
-     * @return void
-     */
-    public function retire($retiredAt = null)
-    {
-        throw_unless($this->canBeRetired(), new CannotBeRetiredException);
-
-        $retiredDate = $retiredAt ?: now();
-
-        $this->currentActivation()->update(['ended_at' => $retiredDate]);
-        $this->retirements()->create(['started_at' => now()]);
-        $this->currentWrestlers->each->retire($retiredDate);
-        $this->currentTagTeams->each->retire();
-        $this->updateStatusAndSave();
-    }
-
-    /**
-     * Unretire a stable.
-     *
-     * @param  string|null $unretiredAt
-     * @return $this
-     */
-    public function unretire($unretiredAt = null)
-    {
-        throw_unless($this->canBeUnretired(), new CannotBeUnretiredException('Entity cannot be unretired. This entity is not retired.'));
-
-        $unretiredDate = $unretiredAt ?: now();
-
-        $this->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->activate($unretiredDate);
-        $this->updateStatusAndSave();
     }
 
     /**

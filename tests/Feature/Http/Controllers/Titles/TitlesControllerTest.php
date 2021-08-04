@@ -28,6 +28,7 @@ class TitlesControllerTest extends TestCase
     {
         return array_replace([
             'name' => 'Example Name Title',
+            'activated_at' => now()->toDateTimeString(),
         ], $overrides);
     }
 
@@ -116,7 +117,7 @@ class TitlesControllerTest extends TestCase
             ->post(route('titles.store'), $this->validParams(['activated_at' => null]));
 
         tap(Title::first(), function ($title) {
-            $this->assertCount(0, $title->activations);
+            $this->assertFalse($title->hasActivations());
         });
     }
 
@@ -133,7 +134,7 @@ class TitlesControllerTest extends TestCase
             ->post(route('titles.store'), $this->validParams(['activated_at' => $activatedAt]));
 
         tap(Title::first(), function ($title) use ($activatedAt) {
-            $this->assertCount(1, $title->activations);
+            $this->assertTrue($title->hasActivations());
             $this->assertEquals($activatedAt, $title->activations->first()->started_at->toDateTimeString());
         });
     }
@@ -226,7 +227,7 @@ class TitlesControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) {
-            $this->assertCount(1, $title->activations);
+            $this->assertTrue($title->hasActivations());
         });
     }
 

@@ -70,4 +70,77 @@ class RefereeTest extends TestCase
     {
         $this->assertEquals(SingleRosterMember::class, get_parent_class(Referee::class));
     }
+
+    /** @test */
+    public function employing_a_released_referee_and_redirects($administrators)
+    {
+        $now = now();
+        Carbon::setTestNow($now);
+
+        $referee = Referee::factory()->released()->create();
+
+        $referee->employ();
+
+        tap($referee->fresh(), function ($referee) use ($now) {
+            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
+            $this->assertCount(2, $referee->employments);
+            $this->assertEquals($now->toDateTimeString(), $referee->employments->last()->started_at->toDateTimeString());
+        });
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function employing_a_bookable_referee_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeEmployedException::class);
+        $this->withoutExceptionHandling();
+
+        $referee = Referee::factory()->bookable()->create();
+
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function employing_a_retired_referee_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeEmployedException::class);
+        $this->withoutExceptionHandling();
+
+        $referee = Referee::factory()->retired()->create();
+
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
+    }
+
+    /**
+     * @test
+     * @dataProvider administrators
+     */
+    public function employing_a_suspended_referee_throws_an_exception($administrators)
+    {
+        $this->expectException(CannotBeEmployedException::class);
+        $this->withoutExceptionHandling();
+
+        $referee = Referee::factory()->suspended()->create();
+
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee));
+    }
+
+    /** @test */
+    public function employing_an_injured_referee_throws_an_exception()
+    {
+        $this->expectException(CannotBeEmployedException::class);
+        $this->withoutExceptionHandling();
+
+        $referee = Referee::factory()->injured()->create();
+
+        $referee->employ();
+    }
 }

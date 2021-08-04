@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\Livewire\Titles;
+namespace Tests\Unit\Http\Livewire\Titles;
 
 use App\Http\Livewire\Titles\InactiveTitles;
 use App\Models\Title;

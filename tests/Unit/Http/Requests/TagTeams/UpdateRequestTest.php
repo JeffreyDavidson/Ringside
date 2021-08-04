@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Http\Requests\TagTeams;
 
-use App\Http\Requests\TagTeams\UpdateRequest;
+use Tests\TestCase;
 use App\Models\TagTeam;
-use App\Rules\CannotBelongToMultipleEmployedTagTeams;
-use App\Rules\EmploymentStartDateCanBeChanged;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
 use Illuminate\Validation\Rules\Unique;
-use Tests\TestCase;
+use App\Http\Requests\TagTeams\UpdateRequest;
+use App\Rules\EmploymentStartDateCanBeChanged;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Rules\CannotBelongToMultipleEmployedTagTeams;
 
 /**
  * @group tagteams
@@ -28,7 +28,7 @@ class UpdateRequestTest extends TestCase
         $subject = $this->createFormRequest(UpdateRequest::class);
         $subject->setRouteResolver(function () use ($tagTeam) {
             $stub = $this->createStub(Route::class);
-            $stub->expects($this->any())->method('hasParameter')->with('tag_team')->willReturn(true);
+            // $stub->expects($this->any())->method('hasParameter')->with('tag_team')->willReturn(true);
             $stub->expects($this->any())->method('parameter')->with('tag_team')->willReturn($tagTeam);
 
             return $stub;

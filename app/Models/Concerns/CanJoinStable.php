@@ -2,10 +2,9 @@
 
 namespace App\Models\Concerns;
 
-use App\Models\Member;
 use App\Models\Stable;
 
-trait CanBeStableMember
+trait CanJoinStable
 {
     /**
      * Get the stables the model has been belonged to.

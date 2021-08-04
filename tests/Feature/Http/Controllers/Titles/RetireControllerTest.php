@@ -26,8 +26,7 @@ class RetireControllerTest extends TestCase
      */
     public function invoke_retires_an_active_title_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        Carbon::setTestNow($now = now());
 
         $title = Title::factory()->active()->create();
 
@@ -36,8 +35,8 @@ class RetireControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) use ($now) {
-            $this->assertEquals(TitleStatus::RETIRED, $title->status);
-            $this->assertCount(1, $title->retirements);
+            $this->assertTrue($title->hasRetirements());
+            $this->assertTrue($title->isRetired());
             $this->assertEquals($now->toDateTimeString(), $title->retirements->first()->started_at->toDateTimeString());
         });
     }

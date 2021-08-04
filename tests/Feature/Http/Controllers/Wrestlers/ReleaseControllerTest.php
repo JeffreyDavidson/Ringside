@@ -3,14 +3,11 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
-use App\Enums\TagTeamStatus;
-use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Wrestlers\ReleaseController;
 use App\Http\Requests\Wrestlers\ReleaseRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,18 +29,14 @@ class ReleaseControllerTest extends TestCase
      */
     public function invoke_releases_a_bookable_wrestler_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler))
+            ->put(route('wrestlers.release', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->ended_at->toDateTimeString('minute'));
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertTrue($wrestler->isReleased());
         });
     }
 
@@ -53,19 +46,15 @@ class ReleaseControllerTest extends TestCase
      */
     public function invoke_releases_an_injured_wrestler_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
+        $this->withoutExceptionHandling();
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler))
+            ->put(route('wrestlers.release', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->ended_at->toDateTimeString('minute'));
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->injuries->first()->ended_at->toDateTimeString('minute'));
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertTrue($wrestler->isReleased());
         });
     }
 
@@ -75,19 +64,14 @@ class ReleaseControllerTest extends TestCase
      */
     public function invoke_releases_a_suspended_wrestler_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler))
+            ->put(route('wrestlers.release', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->employments->first()->ended_at->toDateTimeString('minute'));
-            $this->assertEquals($now->toDateTimeString('minute'), $wrestler->suspensions->first()->ended_at->toDateTimeString('minute'));
+        tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertTrue($wrestler->isReleased());
         });
     }
 
@@ -100,12 +84,12 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+            ->put(route('wrestlers.release', $wrestler));
 
-        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
+        tap($tagTeam->fresh(), function ($tagTeam) {
+            $this->assertTrue($tagTeam->isUnbookable());
+        });
     }
 
     /** @test */
@@ -120,7 +104,7 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.release', $wrestler))
+            ->put(route('wrestlers.release', $wrestler))
             ->assertForbidden();
     }
 
@@ -129,7 +113,7 @@ class ReleaseControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.release', $wrestler))
+        $this->put(route('wrestlers.release', $wrestler))
             ->assertRedirect(route('login'));
     }
 
@@ -145,7 +129,7 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+            ->put(route('wrestlers.release', $wrestler));
     }
 
     /**
@@ -160,7 +144,7 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+            ->put(route('wrestlers.release', $wrestler));
     }
 
     /**
@@ -175,7 +159,7 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->released()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+            ->put(route('wrestlers.release', $wrestler));
     }
 
     /**
@@ -190,6 +174,6 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->retired()->create();
 
         $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+            ->put(route('wrestlers.release', $wrestler));
     }
 }

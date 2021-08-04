@@ -1,5 +1,6 @@
 <?php
 
+// Auth::loginUsingId(5);
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -13,9 +14,7 @@ use App\Http\Controllers\DashboardController;
 |
 */
 
-Route::namespace('App\Http\Controllers')->group(function () {
-    Auth::routes();
-});
+require __DIR__.'/auth.php';
 
 Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');

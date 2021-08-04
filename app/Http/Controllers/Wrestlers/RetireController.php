@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wrestlers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\RetireRequest;
 use App\Models\Wrestler;
+use App\Services\WrestlerService;
 
 class RetireController extends Controller
 {
@@ -13,15 +14,12 @@ class RetireController extends Controller
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \App\Http\Requests\Wrestlers\RetireRequest  $request
+     * @param  \App\Services\WrestlerService $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler, RetireRequest $request)
+    public function __invoke(Wrestler $wrestler, RetireRequest $request, WrestlerService $wrestlerService)
     {
-        $wrestler->retire();
-
-        if ($wrestler->currentTagTeam) {
-            $wrestler->currentTagTeam->updateStatusAndSave();
-        }
+        $wrestlerService->retire($wrestler);
 
         return redirect()->route('wrestlers.index');
     }

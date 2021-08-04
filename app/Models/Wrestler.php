@@ -3,19 +3,16 @@
 namespace App\Models;
 
 use App\Enums\WrestlerStatus;
+use App\Models\Contracts\Bookable;
+use App\Models\Contracts\CanJoinStable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Wrestler extends Model
+class Wrestler extends SingleRosterMember implements Bookable, CanJoinStable
 {
     use SoftDeletes,
         HasFactory,
-        Concerns\CanBeStableMember,
-        Concerns\Suspendable,
-        Concerns\Retirable,
-        Concerns\Employable,
-        Concerns\Injurable,
+        Concerns\CanJoinStable,
         Concerns\Unguarded;
 
     /**
@@ -95,6 +92,19 @@ class Wrestler extends Model
     }
 
     /**
+     * Scope a query to only include bookable wrestlers.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBookable($query)
+    {
+        return $query->whereHas('currentEmployment')
+                    ->whereDoesntHave('currentSuspension')
+                    ->whereDoesntHave('currentInjury');
+    }
+
+    /**
      * Return the wrestler's height formatted.
      *
      * @return string
@@ -122,19 +132,6 @@ class Wrestler extends Model
     public function getInchesAttribute()
     {
         return $this->height % 12;
-    }
-
-    /**
-     * Scope a query to only include bookable wrestlers.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeBookable($query)
-    {
-        return $query->whereHas('currentEmployment')
-                    ->whereDoesntHave('currentSuspension')
-                    ->whereDoesntHave('currentInjury');
     }
 
     /**

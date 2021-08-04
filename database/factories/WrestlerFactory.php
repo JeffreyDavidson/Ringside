@@ -36,6 +36,15 @@ class WrestlerFactory extends Factory
         ];
     }
 
+    public function employed(): self
+    {
+        return $this->hasEmployments(1, ['started_at' => Carbon::yesterday()])
+        ->afterCreating(function (Wrestler $wrestler) {
+            $wrestler->save();
+            $wrestler->load('employments');
+        });
+    }
+
     public function bookable(): self
     {
         return $this->state([

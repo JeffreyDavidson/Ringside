@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
-use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Requests\Titles\ActivateRequest;
@@ -26,8 +25,7 @@ class ActivateControllerTest extends TestCase
      */
     public function invoke_activates_an_unactivated_title_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        Carbon::setTestNow($now = now());
 
         $title = Title::factory()->unactivated()->create();
 
@@ -36,8 +34,8 @@ class ActivateControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) use ($now) {
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-            $this->assertCount(1, $title->activations);
+            $this->assertTrue($title->hasActivations());
+            $this->assertTrue($title->isCurrentlyActivated());
             $this->assertEquals($now->toDateTimeString(), $title->activations->first()->started_at->toDateTimeString());
         });
     }
@@ -48,8 +46,7 @@ class ActivateControllerTest extends TestCase
      */
     public function invoke_activates_a_future_activated_title_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        Carbon::setTestNow($now = now());
 
         $title = Title::factory()->withFutureActivation()->create();
 
@@ -58,8 +55,8 @@ class ActivateControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) use ($now) {
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-            $this->assertCount(1, $title->activations);
+            $this->assertTrue($title->hasActivations());
+            $this->assertTrue($title->isCurrentlyActivated());
             $this->assertEquals($now->toDateTimeString(), $title->activations->first()->started_at->toDateTimeString());
         });
     }
@@ -70,8 +67,7 @@ class ActivateControllerTest extends TestCase
      */
     public function invoke_activates_an_inactive_title_and_redirects($administrators)
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        Carbon::setTestNow($now = now());
 
         $title = Title::factory()->inactive()->create();
 
@@ -80,7 +76,7 @@ class ActivateControllerTest extends TestCase
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) use ($now) {
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
+            $this->assertTrue($title->isCurrentlyActivated());
             $this->assertCount(2, $title->activations);
             $this->assertEquals($now->toDateTimeString(), $title->activations->last()->started_at->toDateTimeString());
         });

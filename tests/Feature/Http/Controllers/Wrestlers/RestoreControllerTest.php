@@ -25,7 +25,7 @@ class RestoreControllerTest extends TestCase
         $wrestler = Wrestler::factory()->softDeleted()->create();
 
         $this->actAs(Role::ADMINISTRATOR)
-            ->patch(route('wrestlers.restore', $wrestler))
+            ->put(route('wrestlers.restore', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
 
         $this->assertNull($wrestler->fresh()->deleted_at);
@@ -37,7 +37,7 @@ class RestoreControllerTest extends TestCase
         $wrestler = Wrestler::factory()->softDeleted()->create();
 
         $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.restore', $wrestler))
+            ->put(route('wrestlers.restore', $wrestler))
             ->assertForbidden();
     }
 
@@ -46,7 +46,7 @@ class RestoreControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->softDeleted()->create();
 
-        $this->patch(route('wrestlers.restore', $wrestler))
+        $this->put(route('wrestlers.restore', $wrestler))
             ->assertRedirect(route('login'));
     }
 }

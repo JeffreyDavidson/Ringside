@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wrestlers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\ReleaseRequest;
 use App\Models\Wrestler;
+use App\Services\WrestlerService;
 
 class ReleaseController extends Controller
 {
@@ -13,15 +14,12 @@ class ReleaseController extends Controller
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \App\Http\Requests\Wrestlers\ReleaseRequest  $request
+     * @param  \App\Services\WrestlerService $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler, ReleaseRequest $request)
+    public function __invoke(Wrestler $wrestler, ReleaseRequest $request, WrestlerService $wrestlerService)
     {
-        $wrestler->release();
-
-        if ($wrestler->currentTagTeam) {
-            $wrestler->currentTagTeam->updateStatusAndSave();
-        }
+        $wrestlerService->release($wrestler);
 
         return redirect()->route('wrestlers.index');
     }
