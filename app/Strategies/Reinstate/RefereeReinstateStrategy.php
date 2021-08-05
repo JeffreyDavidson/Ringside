@@ -3,17 +3,25 @@
 namespace App\Strategies\Reinstate;
 
 use App\Exceptions\CannotBeReinstatedException;
+use App\Models\Contracts\Reinstatable;
 use Carbon\Carbon;
 
 class RefereeReinstateStrategy extends BaseReinstateStrategy implements ReinstateStrategyInterface
 {
-    public function reinstate($model)
+    private Reinstatable $reinstatable;
+
+    public function __construct(Reinstatable $reinstatable)
     {
-        throw_unless($model->canBeReinstated(), new CannotBeReinstatedException);
+        $this->reinstatable = $reinstatable;
+    }
+
+    public function reinstate(Carbon $reinstatedAt = null)
+    {
+        throw_unless($this->reinstatable->canBeReinstated(), new CannotBeReinstatedException);
 
         $reinstatedDate = Carbon::parse($reinstatedAt)->toDateTimeString() ?: now()->toDateTimeString();
 
-        $model->currentSuspension()->update(['ended_at' => $reinstatedDate]);
-        $model->updateStatusAndSave();
+        $this->reinstatable->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+        $this->reinstatable->updateStatusAndSave();
     }
 }

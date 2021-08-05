@@ -3,22 +3,30 @@
 namespace App\Strategies\Employment;
 
 use App\Exceptions\CannotBeEmployedException;
+use App\Models\Contracts\Employable;
 use Carbon\Carbon;
 
 class TagTeamEmploymentStrategy extends BaseEmploymentStrategy implements EmploymentStrategyInterface
 {
-    public function employ($model)
+    private Employable $employable;
+
+    public function __construct(Employable $employable)
     {
-        throw_unless($model->canBeEmployed(), new CannotBeEmployedException);
+        $this->employable = $employable;
+    }
 
-        $startAtDate = Carbon::parse($startAtDate)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
+    public function employ(Carbon $startedAt = null)
+    {
+        throw_unless($this->employable->canBeEmployed(), new CannotBeEmployedException);
 
-        $model->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
+        $startAtDate = Carbon::parse($startedAt)->toDateTimeString('minute') ?? now()->toDateTimeString('minute');
 
-        if ($model->currentWrestlers->every->isNotInEmployment()) {
-            $model->currentWrestlers->each->employ($startAtDate);
+        $this->employable->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
+
+        if ($this->employable->currentWrestlers->every->isNotInEmployment()) {
+            $this->employable->currentWrestlers->each->employ($startAtDate);
         }
 
-        $model->updateStatusAndSave();
+        $this->employable->updateStatusAndSave();
     }
 }

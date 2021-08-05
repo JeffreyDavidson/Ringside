@@ -3,17 +3,26 @@
 namespace App\Strategies\Unretire;
 
 use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Contracts\Unretirable;
+use Carbon\Carbon;
 
 class StableUnretireStrategy extends BaseUnretireStrategy implements UnretireStrategyInterface
 {
-    public function unretire($model)
+    private Unretirable $unretirable;
+
+    public function __construct(Unretirable $unretirable)
     {
-        throw_unless($model->canBeUnretired(), new CannotBeUnretiredException);
+        $this->unretirable = $unretirable;
+    }
+
+    public function unretire(Carbon $unretiredAt = null)
+    {
+        throw_unless($this->unretirable->canBeUnretired(), new CannotBeUnretiredException);
 
         $unretiredDate = $unretiredAt ?: now();
 
-        $model->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $model->activate($unretiredDate);
-        $model->updateStatusAndSave();
+        $this->unretirable->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        $this->unretirable->activate($unretiredDate);
+        $this->unretirable->updateStatusAndSave();
     }
 }

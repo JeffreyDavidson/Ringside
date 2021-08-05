@@ -4,11 +4,12 @@ namespace App\Models;
 
 use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
+use App\Models\Contracts\Deactivatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Stable extends Model implements Activatable
+class Stable extends Model implements Activatable, Deactivatable
 {
     use SoftDeletes,
         HasFactory,

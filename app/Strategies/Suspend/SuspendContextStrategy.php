@@ -6,6 +6,7 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class SuspendContextStrategy
@@ -27,8 +28,8 @@ class SuspendContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(): void
+    public function process(Carbon $suspendedAt = null): void
     {
-        $this->strategy->suspend();
+        $this->strategy->suspend($suspendedAt);
     }
 }

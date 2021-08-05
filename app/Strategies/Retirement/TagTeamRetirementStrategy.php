@@ -3,23 +3,32 @@
 namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
+use App\Models\Contracts\Retirable;
 use App\Strategies\Reinstate\TagTeamReinstateStrategy;
+use Carbon\Carbon;
 
 class TagTeamRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
-    public function retire($model)
+    private Retirable $retirable;
+
+    public function __construct(Retirable $retirable)
     {
-        throw_unless($model->canBeRetired(), new CannotBeRetiredException);
+        $this->retirable = $retirable;
+    }
+
+    public function retire(Carbon $retiredAt = null)
+    {
+        throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
         $retiredDate = $retiredAt ?: now();
 
-        if ($model->isSuspended()) {
-            TagTeamReinstateStrategy::handle($model);
+        if ($this->retirable->isSuspended()) {
+            TagTeamReinstateStrategy::handle($this->retirable);
         }
 
-        $model->currentEmployment()->update(['ended_at' => $retiredDate]);
-        $model->retirements()->create(['started_at' => $retiredDate]);
-        $model->currentWrestlers->each->retire($retiredDate);
-        $model->updateStatusAndSave();
+        $this->retirable->currentEmployment()->update(['ended_at' => $retiredDate]);
+        $this->retirable->retirements()->create(['started_at' => $retiredDate]);
+        $this->retirable->currentWrestlers->each->retire($retiredDate);
+        $this->retirable->updateStatusAndSave();
     }
 }

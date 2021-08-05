@@ -3,21 +3,29 @@
 namespace App\Strategies\Injure;
 
 use App\Exceptions\CannotBeInjuredException;
+use App\Models\Contracts\Injurable;
 use Carbon\Carbon;
 
 class WrestlerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategyInterface
 {
-    public function injure($model)
+    private Injurable $injurable;
+
+    public function __construct(Injurable $injurable)
     {
-        throw_unless($model->canBeInjured(), new CannotBeInjuredException);
+        $this->injurable = $injurable;
+    }
+
+    public function injure(Carbon $injuredAt = null)
+    {
+        throw_unless($this->injurable->canBeInjured(), new CannotBeInjuredException);
 
         $injuredDate = Carbon::parse($injuredAt)->toDateTimeString() ?? now()->toDateTimeString();
 
-        $model->injuries()->create(['started_at' => $injuredDate]);
-        $model->updateStatusAndSave();
+        $this->injurable->injuries()->create(['started_at' => $injuredDate]);
+        $this->injurable->updateStatusAndSave();
 
-        if ($model->currentTagTeam) {
-            $model->currentTagTeam->updateStatusAndSave();
+        if ($this->injurable->currentTagTeam) {
+            $this->injurable->currentTagTeam->updateStatusAndSave();
         }
     }
 }

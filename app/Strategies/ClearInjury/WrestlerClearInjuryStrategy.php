@@ -3,21 +3,27 @@
 namespace App\Strategies\ClearInjury;
 
 use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Models\Contracts\Injurable;
 use Carbon\Carbon;
 
 class WrestlerClearInjuryStrategy extends BaseClearInjuryStrategy implements ClearInjuryStrategyInterface
 {
-    public function clearInjury($model)
+    public function __construct(Injurable $injurable)
     {
-        throw_unless($model->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
+        $this->injurable = $injurable;
+    }
+
+    public function clearInjury(Carbon $recoveredAt = null)
+    {
+        throw_unless($this->injurable->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
 
         $recoveryDate = Carbon::parse($recoveredAt)->toDateTImeString() ?? now()->toDateTimeString();
 
-        $model->currentInjury()->update(['ended_at' => $recoveryDate]);
-        $model->updateStatusAndSave();
+        $this->injurable->currentInjury()->update(['ended_at' => $recoveryDate]);
+        $this->injurable->updateStatusAndSave();
 
-        if ($model->currentTagTeam) {
-            $model->currentTagTeam->updateStatusAndSave();
+        if ($this->injurable->currentTagTeam) {
+            $this->injurable->currentTagTeam->updateStatusAndSave();
         }
     }
 }

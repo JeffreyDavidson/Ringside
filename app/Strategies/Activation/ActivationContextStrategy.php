@@ -2,11 +2,10 @@
 
 namespace App\Strategies\Activation;
 
-use Carbon\Carbon;
 use App\Models\Title;
 use App\Models\Stable;
-use App\Models\Contracts\Activatable;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class ActivationContextStrategy
 {

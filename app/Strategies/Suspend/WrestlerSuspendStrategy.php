@@ -3,21 +3,29 @@
 namespace App\Strategies\Suspend;
 
 use App\Exceptions\CannotBeSuspendedException;
+use App\Models\Contracts\Suspendable;
 use Carbon\Carbon;
 
 class WrestlerSuspendStrategy extends BaseSuspendStrategy implements SuspendStrategyInterface
 {
-    public function suspend($model)
+    private Suspendable $suspendable;
+
+    public function __construct(Suspendable $suspendable)
     {
-        throw_unless($model->canBeSuspended(), new CannotBeSuspendedException);
+        $this->suspendable = $suspendable;
+    }
+
+    public function suspend(Carbon $suspendedAt = null)
+    {
+        throw_unless($this->suspendable->canBeSuspended(), new CannotBeSuspendedException);
 
         $suspensionDate = Carbon::parse($suspendedAt)->toDateTimeString() ?? now()->toDateTimeString();
 
-        $model->suspensions()->create(['started_at' => $suspensionDate]);
-        $model->updateStatusAndSave();
+        $this->suspendable->suspensions()->create(['started_at' => $suspensionDate]);
+        $this->suspendable->updateStatusAndSave();
 
-        if ($model->currentTagTeam) {
-            $model->currentTagTeam->updateStatusAndSave();
+        if ($this->suspendable->currentTagTeam) {
+            $this->suspendable->currentTagTeam->updateStatusAndSave();
         }
     }
 }

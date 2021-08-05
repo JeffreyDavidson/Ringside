@@ -3,19 +3,28 @@
 namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
+use App\Models\Contracts\Retirable;
+use Carbon\Carbon;
 
 class StableRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
-    public function retire($model)
+    private Retirable $retirable;
+
+    public function __construct(Retirable $retirable)
     {
-        throw_unless($model->canBeRetired(), new CannotBeRetiredException);
+        $this->retirable = $retirable;
+    }
+
+    public function retire(Carbon $retiredAt = null)
+    {
+        throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
         $retiredDate = $retiredAt ?: now();
 
-        $model->currentActivation()->update(['ended_at' => $retiredDate]);
-        $model->retirements()->create(['started_at' => now()]);
-        $model->currentWrestlers->each->retire($retiredDate);
-        $model->currentTagTeams->each->retire();
-        $model->updateStatusAndSave();
+        $this->retirable->currentActivation()->update(['ended_at' => $retiredDate]);
+        $this->retirable->retirements()->create(['started_at' => now()]);
+        $this->retirable->currentWrestlers->each->retire($retiredDate);
+        $this->retirable->currentTagTeams->each->retire();
+        $this->retirable->updateStatusAndSave();
     }
 }
