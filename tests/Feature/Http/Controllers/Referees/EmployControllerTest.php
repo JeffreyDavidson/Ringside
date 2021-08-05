@@ -28,11 +28,12 @@ class EmployControllerTest extends TestCase
      */
     public function invoke_employs_an_employable_referee_and_redirects($employableReferees)
     {
+        dd($employableReferees);
         $this->actAs(Role::ADMINISTRATOR)
             ->patch(route('referees.employ', $employableReferees))
             ->assertRedirect(route('referees.index'));
 
-        tap($employableReferees->fresh(), function ($referee) use ($now) {
+        tap($employableReferees->fresh(), function ($referee) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
     }
@@ -65,8 +66,8 @@ class EmployControllerTest extends TestCase
     public function employableReferees()
     {
         return [
-            'released' => ['testing'],
-            // 'released' => [Referee::factory()->released()->create()],
+            // 'released' => ['testing'],
+            'released' => [Referee::factory()->released()->create()],
             // 'has_future_employment' => [Referee::factory()->withFutureEmployment()->create()],
             // 'unemployed' => [Referee::factory()->unemployed()->create()],
         ];

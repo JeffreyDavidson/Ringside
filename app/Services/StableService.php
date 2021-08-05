@@ -2,11 +2,7 @@
 
 namespace App\Services;
 
-use App\Exceptions\CannotBeActivatedException;
-use App\Exceptions\CannotBeDeactivatedException;
 use App\Exceptions\CannotBeDisassembledException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
 
@@ -160,37 +156,6 @@ class StableService
     }
 
     /**
-     * Activate a model.
-     *
-     *
-     * @param \App\Models\Stable $stable
-     * @param  string|null $startedAt
-     * @return void
-     */
-    public function activate($stable, $startedAt = null)
-    {
-        throw_unless($stable->canBeActivated(), new CannotBeActivatedException);
-
-        $stable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
-        $stable->updateStatusAndSave();
-    }
-
-    /**
-     * Deactivate a model.
-     *
-     * @param \App\Models\Stable $stable
-     * @param  string|null $deactivatedAt
-     * @return void
-     */
-    public function deactivate($stable, $deactivatedAt = null)
-    {
-        throw_unless($stable->canBeDeactivated(), new CannotBeDeactivatedException);
-
-        $stable->currentActivation()->update(['ended_at' => $deactivatedAt ?? now()]);
-        $stable->updateStatusAndSave();
-    }
-
-    /**
      * Undocumented function.
      *
      * @param  \App\Models\Stable $stable
@@ -222,44 +187,6 @@ class StableService
         }
 
         return true;
-    }
-
-    /**
-     * Retire a stable and its members.
-     *
-     * @param  \App\Models\Stable $stable
-     * @param  string|null $retiredAt
-     * @return void
-     */
-    public function retire($stable, $retiredAt = null)
-    {
-        throw_unless($stable->canBeRetired(), new CannotBeRetiredException);
-
-        $retiredDate = $retiredAt ?: now();
-
-        $stable->currentActivation()->update(['ended_at' => $retiredDate]);
-        $stable->retirements()->create(['started_at' => now()]);
-        $stable->currentWrestlers->each->retire($retiredDate);
-        $stable->currentTagTeams->each->retire();
-        $stable->updateStatusAndSave();
-    }
-
-    /**
-     * Unretire a stable.
-     *
-     * @param  \App\Models\Stable $stable
-     * @param  string|null $unretiredAt
-     * @return $this
-     */
-    public function unretire($stable, $unretiredAt = null)
-    {
-        throw_unless($stable->canBeUnretired(), new CannotBeUnretiredException);
-
-        $unretiredDate = $unretiredAt ?: now();
-
-        $stable->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $stable->activate($unretiredDate);
-        $stable->updateStatusAndSave();
     }
 
     public function addWrestlers($stable, $wrestlerIds, $joinedDate)
