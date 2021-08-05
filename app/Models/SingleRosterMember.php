@@ -12,7 +12,7 @@ use App\Models\Contracts\Suspendable;
 use App\Models\Contracts\Unretirable;
 use Illuminate\Database\Eloquent\Model;
 
-class SingleRosterMember extends Model implements Deactivatable, Employable, Injurable, Releasable, Reinstatable, Retirable, Suspendable, Unretirable
+abstract class SingleRosterMember extends Model implements Deactivatable, Employable, Injurable, Releasable, Reinstatable, Retirable, Suspendable, Unretirable
 {
     /**
      * Get all of the employments of the model.
@@ -21,6 +21,7 @@ class SingleRosterMember extends Model implements Deactivatable, Employable, Inj
      */
     public function employments()
     {
+        return $this->morphMany(Employment::class, 'employable');
         return $this->morphMany(Employment::class, 'employable');
     }
 
