@@ -3,31 +3,39 @@
 namespace App\Strategies\Release;
 
 use App\Exceptions\CannotBeReleasedException;
+use App\Models\Contracts\Releasable;
 use App\Strategies\ClearInjury\WrestlerClearInjuryStrategy;
 use App\Strategies\Reinstate\WrestlerReinstateStrategy;
 use Carbon\Carbon;
 
 class WrestlerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
-    public function release($model)
-    {
-        throw_unless($model->canBeReleased(), new CannotBeReleasedException);
+    private Releasable $releasable;
 
-        if ($model->isSuspended()) {
-            WrestlerReinstateStrategy::handle($model);
+    public function __construct(Releasable $releasable)
+    {
+        $this->releasable = $releasable;
+    }
+
+    public function release(Carbon $releasedAt = null)
+    {
+        throw_unless($this->releasable->canBeReleased(), new CannotBeReleasedException);
+
+        if ($this->releasable->isSuspended()) {
+            WrestlerReinstateStrategy::handle($this->releasable);
         }
 
-        if ($model->isInjured()) {
-            WrestlerClearInjuryStrategy::handle($model);
+        if ($this->releasable->isInjured()) {
+            WrestlerClearInjuryStrategy::handle($this->releasable);
         }
 
         $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();
 
-        $model->currentEmployment->update(['ended_at' => $releaseDate]);
-        $model->updateStatusAndSave();
+        $this->releasable->currentEmployment->update(['ended_at' => $releaseDate]);
+        $this->releasable->updateStatusAndSave();
 
-        if ($model->currentTagTeam) {
-            $model->currentTagTeam->updateStatusAndSave();
+        if ($this->releasable->currentTagTeam) {
+            $this->releasable->currentTagTeam->updateStatusAndSave();
         }
     }
 }

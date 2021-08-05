@@ -2,7 +2,9 @@
 
 namespace App\Strategies\Reinstate;
 
+use Carbon\Carbon;
+
 interface ReinstateStrategyInterface
 {
-    public function reinstate($model);
+    public function reinstate(Carbon $reinstatedAt = null);
 }

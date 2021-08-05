@@ -2,7 +2,9 @@
 
 namespace App\Strategies\Retirement;
 
+use Carbon\Carbon;
+
 interface RetirementStrategyInterface
 {
-    public function retire($model);
+    public function retire(Carbon $retiredAt = null);
 }

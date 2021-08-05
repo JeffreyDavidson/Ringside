@@ -8,14 +8,17 @@ use App\Exceptions\NotEnoughMembersException;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanJoinStable;
 use App\Models\Contracts\Employable;
+use App\Models\Contracts\Reinstatable;
+use App\Models\Contracts\Releasable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Contracts\Unretirable;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TagTeam extends Model implements Bookable, CanJoinStable, Employable, Retirable, Suspendable
+class TagTeam extends Model implements Bookable, CanJoinStable, Employable, Releasable, Reinstatable, Retirable, Suspendable, Unretirable
 {
     use SoftDeletes,
         HasFactory,

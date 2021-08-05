@@ -3,14 +3,23 @@
 namespace App\Strategies\Deactivation;
 
 use App\Exceptions\CannotBeDeactivatedException;
+use App\Models\Contracts\Deactivatable;
+use Carbon\Carbon;
 
 class BaseDeactivationStrategy implements DeactivationStrategyInterface
 {
-    public function deactivate($model)
-    {
-        throw_unless($model->canBeDeactivated(), new CannotBeDeactivatedException);
+    private Deactivatable $deactivatable;
 
-        $model->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
-        $model->updateStatusAndSave();
+    public function __construct(Deactivatable $deactivatable)
+    {
+        $this->deactivatable = $deactivatable;
+    }
+
+    public function deactivate(Carbon $startedAt = null)
+    {
+        throw_unless($this->deactivatable->canBeDeactivated(), new CannotBeDeactivatedException);
+
+        $this->deactivatable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+        $this->deactivatable->updateStatusAndSave();
     }
 }

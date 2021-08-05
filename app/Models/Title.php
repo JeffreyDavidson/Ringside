@@ -4,11 +4,13 @@ namespace App\Models;
 
 use App\Enums\TitleStatus;
 use App\Models\Contracts\Activatable;
+use App\Models\Contracts\Deactivatable;
+use App\Models\Contracts\Unretirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Title extends Model implements Activatable
+class Title extends Model implements Activatable, Deactivatable, Unretirable
 {
     use SoftDeletes,
         HasFactory,

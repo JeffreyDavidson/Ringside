@@ -6,6 +6,7 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class RetirementContextStrategy
@@ -27,8 +28,8 @@ class RetirementContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(): void
+    public function process(Carbon $retiredAt = null): void
     {
-        $this->strategy->retire();
+        $this->strategy->retire($retiredAt);
     }
 }

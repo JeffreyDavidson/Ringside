@@ -17,9 +17,9 @@ class BaseActivationStrategy implements ActivationStrategyInterface
 
     public function activate(Carbon $startedAt = null)
     {
-        throw_unless($this->model->canBeActivated(), new CannotBeActivatedException);
+        throw_unless($this->activatable->canBeActivated(), new CannotBeActivatedException);
 
-        $this->model->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
-        $this->model->updateStatusAndSave();
+        $this->activatable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+        $this->activatable->updateStatusAndSave();
     }
 }

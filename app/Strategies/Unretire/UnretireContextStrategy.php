@@ -7,6 +7,7 @@ use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class UnretireContextStrategy
@@ -30,8 +31,8 @@ class UnretireContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(): void
+    public function process(Carbon $unretiredAt = null): void
     {
-        $this->strategy->unretire();
+        $this->strategy->unretire($unretiredAt);
     }
 }

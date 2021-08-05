@@ -3,32 +3,32 @@
 namespace App\Strategies\Unretire;
 
 use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Contracts\Unretirable;
 use App\Strategies\ClearInjury\WrestlerClearInjuryStrategy;
 use App\Strategies\Reinstate\WrestlerReinstateStrategy;
 use Carbon\Carbon;
 
 class WrestlerUnretireStrategy extends BaseUnretireStrategy
 {
-    public function unretire($model)
+    private Unretirable $unretirable;
+
+    public function __construct(Unretirable $unretirable)
     {
-        throw_unless($model->canBeUnretired(), new CannotBeUnretiredException);
+        $this->unretirable = $unretirable;
+    }
 
-        if ($model->isSuspended()) {
-            WrestlerReinstateStrategy::handle($model);
-        }
-
-        if ($model->isInjured()) {
-            WrestlerClearInjuryStrategy::handle($model);
-        }
+    public function unretire(Carbon $retiredAt = null)
+    {
+        throw_unless($this->unretirable->canBeUnretired(), new CannotBeUnretiredException);
 
         $retiredDate = Carbon::parse($retiredAt)->toDateTimeString() ?: now()->toDateTimeString();
 
-        $model->currentEmployment()->update(['ended_at' => $retiredDate]);
-        $model->retirements()->create(['started_at' => $retiredDate]);
-        $model->updateStatusAndSave();
+        $this->unretirable->currentEmployment()->update(['ended_at' => $retiredDate]);
+        $this->unretirable->retirements()->create(['started_at' => $retiredDate]);
+        $this->unretirable->updateStatusAndSave();
 
-        if ($model->currentTagTeam) {
-            $model->currentTagTeam->updateStatusAndSave();
+        if ($this->unretirable->currentTagTeam) {
+            $this->unretirable->currentTagTeam->updateStatusAndSave();
         }
     }
 }
