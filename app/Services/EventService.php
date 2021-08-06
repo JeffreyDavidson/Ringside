@@ -48,7 +48,7 @@ class EventService
         $this->eventRepository->update($event, $data);
 
         if ($data['started_at']) {
-            $this->employOrUpdateEmployment($wrestler, Carbon::parse($data['started_at']));
+            $this->employOrUpdateEmployment($event, Carbon::parse($data['started_at']));
         }
 
         return $event;
