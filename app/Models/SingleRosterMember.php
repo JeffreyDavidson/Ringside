@@ -294,7 +294,7 @@ abstract class SingleRosterMember extends Model implements Employable, Injurable
         return optional($this->employments->first())->started_at;
     }
 
-     /**
+    /**
      * Get the injuries of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany

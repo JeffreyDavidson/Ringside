@@ -46,21 +46,21 @@ interface Employable
      */
     public function scopeEmployed($query);
 
-     /**
+    /**
      * Set the token value for the "remember me" session.
      *
      * @return void
      */
     public function scopeFutureEmployed($query);
 
-     /**
+    /**
      * Set the token value for the "remember me" session.
      *
      * @return void
      */
     public function scopeReleased($query);
 
-     /**
+    /**
      * Set the token value for the "remember me" session.
      *
      * @return void
@@ -81,14 +81,14 @@ interface Employable
      */
     public function scopeOrderByFirstEmployedAtDate($query);
 
-     /**
+    /**
      * Get the column name for the "remember me" token.
      *
      * @return string
      */
     public function scopeWithReleasedAtDate($query);
 
-     /**
+    /**
      * Get the column name for the "remember me" token.
      *
      * @return string

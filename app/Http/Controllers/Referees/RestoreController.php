@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Referees;
 
-use App\Models\Referee;
 use App\Http\Controllers\Controller;
+use App\Models\Referee;
 use App\Services\RefereeService;
 
 class RestoreController extends Controller

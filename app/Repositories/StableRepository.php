@@ -15,7 +15,7 @@ class StableRepository
     public function create(array $data)
     {
         return Stable::create([
-            'name' => $data['name']
+            'name' => $data['name'],
         ]);
     }
 
@@ -29,7 +29,7 @@ class StableRepository
     public function update(Stable $stable, array $data)
     {
         return $stable->update([
-            'name' => $data['name']
+            'name' => $data['name'],
         ]);
     }
 

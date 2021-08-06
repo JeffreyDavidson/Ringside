@@ -113,6 +113,6 @@ class Title extends Model implements Activatable, Deactivatable, Retirable, Unre
 
     public function deactivate()
     {
-        return null;
+
     }
 }

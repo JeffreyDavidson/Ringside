@@ -16,7 +16,7 @@ class TagTeamRepository
     {
         return TagTeam::create([
             'name' => $data['name'],
-            'signature_move' => $data['signature_move']
+            'signature_move' => $data['signature_move'],
         ]);
     }
 
@@ -31,7 +31,7 @@ class TagTeamRepository
     {
         return $tagTeam->update([
             'name' => $data['name'],
-            'signature_move' => $data['signature_move']
+            'signature_move' => $data['signature_move'],
         ]);
     }
 

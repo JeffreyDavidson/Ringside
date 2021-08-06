@@ -27,7 +27,7 @@ class InjuredReferees extends Component
             ->paginate($this->perPage);
 
         return view('livewire.referees.injured-referees', [
-            'injuredReferees' => $injuredReferees
+            'injuredReferees' => $injuredReferees,
         ]);
     }
 }

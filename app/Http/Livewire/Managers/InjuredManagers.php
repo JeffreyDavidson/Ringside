@@ -27,7 +27,7 @@ class InjuredManagers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.managers.injured-managers', [
-            'injuredManagers' => $injuredManagers
+            'injuredManagers' => $injuredManagers,
         ]);
     }
 }

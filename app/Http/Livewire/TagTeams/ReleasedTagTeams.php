@@ -15,7 +15,7 @@ class ReleasedTagTeams extends Component
     public function render()
     {
         return view('livewire.tagteams.released-tagteams', [
-            'releasedTagTeams' => TagTeam::released()->withReleasedAtDate()->paginate($this->perPage)
+            'releasedTagTeams' => TagTeam::released()->withReleasedAtDate()->paginate($this->perPage),
         ]);
     }
 }

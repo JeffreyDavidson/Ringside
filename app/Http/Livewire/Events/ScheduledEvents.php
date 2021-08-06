@@ -20,7 +20,7 @@ class ScheduledEvents extends Component
     public function render()
     {
         return view('livewire.events.scheduled-events', [
-            'scheduledEvents' => Event::scheduled()->paginate($this->perPage)
+            'scheduledEvents' => Event::scheduled()->paginate($this->perPage),
         ]);
     }
 }

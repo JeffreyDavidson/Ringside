@@ -29,7 +29,7 @@ class TitleRepository implements DeactivationRepositoryInterface
     public function update(Title $title, array $data)
     {
         return $title->update([
-            'name' => $data['name']
+            'name' => $data['name'],
         ]);
     }
 

@@ -14,6 +14,6 @@ class VenueRepository
      */
     public function create(array $data)
     {
-        return Venue::create($data);;
+        return Venue::create($data);
     }
 }

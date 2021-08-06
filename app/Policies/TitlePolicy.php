@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Title;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TitlePolicy
@@ -57,7 +57,7 @@ class TitlePolicy
      */
     public function restore(User $user, Title $title)
     {
-        if (!$title->trashed()) {
+        if (! $title->trashed()) {
             return false;
         }
 

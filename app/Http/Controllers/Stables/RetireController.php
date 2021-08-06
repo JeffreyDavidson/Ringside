@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Stables;
 
-use App\Models\Stable;
-use App\Services\StableService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\RetireRequest;
+use App\Models\Stable;
+use App\Services\StableService;
 
 class RetireController extends Controller
 {

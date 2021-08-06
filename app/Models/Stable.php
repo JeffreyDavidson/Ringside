@@ -183,8 +183,6 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable, Unr
 
     public function deactivate()
     {
-        return null;
+
     }
-
-
 }

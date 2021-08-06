@@ -24,7 +24,7 @@ class AllVenues extends Component
             ->paginate($this->perPage);
 
         return view('livewire.venues.all-venues', [
-            'venues' => $venues
+            'venues' => $venues,
         ]);
     }
 }

@@ -27,7 +27,7 @@ class SuspendedReferees extends Component
             ->paginate($this->perPage);
 
         return view('livewire.referees.suspended-referees', [
-            'suspendedReferees' => $suspendedReferees
+            'suspendedReferees' => $suspendedReferees,
         ]);
     }
 }

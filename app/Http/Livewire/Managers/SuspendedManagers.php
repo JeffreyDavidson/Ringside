@@ -27,7 +27,7 @@ class SuspendedManagers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.managers.suspended-managers', [
-            'suspendedManagers' => $suspendedManagers
+            'suspendedManagers' => $suspendedManagers,
         ]);
     }
 }

@@ -21,7 +21,7 @@ class ReleasedReferees extends Component
             ->paginate($this->perPage);
 
         return view('livewire.referees.released-referees', [
-            'releasedReferees' => $releasedReferees
+            'releasedReferees' => $releasedReferees,
         ]);
     }
 }

@@ -22,7 +22,7 @@ class RetiredTagTeams extends Component
             ->paginate($this->perPage);
 
         return view('livewire.tagteams.retired-tagteams', [
-            'retiredTagTeams' => $retiredTagTeams
+            'retiredTagTeams' => $retiredTagTeams,
         ]);
     }
 }

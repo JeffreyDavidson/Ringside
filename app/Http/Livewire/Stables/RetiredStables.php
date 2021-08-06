@@ -22,7 +22,7 @@ class RetiredStables extends Component
             ->paginate($this->perPage);
 
         return view('livewire.stables.retired-stables', [
-            'retiredStables' => $retiredStables
+            'retiredStables' => $retiredStables,
         ]);
     }
 }

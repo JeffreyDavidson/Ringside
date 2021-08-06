@@ -21,7 +21,7 @@ class ReleasedManagers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.managers.released-managers', [
-            'releasedManagers' => $releasedManagers
+            'releasedManagers' => $releasedManagers,
         ]);
     }
 }

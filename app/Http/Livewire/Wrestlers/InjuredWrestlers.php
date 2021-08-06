@@ -27,7 +27,7 @@ class InjuredWrestlers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.wrestlers.injured-wrestlers', [
-            'injuredWrestlers' => $injuredWrestlers
+            'injuredWrestlers' => $injuredWrestlers,
         ]);
     }
 }

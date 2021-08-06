@@ -35,7 +35,7 @@ class SuspendContextStrategy
             $this->strategy = new WrestlerSuspendStrategy($model);
         }
 
-        throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
+        throw new \InvalidArgumentException('Could not find strategy for: '.$model::class);
     }
 
     /**

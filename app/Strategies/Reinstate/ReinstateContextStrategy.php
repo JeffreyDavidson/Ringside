@@ -29,13 +29,13 @@ class ReinstateContextStrategy
             $this->strategy = new ManagerReinstateStrategy($model);
         } elseif ($model instanceof Referee) {
             $this->strategy = new RefereeReinstateStrategy($model);
-        }  elseif ($model instanceof TagTeam) {
+        } elseif ($model instanceof TagTeam) {
             $this->strategy = new TagTeamReinstateStrategy($model);
         } elseif ($model instanceof Wrestler) {
             $this->strategy = new WrestlerReinstateStrategy($model);
         }
 
-        throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
+        throw new \InvalidArgumentException('Could not find strategy for: '.$model::class);
     }
 
     /**

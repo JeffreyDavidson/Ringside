@@ -22,7 +22,7 @@ class InactiveTitles extends Component
             ->paginate($this->perPage);
 
         return view('livewire.titles.inactive-titles', [
-            'inactiveTitles' => $inactiveTitles
+            'inactiveTitles' => $inactiveTitles,
         ]);
     }
 }

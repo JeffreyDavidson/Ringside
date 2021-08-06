@@ -32,7 +32,7 @@ class ClearInjuryContextStrategy
             $this->strategy = new WrestlerClearInjuryStrategy($model);
         }
 
-        throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
+        throw new \InvalidArgumentException('Could not find strategy for: '.$model::class);
     }
 
     /**
