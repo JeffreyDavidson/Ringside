@@ -4,6 +4,7 @@ namespace App\Strategies\Unretire;
 
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Contracts\Unretirable;
+use App\Strategies\Activation\TitleActivationStrategy;
 use Carbon\Carbon;
 
 class TitleUnretireStrategy extends BaseUnretireStrategy implements UnretireStrategyInterface
@@ -38,7 +39,7 @@ class TitleUnretireStrategy extends BaseUnretireStrategy implements UnretireStra
         $unretiredDate = $unretiredAt ?: now();
 
         $this->unretirable->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->unretirable->activate($unretiredDate);
+        (new TitleActivationStrategy($this->unretirable))->activate($unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

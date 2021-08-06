@@ -38,6 +38,7 @@ class TitlesControllerTest extends TestCase
      */
     public function index_returns_a_view($administrators)
     {
+        $this->withoutExceptionHandling();
         $this->actAs($administrators)
             ->get(route('titles.index'))
             ->assertOk()

@@ -348,7 +348,6 @@ class StableControllerTest extends TestCase
      */
     public function updates_a_stable_and_redirects($administrators)
     {
-        $this->withoutExceptionHandling();
         $stable = Stable::factory()->create();
 
         $this->actAs($administrators)

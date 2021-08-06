@@ -93,13 +93,14 @@ class StablesController extends Controller
      * Delete a stable.
      *
      * @param  \App\Models\Stable  $stable
+     * @param  \App\Services\StableService  $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Stable $stable)
+    public function destroy(Stable $stable, StableService $stableService)
     {
         $this->authorize('delete', Stable::class);
 
-        $stable->delete();
+        $stableService->delete($stable);
 
         return redirect()->route('stables.index');
     }

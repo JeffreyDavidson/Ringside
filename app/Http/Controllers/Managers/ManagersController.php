@@ -93,13 +93,14 @@ class ManagersController extends Controller
      * Delete a manager.
      *
      * @param  \App\Models\Manager  $manager
+     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Manager $manager)
+    public function destroy(Manager $manager, ManagerService $managerService)
     {
         $this->authorize('delete', $manager);
 
-        $manager->delete();
+        $managerService->delete($manager);
 
         return redirect()->route('managers.index');
     }

@@ -79,6 +79,7 @@ class RefereesController extends Controller
      *
      * @param  \App\Http\Requests\Referees\UpdateRequest  $request
      * @param  \App\Models\Referee  $referee
+     * @param  \App\Services\RefereeService  $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Referee $referee, RefereeService $refereeService)
@@ -94,11 +95,11 @@ class RefereesController extends Controller
      * @param  \App\Models\Referee  $referee
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Referee $referee)
+    public function destroy(Referee $referee, RefereeService $refereeService)
     {
         $this->authorize('delete', $referee);
 
-        $referee->delete();
+        $refereeService->delete($referee);
 
         return redirect()->route('referees.index');
     }

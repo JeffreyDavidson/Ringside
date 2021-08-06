@@ -6,6 +6,11 @@ use App\Exceptions\NotEnoughMembersException;
 use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
 use App\Strategies\Employment\TagTeamEmploymentStrategy;
+use App\Strategies\Reinstate\TagTeamReinstateStrategy;
+use App\Strategies\Release\TagTeamReleaseStrategy;
+use App\Strategies\Retirement\TagTeamRetirementStrategy;
+use App\Strategies\Suspend\TagTeamSuspendStrategy;
+use App\Strategies\Unretire\TagTeamUnretireStrategy;
 use Exception;
 
 class TagTeamService
@@ -64,6 +69,28 @@ class TagTeamService
         }
 
         return $tagTeam;
+    }
+
+    /**
+     * Delete a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function delete(TagTeam $tagTeam)
+    {
+        $this->tagTeamRepository->delete($tagTeam);
+    }
+
+    /**
+     * Restore a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function restore(TagTeam $tagTeam)
+    {
+        $this->tagTeamRepository->restore($tagTeam);
     }
 
     /**
@@ -145,5 +172,75 @@ class TagTeamService
         }
 
         return $tagTeam;
+    }
+
+    /**
+     * Employ a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function employ(TagTeam $tagTeam)
+    {
+        (new TagTeamEmploymentStrategy($tagTeam))->employ();
+
+        if ($tagTeam->currentWrestlers->every->isNotInEmployment()) {
+            $tagTeam->currentWrestlers->each->employ($startAtDate);
+        }
+    }
+
+    /**
+     * Release a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function release(TagTeam $tagTeam)
+    {
+        (new TagTeamReleaseStrategy($tagTeam))->release();
+    }
+
+    /**
+     * Suspend a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function suspend(TagTeam $tagTeam)
+    {
+        (new TagTeamSuspendStrategy($tagTeam))->suspend();
+    }
+
+    /**
+     * Reinstate a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function reinstate(TagTeam $tagTeam)
+    {
+        (new TagTeamReinstateStrategy($tagTeam))->reinstate();
+    }
+
+    /**
+     * Retire a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function retire(TagTeam $tagTeam)
+    {
+        (new TagTeamRetirementStrategy($tagTeam))->retire();
+    }
+
+    /**
+     * Unretire a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function unretire(TagTeam $tagTeam)
+    {
+        (new TagTeamUnretireStrategy($tagTeam))->unretire();
     }
 }

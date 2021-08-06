@@ -34,4 +34,26 @@ class ManagerRepository
             'last_name' => $data['last_name'],
         ]);
     }
+
+    /**
+     * Delete a given manager.
+     *
+     * @param  \App\Models\Manager $manager
+     * @return void
+     */
+    public function delete(Manager $manager)
+    {
+        $manager->delete();
+    }
+
+    /**
+     * Restore a given manager.
+     *
+     * @param  \App\Models\Manager $manager
+     * @return void
+     */
+    public function restore(Manager $manager)
+    {
+        $manager->restore();
+    }
 }

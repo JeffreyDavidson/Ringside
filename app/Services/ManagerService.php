@@ -80,6 +80,28 @@ class ManagerService
     }
 
     /**
+     * Delete a given manager.
+     *
+     * @param  \App\Models\Manager $manager
+     * @return void
+     */
+    public function delete(Manager $manager)
+    {
+        $this->managerRepository->delete($manager);
+    }
+
+    /**
+     * Delete a given manager.
+     *
+     * @param  \App\Models\Manager $manager
+     * @return void
+     */
+    public function restore(Manager $manager)
+    {
+        $this->managerRepository->restore($manager);
+    }
+
+    /**
      * Clear an injury of a manager.
      *
      * @param  \App\Models\Manager $manager

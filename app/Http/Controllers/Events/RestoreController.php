@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Services\EventService;
 
 class RestoreController extends Controller
 {
@@ -13,13 +14,13 @@ class RestoreController extends Controller
      * @param  int  $eventId
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($eventId)
+    public function __invoke($eventId, EventService $eventService)
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 
         $this->authorize('restore', $event);
 
-        $event->restore();
+        $eventService->restore($event);
 
         return redirect()->route('events.index');
     }

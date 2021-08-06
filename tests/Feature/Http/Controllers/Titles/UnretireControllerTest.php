@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
-use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Titles\UnretireController;
 use App\Http\Requests\Titles\UnretireRequest;
@@ -26,6 +25,7 @@ class UnretireControllerTest extends TestCase
      */
     public function invoke_unretires_a_retired_title_and_redirects($administrators)
     {
+        $this->withoutExceptionHandling();
         Carbon::setTestNow($now = now());
 
         $title = Title::factory()->retired()->create();

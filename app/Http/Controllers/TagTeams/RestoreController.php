@@ -4,6 +4,7 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
+use App\Services\TagTeamService;
 
 class RestoreController extends Controller
 {
@@ -13,13 +14,13 @@ class RestoreController extends Controller
      * @param  int  $tagTeamId
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($tagTeamId)
+    public function __invoke($tagTeamId, TagTeamService $tagTeamService)
     {
         $tagTeam = TagTeam::onlyTrashed()->findOrFail($tagTeamId);
 
         $this->authorize('restore', $tagTeam);
 
-        $tagTeam->restore();
+        $tagTeamService->restore($tagTeam);
 
         return redirect()->route('tag-teams.index');
     }

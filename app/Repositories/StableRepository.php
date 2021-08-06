@@ -32,4 +32,26 @@ class StableRepository
             'name' => $data['name']
         ]);
     }
+
+    /**
+     * Delete a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function delete(Stable $stable)
+    {
+        $stable->delete();
+    }
+
+    /**
+     * Restore a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function restore(Stable $stable)
+    {
+        $stable->restore();
+    }
 }
