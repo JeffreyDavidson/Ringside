@@ -59,7 +59,9 @@ class StableControllerTest extends TestCase
             ->assertSeeLivewire('stables.retired-stables');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_stables_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -67,7 +69,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_stables_index_page()
     {
         $this->get(route('stables.index'))
@@ -86,7 +90,9 @@ class StableControllerTest extends TestCase
             ->assertViewHas('stable', new Stable);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_stable()
     {
         $this->actAs(Role::BASIC)
@@ -94,7 +100,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_a_stable()
     {
         $this->get(route('stables.create'))
@@ -150,7 +158,9 @@ class StableControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function wrestlers_are_added_to_stable_if_present()
     {
         $now = now()->subDays(3);
@@ -171,7 +181,9 @@ class StableControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function tag_teams_are_added_to_stable_if_present()
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
@@ -186,7 +198,9 @@ class StableControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_stables_members_join_when_stable_is_started_if_filled()
     {
         $now = now()->subDays(3);
@@ -214,7 +228,9 @@ class StableControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_stables_members_join_at_the_current_time_when_stable_is_created_if_started_at_is_not_filled()
     {
         $now = now();
@@ -242,7 +258,9 @@ class StableControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_stable()
     {
         $this->actAs(Role::BASIC)
@@ -251,7 +269,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_stable()
     {
         $this->from('stables.create')
@@ -259,7 +279,9 @@ class StableControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(StablesController::class, 'store', StoreRequest::class);
@@ -279,7 +301,9 @@ class StableControllerTest extends TestCase
             ->assertViewHas('stable', $stable);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_can_view_their_stable_profile()
     {
         $signedInUser = $this->actAs(Role::BASIC);
@@ -289,7 +313,9 @@ class StableControllerTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_another_users_stable_profile()
     {
         $otherUser = User::factory()->create();
@@ -300,7 +326,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_stable_profile()
     {
         $stable = Stable::factory()->create();
@@ -323,7 +351,9 @@ class StableControllerTest extends TestCase
             ->assertViewHas('stable', $stable);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -333,7 +363,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -376,7 +408,9 @@ class StableControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -387,7 +421,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -397,7 +433,9 @@ class StableControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(StablesController::class, 'update', UpdateRequest::class);
@@ -418,7 +456,9 @@ class StableControllerTest extends TestCase
         $this->assertSoftDeleted($stable);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -428,7 +468,9 @@ class StableControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_a_stable()
     {
         $stable = Stable::factory()->create();

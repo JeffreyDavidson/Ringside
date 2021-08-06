@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\TagTeam;
 use App\Enums\TagTeamStatus;
+use App\Models\TagTeam;
 use Tests\TestCase;
 
 /**
@@ -13,7 +13,9 @@ use Tests\TestCase;
  */
 class TagTeamTest extends TestCase
 {
-    /** @test */
+    /**
+     * @test
+     */
     public function a_tag_team_has_a_name()
     {
         $tagTeam = new TagTeam(['name' => 'Example Tag Team Name']);
@@ -21,7 +23,9 @@ class TagTeamTest extends TestCase
         $this->assertEquals('Example Tag Team Name', $tagTeam->name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_tag_team_can_have_a_signature_move()
     {
         $tagTeam = new TagTeam(['signature_move' => 'Example Signature Move']);
@@ -29,7 +33,9 @@ class TagTeamTest extends TestCase
         $this->assertEquals('Example Signature Move', $tagTeam->signature_move);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_tag_team_has_a_status()
     {
         $tagTeam = new TagTeam();
@@ -38,7 +44,9 @@ class TagTeamTest extends TestCase
         $this->assertEquals('example', $tagTeam->getRawOriginal('status'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_tag_team_status_gets_cast_as_a_tag_team_status_enum()
     {
         $tagTeam = new TagTeam();

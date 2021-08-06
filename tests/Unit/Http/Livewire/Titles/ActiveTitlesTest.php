@@ -28,13 +28,17 @@ class ActiveTitlesTest extends TestCase
         $this->component = Livewire::test(ActiveTitles::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_should_return_correct_view()
     {
         $this->assertEquals('livewire.titles.active-titles', $this->component->lastRenderedView->getName());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_should_pass_correct_data()
     {
         $activeTitles = Title::active()->get();

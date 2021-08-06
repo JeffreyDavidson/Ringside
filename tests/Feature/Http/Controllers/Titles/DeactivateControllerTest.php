@@ -41,13 +41,17 @@ class DeactivateControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(DeactivateController::class, '__invoke', DeactivateRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_deactivates_a_title()
     {
         $title = Title::factory()->create();
@@ -57,7 +61,9 @@ class DeactivateControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_deactivates_a_title()
     {
         $title = Title::factory()->create();

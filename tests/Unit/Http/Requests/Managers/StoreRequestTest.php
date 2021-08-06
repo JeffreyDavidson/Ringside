@@ -12,7 +12,9 @@ use Tests\TestCase;
  */
 class StoreRequestTest extends TestCase
 {
-    /** @test */
+    /**
+     * @test
+     */
     public function rules_returns_validation_requirements()
     {
         $subject = $this->createFormRequest(StoreRequest::class);

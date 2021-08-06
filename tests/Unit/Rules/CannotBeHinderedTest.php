@@ -14,7 +14,9 @@ class CannotBeHinderedTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_wrestler_cannot_join_a_tag_team()
     {
         $wrestler = Wrestler::factory()->suspended()->create();
@@ -22,7 +24,9 @@ class CannotBeHinderedTest extends TestCase
         $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_wrestler_cannot_join_a_tag_team()
     {
         $wrestler = Wrestler::factory()->injured()->create();
@@ -30,7 +34,9 @@ class CannotBeHinderedTest extends TestCase
         $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_wrestler_cannot_join_a_tag_team()
     {
         $wrestler = Wrestler::factory()->retired()->create();

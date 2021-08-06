@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Models\Concerns;
 
-use Tests\TestCase;
 use App\Models\Manager;
 use App\Models\Referee;
+use Tests\TestCase;
 
 /**
  * @group roster

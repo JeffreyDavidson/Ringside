@@ -37,7 +37,7 @@ class CanBeBookedTest extends TestCase
         $this->assertFalse($bookableModels->contains($pendingEmploymentModel));
         $this->assertFalse($bookableModels->contains($injuredModel));
         $this->assertFalse($bookableModels->contains($suspendedModel));
-        $this->assertFalse($bookableModels->contains($retiredModel));;
+        $this->assertFalse($bookableModels->contains($retiredModel));
     }
 
     /**

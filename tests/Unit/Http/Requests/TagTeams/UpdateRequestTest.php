@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Http\Requests\TagTeams;
 
-use Tests\TestCase;
-use App\Models\TagTeam;
-use Illuminate\Routing\Route;
-use Illuminate\Validation\Rules\Unique;
 use App\Http\Requests\TagTeams\UpdateRequest;
+use App\Models\TagTeam;
+use App\Rules\CannotBelongToMultipleEmployedTagTeams;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Rules\CannotBelongToMultipleEmployedTagTeams;
+use Illuminate\Routing\Route;
+use Illuminate\Validation\Rules\Unique;
+use Tests\TestCase;
 
 /**
  * @group tagteams
@@ -20,7 +20,9 @@ class UpdateRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function rules_returns_validation_requirements()
     {
         $tagTeam = TagTeam::factory()->create();

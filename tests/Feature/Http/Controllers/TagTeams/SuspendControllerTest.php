@@ -39,13 +39,17 @@ class SuspendControllerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $tagTeam->fresh()->currentSuspension->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(SuspendController::class, '__invoke', SuspendRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_suspend_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -55,7 +59,9 @@ class SuspendControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_suspend_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();

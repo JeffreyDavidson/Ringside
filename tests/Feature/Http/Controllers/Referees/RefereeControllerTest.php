@@ -55,7 +55,9 @@ class RefereeControllerTest extends TestCase
             ->assertSeeLivewire('referees.retired-referees');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_referees_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -63,7 +65,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_referees_index_page()
     {
         $this->get(route('referees.index'))
@@ -82,7 +86,9 @@ class RefereeControllerTest extends TestCase
             ->assertViewHas('referee', new Referee);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_referee()
     {
         $this->actAs(Role::BASIC)
@@ -90,7 +96,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_a_referee()
     {
         $this->get(route('referees.create'))
@@ -147,7 +155,9 @@ class RefereeControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_referee()
     {
         $this->actAs(Role::BASIC)
@@ -156,7 +166,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_referee()
     {
         $this->from(route('referees.create'))
@@ -164,7 +176,9 @@ class RefereeControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(RefereesController::class, 'store', StoreRequest::class);
@@ -184,7 +198,9 @@ class RefereeControllerTest extends TestCase
             ->assertViewHas('referee', $referee);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_a_referee_profile()
     {
         $referee = Referee::factory()->create();
@@ -194,7 +210,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_referee_profile()
     {
         $referee = Referee::factory()->create();
@@ -217,7 +235,9 @@ class RefereeControllerTest extends TestCase
             ->assertViewHas('referee', $referee);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_referee()
     {
         $referee = Referee::factory()->create();
@@ -227,7 +247,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_referee()
     {
         $referee = Referee::factory()->create();
@@ -307,7 +329,7 @@ class RefereeControllerTest extends TestCase
         $response = $this->actAs($administrators)
             ->from(route('referees.edit', $referee))
             ->put(route('referees.update', $referee), $this->validParams(['started_at' => $now]));
-            $response->assertRedirect(route('referees.index'));
+        $response->assertRedirect(route('referees.index'));
 
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertCount(2, $referee->employments);
@@ -333,7 +355,9 @@ class RefereeControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_referee()
     {
         $referee = Referee::factory()->create();
@@ -344,7 +368,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_referee()
     {
         $referee = Referee::factory()->create();
@@ -354,7 +380,9 @@ class RefereeControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(RefereesController::class, 'update', UpdateRequest::class);
@@ -375,7 +403,9 @@ class RefereeControllerTest extends TestCase
         $this->assertSoftDeleted($referee);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_a_referee()
     {
         $referee = Referee::factory()->create();
@@ -385,7 +415,9 @@ class RefereeControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_a_referee()
     {
         $referee = Referee::factory()->create();

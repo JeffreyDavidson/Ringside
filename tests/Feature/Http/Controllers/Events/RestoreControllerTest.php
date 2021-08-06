@@ -30,7 +30,9 @@ class RestoreControllerTest extends TestCase
         $this->assertNull($event->fresh()->deleted_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_restore_a_deleted_event()
     {
         $event = Event::factory()->softDeleted()->create();
@@ -40,7 +42,9 @@ class RestoreControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_restore_a_event()
     {
         $event = Event::factory()->softDeleted()->create();

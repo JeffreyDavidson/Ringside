@@ -15,7 +15,9 @@ use Tests\TestCase;
  */
 class RefereeTest extends TestCase
 {
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_has_a_first_name()
     {
         $referee = new Referee(['first_name' => 'John']);
@@ -23,7 +25,9 @@ class RefereeTest extends TestCase
         $this->assertEquals('John', $referee->first_name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_has_a_last_name()
     {
         $referee = new Referee(['last_name' => 'Smith']);
@@ -31,7 +35,9 @@ class RefereeTest extends TestCase
         $this->assertEquals('Smith', $referee->last_name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_has_a_status()
     {
         $referee = new Referee();
@@ -40,7 +46,9 @@ class RefereeTest extends TestCase
         $this->assertEquals('example', $referee->getRawOriginal('status'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_status_gets_cast_as_a_referee_status_enum()
     {
         $referee = new Referee();
@@ -48,31 +56,41 @@ class RefereeTest extends TestCase
         $this->assertInstanceOf(RefereeStatus::class, $referee->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_uses_has_a_full_name_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\HasFullName', Referee::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_uses_can_be_booked_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeBooked', Referee::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Referee::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_referee_is_a_single_roster_member()
     {
         $this->assertEquals(SingleRosterMember::class, get_parent_class(Referee::class));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function employing_a_released_referee_and_redirects($administrators)
     {
         $now = now();
@@ -134,7 +152,9 @@ class RefereeTest extends TestCase
             ->patch(route('referees.employ', $referee));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function employing_an_injured_referee_throws_an_exception()
     {
         $this->expectException(CannotBeEmployedException::class);

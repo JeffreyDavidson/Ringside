@@ -15,7 +15,9 @@ class EventTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_event_has_a_name()
     {
         $event = Event::factory()->create(['name' => 'Example Event Name']);
@@ -23,7 +25,9 @@ class EventTest extends TestCase
         $this->assertEquals('Example Event Name', $event->name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_event_has_a_date()
     {
         $event = Event::factory()->create(['date' => '2020-03-05 00:00:00']);
@@ -31,7 +35,9 @@ class EventTest extends TestCase
         $this->assertEquals('2020-03-05 00:00:00', $event->date);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_event_has_a_venue()
     {
         $event = Event::factory()->create();
@@ -39,7 +45,9 @@ class EventTest extends TestCase
         $this->assertInstanceOf(Venue::class, $event->venue);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_event_date_can_be_formatted()
     {
         $event = Event::factory()->create(['date' => '2020-03-05 00:00:00']);

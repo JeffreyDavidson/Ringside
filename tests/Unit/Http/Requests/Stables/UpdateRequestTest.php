@@ -22,7 +22,9 @@ class UpdateRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function rules_returns_validation_requirements()
     {
         $stable = Stable::factory()->create();

@@ -43,13 +43,17 @@ class DisassembleControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(DisassembleController::class, '__invoke', DisassembleRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_disassemble_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -59,7 +63,9 @@ class DisassembleControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_disassemble_a_stable()
     {
         $stable = Stable::factory()->create();

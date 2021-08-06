@@ -11,7 +11,9 @@ use Tests\TestCase;
  */
 class UpdateRequestTest extends TestCase
 {
-    /** @test */
+    /**
+     * @test
+     */
     public function rules_returns_validation_requirements()
     {
         $subject = $this->createFormRequest(UpdateRequest::class);

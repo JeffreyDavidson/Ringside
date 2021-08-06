@@ -13,7 +13,9 @@ class TitleFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_title_is_unactivated()
     {
         $title = Title::factory()->create();
@@ -21,7 +23,9 @@ class TitleFactoryTest extends TestCase
         $this->assertEquals(TitleStatus::UNACTIVATED, $title->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unactivated_title_has_zero_activations()
     {
         $title = Title::factory()->unactivated()->create();
@@ -30,7 +34,9 @@ class TitleFactoryTest extends TestCase
         $this->assertCount(0, $title->activations);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_inactive_title_has_a_previous_activation()
     {
         $title = Title::factory()->inactive()->create();
@@ -44,7 +50,9 @@ class TitleFactoryTest extends TestCase
         $this->assertTrue($activation->ended_at->gt($activation->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_title_has_an_mployment()
     {
         $title = Title::factory()->withFutureActivation()->create();
@@ -58,7 +66,9 @@ class TitleFactoryTest extends TestCase
         $this->assertNull($activation->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_active_title_has_an_active_activation()
     {
         $title = Title::factory()->active()->create();
@@ -72,7 +82,9 @@ class TitleFactoryTest extends TestCase
         $this->assertNull($activation->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_title_has_a_previous_activation_and_active_retirement()
     {
         $title = Title::factory()->retired()->create();

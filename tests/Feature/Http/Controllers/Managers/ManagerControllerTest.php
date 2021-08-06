@@ -57,7 +57,9 @@ class ManagerControllerTest extends TestCase
             ->assertSeeLivewire('managers.retired-managers');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_managers_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -65,7 +67,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_managers_index_page()
     {
         $this->get(route('managers.index'))
@@ -84,7 +88,9 @@ class ManagerControllerTest extends TestCase
             ->assertViewHas('manager', new Manager);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_manager()
     {
         $this->actAs(Role::BASIC)
@@ -92,7 +98,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_a_manager()
     {
         $this->get(route('managers.create'))
@@ -152,7 +160,9 @@ class ManagerControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_manager()
     {
         $this->actAs(Role::BASIC)
@@ -161,7 +171,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_manager()
     {
         $this->from(route('managers.create'))
@@ -169,7 +181,9 @@ class ManagerControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(ManagersController::class, 'store', StoreRequest::class);
@@ -189,7 +203,9 @@ class ManagerControllerTest extends TestCase
             ->assertViewHas('manager', $manager);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_can_view_their_manager_profile()
     {
         $signedInUser = $this->actAs(Role::BASIC);
@@ -199,7 +215,9 @@ class ManagerControllerTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_another_users_manager_profile()
     {
         $otherUser = User::factory()->create();
@@ -210,7 +228,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_manager_profile()
     {
         $manager = Manager::factory()->create();
@@ -233,7 +253,9 @@ class ManagerControllerTest extends TestCase
             ->assertViewHas('manager', $manager);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -243,7 +265,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -349,7 +373,9 @@ class ManagerControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -360,7 +386,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -370,7 +398,9 @@ class ManagerControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(ManagersController::class, 'update', UpdateRequest::class);
@@ -391,7 +421,9 @@ class ManagerControllerTest extends TestCase
         $this->assertSoftDeleted($manager);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -401,7 +433,9 @@ class ManagerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_a_manager()
     {
         $manager = Manager::factory()->create();

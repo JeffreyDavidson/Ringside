@@ -3,17 +3,19 @@
 namespace Tests\Browser;
 
 use App\Models\User;
-use Tests\DuskTestCase;
 use App\Models\Wrestler;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Pages\Login;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Tests\DuskTestCase;
 
 class ClearWrestlerInjuryTest extends DuskTestCase
 {
     use DatabaseMigrations;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function testExample()
     {
         $user = User::factory()->superAdministrator()->create();

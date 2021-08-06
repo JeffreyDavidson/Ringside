@@ -90,13 +90,17 @@ class ReleaseControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(ReleaseController::class, '__invoke', ReleaseRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_suspend_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -106,7 +110,9 @@ class ReleaseControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_release_a_manager()
     {
         $manager = Manager::factory()->create();

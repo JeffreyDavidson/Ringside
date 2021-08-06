@@ -19,7 +19,9 @@ class RestoreControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_restores_a_deleted_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->softDeleted()->create();
@@ -31,7 +33,9 @@ class RestoreControllerTest extends TestCase
         $this->assertNull($wrestler->fresh()->deleted_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_restore_a_wrestler()
     {
         $wrestler = Wrestler::factory()->softDeleted()->create();
@@ -41,7 +45,9 @@ class RestoreControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_restore_a_wrestler()
     {
         $wrestler = Wrestler::factory()->softDeleted()->create();

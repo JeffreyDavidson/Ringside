@@ -13,7 +13,9 @@ class EventFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_event_is_pending()
     {
         $event = Event::factory()->create();
@@ -21,7 +23,9 @@ class EventFactoryTest extends TestCase
         $this->assertEquals(EventStatus::UNSCHEDULED, $event->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unscheduled_event_has_no_date()
     {
         $event = Event::factory()->unscheduled()->create();
@@ -30,7 +34,9 @@ class EventFactoryTest extends TestCase
         $this->assertNull($event->date);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_past_event_has_a_date_in_the_past()
     {
         $event = Event::factory()->past()->create();
@@ -39,7 +45,9 @@ class EventFactoryTest extends TestCase
         $this->assertTrue($event->date->isPast());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_scheduled_event_has_a_date_in_the_future()
     {
         $event = Event::factory()->scheduled()->create();

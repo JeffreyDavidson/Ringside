@@ -57,7 +57,9 @@ class TagTeamControllerTest extends TestCase
             ->assertSeeLivewire('tag-teams.retired-tag-teams');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_tag_teams_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -65,7 +67,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_tag_teams_index_page()
     {
         $this->get(route('tag-teams.index'))
@@ -84,7 +88,9 @@ class TagTeamControllerTest extends TestCase
             ->assertViewHas('tagTeam', new TagTeam);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_tag_team()
     {
         $this->actAs(Role::BASIC)
@@ -92,7 +98,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_a_tag_team()
     {
         $this->get(route('tag-teams.create'))
@@ -149,7 +157,9 @@ class TagTeamControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_tag_team()
     {
         $this->actAs(Role::BASIC)
@@ -158,7 +168,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_tag_team()
     {
         $this->from(route('tag-teams.create'))
@@ -166,7 +178,9 @@ class TagTeamControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(TagTeamsController::class, 'store', StoreRequest::class);
@@ -186,7 +200,9 @@ class TagTeamControllerTest extends TestCase
             ->assertViewHas('tagTeam', $tagTeam);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_can_view_their_tag_team_profile()
     {
         $signedInUser = $this->actAs(Role::BASIC);
@@ -196,7 +212,9 @@ class TagTeamControllerTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_another_users_tag_team_profile()
     {
         $otherUser = User::factory()->create();
@@ -207,7 +225,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_tag_team_profile()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -230,7 +250,9 @@ class TagTeamControllerTest extends TestCase
             ->assertViewHas('tagTeam', $tagTeam);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -240,7 +262,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -296,7 +320,9 @@ class TagTeamControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -307,7 +333,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -317,7 +345,9 @@ class TagTeamControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(TagTeamsController::class, 'update', UpdateRequest::class);
@@ -338,7 +368,9 @@ class TagTeamControllerTest extends TestCase
         $this->assertSoftDeleted($tagTeam);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -348,7 +380,9 @@ class TagTeamControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_a_tag_team()
     {
         $tagTeam = TagTeam::factory()->create();

@@ -36,7 +36,9 @@ class RestoreControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_restore_a_stable()
     {
         $stable = Stable::factory()->softDeleted()->create();
@@ -46,7 +48,9 @@ class RestoreControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_restore_a_stable()
     {
         $stable = Stable::factory()->softDeleted()->create();

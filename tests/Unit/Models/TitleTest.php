@@ -12,7 +12,9 @@ use Tests\TestCase;
  */
 class TitleTest extends TestCase
 {
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_has_a_name()
     {
         $wrestler = new Title(['name' => 'Example Title Name']);
@@ -20,7 +22,9 @@ class TitleTest extends TestCase
         $this->assertEquals('Example Title Name', $wrestler->name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_has_a_status()
     {
         $title = new Title();
@@ -29,7 +33,9 @@ class TitleTest extends TestCase
         $this->assertEquals('example', $title->getRawOriginal('status'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_status_gets_cast_as_a_title_status_enum()
     {
         $title = new Title();
@@ -37,25 +43,33 @@ class TitleTest extends TestCase
         $this->assertInstanceOf(TitleStatus::class, $title->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Title::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_uses_can_be_activated_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeActivated', Title::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_uses_can_be_competed_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeCompeted', Title::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_title_uses_can_be_retired_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeRetired', Title::class);

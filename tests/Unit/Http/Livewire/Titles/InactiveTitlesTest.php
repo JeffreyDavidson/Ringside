@@ -24,7 +24,9 @@ class InactiveTitlesTest extends TestCase
         $this->seed(TitlesTestTableSeeder::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function retired_titles_component_should_return_correct_view()
     {
         $component = Livewire::test(RetiredTitles::class);
@@ -32,7 +34,9 @@ class InactiveTitlesTest extends TestCase
         $this->assertEquals('livewire.titles.retired-titles', $component->lastRenderedView->getName());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function inactive_titles_component_should_pass_correct_data()
     {
         $component = Livewire::test(InactiveTitles::class);

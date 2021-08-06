@@ -15,7 +15,9 @@ class ManagerFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_manager_is_unemployed()
     {
         $manager = Manager::factory()->create();
@@ -23,7 +25,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertEquals(ManagerStatus::UNEMPLOYED, $manager->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unemployed_manager_has_zero_employments()
     {
         $manager = Manager::factory()->unemployed()->create();
@@ -32,7 +36,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertCount(0, $manager->employments);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_released_manager_has_a_previous_employment()
     {
         $manager = Manager::factory()->released()->create();
@@ -46,7 +52,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_manager_has_an_mployment()
     {
         $manager = Manager::factory()->withFutureEmployment()->create();
@@ -60,7 +68,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_has_an_active_employment()
     {
         $manager = Manager::factory()->available()->create();
@@ -74,7 +84,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_has_an_active_employment_and_active_suspension()
     {
         $manager = Manager::factory()->suspended()->create();
@@ -93,7 +105,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_has_a_previous_employment_and_active_retirement()
     {
         $manager = Manager::factory()->retired()->create();
@@ -113,7 +127,9 @@ class ManagerFactoryTest extends TestCase
         $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_manager_has_an_active_employment_and_active_suspension()
     {
         $manager = Manager::factory()->injured()->create();
