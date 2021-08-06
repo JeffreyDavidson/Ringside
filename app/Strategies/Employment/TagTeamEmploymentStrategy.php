@@ -36,7 +36,7 @@ class TagTeamEmploymentStrategy extends BaseEmploymentStrategy implements Employ
 
         $startAtDate = $startedAt ?? now()->toDateTimeString();
 
-        $this->employable->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
+        $this->repository->employ($this->employable, $startAtDate);
         $this->employable->updateStatusAndSave();
     }
 }

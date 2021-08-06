@@ -10,8 +10,8 @@ interface DeactivationRepositoryInterface
      * Deactivate a deactivatable.
      *
      * @param  \App\Models\Contracts\Deactivatable $deactivatable
-     * @param  string|null $endedAt
+     * @param  string $deactivationDate
      * @return \App\Models\Contracts\Deactivatable $deactivatable
      */
-    public function deactivate(Deactivatable $deactivatable, string $endedAt = null);
+    public function deactivate(Deactivatable $deactivatable, string $deactivationDate);
 }

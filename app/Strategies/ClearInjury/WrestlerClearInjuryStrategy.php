@@ -5,7 +5,6 @@ namespace App\Strategies\ClearInjury;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Models\Contracts\Injurable;
 use App\Repositories\WrestlerRepository;
-use Carbon\Carbon;
 
 class WrestlerClearInjuryStrategy extends BaseClearInjuryStrategy implements ClearInjuryStrategyInterface
 {
@@ -31,6 +30,7 @@ class WrestlerClearInjuryStrategy extends BaseClearInjuryStrategy implements Cle
      */
     public function __construct(Injurable $injurable, WrestlerRepository $wrestlerRepository)
     {
+        dd($injurable, $wrestlerRepository);
         $this->injurable = $injurable;
         $this->wrestlerRepository = $wrestlerRepository;
     }

@@ -36,7 +36,7 @@ class ManagerSuspendStrategy extends BaseSuspendStrategy implements SuspendStrat
 
         $suspensionDate = $suspendedAt ?? now()->toDateTimeString();
 
-        $this->suspendable->suspensions()->create(['started_at' => $suspensionDate]);
+        $this->repository->suspend($this->suspendable, $suspensionDate);
         $this->suspendable->updateStatusAndSave();
 
         if ($this->suspendable->currentTagTeam) {

@@ -46,8 +46,8 @@ class WrestlerRetirementStrategy extends BaseRetirementStrategy implements Retir
 
         $retiredDate = $retiredAt ?: now()->toDateTimeString();
 
-        $this->retirable->currentEmployment()->update(['ended_at' => $retiredDate]);
-        $this->retirable->retirements()->create(['started_at' => $retiredDate]);
+        $this->repository->release($this->retirable, $retiredDate);
+        $this->repository->retire($this->retirable, $retiredDate);
         $this->retirable->updateStatusAndSave();
 
         if ($this->retirable->currentTagTeam) {

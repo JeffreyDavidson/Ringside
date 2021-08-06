@@ -36,7 +36,7 @@ class TagTeamUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
 
         $unretiredDate = $unretiredAt ?: now();
 
-        $this->unretirable->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        $this->repository->unretire($this->unretirable, $unretiredDate);
         $this->unretirable->currentWrestlers->each->unretire($unretiredDate);
         $this->unretirable->updateStatusAndSave();
 

@@ -35,8 +35,7 @@ class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategy
         throw_unless($this->injurable->canBeInjured(), new CannotBeInjuredException);
 
         $injuredDate = $injuredAt ?? now()->toDateTimeString();
-
-        $this->injurable->injuries()->create(['started_at' => $injuredDate]);
+        $this->repository->injure($this->injurable, $injuredDate);
         $this->injurable->updateStatusAndSave();
     }
 }

@@ -36,7 +36,7 @@ class ManagerReinstateStrategy extends BaseReinstateStrategy implements Reinstat
 
         $reinstatedDate = $reinstatedAt ?: now()->toDateTimeString();
 
-        $this->reinstatable->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+        $this->repository->reinstate($this->reinstatable, $reinstatedDate);
         $this->reinstatable->updateStatusAndSave();
     }
 }

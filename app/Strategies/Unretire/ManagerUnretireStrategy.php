@@ -36,8 +36,8 @@ class ManagerUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
 
         $unretiredDate = $unretiredAt ?: now()->toDateTimeString();
 
-        $this->unretirable->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->unretirable->employments()->create(['started_at' => $unretiredDate]);
+        $this->repository->unretire($this->unretirable, $unretiredDate);
+        $this->repository->employ($this->unretirable, $unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

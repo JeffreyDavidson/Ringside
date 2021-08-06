@@ -36,7 +36,8 @@ class TagTeamSuspendStrategy extends BaseSuspendStrategy implements SuspendStrat
 
         $suspendedDate = $suspendedAt ?: now();
 
-        $this->suspendable->suspensions()->create(['started_at' => $suspendedDate]);
+        $this->repository->suspend($this->suspendable, $suspendedDate);
+
         $this->suspendable->currentWrestlers->each->suspend($suspendedDate);
         $this->suspendable->updateStatusAndSave();
     }

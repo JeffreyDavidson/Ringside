@@ -30,13 +30,13 @@ class RefereeEmploymentStrategy extends BaseEmploymentStrategy implements Employ
      * @param  string|null $startedAt
      * @return void
      */
-    public function employ($startedAt = null)
+    public function employ(string $startedAt = null)
     {
         throw_unless($this->employable->canBeEmployed(), new CannotBeEmployedException);
 
-        $startDate = $startedAt ?? now()->toDateTimeString();
+        $startAtDate = $startedAt ?? now()->toDateTimeString();
 
-        $this->employable->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+        $this->repository->employ($this->employable, $startAtDate);
         $this->employable->updateStatusAndSave();
     }
 }

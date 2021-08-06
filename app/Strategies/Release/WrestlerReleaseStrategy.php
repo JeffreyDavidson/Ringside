@@ -46,7 +46,7 @@ class WrestlerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStra
 
         $releaseDate = $releasedAt ?? now()->toDateTimeString();
 
-        $this->releasable->currentEmployment->update(['ended_at' => $releaseDate]);
+        $this->repository->release($this->releasable, $releaseDate);
         $this->releasable->updateStatusAndSave();
 
         if ($this->releasable->currentTagTeam) {

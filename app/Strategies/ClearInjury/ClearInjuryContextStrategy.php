@@ -37,11 +37,11 @@ class ClearInjuryContextStrategy
     /**
      * Process the clearing of the injury of the model.
      *
-     * @param  string|null $recoveredAt
+     * @param  string|null $recoveryDate
      * @return void
      */
-    public function process($recoveredAt = null)
+    public function process($recoveryDate = null)
     {
-        $this->strategy->clearInjury($recoveredAt);
+        $this->strategy->clearInjury($recoveryDate);
     }
 }

@@ -37,17 +37,17 @@ class ManagerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     {
         throw_unless($this->releasable->canBeReleased(), new CannotBeReleasedException);
 
+        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();
+
         if ($this->releasable->isSuspended()) {
-            (new ManagerReinstateStrategy($this->releasable))->reinstate();
+            $this->repository->reinstate($this->releasable, $releaseDate);
         }
 
         if ($this->releasable->isInjured()) {
-            (new ManagerClearInjuryStrategy($this->releasable))->clearInjury();
+            $this->repository->clearInjury($this->releasable, $releaseDate);
         }
 
-        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();
-
-        $this->releasable->currentEmployment->update(['ended_at' => $releaseDate]);
+        $this->repository->release($this->releasable, $releaseDate);
         $this->releasable->updateStatusAndSave();
 
         if ($this->releasable->currentTagTeam) {

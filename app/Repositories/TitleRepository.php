@@ -2,8 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\Contracts\Activatable;
-use App\Models\Contracts\Deactivatable;
 use App\Models\Title;
 use App\Repositories\Contracts\ActivationRepositoryInterface;
 use App\Repositories\Contracts\DeactivationRepositoryInterface;
@@ -58,26 +56,50 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
     }
 
     /**
-     * Activate a given title with a given date.
+     * Activate a given title on a given date.
      *
-     * @param  \App\Models\Contracts\Activatable $title
-     * @param  string|null $startedAt
+     * @param  \App\Models\Title $title
+     * @param  string $activationDate
      * @return \App\Models\Title $title
      */
-    public function activate(Activatable $title, string $startedAt = null)
+    public function activate(Title $title, string $activationDate)
     {
-        return $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+        return $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
     }
 
     /**
-     * Deactivate a given title with a given date.
+     * Deactivate a given title on a given date.
      *
-     * @param  \App\Models\Contracts\Deactivatable $title
-     * @param  string|null $endedAt
+     * @param  \App\Models\Title $title
+     * @param  string $deactivationDate
      * @return \App\Models\Title $title
      */
-    public function deactivate(Deactivatable $title, string $endedAt = null)
+    public function deactivate(Title $title, string $deactivationDate)
     {
-        return $title->currentActivation()->update(['ended_at' => $endedAt]);
+        return $title->currentActivation()->update(['ended_at' => $deactivationDate]);
+    }
+
+    /**
+     * Retire a given title on a given date.
+     *
+     * @param  \App\Models\Title $title
+     * @param  string $retirementDate
+     * @return \App\Models\Title $title
+     */
+    public function retire(Title $title, string $retirementDate)
+    {
+        return $title->retirements()->create(['started_at' => $retirementDate]);
+    }
+
+    /**
+     * Unretire a given title on a given date.
+     *
+     * @param  \App\Models\Title $title
+     * @param  string $unretiredDate
+     * @return \App\Models\Title $title
+     */
+    public function unretire(Title $title, string $unretiredDate)
+    {
+        return $title->curentRetirement()->update(['ended_at' => $unretiredDate]);
     }
 }

@@ -36,8 +36,9 @@ class StableRetirementStrategy extends BaseRetirementStrategy implements Retirem
 
         $retiredDate = $retiredAt ?: now();
 
-        $this->retirable->currentActivation()->update(['ended_at' => $retiredDate]);
-        $this->retirable->retirements()->create(['started_at' => now()]);
+        $this->repository->deactivate($this->retirable, $retiredDate);
+        $this->repository->retire($this->retirable, $retiredDate);
+
         $this->retirable->currentWrestlers->each->retire($retiredDate);
         $this->retirable->currentTagTeams->each->retire();
         $this->retirable->updateStatusAndSave();

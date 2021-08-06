@@ -46,7 +46,7 @@ class RefereeReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
 
         $releaseDate = $releasedAt ?? now()->toDateTimeString();
 
-        $this->releasable->currentEmployment->update(['ended_at' => $releaseDate]);
+        $this->repository->release($this->releasable, $releaseDate);
         $this->releasable->updateStatusAndSave();
     }
 }
