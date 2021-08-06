@@ -7,7 +7,6 @@ use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class UnretireContextStrategy
@@ -44,10 +43,10 @@ class UnretireContextStrategy
     /**
      * Process the unretire of the model.
      *
-     * @param  \Carbon\Carbon|null $unretiredAt
+     * @param  string|null $unretiredAt
      * @return void
      */
-    public function process(Carbon $unretiredAt = null): void
+    public function process(string $unretiredAt = null): void
     {
         $this->strategy->unretire($unretiredAt);
     }

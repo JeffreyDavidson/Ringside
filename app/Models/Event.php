@@ -20,8 +20,8 @@ class Event extends Model
      */
     protected static function booted()
     {
-        static::saving(function ($evemt) {
-            $evemt->updateStatus();
+        static::saving(function ($event) {
+            $event->updateStatus();
         });
     }
 

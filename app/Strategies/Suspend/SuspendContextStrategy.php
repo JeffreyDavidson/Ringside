@@ -6,7 +6,6 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class SuspendContextStrategy
@@ -41,10 +40,10 @@ class SuspendContextStrategy
     /**
      * Process the suspend of the model.
      *
-     * @param  \Carbon\Carbon|null $unretiredAt
+     * @param  string|null $suspendedAt
      * @return void
      */
-    public function process(Carbon $suspendedAt = null): void
+    public function process(string $suspendedAt = null): void
     {
         $this->strategy->suspend($suspendedAt);
     }

@@ -4,7 +4,6 @@ namespace App\Strategies\Activation;
 
 use App\Models\Stable;
 use App\Models\Title;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ActivationContextStrategy
@@ -35,10 +34,10 @@ class ActivationContextStrategy
     /**
      * Process the activation of the model.
      *
-     * @param  \Carbon\Carbon|null $activatedAtDate
+     * @param  string|null $activatedAtDate
      * @return void
      */
-    public function process(Carbon $activatedAtDate = null): void
+    public function process($activatedAtDate = null)
     {
         $this->strategy->activate($activatedAtDate);
     }

@@ -2,11 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Title;
-use Carbon\Carbon;
+use App\Repositories\Contracts\ActivationRepositoryInterface;
+use App\Repositories\Contracts\DeactivationRepositoryInterface;
 
-class TitleRepository implements DeactivationRepositoryInterface
+class TitleRepository implements ActivationRepositoryInterface, DeactivationRepositoryInterface
 {
     /**
      * Create a new title with the given data.
@@ -56,14 +58,26 @@ class TitleRepository implements DeactivationRepositoryInterface
     }
 
     /**
-     * Deactivate a given title with a given date.
+     * Activate a given title with a given date.
      *
-     * @param  \App\Models\Title $title
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  \App\Models\Contracts\Activatable $title
+     * @param  string|null $startedAt
      * @return \App\Models\Title $title
      */
-    public function deactivate(Deactivatable $title, Carbon $startedAt = null)
+    public function activate(Activatable $title, string $startedAt = null)
     {
-        return $title->currentActivation()->update(['ended_at' => $startedAt]);
+        return $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+    }
+
+    /**
+     * Deactivate a given title with a given date.
+     *
+     * @param  \App\Models\Contracts\Deactivatable $title
+     * @param  string|null $endedAt
+     * @return \App\Models\Title $title
+     */
+    public function deactivate(Deactivatable $title, string $endedAt = null)
+    {
+        return $title->currentActivation()->update(['ended_at' => $endedAt]);
     }
 }

@@ -6,7 +6,6 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ReleaseContextStrategy
@@ -41,10 +40,10 @@ class ReleaseContextStrategy
     /**
      * Process the release of the model.
      *
-     * @param  \Carbon\Carbon|null $releasedAt
+     * @param  string|null $releasedAt
      * @return void
      */
-    public function process(Carbon $releasedAt = null): void
+    public function process(string $releasedAt = null): void
     {
         $this->strategy->release($releasedAt);
     }

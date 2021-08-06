@@ -4,7 +4,6 @@ namespace App\Strategies\Reinstate;
 
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Contracts\Reinstatable;
-use Carbon\Carbon;
 
 class TagTeamReinstateStrategy extends BaseReinstateStrategy implements ReinstateStrategyInterface
 {
@@ -28,10 +27,10 @@ class TagTeamReinstateStrategy extends BaseReinstateStrategy implements Reinstat
     /**
      * Reinstate a reinstatable model.
      *
-     * @param  \Carbon\Carbon|null $reinstatedAt
+     * @param  string|null $reinstatedAt
      * @return void
      */
-    public function reinstate(Carbon $reinstatedAt = null)
+    public function reinstate(string $reinstatedAt = null)
     {
         throw_unless($this->reinstatable->canBeReinstated(), new CannotBeReinstatedException);
 

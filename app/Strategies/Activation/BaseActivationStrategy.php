@@ -4,7 +4,7 @@ namespace App\Strategies\Activation;
 
 use App\Exceptions\CannotBeActivatedException;
 use App\Models\Contracts\Activatable;
-use Carbon\Carbon;
+use App\Repositories\Contracts\ActivationRepositoryInterface;
 
 class BaseActivationStrategy implements ActivationStrategyInterface
 {
@@ -16,26 +16,35 @@ class BaseActivationStrategy implements ActivationStrategyInterface
     private Activatable $activatable;
 
     /**
+     * The repository associated with the interface.
+     *
+     * @var \App\Repositories\Contracts\ActivationRepositoryInterface
+     */
+    private ActivationRepositoryInterface $repository;
+
+    /**
      * Create a new base activation strategy instance.
      *
      * @param \App\Models\Contracts\Activatable $activatable
+     * @param \App\Repositories\Contracts\ActivationRepositoryInterface $repository
      */
-    public function __construct(Activatable $activatable)
+    public function __construct(Activatable $activatable, ActivationRepositoryInterface $repository)
     {
         $this->activatable = $activatable;
+        $this->repository = $repository;
     }
 
     /**
      * Activate an activatable model.
      *
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  string|null $startedAt
      * @return void
      */
-    public function activate(Carbon $startedAt = null)
+    public function activate(string $startedAt = null)
     {
         throw_unless($this->activatable->canBeActivated(), new CannotBeActivatedException);
 
-        $this->activatable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+        $this->repository->activate($this->activatable, $startedAt);
         $this->activatable->updateStatusAndSave();
     }
 }

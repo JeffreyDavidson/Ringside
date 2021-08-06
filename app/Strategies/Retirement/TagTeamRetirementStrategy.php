@@ -5,7 +5,6 @@ namespace App\Strategies\Retirement;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
 use App\Strategies\Reinstate\TagTeamReinstateStrategy;
-use Carbon\Carbon;
 
 class TagTeamRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
@@ -29,17 +28,17 @@ class TagTeamRetirementStrategy extends BaseRetirementStrategy implements Retire
     /**
      * Retire a retirable model.
      *
-     * @param  \Carbon\Carbon|null $retiredAt
+     * @param  string|null $retiredAt
      * @return void
      */
-    public function retire(Carbon $retiredAt = null)
+    public function retire(string $retiredAt = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
         $retiredDate = $retiredAt ?: now();
 
         if ($this->retirable->isSuspended()) {
-            TagTeamReinstateStrategy::handle($this->retirable);
+            (new TagTeamReinstateStrategy($this->retirable))->reinstate();
         }
 
         $this->retirable->currentEmployment()->update(['ended_at' => $retiredDate]);

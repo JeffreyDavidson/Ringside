@@ -56,4 +56,16 @@ class ManagerRepository
     {
         $manager->restore();
     }
+
+    /**
+     * Clear the current injury a given manager.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $recoveryDate
+     * @return void
+     */
+    public function clearInjury(Manager $manager, string $recoveryDate)
+    {
+        $manager->currentInjury()->update(['ended_at' => $recoveryDate]);
+    }
 }

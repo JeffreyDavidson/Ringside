@@ -6,7 +6,6 @@ use App\Exceptions\CannotBeReleasedException;
 use App\Models\Contracts\Releasable;
 use App\Strategies\ClearInjury\WrestlerClearInjuryStrategy;
 use App\Strategies\Reinstate\WrestlerReinstateStrategy;
-use Carbon\Carbon;
 
 class WrestlerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
@@ -30,10 +29,10 @@ class WrestlerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStra
     /**
      * Release a releasable model.
      *
-     * @param  \Carbon\Carbon|null $releasedAt
+     * @param  string|null $releasedAt
      * @return void
      */
-    public function release(Carbon $releasedAt = null)
+    public function release(string $releasedAt = null)
     {
         throw_unless($this->releasable->canBeReleased(), new CannotBeReleasedException);
 
@@ -45,7 +44,7 @@ class WrestlerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStra
             (new WrestlerClearInjuryStrategy($this->releasable))->clearInjury();
         }
 
-        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();
+        $releaseDate = $releasedAt ?? now()->toDateTimeString();
 
         $this->releasable->currentEmployment->update(['ended_at' => $releaseDate]);
         $this->releasable->updateStatusAndSave();

@@ -6,7 +6,6 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
 use App\Strategies\ClearInjury\ManagerClearInjuryStrategy;
 use App\Strategies\Reinstate\ManagerReinstateStrategy;
-use Carbon\Carbon;
 
 class ManagerRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
@@ -30,10 +29,10 @@ class ManagerRetirementStrategy extends BaseRetirementStrategy implements Retire
     /**
      * Retire a retirable model.
      *
-     * @param  \Carbon\Carbon|null $retiredAt
+     * @param  string|null $retiredAt
      * @return void
      */
-    public function retire(Carbon $retiredAt = null)
+    public function retire(string $retiredAt = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
@@ -45,7 +44,7 @@ class ManagerRetirementStrategy extends BaseRetirementStrategy implements Retire
             (new ManagerClearInjuryStrategy($this->retirable))->clearInjury();
         }
 
-        $retiredDate = Carbon::parse($retiredAt)->toDateTimeString() ?: now()->toDateTimeString();
+        $retiredDate = $retiredAt ?: now()->toDateTimeString();
 
         $this->retirable->currentEmployment()->update(['ended_at' => $retiredDate]);
         $this->retirable->retirements()->create(['started_at' => $retiredDate]);

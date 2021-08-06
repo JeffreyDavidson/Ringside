@@ -5,7 +5,6 @@ namespace App\Strategies\Unretire;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Contracts\Unretirable;
 use App\Strategies\Activation\TitleActivationStrategy;
-use Carbon\Carbon;
 
 class TitleUnretireStrategy extends BaseUnretireStrategy implements UnretireStrategyInterface
 {
@@ -29,10 +28,10 @@ class TitleUnretireStrategy extends BaseUnretireStrategy implements UnretireStra
     /**
      * Unretire an unretirable model.
      *
-     * @param  \Carbon\Carbon|null $unretiredAt
+     * @param  string|null $unretiredAt
      * @return void
      */
-    public function unretire(Carbon $unretiredAt = null)
+    public function unretire(string $unretiredAt = null)
     {
         throw_unless($this->unretirable->canBeUnretired(), new CannotBeUnretiredException);
 

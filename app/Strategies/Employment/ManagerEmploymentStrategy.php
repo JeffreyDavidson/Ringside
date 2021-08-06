@@ -4,7 +4,6 @@ namespace App\Strategies\Employment;
 
 use App\Exceptions\CannotBeEmployedException;
 use App\Models\Contracts\Employable;
-use Carbon\Carbon;
 
 class ManagerEmploymentStrategy extends BaseEmploymentStrategy implements EmploymentStrategyInterface
 {
@@ -28,14 +27,14 @@ class ManagerEmploymentStrategy extends BaseEmploymentStrategy implements Employ
     /**
      * Employ an employable model.
      *
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  string|null $startedAt
      * @return void
      */
-    public function employ(Carbon $startedAt = null)
+    public function employ(string $startedAt = null)
     {
         throw_unless($this->employable->canBeEmployed(), new CannotBeEmployedException);
 
-        $startDate = Carbon::parse($startedAt)->toDateTimeString() ?? now()->toDateTimeString();
+        $startDate = $startedAt ?? now()->toDateTimeString();
 
         $this->employable->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
         $this->employable->updateStatusAndSave();
