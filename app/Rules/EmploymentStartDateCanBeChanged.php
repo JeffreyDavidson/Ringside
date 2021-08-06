@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use Carbon\Carbon;
+use App\Models\Contracts\Employable;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,9 +14,9 @@ class EmploymentStartDateCanBeChanged implements Rule
     /**
      * Undocumented function.
      *
-     * @param Model $employable
+     * @param \App\Models\Contracts\Employable $employable
      */
-    public function __construct(Model $employable)
+    public function __construct(Employable $employable)
     {
         $this->model = $employable;
     }
@@ -30,7 +30,7 @@ class EmploymentStartDateCanBeChanged implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->model->isUnemployed()) {
+        if ($this->model->canBeEmployed()) {
             return true;
         }
 

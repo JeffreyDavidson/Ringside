@@ -149,19 +149,5 @@ interface Activatable
      *
      * @return string
      */
-    public function canBeDeactivated();
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
     public function getActivatedAtAttribute();
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
-    public function isNotInActivation();
 }

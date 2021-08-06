@@ -10,23 +10,39 @@ use Carbon\Carbon;
 
 class ManagerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
+    /**
+     * The interface implementation.
+     *
+     * @var \App\Models\Contracts\Releasable
+     */
     private Releasable $releasable;
 
+    /**
+     * Create a new manager releasable strategy instance.
+     *
+     * @param \App\Models\Contracts\Releasable $releasable
+     */
     public function __construct(Releasable $releasable)
     {
         $this->releasable = $releasable;
     }
 
+    /**
+     * Release a releasable model.
+     *
+     * @param  \Carbon\Carbon|null $releasedAt
+     * @return void
+     */
     public function release(Carbon $releasedAt = null)
     {
         throw_unless($this->releasable->canBeReleased(), new CannotBeReleasedException);
 
         if ($this->releasable->isSuspended()) {
-            ManagerReinstateStrategy::handle($this->releasable);
+            (new ManagerReinstateStrategy($this->releasable))->reinstate();
         }
 
         if ($this->releasable->isInjured()) {
-            ManagerClearInjuryStrategy::handle($this->releasable);
+            (new ManagerClearInjuryStrategy($this->releasable))->clearInjury();
         }
 
         $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();

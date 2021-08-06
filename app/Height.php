@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App;
 
 class Height
 {
-    private $height;
+    public $height;
 
     public function __construct($height)
     {
@@ -26,9 +26,9 @@ class Height
      *
      * @return string
      */
-    public function getFeetAttribute()
+    public function feet()
     {
-        return floor($this->height / 12);
+        return intval ($this->height / 12);
     }
 
     /**
@@ -36,8 +36,13 @@ class Height
      *
      * @return string
      */
-    public function getInchesAttribute()
+    public function inches()
     {
         return $this->height % 12;
+    }
+
+    public function __toString()
+    {
+        return strval($this->height);
     }
 }

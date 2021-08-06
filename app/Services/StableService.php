@@ -5,28 +5,39 @@ namespace App\Services;
 use App\Exceptions\CannotBeDisassembledException;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
+use App\Strategies\Activation\StableActivationStrategy;
 
 class StableService
 {
+    /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\StableRepository
+     */
     protected $stableRepository;
 
+    /**
+     * Create a new stable service instance.
+     *
+     * @param \App\Repositories\StableRepository $stableRepository
+     */
     public function __construct(StableRepository $stableRepository)
     {
         $this->stableRepository = $stableRepository;
     }
 
     /**
-     * Creates a new stable.
+     * Create a stable.
      *
      * @param  array $data
-     * @return \App\Models\Stable
+     * @return \App\Models\Stable $stable
      */
-    public function create(array $data): Stable
+    public function create(array $data)
     {
         $stable = $this->stableRepository->create($data);
 
         if ($data['started_at']) {
-            $stable->activations()->create(['started_at' => $data['started_at']]);
+            (new StableActivationStrategy($stable))->activate($data['started_at']);
         }
 
         $this->addMembers($stable, $data['wrestlers'], $data['tag_teams']);
@@ -35,15 +46,15 @@ class StableService
     }
 
     /**
-     * Updates a stable.
+     * Update a stable.
      *
      * @param  \App\Models\Stable $stable
      * @param  array $data
-     * @return \App\Models\Stable
+     * @return \App\Models\Stable $stable
      */
-    public function update(Stable $stable, array $data): Stable
+    public function update(Stable $stable, array $data)
     {
-        $stable->update(['name' => $data['name']]);
+        $this->stableRepository->update($stable, $data);
 
         $this->updateActivation($stable, $data['started_at']);
 

@@ -324,6 +324,7 @@ class WrestlerControllerTest extends TestCase
      */
     public function update_cannot_employ_a_released_wrestler_when_started_at_is_filled($administrators)
     {
+        $this->withoutExceptionHandling();
         $wrestler = Wrestler::factory()->released()->create();
 
         $this->actAs($administrators)

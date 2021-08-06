@@ -24,16 +24,17 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider employableReferees
+     * @dataProvider administrators
      */
-    public function invoke_employs_an_employable_referee_and_redirects($employableReferees)
+    public function invoke_employs_an_employable_referee_and_redirects($administrators)
     {
-        dd($employableReferees);
-        $this->actAs(Role::ADMINISTRATOR)
-            ->patch(route('referees.employ', $employableReferees))
+        $referee = Referee::factory()->unemployed()->create();
+
+        $this->actAs($administrators)
+            ->patch(route('referees.employ', $referee))
             ->assertRedirect(route('referees.index'));
 
-        tap($employableReferees->fresh(), function ($referee) {
+        tap($referee->fresh(), function ($referee) {
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
     }

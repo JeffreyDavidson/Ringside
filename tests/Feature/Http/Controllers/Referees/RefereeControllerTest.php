@@ -304,10 +304,10 @@ class RefereeControllerTest extends TestCase
         $now = now()->toDateTimeString();
         $referee = Referee::factory()->released()->create();
 
-        $this->actAs($administrators)
+        $response = $this->actAs($administrators)
             ->from(route('referees.edit', $referee))
-            ->put(route('referees.update', $referee), $this->validParams(['started_at' => $now]))
-            ->assertRedirect(route('referees.index'));
+            ->put(route('referees.update', $referee), $this->validParams(['started_at' => $now]));
+            $response->assertRedirect(route('referees.index'));
 
         tap($referee->fresh(), function ($referee) use ($now) {
             $this->assertCount(2, $referee->employments);
@@ -368,7 +368,7 @@ class RefereeControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $$this->actAs($administrators)
+        $this->actAs($administrators)
             ->delete(route('referees.destroy', $referee))
             ->assertRedirect(route('referees.index'));
 

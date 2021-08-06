@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
+use App\Services\ManagerService;
 
 class ManagersController extends Controller
 {
@@ -37,15 +38,12 @@ class ManagersController extends Controller
      * Create a new manager.
      *
      * @param  \App\Http\Requests\Managers\StoreRequest  $request
+     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, ManagerService $managerService)
     {
-        $manager = Manager::create($request->validatedExcept('started_at'));
-
-        if ($request->filled('started_at')) {
-            $manager->employ($request->input('started_at'));
-        }
+        $managerService->create($request->validated());
 
         return redirect()->route('managers.index');
     }
@@ -81,15 +79,12 @@ class ManagersController extends Controller
      *
      * @param  \App\Http\Requests\Managers\UpdateRequest  $request
      * @param  \App\Models\Manager  $manager
+     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Manager $manager)
+    public function update(UpdateRequest $request, Manager $manager, ManagerService $managerService)
     {
-        $manager->update($request->except('started_at'));
-
-        if ($request->filled('started_at') && ! $manager->isCurrentlyEmployed()) {
-            $manager->employ($request->input('started_at'));
-        }
+        $managerService->update($manager, $request->validated());
 
         return redirect()->route('managers.index');
     }

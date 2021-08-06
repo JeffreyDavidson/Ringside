@@ -12,8 +12,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class UnretireContextStrategy
 {
+    /**
+     * The strategy to be used for the given model.
+     *
+     * @var \App\Strategies\Unretire\UnretireStrategyInterface
+     */
     private UnretireStrategyInterface $strategy;
 
+    /**
+     * Create a new unretire context strategy instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model $model
+     */
     public function __construct(Model $model)
     {
         if ($model instanceof Manager) {
@@ -31,6 +41,12 @@ class UnretireContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
+    /**
+     * Process the unretire of the model.
+     *
+     * @param  \Carbon\Carbon|null $unretiredAt
+     * @return void
+     */
     public function process(Carbon $unretiredAt = null): void
     {
         $this->strategy->unretire($unretiredAt);

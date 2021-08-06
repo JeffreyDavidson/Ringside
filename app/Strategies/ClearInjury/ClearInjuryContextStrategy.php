@@ -10,8 +10,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class ClearInjuryContextStrategy
 {
+    /**
+     * The strategy to be used for the given model.
+     *
+     * @var \App\Strategies\ClearInjury\ClearInjuryStrategyInterface
+     */
     private ClearInjuryStrategyInterface $strategy;
 
+    /**
+     * Create a new clear injury context strategy instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model $model
+     */
     public function __construct(Model $model)
     {
         if ($model instanceof Manager) {
@@ -25,7 +35,13 @@ class ClearInjuryContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(Carbon $recoveredAt = null): void
+    /**
+     * Process the clearing of the injury of the model.
+     *
+     * @param  \Carbon\Carbon|null $recoveredAt
+     * @return void
+     */
+    public function process(Carbon $recoveredAt = null)
     {
         $this->strategy->clearInjury($recoveredAt);
     }

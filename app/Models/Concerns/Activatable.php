@@ -112,18 +112,6 @@ trait Activatable
     }
 
     /**
-     * Scope a query to only include unactivated models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeDeactivated($query)
-    {
-        return $query->whereDoesntHave('currentActivation')
-                    ->orWhereDoesntHave('previousActivations');
-    }
-
-    /**
      * Scope a query to include current activation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
@@ -140,22 +128,6 @@ trait Activatable
     }
 
     /**
-     * Scope a query to include current deactivation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithLastDeactivatedAtDate($query)
-    {
-        return $query->addSelect(['last_deactivated_at' => Activation::select('ended_at')
-            ->whereColumn('activatable_id', $query->qualifyColumn('id'))
-            ->where('activatable_type', $this->getMorphClass())
-            ->orderBy('ended_at', 'desc')
-            ->limit(1),
-        ])->withCasts(['last_deactivated_at' => 'datetime']);
-    }
-
-    /**
      * Scope a query to order by the models first activation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query
@@ -165,18 +137,6 @@ trait Activatable
     public function scopeOrderByFirstActivatedAtDate($query, $direction = 'asc')
     {
         return $query->orderByRaw("DATE(first_activated_at) $direction");
-    }
-
-    /**
-     * Scope a query to order by the models current deactivation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  string $direction
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByLastDeactivatedAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(last_deactivated_at) $direction");
     }
 
     /**
@@ -220,18 +180,6 @@ trait Activatable
     }
 
     /**
-     * Check to see if the model is deactivated.
-     *
-     * @return bool
-     */
-    public function isDeactivated()
-    {
-        return $this->previousActivation()->exists() &&
-                $this->currentActivation()->doesntExist() &&
-                $this->currentRetirement()->doesntExist();
-    }
-
-    /**
      * Determine if the model can be activated.
      *
      * @return bool
@@ -245,21 +193,6 @@ trait Activatable
 
         if ($this->isRetired()) {
             // throw new CannotBeActivatedException('Entity cannot be activated. This entity is retired.');
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Determine if the model can be deactivated.
-     *
-     * @return bool
-     */
-    public function canBeDeactivated()
-    {
-        if ($this->isNotInActivation()) {
-            // throw new CannotBeDeactivatedException('Entity cannot be deactivated. This entity has not been activated.');
             return false;
         }
 
@@ -283,6 +216,6 @@ trait Activatable
      */
     public function isNotInActivation()
     {
-        return $this->isUnactivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+        return $this->isNotActivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 }

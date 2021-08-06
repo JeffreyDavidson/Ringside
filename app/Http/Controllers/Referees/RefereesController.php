@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
+use App\Services\RefereeService;
 
 class RefereesController extends Controller
 {
@@ -37,15 +38,12 @@ class RefereesController extends Controller
      * Create a new referee.
      *
      * @param  \App\Http\Requests\Referees\StoreRequest  $request
+     * @param  \App\Services\RefereeService  $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, RefereeService $refereeService)
     {
-        $referee = Referee::create($request->validatedExcept('started_at'));
-
-        if ($request->filled('started_at')) {
-            $referee->employ($request->input('started_at'));
-        }
+        $refereeService->create($request->validated());
 
         return redirect()->route('referees.index');
     }
@@ -83,13 +81,9 @@ class RefereesController extends Controller
      * @param  \App\Models\Referee  $referee
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Referee $referee)
+    public function update(UpdateRequest $request, Referee $referee, RefereeService $refereeService)
     {
-        $referee->update($request->except('started_at'));
-
-        if ($request->filled('started_at') && ! $referee->isCurrentlyEmployed()) {
-            $referee->employ($request->input('started_at'));
-        }
+        $refereeService->update($referee, $request->validated());
 
         return redirect()->route('referees.index');
     }

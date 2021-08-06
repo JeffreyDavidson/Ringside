@@ -77,8 +77,8 @@ class RefereeFactory extends Factory
     public function released(): self
     {
         $now = now();
-        $start = $now->copy()->subDays(2);
-        $end = $now->copy()->subDays(1);
+        $start = $now->copy()->subWeeks(2);
+        $end = $now->copy()->subWeeks(1);
 
         return $this->state([
             'status' => RefereeStatus::RELEASED,

@@ -10,23 +10,39 @@ use Carbon\Carbon;
 
 class RefereeRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
+    /**
+     * The interface implementation.
+     *
+     * @var \App\Models\Contracts\Retirable
+     */
     private Retirable $retirable;
 
+    /**
+     * Create a new referee retirement strategy instance.
+     *
+     * @param \App\Models\Contracts\Retirable $retirable
+     */
     public function __construct(Retirable $retirable)
     {
         $this->retirable = $retirable;
     }
 
+    /**
+     * Retire a retirable model.
+     *
+     * @param  \Carbon\Carbon|null $retiredAt
+     * @return void
+     */
     public function retire(Carbon $retiredAt = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
         if ($this->retirable->isSuspended()) {
-            RefereeReinstateStrategy::handle($this->retirable);
+            (new RefereeReinstateStrategy($this->retirable))->reinstate();
         }
 
         if ($this->retirable->isInjured()) {
-            RefereeClearInjuryStrategy::handle($this->retirable);
+            (new RefereeClearInjuryStrategy($this->retirable))->clearInjury();
         }
 
         $retiredDate = Carbon::parse($retiredAt)->toDateTimeString() ?: now()->toDateTimeString();
