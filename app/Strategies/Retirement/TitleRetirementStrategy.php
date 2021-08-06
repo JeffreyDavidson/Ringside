@@ -4,7 +4,6 @@ namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
-use Carbon\Carbon;
 
 class TitleRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
@@ -28,10 +27,10 @@ class TitleRetirementStrategy extends BaseRetirementStrategy implements Retireme
     /**
      * Retire a retirable model.
      *
-     * @param  \Carbon\Carbon|null $retiredAt
+     * @param  string|null $retiredAt
      * @return void
      */
-    public function retire(Carbon $retiredAt = null)
+    public function retire(string $retiredAt = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 

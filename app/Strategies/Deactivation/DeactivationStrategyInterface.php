@@ -2,16 +2,14 @@
 
 namespace App\Strategies\Deactivation;
 
-use Carbon\Carbon;
-
 interface DeactivationStrategyInterface
 {
     /**
      * Deactivate a deactivatable model.
      *
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  string|null $endedAt
      */
-    public function deactivate(Carbon $startedAt = null);
+    public function deactivate(string $endedAt = null);
 
     /**
      * Determine if the deactivatable can be deactivated.

@@ -2,15 +2,13 @@
 
 namespace App\Strategies\ClearInjury;
 
-use Carbon\Carbon;
-
 interface ClearInjuryStrategyInterface
 {
     /**
      * Clear an injury of an injurable model.
      *
-     * @param  \Carbon\Carbon|null $recoveredAt
+     * @param  string|null $recoveredAt
      * @return void
      */
-    public function clearInjury(Carbon $recoveredAt = null);
+    public function clearInjury(string $recoveredAt = null);
 }

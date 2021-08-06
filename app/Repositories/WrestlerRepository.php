@@ -40,4 +40,16 @@ class WrestlerRepository
             'signature_move' => $data['signature_move'],
         ]);
     }
+
+    /**
+     * Clear the current injury a given wrestler.
+     *
+     * @param  \App\Models\Wrestler $wrestler
+     * @param  string $recoveryDate
+     * @return void
+     */
+    public function clearInjury(Wrestler $wrestler, string $recoveryDate)
+    {
+        $wrestler->currentInjury()->update(['ended_at' => $recoveryDate]);
+    }
 }

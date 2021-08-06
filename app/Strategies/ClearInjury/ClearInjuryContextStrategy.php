@@ -5,7 +5,6 @@ namespace App\Strategies\ClearInjury;
 use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ClearInjuryContextStrategy
@@ -38,10 +37,10 @@ class ClearInjuryContextStrategy
     /**
      * Process the clearing of the injury of the model.
      *
-     * @param  \Carbon\Carbon|null $recoveredAt
+     * @param  string|null $recoveredAt
      * @return void
      */
-    public function process(Carbon $recoveredAt = null)
+    public function process($recoveredAt = null)
     {
         $this->strategy->clearInjury($recoveredAt);
     }

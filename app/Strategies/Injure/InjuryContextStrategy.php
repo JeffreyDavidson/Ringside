@@ -38,10 +38,10 @@ class InjuryContextStrategy
     /**
      * Process the injury of the model.
      *
-     * @param  \Carbon\Carbon|null $injuredAt
+     * @param  string|null $injuredAt
      * @return void
      */
-    public function process(Carbon $injuredAt = null)
+    public function process(string $injuredAt = null)
     {
         $this->strategy->injure($injuredAt);
     }

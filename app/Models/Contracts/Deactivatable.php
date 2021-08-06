@@ -4,5 +4,12 @@ namespace App\Models\Contracts;
 
 interface Deactivatable
 {
-    public function deactivate();
+    /**
+     * Deactivate a given deactivatable with a given date.
+     *
+     * @param  self $deactivatable
+     * @param  string|null $endedAt
+     * @return self $deactivatable
+     */
+    public function deactivate(self $deactivatable, string $endedAt = null);
 }

@@ -4,7 +4,6 @@ namespace App\Strategies\Reinstate;
 
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Contracts\Reinstatable;
-use Carbon\Carbon;
 
 class WrestlerReinstateStrategy extends BaseReinstateStrategy implements ReinstateStrategyInterface
 {
@@ -28,14 +27,14 @@ class WrestlerReinstateStrategy extends BaseReinstateStrategy implements Reinsta
     /**
      * Reinstate a reinstatable model.
      *
-     * @param  \Carbon\Carbon|null $reinstatedAt
+     * @param  string|null $reinstatedAt
      * @return void
      */
-    public function reinstate(Carbon $reinstatedAt = null)
+    public function reinstate(string $reinstatedAt = null)
     {
         throw_unless($this->reinstatable->canBeReinstated(), new CannotBeReinstatedException);
 
-        $reinstatedDate = Carbon::parse($reinstatedAt)->toDateTimeString() ?: now()->toDateTimeString();
+        $reinstatedDate = $reinstatedAt ?: now()->toDateTimeString();
 
         $this->reinstatable->currentSuspension()->update(['ended_at' => $reinstatedDate]);
         $this->reinstatable->updateStatusAndSave();

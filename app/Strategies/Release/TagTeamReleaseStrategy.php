@@ -4,7 +4,6 @@ namespace App\Strategies\Release;
 
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Contracts\Releasable;
-use Carbon\Carbon;
 
 class TagTeamReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
@@ -28,10 +27,10 @@ class TagTeamReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     /**
      * Release a releasable model.
      *
-     * @param  \Carbon\Carbon|null $releasedAt
+     * @param  string|null $releasedAt
      * @return void
      */
-    public function release(Carbon $releasedAt = null)
+    public function release(string $releasedAt = null)
     {
         throw_unless($this->releasable->canBeSuspended(), new CannotBeSuspendedException());
     }

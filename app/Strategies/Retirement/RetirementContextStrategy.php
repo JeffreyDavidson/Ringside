@@ -6,7 +6,6 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class RetirementContextStrategy
@@ -41,10 +40,10 @@ class RetirementContextStrategy
     /**
      * Process the retire of the model.
      *
-     * @param  \Carbon\Carbon|null $retiredAt
+     * @param  string|null $retiredAt
      * @return void
      */
-    public function process(Carbon $retiredAt = null): void
+    public function process(string $retiredAt = null)
     {
         $this->strategy->retire($retiredAt);
     }

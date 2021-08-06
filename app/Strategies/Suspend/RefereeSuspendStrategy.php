@@ -4,7 +4,6 @@ namespace App\Strategies\Suspend;
 
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Contracts\Suspendable;
-use Carbon\Carbon;
 
 class RefereeSuspendStrategy extends BaseSuspendStrategy implements SuspendStrategyInterface
 {
@@ -28,14 +27,14 @@ class RefereeSuspendStrategy extends BaseSuspendStrategy implements SuspendStrat
     /**
      * Suspend a suspendable model.
      *
-     * @param  \Carbon\Carbon|null $suspendedAt
+     * @param  string|null $suspendedAt
      * @return void
      */
-    public function suspend(Carbon $suspendedAt = null)
+    public function suspend(string $suspendedAt = null)
     {
         throw_unless($this->suspendable->canBeSuspended(), new CannotBeSuspendedException);
 
-        $suspensionDate = Carbon::parse($suspendedAt)->toDateTimeString() ?? now()->toDateTimeString();
+        $suspensionDate = $suspendedAt ?? now()->toDateTimeString();
 
         $this->suspendable->suspensions()->create(['started_at' => $suspensionDate]);
         $this->suspendable->updateStatusAndSave();

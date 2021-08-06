@@ -6,7 +6,6 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class EmploymentContextStrategy
@@ -41,10 +40,10 @@ class EmploymentContextStrategy
     /**
      * Process the employment of the model.
      *
-     * @param  \Carbon\Carbon|null $startedAtDate
+     * @param  string|null $startedAtDate
      * @return void
      */
-    public function process(Carbon $startedAtDate = null)
+    public function process(string $startedAtDate = null)
     {
         $this->strategy->employ($startedAtDate);
     }

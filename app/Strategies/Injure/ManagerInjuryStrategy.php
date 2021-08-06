@@ -4,7 +4,6 @@ namespace App\Strategies\Injure;
 
 use App\Exceptions\CannotBeInjuredException;
 use App\Models\Contracts\Injurable;
-use Carbon\Carbon;
 
 class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategyInterface
 {
@@ -28,14 +27,14 @@ class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategy
     /**
      * Injure an injurable model.
      *
-     * @param  \Carbon\Carbon|null $injuredAt
+     * @param  string|null $injuredAt
      * @return void
      */
-    public function injure(Carbon $injuredAt = null)
+    public function injure(string $injuredAt = null)
     {
         throw_unless($this->injurable->canBeInjured(), new CannotBeInjuredException);
 
-        $injuredDate = Carbon::parse($injuredAt)->toDateTimeString() ?? now()->toDateTimeString();
+        $injuredDate = $injuredAt ?? now()->toDateTimeString();
 
         $this->injurable->injuries()->create(['started_at' => $injuredDate]);
         $this->injurable->updateStatusAndSave();

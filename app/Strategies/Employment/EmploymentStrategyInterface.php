@@ -2,15 +2,13 @@
 
 namespace App\Strategies\Employment;
 
-use Carbon\Carbon;
-
 interface EmploymentStrategyInterface
 {
     /**
      * Employ an employable model.
      *
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  string|null $startedAt
      * @return void
      */
-    public function employ(Carbon $startedAt = null);
+    public function employ(string $startedAt = null);
 }

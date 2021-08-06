@@ -4,8 +4,6 @@ namespace App\Strategies\Deactivation;
 
 use App\Models\Stable;
 use App\Models\Title;
-use App\Repositories\DeactivationRepositoryInterface;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class DeactivationContextStrategy
@@ -13,9 +11,9 @@ class DeactivationContextStrategy
     /**
      * The strategy to be used for the given model.
      *
-     * @var \App\Strategies\Deactivation\DeactivationRepositoryInterface
+     * @var \App\Strategies\Deactivation\DeactivationStrategyInterface
      */
-    private DeactivationRepositoryInterface $strategy;
+    private DeactivationStrategyInterface $strategy;
 
     /**
      * Create a new deactivation context strategy instance.
@@ -36,11 +34,11 @@ class DeactivationContextStrategy
     /**
      * Process the deactivation of the model.
      *
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  string|null $endedAt
      * @return void
      */
-    public function process(Carbon $startedAt = null)
+    public function process(string $endedAt = null)
     {
-        $this->strategy->deactivate($startedAt);
+        $this->strategy->deactivate($endedAt);
     }
 }

@@ -4,8 +4,7 @@ namespace App\Strategies\Deactivation;
 
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Models\Contracts\Deactivatable;
-use App\Repositories\DeactivationRepositoryInterface;
-use Carbon\Carbon;
+use App\Repositories\Contracts\DeactivationRepositoryInterface;
 
 class BaseDeactivationStrategy implements DeactivationStrategyInterface
 {
@@ -19,7 +18,7 @@ class BaseDeactivationStrategy implements DeactivationStrategyInterface
     /**
      * The repository associated with the interface.
      *
-     * @var \App\Repositories\DeactivationRepositoryInterface
+     * @var \App\Repositories\Contracts\DeactivationRepositoryInterface
      */
     private DeactivationRepositoryInterface $repository;
 
@@ -27,7 +26,7 @@ class BaseDeactivationStrategy implements DeactivationStrategyInterface
      * Create a new base deactivatable service instance.
      *
      * @param \App\Models\Contracts\Deactivatable $deactivatable
-     * @param \App\Repositories\DeactivationRepositoryInterface $repository
+     * @param \App\Repositories\Contracts\DeactivationRepositoryInterface $repository
      */
     public function __construct(Deactivatable $deactivatable, DeactivationRepositoryInterface $repository)
     {
@@ -38,14 +37,14 @@ class BaseDeactivationStrategy implements DeactivationStrategyInterface
     /**
      * Deactivate a deactivatable model.
      *
-     * @param  \Carbon\Carbon|null $startedAt
+     * @param  string|null $endedAt
      * @return void
      */
-    public function deactivate(Carbon $startedAt = null)
+    public function deactivate(string $endedAt = null)
     {
         throw_unless($this->canBeDeactivated(), new CannotBeDeactivatedException);
 
-        $this->repository->deactivate($this->deactivatable, $startedAt);
+        $this->repository->deactivate($this->deactivatable, $endedAt);
         $this->deactivatable->updateStatusAndSave();
     }
 

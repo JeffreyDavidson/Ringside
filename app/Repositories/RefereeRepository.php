@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Referee;
+use Carbon\Carbon;
 
 class RefereeRepository
 {
@@ -55,5 +56,17 @@ class RefereeRepository
     public function restore(Referee $referee)
     {
         $referee->restore();
+    }
+
+    /**
+     * Clear the current injury a given referee.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $recoveryDate
+     * @return void
+     */
+    public function clearInjury(Referee $referee, string $recoveryDate)
+    {
+        $referee->currentInjury()->update(['ended_at' => $recoveryDate]);
     }
 }

@@ -6,7 +6,6 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class ReinstateContextStrategy
@@ -41,10 +40,10 @@ class ReinstateContextStrategy
     /**
      * Process the reinstate of the model.
      *
-     * @param  \Carbon\Carbon|null $reinstatedAt
+     * @param  string|null $reinstatedAt
      * @return void
      */
-    public function process(Carbon $reinstatedAt = null)
+    public function process(string $reinstatedAt = null)
     {
         $this->strategy->reinstate($reinstatedAt);
     }

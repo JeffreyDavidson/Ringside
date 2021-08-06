@@ -6,7 +6,6 @@ use App\Exceptions\CannotBeReleasedException;
 use App\Models\Contracts\Releasable;
 use App\Strategies\ClearInjury\RefereeClearInjuryStrategy;
 use App\Strategies\Reinstate\RefereeReinstateStrategy;
-use Carbon\Carbon;
 
 class RefereeReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
@@ -30,10 +29,10 @@ class RefereeReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     /**
      * Release a releasable model.
      *
-     * @param  \Carbon\Carbon|null $releasedAt
+     * @param  string|null $releasedAt
      * @return void
      */
-    public function release(Carbon $releasedAt = null)
+    public function release(string $releasedAt = null)
     {
         throw_unless($this->releasable->canBeReleased(), new CannotBeReleasedException);
 
@@ -45,7 +44,7 @@ class RefereeReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
             (new RefereeClearInjuryStrategy($this->releasable))->clearInjury();
         }
 
-        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();
+        $releaseDate = $releasedAt ?? now()->toDateTimeString();
 
         $this->releasable->currentEmployment->update(['ended_at' => $releaseDate]);
         $this->releasable->updateStatusAndSave();

@@ -4,7 +4,7 @@ namespace App\Strategies\ClearInjury;
 
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Models\Contracts\Injurable;
-use Carbon\Carbon;
+use App\Repositories\ManagerRepository;
 
 class ManagerClearInjuryStrategy extends BaseClearInjuryStrategy implements ClearInjuryStrategyInterface
 {
@@ -16,28 +16,37 @@ class ManagerClearInjuryStrategy extends BaseClearInjuryStrategy implements Clea
     private Injurable $injurable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\ManagerRepository
+     */
+    private ManagerRepository $managerRepository;
+
+    /**
      * Create a new manager clear injury strategy instance.
      *
      * @param \App\Models\Contracts\Injurable $injurable
+     * @param \App\Repositories\ManagerRepository $managerRepository
      */
-    public function __construct(Injurable $injurable)
+    public function __construct(Injurable $injurable, ManagerRepository $managerRepository)
     {
         $this->injurable = $injurable;
+        $this->managerRepository = $managerRepository;
     }
 
     /**
      * Clear an injury of an injurable model.
      *
-     * @param  \Carbon\Carbon|null $recoveredAt
+     * @param  string|null $recoveredAt
      * @return void
      */
-    public function clearInjury(Carbon $recoveredAt = null)
+    public function clearInjury($recoveredAt = null)
     {
         throw_unless($this->injurable->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
 
-        $recoveryDate = Carbon::parse($recoveredAt)->toDateTImeString() ?? now()->toDateTimeString();
+        $recoveryDate = $recoveredAt ?? now()->toDateTimeString();
 
-        $this->injurable->currentInjury()->update(['ended_at' => $recoveryDate]);
+        $this->managerRepository->clearInjury($this->injurable, $recoveryDate);
         $this->injurable->updateStatusAndSave();
     }
 }
