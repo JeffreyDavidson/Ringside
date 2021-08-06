@@ -36,7 +36,7 @@ class TagTeamReinstateStrategy extends BaseReinstateStrategy implements Reinstat
 
         $reinstatedDate = $reinstatedAt ?: now();
 
-        $this->reinstatable->currentSuspension()->update(['ended_at' => $reinstatedDate]);
+        $this->repository->reinstate($this->reinstatable, $reinstatedDate);
         $this->reinstatable->currentWrestlers->each->reinstate($reinstatedDate);
         $this->reinstatable->updateStatusAndSave();
     }

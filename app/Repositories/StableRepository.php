@@ -2,8 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\Contracts\Activatable;
-use App\Models\Contracts\Deactivatable;
 use App\Models\Stable;
 use App\Repositories\Contracts\ActivationRepositoryInterface;
 use App\Repositories\Contracts\DeactivationRepositoryInterface;
@@ -60,26 +58,50 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     }
 
     /**
-     * Activate a given title with a given date.
+     * Activate a given stable on a given date.
      *
-     * @param  \App\Models\Contracts\Activatable $stable
-     * @param  string|null $startedAt
+     * @param  \App\Models\Stable $stable
+     * @param  string $activationDate
      * @return \App\Models\Stable $stable
      */
-    public function activate(Activatable $stable, string $startedAt = null)
+    public function activate(Stable $stable, string $activationDate)
     {
-        return $stable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $startedAt ?? now()]);
+        return $stable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
     }
 
     /**
-     * Deactivate a given title with a given date.
+     * Deactivate a given stable on a given date.
      *
-     * @param  \App\Models\Contracts\Deactivatable $stable
-     * @param  string|null $endedAt
+     * @param  \App\Models\Stable $stable
+     * @param  string $deactivationDate
      * @return \App\Models\Stable $stable
      */
-    public function deactivate(Deactivatable $stable, string $endedAt = null)
+    public function deactivate(Stable $stable, string $deactivationDate)
     {
-        return $stable->currentActivation()->update(['ended_at' => $endedAt]);
+        return $stable->currentActivation()->update(['ended_at' => $deactivationDate]);
+    }
+
+    /**
+     * Retire a given stable on a given date.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  string $retirementDate
+     * @return \App\Models\Stable $stable
+     */
+    public function retire(Stable $stable, string $retirementDate)
+    {
+        return $stable->retirements()->create(['started_at' => $retirementDate]);
+    }
+
+    /**
+     * Unretire a given stable on a given date.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  string $unretireDate
+     * @return \App\Models\Stable $stable
+     */
+    public function unretire(Stable $stable, string $unretireDate)
+    {
+        return $stable->currentRetirement()->update(['ended_at' => $unretireDate]);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Referee;
-use Carbon\Carbon;
 
 class RefereeRepository
 {
@@ -59,14 +58,98 @@ class RefereeRepository
     }
 
     /**
-     * Clear the current injury a given referee.
+     * Employ a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $employmentDate
+     * @return \App\Models\Referee $referee
+     */
+    public function employ(Referee $referee, string $employmentDate)
+    {
+        return $referee->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $employmentDate]);
+    }
+
+    /**
+     * Release a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $releaseDate
+     * @return \App\Models\Referee $referee
+     */
+    public function release(Referee $referee, string $releaseDate)
+    {
+        return $referee->currentEmployment()->update(['ended_at' => $releaseDate]);
+    }
+
+    /**
+     * Injure a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $injureDate
+     * @return \App\Models\Referee $referee
+     */
+    public function injure(Referee $referee, string $injureDate)
+    {
+        return $referee->injuries()->create(['started_at' => $injureDate]);
+    }
+
+    /**
+     * Clear the current injury of a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
      * @param  string $recoveryDate
-     * @return void
+     * @return \App\Models\Referee $referee
      */
     public function clearInjury(Referee $referee, string $recoveryDate)
     {
-        $referee->currentInjury()->update(['ended_at' => $recoveryDate]);
+        return $referee->currentInjury()->update(['ended_at' => $recoveryDate]);
+    }
+
+    /**
+     * Retire a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $retirementDate
+     * @return \App\Models\Referee $referee
+     */
+    public function retire(Referee $referee, string $retirementDate)
+    {
+        return $referee->retirements()->create(['started_at' => $retirementDate]);
+    }
+
+    /**
+     * Unretire a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $unretireDate
+     * @return \App\Models\Referee $referee
+     */
+    public function unretire(Referee $referee, string $unretireDate)
+    {
+        return $referee->currentRetirement()->update(['ended_at' => $unretireDate]);
+    }
+
+    /**
+     * Suspend a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $suspensionDate
+     * @return \App\Models\Referee $referee
+     */
+    public function suspend(Referee $referee, string $suspensionDate)
+    {
+        return $referee->suspensions()->create(['started_at' => $suspensionDate]);
+    }
+
+    /**
+     * Reinstate a given referee on a given date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $reinstateDate
+     * @return \App\Models\Referee $referee
+     */
+    public function reinstate(Referee $referee, string $reinstateDate)
+    {
+        return $referee->currentSuspension()->update(['ended_at' => $reinstateDate]);
     }
 }

@@ -10,8 +10,8 @@ interface ActivationRepositoryInterface
      * Activate an activatable.
      *
      * @param  \App\Models\Contracts\Activatable $activatable
-     * @param  string|null $startedAt
+     * @param  string $activationDate
      * @return \App\Models\Contracts\Activatable $activatable
      */
-    public function activate(Activatable $activatable, string $startedAt = null);
+    public function activate(Activatable $activatable, string $activationDate);
 }

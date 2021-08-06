@@ -36,8 +36,8 @@ class TitleRetirementStrategy extends BaseRetirementStrategy implements Retireme
 
         $retiredDate = $retiredAt ?: now();
 
-        $this->retirable->currentActivation()->update(['ended_at' => $retiredDate]);
-        $this->retirable->retirements()->create(['started_at' => $retiredDate]);
+        $this->repository->deactivate($this->retirable, $retiredDate);
+        $this->repository->retire($this->retirable, $retiredDate);
         $this->retirable->updateStatusAndSave();
     }
 }

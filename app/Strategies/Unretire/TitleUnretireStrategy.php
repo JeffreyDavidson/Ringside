@@ -37,8 +37,8 @@ class TitleUnretireStrategy extends BaseUnretireStrategy implements UnretireStra
 
         $unretiredDate = $unretiredAt ?: now();
 
-        $this->unretirable->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        (new TitleActivationStrategy($this->unretirable))->activate($unretiredDate);
+        $this->repository->unretire($this->unretireable, $unretiredDate);
+        $this->repository->activate($this->unretirable, $unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

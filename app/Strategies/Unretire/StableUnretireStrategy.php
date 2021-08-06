@@ -36,8 +36,8 @@ class StableUnretireStrategy extends BaseUnretireStrategy implements UnretireStr
 
         $unretiredDate = $unretiredAt ?: now();
 
-        $this->unretirable->currentRetirement()->update(['ended_at' => $unretiredDate]);
-        $this->unretirable->activate($unretiredDate);
+        $this->repository->unretire($this->unretirable, $unretiredDate);
+        $this->repository->activate($this->unretirable, $unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

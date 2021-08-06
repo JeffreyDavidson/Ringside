@@ -58,14 +58,98 @@ class ManagerRepository
     }
 
     /**
-     * Clear the current injury a given manager.
+     * Employ a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $startDate
+     * @return \App\Models\Manager $manager
+     */
+    public function employ(Manager $manager, string $startDate)
+    {
+        return $manager->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+    }
+
+    /**
+     * Release a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $releaseDate
+     * @return \App\Models\Manager $manager
+     */
+    public function release(Manager $manager, string $releaseDate)
+    {
+        return $manager->currentEmployment()->update(['ended_at' => $releaseDate]);
+    }
+
+    /**
+     * Injure a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $injureDate
+     * @return \App\Models\Manager $manager
+     */
+    public function injure(Manager $manager, string $injureDate)
+    {
+        return $manager->injuries()->create(['started_at' => $injureDate]);
+    }
+
+    /**
+     * Clear the current injury of a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
      * @param  string $recoveryDate
-     * @return void
+     * @return \App\Models\Manager $manager
      */
     public function clearInjury(Manager $manager, string $recoveryDate)
     {
-        $manager->currentInjury()->update(['ended_at' => $recoveryDate]);
+        return $manager->currentInjury()->update(['ended_at' => $recoveryDate]);
+    }
+
+    /**
+     * Retire a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $retireDate
+     * @return \App\Models\Manager $manager
+     */
+    public function retire(Manager $manager, string $retireDate)
+    {
+        return $manager->retirements()->create(['started_at' => $retireDate]);
+    }
+
+    /**
+     * Unretire a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $unretireDate
+     * @return \App\Models\Manager $manager
+     */
+    public function unretire(Manager $manager, string $unretireDate)
+    {
+        return $manager->currentRetirement()->update(['ended_at' => $unretireDate]);
+    }
+
+    /**
+     * Suspend a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $suspensionDate
+     * @return \App\Models\Manager $manager
+     */
+    public function suspend(Manager $manager, string $suspensionDate)
+    {
+        return $manager->suspensions()->create(['started_at' => $suspensionDate]);
+    }
+
+    /**
+     * Reinstate a given manager on a given date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $reinstateDate
+     * @return \App\Models\Manager $manager
+     */
+    public function reinstate(Manager $manager, string $reinstateDate)
+    {
+        return $manager->currentSuspension()->update(['ended_at' => $reinstateDate]);
     }
 }
