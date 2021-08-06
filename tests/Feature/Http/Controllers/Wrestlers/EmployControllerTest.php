@@ -71,7 +71,7 @@ class EmployControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->employed()->create();
 
-        $respons = $this->actAs($administrators)
+        $this->actAs($administrators)
             ->patch(route('wrestlers.employ', $wrestler));
     }
 }

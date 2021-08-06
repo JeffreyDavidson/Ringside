@@ -80,6 +80,28 @@ class RefereeService
     }
 
     /**
+     * Delete a referee.
+     *
+     * @param  \App\Models\Referee $referee
+     * @return void
+     */
+    public function delete(Referee $referee)
+    {
+        $this->refereeRepository->delete($referee);
+    }
+
+    /**
+     * Restore a referee.
+     *
+     * @param  \App\Models\Referee $referee
+     * @return void
+     */
+    public function restore(Referee $referee)
+    {
+        $this->refereeRepository->restore($referee);
+    }
+
+    /**
      * Clear an injury of a referee.
      *
      * @param  \App\Models\Referee $referee
@@ -113,29 +135,18 @@ class RefereeService
     }
 
     /**
-     * Employ a referee.
+     * Release a referee.
      *
      * @param  \App\Models\Referee $referee
      * @return void
      */
-    public function reinstate(Referee $referee)
+    public function release(Referee $referee)
     {
-        (new RefereeReinstateStrategy($referee))->reinstate();
+        (new RefereeReleaseStrategy($referee))->release();
     }
 
     /**
-     * Unretire a referee.
-     *
-     * @param  \App\Models\Referee $referee
-     * @return void
-     */
-    public function unretire(Referee $referee)
-    {
-        (new RefereeUnretireStrategy($referee))->unretire();
-    }
-
-    /**
-     * Unretire a referee.
+     * Suspend a referee.
      *
      * @param  \App\Models\Referee $referee
      * @return void
@@ -143,6 +154,17 @@ class RefereeService
     public function suspend(Referee $referee)
     {
         (new RefereeSuspendStrategy($referee))->suspend();
+    }
+
+    /**
+     * Reinstate a referee.
+     *
+     * @param  \App\Models\Referee $referee
+     * @return void
+     */
+    public function reinstate(Referee $referee)
+    {
+        (new RefereeReinstateStrategy($referee))->reinstate();
     }
 
     /**
@@ -157,13 +179,13 @@ class RefereeService
     }
 
     /**
-     * Release a referee.
+     * Unretire a referee.
      *
      * @param  \App\Models\Referee $referee
      * @return void
      */
-    public function release(Referee $referee)
+    public function unretire(Referee $referee)
     {
-        (new RefereeReleaseStrategy($referee))->release();
+        (new RefereeUnretireStrategy($referee))->unretire();
     }
 }

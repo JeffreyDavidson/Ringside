@@ -104,7 +104,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('delete', $tagTeam);
 
-        $tagTeam->delete();
+        $this->tagTeamRepository->delete($tagTeam);
 
         return redirect()->route('tag-teams.index');
     }

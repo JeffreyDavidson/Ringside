@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
-use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Requests\Titles\RetireRequest;

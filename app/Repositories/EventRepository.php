@@ -16,4 +16,43 @@ class EventRepository
     {
         return Event::create($data);;
     }
+
+    /**
+     * Update a given event with given data.
+     *
+     * @param  \App\Models\Event $event
+     * @param  array $data
+     * @return \App\Models\Event $event
+     */
+    public function update(Event $event, array $data)
+    {
+        return $event->update([
+            'name' => $data['name'],
+            'date' => $data['date'],
+            'venue_id' => $data['venue_id'],
+            'preview' => $data['preview'],
+        ]);
+    }
+
+    /**
+     * Delete a given event.
+     *
+     * @param  \App\Models\Event $event
+     * @return void
+     */
+    public function delete(Event $event)
+    {
+        $event->delete($event);
+    }
+
+    /**
+     * Restore a given event.
+     *
+     * @param  \App\Models\Event $event
+     * @return void
+     */
+    public function restore(Event $event)
+    {
+        $event->restore($event);
+    }
 }

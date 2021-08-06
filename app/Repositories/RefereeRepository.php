@@ -34,4 +34,26 @@ class RefereeRepository
             'last_name' => $data['last_name'],
         ]);
     }
+
+    /**
+     * Delete a given referee.
+     *
+     * @param  \App\Models\Referee $referee
+     * @return void
+     */
+    public function delete(Referee $referee)
+    {
+        $referee->delete();
+    }
+
+    /**
+     * Restore a given referee.
+     *
+     * @param  \App\Models\Referee $referee
+     * @return void
+     */
+    public function restore(Referee $referee)
+    {
+        $referee->restore();
+    }
 }

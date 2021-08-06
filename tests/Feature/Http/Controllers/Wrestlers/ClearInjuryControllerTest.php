@@ -3,13 +3,13 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
-use Tests\TestCase;
+use App\Http\Controllers\Wrestlers\ClearInjuryController;
+use App\Http\Requests\Wrestlers\ClearInjuryRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Services\WrestlerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Http\Requests\Wrestlers\ClearInjuryRequest;
-use App\Http\Controllers\Wrestlers\ClearInjuryController;
+use Tests\TestCase;
 
 /**
  * @group wrestlers
@@ -31,7 +31,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $response = $this->actAs($administrators)
+        $this->actAs($administrators)
             ->patch(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect(route('wrestlers.index'));
     }

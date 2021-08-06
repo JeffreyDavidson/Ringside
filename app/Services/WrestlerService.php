@@ -120,28 +120,6 @@ class WrestlerService
     }
 
     /**
-     * Employ a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function reinstate(Wrestler $wrestler)
-    {
-        (new WrestlerReinstateStrategy($wrestler))->reinstate();
-    }
-
-    /**
-     * Unretire a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function unretire(Wrestler $wrestler)
-    {
-        (new WrestlerUnretireStrategy($wrestler))->unretire();
-    }
-
-    /**
      * Unretire a wrestler.
      *
      * @param  \App\Models\Wrestler $wrestler
@@ -153,6 +131,17 @@ class WrestlerService
     }
 
     /**
+     * Reinstate a wrestler.
+     *
+     * @param  \App\Models\Wrestler $wrestler
+     * @return void
+     */
+    public function reinstate(Wrestler $wrestler)
+    {
+        (new WrestlerReinstateStrategy($wrestler))->reinstate();
+    }
+
+    /**
      * Retire a wrestler.
      *
      * @param  \App\Models\Wrestler $wrestler
@@ -161,6 +150,17 @@ class WrestlerService
     public function retire(Wrestler $wrestler)
     {
         (new WrestlerRetirementStrategy($wrestler))->retire();
+    }
+
+    /**
+     * Unretire a wrestler.
+     *
+     * @param  \App\Models\Wrestler $wrestler
+     * @return void
+     */
+    public function unretire(Wrestler $wrestler)
+    {
+        (new WrestlerUnretireStrategy($wrestler))->unretire();
     }
 
     /**

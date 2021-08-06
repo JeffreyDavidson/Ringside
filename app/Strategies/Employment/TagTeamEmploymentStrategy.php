@@ -39,10 +39,6 @@ class TagTeamEmploymentStrategy extends BaseEmploymentStrategy implements Employ
 
         $this->employable->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startAtDate]);
 
-        if ($this->employable->currentWrestlers->every->isNotInEmployment()) {
-            $this->employable->currentWrestlers->each->employ($startAtDate);
-        }
-
         $this->employable->updateStatusAndSave();
     }
 }

@@ -6,6 +6,9 @@ use App\Exceptions\CannotBeDisassembledException;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
 use App\Strategies\Activation\StableActivationStrategy;
+use App\Strategies\Deactivation\StableDeactivationStrategy;
+use App\Strategies\Retirement\StableRetirementStrategy;
+use App\Strategies\Unretire\StableUnretireStrategy;
 
 class StableService
 {
@@ -61,6 +64,28 @@ class StableService
         $this->updateMembers($stable, $data['wrestlers'], $data['tag_teams']);
 
         return $stable;
+    }
+
+    /**
+     * Delete a given stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function delete(Stable $stable)
+    {
+        $this->stableRepository->delete($stable);
+    }
+
+    /**
+     * Restore a given stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function restore(Stable $stable)
+    {
+        $this->stableRepository->restore($stable);
     }
 
     /**
@@ -212,5 +237,49 @@ class StableService
         foreach ($tagTeamIds as $tagTeamId) {
             $stable->tagTeams()->attach($tagTeamId, ['joined_at' => $joinedDate]);
         }
+    }
+
+    /**
+     * Activate a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function activate(Stable $stable)
+    {
+        (new StableActivationStrategy($stable))->activate();
+    }
+
+    /**
+     * Deactivate a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function deactivate(Stable $stable)
+    {
+        (new StableDeactivationStrategy($stable))->deactivate();
+    }
+
+    /**
+     * Retire a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function retire(Stable $stable)
+    {
+        (new StableRetirementStrategy($stable))->retire();
+    }
+
+    /**
+     * Unretire a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @return void
+     */
+    public function unretire(Stable $stable)
+    {
+        (new StableUnretireStrategy($stable))->unretire();
     }
 }

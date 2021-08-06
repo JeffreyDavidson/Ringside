@@ -6,6 +6,8 @@ use App\Models\Title;
 use App\Repositories\TitleRepository;
 use App\Strategies\Activation\TitleActivationStrategy;
 use App\Strategies\Deactivation\TitleDeactivationStrategy;
+use App\Strategies\Retirement\TitleRetirementStrategy;
+use App\Strategies\Unretire\TitleUnretireStrategy;
 
 class TitleService
 {
@@ -44,6 +46,44 @@ class TitleService
     }
 
     /**
+     * Update a title.
+     *
+     * @param  \App\Models\Title $title
+     * @param  array $data
+     * @return \App\Models\Title $title
+     */
+    public function update(Title $title, array $data)
+    {
+        $this->stableRepository->update($title, $data);
+
+        $this->updateActivation($title, $data['started_at']);
+
+        return $title;
+    }
+
+    /**
+     * Delete a title.
+     *
+     * @param  \App\Models\Title $title
+     * @return void
+     */
+    public function delete(Title $title)
+    {
+        $this->titleRepository->delete($title);
+    }
+
+    /**
+     * Restore a title.
+     *
+     * @param  \App\Models\Title $title
+     * @return void
+     */
+    public function restore(Title $title)
+    {
+        $this->titleRepository->restore($title);
+    }
+
+    /**
      * Activate a title.
      *
      * @param  \App\Models\Title $title
@@ -63,5 +103,27 @@ class TitleService
     public function deactivate(Title $title)
     {
         (new TitleDeactivationStrategy($title))->deactivate();
+    }
+
+    /**
+     * Retire a title.
+     *
+     * @param  \App\Models\Title $title
+     * @return void
+     */
+    public function retire(Title $title)
+    {
+        (new TitleRetirementStrategy($title))->retire();
+    }
+
+    /**
+     * Unretire a title.
+     *
+     * @param  \App\Models\Title $title
+     * @return void
+     */
+    public function unretire(Title $title)
+    {
+        (new TitleUnretireStrategy($title))->unretire();
     }
 }

@@ -112,6 +112,19 @@ trait Activatable
     }
 
     /**
+     * Scope a query to only include inactive models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeUnactivated($query)
+    {
+        return $query->whereDoesntHas('previousActivation')
+                    ->whereDoesntHave('currentActivation')
+                    ->whereDoesntHave('currentRetirement');
+    }
+
+    /**
      * Scope a query to include current activation date.
      *
      * @param  \Illuminate\Database\Eloquent\Builder $query

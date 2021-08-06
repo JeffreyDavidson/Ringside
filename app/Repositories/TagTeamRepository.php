@@ -34,4 +34,26 @@ class TagTeamRepository
             'signature_move' => $data['signature_move']
         ]);
     }
+
+    /**
+     * Delete a given tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function delete(TagTeam $tagTeam)
+    {
+        $tagTeam->delete();
+    }
+
+    /**
+     * Restore a given tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @return void
+     */
+    public function restore(TagTeam $tagTeam)
+    {
+        $tagTeam->restore();
+    }
 }

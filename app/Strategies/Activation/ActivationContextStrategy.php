@@ -2,8 +2,8 @@
 
 namespace App\Strategies\Activation;
 
-use App\Models\Title;
 use App\Models\Stable;
+use App\Models\Title;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 

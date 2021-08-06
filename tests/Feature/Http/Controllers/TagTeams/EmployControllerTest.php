@@ -29,6 +29,7 @@ class EmployControllerTest extends TestCase
      */
     public function invoke_employs_a_future_employed_tag_team_and_redirects($administrators)
     {
+        $this->withoutExceptionHandling();
         $now = now();
         Carbon::setTestNow($now);
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
+use App\Services\TitleService;
 
 class TitlesController extends Controller
 {
@@ -37,11 +38,12 @@ class TitlesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\Titles\StoreRequest  $request
+     * @param  \App\Services\TitleService $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, TitleService $titleService)
     {
-        $this->titleService->create();
+        $titleService->create($request->validated());
 
         return redirect()->route('titles.index');
     }
@@ -76,15 +78,12 @@ class TitlesController extends Controller
      *
      * @param  \App\Http\Requests\Titles\UpdateRequest  $request
      * @param  \App\Models\Title  $title
+     * @param  \App\Services\TitleService $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Title $title)
+    public function update(UpdateRequest $request, Title $title, TitleService $titleService)
     {
-        $title->update($request->validatedExcept('activated_at'));
-
-        if ($request->filled('activated_at') && ! $title->isCurrentlyActivated()) {
-            $title->activate($request->input('activated_at'));
-        }
+        $titleService->update($title, $request->validated());
 
         return redirect()->route('titles.index');
     }
@@ -93,13 +92,14 @@ class TitlesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Title  $title
+     * @param  \App\Services\TitleService  $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Title $title)
+    public function destroy(Title $title, TitleService $titleService)
     {
         $this->authorize('delete', $title);
 
-        $title->delete();
+        $titleService->delete($title);
 
         return redirect()->route('titles.index');
     }
