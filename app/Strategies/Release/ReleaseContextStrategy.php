@@ -11,8 +11,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReleaseContextStrategy
 {
+    /**
+     * The strategy to be used for the given model.
+     *
+     * @var \App\Strategies\Release\ReleaseStrategyInterface
+     */
     private ReleaseStrategyInterface $strategy;
 
+    /**
+     * Create a new release context strategy instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model $model
+     */
     public function __construct(Model $model)
     {
         if ($model instanceof Manager) {
@@ -28,6 +38,12 @@ class ReleaseContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
+    /**
+     * Process the release of the model.
+     *
+     * @param  \Carbon\Carbon|null $releasedAt
+     * @return void
+     */
     public function process(Carbon $releasedAt = null): void
     {
         $this->strategy->release($releasedAt);

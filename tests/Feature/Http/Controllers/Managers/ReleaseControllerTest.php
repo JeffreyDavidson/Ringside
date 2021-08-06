@@ -51,6 +51,7 @@ class ReleaseControllerTest extends TestCase
      */
     public function invoke_releases_an_injured_manager_and_redirects($administrators)
     {
+        $this->withoutExceptionHandling();
         $now = now();
         Carbon::setTestNow($now);
 

@@ -5,46 +5,57 @@ namespace App\Services;
 use App\Exceptions\NotEnoughMembersException;
 use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
+use App\Strategies\Employment\TagTeamEmploymentStrategy;
 use Exception;
 
 class TagTeamService
 {
+    /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
     protected $tagTeamRepository;
 
+    /**
+     * Create a new tag team service instance.
+     *
+     * @param \App\Repositories\TagTeamRepository $tagTeamRepository
+     */
     public function __construct(TagTeamRepository $tagTeamRepository)
     {
         $this->tagTeamRepository = $tagTeamRepository;
     }
 
     /**
-     * Creates a new tag team.
+     * Create a tag team.
      *
      * @param  array $data
-     * @return \App\Models\TagTeam
+     * @return \App\Models\TagTeam $tagTeam
      */
-    public function create(array $data): TagTeam
+    public function create(array $data)
     {
         $tagTeam = $this->tagTeamRepository->create($data);
 
         $this->addTagTeamPartners($tagTeam, $data['wrestlers']);
 
         if ($data['started_at']) {
-            $tagTeam->employ($data['started_at']);
+            (new TagTeamEmploymentStrategy($tagTeam))->employ($data['started_at']);
         }
 
         return $tagTeam;
     }
 
     /**
-     * Updates a tag team.
+     * Update a tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  array $data
-     * @return \App\Models\TagTeam
+     * @return \App\Models\TagTeam $tagTeam
      */
-    public function update(TagTeam $tagTeam, array $data): TagTeam
+    public function update(TagTeam $tagTeam, array $data)
     {
-        $tagTeam->update(['name' => $data['name'], 'signature_move' => $data['signature_move']]);
+        $this->tagTeamRepository->update($tagTeam, $data);
 
         $this->updateTagTeamPartners($tagTeam, $data['wrestlers']);
 

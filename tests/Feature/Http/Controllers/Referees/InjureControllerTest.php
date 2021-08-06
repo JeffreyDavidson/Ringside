@@ -158,6 +158,6 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->injured()->create();
 
         $this->actAs($administrators)
-            ->put(route('referees.injure', $referee));
+            ->patch(route('referees.injure', $referee));
     }
 }

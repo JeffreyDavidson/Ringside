@@ -30,6 +30,7 @@ class ClearInjuryControllerTest extends TestCase
     public function invoke_marks_an_injured_wrestler_as_being_recovered_and_redirects($administrators)
     {
         $wrestler = Wrestler::factory()->injured()->create();
+
         $response = $this->actAs($administrators)
             ->patch(route('wrestlers.clear-from-injury', $wrestler))
             ->assertRedirect(route('wrestlers.index'));

@@ -46,7 +46,6 @@ class ReleaseControllerTest extends TestCase
      */
     public function invoke_releases_an_injured_wrestler_and_redirects($administrators)
     {
-        $this->withoutExceptionHandling();
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this->actAs($administrators)

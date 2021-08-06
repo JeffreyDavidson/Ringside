@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
-use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Wrestlers\EmployController;
 use App\Http\Requests\Wrestlers\EmployRequest;

@@ -11,8 +11,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReinstateContextStrategy
 {
+    /**
+     * The strategy to be used for the given model.
+     *
+     * @var \App\Strategies\Reinstate\ReinstateStrategyInterface
+     */
     private ReinstateStrategyInterface $strategy;
 
+    /**
+     * Create a new reinstate context strategy instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model $model
+     */
     public function __construct(Model $model)
     {
         if ($model instanceof Manager) {
@@ -28,7 +38,13 @@ class ReinstateContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(Carbon $reinstatedAt = null): void
+    /**
+     * Process the reinstate of the model.
+     *
+     * @param  \Carbon\Carbon|null $reinstatedAt
+     * @return void
+     */
+    public function process(Carbon $reinstatedAt = null)
     {
         $this->strategy->reinstate($reinstatedAt);
     }

@@ -15,6 +15,7 @@ class Title extends Model implements Activatable, Deactivatable, Unretirable
     use SoftDeletes,
         HasFactory,
         Concerns\Activatable,
+        Concerns\Deactivatable,
         Concerns\Retirable,
         Concerns\Unguarded;
 
@@ -71,7 +72,7 @@ class Title extends Model implements Activatable, Deactivatable, Unretirable
      */
     public function isCompetable()
     {
-        if ($this->isUnactivated() || $this->isDeactivated() || $this->isRetired() || $this->hasFutureActivation()) {
+        if ($this->isNotActivated() || $this->isDeactivated() || $this->isRetired() || $this->hasFutureActivation()) {
             return false;
         }
 
@@ -107,5 +108,10 @@ class Title extends Model implements Activatable, Deactivatable, Unretirable
     {
         $this->updateStatus();
         $this->save();
+    }
+
+    public function deactivate()
+    {
+        return null;
     }
 }

@@ -25,6 +25,7 @@ class ActivateControllerTest extends TestCase
      */
     public function invoke_activates_an_unactivated_title_and_redirects($administrators)
     {
+        $this->withoutExceptionHandling();
         Carbon::setTestNow($now = now());
 
         $title = Title::factory()->unactivated()->create();

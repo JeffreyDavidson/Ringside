@@ -8,13 +8,29 @@ use Carbon\Carbon;
 
 class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategyInterface
 {
+    /**
+     * The interface implementation.
+     *
+     * @var \App\Models\Contracts\Injurable
+     */
     private Injurable $injurable;
 
+    /**
+     * Create a new manager injury strategy instance.
+     *
+     * @param \App\Models\Contracts\Injurable $injurable
+     */
     public function __construct(Injurable $injurable)
     {
         $this->injurable = $injurable;
     }
 
+    /**
+     * Injure an injurable model.
+     *
+     * @param  \Carbon\Carbon|null $injuredAt
+     * @return void
+     */
     public function injure(Carbon $injuredAt = null)
     {
         throw_unless($this->injurable->canBeInjured(), new CannotBeInjuredException);

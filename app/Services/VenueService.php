@@ -7,15 +7,25 @@ use App\Repositories\VenueRepository;
 
 class VenueService
 {
+    /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\VenueRepository
+     */
     protected $venueRepository;
 
+    /**
+     * Create a new venue service instance.
+     *
+     * @param \App\Repositories\VenueRepository $venueRepository
+     */
     public function __construct(VenueRepository $venueRepository)
     {
         $this->venueRepository = $venueRepository;
     }
 
     /**
-     * Creates a new tag team.
+     * Create a new venue.
      *
      * @param  array $data
      * @return \App\Models\Venue $venue

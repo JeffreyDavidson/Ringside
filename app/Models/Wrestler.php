@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\HeightCast;
 use App\Enums\WrestlerStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanJoinStable;
@@ -34,6 +35,7 @@ class Wrestler extends SingleRosterMember implements Bookable, CanJoinStable
      */
     protected $casts = [
         'status' => WrestlerStatus::class,
+        'height' => HeightCast::class,
     ];
 
     /**
@@ -102,11 +104,6 @@ class Wrestler extends SingleRosterMember implements Bookable, CanJoinStable
         return $query->whereHas('currentEmployment')
                     ->whereDoesntHave('currentSuspension')
                     ->whereDoesntHave('currentInjury');
-    }
-
-    public function getHeightAttribute($height)
-    {
-        return new Height($height);
     }
 
     /**

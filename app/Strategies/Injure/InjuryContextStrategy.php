@@ -10,8 +10,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class InjuryContextStrategy
 {
+    /**
+     * The strategy to be used for the given model.
+     *
+     * @var \App\Strategies\Injure\InjuryStrategyInterface
+     */
     private InjuryStrategyInterface $strategy;
 
+    /**
+     * Create a new injury context strategy instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model $model
+     */
     public function __construct(Model $model)
     {
         if ($model instanceof Manager) {
@@ -25,7 +35,13 @@ class InjuryContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(Carbon $injuredAt = null): void
+    /**
+     * Process the injury of the model.
+     *
+     * @param  \Carbon\Carbon|null $injuredAt
+     * @return void
+     */
+    public function process(Carbon $injuredAt = null)
     {
         $this->strategy->injure($injuredAt);
     }

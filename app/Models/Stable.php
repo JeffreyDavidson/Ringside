@@ -14,6 +14,7 @@ class Stable extends Model implements Activatable, Deactivatable
     use SoftDeletes,
         HasFactory,
         Concerns\Activatable,
+        Concerns\Deactivatable,
         Concerns\Retirable,
         Concerns\Unguarded;
 
@@ -177,4 +178,11 @@ class Stable extends Model implements Activatable, Deactivatable
         $this->updateStatus();
         $this->save();
     }
+
+    public function deactivate()
+    {
+        return null;
+    }
+
+
 }

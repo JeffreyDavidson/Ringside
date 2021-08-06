@@ -11,8 +11,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmploymentContextStrategy
 {
+    /**
+     * The strategy to be used for the given model.
+     *
+     * @var \App\Strategies\Employment\EmploymentStrategyInterface
+     */
     private EmploymentStrategyInterface $strategy;
 
+    /**
+     * Create a new employment context strategy instance.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model $model
+     */
     public function __construct(Model $model)
     {
         if ($model instanceof Manager) {
@@ -28,7 +38,13 @@ class EmploymentContextStrategy
         throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
     }
 
-    public function process(Carbon $startedAtDate = null): void
+    /**
+     * Process the employment of the model.
+     *
+     * @param  \Carbon\Carbon|null $startedAtDate
+     * @return void
+     */
+    public function process(Carbon $startedAtDate = null)
     {
         $this->strategy->employ($startedAtDate);
     }
