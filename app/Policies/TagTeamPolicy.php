@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\TagTeam;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TagTeamPolicy
@@ -129,7 +129,7 @@ class TagTeamPolicy
      */
     public function view(User $user, TagTeam $tagTeam)
     {
-        if (!is_null($tagTeam->user) && $tagTeam->user->is($user)) {
+        if (! is_null($tagTeam->user) && $tagTeam->user->is($user)) {
             return true;
         }
 

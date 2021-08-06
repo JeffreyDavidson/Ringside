@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Stables;
 
-use App\Models\Stable;
 use App\Http\Controllers\Controller;
+use App\Models\Stable;
 use App\Services\StableService;
 
 class RestoreController extends Controller

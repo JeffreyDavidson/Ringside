@@ -22,7 +22,7 @@ class RetiredTitles extends Component
             ->paginate($this->perPage);
 
         return view('livewire.titles.retired-titles', [
-            'retiredTitles' => $retiredTitles
+            'retiredTitles' => $retiredTitles,
         ]);
     }
 }

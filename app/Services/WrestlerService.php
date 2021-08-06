@@ -69,7 +69,7 @@ class WrestlerService
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @param  \App\Models\Wrestler $wrestler
      * @param  \Carbon\Carbon $startedAt

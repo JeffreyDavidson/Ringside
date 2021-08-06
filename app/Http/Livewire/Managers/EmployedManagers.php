@@ -27,7 +27,7 @@ class EmployedManagers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.managers.employed-managers', [
-            'employedManagers' => $employedManagers
+            'employedManagers' => $employedManagers,
         ]);
     }
 }

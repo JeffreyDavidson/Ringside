@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class EventPolicy
@@ -30,7 +30,7 @@ class EventPolicy
      */
     public function update(User $user, Event $event)
     {
-        if (!($user->isSuperAdministrator() || $user->isAdministrator())) {
+        if (! ($user->isSuperAdministrator() || $user->isAdministrator())) {
             return false;
         }
 
@@ -81,6 +81,6 @@ class EventPolicy
      */
     public function view(User $user, Event $event)
     {
-        return $user->isSuperAdministrator() ||  $user->isAdministrator();
+        return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 }

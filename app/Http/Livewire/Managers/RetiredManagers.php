@@ -22,7 +22,7 @@ class RetiredManagers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.managers.retired-managers', [
-            'retiredManagers' => $retiredManagers
+            'retiredManagers' => $retiredManagers,
         ]);
     }
 }

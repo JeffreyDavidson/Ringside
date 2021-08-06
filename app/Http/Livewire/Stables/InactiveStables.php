@@ -22,7 +22,7 @@ class InactiveStables extends Component
             ->paginate($this->perPage);
 
         return view('livewire.stables.inactive-stables', [
-            'inactiveStables' => $inactiveStables
+            'inactiveStables' => $inactiveStables,
         ]);
     }
 }

@@ -27,7 +27,7 @@ class ValidationServiceProvider extends ServiceProvider
             $values = array_pop($parameters);
 
             if (count($parameters)) {
-                $values = implode(', ', $parameters) . ' or ' . $values;
+                $values = implode(', ', $parameters).' or '.$values;
             }
 
             return str_replace(':values', $values, $message);

@@ -28,7 +28,7 @@ class Height
      */
     public function feet()
     {
-        return intval ($this->height / 12);
+        return intval($this->height / 12);
     }
 
     /**

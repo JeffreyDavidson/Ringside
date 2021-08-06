@@ -24,7 +24,7 @@ class FutureActivationAndUnactivatedTitles extends Component
             ->paginate();
 
         return view('livewire.titles.future-activation-and-unactivated-titles', [
-            'futureActivationAndUnactivatedTitles' => $futureActivationAndUnactivatedTitles
+            'futureActivationAndUnactivatedTitles' => $futureActivationAndUnactivatedTitles,
         ]);
     }
 }

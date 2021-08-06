@@ -35,7 +35,7 @@ class ReleaseContextStrategy
             $this->strategy = new WrestlerReleaseStrategy($model);
         }
 
-        throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
+        throw new \InvalidArgumentException('Could not find strategy for: '.$model::class);
     }
 
     /**

@@ -22,7 +22,7 @@ class RetiredWrestlers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.wrestlers.retired-wrestlers', [
-            'retiredWrestlers' => $retiredWrestlers
+            'retiredWrestlers' => $retiredWrestlers,
         ]);
     }
 }

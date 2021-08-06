@@ -38,7 +38,7 @@ class UnretireContextStrategy
             $this->strategy = new WrestlerUnretireStrategy($model);
         }
 
-        throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
+        throw new \InvalidArgumentException('Could not find strategy for: '.$model::class);
     }
 
     /**

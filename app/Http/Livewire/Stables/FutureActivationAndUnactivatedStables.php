@@ -24,7 +24,7 @@ class FutureActivationAndUnactivatedStables extends Component
             ->paginate();
 
         return view('livewire.stables.future-activation-and-unactivated-stables', [
-            'futureActivationAndUnactivatedStables' => $futureActivationAndUnactivatedStables
+            'futureActivationAndUnactivatedStables' => $futureActivationAndUnactivatedStables,
         ]);
     }
 }

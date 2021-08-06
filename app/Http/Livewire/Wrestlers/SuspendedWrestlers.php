@@ -27,7 +27,7 @@ class SuspendedWrestlers extends Component
             ->paginate($this->perPage);
 
         return view('livewire.wrestlers.suspended-wrestlers', [
-            'suspendedWrestlers' => $suspendedWrestlers
+            'suspendedWrestlers' => $suspendedWrestlers,
         ]);
     }
 }

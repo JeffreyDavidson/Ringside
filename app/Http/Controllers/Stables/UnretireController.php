@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Stables;
 
-use App\Models\Stable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\UnretireRequest;
+use App\Models\Stable;
 use App\Services\StableService;
 
 class UnretireController extends Controller

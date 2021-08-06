@@ -4,8 +4,8 @@ namespace App\Strategies\Activation;
 
 use App\Models\Stable;
 use App\Models\Title;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class ActivationContextStrategy
 {
@@ -29,7 +29,7 @@ class ActivationContextStrategy
             $this->strategy = new TitleActivationStrategy($model);
         }
 
-        throw new \InvalidArgumentException('Could not find strategy for: ' . $model::class);
+        throw new \InvalidArgumentException('Could not find strategy for: '.$model::class);
     }
 
     /**

@@ -19,7 +19,7 @@ class WrestlerRepository
             'height' => $data['height'],
             'weight' => $data['weight'],
             'hometown' => $data['hometown'],
-            'signature_move' => $data['signature_move']
+            'signature_move' => $data['signature_move'],
         ]);
     }
 

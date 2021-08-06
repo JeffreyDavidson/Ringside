@@ -27,7 +27,7 @@ class EmployedTagTeams extends Component
             ->paginate($this->perPage);
 
         return view('livewire.tagteams.employed-tagteams', [
-            'employedTagTeams' => $employedTagTeams
+            'employedTagTeams' => $employedTagTeams,
         ]);
     }
 }

@@ -69,7 +69,8 @@ class AppServiceProvider extends ServiceProvider
                         if (isset($dictionary[$key = $model->{$this->parentKey}])) {
                             $model->setRelation(
                                 // $relation, $this->related->newCollection($dictionary[$key])      // original code
-                                $relation, array_first($dictionary[$key])
+                                $relation,
+                                array_first($dictionary[$key])
                             );
                         } else {
                             $model->setRelation($relation, null);

@@ -27,7 +27,7 @@ class EmployedReferees extends Component
             ->paginate($this->perPage);
 
         return view('livewire.referees.employed-referees', [
-            'employedReferees' => $employedReferees
+            'employedReferees' => $employedReferees,
         ]);
     }
 }

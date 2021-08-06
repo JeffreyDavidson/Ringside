@@ -25,7 +25,7 @@ interface Activatable
      */
     public function firstActivation();
 
-     /**
+    /**
      * Get the password for the user.
      *
      * @return string
@@ -67,7 +67,7 @@ interface Activatable
      */
     public function scopeInactive($query);
 
-     /**
+    /**
      * Get the column name for the "remember me" token.
      *
      * @return string
@@ -116,7 +116,7 @@ interface Activatable
      */
     public function hasActivations();
 
-     /**
+    /**
      * Get the column name for the "remember me" token.
      *
      * @return string

@@ -15,7 +15,7 @@ class PastEvents extends Component
     public function render()
     {
         return view('livewire.events.past-events', [
-            'pastEvents' => Event::past()->paginate($this->perPage)
+            'pastEvents' => Event::past()->paginate($this->perPage),
         ]);
     }
 }

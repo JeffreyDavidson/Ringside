@@ -27,7 +27,7 @@ class SuspendedTagTeams extends Component
             ->paginate($this->perPage);
 
         return view('livewire.tagteams.suspended-tagteams', [
-            'suspendedTagTeams' => $suspendedTagTeams
+            'suspendedTagTeams' => $suspendedTagTeams,
         ]);
     }
 }

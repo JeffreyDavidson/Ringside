@@ -14,7 +14,7 @@ class EventRepository
      */
     public function create(array $data)
     {
-        return Event::create($data);;
+        return Event::create($data);
     }
 
     /**
