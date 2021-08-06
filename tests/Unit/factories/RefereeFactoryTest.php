@@ -15,7 +15,9 @@ class RefereeFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_referee_is_unemployed()
     {
         $referee = Referee::factory()->create();
@@ -23,7 +25,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertEquals(RefereeStatus::UNEMPLOYED, $referee->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unemployed_referee_has_zero_employments()
     {
         $referee = Referee::factory()->unemployed()->create();
@@ -32,7 +36,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertCount(0, $referee->employments);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_released_referee_has_a_previous_employment()
     {
         $referee = Referee::factory()->released()->create();
@@ -46,7 +52,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_referee_has_an_mployment()
     {
         $referee = Referee::factory()->withFutureEmployment()->create();
@@ -60,7 +68,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_bookable_referee_has_an_active_employment()
     {
         $referee = Referee::factory()->bookable()->create();
@@ -74,7 +84,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_referee_has_an_active_employment_and_active_suspension()
     {
         $referee = Referee::factory()->suspended()->create();
@@ -93,7 +105,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_referee_has_a_previous_employment_and_active_retirement()
     {
         $referee = Referee::factory()->retired()->create();
@@ -113,7 +127,9 @@ class RefereeFactoryTest extends TestCase
         $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_referee_has_an_active_employment_and_active_suspension()
     {
         $referee = Referee::factory()->injured()->create();

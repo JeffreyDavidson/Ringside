@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Models\Concerns;
 
-use Carbon\Carbon;
-use Tests\TestCase;
+use App\Exceptions\CannotBeFiredException;
 use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\Wrestler;
-use App\Exceptions\CannotBeFiredException;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group traits

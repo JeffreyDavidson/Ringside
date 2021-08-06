@@ -90,13 +90,17 @@ class RetireControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_retire_a_referee()
     {
         $referee = Referee::factory()->create();
@@ -106,7 +110,9 @@ class RetireControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_retire_a_referee()
     {
         $referee = Referee::factory()->create();

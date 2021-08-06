@@ -15,7 +15,9 @@ class ActivationtStartDateCanBeChangedTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unactivated_titles_start_date_can_be_changed()
     {
         $title = Title::factory()->unactivated()->create();
@@ -23,7 +25,9 @@ class ActivationtStartDateCanBeChangedTest extends TestCase
         $this->assertTrue((new ActivationStartDateCanBeChanged($title))->passes(null, now()->toDateTimeString()));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_activated_titles_start_date_can_be_changed()
     {
         $title = Title::factory()->withFutureActivation()->create();
@@ -31,7 +35,9 @@ class ActivationtStartDateCanBeChangedTest extends TestCase
         $this->assertTrue((new ActivationStartDateCanBeChanged($title))->passes(null, now()->toDateTimeString()));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_active_titles_start_date_cannot_be_changed()
     {
         $title = Title::factory()->active()->create();
@@ -39,7 +45,9 @@ class ActivationtStartDateCanBeChangedTest extends TestCase
         $this->assertFalse((new ActivationStartDateCanBeChanged($title))->passes(null, now()->toDateTimeString()));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unactivated_stables_start_date_can_be_changed()
     {
         $stable = Stable::factory()->unactivated()->create();
@@ -47,7 +55,9 @@ class ActivationtStartDateCanBeChangedTest extends TestCase
         $this->assertTrue((new ActivationStartDateCanBeChanged($stable))->passes(null, now()->toDateTimeString()));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_activated_stables_start_date_can_be_changed()
     {
         $stable = Stable::factory()->withFutureActivation()->create();
@@ -55,7 +65,9 @@ class ActivationtStartDateCanBeChangedTest extends TestCase
         $this->assertTrue((new ActivationStartDateCanBeChanged($stable))->passes(null, now()->toDateTimeString()));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_active_stables_start_date_cannot_be_changed()
     {
         $stable = Stable::factory()->active()->create();

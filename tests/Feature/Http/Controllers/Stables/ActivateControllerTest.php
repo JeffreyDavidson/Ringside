@@ -88,13 +88,17 @@ class ActivateControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(ActivateController::class, '__invoke', ActivateRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_activate_a_stable()
     {
         $stable = Stable::factory()->create();
@@ -104,7 +108,9 @@ class ActivateControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_activate_a_stable()
     {
         $stable = Stable::factory()->create();

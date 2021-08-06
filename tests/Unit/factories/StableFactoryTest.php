@@ -14,7 +14,9 @@ class StableFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_stable_is_unactivated()
     {
         $stable = Stable::factory()->create();
@@ -22,7 +24,9 @@ class StableFactoryTest extends TestCase
         $this->assertEquals(StableStatus::UNACTIVATED, $stable->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unactivated_stable_has_zero_activations()
     {
         $stable = Stable::factory()->unactivated()->create();
@@ -31,7 +35,9 @@ class StableFactoryTest extends TestCase
         $this->assertCount(0, $stable->activations);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_inactive_stable_has_a_previous_activation()
     {
         $stable = Stable::factory()->inactive()->create();
@@ -45,7 +51,9 @@ class StableFactoryTest extends TestCase
         $this->assertTrue($activation->ended_at->gt($activation->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_inactive_stable_removes_current_members()
     {
         $stable = Stable::factory()->inactive()->create();
@@ -58,7 +66,9 @@ class StableFactoryTest extends TestCase
         }));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_stable_has_an_mployment()
     {
         $stable = Stable::factory()->withFutureActivation()->create();
@@ -72,7 +82,9 @@ class StableFactoryTest extends TestCase
         $this->assertNull($activation->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_active_stable_has_an_active_activation()
     {
         $stable = Stable::factory()->active()->create();
@@ -86,7 +98,9 @@ class StableFactoryTest extends TestCase
         $this->assertNull($activation->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_stable_has_a_previous_activation_and_active_retirement()
     {
         $stable = Stable::factory()->retired()->create();

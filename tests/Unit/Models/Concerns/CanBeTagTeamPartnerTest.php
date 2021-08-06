@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Models\Concerns;
 
-use Tests\TestCase;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @group traits

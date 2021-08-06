@@ -24,7 +24,9 @@ class ManagerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_has_a_first_name()
     {
         $manager = new Manager(['first_name' => 'John']);
@@ -32,7 +34,9 @@ class ManagerTest extends TestCase
         $this->assertEquals('John', $manager->first_name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_has_a_last_name()
     {
         $manager = new Manager(['last_name' => 'Smith']);
@@ -40,7 +44,9 @@ class ManagerTest extends TestCase
         $this->assertEquals('Smith', $manager->last_name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_has_a_status()
     {
         $manager = new Manager();
@@ -49,7 +55,9 @@ class ManagerTest extends TestCase
         $this->assertEquals('example', $manager->getRawOriginal('status'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_status_is_a_enum()
     {
         $manager = new Manager();
@@ -57,19 +65,25 @@ class ManagerTest extends TestCase
         $this->assertInstanceOf(ManagerStatus::class, $manager->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_uses_has_a_full_name_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\HasFullName', Manager::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Manager::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_can_be_suspended()
     {
         $now = Carbon::now();
@@ -85,7 +99,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->currentSuspension->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_manager_cannot_be_suspended()
     {
         $this->expectException(CannotBeSuspendedException::class);
@@ -95,7 +111,9 @@ class ManagerTest extends TestCase
         $manager->suspend();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_cannot_be_suspended()
     {
         $this->expectException(CannotBeSuspendedException::class);
@@ -105,7 +123,9 @@ class ManagerTest extends TestCase
         $manager->suspend();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_cannot_be_suspended()
     {
         $this->expectException(CannotBeSuspendedException::class);
@@ -115,7 +135,9 @@ class ManagerTest extends TestCase
         $manager->suspend();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_suspended_manager_cannot_be_suspended()
     {
         $this->expectException(CannotBeSuspendedException::class);
@@ -125,7 +147,9 @@ class ManagerTest extends TestCase
         $manager->suspend();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_cannot_be_reinstated()
     {
         $this->expectException(CannotBeReinstatedException::class);
@@ -135,7 +159,9 @@ class ManagerTest extends TestCase
         $manager->reinstate();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_manager_cannot_be_reinstated()
     {
         $this->expectException(CannotBeReinstatedException::class);
@@ -145,7 +171,9 @@ class ManagerTest extends TestCase
         $manager->reinstate();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_manager_cannot_be_reinstated()
     {
         $this->expectException(CannotBeReinstatedException::class);
@@ -155,7 +183,9 @@ class ManagerTest extends TestCase
         $manager->reinstate();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_cannot_be_reinstated()
     {
         $this->expectException(CannotBeReinstatedException::class);
@@ -165,7 +195,9 @@ class ManagerTest extends TestCase
         $manager->reinstate();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_can_be_reinstated()
     {
         $manager = Manager::factory()->suspended()->create();
@@ -176,7 +208,9 @@ class ManagerTest extends TestCase
         $this->assertNotNull($manager->previousSuspension->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_with_a_suspension_is_suspended()
     {
         $manager = Manager::factory()->suspended()->create();
@@ -184,7 +218,9 @@ class ManagerTest extends TestCase
         $this->assertTrue($manager->isSuspended());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_can_be_suspended_multiple_times()
     {
         $manager = Manager::factory()->suspended()->create();
@@ -195,7 +231,9 @@ class ManagerTest extends TestCase
         $this->assertCount(1, $manager->previousSuspensions);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_with_a_retirement_is_retired()
     {
         $manager = Manager::factory()->retired()->create();
@@ -203,7 +241,9 @@ class ManagerTest extends TestCase
         $this->assertTrue($manager->isRetired());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_retired_models()
     {
         $retiredManager = Manager::factory()->retired()->create();
@@ -222,7 +262,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($retiredModels->contains($suspendedManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_can_be_retired()
     {
         $now = Carbon::now();
@@ -237,7 +279,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->currentRetirement->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_can_be_retired()
     {
         $now = Carbon::now();
@@ -255,7 +299,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->currentRetirement->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_manager_can_be_retired()
     {
         $now = Carbon::now();
@@ -273,7 +319,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->currentRetirement->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_manager_cannot_be_retired()
     {
         $this->expectException(CannotBeRetiredException::class);
@@ -283,7 +331,9 @@ class ManagerTest extends TestCase
         $manager->retire();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_cannot_be_retired()
     {
         $this->expectException(CannotBeRetiredException::class);
@@ -293,7 +343,9 @@ class ManagerTest extends TestCase
         $manager->retire();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_can_be_unretired()
     {
         $manager = Manager::factory()->retired()->create();
@@ -304,7 +356,9 @@ class ManagerTest extends TestCase
         $this->assertNotNull($manager->previousRetirement->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_manager_cannot_be_unretired()
     {
         $this->expectException(CannotBeUnretiredException::class);
@@ -314,7 +368,9 @@ class ManagerTest extends TestCase
         $manager->unretire();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_cannot_be_unretired()
     {
         $this->expectException(CannotBeUnretiredException::class);
@@ -324,7 +380,9 @@ class ManagerTest extends TestCase
         $manager->unretire();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_manager_cannot_be_unretired()
     {
         $this->expectException(CannotBeUnretiredException::class);
@@ -334,7 +392,9 @@ class ManagerTest extends TestCase
         $manager->unretire();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_cannot_be_unretired()
     {
         $this->expectException(CannotBeUnretiredException::class);
@@ -344,7 +404,9 @@ class ManagerTest extends TestCase
         $manager->unretire();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_that_retires_and_unretires_has_a_previous_retirement()
     {
         $manager = Manager::factory()->available()->create();
@@ -354,7 +416,9 @@ class ManagerTest extends TestCase
         $this->assertCount(1, $manager->previousRetirements);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_can_be_injured()
     {
         $now = Carbon::now();
@@ -370,7 +434,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->currentInjury->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_manager_cannot_be_injured()
     {
         $this->expectException(CannotBeInjuredException::class);
@@ -380,7 +446,9 @@ class ManagerTest extends TestCase
         $manager->injure();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_cannot_be_injured()
     {
         $this->expectException(CannotBeInjuredException::class);
@@ -390,7 +458,9 @@ class ManagerTest extends TestCase
         $manager->injure();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_cannot_be_injured()
     {
         $this->expectException(CannotBeInjuredException::class);
@@ -400,7 +470,9 @@ class ManagerTest extends TestCase
         $manager->injure();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_manager_cannot_be_injured()
     {
         $this->expectException(CannotBeInjuredException::class);
@@ -410,7 +482,9 @@ class ManagerTest extends TestCase
         $manager->injure();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_available_manager_cannot_be_cleared_from_an_injury()
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
@@ -420,7 +494,9 @@ class ManagerTest extends TestCase
         $manager->clearFromInjury();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_manager_cannot_be_cleared_from_an_injury()
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
@@ -430,7 +506,9 @@ class ManagerTest extends TestCase
         $manager->clearFromInjury();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_manager_cannot_be_cleared_from_an_injury()
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
@@ -440,7 +518,9 @@ class ManagerTest extends TestCase
         $manager->clearFromInjury();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_manager_cannot_be_cleared_from_injury()
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
@@ -450,7 +530,9 @@ class ManagerTest extends TestCase
         $manager->clearFromInjury();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_manager_can_be_cleared_from_an_injury()
     {
         $manager = Manager::factory()->injured()->create();
@@ -461,7 +543,9 @@ class ManagerTest extends TestCase
         $this->assertNotNull($manager->previousInjury->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_with_an_injury_is_injured()
     {
         $manager = Manager::factory()->injured()->create();
@@ -469,7 +553,9 @@ class ManagerTest extends TestCase
         $this->assertTrue($manager->isInjured());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_can_be_injured_multiple_times()
     {
         $manager = Manager::factory()->injured()->create();
@@ -480,7 +566,9 @@ class ManagerTest extends TestCase
         $this->assertCount(1, $manager->previousInjuries);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_single_roster_member_can_be_employed_default_to_now()
     {
         $now = Carbon::now();
@@ -494,7 +582,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->currentEmployment->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_single_roster_member_can_be_employed_at_start_date()
     {
         $yesterday = Carbon::yesterday();
@@ -507,7 +597,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($yesterday->toDateTimeString(), $manager->currentEmployment->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_single_roster_member_with_an_employment_in_the_future_can_be_employed_at_start_date()
     {
         $today = Carbon::today();
@@ -521,7 +613,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($today->toDateTimeString(), $manager->currentEmployment->started_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_available_single_roster_member_can_be_fired_default_to_now()
     {
         $now = Carbon::now();
@@ -537,7 +631,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($now->toDateTimeString(), $manager->previousEmployment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_available_single_roster_member_can_be_fired_at_start_date()
     {
         $yesterday = Carbon::yesterday();
@@ -553,7 +649,9 @@ class ManagerTest extends TestCase
         $this->assertEquals($yesterday->toDateTimeString(), $manager->previousEmployment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_single_roster_member_can_be_fired_default_to_now()
     {
         $now = Carbon::now();
@@ -570,7 +668,9 @@ class ManagerTest extends TestCase
         $this->assertNotNull($manager->previousInjury->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_single_roster_member_can_be_fired_default_to_now()
     {
         $now = Carbon::now();
@@ -587,7 +687,9 @@ class ManagerTest extends TestCase
         $this->assertNotNull($manager->previousSuspension->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employment_single_roster_member_cannot_be_fired()
     {
         $this->expectException(CannotBeReleasedException::class);
@@ -597,7 +699,9 @@ class ManagerTest extends TestCase
         $manager->release();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_single_roster_member_cannot_be_fired()
     {
         $this->expectException(CannotBeReleasedException::class);
@@ -607,7 +711,9 @@ class ManagerTest extends TestCase
         $manager->release();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_with_an_employment_now_or_in_the_past_is_employed()
     {
         $manager = Manager::factory()->create();
@@ -616,7 +722,9 @@ class ManagerTest extends TestCase
         $this->assertTrue($manager->isCurrentlyEmployed());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_available_managers()
     {
         $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
@@ -637,7 +745,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($availableManagers->contains($releasedManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_future_employmed_managers()
     {
         $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
@@ -658,7 +768,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($futureEmployedManagers->contains($releasedManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_employed_managers()
     {
         $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
@@ -679,7 +791,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($employedManagers->contains($releasedManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_released_managers()
     {
         $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
@@ -700,7 +814,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($releasedManagers->contains($retiredManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_injured_managers()
     {
         $injuredManager = Manager::factory()->injured()->create();
@@ -721,7 +837,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($injuredManagers->contains($releasedManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function it_can_get_suspended_managers()
     {
         $suspendedManager = Manager::factory()->suspended()->create();
@@ -742,7 +860,9 @@ class ManagerTest extends TestCase
         $this->assertFalse($suspendedManagers->contains($releasedManager));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_without_an_employment_is_unemployed()
     {
         $manager = Manager::factory()->create();
@@ -750,7 +870,9 @@ class ManagerTest extends TestCase
         $this->assertTrue($manager->isUnemployed());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_manager_employed_in_the_future_has_future_employment()
     {
         /** @var \App\Models\Manager $manager */

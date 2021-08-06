@@ -46,13 +46,17 @@ class ReinstateControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_reinstate_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -62,7 +66,9 @@ class ReinstateControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_reinstate_a_manager()
     {
         $manager = Manager::factory()->create();

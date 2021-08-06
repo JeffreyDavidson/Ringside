@@ -51,7 +51,9 @@ class EventControllerTest extends TestCase
             ->assertSeeLivewire('events.past-events');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_events_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -59,7 +61,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_events_index_page()
     {
         $this->get(route('events.index'))
@@ -78,7 +82,9 @@ class EventControllerTest extends TestCase
             ->assertViewHas('event', new Event);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_an_event()
     {
         $this->actAs(Role::BASIC)
@@ -86,7 +92,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_an_event()
     {
         $this->get(route('events.create'))
@@ -112,7 +120,9 @@ class EventControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_an_event()
     {
         $this->actAs(Role::BASIC)
@@ -121,7 +131,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_event()
     {
         $this->from(route('events.create'))
@@ -129,7 +141,9 @@ class EventControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(EventsController::class, 'store', StoreRequest::class);
@@ -149,7 +163,9 @@ class EventControllerTest extends TestCase
             ->assertViewHas('event', $event);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_an_event_page()
     {
         $event = Event::factory()->create();
@@ -159,7 +175,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_an_event_page()
     {
         $event = Event::factory()->create();
@@ -168,7 +186,9 @@ class EventControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_administrator_can_view_the_form_for_editing_a_scheduled_event()
     {
         $event = Event::factory()->scheduled()->create();
@@ -179,7 +199,9 @@ class EventControllerTest extends TestCase
             ->assertViewHas('event', $event);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_an_event()
     {
         $event = Event::factory()->create();
@@ -189,7 +211,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_an_event()
     {
         $event = Event::factory()->create();
@@ -198,7 +222,9 @@ class EventControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_past_event_cannot_be_edited()
     {
         $event = Event::factory()->past()->create();
@@ -208,7 +234,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_administrator_can_update_a_scheduled_event()
     {
         $now = now();
@@ -228,7 +256,9 @@ class EventControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_an_event()
     {
         $event = Event::factory()->create();
@@ -239,7 +269,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_an_event()
     {
         $event = Event::factory()->create();
@@ -249,7 +281,9 @@ class EventControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_past_event_cannot_be_updated()
     {
         $event = Event::factory()->past()->create();
@@ -260,7 +294,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(EventsController::class, 'update', UpdateRequest::class);
@@ -280,7 +316,9 @@ class EventControllerTest extends TestCase
         $this->assertSoftDeleted($event);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_an_event()
     {
         $event = Event::factory()->create();
@@ -290,7 +328,9 @@ class EventControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_an_event()
     {
         $event = Event::factory()->create();

@@ -21,7 +21,9 @@ class FutureActivationAndUnactivatedTitlesTest extends TestCase
         parent::setUp();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function future_activations_and_unactivated_titles_component_should_return_correct_view()
     {
         $component = Livewire::test(FutureActivationAndUnactivatedTitles::class);
@@ -29,7 +31,9 @@ class FutureActivationAndUnactivatedTitlesTest extends TestCase
         $this->assertEquals('livewire.titles.future-activation-and-unactivated-titles', $component->lastRenderedView->getName());
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function future_activations_and_unactivated_titles_component_should_pass_correct_data()
     {
         $futureActivationAndUnactivatedTitles = Title::query()

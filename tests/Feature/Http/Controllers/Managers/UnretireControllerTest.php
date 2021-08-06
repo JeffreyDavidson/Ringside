@@ -46,13 +46,17 @@ class UnretireControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_unretire_a_manager()
     {
         $manager = Manager::factory()->create();
@@ -62,7 +66,9 @@ class UnretireControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_unretire_a_manager()
     {
         $manager = Manager::factory()->create();

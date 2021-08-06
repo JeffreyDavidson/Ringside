@@ -60,7 +60,9 @@ class WrestlerControllerTest extends TestCase
             ->assertSeeLivewire('wrestlers.retired-wrestlers');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_wrestlers_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -68,7 +70,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_wrestlers_index_page()
     {
         $this->get(route('wrestlers.index'))
@@ -87,7 +91,9 @@ class WrestlerControllerTest extends TestCase
             ->assertViewHas('wrestler', new Wrestler);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_wrestler()
     {
         $this->actAs(Role::BASIC)
@@ -95,7 +101,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_a_wrestler()
     {
         $this->get(route('wrestlers.create'))
@@ -155,7 +163,9 @@ class WrestlerControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_wrestler()
     {
         $this->actAs(Role::BASIC)
@@ -164,7 +174,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_wrestler()
     {
         $this->from(route('wrestlers.create'))
@@ -172,7 +184,9 @@ class WrestlerControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(WrestlersController::class, 'store', StoreRequest::class);
@@ -192,7 +206,9 @@ class WrestlerControllerTest extends TestCase
             ->assertViewHas('wrestler', $wrestler);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_can_view_their_wrestler_profile()
     {
         $this->actAs(Role::BASIC);
@@ -202,7 +218,9 @@ class WrestlerControllerTest extends TestCase
             ->assertOk();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_another_users_wrestler_profile()
     {
         $otherUser = User::factory()->create();
@@ -213,7 +231,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_wrestler_profile()
     {
         $wrestler = Wrestler::factory()->create();
@@ -236,7 +256,9 @@ class WrestlerControllerTest extends TestCase
             ->assertViewHas('wrestler', $wrestler);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();
@@ -246,7 +268,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();
@@ -354,7 +378,9 @@ class WrestlerControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();
@@ -365,7 +391,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();
@@ -375,7 +403,9 @@ class WrestlerControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(WrestlersController::class, 'update', UpdateRequest::class);
@@ -396,7 +426,9 @@ class WrestlerControllerTest extends TestCase
         $this->assertSoftDeleted($wrestler);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();
@@ -406,7 +438,9 @@ class WrestlerControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();

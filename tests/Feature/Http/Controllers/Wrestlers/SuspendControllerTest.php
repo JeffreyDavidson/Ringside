@@ -60,13 +60,17 @@ class SuspendControllerTest extends TestCase
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(SuspendController::class, '__invoke', SuspendRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_suspend_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();
@@ -76,7 +80,9 @@ class SuspendControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_suspend_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();

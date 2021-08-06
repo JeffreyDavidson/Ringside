@@ -55,13 +55,17 @@ class ClearInjuryControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_mark_an_injured_wrestler_as_recovered()
     {
         $wrestler = Wrestler::factory()->injured()->create();
@@ -71,7 +75,9 @@ class ClearInjuryControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_mark_an_injured_wrestler_as_recovered()
     {
         $wrestler = Wrestler::factory()->injured()->create();

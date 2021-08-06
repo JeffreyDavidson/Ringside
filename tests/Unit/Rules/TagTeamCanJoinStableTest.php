@@ -15,7 +15,9 @@ class TagTeamCanJoinStableTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unactivated_tag_team_can_join_an_unactivated_stable()
     {
         $stable = Stable::factory()->unactivated()->create();
@@ -24,7 +26,9 @@ class TagTeamCanJoinStableTest extends TestCase
         $this->assertTrue((new TagTeamCanJoinStable($stable))->passes(null, $tagTeam->id));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_tag_team_in_an_active_stable_cannot_join_another_ctive_stable()
     {
         $stableA = Stable::factory()->active()->create();

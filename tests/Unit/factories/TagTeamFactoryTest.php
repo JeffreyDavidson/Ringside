@@ -14,7 +14,9 @@ class TagTeamFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_tag_team_is_unemployed()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -22,7 +24,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertEquals(TagTeamStatus::UNEMPLOYED, $tagTeam->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unemployed_tag_team_has_zero_employments()
     {
         $tagTeam = TagTeam::factory()->unemployed()->create();
@@ -31,7 +35,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertCount(0, $tagTeam->employments);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_released_tag_team_has_a_previous_employment()
     {
         $tagTeam = TagTeam::factory()->released()->create();
@@ -45,7 +51,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_tag_team_has_an_mployment()
     {
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
@@ -59,7 +67,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_tag_team_without_wrestlers_has_an_mployment_but_no_current_wrestlers()
     {
         $tagTeam = TagTeam::factory()->withFutureEmploymentWithoutWrestlers()->create();
@@ -75,7 +85,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertEmpty($tagTeam->wrestlers);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_bookable_tag_team_has_an_active_employment()
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
@@ -89,7 +101,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_tag_team_has_an_active_employment_and_active_suspension()
     {
         $tagTeam = TagTeam::factory()->suspended()->create();
@@ -108,7 +122,9 @@ class TagTeamFactoryTest extends TestCase
         $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_tag_team_has_a_previous_employment_and_active_retirement()
     {
         $tagTeam = TagTeam::factory()->retired()->create();

@@ -58,13 +58,17 @@ class InjureControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function invoke_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(InjureController::class, '__invoke', InjureRequest::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_injure_a_wrestler()
     {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
@@ -74,7 +78,9 @@ class InjureControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_injure_a_wrestler()
     {
         $wrestler = Wrestler::factory()->create();

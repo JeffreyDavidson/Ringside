@@ -49,7 +49,9 @@ class TitlesControllerTest extends TestCase
             ->assertSeeLivewire('titles.retired-titles');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_titles_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -57,7 +59,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_titles_index_page()
     {
         $this->get(route('titles.index'))
@@ -76,7 +80,9 @@ class TitlesControllerTest extends TestCase
             ->assertViewHas('title', new Title);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_title()
     {
         $this->actAs(Role::BASIC)
@@ -84,7 +90,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function guests_cannot_view_the_form_for_creating_a_title()
     {
         $this->get(route('titles.create'))
@@ -140,7 +148,9 @@ class TitlesControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_title()
     {
         $this->actAs(Role::BASIC)
@@ -149,7 +159,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function guests_cannot_create_a_title()
     {
         $this->from(route('titles.create'))
@@ -157,7 +169,9 @@ class TitlesControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(TitlesController::class, 'store', StoreRequest::class);
@@ -177,7 +191,9 @@ class TitlesControllerTest extends TestCase
             ->assertViewHas('title', $title);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_title()
     {
         $title = Title::factory()->create();
@@ -187,7 +203,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_title()
     {
         $title = Title::factory()->create();
@@ -292,7 +310,9 @@ class TitlesControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_title()
     {
         $title = Title::factory()->create();
@@ -303,7 +323,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_title()
     {
         $title = Title::factory()->create();
@@ -313,7 +335,9 @@ class TitlesControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(TitlesController::class, 'update', UpdateRequest::class);
@@ -333,7 +357,9 @@ class TitlesControllerTest extends TestCase
             ->assertViewHas('title', $title);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_can_view_a_title()
     {
         $title = Title::factory()->create();
@@ -343,7 +369,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_title()
     {
         $title = Title::factory()->create();
@@ -367,7 +395,9 @@ class TitlesControllerTest extends TestCase
         $this->assertSoftDeleted($title);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_delete_a_title()
     {
         $title = Title::factory()->create();
@@ -377,7 +407,9 @@ class TitlesControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_delete_a_title()
     {
         $title = Title::factory()->create();

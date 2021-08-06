@@ -16,7 +16,9 @@ class WrestlerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_has_a_name()
     {
         $wrestler = Wrestler::factory()->create(['name' => 'Example Wrestler Name']);
@@ -24,7 +26,9 @@ class WrestlerTest extends TestCase
         $this->assertEquals('Example Wrestler Name', $wrestler->name);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_has_a_height()
     {
         $wrestler = Wrestler::factory()->create(['height' => 70]);
@@ -32,7 +36,9 @@ class WrestlerTest extends TestCase
         $this->assertEquals('70', $wrestler->height);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_has_a_weight()
     {
         $wrestler = Wrestler::factory()->create(['weight' => 210]);
@@ -40,7 +46,9 @@ class WrestlerTest extends TestCase
         $this->assertEquals(210, $wrestler->weight);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_has_a_hometown()
     {
         $wrestler = Wrestler::factory()->create(['hometown' => 'Los Angeles, California']);
@@ -48,7 +56,9 @@ class WrestlerTest extends TestCase
         $this->assertEquals('Los Angeles, California', $wrestler->hometown);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_can_have_a_signature_move()
     {
         $wrestler = Wrestler::factory()->create(['signature_move' => 'Example Signature Move']);
@@ -56,7 +66,9 @@ class WrestlerTest extends TestCase
         $this->assertEquals('Example Signature Move', $wrestler->signature_move);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_has_a_status()
     {
         $wrestler = Wrestler::factory()->create();
@@ -65,7 +77,9 @@ class WrestlerTest extends TestCase
         $this->assertEquals('example', $wrestler->getRawOriginal('status'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_status_gets_cast_as_a_wrestler_status_enum()
     {
         $wrestler = Wrestler::factory()->create();
@@ -73,13 +87,17 @@ class WrestlerTest extends TestCase
         $this->assertInstanceOf(WrestlerStatus::class, $wrestler->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_uses_can_be_stable_member_trait()
     {
         $this->assertUsesTrait('App\Models\Concerns\CanBeStableMember', Wrestler::class);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_wrestler_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Wrestler::class);

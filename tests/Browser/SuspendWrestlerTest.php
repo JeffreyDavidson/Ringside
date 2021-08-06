@@ -13,7 +13,9 @@ class SuspendWrestlerTest extends DuskTestCase
 {
     use DatabaseMigrations;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_user_can_suspend_a_wrestler()
     {
         $user = User::factory()->superAdministrator()->create();

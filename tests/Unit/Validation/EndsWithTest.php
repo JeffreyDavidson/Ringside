@@ -19,7 +19,7 @@ class EndsWithTest extends TestCase
         $arguments = implode(',', $arguments);
 
         $validator = Validator::make(['name' => 'Hello world'], [
-            'name' => "ends_with:{$arguments}"
+            'name' => "ends_with:{$arguments}",
         ]);
 
         $this->assertEquals($message, $validator->errors()->first('name'));

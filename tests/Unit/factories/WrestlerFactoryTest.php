@@ -15,7 +15,9 @@ class WrestlerFactoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    /**
+     * @test
+     */
     public function default_wrestler_is_unemployed()
     {
         $wrestler = Wrestler::factory()->create();
@@ -23,7 +25,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertEquals(WrestlerStatus::UNEMPLOYED, $wrestler->status);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_unemployed_wrestler_has_zero_employments()
     {
         $wrestler = Wrestler::factory()->unemployed()->create();
@@ -32,7 +36,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertCount(0, $wrestler->employments);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_released_wrestler_has_a_previous_employment()
     {
         $wrestler = Wrestler::factory()->released()->create();
@@ -46,7 +52,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertTrue($employment->ended_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_future_employed_wrestler_has_an_mployment()
     {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
@@ -60,7 +68,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_bookable_wrestler_has_an_active_employment()
     {
         $wrestler = Wrestler::factory()->bookable()->create();
@@ -74,7 +84,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertNull($employment->ended_at);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_suspended_wrestler_has_an_active_employment_and_active_suspension()
     {
         $wrestler = Wrestler::factory()->suspended()->create();
@@ -93,7 +105,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertTrue($suspension->started_at->gt($employment->started_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_retired_wrestler_has_a_previous_employment_and_active_retirement()
     {
         $wrestler = Wrestler::factory()->retired()->create();
@@ -113,7 +127,9 @@ class WrestlerFactoryTest extends TestCase
         $this->assertTrue($retirement->started_at->eq($employment->ended_at));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function an_injured_wrestler_has_an_active_employment_and_active_suspension()
     {
         $wrestler = Wrestler::factory()->injured()->create();

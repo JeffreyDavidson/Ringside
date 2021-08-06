@@ -48,7 +48,9 @@ class VenueControllerTest extends TestCase
             ->assertViewIs('venues.index');
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_venues_index_page()
     {
         $this->actAs(Role::BASIC)
@@ -56,7 +58,9 @@ class VenueControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_venues_index_page()
     {
         $this->get(route('venues.index'))
@@ -75,7 +79,9 @@ class VenueControllerTest extends TestCase
             ->assertViewHas('venue', new Venue);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_creating_a_venue()
     {
         $this->actAs(Role::BASIC)
@@ -83,7 +89,9 @@ class VenueControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_creating_a_venue()
     {
         $this->get(route('venues.create'))
@@ -111,7 +119,9 @@ class VenueControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_create_a_venue()
     {
         $this->actAs(Role::BASIC)
@@ -120,7 +130,9 @@ class VenueControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_create_a_venue()
     {
         $this->from(route('venues.create'))
@@ -128,7 +140,9 @@ class VenueControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function store_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(VenuesController::class, 'store', StoreRequest::class);
@@ -148,7 +162,9 @@ class VenueControllerTest extends TestCase
             ->assertViewHas('venue', $venue);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_a_venue()
     {
         $venue = Venue::factory()->create();
@@ -158,7 +174,9 @@ class VenueControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_a_venue()
     {
         $venue = Venue::factory()->create();
@@ -181,7 +199,9 @@ class VenueControllerTest extends TestCase
             ->assertViewHas('venue', $venue);
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_view_the_form_for_editing_a_venue()
     {
         $venue = Venue::factory()->create();
@@ -191,7 +211,9 @@ class VenueControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_view_the_form_for_editing_a_venue()
     {
         $venue = Venue::factory()->create();
@@ -223,7 +245,9 @@ class VenueControllerTest extends TestCase
         });
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_basic_user_cannot_update_a_venue()
     {
         $venue = Venue::factory()->create();
@@ -234,7 +258,9 @@ class VenueControllerTest extends TestCase
             ->assertForbidden();
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function a_guest_cannot_update_a_venue()
     {
         $venue = Venue::factory()->create();
@@ -244,7 +270,9 @@ class VenueControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** @test */
+    /**
+     * @test
+     */
     public function update_validates_using_a_form_request()
     {
         $this->assertActionUsesFormRequest(VenuesController::class, 'update', UpdateRequest::class);
