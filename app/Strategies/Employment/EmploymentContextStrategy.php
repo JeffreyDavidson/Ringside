@@ -40,11 +40,11 @@ class EmploymentContextStrategy
     /**
      * Process the employment of the model.
      *
-     * @param  string|null $startedAtDate
+     * @param  string|null $employmentDate
      * @return void
      */
-    public function process(string $startedAtDate = null)
+    public function process(string $employmentDate = null)
     {
-        $this->strategy->employ($startedAtDate);
+        $this->strategy->employ($employmentDate);
     }
 }

@@ -3,23 +3,23 @@
 namespace App\Http\Controllers\Stables;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Stables\DisassembleRequest;
+use App\Http\Requests\Stables\DisbandRequest;
 use App\Models\Stable;
 use App\Services\StableService;
 
-class DisassembleController extends Controller
+class DisbandController extends Controller
 {
     /**
-     * Disassemble a stable.
+     * Disband a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \App\Http\Requests\Stables\DisassembleRequest  $request
+     * @param  \App\Http\Requests\Stables\DisbandRequest  $request
      * @param  \App\Services\StableService $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Stable $stable, DisassembleRequest $request, StableService $stableService)
+    public function __invoke(Stable $stable, DisbandRequest $request, StableService $stableService)
     {
-        $stableService->disassemble($stable);
+        $stableService->disband($stable);
 
         return redirect()->route('stables.index');
     }

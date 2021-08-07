@@ -4,6 +4,7 @@ namespace App\Strategies\Unretire;
 
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Contracts\Unretirable;
+use App\Repositories\ManagerRepository;
 
 class ManagerUnretireStrategy extends BaseUnretireStrategy implements UnretireStrategyInterface
 {
@@ -15,6 +16,13 @@ class ManagerUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
     private Unretirable $unretirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\ManagerRepository
+     */
+    private ManagerRepository $managerRepository;
+
+    /**
      * Create a new manager unretire strategy instance.
      *
      * @param \App\Models\Contracts\Unretirable $unretirable
@@ -22,22 +30,23 @@ class ManagerUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
     public function __construct(Unretirable $unretirable)
     {
         $this->unretirable = $unretirable;
+        $this->managerRepository = new ManagerRepository;
     }
 
     /**
      * Unretire an unretirable model.
      *
-     * @param  string|null $unretiredAt
+     * @param  string|null $unretiredDate
      * @return void
      */
-    public function unretire(string $unretiredAt = null)
+    public function unretire(string $unretiredDate = null)
     {
         throw_unless($this->unretirable->canBeUnretired(), new CannotBeUnretiredException);
 
-        $unretiredDate = $unretiredAt ?: now()->toDateTimeString();
+        $unretiredDate = $unretiredDate ?: now()->toDateTimeString();
 
-        $this->repository->unretire($this->unretirable, $unretiredDate);
-        $this->repository->employ($this->unretirable, $unretiredDate);
+        $this->managerRepository->unretire($this->unretirable, $unretiredDate);
+        $this->managerRepository->employ($this->unretirable, $unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

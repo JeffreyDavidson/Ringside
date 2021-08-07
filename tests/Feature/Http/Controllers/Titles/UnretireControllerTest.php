@@ -25,7 +25,6 @@ class UnretireControllerTest extends TestCase
      */
     public function invoke_unretires_a_retired_title_and_redirects($administrators)
     {
-        $this->withoutExceptionHandling();
         Carbon::setTestNow($now = now());
 
         $title = Title::factory()->retired()->create();

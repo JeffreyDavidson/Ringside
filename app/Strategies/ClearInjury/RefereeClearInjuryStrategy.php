@@ -26,27 +26,26 @@ class RefereeClearInjuryStrategy extends BaseClearInjuryStrategy implements Clea
      * Create a new referee clear injury strategy instance.
      *
      * @param \App\Models\Contracts\Injurable $injurable
-     * @param \App\Repositories\RefereeRepository $refereeRepository
      */
-    public function __construct(Injurable $injurable, RefereeRepository $refereeRepository)
+    public function __construct(Injurable $injurable)
     {
         $this->injurable = $injurable;
-        $this->refereeRepository = $refereeRepository;
+        $this->refereeRepository = new RefereeRepository;
     }
 
     /**
      * Clear an injury of an injurable model.
      *
-     * @param  string|null $recoveredAt
+     * @param  string|null $recoveryDate
      * @return void
      */
-    public function clearInjury(string $recoveredAt = null)
+    public function clearInjury(string $recoveryDate = null)
     {
         throw_unless($this->injurable->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
 
-        $recoveryDate = $recoveredAt ?? now()->toDateTimeString();
+        $recoveryDate = $recoveryDate ?? now()->toDateTimeString();
 
         $this->refereeRepository->clearInjury($this->injurable, $recoveryDate);
-        $this->refereeRepository->updateStatusAndSave();
+        $this->injurable->updateStatusAndSave();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Strategies\Reinstate;
 
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Contracts\Reinstatable;
+use App\Repositories\RefereeRepository;
 
 class RefereeReinstateStrategy extends BaseReinstateStrategy implements ReinstateStrategyInterface
 {
@@ -15,6 +16,13 @@ class RefereeReinstateStrategy extends BaseReinstateStrategy implements Reinstat
     private Reinstatable $reinstatable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\RefereeRepository
+     */
+    private RefereeRepository $refereeRepository;
+
+    /**
      * Create a new referee reinstate strategy instance.
      *
      * @param \App\Models\Contracts\Reinstatable $reinstatable
@@ -22,21 +30,22 @@ class RefereeReinstateStrategy extends BaseReinstateStrategy implements Reinstat
     public function __construct(Reinstatable $reinstatable)
     {
         $this->reinstatable = $reinstatable;
+        $this->refereeRepository = new RefereeRepository;
     }
 
     /**
      * Reinstate a reinstatable model.
      *
-     * @param  string|null $reinstatedAt
+     * @param  string|null $reinstatementDate
      * @return void
      */
-    public function reinstate(string $reinstatedAt = null)
+    public function reinstate(string $reinstatementDate = null)
     {
         throw_unless($this->reinstatable->canBeReinstated(), new CannotBeReinstatedException);
 
-        $reinstatedDate = $reinstatedAt ?: now()->toDateTimeString();
+        $reinstatementDate = $reinstatementDate ?: now()->toDateTimeString();
 
-        $this->repository->reinstate($this->reinstatable, $reinstatedDate);
+        $this->refereeRepository->reinstate($this->reinstatable, $reinstatementDate);
         $this->reinstatable->updateStatusAndSave();
     }
 }

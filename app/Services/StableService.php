@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Exceptions\CannotBeDisassembledException;
+use App\Exceptions\CannotBeDisbandedException;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
 use App\Strategies\Activation\StableActivationStrategy;
@@ -192,37 +192,22 @@ class StableService
     }
 
     /**
-     * Undocumented function.
+     * Disband the stable.
      *
      * @param  \App\Models\Stable $stable
-     * @param  string|null $deactivatedAt
+     * @param  string|null $disbandedDate
      * @return void
      */
-    public function disassemble($stable, $deactivatedAt = null)
+    public function disband($stable, $disbandedDate = null)
     {
-        throw_unless($stable->canBeDisassembled(), new CannotBeDisassembledException);
+        throw_unless($stable->canBeDisbanded(), new CannotBeDisbandedException);
 
-        $deactivationDate = $deactivatedAt ?: now();
+        $disbandedDate = $disbandedDate ?: now();
 
-        $stable->currentActivation()->update(['ended_at' => $deactivationDate]);
+        $stable->currentActivation()->update(['ended_at' => $disbandedDate]);
         $stable->currentWrestlers()->detach();
         $stable->currentTagTeams()->detach();
         $stable->updateStatusAndSave();
-    }
-
-    /**
-     * Determine if the tag team can be disassembled.
-     *
-     * @return bool
-     */
-    public function canBeDisassembled()
-    {
-        if ($this->isNotInActivation()) {
-            // throw new CannotBeRetiredException('Stable cannot be retired. This Stable does not have an active activation.');
-            return false;
-        }
-
-        return true;
     }
 
     public function addWrestlers($stable, $wrestlerIds, $joinedDate)

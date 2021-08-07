@@ -7,8 +7,8 @@ interface ClearInjuryStrategyInterface
     /**
      * Clear an injury of an injurable model.
      *
-     * @param  string|null $recoveredAt
+     * @param  string|null $recoveryDate
      * @return void
      */
-    public function clearInjury(string $recoveredAt = null);
+    public function clearInjury(string $recoveryDate = null);
 }

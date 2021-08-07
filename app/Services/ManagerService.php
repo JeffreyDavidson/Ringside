@@ -44,7 +44,7 @@ class ManagerService
         $manager = $this->managerRepository->create($data);
 
         if ($data['started_at']) {
-            (new ManagerEmploymentStrategy($manager))->employ(Carbon::parse($data['started_at']));
+            (new ManagerEmploymentStrategy($manager))->employ($data['started_at']);
         }
 
         return $manager;
@@ -62,20 +62,20 @@ class ManagerService
         $this->managerRepository->update($manager, $data);
 
         if ($data['started_at']) {
-            $this->employOrUpdateEmployment($manager, Carbon::parse($data['started_at']));
+            $this->employOrUpdateEmployment($manager, $data['started_at']);
         }
 
         return $manager;
     }
 
-    public function employOrUpdateEmployment(Manager $manager, $startedAt)
+    public function employOrUpdateEmployment(Manager $manager, $employmentDate)
     {
-        if ($manager->isUnemployed()) {
-            (new ManagerEmploymentStrategy($manager))->employ($startedAt);
+        if ($manager->isNotInEmployment()) {
+            (new ManagerEmploymentStrategy($manager))->employ($employmentDate);
         }
 
-        if ($manager->hasFutureEmployment() && $manager->futureEmployment->started_at->ne($startedAt)) {
-            return $manager->futureEmployment()->update(['started_at' => $startedAt]);
+        if ($manager->hasFutureEmployment() && $manager->futureEmployment->started_at->ne($employmentDate)) {
+            return $manager->futureEmployment()->update(['started_at' => $employmentDate]);
         }
     }
 

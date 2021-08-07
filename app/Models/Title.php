@@ -110,9 +110,4 @@ class Title extends Model implements Activatable, Deactivatable, Retirable, Unre
         $this->updateStatus();
         $this->save();
     }
-
-    public function deactivate()
-    {
-
-    }
 }

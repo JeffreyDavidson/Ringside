@@ -43,8 +43,8 @@ class ReinstateContextStrategy
      * @param  string|null $reinstatedAt
      * @return void
      */
-    public function process(string $reinstatedAt = null)
+    public function process(string $reinstatementDate = null)
     {
-        $this->strategy->reinstate($reinstatedAt);
+        $this->strategy->reinstate($reinstatementDate);
     }
 }

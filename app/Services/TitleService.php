@@ -54,11 +54,31 @@ class TitleService
      */
     public function update(Title $title, array $data)
     {
-        $this->stableRepository->update($title, $data);
+        $this->titleRepository->update($title, $data);
 
-        $this->updateActivation($title, $data['started_at']);
+        if ($data['activated_at']) {
+            $this->activateOrUpdateActivation($title, $data['activated_at']);
+        }
 
         return $title;
+    }
+
+    /**
+     * Update the activation date for a title.
+     *
+     * @param  \App\Models\Title $title
+     * @param  string $startDate
+     * @return \App\Models\Stable
+     */
+    public function activateOrUpdateActivation(Title $title, string $activationDate)
+    {
+        if ($title->isNotInActivation()) {
+            return (new TitleActivationStrategy($title))->activate($activationDate);
+        }
+
+        if ($title->hasFutureActivation() && $title->futureActivation->started_at->ne($activationDate)) {
+            return $title->futureActivation()->update(['started_at' => $activationDate]);
+        }
     }
 
     /**

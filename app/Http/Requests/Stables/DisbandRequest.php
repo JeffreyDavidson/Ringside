@@ -4,7 +4,7 @@ namespace App\Http\Requests\Stables;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DisassembleRequest extends FormRequest
+class DisbandRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,7 +16,7 @@ class DisassembleRequest extends FormRequest
         /** @var \App\Models\Stable */
         $stable = $this->route('stable');
 
-        return $this->user()->can('disassemble', $stable);
+        return $this->user()->can('disband', $stable);
     }
 
     /**

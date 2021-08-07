@@ -103,13 +103,13 @@ class StablePolicy
     }
 
     /**
-     * Determine whether the user can disassemble a stable.
+     * Determine whether the user can disband a stable.
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\Stable  $stable
      * @return bool
      */
-    public function disassemble(User $user, Stable $stable)
+    public function disband(User $user, Stable $stable)
     {
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }

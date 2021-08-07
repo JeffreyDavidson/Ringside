@@ -16,8 +16,8 @@ class InactiveTitles extends Component
     {
         $inactiveTitles = Title::query()
             ->inactive()
-            ->withCurrentDeactivatedAtDate()
-            ->orderByCurrentDeactivatedAtDate()
+            ->withLastDeactivationDate()
+            ->orderByLastDeactivationDate()
             ->orderBy('name')
             ->paginate($this->perPage);
 

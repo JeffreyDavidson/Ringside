@@ -4,7 +4,7 @@ namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
-use App\Strategies\Reinstate\TagTeamReinstateStrategy;
+use App\Repositories\TagTeamRepository;
 
 class TagTeamRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
@@ -16,6 +16,13 @@ class TagTeamRetirementStrategy extends BaseRetirementStrategy implements Retire
     private Retirable $retirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
+    private TagTeamRepository $tagTeamRepository;
+
+    /**
      * Create a new tag team retirement strategy instance.
      *
      * @param \App\Models\Contracts\Retirable $retirable
@@ -23,28 +30,29 @@ class TagTeamRetirementStrategy extends BaseRetirementStrategy implements Retire
     public function __construct(Retirable $retirable)
     {
         $this->retirable = $retirable;
+        $this->tagTeamRepository = new TagTeamRepository;
     }
 
     /**
      * Retire a retirable model.
      *
-     * @param  string|null $retiredAt
+     * @param  string|null $retirementDate
      * @return void
      */
-    public function retire(string $retiredAt = null)
+    public function retire(string $retirementDate = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
-        $retiredDate = $retiredAt ?: now();
+        $retirementDate = $retirementDate ?: now();
 
         if ($this->retirable->isSuspended()) {
-            (new TagTeamReinstateStrategy($this->retirable))->reinstate();
+            $this->tagTeamRepository->reinstate($this->retirable, $retirementDate);
         }
 
-        $this->repository->release($this->retirable, $retiredDate);
-        $this->repository->retire($this->retirable, $retiredDate);
+        $this->tagTeamRepository->release($this->retirable, $retirementDate);
+        $this->tagTeamRepository->retire($this->retirable, $retirementDate);
 
-        $this->retirable->currentWrestlers->each->retire($retiredDate);
+        $this->retirable->currentWrestlers->each->retire($retirementDate);
         $this->retirable->updateStatusAndSave();
     }
 }

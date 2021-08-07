@@ -7,8 +7,8 @@ interface ReleaseStrategyInterface
     /**
      * Release a releasable model.
      *
-     * @param  string|null $releasedAt
+     * @param  string|null $releaseDate
      * @return void
      */
-    public function release(string $releasedAt = null);
+    public function release(string $releaseDate = null);
 }

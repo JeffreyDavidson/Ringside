@@ -12,7 +12,6 @@ use App\Strategies\Release\WrestlerReleaseStrategy;
 use App\Strategies\Retirement\WrestlerRetirementStrategy;
 use App\Strategies\Suspend\WrestlerSuspendStrategy;
 use App\Strategies\Unretire\WrestlerUnretireStrategy;
-use Carbon\Carbon;
 
 class WrestlerService
 {
@@ -44,7 +43,7 @@ class WrestlerService
         $wrestler = $this->wrestlerRepository->create($data);
 
         if ($data['started_at']) {
-            (new WrestlerEmploymentStrategy($wrestler))->employ(Carbon::parse($data['started_at']));
+            (new WrestlerEmploymentStrategy($wrestler))->employ($data['started_at']);
         }
 
         return $wrestler;
@@ -62,7 +61,7 @@ class WrestlerService
         $this->wrestlerRepository->update($wrestler, $data);
 
         if ($data['started_at']) {
-            $this->employOrUpdateEmployment($wrestler, Carbon::parse($data['started_at']));
+            $this->employOrUpdateEmployment($wrestler, $data['started_at']);
         }
 
         return $wrestler;
@@ -72,17 +71,17 @@ class WrestlerService
      * Undocumented function.
      *
      * @param  \App\Models\Wrestler $wrestler
-     * @param  \Carbon\Carbon $startedAt
+     * @param  string $employmentDate
      * @return void
      */
-    public function employOrUpdateEmployment(Wrestler $wrestler, Carbon $startedAt)
+    public function employOrUpdateEmployment(Wrestler $wrestler, string $employmentDate)
     {
-        if ($wrestler->isUnemployed()) {
-            return (new WrestlerEmploymentStrategy($wrestler))->employ(Carbon::parse($startedAt));
+        if ($wrestler->isNotInEmployment()) {
+            return (new WrestlerEmploymentStrategy($wrestler))->employ($employmentDate);
         }
 
-        if ($wrestler->hasFutureEmployment() && $wrestler->futureEmployment->started_at->ne($startedAt)) {
-            return $wrestler->futureEmployment()->update(['started_at' => $startedAt]);
+        if ($wrestler->hasFutureEmployment() && $wrestler->futureEmployment->started_at->ne($employmentDate)) {
+            return $wrestler->futureEmployment()->update(['started_at' => $employmentDate]);
         }
     }
 

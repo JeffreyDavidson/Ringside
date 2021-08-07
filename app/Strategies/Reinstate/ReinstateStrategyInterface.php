@@ -7,8 +7,8 @@ interface ReinstateStrategyInterface
     /**
      * Reinstate a reinstatable model.
      *
-     * @param  string|null $reinstatedAt
+     * @param  string|null $reinstatementDate
      * @return void
      */
-    public function reinstate(string $reinstatedAt = null);
+    public function reinstate(string $reinstatementDate = null);
 }

@@ -34,11 +34,11 @@ class DeactivationContextStrategy
     /**
      * Process the deactivation of the model.
      *
-     * @param  string|null $endedAt
+     * @param  string|null $deactivationDate
      * @return void
      */
-    public function process(string $endedAt = null)
+    public function process(string $deactivationDate = null)
     {
-        $this->strategy->deactivate($endedAt);
+        $this->strategy->deactivate($deactivationDate);
     }
 }

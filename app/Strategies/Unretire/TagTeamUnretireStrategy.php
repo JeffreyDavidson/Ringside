@@ -4,6 +4,7 @@ namespace App\Strategies\Unretire;
 
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Contracts\Unretirable;
+use App\Repositories\TagTeamRepository;
 
 class TagTeamUnretireStrategy extends BaseUnretireStrategy implements UnretireStrategyInterface
 {
@@ -15,6 +16,13 @@ class TagTeamUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
     private Unretirable $unretirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
+    private TagTeamRepository $tagTeamRepository;
+
+    /**
      * Create a new tag team unretire strategy instance.
      *
      * @param \App\Models\Contracts\Unretirable $unretirable
@@ -22,25 +30,26 @@ class TagTeamUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
     public function __construct(Unretirable $unretirable)
     {
         $this->unretirable = $unretirable;
+        $this->tagTeamRepository = new TagTeamRepository;
     }
 
     /**
      * Unretire an unretirable model.
      *
-     * @param  string|null $unretiredAt
+     * @param  string|null $unretiredDate
      * @return void
      */
-    public function unretire(string $unretiredAt = null)
+    public function unretire(string $unretiredDate = null)
     {
         throw_unless($this->unretirable->canBeUnretired(), new CannotBeUnretiredException);
 
-        $unretiredDate = $unretiredAt ?: now();
+        $unretiredDate = $unretiredDate ?: now();
 
-        $this->repository->unretire($this->unretirable, $unretiredDate);
+        $this->tagTeamRepository->unretire($this->unretirable, $unretiredDate);
         $this->unretirable->currentWrestlers->each->unretire($unretiredDate);
         $this->unretirable->updateStatusAndSave();
 
-        $this->unretirable->employ($unretiredDate);
+        $this->tagTeamRepository->employ($this->unretirable, $unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

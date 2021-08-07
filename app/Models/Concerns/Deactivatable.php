@@ -24,7 +24,7 @@ trait Deactivatable
      * @param  \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithLastDeactivatedAtDate($query)
+    public function scopeWithLastDeactivationDate($query)
     {
         return $query->addSelect(['last_deactivated_at' => Activation::select('ended_at')
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
@@ -41,7 +41,7 @@ trait Deactivatable
      * @param  string $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByLastDeactivatedAtDate($query, $direction = 'asc')
+    public function scopeOrderByLastDeactivationDate($query, $direction = 'asc')
     {
         return $query->orderByRaw("DATE(last_deactivated_at) $direction");
     }
@@ -56,5 +56,29 @@ trait Deactivatable
         return $this->previousActivation()->exists() &&
                 $this->currentActivation()->doesntExist() &&
                 $this->currentRetirement()->doesntExist();
+    }
+
+    /**
+     * Determine if the deactivatable can be deactivated.
+     *
+     * @return bool
+     */
+    public function canBeDeactivated()
+    {
+        if ($this->isNotInActivation()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check to see if the model is not in activation.
+     *
+     * @return bool
+     */
+    public function isNotInActivation()
+    {
+        return $this->isNotActivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 }

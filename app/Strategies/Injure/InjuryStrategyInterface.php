@@ -7,8 +7,8 @@ interface InjuryStrategyInterface
     /**
      * Injure an injurable model.
      *
-     * @param  string|null $injuredAt
+     * @param  string|null $injureDate
      * @return void
      */
-    public function injure(string $injuredAt = null);
+    public function injure(string $injureDate = null);
 }

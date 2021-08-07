@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Models\Contracts\Activatable;
+use App\Models\Contracts\Deactivatable;
 use App\Models\Title;
 use App\Repositories\Contracts\ActivationRepositoryInterface;
 use App\Repositories\Contracts\DeactivationRepositoryInterface;
@@ -16,7 +18,9 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      */
     public function create(array $data)
     {
-        return Title::create($data);
+        return Title::create([
+            'name' => $data['name'],
+        ]);
     }
 
     /**
@@ -58,11 +62,11 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
     /**
      * Activate a given title on a given date.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Contracts\Activatable $title
      * @param  string $activationDate
      * @return \App\Models\Title $title
      */
-    public function activate(Title $title, string $activationDate)
+    public function activate(Activatable $title, string $activationDate)
     {
         return $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
     }
@@ -70,11 +74,11 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
     /**
      * Deactivate a given title on a given date.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Contracts\Deactivatable $title
      * @param  string $deactivationDate
      * @return \App\Models\Title $title
      */
-    public function deactivate(Title $title, string $deactivationDate)
+    public function deactivate(Deactivatable $title, string $deactivationDate)
     {
         return $title->currentActivation()->update(['ended_at' => $deactivationDate]);
     }
@@ -100,6 +104,6 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      */
     public function unretire(Title $title, string $unretiredDate)
     {
-        return $title->curentRetirement()->update(['ended_at' => $unretiredDate]);
+        return $title->currentRetirement()->update(['ended_at' => $unretiredDate]);
     }
 }

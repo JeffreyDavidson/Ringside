@@ -10,11 +10,4 @@ interface DeactivationStrategyInterface
      * @param  string|null $endedAt
      */
     public function deactivate(string $endedAt = null);
-
-    /**
-     * Determine if the deactivatable can be deactivated.
-     *
-     * @return bool
-     */
-    public function canBeDeactivated();
 }

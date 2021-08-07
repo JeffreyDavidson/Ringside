@@ -7,8 +7,8 @@ interface RetirementStrategyInterface
     /**
      * Retire a retirable model.
      *
-     * @param  string|null $retiredAt
+     * @param  string|null $retirementDate
      * @return void
      */
-    public function retire(string $retiredAt = null);
+    public function retire(string $retirementDate = null);
 }

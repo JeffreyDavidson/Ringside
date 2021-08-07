@@ -4,6 +4,7 @@ namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
+use App\Repositories\StableRepository;
 
 class StableRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
@@ -15,6 +16,13 @@ class StableRetirementStrategy extends BaseRetirementStrategy implements Retirem
     private Retirable $retirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\StableRepository
+     */
+    private StableRepository $stableRepository;
+
+    /**
      * Create a new stable retirement strategy instance.
      *
      * @param \App\Models\Contracts\Retirable $retirable
@@ -22,25 +30,36 @@ class StableRetirementStrategy extends BaseRetirementStrategy implements Retirem
     public function __construct(Retirable $retirable)
     {
         $this->retirable = $retirable;
+        $this->stableRepository = new StableRepository;
     }
 
     /**
      * Retire a retirable model.
      *
-     * @param  string|null $retiredAt
+     * @param  string|null $retirementDate
      * @return void
      */
-    public function retire(string $retiredAt = null)
+    public function retire(string $retirementDate = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
-        $retiredDate = $retiredAt ?: now();
+        $retirementDate = $retirementDate ?: now();
 
-        $this->repository->deactivate($this->retirable, $retiredDate);
-        $this->repository->retire($this->retirable, $retiredDate);
+        $this->stableRepository->deactivate($this->retirable, $retirementDate);
+        $this->stableRepository->retire($this->retirable, $retirementDate);
 
-        $this->retirable->currentWrestlers->each->retire($retiredDate);
-        $this->retirable->currentTagTeams->each->retire();
+        if ($this->retirable->currentWrestlers->every->isNotInEmployment()) {
+            foreach ($this->retirable->currentWrestlers as $wrestler) {
+                (new WrestlerRetirementStrategy($wrestler))->retire($this->retirable->currentEmployment->started_at);
+            }
+        }
+
+        if ($this->retirable->currentTagTeams->every->isNotInEmployment()) {
+            foreach ($this->retirable->currentTagTeams as $tagTeam) {
+                (new TagTeamRetirementStrategy($tagTeam))->retire($this->retirable->currentEmployment->started_at);
+            }
+        }
+
         $this->retirable->updateStatusAndSave();
     }
 }

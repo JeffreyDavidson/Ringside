@@ -40,11 +40,11 @@ class SuspendContextStrategy
     /**
      * Process the suspend of the model.
      *
-     * @param  string|null $suspendedAt
+     * @param  string|null $suspensionDate
      * @return void
      */
-    public function process(string $suspendedAt = null): void
+    public function process(string $suspensionDate = null): void
     {
-        $this->strategy->suspend($suspendedAt);
+        $this->strategy->suspend($suspensionDate);
     }
 }

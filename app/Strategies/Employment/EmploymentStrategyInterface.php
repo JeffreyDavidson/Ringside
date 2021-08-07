@@ -7,8 +7,8 @@ interface EmploymentStrategyInterface
     /**
      * Employ an employable model.
      *
-     * @param  string|null $startedAt
+     * @param  string|null $employmentDate
      * @return void
      */
-    public function employ(string $startedAt = null);
+    public function employ(string $employmentDate = null);
 }

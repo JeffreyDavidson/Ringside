@@ -208,8 +208,8 @@ class ManagerControllerTest extends TestCase
      */
     public function a_basic_user_can_view_their_manager_profile()
     {
-        $signedInUser = $this->actAs(Role::BASIC);
-        $manager = Manager::factory()->create(['user_id' => $signedInUser->id]);
+        $this->actAs(Role::BASIC);
+        $manager = Manager::factory()->create(['user_id' => auth()->user()]);
 
         $this->get(route('managers.show', $manager))
             ->assertOk();

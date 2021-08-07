@@ -5,7 +5,6 @@ namespace App\Strategies\Injure;
 use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class InjuryContextStrategy
@@ -38,10 +37,10 @@ class InjuryContextStrategy
     /**
      * Process the injury of the model.
      *
-     * @param  string|null $injuredAt
+     * @param  string|null $injureDate
      * @return void
      */
-    public function process(string $injuredAt = null)
+    public function process(string $injureDate = null)
     {
         $this->strategy->injure($injuredAt);
     }

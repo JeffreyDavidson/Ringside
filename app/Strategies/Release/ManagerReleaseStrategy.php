@@ -4,9 +4,7 @@ namespace App\Strategies\Release;
 
 use App\Exceptions\CannotBeReleasedException;
 use App\Models\Contracts\Releasable;
-use App\Strategies\ClearInjury\ManagerClearInjuryStrategy;
-use App\Strategies\Reinstate\ManagerReinstateStrategy;
-use Carbon\Carbon;
+use App\Repositories\ManagerRepository;
 
 class ManagerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
@@ -18,6 +16,13 @@ class ManagerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     private Releasable $releasable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\ManagerRepository
+     */
+    private ManagerRepository $managerRepository;
+
+    /**
      * Create a new manager releasable strategy instance.
      *
      * @param \App\Models\Contracts\Releasable $releasable
@@ -25,33 +30,30 @@ class ManagerReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     public function __construct(Releasable $releasable)
     {
         $this->releasable = $releasable;
+        $this->managerRepository = new ManagerRepository;
     }
 
     /**
      * Release a releasable model.
      *
-     * @param  \Carbon\Carbon|null $releasedAt
+     * @param  string|null $releaseDate
      * @return void
      */
-    public function release(Carbon $releasedAt = null)
+    public function release($releaseDate = null)
     {
         throw_unless($this->releasable->canBeReleased(), new CannotBeReleasedException);
 
-        $releaseDate = Carbon::parse($releasedAt)->toDateTimeString() ?? now()->toDateTimeString();
+        $releaseDate = $releaseDate ?? now()->toDateTimeString();
 
         if ($this->releasable->isSuspended()) {
-            $this->repository->reinstate($this->releasable, $releaseDate);
+            $this->managerRepository->reinstate($this->releasable, $releaseDate);
         }
 
         if ($this->releasable->isInjured()) {
-            $this->repository->clearInjury($this->releasable, $releaseDate);
+            $this->managerRepository->clearInjury($this->releasable, $releaseDate);
         }
 
-        $this->repository->release($this->releasable, $releaseDate);
+        $this->managerRepository->release($this->releasable, $releaseDate);
         $this->releasable->updateStatusAndSave();
-
-        if ($this->releasable->currentTagTeam) {
-            $this->releasable->currentTagTeam->updateStatusAndSave();
-        }
     }
 }

@@ -44,9 +44,9 @@ class TagTeamFactory extends Factory
             ['joined_at' => Carbon::yesterday()]
         )
         ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->currentWrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
-            $tagTeam->load('currentWrestlers');
+            // $tagTeam->save();
+            // $tagTeam->currentWrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
+            // $tagTeam->load('currentWrestlers');
         });
     }
 
@@ -160,8 +160,8 @@ class TagTeamFactory extends Factory
                 Wrestler::factory()
                 ->count(2)
                 ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end]),
-            ['joined_at' => $start]
-        )
+                ['joined_at' => $start]
+            )
         ->afterCreating(function (TagTeam $tagTeam) {
             $tagTeam->save();
             $tagTeam->currentWrestlers->each->save();
