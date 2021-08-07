@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\StableStatus;
+use App\Models\Activation;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -34,126 +35,73 @@ class StableFactory extends Factory
 
     public function withFutureActivation(): self
     {
-        return $this->state([
-            'status' => StableStatus::FUTURE_ACTIVATION,
-        ])->hasActivations(1, ['started_at' => Carbon::tomorrow()])
-        ->afterCreating(function (Stable $stable) {
-            $stable->save();
-        });
+        $this->state(['status' => StableStatus::FUTURE_ACTIVATION])
+            ->hasActivations(1, ['started_at' => Carbon::tomorrow()]);
+
+        return $this;
     }
 
     public function unactivated()
     {
-        return $this->state([
-            'status' => StableStatus::UNACTIVATED,
-        ])->afterCreating(function (Stable $stable) {
-            $stable->save();
-        });
+        $this->state(['status' => StableStatus::UNACTIVATED]);
+
+        return $this;
     }
 
-    public function active(): self
+    public function active()
     {
-        $start = Carbon::yesterday();
+        $activationDate = Carbon::yesterday();
 
-        return $this->state([
-            'status' => StableStatus::ACTIVE,
-        ])->hasActivations(1, ['started_at' => $start])
-        // ->hasAttached(
-        //     Wrestler::factory()
-        //         ->bookable()
-        //         ->count(1)
-        //         ->hasEmployments(
-        //             1,
-        //             ['started_at' => $start]
-        //         ),
-        //     ['joined_at' => $start]
-        // )
-        ->hasAttached(
-            TagTeam::factory()
-                ->bookable()
-                ->count(1)
-                ->hasEmployments(
-                    1,
-                    ['started_at' => $start]
-                ),
-            ['joined_at' => $start]
-        )
-        ->afterCreating(function (Stable $stable) {
-            // $stable->currentTagTeams->each->update(['current_stable_id' => $stable->id]);
-            // $stable->currentWrestlers->each->update(['current_stable_id' => $stable->id]);
-            $stable->updateStatusAndSave();
-        });
+        $this->state(['status' => StableStatus::ACTIVE])
+            ->hasAttached(Activation::factory(), ['started_at' => $activationDate->toDateTimeString()])
+            ->hasActivations(1, ['started_at' => $activationDate->toDateTimeString()])
+            ->hasAttached(Wrestler::factory()->bookable()->hasEmployments(1, ['started_at' => $activationDate])->count(1), ['joined_at' => $activationDate])
+            ->hasAttached(TagTeam::factory()->bookable()->hasEmployments(1, ['started_at' => $activationDate])->count(1), ['joined_at' => $activationDate])
+            ->afterCreating(function (Stable $stable) {
+                $stable->updateStatusAndSave();
+            });
+
+        return $this;
     }
 
-    public function inactive(): self
+    public function inactive()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => StableStatus::INACTIVE,
-        ])->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasAttached(
-            Wrestler::factory()
-                ->bookable()
-                ->count(1)
-                ->hasEmployments(
-                    1,
-                    ['started_at' => $start]
-                ),
-            ['joined_at' => $start, 'left_at' => $end]
-        )
-        ->hasAttached(
-            TagTeam::factory()
-                ->bookable()
-                ->count(1)
-                ->hasEmployments(
-                    1,
-                    ['started_at' => $start]
-                ),
-            ['joined_at' => $start, 'left_at' => $end]
-        )
-        ->afterCreating(function (Stable $stable) {
-            $stable->save();
-        });
+        return $this->state(['status' => StableStatus::INACTIVE])
+            ->has(Activation::factory()->started($start)->ended($end))
+            ->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
+            ->hasAttached(Wrestler::factory()->bookable()->count(1)->hasEmployments(1, ['started_at' => $start]), ['joined_at' => $start, 'left_at' => $end])
+            ->hasAttached(TagTeam::factory()->bookable()->count(1)->hasEmployments(1, ['started_at' => $start]), ['joined_at' => $start, 'left_at' => $end])
+            ->afterCreating(function (Stable $stable) {
+                $stable->updateStatusAndSave();
+            });
     }
 
-    public function retired(): self
+    public function retired()
     {
         $now = now();
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => StableStatus::RETIRED,
-        ])->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasRetirements(1, ['started_at' => $end])
-        ->hasAttached(
-            Wrestler::factory()
-                ->count(1)
-                ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-                ->hasRetirements(1, ['started_at' => $end]),
-            ['joined_at' => $start]
-        )
-        ->hasAttached(
-            TagTeam::factory()
-                ->count(1)
-                ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-                ->hasRetirements(1, ['started_at' => $end]),
-            ['joined_at' => $start]
-        )
-        ->afterCreating(function (Stable $stable) {
-            $stable->save();
-        });
+        $this->state(['status' => StableStatus::RETIRED])
+            ->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
+            ->hasRetirements(1, ['started_at' => $end])
+            ->hasAttached(Wrestler::factory()->count(1)->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])->hasRetirements(1, ['started_at' => $end]), ['joined_at' => $start])
+            ->hasAttached(TagTeam::factory()->count(1)->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])->hasRetirements(1, ['started_at' => $end]), ['joined_at' => $start]);
+
+        return $this;
     }
 
     public function softDeleted($delete = true)
     {
-        return $this->state([
-            'deleted_at' => now(),
-        ])->afterCreating(function (Stable $stable) {
-            $stable->save();
-        });
+        $this->state(['deleted_at' => now()])
+            ->afterCreating(function (Stable $stable) {
+                $stable->save();
+            });
+
+        return $this;
     }
 }
