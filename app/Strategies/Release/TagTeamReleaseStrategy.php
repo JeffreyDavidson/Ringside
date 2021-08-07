@@ -4,6 +4,7 @@ namespace App\Strategies\Release;
 
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Contracts\Releasable;
+use App\Repositories\TagTeamRepository;
 
 class TagTeamReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrategyInterface
 {
@@ -15,6 +16,13 @@ class TagTeamReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     private Releasable $releasable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
+    private TagTeamRepository $tagTeamRepository;
+
+    /**
      * Create a new tag team releasable strategy instance.
      *
      * @param \App\Models\Contracts\Releasable $releasable
@@ -22,6 +30,7 @@ class TagTeamReleaseStrategy extends BaseReleaseStrategy implements ReleaseStrat
     public function __construct(Releasable $releasable)
     {
         $this->releasable = $releasable;
+        $this->tagTeamRepository = new TagTeamRepository;
     }
 
     /**

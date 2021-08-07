@@ -4,9 +4,9 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeDisassembledException extends Exception
+class CannotBeDisbandedException extends Exception
 {
-    protected $message = 'Entity cannot be disassembled. This entity does not have an active activation.';
+    protected $message = 'Entity cannot be disbanded.';
 
     /**
      * Render the exception into an HTTP response.

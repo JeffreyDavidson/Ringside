@@ -346,24 +346,6 @@ class WrestlerControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function update_cannot_employ_a_released_wrestler_when_started_at_is_filled($administrators)
-    {
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this->actAs($administrators)
-            ->from(route('wrestlers.edit', $wrestler))
-            ->patch(route('wrestlers.update', $wrestler), $this->validParams(['started_at' => $wrestler->employments()->first()->started_at->toDateTimeString()]))
-            ->assertRedirect(route('wrestlers.index'));
-
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertCount(1, $wrestler->employments);
-        });
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
     public function updating_cannot_employ_a_bookable_wrestler_when_started_at_is_filled($administrators)
     {
         $wrestler = Wrestler::factory()->bookable()->create();

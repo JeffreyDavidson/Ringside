@@ -7,8 +7,8 @@ interface SuspendStrategyInterface
     /**
      * Suspend a suspendable model.
      *
-     * @param  string|null $suspendedAt
+     * @param  string|null $suspensionDate
      * @return void
      */
-    public function suspend(string $suspendedAt = null);
+    public function suspend(string $suspensionDate = null);
 }

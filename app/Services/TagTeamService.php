@@ -6,6 +6,7 @@ use App\Exceptions\NotEnoughMembersException;
 use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
 use App\Strategies\Employment\TagTeamEmploymentStrategy;
+use App\Strategies\Employment\WrestlerEmploymentStrategy;
 use App\Strategies\Reinstate\TagTeamReinstateStrategy;
 use App\Strategies\Release\TagTeamReleaseStrategy;
 use App\Strategies\Retirement\TagTeamRetirementStrategy;
@@ -185,7 +186,9 @@ class TagTeamService
         (new TagTeamEmploymentStrategy($tagTeam))->employ();
 
         if ($tagTeam->currentWrestlers->every->isNotInEmployment()) {
-            $tagTeam->currentWrestlers->each->employ($startAtDate);
+            foreach ($tagTeam->currentWrestlers as $wrestler) {
+                (new WrestlerEmploymentStrategy($wrestler))->employ($tagTeam->currentEmployment->started_at);
+            }
         }
     }
 

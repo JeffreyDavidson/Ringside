@@ -4,8 +4,7 @@ namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
-use App\Strategies\ClearInjury\RefereeClearInjuryStrategy;
-use App\Strategies\Reinstate\RefereeReinstateStrategy;
+use App\Repositories\RefereeRepository;
 
 class RefereeRetirementStrategy extends BaseRetirementStrategy implements RetirementStrategyInterface
 {
@@ -17,6 +16,13 @@ class RefereeRetirementStrategy extends BaseRetirementStrategy implements Retire
     private Retirable $retirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\RefereeRepository
+     */
+    private RefereeRepository $refereeRepository;
+
+    /**
      * Create a new referee retirement strategy instance.
      *
      * @param \App\Models\Contracts\Retirable $retirable
@@ -24,30 +30,31 @@ class RefereeRetirementStrategy extends BaseRetirementStrategy implements Retire
     public function __construct(Retirable $retirable)
     {
         $this->retirable = $retirable;
+        $this->refereeRepository = new RefereeRepository;
     }
 
     /**
      * Retire a retirable model.
      *
-     * @param  string|null $retiredAt
+     * @param  string|null $retirementDate
      * @return void
      */
-    public function retire(string $retiredAt = null)
+    public function retire(string $retirementDate = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
+        $retirementDate = $retirementDate ?: now()->toDateTimeString();
+
         if ($this->retirable->isSuspended()) {
-            (new RefereeReinstateStrategy($this->retirable))->reinstate();
+            $this->refereeRepository->reinstate($this->retirable, $retirementDate);
         }
 
         if ($this->retirable->isInjured()) {
-            (new RefereeClearInjuryStrategy($this->retirable))->clearInjury();
+            $this->refereeRepository->clearInjury($this->retirable, $retirementDate);
         }
 
-        $retiredDate = $retiredAt ?: now()->toDateTimeString();
-
-        $this->repository->release($this->retirable, $retiredDate);
-        $this->repository->retire($this->retirable, $retiredDate);
+        $this->refereeRepository->release($this->retirable, $retirementDate);
+        $this->refereeRepository->retire($this->retirable, $retirementDate);
         $this->retirable->updateStatusAndSave();
     }
 }

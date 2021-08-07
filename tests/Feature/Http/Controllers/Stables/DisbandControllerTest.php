@@ -4,9 +4,9 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Enums\StableStatus;
-use App\Exceptions\CannotBeDisassembledException;
-use App\Http\Controllers\Stables\DisassembleController;
-use App\Http\Requests\Stables\DisassembleRequest;
+use App\Exceptions\CannotBeDisbandedException;
+use App\Http\Controllers\Stables\DisbandController;
+use App\Http\Requests\Stables\DisbandRequest;
 use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,7 +18,7 @@ use Tests\TestCase;
  * @group roster
  * @group feature-roster
  */
-class DisassembleControllerTest extends TestCase
+class DisbandControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -26,7 +26,7 @@ class DisassembleControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function invoke_disassembles_an_active_stable_and_its_members_and_redirectsP($administrators)
+    public function invoke_disbands_an_active_stable_and_its_members_and_redirects($administrators)
     {
         $now = now();
         Carbon::setTestNow($now);
@@ -34,7 +34,7 @@ class DisassembleControllerTest extends TestCase
         $stable = Stable::factory()->active()->create();
 
         $this->actAs($administrators)
-            ->patch(route('stables.disassemble', $stable))
+            ->patch(route('stables.disband', $stable))
             ->assertRedirect(route('stables.index'));
 
         tap($stable->fresh(), function ($stable) use ($now) {
@@ -48,29 +48,29 @@ class DisassembleControllerTest extends TestCase
      */
     public function invoke_validates_using_a_form_request()
     {
-        $this->assertActionUsesFormRequest(DisassembleController::class, '__invoke', DisassembleRequest::class);
+        $this->assertActionUsesFormRequest(DisbandController::class, '__invoke', DisbandRequest::class);
     }
 
     /**
      * @test
      */
-    public function a_basic_user_cannot_disassemble_a_stable()
+    public function a_basic_user_cannot_disband_a_stable()
     {
         $stable = Stable::factory()->create();
 
         $this->actAs(Role::BASIC)
-            ->patch(route('stables.disassemble', $stable))
+            ->patch(route('stables.disband', $stable))
             ->assertForbidden();
     }
 
     /**
      * @test
      */
-    public function a_guest_cannot_disassemble_a_stable()
+    public function a_guest_cannot_disband_a_stable()
     {
         $stable = Stable::factory()->create();
 
-        $this->patch(route('stables.disassemble', $stable))
+        $this->patch(route('stables.disband', $stable))
             ->assertRedirect(route('login'));
     }
 
@@ -78,59 +78,59 @@ class DisassembleControllerTest extends TestCase
      * @test
      * @dataProvider administrators
      */
-    public function disassembling_an_inactive_stable_throws_an_exception($administrators)
+    public function disbanding_an_inactive_stable_throws_an_exception($administrators)
     {
-        $this->expectException(CannotBeDisassembledException::class);
+        $this->expectException(CannotBeDisbandedException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->inactive()->create();
 
         $this->actAs($administrators)
-            ->patch(route('stables.disassemble', $stable));
+            ->patch(route('stables.disband', $stable));
     }
 
     /**
      * @test
      * @dataProvider administrators
      */
-    public function disassembling_an_retired_stable_throws_an_exception($administrators)
+    public function disbanding_a_retired_stable_throws_an_exception($administrators)
     {
-        $this->expectException(CannotBeDisassembledException::class);
+        $this->expectException(CannotBeDisbandedException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->retired()->create();
 
         $this->actAs($administrators)
-            ->patch(route('stables.disassemble', $stable));
+            ->patch(route('stables.disband', $stable));
     }
 
     /**
      * @test
      * @dataProvider administrators
      */
-    public function disassembling_an_unactivated_stable_throws_an_exception($administrators)
+    public function disbanding_an_unactivated_stable_throws_an_exception($administrators)
     {
-        $this->expectException(CannotBeDisassembledException::class);
+        $this->expectException(CannotBeDisbandedException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->unactivated()->create();
 
         $this->actAs($administrators)
-            ->patch(route('stables.disassemble', $stable));
+            ->patch(route('stables.disband', $stable));
     }
 
     /**
      * @test
      * @dataProvider administrators
      */
-    public function disassembling_a_future_activated_stable_throws_an_exception($administrators)
+    public function disbanding_a_future_activated_stable_throws_an_exception($administrators)
     {
-        $this->expectException(CannotBeDisassembledException::class);
+        $this->expectException(CannotBeDisbandedException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->withFutureActivation()->create();
 
         $this->actAs($administrators)
-            ->patch(route('stables.disassemble', $stable));
+            ->patch(route('stables.disband', $stable));
     }
 }

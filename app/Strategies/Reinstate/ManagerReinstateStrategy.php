@@ -4,6 +4,7 @@ namespace App\Strategies\Reinstate;
 
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Contracts\Reinstatable;
+use App\Repositories\ManagerRepository;
 
 class ManagerReinstateStrategy extends BaseReinstateStrategy implements ReinstateStrategyInterface
 {
@@ -15,6 +16,13 @@ class ManagerReinstateStrategy extends BaseReinstateStrategy implements Reinstat
     private Reinstatable $reinstatable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\ManagerRepository
+     */
+    private ManagerRepository $managerRepository;
+
+    /**
      * Create a new manager reinstate strategy instance.
      *
      * @param \App\Models\Contracts\Reinstatable $reinstatable
@@ -22,21 +30,22 @@ class ManagerReinstateStrategy extends BaseReinstateStrategy implements Reinstat
     public function __construct(Reinstatable $reinstatable)
     {
         $this->reinstatable = $reinstatable;
+        $this->managerRepository = new ManagerRepository;
     }
 
     /**
      * Reinstate a reinstatable model.
      *
-     * @param  string|null $reinstatedAt
+     * @param  string|null $reinstatedDate
      * @return void
      */
-    public function reinstate(string $reinstatedAt = null)
+    public function reinstate(string $reinstatedDate = null)
     {
         throw_unless($this->reinstatable->canBeReinstated(), new CannotBeReinstatedException);
 
-        $reinstatedDate = $reinstatedAt ?: now()->toDateTimeString();
+        $reinstatedDate = $reinstatedDate ?: now()->toDateTimeString();
 
-        $this->repository->reinstate($this->reinstatable, $reinstatedDate);
+        $this->managerRepository->reinstate($this->reinstatable, $reinstatedDate);
         $this->reinstatable->updateStatusAndSave();
     }
 }

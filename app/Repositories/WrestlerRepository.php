@@ -3,9 +3,8 @@
 namespace App\Repositories;
 
 use App\Models\Wrestler;
-use App\Repositories\Contracts\EmploymentRepositoryInterface;
 
-class WrestlerRepository implements EmploymentRepositoryInterface
+class WrestlerRepository
 {
     /**
      * Create a new wrestler with the given data.
@@ -111,7 +110,7 @@ class WrestlerRepository implements EmploymentRepositoryInterface
      */
     public function unretire(Wrestler $wrestler, string $unretiredDate)
     {
-        return $wrestler->curentRetirement()->update(['ended_at' => $unretiredDate]);
+        return $wrestler->currentRetirement()->update(['ended_at' => $unretiredDate]);
     }
 
     /**

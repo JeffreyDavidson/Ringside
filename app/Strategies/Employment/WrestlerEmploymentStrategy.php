@@ -4,6 +4,7 @@ namespace App\Strategies\Employment;
 
 use App\Exceptions\CannotBeEmployedException;
 use App\Models\Contracts\Employable;
+use App\Repositories\WrestlerRepository;
 
 class WrestlerEmploymentStrategy extends BaseEmploymentStrategy implements EmploymentStrategyInterface
 {
@@ -15,6 +16,13 @@ class WrestlerEmploymentStrategy extends BaseEmploymentStrategy implements Emplo
     private Employable $employable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\WrestlerRepository
+     */
+    private WrestlerRepository $wrestlerRepository;
+
+    /**
      * Create a new wrestler employment strategy instance.
      *
      * @param \App\Models\Contracts\Employable $employable
@@ -22,21 +30,22 @@ class WrestlerEmploymentStrategy extends BaseEmploymentStrategy implements Emplo
     public function __construct(Employable $employable)
     {
         $this->employable = $employable;
+        $this->wrestlerRepository = new WrestlerRepository;
     }
 
     /**
      * Employ an employable model.
      *
-     * @param  string|null $startedAt
+     * @param  string|null $employmentDate
      * @return void
      */
-    public function employ(string $startedAt = null)
+    public function employ(string $employmentDate = null)
     {
         throw_unless($this->employable->canBeEmployed(), new CannotBeEmployedException);
 
-        $startAtDate = $startedAt ?? now()->toDateTimeString();
+        $employmentDate = $employmentDate ?? now()->toDateTimeString();
 
-        $this->repository->employ($this->employable, $startAtDate);
+        $this->wrestlerRepository->employ($this->employable, $employmentDate);
         $this->employable->updateStatusAndSave();
     }
 }

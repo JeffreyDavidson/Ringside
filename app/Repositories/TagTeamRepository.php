@@ -102,7 +102,7 @@ class TagTeamRepository
      */
     public function unretire(TagTeam $tagTeam, string $unretiredDate)
     {
-        return $tagTeam->curentRetirement()->update(['ended_at' => $unretiredDate]);
+        return $tagTeam->currentRetirement()->update(['ended_at' => $unretiredDate]);
     }
 
     /**

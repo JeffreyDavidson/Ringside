@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Models\Contracts\Activatable;
+use App\Models\Contracts\Deactivatable;
 use App\Models\Stable;
 use App\Repositories\Contracts\ActivationRepositoryInterface;
 use App\Repositories\Contracts\DeactivationRepositoryInterface;
@@ -60,11 +62,11 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     /**
      * Activate a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Contracts\Activatable $stable
      * @param  string $activationDate
      * @return \App\Models\Stable $stable
      */
-    public function activate(Stable $stable, string $activationDate)
+    public function activate(Activatable $stable, string $activationDate)
     {
         return $stable->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
     }
@@ -72,11 +74,11 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     /**
      * Deactivate a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Contracts\Deactivatable $stable
      * @param  string $deactivationDate
      * @return \App\Models\Stable $stable
      */
-    public function deactivate(Stable $stable, string $deactivationDate)
+    public function deactivate(Deactivatable $stable, string $deactivationDate)
     {
         return $stable->currentActivation()->update(['ended_at' => $deactivationDate]);
     }

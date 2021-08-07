@@ -4,6 +4,7 @@ namespace App\Strategies\Unretire;
 
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Contracts\Unretirable;
+use App\Repositories\RefereeRepository;
 
 class RefereeUnretireStrategy extends BaseUnretireStrategy implements UnretireStrategyInterface
 {
@@ -15,6 +16,13 @@ class RefereeUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
     private Unretirable $unretirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\RefereeRepository
+     */
+    private RefereeRepository $refereeRepository;
+
+    /**
      * Create a new referee unretire strategy instance.
      *
      * @param \App\Models\Contracts\Unretirable $unretirable
@@ -22,22 +30,23 @@ class RefereeUnretireStrategy extends BaseUnretireStrategy implements UnretireSt
     public function __construct(Unretirable $unretirable)
     {
         $this->unretirable = $unretirable;
+        $this->refereeRepository = new RefereeRepository;
     }
 
     /**
      * Unretire an unretirable model.
      *
-     * @param  string|null $unretiredAt
+     * @param  string|null $unretiredDate
      * @return void
      */
-    public function unretire(string $unretiredAt = null)
+    public function unretire(string $unretiredDate = null)
     {
         throw_unless($this->unretirable->canBeUnretired(), new CannotBeUnretiredException);
 
-        $unretiredDate = $unretiredAt ?: now()->toDateTimeString();
+        $unretiredDate = $unretiredDate ?: now()->toDateTimeString();
 
-        $this->repository->unretire($this->unretirable, $unretiredDate);
-        $this->repository->employ($this->unretirable, $unretiredDate);
+        $this->refereeRepository->unretire($this->unretirable, $unretiredDate);
+        $this->refereeRepository->employ($this->unretirable, $unretiredDate);
         $this->unretirable->updateStatusAndSave();
     }
 }

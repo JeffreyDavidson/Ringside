@@ -4,6 +4,7 @@ namespace App\Strategies\Injure;
 
 use App\Exceptions\CannotBeInjuredException;
 use App\Models\Contracts\Injurable;
+use App\Repositories\ManagerRepository;
 
 class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategyInterface
 {
@@ -15,6 +16,13 @@ class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategy
     private Injurable $injurable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\ManagerRepository
+     */
+    private ManagerRepository $managerRepository;
+
+    /**
      * Create a new manager injury strategy instance.
      *
      * @param \App\Models\Contracts\Injurable $injurable
@@ -22,20 +30,22 @@ class ManagerInjuryStrategy extends BaseInjuryStrategy implements InjuryStrategy
     public function __construct(Injurable $injurable)
     {
         $this->injurable = $injurable;
+        $this->managerRepository = new ManagerRepository;
     }
 
     /**
      * Injure an injurable model.
      *
-     * @param  string|null $injuredAt
+     * @param  string|null $injureDate
      * @return void
      */
-    public function injure(string $injuredAt = null)
+    public function injure(string $injureDate = null)
     {
         throw_unless($this->injurable->canBeInjured(), new CannotBeInjuredException);
 
-        $injuredDate = $injuredAt ?? now()->toDateTimeString();
-        $this->repository->injure($this->injurable, $injuredDate);
+        $injureDate = $injureDate ?? now()->toDateTimeString();
+
+        $this->managerRepository->injure($this->injurable, $injureDate);
         $this->injurable->updateStatusAndSave();
     }
 }

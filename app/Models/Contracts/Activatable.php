@@ -72,13 +72,6 @@ interface Activatable
      *
      * @return string
      */
-    public function scopeDeactivated($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
     public function scopeWithFirstActivatedAtDate($query);
 
     /**
@@ -86,21 +79,7 @@ interface Activatable
      *
      * @return string
      */
-    public function scopeWithLastDeactivatedAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
     public function scopeOrderByFirstActivatedAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
-    public function scopeOrderByLastDeactivatedAtDate($query);
 
     /**
      * Get the column name for the "remember me" token.
@@ -129,13 +108,6 @@ interface Activatable
      * @return string
      */
     public function hasFutureActivation();
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
-    public function isDeactivated();
 
     /**
      * Get the column name for the "remember me" token.

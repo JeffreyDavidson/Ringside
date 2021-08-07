@@ -4,6 +4,7 @@ namespace App\Strategies\Suspend;
 
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Contracts\Suspendable;
+use App\Repositories\TagTeamRepository;
 
 class TagTeamSuspendStrategy extends BaseSuspendStrategy implements SuspendStrategyInterface
 {
@@ -15,6 +16,13 @@ class TagTeamSuspendStrategy extends BaseSuspendStrategy implements SuspendStrat
     private Suspendable $suspendable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
+    private TagTeamRepository $tagTeamRepository;
+
+    /**
      * Create a new tag team suspend strategy instance.
      *
      * @param \App\Models\Contracts\Suspendable $suspendable
@@ -22,23 +30,24 @@ class TagTeamSuspendStrategy extends BaseSuspendStrategy implements SuspendStrat
     public function __construct(Suspendable $suspendable)
     {
         $this->suspendable = $suspendable;
+        $this->tagTeamRepository = new TagTeamRepository;
     }
 
     /**
      * Suspend a suspendable model.
      *
-     * @param  string|null $suspendedAt
+     * @param  string|null $suspensionDate
      * @return void
      */
-    public function suspend(string $suspendedAt = null)
+    public function suspend(string $suspensionDate = null)
     {
         throw_unless($this->suspendable->canBeSuspended(), new CannotBeSuspendedException);
 
-        $suspendedDate = $suspendedAt ?: now();
+        $suspensionDate = $suspensionDate ?: now();
 
-        $this->repository->suspend($this->suspendable, $suspendedDate);
+        $this->tagTeamRepository->suspend($this->suspendable, $suspensionDate);
 
-        $this->suspendable->currentWrestlers->each->suspend($suspendedDate);
+        $this->suspendable->currentWrestlers->each->suspend($suspensionDate);
         $this->suspendable->updateStatusAndSave();
     }
 }

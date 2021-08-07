@@ -7,8 +7,8 @@ interface UnretireStrategyInterface
     /**
      * Unretire an unretirable model.
      *
-     * @param  string|null $unretiredAt
+     * @param  string|null $unretiredDate
      * @return void
      */
-    public function unretire(string $unretiredAt = null);
+    public function unretire(string $unretiredDate = null);
 }

@@ -4,6 +4,7 @@ namespace App\Strategies\Retirement;
 
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\Retirable;
+use App\Repositories\WrestlerRepository;
 use App\Strategies\ClearInjury\WrestlerClearInjuryStrategy;
 use App\Strategies\Reinstate\WrestlerReinstateStrategy;
 
@@ -17,6 +18,13 @@ class WrestlerRetirementStrategy extends BaseRetirementStrategy implements Retir
     private Retirable $retirable;
 
     /**
+     * The repository implementation.
+     *
+     * @var \App\Repositories\WrestlerRepository
+     */
+    private WrestlerRepository $wrestlerRepository;
+
+    /**
      * Create a new wrestler retirement strategy instance.
      *
      * @param \App\Models\Contracts\Retirable $retirable
@@ -24,30 +32,31 @@ class WrestlerRetirementStrategy extends BaseRetirementStrategy implements Retir
     public function __construct(Retirable $retirable)
     {
         $this->retirable = $retirable;
+        $this->wrestlerRepository = new WrestlerRepository;
     }
 
     /**
      * Retire a retirable model.
      *
-     * @param  string|null $retiredAt
+     * @param  string|null $retirementDate
      * @return void
      */
-    public function retire(string $retiredAt = null)
+    public function retire(string $retirementDate = null)
     {
         throw_unless($this->retirable->canBeRetired(), new CannotBeRetiredException);
 
+        $retirementDate = $retirementDate ?: now()->toDateTimeString();
+
         if ($this->retirable->isSuspended()) {
-            (new WrestlerReinstateStrategy($this->retirable))->reinstate();
+            $this->wrestlerRepository->reinstate($this->retirable, $retirementDate);
         }
 
         if ($this->retirable->isInjured()) {
-            (new WrestlerClearInjuryStrategy($this->retirable))->clearInjury();
+            $this->wrestlerRepository->clearInjury($this->retirable, $retirementDate);
         }
 
-        $retiredDate = $retiredAt ?: now()->toDateTimeString();
-
-        $this->repository->release($this->retirable, $retiredDate);
-        $this->repository->retire($this->retirable, $retiredDate);
+        $this->wrestlerRepository->release($this->retirable, $retirementDate);
+        $this->wrestlerRepository->retire($this->retirable, $retirementDate);
         $this->retirable->updateStatusAndSave();
 
         if ($this->retirable->currentTagTeam) {

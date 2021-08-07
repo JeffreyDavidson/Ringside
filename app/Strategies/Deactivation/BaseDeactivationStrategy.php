@@ -37,38 +37,16 @@ class BaseDeactivationStrategy implements DeactivationStrategyInterface
     /**
      * Deactivate a deactivatable model.
      *
-     * @param  string|null $endedAt
+     * @param  string|null $deactivationDate
      * @return void
      */
-    public function deactivate(string $endedAt = null)
+    public function deactivate(string $deactivationDate = null)
     {
-        throw_unless($this->canBeDeactivated(), new CannotBeDeactivatedException);
+        throw_unless($this->deactivatable->canBeDeactivated(), new CannotBeDeactivatedException);
 
-        $this->repository->deactivate($this->deactivatable, $endedAt);
+        $deactivationDate = $deactivationDate ?? now()->toDateTimeString();
+
+        $this->repository->deactivate($this->deactivatable, $deactivationDate);
         $this->deactivatable->updateStatusAndSave();
-    }
-
-    /**
-     * Determine if the deactivatable can be deactivated.
-     *
-     * @return bool
-     */
-    public function canBeDeactivated()
-    {
-        if ($this->isNotInActivation()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Check to see if the model is not in activation.
-     *
-     * @return bool
-     */
-    public function isNotInActivation()
-    {
-        return $this->isNotActivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 }

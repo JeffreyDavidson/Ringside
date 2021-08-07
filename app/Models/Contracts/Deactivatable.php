@@ -5,11 +5,30 @@ namespace App\Models\Contracts;
 interface Deactivatable
 {
     /**
-     * Deactivate a given deactivatable with a given date.
+     * Get the column name for the "remember me" token.
      *
-     * @param  self $deactivatable
-     * @param  string|null $endedAt
-     * @return self $deactivatable
+     * @return string
      */
-    public function deactivate(self $deactivatable, string $endedAt = null);
+    public function isDeactivated();
+
+    /**
+     * Get the column name for the "remember me" token.
+     *
+     * @return string
+     */
+    public function scopeDeactivated($query);
+
+    /**
+     * Get the column name for the "remember me" token.
+     *
+     * @return string
+     */
+    public function scopeWithLastDeactivationDate($query);
+
+    /**
+     * Get the column name for the "remember me" token.
+     *
+     * @return string
+     */
+    public function scopeOrderByLastDeactivationDate($query);
 }

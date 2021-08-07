@@ -58,25 +58,29 @@ class StableFactory extends Factory
         return $this->state([
             'status' => StableStatus::ACTIVE,
         ])->hasActivations(1, ['started_at' => $start])
-        ->hasAttached(
-            Wrestler::factory()
-                ->bookable()
-                ->count(1)
-                ->hasEmployments(1, ['started_at' => $start]
-            ),
-            ['joined_at' => $start]
-        )
+        // ->hasAttached(
+        //     Wrestler::factory()
+        //         ->bookable()
+        //         ->count(1)
+        //         ->hasEmployments(
+        //             1,
+        //             ['started_at' => $start]
+        //         ),
+        //     ['joined_at' => $start]
+        // )
         ->hasAttached(
             TagTeam::factory()
                 ->bookable()
                 ->count(1)
-                ->hasEmployments(1, ['started_at' => $start]
-            ),
+                ->hasEmployments(
+                    1,
+                    ['started_at' => $start]
+                ),
             ['joined_at' => $start]
         )
         ->afterCreating(function (Stable $stable) {
-            $stable->currentTagTeams->each->update(['current_stable_id' => $stable->id]);
-            $stable->currentWrestlers->each->update(['current_stable_id' => $stable->id]);
+            // $stable->currentTagTeams->each->update(['current_stable_id' => $stable->id]);
+            // $stable->currentWrestlers->each->update(['current_stable_id' => $stable->id]);
             $stable->updateStatusAndSave();
         });
     }
@@ -94,16 +98,20 @@ class StableFactory extends Factory
             Wrestler::factory()
                 ->bookable()
                 ->count(1)
-                ->hasEmployments(1, ['started_at' => $start]
-            ),
+                ->hasEmployments(
+                    1,
+                    ['started_at' => $start]
+                ),
             ['joined_at' => $start, 'left_at' => $end]
         )
         ->hasAttached(
             TagTeam::factory()
                 ->bookable()
                 ->count(1)
-                ->hasEmployments(1, ['started_at' => $start]
-            ),
+                ->hasEmployments(
+                    1,
+                    ['started_at' => $start]
+                ),
             ['joined_at' => $start, 'left_at' => $end]
         )
         ->afterCreating(function (Stable $stable) {

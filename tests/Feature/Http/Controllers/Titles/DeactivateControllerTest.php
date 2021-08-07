@@ -25,7 +25,6 @@ class DeactivateControllerTest extends TestCase
      */
     public function invoke_deactivates_an_active_title_and_redirects($administrators)
     {
-        $this->withoutExceptionHandling();
         Carbon::setTestNow($now = now());
 
         $title = Title::factory()->active()->create();

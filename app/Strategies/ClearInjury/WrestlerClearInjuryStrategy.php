@@ -26,26 +26,24 @@ class WrestlerClearInjuryStrategy extends BaseClearInjuryStrategy implements Cle
      * Create a new wrestler clear injury strategy instance.
      *
      * @param \App\Models\Contracts\Injurable $injurable
-     * @param \App\Repositories\WrestlerRepository $wrestlerRepository
      */
-    public function __construct(Injurable $injurable, WrestlerRepository $wrestlerRepository)
+    public function __construct(Injurable $injurable)
     {
-        dd($injurable, $wrestlerRepository);
         $this->injurable = $injurable;
-        $this->wrestlerRepository = $wrestlerRepository;
+        $this->wrestlerRepository = new WrestlerRepository;
     }
 
     /**
      * Clear an injury of an injurable model.
      *
-     * @param  string|null $recoveredAt
+     * @param  string|null $recoveryDate
      * @return void
      */
-    public function clearInjury(string $recoveredAt = null)
+    public function clearInjury(string $recoveryDate = null)
     {
         throw_unless($this->injurable->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
 
-        $recoveryDate = $recoveredAt ?? now()->toDateTimeString();
+        $recoveryDate = $recoveryDate ?? now()->toDateTimeString();
 
         $this->wrestlerRepository->clearInjury($this->injurable, $recoveryDate);
         $this->injurable->updateStatusAndSave();

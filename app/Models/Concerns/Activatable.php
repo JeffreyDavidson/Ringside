@@ -227,7 +227,7 @@ trait Activatable
      *
      * @return bool
      */
-    public function isNotInActivation()
+    public function isNotActivation()
     {
         return $this->isNotActivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }

@@ -43,11 +43,11 @@ class UnretireContextStrategy
     /**
      * Process the unretire of the model.
      *
-     * @param  string|null $unretiredAt
+     * @param  string|null $unretiredDate
      * @return void
      */
-    public function process(string $unretiredAt = null): void
+    public function process(string $unretiredDate = null)
     {
-        $this->strategy->unretire($unretiredAt);
+        $this->strategy->unretire($unretiredDate);
     }
 }

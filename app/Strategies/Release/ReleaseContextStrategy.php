@@ -40,11 +40,11 @@ class ReleaseContextStrategy
     /**
      * Process the release of the model.
      *
-     * @param  string|null $releasedAt
+     * @param  string|null $releaseDate
      * @return void
      */
-    public function process(string $releasedAt = null): void
+    public function process(string $releaseDate = null): void
     {
-        $this->strategy->release($releasedAt);
+        $this->strategy->release($releaseDate);
     }
 }

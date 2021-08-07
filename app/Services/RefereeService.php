@@ -44,7 +44,7 @@ class RefereeService
         $referee = $this->refereeRepository->create($data);
 
         if ($data['started_at']) {
-            (new RefereeEmploymentStrategy($referee))->employ(Carbon::parse($data['started_at']));
+            (new RefereeEmploymentStrategy($referee))->employ($data['started_at']);
         }
 
         return $referee;
@@ -62,20 +62,20 @@ class RefereeService
         $this->refereeRepository->update($referee, $data);
 
         if ($data['started_at']) {
-            $this->employOrUpdateEmployment($referee, Carbon::parse($data['started_at']));
+            $this->employOrUpdateEmployment($referee, $data['started_at']);
         }
 
         return $referee;
     }
 
-    public function employOrUpdateEmployment(Referee $referee, Carbon $startedAt)
+    public function employOrUpdateEmployment(Referee $referee, $employmentDate)
     {
-        if ($referee->isUnemployed()) {
-            (new RefereeEmploymentStrategy($referee))->employ($startedAt);
+        if ($referee->isNotInEmployment()) {
+            (new RefereeEmploymentStrategy($referee))->employ($employmentDate);
         }
 
-        if ($referee->hasFutureEmployment() && $referee->futureEmployment->started_at->ne($startedAt)) {
-            return $referee->futureEmployment()->update(['started_at' => $startedAt]);
+        if ($referee->hasFutureEmployment() && $referee->futureEmployment->started_at->ne($employmentDate)) {
+            return $referee->futureEmployment()->update(['started_at' => $employmentDate]);
         }
     }
 
