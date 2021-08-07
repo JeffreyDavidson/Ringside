@@ -7,6 +7,7 @@ use App\Enums\StableStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Stables\RetireController;
 use App\Http\Requests\Stables\RetireRequest;
+use App\Models\Activation;
 use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
