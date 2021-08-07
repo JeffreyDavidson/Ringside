@@ -17,7 +17,17 @@ class StableFactoryTest extends TestCase
     /**
      * @test
      */
-    public function default_stable_is_unactivated()
+    public function a_stable_has_one_tag_team_and_one_wrestler_by_default()
+    {
+        $stable = Stable::factory()->create();
+
+        $this->assertCount(1, $stable->tagTeams);
+    }
+
+    /**
+     * @test
+     */
+    public function stable_is_unactivated_by_default()
     {
         $stable = Stable::factory()->create();
 
