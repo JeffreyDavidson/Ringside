@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\StableStatus;
+use App\Models\Activation;
 use App\Models\Stable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,6 +23,7 @@ class StableFactoryTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this->assertCount(1, $stable->tagTeams);
+        $this->assertCount(1, $stable->wrestlers);
     }
 
     /**
@@ -51,6 +53,8 @@ class StableFactoryTest extends TestCase
     public function an_inactive_stable_has_a_previous_activation()
     {
         $stable = Stable::factory()->inactive()->create();
+        dd(Activation::count());
+        dd($stable->activations);
 
         $this->assertEquals(StableStatus::INACTIVE, $stable->status);
         $this->assertCount(1, $stable->activations);
@@ -98,6 +102,7 @@ class StableFactoryTest extends TestCase
     public function an_active_stable_has_an_active_activation()
     {
         $stable = Stable::factory()->active()->create();
+        dd($stable->activations);
 
         $this->assertEquals(StableStatus::ACTIVE, $stable->status);
         $this->assertCount(1, $stable->activations);
