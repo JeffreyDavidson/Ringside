@@ -17,6 +17,16 @@ class TagTeamFactoryTest extends TestCase
     /**
      * @test
      */
+    public function a_tag_team_has_two_wrestlers_by_default()
+    {
+        $stable = TagTeam::factory()->create();
+
+        $this->assertCount(2, $stable->wrestlers);
+    }
+
+    /**
+     * @test
+     */
     public function default_tag_team_is_unemployed()
     {
         $tagTeam = TagTeam::factory()->create();
@@ -65,24 +75,6 @@ class TagTeamFactoryTest extends TestCase
 
         $this->assertTrue($employment->started_at->isFuture());
         $this->assertNull($employment->ended_at);
-    }
-
-    /**
-     * @test
-     */
-    public function a_future_employed_tag_team_without_wrestlers_has_an_mployment_but_no_current_wrestlers()
-    {
-        $tagTeam = TagTeam::factory()->withFutureEmploymentWithoutWrestlers()->create();
-
-        $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
-        $this->assertCount(1, $tagTeam->employments);
-
-        $employment = $tagTeam->employments->first();
-
-        $this->assertTrue($employment->started_at->isFuture());
-        $this->assertNull($employment->ended_at);
-
-        $this->assertEmpty($tagTeam->wrestlers);
     }
 
     /**
