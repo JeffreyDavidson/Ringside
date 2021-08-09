@@ -234,10 +234,10 @@ class TagTeam extends Model implements Bookable, CanJoinStable, Employable, Rele
         if ($this->isCurrentlyEmployed()) {
             if ($this->isSuspended()) {
                 $this->status = TagTeamStatus::SUSPENDED;
-            } elseif ($this->isBookable()) {
-                $this->status = TagTeamStatus::BOOKABLE;
             } elseif ($this->isUnbookable()) {
                 $this->status = TagTeamStatus::UNBOOKABLE;
+            } elseif ($this->isBookable()) {
+                $this->status = TagTeamStatus::BOOKABLE;
             }
         } elseif ($this->hasFutureEmployment()) {
             $this->status = TagTeamStatus::FUTURE_EMPLOYMENT;

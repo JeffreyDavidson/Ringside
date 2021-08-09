@@ -100,9 +100,6 @@ class StableFactoryTest extends TestCase
     public function an_active_stable_has_an_active_activation()
     {
         $stable = Stable::factory()->active()->create();
-        dd($stable->activations);
-        // $stable->activations()->create(['started_at' => now()->toDateTimeString()]);
-        // dd(Activation::count());
 
         $this->assertEquals(StableStatus::ACTIVE, $stable->status);
         $this->assertCount(1, $stable->activations);

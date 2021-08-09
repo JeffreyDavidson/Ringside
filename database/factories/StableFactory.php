@@ -41,9 +41,9 @@ class StableFactory extends Factory
      */
     public function configure()
     {
-        return $this
-            ->hasAttached(Wrestler::factory()->count(1), ['joined_at' => now()])
-            ->hasAttached(TagTeam::factory()->count(1), ['joined_at' => now()]);
+        return $this;
+            // ->hasAttached(Wrestler::factory()->count(1), ['joined_at' => now()])
+            // ->hasAttached(TagTeam::factory()->count(1), ['joined_at' => now()]);
     }
 
     public function withFutureActivation()
@@ -90,6 +90,7 @@ class StableFactory extends Factory
         ->hasAttached(TagTeam::factory()->bookable()->has(Employment::factory()->started($start)), ['joined_at' => $start, 'left_at' => $end])
         ->afterCreating(function (Stable $stable) {
             $stable->updateStatusAndSave();
+            $stable->currentWrestlers->each->updateStatusAndSave();
         });
     }
 
