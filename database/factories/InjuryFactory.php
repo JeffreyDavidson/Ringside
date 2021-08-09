@@ -3,6 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Injury;
+use App\Models\Manager;
+use App\Models\Referee;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,27 +25,41 @@ class InjuryFactory extends Factory
      */
     public function definition(): array
     {
+        $injurable = $this->injurable();
+
         return [
+            'injurable_id' => $injurable::factory(),
+            'injurable_type' => $injurable,
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 
     /**
-     * @param string|Carbon $startDate
+     * @param string|Carbon $injureDate
      */
-    public function started($startDate = 'now'): self
+    public function started($injureDate = 'now')
     {
-        return tap(clone $this)->overwriteDefaults([
-            'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
+        return $this->state([
+            'started_at' => $injureDate instanceof Carbon ? $injureDate : new Carbon($injureDate),
         ]);
     }
 
     /**
-     * @param string|Carbon $endDate
+     * @param string|Carbon $recoveryDate
      */
-    public function ended($endDate = 'now'): self
+    public function ended($recoveryDate = 'now'): self
     {
-        return tap(clone $this)->overwriteDefaults([
-            'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
+        return $this->state([
+            'ended_at' => $recoveryDate instanceof Carbon ? $recoveryDate : new Carbon($recoveryDate),
+        ]);
+    }
+
+    public function injurable()
+    {
+        return $this->faker->randomElement([
+            Manager::class,
+            Referee::class,
+            Wrestler::class,
         ]);
     }
 }

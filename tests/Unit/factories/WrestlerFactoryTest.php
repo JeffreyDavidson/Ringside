@@ -130,7 +130,7 @@ class WrestlerFactoryTest extends TestCase
     /**
      * @test
      */
-    public function an_injured_wrestler_has_an_active_employment_and_active_suspension()
+    public function an_injured_wrestler_has_an_active_employment_and_active_injury()
     {
         $wrestler = Wrestler::factory()->injured()->create();
 

@@ -2,7 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Manager;
+use App\Models\Referee;
 use App\Models\Suspension;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,26 +26,42 @@ class SuspensionFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        $suspendable = $this->suspendable();
+
+        return [
+            'suspendable_id' => $suspendable::factory(),
+            'suspendable_type' => $suspendable,
+            'started_at' => now()->toDateTimeString(),
+        ];
     }
 
     /**
-     * @param string|Carbon $startDate
+     * @param string|Carbon $suspensionDate
      */
-    public function started($startDate = 'now'): self
+    public function started($suspensionDate = 'now'): self
     {
-        return tap(clone $this)->overwriteDefaults([
-            'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
+        return $this->state([
+            'started_at' => $suspensionDate instanceof Carbon ? $suspensionDate : new Carbon($suspensionDate),
         ]);
     }
 
     /**
-     * @param string|Carbon $endDate
+     * @param string|Carbon $reinstateDate
      */
-    public function ended($endDate = 'now'): self
+    public function ended($reinstateDate = 'now'): self
     {
-        return tap(clone $this)->overwriteDefaults([
-            'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
+        return $this->state([
+            'ended_at' => $reinstateDate instanceof Carbon ? $reinstateDate : new Carbon($reinstateDate),
+        ]);
+    }
+
+    public function suspendable()
+    {
+        return $this->faker->randomElement([
+            Manager::class,
+            Referee::class,
+            TagTeam::class,
+            Wrestler::class,
         ]);
     }
 }

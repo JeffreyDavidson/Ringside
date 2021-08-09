@@ -3,7 +3,11 @@
 namespace Database\Factories;
 
 use App\Enums\ManagerStatus;
+use App\Models\Employment;
+use App\Models\Injury;
 use App\Models\Manager;
+use App\Models\Retirement;
+use App\Models\Suspension;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -30,96 +34,104 @@ class ManagerFactory extends Factory
         ];
     }
 
-    public function available(): self
+    public function available()
     {
-        return $this->state([
-            'status' => ManagerStatus::AVAILABLE,
-        ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::AVAILABLE];
+        })
+        ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function withFutureEmployment(): self
+    public function withFutureEmployment()
     {
-        return $this->state([
-            'status' => ManagerStatus::FUTURE_EMPLOYMENT,
-        ])->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::FUTURE_EMPLOYMENT];
+        })
+        ->has(Employment::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function unemployed(): self
+    public function unemployed()
     {
-        return $this->state([
-            'status' => ManagerStatus::UNEMPLOYED,
-        ])->afterCreating(function (Manager $manager) {
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::UNEMPLOYED];
+        })
+        ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function retired(): self
+    public function retired()
     {
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        return $this->state([
-            'status' => ManagerStatus::RETIRED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasRetirements(1, ['started_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::RETIRED];
+        })
+        ->has(Employment::factory()->started($start)->ended($end))
+        ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function released(): self
+    public function released()
     {
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        return $this->state([
-            'status' => ManagerStatus::RELEASED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::RELEASED];
+        })
+        ->has(Employment::factory()->started($start)->ended($end))
         ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function suspended(): self
+    public function suspended()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => ManagerStatus::SUSPENDED,
-        ])->hasEmployments(1, ['started_at' => $start])
-        ->hasSuspensions(1, ['started_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::SUSPENDED];
+        })
+        ->has(Employment::factory()->started($start))
+        ->has(Suspension::factory()->started($end))
         ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function injured(): self
+    public function injured()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state([
-            'status' => ManagerStatus::INJURED,
-        ])->hasEmployments(1, ['started_at' => $start])
-        ->hasInjuries(1, ['started_at' => $now])
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::INJURED];
+        })
+        ->has(Employment::factory()->started($start))
+        ->has(Injury::factory()->started($now))
         ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }
 
-    public function softDeleted(): self
+    public function softDeleted()
     {
-        return $this->state([
-            'deleted_at' => now(),
-        ])->afterCreating(function (Manager $manager) {
+        return $this->state(function (array $attributes) {
+            return ['deleted_at' => now()];
+        })
+        ->afterCreating(function (Manager $manager) {
             $manager->save();
         });
     }

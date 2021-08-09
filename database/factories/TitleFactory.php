@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Enums\TitleStatus;
+use App\Models\Activation;
+use App\Models\Retirement;
 use App\Models\Title;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +24,7 @@ class TitleFactory extends Factory
      *
      * @return array
      */
-    public function definition(): array
+    public function definition()
     {
         return [
             'name' => Str::title($this->faker->unique()->words(2, true)).' Title',
@@ -30,69 +32,75 @@ class TitleFactory extends Factory
         ];
     }
 
-    public function active(): self
+    public function active()
     {
-        return $this->state([
-            'status' => TitleStatus::ACTIVE,
-        ])->hasActivations(1, ['started_at' => Carbon::yesterday()])
+        $activationDate = Carbon::yesterday();
+
+        return $this->state(function (array $attributes) {
+            return ['status' => TitleStatus::ACTIVE];
+        })
+        ->has(Activation::factory()->started($activationDate))
         ->afterCreating(function (Title $title) {
             $title->updateStatusAndSave();
         });
     }
 
-    public function inactive(): self
+    public function inactive()
     {
         $now = now();
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => TitleStatus::INACTIVE,
-        ])->hasActivations(1, ['started_at' => Carbon::yesterday(), 'ended_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => TitleStatus::INACTIVE];
+        })
+        ->has(Activation::factory()->started($start)->ended($end))
         ->afterCreating(function (Title $title) {
             $title->updateStatusAndSave();
         });
     }
 
-    public function withFutureActivation(): self
+    public function withFutureActivation()
     {
-        return $this->state([
-            'status' => TitleStatus::FUTURE_ACTIVATION,
-        ])->hasActivations(1, ['started_at' => Carbon::tomorrow()])
+        return $this->state(function (array $attributes) {
+            return ['status' => TitleStatus::FUTURE_ACTIVATION];
+        })
+        ->has(Activation::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Title $title) {
             $title->updateStatusAndSave();
         });
     }
 
-    public function retired(): self
+    public function retired()
     {
         $now = now();
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => TitleStatus::RETIRED,
-        ])->hasActivations(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasRetirements(1, ['started_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => TitleStatus::RETIRED];
+        })
+        ->has(Activation::factory()->started($start)->ended($end))
+        ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Title $title) {
             $title->updateStatusAndSave();
         });
     }
 
-    public function unactivated(): self
+    public function unactivated()
     {
-        return $this->state([
-            'status' => TitleStatus::UNACTIVATED,
-        ])->afterCreating(function (Title $title) {
+        return $this->state(function (array $attributes) {
+            return ['status' => TitleStatus::UNACTIVATED];
+        })->afterCreating(function (Title $title) {
             $title->updateStatusAndSave();
         });
     }
 
     public function softDeleted($delete = true)
     {
-        return $this->state([
-            'deleted_at' => now(),
-        ])->afterCreating(function (Title $title) {
+        return $this->state(function (array $attributes) {
+            return ['deleted_at' => now()];
+        })->afterCreating(function (Title $title) {
             $title->updateStatusAndSave();
         });
     }

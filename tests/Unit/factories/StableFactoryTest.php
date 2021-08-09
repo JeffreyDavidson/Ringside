@@ -53,8 +53,6 @@ class StableFactoryTest extends TestCase
     public function an_inactive_stable_has_a_previous_activation()
     {
         $stable = Stable::factory()->inactive()->create();
-        dd(Activation::count());
-        dd($stable->activations);
 
         $this->assertEquals(StableStatus::INACTIVE, $stable->status);
         $this->assertCount(1, $stable->activations);
@@ -103,6 +101,8 @@ class StableFactoryTest extends TestCase
     {
         $stable = Stable::factory()->active()->create();
         dd($stable->activations);
+        // $stable->activations()->create(['started_at' => now()->toDateTimeString()]);
+        // dd(Activation::count());
 
         $this->assertEquals(StableStatus::ACTIVE, $stable->status);
         $this->assertCount(1, $stable->activations);
