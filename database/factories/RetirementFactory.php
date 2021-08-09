@@ -2,7 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Manager;
+use App\Models\Referee;
 use App\Models\Retirement;
+use App\Models\Stable;
+use App\Models\TagTeam;
+use App\Models\Title;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,26 +28,44 @@ class RetirementFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        $retiree = $this->retirable();
+
+        return [
+            'retiree_id' => $retiree::factory(),
+            'retiree_type' => $retiree,
+            'started_at' => now()->toDateTimeString(),
+        ];
     }
 
     /**
-     * @param string|Carbon $startDate
+     * @param string|Carbon $retirementDate
      */
-    public function started($startDate = 'now')
+    public function started($retirementDate = 'now')
     {
-        return tap(clone $this)->overwriteDefaults([
-           'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
-       ]);
+        return $this->state([
+            'started_at' => $retirementDate instanceof Carbon ? $retirementDate : new Carbon($retirementDate),
+        ]);
     }
 
     /**
-     * @param string|Carbon $endDate
+     * @param string|Carbon $unretireDate
      */
-    public function ended($endDate = 'now')
+    public function ended($unretireDate = 'now')
     {
-        return tap(clone $this)->overwriteDefaults([
-           'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
-       ]);
+        return $this->state([
+            'ended_at' => $unretireDate instanceof Carbon ? $unretireDate : new Carbon($unretireDate),
+        ]);
+    }
+
+    public function retirable()
+    {
+        return $this->faker->randomElement([
+            Manager::class,
+            Referee::class,
+            Stable::class,
+            TagTeam::class,
+            Title::class,
+            Wrestler::class,
+        ]);
     }
 }

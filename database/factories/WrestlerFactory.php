@@ -3,6 +3,10 @@
 namespace Database\Factories;
 
 use App\Enums\WrestlerStatus;
+use App\Models\Employment;
+use App\Models\Injury;
+use App\Models\Retirement;
+use App\Models\Suspension;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -36,56 +40,63 @@ class WrestlerFactory extends Factory
         ];
     }
 
-    public function employed(): self
+    public function employed()
     {
-        return $this->hasEmployments(1, ['started_at' => Carbon::yesterday()])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::BOOKABLE];
+        })
+        ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
         });
     }
 
-    public function bookable(): self
+    public function bookable()
     {
-        return $this->state([
-            'status' => WrestlerStatus::BOOKABLE,
-        ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::BOOKABLE];
+        })
+        ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
         });
     }
 
-    public function withFutureEmployment(): self
+    public function withFutureEmployment()
     {
-        return $this->state([
-            'status' => WrestlerStatus::FUTURE_EMPLOYMENT,
-        ])->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::FUTURE_EMPLOYMENT];
+        })
+        ->has(Employment::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
         });
     }
 
-    public function unemployed(): self
+    public function unemployed()
     {
-        return $this->state([
-            'status' => WrestlerStatus::UNEMPLOYED,
-        ])->afterCreating(function (Wrestler $wrestler) {
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::UNEMPLOYED];
+        })
+        ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
         });
     }
 
-    public function retired(): self
+    public function retired()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => WrestlerStatus::RETIRED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasRetirements(1, ['started_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::RETIRED];
+        })
+        ->has(Employment::factory()->started($start)->ended($end))
+        ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
@@ -93,31 +104,33 @@ class WrestlerFactory extends Factory
         });
     }
 
-    public function released(): self
+    public function released()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => WrestlerStatus::RELEASED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::RELEASED];
+        })
+        ->has(Employment::factory()->started($start)->ended($end))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
         });
     }
 
-    public function suspended(): self
+    public function suspended()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => WrestlerStatus::SUSPENDED,
-        ])->hasEmployments(1, ['started_at' => $start])
-        ->hasSuspensions(1, ['started_at' => $end])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::SUSPENDED];
+        })
+        ->has(Employment::factory()->started($start))
+        ->has(Suspension::factory()->started($end))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
@@ -125,15 +138,16 @@ class WrestlerFactory extends Factory
         });
     }
 
-    public function injured(): self
+    public function injured()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state([
-            'status' => WrestlerStatus::INJURED,
-        ])->hasEmployments(1, ['started_at' => $start])
-        ->hasInjuries(1, ['started_at' => $now])
+        return $this->state(function (array $attributes) {
+            return ['status' => WrestlerStatus::INJURED];
+        })
+        ->has(Employment::factory()->started($start))
+        ->has(Injury::factory()->started($now))
         ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
             $wrestler->load('employments');
@@ -141,11 +155,12 @@ class WrestlerFactory extends Factory
         });
     }
 
-    public function softDeleted(): self
+    public function softDeleted()
     {
-        return $this->state([
-            'deleted_at' => now(),
-        ])->afterCreating(function (Wrestler $wrestler) {
+        return $this->state(function (array $attributes) {
+            return ['deleted_at' => now()];
+        })
+        ->afterCreating(function (Wrestler $wrestler) {
             $wrestler->save();
         });
     }

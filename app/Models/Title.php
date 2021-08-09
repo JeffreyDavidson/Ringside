@@ -110,4 +110,14 @@ class Title extends Model implements Activatable, Deactivatable, Retirable, Unre
         $this->updateStatus();
         $this->save();
     }
+
+    /**
+     * Get all of the activations of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function activations()
+    {
+        return $this->morphMany(Activation::class, 'activatable');
+    }
 }

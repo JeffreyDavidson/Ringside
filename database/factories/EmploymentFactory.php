@@ -3,6 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\Employment;
+use App\Models\Manager;
+use App\Models\Referee;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,26 +26,42 @@ class EmploymentFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        $employable = $this->employable();
+
+        return [
+            'employable_id' => $employable::factory(),
+            'employable_type' => $employable,
+            'started_at' => now()->toDateTimeString(),
+        ];
     }
 
     /**
-     * @param string|Carbon $startDate
+     * @param string|Carbon $employmentDate
      */
-    public function started($startDate = 'now')
+    public function started($employmentDate = 'now')
     {
         return $this->state([
-            'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
+            'started_at' => $employmentDate instanceof Carbon ? $employmentDate : new Carbon($employmentDate),
         ]);
     }
 
     /**
-     * @param string|Carbon $endDate
+     * @param string|Carbon $releaseDate
      */
-    public function ended($endDate = 'now')
+    public function ended($releaseDate = 'now')
     {
         return $this->state([
-            'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
+            'ended_at' => $releaseDate instanceof Carbon ? $releaseDate : new Carbon($releaseDate),
+        ]);
+    }
+
+    public function employable()
+    {
+        return $this->faker->randomElement([
+            Manager::class,
+            Referee::class,
+            TagTeam::class,
+            Wrestler::class,
         ]);
     }
 }

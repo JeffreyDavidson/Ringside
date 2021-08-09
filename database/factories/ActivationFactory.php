@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Activation;
+use App\Models\Stable;
+use App\Models\Title;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,26 +24,40 @@ class ActivationFactory extends Factory
      */
     public function definition(): array
     {
-        return [];
+        $activatable = $this->activatable();
+
+        return [
+            'activatable_id' => $activatable::factory(),
+            'activatable_type' => $activatable,
+            'started_at' => now()->toDateTimeString(),
+        ];
     }
 
     /**
-     * @param string|Carbon $startDate
+     * @param string|Carbon $activationDate
      */
-    public function started($startDate = 'now')
+    public function started($activationDate = 'now')
     {
         return $this->state([
-            'started_at' => $startDate instanceof Carbon ? $startDate : new Carbon($startDate),
+            'started_at' => $activationDate instanceof Carbon ? $activationDate : new Carbon($activationDate),
         ]);
     }
 
     /**
-     * @param string|Carbon $endDate
+     * @param string|Carbon $deactivationDate
      */
-    public function ended($endDate = 'now')
+    public function ended($deactivationDate = 'now')
     {
         return $this->state([
-            'ended_at' => $endDate instanceof Carbon ? $endDate : new Carbon($endDate),
+            'ended_at' => $deactivationDate instanceof Carbon ? $deactivationDate : new Carbon($deactivationDate),
+        ]);
+    }
+
+    public function activatable()
+    {
+        return $this->faker->randomElement([
+            Stable::class,
+            Title::class,
         ]);
     }
 }

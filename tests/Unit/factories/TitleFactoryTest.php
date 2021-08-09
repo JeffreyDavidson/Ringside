@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\TitleStatus;
+use App\Models\Activation;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -53,7 +54,7 @@ class TitleFactoryTest extends TestCase
     /**
      * @test
      */
-    public function a_future_employed_title_has_an_mployment()
+    public function a_future_employed_title_has_an_employment()
     {
         $title = Title::factory()->withFutureActivation()->create();
 

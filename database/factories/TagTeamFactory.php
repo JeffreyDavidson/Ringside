@@ -34,146 +34,120 @@ class TagTeamFactory extends Factory
 
     public function bookable()
     {
-        return $this->state([
-            'status' => TagTeamStatus::BOOKABLE,
-        ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
-        ->hasAttached(
-            Wrestler::factory()
-                ->count(2)
-                ->bookable(),
-            ['joined_at' => Carbon::yesterday()]
-        )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            // $tagTeam->save();
-            // $tagTeam->currentWrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
-            // $tagTeam->load('currentWrestlers');
-        });
+        $this->state(['status' => TagTeamStatus::BOOKABLE])
+            ->hasEmployments(1, ['started_at' => Carbon::yesterday()])
+            ->hasAttached(Wrestler::factory()->count(2)->bookable(), ['joined_at' => Carbon::yesterday()])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                // $tagTeam->save();
+                // $tagTeam->currentWrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
+                // $tagTeam->load('currentWrestlers');
+            });
+
+        return $this;
     }
 
     public function unbookable()
     {
-        return $this->state([
-            'status' => TagTeamStatus::UNBOOKABLE,
-        ])->hasEmployments(1, ['started_at' => Carbon::yesterday()])
-        ->hasAttached(
-            Wrestler::factory()
-                ->count(2)
-                ->bookable(),
-            ['joined_at' => Carbon::yesterday()]
-        )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->currentWrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
-            $tagTeam->load('currentWrestlers');
-        });
+        $this->state(['status' => TagTeamStatus::UNBOOKABLE])
+            ->hasEmployments(1, ['started_at' => Carbon::yesterday()])
+            ->hasAttached(Wrestler::factory()->count(2)->bookable(), ['joined_at' => Carbon::yesterday()])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+                $tagTeam->currentWrestlers->each->update(['current_tag_team_id' => $tagTeam->id]);
+                $tagTeam->load('currentWrestlers');
+            });
+
+        return $this;
     }
 
     public function withFutureEmployment()
     {
-        return $this->state([
-            'status' => TagTeamStatus::FUTURE_EMPLOYMENT,
-        ])->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
-        ->hasAttached(
-            Wrestler::factory()
-                ->count(2)
-                ->withFutureEmployment(),
-            ['joined_at' => Carbon::now()]
-        )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->load('employments');
-            $tagTeam->load('currentWrestlers');
-        });
+        $this->state(['status' => TagTeamStatus::FUTURE_EMPLOYMENT])
+            ->hasEmployments(1, ['started_at' => Carbon::tomorrow()])
+            ->hasAttached(Wrestler::factory()->count(2)->withFutureEmployment(), ['joined_at' => Carbon::now()])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+                $tagTeam->load('employments');
+                $tagTeam->load('currentWrestlers');
+            });
+
+        return $this;
     }
 
-    public function suspended(): self
+    public function suspended()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => TagTeamStatus::SUSPENDED,
-        ])->hasEmployments(1, ['started_at' => $start])
-        ->hasSuspensions(1, ['started_at' => $end])
-        ->hasAttached(
-            Wrestler::factory()
-                ->count(2)
-                ->suspended(),
-            ['joined_at' => $start]
-        )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->load('employments');
-            $tagTeam->load('suspensions');
-            $tagTeam->load('currentWrestlers');
-        });
+        $this->state(['status' => TagTeamStatus::SUSPENDED])
+            ->hasEmployments(1, ['started_at' => $start])
+            ->hasSuspensions(1, ['started_at' => $end])
+            ->hasAttached(Wrestler::factory()->count(2)->suspended(), ['joined_at' => $start])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+                $tagTeam->load('employments');
+                $tagTeam->load('suspensions');
+                $tagTeam->load('currentWrestlers');
+            });
+
+        return $this;
     }
 
-    public function retired(): self
+    public function retired()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => TagTeamStatus::RETIRED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-        ->hasRetirements(1, ['started_at' => $end])
-        ->hasAttached(
-            Wrestler::factory()
-                ->count(2)
-                ->retired(),
-            ['joined_at' => $start]
-        )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->currentWrestlers->each->save();
-        });
+        $this->state(['status' => TagTeamStatus::RETIRED])
+            ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+            ->hasRetirements(1, ['started_at' => $end])
+            ->hasAttached(Wrestler::factory()->count(2)->retired(), ['joined_at' => $start])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+                $tagTeam->currentWrestlers->each->save();
+            });
+
+        return $this;
     }
 
-    public function unemployed(): self
+    public function unemployed()
     {
-        return $this->state([
-            'status' => TagTeamStatus::UNEMPLOYED,
-        ])->hasAttached(
-            Wrestler::factory()
-            ->count(2),
-            ['joined_at' => Carbon::now()]
-        )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->currentWrestlers->each->save();
-        });
+        $this->state(['status' => TagTeamStatus::UNEMPLOYED])
+            ->hasAttached(Wrestler::factory()->count(2), ['joined_at' => Carbon::now()])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+                $tagTeam->currentWrestlers->each->save();
+            });
+
+        return $this;
     }
 
-    public function released(): self
+    public function released()
     {
         $now = now();
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state([
-            'status' => TagTeamStatus::RELEASED,
-        ])->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
-            ->hasAttached(
-                Wrestler::factory()
-                ->count(2)
-                ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end]),
-                ['joined_at' => $start]
-            )
-        ->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-            $tagTeam->currentWrestlers->each->save();
-        });
+        $this->state(['status' => TagTeamStatus::RELEASED])
+            ->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end])
+            ->hasAttached(Wrestler::factory()->count(2)->hasEmployments(1, ['started_at' => $start, 'ended_at' => $end]), ['joined_at' => $start])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+                $tagTeam->currentWrestlers->each->save();
+            });
+
+        return $this;
     }
 
-    public function softDeleted(): self
+    public function softDeleted()
     {
-        return $this->state([
-            'deleted_at' => now(),
-        ])->afterCreating(function (TagTeam $tagTeam) {
-            $tagTeam->save();
-        });
+        $this->state(['deleted_at' => now()])
+            ->afterCreating(function (TagTeam $tagTeam) {
+                $tagTeam->save();
+            });
+
+        return $this;
     }
 }
