@@ -19,15 +19,6 @@ class CreateActivationsTable extends Migration
             $table->datetime('started_at');
             $table->datetime('ended_at')->nullable();
             $table->timestamps();
-
-            // $table->index('activatable_type');
-            // $table->index('activatable_id');
-            // $table->index(['activatable_id', 'activatable_type']);
-            // $table->index('started_at');
-            // $table->index('ended_at');
-            // $table->index(['started_at', 'ended_at']);
-            // $table->index(['activatable_id', 'activatable_type', 'started_at', 'ended_at'], 'activations_full_index');
-            // $table->unique(['activatable_id', 'activatable_type', 'started_at']);
         });
     }
 

@@ -17,11 +17,15 @@ class ActivationStartDateCanBeChanged implements Rule
 
     public function passes($attribute, $value)
     {
-        if ($this->model->currentActivation()->exists() && $this->model->currentActivation->started_at->gt(Carbon::parse($value))) {
-            return false;
+        if ($this->model->isUnactivated()) {
+            return true;
         }
 
-        return true;
+        if ($this->model->hasFutureActivation()) {
+            return true;
+        }
+
+        return false;
     }
 
     public function message()

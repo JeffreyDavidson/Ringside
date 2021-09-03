@@ -3,6 +3,8 @@
 namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;
+use App\Http\Controllers\Events\EventsController;
+use App\Http\Controllers\Events\RestoreController;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,19 +17,25 @@ class RestoreControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public Event $event;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->event = Event::factory()->softDeleted()->create();
+    }
+
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_restores_a_soft_deleted_event_and_redirects($administrators)
+    public function invoke_restores_a_soft_deleted_event_and_redirects()
     {
-        $event = Event::factory()->softDeleted()->create();
+        $this->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RestoreController::class], $this->event))
+            ->assertRedirect(action([EventsController::class, 'index']));
 
-        $this->actAs($administrators)
-            ->patch(route('events.restore', $event))
-            ->assertRedirect(route('events.index'));
-
-        $this->assertNull($event->fresh()->deleted_at);
+        $this->assertNull($this->event->fresh()->deleted_at);
     }
 
     /**
@@ -35,10 +43,8 @@ class RestoreControllerTest extends TestCase
      */
     public function a_basic_user_cannot_restore_a_deleted_event()
     {
-        $event = Event::factory()->softDeleted()->create();
-
         $this->actAs(Role::BASIC)
-            ->patch(route('events.restore', $event))
+            ->patch(action([RestoreController::class], $this->event))
             ->assertForbidden();
     }
 
@@ -47,9 +53,7 @@ class RestoreControllerTest extends TestCase
      */
     public function a_guest_cannot_restore_a_event()
     {
-        $event = Event::factory()->softDeleted()->create();
-
-        $this->patch(route('events.restore', $event))
+        $this->patch(action([RestoreController::class], $this->event))
             ->assertRedirect(route('login'));
     }
 }

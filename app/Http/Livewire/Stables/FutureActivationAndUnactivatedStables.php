@@ -15,7 +15,7 @@ class FutureActivationAndUnactivatedStables extends Component
     public function render()
     {
         $futureActivationAndUnactivatedStables = Stable::query()
-            ->futureActivation()
+            ->withFutureActivation()
             ->orWhere
             ->unactivated()
             ->withFirstActivatedAtDate()

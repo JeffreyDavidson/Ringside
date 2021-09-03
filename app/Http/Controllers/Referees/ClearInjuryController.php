@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\ClearInjuryRequest;
 use App\Models\Referee;
-use App\Services\RefereeService;
+use App\Repositories\RefereeRepository;
 
 class ClearInjuryController extends Controller
 {
@@ -14,12 +15,17 @@ class ClearInjuryController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\ClearInjuryRequest  $request
-     * @param  \App\Services\RefereeService $refereeService
+     * @param  \App\Repositories\RefereeRepository  $refereeRepository
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, ClearInjuryRequest $request, RefereeService $refereeService)
+    public function __invoke(Referee $referee, ClearInjuryRequest $request, RefereeRepository $refereeRepository)
     {
-        $refereeService->clearFromInjury($referee);
+        throw_unless($referee->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
+
+        $recoveryDate = now()->toDateTimeString();
+
+        $refereeRepository->clearInjury($referee, $recoveryDate);
+        $referee->updateStatus()->save();
 
         return redirect()->route('referees.index');
     }

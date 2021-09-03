@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use SoftDeletes,
+    use Concerns\Unguarded,
         HasFactory,
-        Concerns\Unguarded;
+        SoftDeletes;
 
     /**
      * The "booted" method of the model.
@@ -24,6 +24,13 @@ class Event extends Model
             $event->updateStatus();
         });
     }
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'events';
 
     /**
      * The attributes that should be mutated to dates.
@@ -43,36 +50,36 @@ class Event extends Model
     }
 
     /**
-     * Scope a query to only include scheduled events.
+     * Scope a query to include scheduled events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeScheduled($query)
     {
-        return $query->where('status', EventStatus::SCHEDULED);
+        return $query->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
     }
 
     /**
-     * Scope a query to only include scheduled events.
+     * Scope a query to include unscheduled events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUnscheduled($query)
     {
-        return $query->where('status', EventStatus::UNSCHEDULED);
+        return $query->where('status', EventStatus::UNSCHEDULED)->whereNull('date');
     }
 
     /**
-     * Scope a query to only include past events.
+     * Scope a query to include past events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopePast($query)
     {
-        return $query->where('status', EventStatus::PAST);
+        return $query->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
     }
 
     /**
@@ -82,11 +89,7 @@ class Event extends Model
      */
     public function isScheduled()
     {
-        if (! $this->date) {
-            return false;
-        }
-
-        return $this->date->isFuture();
+        return $this->date?->isFuture() ?? false;
     }
 
     /**
@@ -96,52 +99,42 @@ class Event extends Model
      */
     public function isPast()
     {
-        if (! $this->date) {
-            return false;
-        }
-
-        return $this->date->isPast();
+        return $this->date?->isPast() ?? false;
     }
 
     /**
-     * Checks to see if the event is does not have a scheduled date.
+     * Checks to see if the event has a scheduled date.
      *
      * @return bool
      */
-    public function isUnScheduled()
+    public function isUnscheduled()
     {
         return $this->date === null;
     }
 
+    /**
+     * Retrieve the formatted event date.
+     *
+     * @return string
+     */
     public function getFormattedDateAttribute()
     {
         return $this->date->format('F j, Y');
     }
 
     /**
-     * Update the status for the wrestler.
+     * Update the status for the event.
      *
-     * @return void
+     * @return $this
      */
     public function updateStatus()
     {
-        if ($this->isScheduled()) {
-            $this->status = EventStatus::SCHEDULED;
-        } elseif ($this->isPast()) {
-            $this->status = EventStatus::PAST;
-        } else {
-            $this->status = EventStatus::UNSCHEDULED;
-        }
-    }
+        $this->status = match (true) {
+            $this->isScheduled() => EventStatus::SCHEDULED,
+            $this->isPast() => EventStatus::PAST,
+            default => EventStatus::UNSCHEDULED
+        };
 
-    /**
-     * Updates a wrestler's status and saves.
-     *
-     * @return void
-     */
-    public function updateStatusAndSave()
-    {
-        $this->updateStatus();
-        $this->save();
+        return $this;
     }
 }

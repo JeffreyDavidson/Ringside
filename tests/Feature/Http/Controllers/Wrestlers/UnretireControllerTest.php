@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Wrestlers\UnretireController;
+use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\UnretireRequest;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,8 +15,6 @@ use Tests\TestCase;
 /**
  * @group wrestlers
  * @group feature-wrestlers
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -25,19 +24,19 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_unretires_a_retired_wrestler_and_redirects($administrators)
+    public function invoke_unretires_a_retired_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler))
-            ->assertRedirect(route('wrestlers.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler))
+            ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
+            $this->assertNotNull($wrestler->retirements->last()->ended_at);
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            $this->assertCount(1, $wrestler->retirements);
         });
     }
 
@@ -56,8 +55,9 @@ class UnretireControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.unretire', $wrestler))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([UnretireController::class], $wrestler))
             ->assertForbidden();
     }
 
@@ -68,97 +68,98 @@ class UnretireControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.unretire', $wrestler))
+        $this
+            ->patch(action([UnretireController::class], $wrestler))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_a_bookable_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_unretiring_a_bookable_wrestler()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_a_future_employed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_unretiring_a_future_employed_wrestler()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_an_injured_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_unretiring_an_injured_wrestler()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_a_released_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_unretiring_a_released_wrestler()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_a_suspended_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_unretiring_a_suspended_wrestler()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_an_unemployed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_unretiring_an_unemployed_wrestler()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.unretire', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $wrestler));
     }
 }

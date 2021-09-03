@@ -1,6 +1,5 @@
 <?php
 
-use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $rules = [

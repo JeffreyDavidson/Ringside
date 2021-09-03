@@ -41,6 +41,16 @@ class Height
         return $this->height % 12;
     }
 
+    /**
+     * Return the wrestler's height in inches.
+     *
+     * @return string
+     */
+    public function inInches()
+    {
+        return $this->height;
+    }
+
     public function __toString()
     {
         return strval($this->height);

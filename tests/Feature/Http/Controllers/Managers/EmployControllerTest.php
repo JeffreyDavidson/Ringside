@@ -6,17 +6,15 @@ use App\Enums\ManagerStatus;
 use App\Enums\Role;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Managers\EmployController;
+use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Managers\EmployRequest;
 use App\Models\Manager;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * @group managers
  * @group feature-managers
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -26,67 +24,64 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_employs_a_future_employed_manager_and_redirects($administrators)
+    public function invoke_employs_an_unemployed_manager_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager))
-            ->assertRedirect(route('managers.index'));
-
-        tap($manager->fresh(), function ($manager) use ($now) {
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-            $this->assertCount(1, $manager->employments);
-            $this->assertEquals($now->toDateTimeString(), $manager->employments->first()->started_at->toDateTimeString());
-        });
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function invoke_employs_an_unemployed_manager_and_redirects($administrators)
-    {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager))
-            ->assertRedirect(route('managers.index'));
+        $this->assertCount(0, $manager->employments);
+        $this->assertEquals(ManagerStatus::UNEMPLOYED, $manager->status);
 
-        tap($manager->fresh(), function ($manager) use ($now) {
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager))
+            ->assertRedirect(action([ManagersController::class, 'index']));
+
+        tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->employments);
-            $this->assertEquals($now->toDateTimeString(), $manager->employments->first()->started_at->toDateTimeString());
+            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_employs_a_released_manager_and_redirects($administrators)
+    public function invoke_employs_a_future_employed_manager_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        $manager = Manager::factory()->withFutureEmployment()->create();
+        $startedAt = $manager->employments->last()->started_at;
 
+        $this->assertTrue(now()->lt($startedAt));
+        $this->assertEquals(ManagerStatus::FUTURE_EMPLOYMENT, $manager->status);
+
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager))
+            ->assertRedirect(action([ManagersController::class, 'index']));
+
+        tap($manager->fresh(), function ($manager) use ($startedAt) {
+            $this->assertTrue($manager->currentEmployment->started_at->lt($startedAt));
+            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_employs_a_released_manager_and_redirects()
+    {
         $manager = Manager::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager))
-            ->assertRedirect(route('managers.index'));
+        $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
 
-        tap($manager->fresh(), function ($manager) use ($now) {
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager))
+            ->assertRedirect(action([ManagersController::class, 'index']));
+
+        tap($manager->fresh(), function ($manager) {
             $this->assertCount(2, $manager->employments);
-            $this->assertEquals($now->toDateTimeString(), $manager->employments->last()->started_at->toDateTimeString());
+            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
     }
 
@@ -105,8 +100,9 @@ class EmployControllerTest extends TestCase
     {
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('managers.employ', $manager))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([EmployController::class], $manager))
             ->assertForbidden();
     }
 
@@ -117,67 +113,68 @@ class EmployControllerTest extends TestCase
     {
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->patch(route('managers.employ', $manager))
+        $this
+            ->patch(action([EmployController::class], $manager))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_an_available_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_an_available_manager()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->available()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_a_retired_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_a_retired_manager()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_a_suspended_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_a_suspended_manager()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_an_injured_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_an_injured_manager()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.employ', $manager));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $manager));
     }
 }

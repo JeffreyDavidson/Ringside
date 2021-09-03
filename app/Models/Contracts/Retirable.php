@@ -2,82 +2,87 @@
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface Retirable
 {
     /**
-     * Get the name of the unique identifier for the user.
+     * Get the retirements of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function retirements();
 
     /**
-     * Get the unique identifier for the user.
+     * Get the current retirement of the model.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentRetirement();
 
     /**
-     * Get the password for the user.
+     * Get the previous retirements of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function previousRetirements();
 
     /**
-     * Get the token value for the "remember me" session.
+     * Get the previous retirement of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousRetirement();
 
     /**
-     * Set the token value for the "remember me" session.
+     * Scope a query to include retired models.
      *
-     * @return void
+     * @param   \Illuminate\Database\Eloquent\Builder  $query
+     * @return  \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeRetired($query);
+    public function scopeRetired(Builder $query);
+
+    /**
+     * Scope a query to include model's current retired at date.
+     *
+     * @param   \Illuminate\Database\Eloquent\Builder  $query
+     * @return  \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithCurrentRetiredAtDate(Builder $query);
+
+    /**
+     * Scope a query to order models by current retired at date.
+     *
+     * @param   \Illuminate\Database\Eloquent\Builder  $query
+     * @return  \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentRetiredAtDate(Builder $query);
 
     /**
      * Get the column name for the "remember me" token.
      *
-     * @return string
-     */
-    public function scopeWithCurrentRetiredAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
-    public function scopeOrderByCurrentRetiredAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
+     * @return bool
      */
     public function isRetired();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model has been retired.
      *
-     * @return string
+     * @return bool
      */
     public function hasRetirements();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Determine if a model can be retired.
      *
-     * @return string
+     * @return bool
      */
     public function canBeRetired();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Determine if a model can be unretired.
      *
-     * @return string
+     * @return bool
      */
     public function canBeUnretired();
 }

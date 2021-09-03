@@ -2,33 +2,38 @@
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface Deactivatable
 {
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model is currently deactivated.
      *
-     * @return string
+     * @return bool
      */
     public function isDeactivated();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include deactivated models.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder  $query
      */
-    public function scopeDeactivated($query);
+    public function scopeDeactivated(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include the last deactivation date for models.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder  $query
      */
-    public function scopeWithLastDeactivationDate($query);
+    public function scopeWithLastDeactivationDate(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to order models by the model's last deactivation date.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder  $query
      */
-    public function scopeOrderByLastDeactivationDate($query);
+    public function scopeOrderByLastDeactivationDate(Builder $query);
 }

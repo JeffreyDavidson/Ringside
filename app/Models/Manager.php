@@ -3,18 +3,19 @@
 namespace App\Models;
 
 use App\Enums\ManagerStatus;
-use App\Models\Contracts\CanJoinStable;
-use App\Models\User;
+use App\Models\Contracts\StableMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manager extends SingleRosterMember implements CanJoinStable
+class Manager extends SingleRosterMember implements StableMember
 {
-    use SoftDeletes,
+    use Concerns\HasFullName,
+        Concerns\Manageables,
+        Concerns\OwnedByUser,
+        Concerns\StableMember,
+        Concerns\Unguarded,
         HasFactory,
-        Concerns\HasFullName,
-        Concerns\CanJoinStable,
-        Concerns\Unguarded;
+        SoftDeletes;
 
     /**
      * The "booted" method of the model.
@@ -29,6 +30,13 @@ class Manager extends SingleRosterMember implements CanJoinStable
     }
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'managers';
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -36,16 +44,6 @@ class Manager extends SingleRosterMember implements CanJoinStable
     protected $casts = [
         'status' => ManagerStatus::class,
     ];
-
-    /**
-     * Get the user belonging to the manager.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
     /**
      * Scope a query to only include available managers.
@@ -71,37 +69,22 @@ class Manager extends SingleRosterMember implements CanJoinStable
     /**
      * Update the status for the manager.
      *
-     * @return void
+     * @return $this
      */
     public function updateStatus()
     {
-        if ($this->isCurrentlyEmployed()) {
-            if ($this->isInjured()) {
-                $this->status = ManagerStatus::INJURED;
-            } elseif ($this->isSuspended()) {
-                $this->status = ManagerStatus::SUSPENDED;
-            } elseif ($this->isAvailable()) {
-                $this->status = ManagerStatus::AVAILABLE;
-            }
-        } elseif ($this->hasFutureEmployment()) {
-            $this->status = ManagerStatus::FUTURE_EMPLOYMENT;
-        } elseif ($this->isReleased()) {
-            $this->status = ManagerStatus::RELEASED;
-        } elseif ($this->isRetired()) {
-            $this->status = ManagerStatus::RETIRED;
-        } else {
-            $this->status = ManagerStatus::UNEMPLOYED;
-        }
-    }
+        $this->status = match (true) {
+            $this->isCurrentlyEmployed() => match (true) {
+                $this->isInjured() => ManagerStatus::INJURED,
+                $this->isSuspended() => ManagerStatus::SUSPENDED,
+                $this->isAvailable() => ManagerStatus::AVAILABLE,
+            },
+            $this->hasFutureEmployment() => ManagerStatus::FUTURE_EMPLOYMENT,
+            $this->isReleased() => ManagerStatus::RELEASED,
+            $this->isRetired() => ManagerStatus::RETIRED,
+            default => ManagerStatus::UNEMPLOYED
+        };
 
-    /**
-     * Updates a manager's status and saves.
-     *
-     * @return void
-     */
-    public function updateStatusAndSave()
-    {
-        $this->updateStatus();
-        $this->save();
+        return $this;
     }
 }

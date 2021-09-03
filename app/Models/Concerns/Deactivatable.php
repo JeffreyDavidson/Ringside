@@ -3,16 +3,17 @@
 namespace App\Models\Concerns;
 
 use App\Models\Activation;
+use Illuminate\Database\Eloquent\Builder;
 
 trait Deactivatable
 {
     /**
      * Scope a query to only include unactivated models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeDeactivated($query)
+    public function scopeDeactivated(Builder $query)
     {
         return $query->whereDoesntHave('currentActivation')
                     ->orWhereDoesntHave('previousActivations');
@@ -21,10 +22,10 @@ trait Deactivatable
     /**
      * Scope a query to include current deactivation date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithLastDeactivationDate($query)
+    public function scopeWithLastDeactivationDate(Builder $query)
     {
         return $query->addSelect(['last_deactivated_at' => Activation::select('ended_at')
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
@@ -37,11 +38,11 @@ trait Deactivatable
     /**
      * Scope a query to order by the models current deactivation date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  string $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByLastDeactivationDate($query, $direction = 'asc')
+    public function scopeOrderByLastDeactivationDate(Builder $query, string $direction = 'asc')
     {
         return $query->orderByRaw("DATE(last_deactivated_at) $direction");
     }
@@ -55,21 +56,22 @@ trait Deactivatable
     {
         return $this->previousActivation()->exists() &&
                 $this->currentActivation()->doesntExist() &&
+                $this->futureActivation()->doesntExist() &&
                 $this->currentRetirement()->doesntExist();
     }
 
     /**
-     * Determine if the deactivatable can be deactivated.
+     * Determine if the stable can be deactivated.
      *
      * @return bool
      */
     public function canBeDeactivated()
     {
-        if ($this->isNotInActivation()) {
-            return false;
+        if ($this->isCurrentlyActivated()) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -79,6 +81,6 @@ trait Deactivatable
      */
     public function isNotInActivation()
     {
-        return $this->isNotActivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+        return $this->isNotActivation() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 }

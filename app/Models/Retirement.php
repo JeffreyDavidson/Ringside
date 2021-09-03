@@ -10,6 +10,13 @@ class Retirement extends Model
     use Concerns\Unguarded, HasFactory;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'retirements';
+
+    /**
      * The attributes that should be mutated to dates.
      *
      * @var array

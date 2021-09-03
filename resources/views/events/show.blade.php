@@ -60,15 +60,17 @@
                                             >
                                         </div>
                                     @endif
-                                    <div class="kt-widget__info">
-                                        <span class="kt-widget__label"
-                                            >Venue:</span
-                                        >
-                                        <span
-                                            class="kt-widget__data"
-                                            >{{ $event->venue->name }}</span
-                                        >
-                                    </div>
+                                    @isset($event->venue)
+                                        <div class="kt-widget__info">
+                                            <span class="kt-widget__label"
+                                                >Venue:</span
+                                            >
+                                            <span
+                                                class="kt-widget__data"
+                                                >{{ $event->venue->name }}</span
+                                            >
+                                        </div>
+                                    @endisset
                                 </div>
                                 <p>{{ $event->preview }}</p>
                             </div>

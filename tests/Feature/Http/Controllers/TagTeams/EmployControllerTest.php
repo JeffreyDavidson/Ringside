@@ -4,12 +4,12 @@ namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
 use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\TagTeams\EmployController;
+use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Requests\TagTeams\EmployRequest;
 use App\Models\TagTeam;
-use App\Models\Wrestler;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -25,73 +25,79 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_employs_a_future_employed_tag_team_and_redirects($administrators)
+    public function invoke_employs_an_unemployed_tag_team_and_their_tag_team_partners_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+        $this->assertCount(0, $tagTeam->employments);
+        $this->assertEquals(TagTeamStatus::UNEMPLOYED, $tagTeam->status);
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.employ', $tagTeam))
-            ->assertRedirect(route('tag-teams.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $tagTeam))
+            ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
+        tap($tagTeam->fresh(), function ($tagTeam) {
+            $this->assertCount(1, $tagTeam->employments);
             $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
-            $this->assertEquals(
-                $now->toDateTimeString(),
-                $tagTeam->employments->first()->started_at->toDateTimeString()
-            );
-            $tagTeam->currentWrestlers->each(
-                fn (Wrestler $wrestler) => $this->assertTrue($wrestler->isCurrentlyEmployed())
-            );
+
+            foreach ($tagTeam->currentWrestlers as $wrestler) {
+                $this->assertCount(1, $wrestler->employments);
+                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+            }
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_employs_an_unemployed_tag_team_and_redirects($administrators)
+    public function invoke_employs_a_future_employed_tag_team_and_their_tag_team_partners_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+        $startedAt = $tagTeam->employments->last()->started_at;
 
-        $tagTeam = Tagteam::factory()->unemployed()->create();
+        $this->assertTrue(now()->lt($startedAt));
+        $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.employ', $tagTeam))
-            ->assertRedirect(route('tag-teams.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $tagTeam))
+            ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
-            $this->assertEquals(TagteamStatus::BOOKABLE, $tagTeam->status);
-            $this->assertCount(1, $tagTeam->employments);
-            $this->assertEquals($now->toDateTimeString(), $tagTeam->employments->first()->started_at->toDateTimeString());
+        tap($tagTeam->fresh(), function ($tagTeam) use ($startedAt) {
+            $this->assertTrue($tagTeam->currentEmployment->started_at->lt($startedAt));
+            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+
+            foreach ($tagTeam->currentWrestlers as $wrestler) {
+                $this->assertTrue($wrestler->currentEmployment->started_at->lt($startedAt));
+                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+            }
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_employs_a_released_tagteam_and_redirects($administrators)
+    public function invoke_employs_a_released_tag_team_and_their_tag_team_partners_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
+        $tagTeam = TagTeam::factory()->released()->create();
 
-        $tagTeam = Tagteam::factory()->released()->create();
+        $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.employ', $tagTeam))
-            ->assertRedirect(route('tag-teams.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $tagTeam))
+            ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        tap($tagTeam->fresh(), function ($tagTeam) use ($now) {
-            $this->assertEquals(TagteamStatus::BOOKABLE, $tagTeam->status);
+        tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertCount(2, $tagTeam->employments);
-            $this->assertEquals($now->toDateTimeString(), $tagTeam->employments->last()->started_at->toDateTimeString());
+            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+
+            foreach ($tagTeam->currentWrestlers as $wrestler) {
+                $this->assertCount(2, $wrestler->employments);
+                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+            }
         });
     }
 
@@ -110,8 +116,9 @@ class EmployControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('tag-teams.employ', $tagTeam))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([EmployController::class], $tagTeam))
             ->assertForbidden();
     }
 
@@ -122,52 +129,49 @@ class EmployControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->patch(route('tag-teams.employ', $tagTeam))
+        $this->patch(action([EmployController::class], $tagTeam))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_a_bookable_tag_team_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_a_bookable_tag_team()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.employ', $tagTeam));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $tagTeam));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_a_retired_tag_team_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_a_retired_tag_team()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.employ', $tagTeam));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $tagTeam));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function employing_a_suspended_tag_team_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_employing_a_suspended_tag_team()
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.employ', $tagTeam));
+        $this->actAs(Role::ADMINISTRATOR)
+            ->patch(action([EmployController::class], $tagTeam));
     }
 }

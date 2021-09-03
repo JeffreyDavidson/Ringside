@@ -4,7 +4,6 @@ namespace App\Rules;
 
 use App\Models\Contracts\Employable;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Database\Eloquent\Model;
 
 class EmploymentStartDateCanBeChanged implements Rule
 {
@@ -32,15 +31,11 @@ class EmploymentStartDateCanBeChanged implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->model->canBeEmployed()) {
+        if ($this->model->isUnemployed() || $this->model->hasFutureEmployment()) {
             return true;
         }
 
-        if ($this->model->hasFutureEmployment()) {
-            return true;
-        }
-
-        if ($this->model->started_at->eq($value)) {
+        if ($this->model->isCurrentlyEmployed() && $this->model->currentEmployment->started_at->eq($value)) {
             return true;
         }
 
@@ -49,6 +44,6 @@ class EmploymentStartDateCanBeChanged implements Rule
 
     public function message()
     {
-        return 'The :attribute field cannot be changed to a date different than '.$this->model->started_at->toDateTimeString().'.';
+        return 'The :attribute field cannot be changed.';
     }
 }

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Repositories\EventRepository;
-use Carbon\Carbon;
 
 class EventService
 {
@@ -26,7 +25,7 @@ class EventService
     }
 
     /**
-     * Create an event.
+     * Create an event with given data.
      *
      * @param  array $data
      * @return \App\Models\Event
@@ -37,7 +36,7 @@ class EventService
     }
 
     /**
-     * Update an event.
+     * Update a given event.
      *
      * @param  \App\Models\Event $event
      * @param  array $data
@@ -45,13 +44,7 @@ class EventService
      */
     public function update(Event $event, array $data)
     {
-        $this->eventRepository->update($event, $data);
-
-        if ($data['started_at']) {
-            $this->employOrUpdateEmployment($event, Carbon::parse($data['started_at']));
-        }
-
-        return $event;
+        return $this->eventRepository->update($event, $data);
     }
 
     /**

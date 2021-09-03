@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\EmployRequest;
 use App\Models\Referee;
-use App\Services\RefereeService;
+use App\Repositories\RefereeRepository;
 
 class EmployController extends Controller
 {
@@ -14,12 +15,17 @@ class EmployController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\EmployRequest  $request
-     * @param  \App\Services\RefereeService $refereeService
+     * @param  \App\Repositories\RefereeRepository  $refereeRepository
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, EmployRequest $request, RefereeService $refereeService)
+    public function __invoke(Referee $referee, EmployRequest $request, RefereeRepository $refereeRepository)
     {
-        $refereeService->employ($referee);
+        throw_unless($referee->canBeEmployed(), new CannotBeEmployedException);
+
+        $employmentDate = now()->toDateTimeString();
+
+        $refereeRepository->employ($referee, $employmentDate);
+        $referee->updateStatus()->save();
 
         return redirect()->route('referees.index');
     }

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Referees;
 use App\Models\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -28,7 +29,12 @@ class UpdateRequest extends FormRequest
         return [
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
-            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new EmploymentStartDateCanBeChanged($this->route('referee'))],
+            'started_at' => [
+                'nullable',
+                'string',
+                'date_format:Y-m-d H:i:s',
+                new EmploymentStartDateCanBeChanged($this->route('referee')),
+            ],
         ];
     }
 

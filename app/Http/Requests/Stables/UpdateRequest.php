@@ -7,6 +7,7 @@ use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateRequest extends FormRequest
 {
@@ -43,10 +44,10 @@ class UpdateRequest extends FormRequest
     /**
      * Perform additional validation.
      *
-     * @param  Illuminate\Contracts\Validation\Validator  $validator
+     * @param  \Illuminate\Validation\Validator  $validator
      * @return void
      */
-    public function withValidator($validator)
+    public function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
             if (is_array($this->wrestlers) && is_array($this->tagteams)) {

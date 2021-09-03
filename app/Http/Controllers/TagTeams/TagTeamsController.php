@@ -98,13 +98,14 @@ class TagTeamsController extends Controller
      * Delete a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Services\TagTeamService  $tagTeamService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(TagTeam $tagTeam)
+    public function destroy(TagTeam $tagTeam, TagTeamService $tagTeamService)
     {
         $this->authorize('delete', $tagTeam);
 
-        $this->tagTeamRepository->delete($tagTeam);
+        $tagTeamService->delete($tagTeam);
 
         return redirect()->route('tag-teams.index');
     }

@@ -3,11 +3,12 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\TagTeams\SuspendController;
+use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Requests\TagTeams\SuspendRequest;
 use App\Models\TagTeam;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,20 +24,20 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_suspends_a_tag_team_and_redirects($administrators)
+    public function invoke_suspends_a_tag_team_and_their_tag_team_partners_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.suspend', $tagTeam))
-            ->assertRedirect(route('tag-teams.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $tagTeam))
+            ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        $this->assertEquals($now->toDateTimeString(), $tagTeam->fresh()->currentSuspension->started_at);
+        tap($tagTeam->fresh(), function ($tagTeam) {
+            $this->assertCount(1, $tagTeam->suspensions);
+            $this->assertEquals(TagTeamStatus::SUSPENDED, $tagTeam->status);
+        });
     }
 
     /**
@@ -54,8 +55,9 @@ class SuspendControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('tag-teams.suspend', $tagTeam))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([SuspendController::class], $tagTeam))
             ->assertForbidden();
     }
 
@@ -66,82 +68,83 @@ class SuspendControllerTest extends TestCase
     {
         $tagTeam = TagTeam::factory()->create();
 
-        $this->patch(route('tag-teams.suspend', $tagTeam))
+        $this
+            ->patch(action([SuspendController::class], $tagTeam))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_suspended_tag_team_throws_an_exception($administrators)
+    public function suspending_a_suspended_tag_team_throws_an_exception()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.suspend', $tagTeam));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $tagTeam));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_an_unemployed_tag_team_throws_an_exception($administrators)
+    public function suspending_an_unemployed_tag_team_throws_an_exception()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.suspend', $tagTeam));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $tagTeam));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_released_tag_team_throws_an_exception($administrators)
+    public function suspending_a_released_tag_team_throws_an_exception()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.suspend', $tagTeam));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $tagTeam));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_future_employed_tag_team_throws_an_exception($administrators)
+    public function suspending_a_future_employed_tag_team_throws_an_exception()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.suspend', $tagTeam));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $tagTeam));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_retired_tag_team_throws_an_exception($administrators)
+    public function suspending_a_retired_tag_team_throws_an_exception()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $tagTeam = TagTeam::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('tag-teams.suspend', $tagTeam));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $tagTeam));
     }
 }

@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers\Stables;
 use App\Enums\Role;
 use App\Enums\StableStatus;
 use App\Exceptions\CannotBeUnretiredException;
+use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\Stables\UnretireController;
 use App\Http\Requests\Stables\UnretireRequest;
 use App\Models\Stable;
@@ -24,18 +25,18 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_unretires_a_retired_stable_and_its_members_and_redirects($administrators)
+    public function invoke_unretires_a_retired_stable_and_its_members_and_redirects()
     {
         $now = now();
         Carbon::setTestNow($now);
 
         $stable = Stable::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('stables.unretire', $stable))
-            ->assertRedirect(route('stables.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $stable))
+            ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) use ($now) {
             $this->assertEquals(StableStatus::ACTIVE, $stable->status);
@@ -59,8 +60,9 @@ class UnretireControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('stables.unretire', $stable))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([UnretireController::class], $stable))
             ->assertForbidden();
     }
 
@@ -71,67 +73,68 @@ class UnretireControllerTest extends TestCase
     {
         $stable = Stable::factory()->create();
 
-        $this->patch(route('stables.unretire', $stable))
+        $this
+            ->patch(action([UnretireController::class], $stable))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_an_active_stable_throws_an_exception($administrators)
+    public function unretiring_an_active_stable_throws_an_exception()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->active()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('stables.unretire', $stable));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $stable));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_a_future_activated_stable_throws_an_exception($administrators)
+    public function unretiring_a_future_activated_stable_throws_an_exception()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->withFutureActivation()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('stables.unretire', $stable));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $stable));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_an_inactive_stable_throws_an_exception($administrators)
+    public function unretiring_an_inactive_stable_throws_an_exception()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->inactive()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('stables.unretire', $stable));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $stable));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function unretiring_an_unactivated_stable_throws_an_exception($administrators)
+    public function unretiring_an_unactivated_stable_throws_an_exception()
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('stables.unretire', $stable));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([UnretireController::class], $stable));
     }
 }

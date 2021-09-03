@@ -20,7 +20,7 @@ class FutureEmployedAndUnemployedTagTeams extends Component
     public function render()
     {
         $futureEmployedAndUnemployedTagTeams = TagTeam::query()
-            ->futureEmployment()
+            ->futureEmployed()
             ->orWhere
             ->unemployed()
             ->withFirstEmployedAtDate()

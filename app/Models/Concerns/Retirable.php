@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Retirement;
+use Illuminate\Database\Eloquent\Builder;
 
 trait Retirable
 {
@@ -58,7 +59,7 @@ trait Retirable
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeRetired($query)
+    public function scopeRetired(Builder $query)
     {
         return $query->whereHas('currentRetirement');
     }
@@ -66,10 +67,10 @@ trait Retirable
     /**
      * Scope a query to include current retirement date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithCurrentRetiredAtDate($query)
+    public function scopeWithCurrentRetiredAtDate(Builder $query)
     {
         return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
             ->whereColumn('retiree_id', $this->getTable().'.id')
@@ -82,11 +83,11 @@ trait Retirable
     /**
      * Scope a query to order by the model's current retirement date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  string $direction
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
+    public function scopeOrderByCurrentRetiredAtDate(Builder $query, string $direction = 'asc')
     {
         return $query->orderByRaw("DATE(current_retired_at) $direction");
     }

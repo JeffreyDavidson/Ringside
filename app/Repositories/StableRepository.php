@@ -38,7 +38,7 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     }
 
     /**
-     * Delete a stable.
+     * Delete a given stable.
      *
      * @param  \App\Models\Stable $stable
      * @return void
@@ -49,7 +49,7 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     }
 
     /**
-     * Restore a stable.
+     * Restore a given stable.
      *
      * @param  \App\Models\Stable $stable
      * @return void
@@ -105,5 +105,87 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     public function unretire(Stable $stable, string $unretireDate)
     {
         return $stable->currentRetirement()->update(['ended_at' => $unretireDate]);
+    }
+
+    /**
+     * Unretire a given stable on a given date.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  string $unretireDate
+     * @return \App\Models\Stable $stable
+     */
+    public function disassemble(Stable $stable, string $deactivationDate)
+    {
+        foreach ($stable->currentWrestlers as $wrestler) {
+            $stable->currentWrestlers()->updateExistingPivot($wrestler, ['left_at' => $deactivationDate]);
+            $wrestler->updateStatus()->save();
+        }
+
+        foreach ($stable->currentTagTeams as $tagTeam) {
+            $stable->currentTagTeams()->updateExistingPivot($wrestler, ['left_at' => $deactivationDate]);
+            $tagTeam->updateStatus()->save();
+        }
+
+        return $stable;
+    }
+
+    /**
+     * Add wrestlers to a given stable.
+     *
+     * @param  \App\Models\Stable  $stable
+     * @param  array  $wrestlerIds
+     * @param  string  $joinDate
+     * @return void
+     */
+    public function addWrestlers(Stable $stable, array $wrestlerIds, string $joinDate)
+    {
+        foreach ($wrestlerIds as $wrestlerId) {
+            $stable->currentWrestlers()->attach($wrestlerId, ['joined_at' => $joinDate]);
+        }
+    }
+
+    /**
+     * Add tag teams to a given stable at a given date.
+     *
+     * @param  \App\Models\Stable  $stable
+     * @param  array  $tagTeamIds
+     * @param  string  $joinDate
+     * @return void
+     */
+    public function addTagTeams(Stable $stable, array $tagTeamIds, string $joinDate)
+    {
+        foreach ($tagTeamIds as $tagTeamId) {
+            $stable->currentTagTeams()->attach($tagTeamId, ['joined_at' => $joinDate]);
+        }
+    }
+
+    /**
+     * Undocumented function.
+     *
+     * @param  \App\Models\Stable  $stable
+     * @param  array $currentWrestlerIds
+     * @param  string $removalDate
+     * @return void
+     */
+    public function removeWrestlers(Stable $stable, array $currentWrestlerIds, string $removalDate)
+    {
+        foreach ($currentWrestlerIds as $wrestlerId) {
+            $stable->currentWrestlers()->updateExistingPivot($wrestlerId, ['left_at' => $removalDate]);
+        }
+    }
+
+    /**
+     * Undocumented function.
+     *
+     * @param  \App\Models\Stable  $stable
+     * @param  array $currentTagTeamIds
+     * @param  string $removalDate
+     * @return void
+     */
+    public function removeTagTeams(Stable $stable, array $currentTagTeamIds, string $removalDate)
+    {
+        foreach ($currentTagTeamIds as $tagTeamId) {
+            $stable->currentTagTeams()->updateExistingPivot($tagTeamId, ['left_at' => $removalDate]);
+        }
     }
 }

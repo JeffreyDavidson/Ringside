@@ -20,7 +20,7 @@ class ActiveTitles extends Component
     public function render()
     {
         $activeTitles = Title::query()
-            ->activated()
+            ->active()
             ->withFirstActivatedAtDate()
             ->orderByFirstActivatedAtDate()
             ->orderBy('name')

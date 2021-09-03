@@ -3,8 +3,11 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Wrestlers\InjureController;
+use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\InjureRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -14,8 +17,6 @@ use Tests\TestCase;
 /**
  * @group wrestlers
  * @group feature-wrestlers
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -25,36 +26,40 @@ class InjureControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_injures_a_bookable_wrestler_and_redirects($administrators)
+    public function invoke_injures_a_bookable_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler))
-            ->assertRedirect(route('wrestlers.index'));
+        $this->assertCount(0, $wrestler->injuries);
+
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler))
+            ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertTrue($wrestler->hasInjuries());
-            $this->assertTrue($wrestler->isInjured());
+            $this->assertCount(1, $wrestler->injuries);
+            $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    public function injuring_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable()
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertTrue($tagTeam->isUnbookable());
+            $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
         });
     }
 
@@ -73,8 +78,9 @@ class InjureControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.injure', $wrestler))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([InjureController::class], $wrestler))
             ->assertForbidden();
     }
 
@@ -85,97 +91,98 @@ class InjureControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.injure', $wrestler))
+        $this
+            ->patch(action([InjureController::class], $wrestler))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_an_unemployed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_an_unemployed_wrestler()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_suspended_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_suspended_wrestler()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_released_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_released_wrestler()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_future_employed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_future_employed_wrestler()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_retired_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_injuring_a_retired_wrestler_throws()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_an_injured_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_an_injured_wrestler()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.injure', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $wrestler));
     }
 }

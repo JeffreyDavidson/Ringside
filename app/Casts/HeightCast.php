@@ -18,7 +18,7 @@ class HeightCast implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-        return strval(new Height($value));
+        return new Height($value);
     }
 
     /**

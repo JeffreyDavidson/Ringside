@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Activation extends Model
 {
-    use Concerns\Unguarded, HasFactory;
+    use Concerns\Unguarded,
+        HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'activations';
 
     /**
      * The attributes that should be mutated to dates.
@@ -34,6 +42,6 @@ class Activation extends Model
      */
     public function startedBefore($date)
     {
-        return $this->started_at->lte($date);
+        return $this->started_at->lt($date);
     }
 }

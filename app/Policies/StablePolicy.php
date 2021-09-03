@@ -103,18 +103,6 @@ class StablePolicy
     }
 
     /**
-     * Determine whether the user can disband a stable.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Stable  $stable
-     * @return bool
-     */
-    public function disband(User $user, Stable $stable)
-    {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
-    }
-
-    /**
      * Determine whether the user can view a list of stables.
      *
      * @param  \App\Models\User  $user

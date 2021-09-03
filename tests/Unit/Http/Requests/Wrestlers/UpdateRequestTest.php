@@ -24,6 +24,7 @@ class UpdateRequestTest extends TestCase
      */
     public function rules_returns_validation_requirements()
     {
+        $this->markTestIncomplete();
         $wrestler = Wrestler::factory()->create();
 
         $subject = $this->createFormRequest(UpdateRequest::class);

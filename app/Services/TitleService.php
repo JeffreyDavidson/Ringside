@@ -4,10 +4,6 @@ namespace App\Services;
 
 use App\Models\Title;
 use App\Repositories\TitleRepository;
-use App\Strategies\Activation\TitleActivationStrategy;
-use App\Strategies\Deactivation\TitleDeactivationStrategy;
-use App\Strategies\Retirement\TitleRetirementStrategy;
-use App\Strategies\Unretire\TitleUnretireStrategy;
 
 class TitleService
 {
@@ -29,7 +25,7 @@ class TitleService
     }
 
     /**
-     * Create a title.
+     * Create a title with given data.
      *
      * @param  array $data
      * @return \App\Models\Title
@@ -38,15 +34,15 @@ class TitleService
     {
         $title = $this->titleRepository->create($data);
 
-        if ($data['activated_at']) {
-            (new TitleActivationStrategy($title))->activate($data['activated_at']);
+        if (isset($data['activated_at'])) {
+            $this->titleRepository->activate($title, $data['activated_at']);
         }
 
         return $title;
     }
 
     /**
-     * Update a title.
+     * Update a given title with given data.
      *
      * @param  \App\Models\Title $title
      * @param  array $data
@@ -56,7 +52,7 @@ class TitleService
     {
         $this->titleRepository->update($title, $data);
 
-        if ($data['activated_at']) {
+        if ($title->canHaveActivationStartDateChanged() && isset($data['activated_at'])) {
             $this->activateOrUpdateActivation($title, $data['activated_at']);
         }
 
@@ -64,25 +60,25 @@ class TitleService
     }
 
     /**
-     * Update the activation date for a title.
+     * Activate a given manager or update the given title's activation date.
      *
      * @param  \App\Models\Title $title
-     * @param  string $startDate
+     * @param  string $activationDate
      * @return \App\Models\Stable
      */
     public function activateOrUpdateActivation(Title $title, string $activationDate)
     {
-        if ($title->isNotInActivation()) {
-            return (new TitleActivationStrategy($title))->activate($activationDate);
+        if ($title->isUnactivated()) {
+            return $this->titleRepository->activate($title, $activationDate);
         }
 
-        if ($title->hasFutureActivation() && $title->futureActivation->started_at->ne($activationDate)) {
-            return $title->futureActivation()->update(['started_at' => $activationDate]);
+        if ($title->hasFutureActivation() && ! $title->activatedOn($activationDate)) {
+            return $this->titleRepository->updateActivation($title, $activationDate);
         }
     }
 
     /**
-     * Delete a title.
+     * Delete a given title.
      *
      * @param  \App\Models\Title $title
      * @return void
@@ -93,7 +89,7 @@ class TitleService
     }
 
     /**
-     * Restore a title.
+     * Restore a given title.
      *
      * @param  \App\Models\Title $title
      * @return void
@@ -101,49 +97,5 @@ class TitleService
     public function restore(Title $title)
     {
         $this->titleRepository->restore($title);
-    }
-
-    /**
-     * Activate a title.
-     *
-     * @param  \App\Models\Title $title
-     * @return void
-     */
-    public function activate(Title $title)
-    {
-        (new TitleActivationStrategy($title))->activate();
-    }
-
-    /**
-     * Deactivate a title.
-     *
-     * @param  \App\Models\Title $title
-     * @return void
-     */
-    public function deactivate(Title $title)
-    {
-        (new TitleDeactivationStrategy($title))->deactivate();
-    }
-
-    /**
-     * Retire a title.
-     *
-     * @param  \App\Models\Title $title
-     * @return void
-     */
-    public function retire(Title $title)
-    {
-        (new TitleRetirementStrategy($title))->retire();
-    }
-
-    /**
-     * Unretire a title.
-     *
-     * @param  \App\Models\Title $title
-     * @return void
-     */
-    public function unretire(Title $title)
-    {
-        (new TitleUnretireStrategy($title))->unretire();
     }
 }

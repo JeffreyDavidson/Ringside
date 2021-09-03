@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Activation;
+use Illuminate\Database\Eloquent\Builder;
 
 trait Activatable
 {
@@ -25,7 +26,7 @@ trait Activatable
     {
         return $this->morphOne(Activation::class, 'activatable')
                         ->where('started_at', '<=', now())
-                        ->whereNull('ended_at')
+                        ->where('ended_at', '=', null)
                         ->latestOfMany();
     }
 
@@ -77,12 +78,12 @@ trait Activatable
     }
 
     /**
-     * Scope a query to only include activated models.
+     * Scope a query to only include active models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActivated($query)
+    public function scopeActive(Builder $query)
     {
         return $query->whereHas('currentActivation');
     }
@@ -90,10 +91,10 @@ trait Activatable
     /**
      * Scope a query to only include future activated models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFutureActivation($query)
+    public function scopeWithFutureActivation(Builder $query)
     {
         return $query->whereHas('futureActivation');
     }
@@ -101,12 +102,13 @@ trait Activatable
     /**
      * Scope a query to only include inactive models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeInactive($query)
+    public function scopeInactive(Builder $query)
     {
         return $query->whereHas('previousActivation')
+                    ->whereDoesntHave('futureActivation')
                     ->whereDoesntHave('currentActivation')
                     ->whereDoesntHave('currentRetirement');
     }
@@ -114,23 +116,21 @@ trait Activatable
     /**
      * Scope a query to only include inactive models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeUnactivated($query)
+    public function scopeUnactivated(Builder $query)
     {
-        return $query->whereDoesntHas('previousActivation')
-                    ->whereDoesntHave('currentActivation')
-                    ->whereDoesntHave('currentRetirement');
+        return $query->whereDoesntHave('activations');
     }
 
     /**
      * Scope a query to include current activation date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithFirstActivatedAtDate($query)
+    public function scopeWithFirstActivatedAtDate(Builder $query)
     {
         return $query->addSelect(['first_activated_at' => Activation::select('started_at')
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
@@ -143,17 +143,17 @@ trait Activatable
     /**
      * Scope a query to order by the models first activation date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  string $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByFirstActivatedAtDate($query, $direction = 'asc')
+    public function scopeOrderByFirstActivatedAtDate(Builder $query, string $direction = 'asc')
     {
         return $query->orderByRaw("DATE(first_activated_at) $direction");
     }
 
     /**
-     * Check to see if the model is active.
+     * Check to see if the model is currently active.
      *
      * @return bool
      */
@@ -177,7 +177,7 @@ trait Activatable
      *
      * @return bool
      */
-    public function isNotActivated()
+    public function isUnactivated()
     {
         return $this->activations()->count() === 0;
     }
@@ -213,7 +213,7 @@ trait Activatable
     }
 
     /**
-     * Retrieve an activation date.
+     * Retrieve the model's first activation date.
      *
      * @return string|null
      */
@@ -229,6 +229,31 @@ trait Activatable
      */
     public function isNotActivation()
     {
-        return $this->isNotActivated() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+        return $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+    }
+
+    /**
+     * Get the model's first activation date.
+     *
+     * @param  string $activationDate
+     * @return bool
+     */
+    public function activatedOn(string $activationDate)
+    {
+        return $this->activations->last()->started_at->ne($activationDate);
+    }
+
+    /**
+     * Check to see if activatable can have their start date changed.
+     *
+     * @return bool
+     */
+    public function canHaveActivationStartDateChanged()
+    {
+        if ($this->isUnactivated() || $this->hasFutureActivation()) {
+            return true;
+        }
+
+        return false;
     }
 }

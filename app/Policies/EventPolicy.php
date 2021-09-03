@@ -34,7 +34,11 @@ class EventPolicy
             return false;
         }
 
-        return $event->date->isFuture(now());
+        if (isset($event->date) && $event->date->isPast()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

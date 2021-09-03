@@ -3,11 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
+use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Titles\RetireController;
+use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Requests\Titles\RetireRequest;
 use App\Models\Title;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,22 +22,37 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_retires_an_active_title_and_redirects($administrators)
+    public function invoke_retires_an_active_title_and_redirects()
     {
-        Carbon::setTestNow($now = now());
-
         $title = Title::factory()->active()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.retire', $title))
-            ->assertRedirect(route('titles.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RetireController::class], $title))
+            ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) use ($now) {
-            $this->assertTrue($title->hasRetirements());
-            $this->assertTrue($title->isRetired());
-            $this->assertEquals($now->toDateTimeString(), $title->retirements->first()->started_at->toDateTimeString());
+        tap($title->fresh(), function ($title) {
+            $this->assertCount(1, $title->retirements);
+            $this->assertEquals(TitleStatus::RETIRED, $title->status);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_retires_an_inactive_title_and_redirects()
+    {
+        $title = Title::factory()->inactive()->create();
+
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RetireController::class], $title))
+            ->assertRedirect(action([TitlesController::class, 'index']));
+
+        tap($title->fresh(), function ($title) {
+            $this->assertCount(1, $title->retirements);
+            $this->assertEquals(TitleStatus::RETIRED, $title->status);
         });
     }
 
@@ -55,8 +71,9 @@ class RetireControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('titles.retire', $title))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([RetireController::class], $title))
             ->assertForbidden();
     }
 
@@ -67,67 +84,53 @@ class RetireControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->patch(route('titles.retire', $title))
+        $this
+            ->patch(action([RetireController::class], $title))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function retiring_a_retired_title_throws_an_exception($administrators)
+    public function retiring_a_retired_title_throws_an_exception()
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
         $title = Title::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.retire', $title));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RetireController::class], $title));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function retiring_a_future_activated_title_throws_an_exception($administrators)
+    public function retiring_a_future_activated_title_throws_an_exception()
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
         $title = Title::factory()->withFutureActivation()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.retire', $title));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RetireController::class], $title));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function retiring_an_unactivated_title_throws_an_exception($administrators)
+    public function retiring_an_unactivated_title_throws_an_exception()
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
         $title = Title::factory()->unactivated()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.retire', $title));
-    }
-
-    /**
-     * @test
-     * @dataProvider administrators
-     */
-    public function retiring_an_inactive_title_throws_an_exception($administrators)
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->inactive()->create();
-
-        $this->actAs($administrators)
-            ->patch(route('titles.retire', $title));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RetireController::class], $title));
     }
 }

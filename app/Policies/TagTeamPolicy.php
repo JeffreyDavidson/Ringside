@@ -88,6 +88,17 @@ class TagTeamPolicy
     }
 
     /**
+     * Determine whether the user can release a tag team.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function release(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
      * Determine whether the user can retire a tag team.
      *
      * @param  \App\Models\User  $user

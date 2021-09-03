@@ -7,8 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Injury extends Model
 {
-    use HasFactory,
-        Concerns\Unguarded;
+    use Concerns\Unguarded,
+        HasFactory;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'injuries';
 
     /**
      * The attributes that should be mutated to dates.

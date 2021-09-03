@@ -5,18 +5,16 @@ namespace Tests\Feature\Http\Controllers\Referees;
 use App\Enums\RefereeStatus;
 use App\Enums\Role;
 use App\Exceptions\CannotBeReinstatedException;
+use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReinstateController;
 use App\Http\Requests\Referees\ReinstateRequest;
 use App\Models\Referee;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * @group referees
  * @group feature-referees
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -26,25 +24,21 @@ class ReinstateControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_reinstates_a_suspended_referee_and_redirects($administrators)
+    public function invoke_reinstates_a_suspended_referee_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $referee = Referee::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee))
-            ->assertRedirect(route('referees.index'));
+        $this->assertNull($referee->currentSuspension->ended_at);
 
-        $this->assertEquals($now->toDateTimeString(), $referee->fresh()->suspensions()->latest()->first()->ended_at);
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee))
+            ->assertRedirect(action([RefereesController::class, 'index']));
 
-        tap($referee->fresh(), function ($referee) use ($now) {
+        tap($referee->fresh(), function ($referee) {
+            $this->assertNotNull($referee->suspensions->last()->ended_at);
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
-            $this->assertCount(1, $referee->suspensions);
-            $this->assertEquals($now->toDateTimeString(), $referee->suspensions->first()->ended_at->toDateTimeString());
         });
     }
 
@@ -64,7 +58,7 @@ class ReinstateControllerTest extends TestCase
         $this->actAs(Role::BASIC);
         $referee = Referee::factory()->create();
 
-        $this->patch(route('referees.reinstate', $referee))
+        $this->patch(action([ReinstateController::class], $referee))
             ->assertForbidden();
     }
 
@@ -75,97 +69,97 @@ class ReinstateControllerTest extends TestCase
     {
         $referee = Referee::factory()->create();
 
-        $this->patch(route('referees.reinstate', $referee))
+        $this->patch(action([ReinstateController::class], $referee))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function reinstating_a_bookable_referee_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_reinstating_a_bookable_referee()
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
         $referee = Referee::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function reinstating_an_unemployed_referee_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_reinstating_an_unemployed_referee()
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
         $referee = Referee::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function reinstating_an_injured_referee_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_reinstating_an_injured_referee()
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
         $referee = Referee::factory()->injured()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function reinstating_a_released_referee_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_reinstating_a_released_referee()
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
         $referee = Referee::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function reinstating_a_future_employed_referee_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_reinstating_a_future_employed_referee()
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function reinstating_a_retired_referee_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_reinstating_a_retired_referee()
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
         $referee = Referee::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('referees.reinstate', $referee));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReinstateController::class], $referee));
     }
 }

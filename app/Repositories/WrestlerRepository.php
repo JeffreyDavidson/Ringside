@@ -78,7 +78,7 @@ class WrestlerRepository
     }
 
     /**
-     * Clear the current injury of a given wrestler on a given date.
+     * Clear the injury of a given wrestler on a given date.
      *
      * @param  \App\Models\Wrestler $wrestler
      * @param  string $recoveryDate
@@ -105,12 +105,12 @@ class WrestlerRepository
      * Unretire a given wrestler on a given date.
      *
      * @param  \App\Models\Wrestler $wrestler
-     * @param  string $unretiredDate
+     * @param  string $unretireDate
      * @return \App\Models\Wrestler $wrestler
      */
-    public function unretire(Wrestler $wrestler, string $unretiredDate)
+    public function unretire(Wrestler $wrestler, string $unretireDate)
     {
-        return $wrestler->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        return $wrestler->currentRetirement()->update(['ended_at' => $unretireDate]);
     }
 
     /**
@@ -135,5 +135,31 @@ class WrestlerRepository
     public function reinstate(Wrestler $wrestler, string $reinstateDate)
     {
         return $wrestler->currentSuspension()->update(['ended_at' => $reinstateDate]);
+    }
+
+    /**
+     * Get the model's first employment date.
+     *
+     * @param  \App\Models\Wrestler $wrestler
+     * @param  string $employmentDate
+     * @return \App\Models\Wrestler $wrestler
+     */
+    public function updateEmployment(Wrestler $wrestler, string $employmentDate)
+    {
+        return $wrestler->futureEmployment()->update(['started_at' => $employmentDate]);
+    }
+
+    /**
+     * Remove the given wrestler from their current tag team on a given date.
+     *
+     * @param  \App\Models\Wrestler
+     * @param  string  $removalDate
+     * @return void
+     */
+    public function removeFromCurrentTagTeam(Wrestler $wrestler, string $removalDate)
+    {
+        $wrestler->currentTagTeam()->updateExistingPivot($wrestler->currentTagTeam->id, [
+            'left_at' => $removalDate,
+        ]);
     }
 }

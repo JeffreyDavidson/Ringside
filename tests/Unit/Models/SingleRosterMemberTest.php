@@ -14,40 +14,40 @@ class SingleRosterMemberTest extends TestCase
     /**
      * @test
      */
-    public function a_single_roster_member_uses_can_be_suspended_trait()
+    public function a_single_roster_member_uses_suspendable_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeSuspended', SingleRosterMember::class);
+        $this->assertUsesTrait('App\Models\Concerns\Suspendable', SingleRosterMember::class);
     }
 
     /**
      * @test
      */
-    public function a_single_roster_member_uses_can_be_injured_trait()
+    public function a_single_roster_member_uses_injurable_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeInjured', SingleRosterMember::class);
+        $this->assertUsesTrait('App\Models\Concerns\Injurable', SingleRosterMember::class);
     }
 
     /**
      * @test
      */
-    public function a_single_roster_member_uses_can_be_retired_trait()
+    public function a_single_roster_member_uses_retirable_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeRetired', SingleRosterMember::class);
+        $this->assertUsesTrait('App\Models\Concerns\Retirable', SingleRosterMember::class);
     }
 
     /**
      * @test
      */
-    public function a_single_roster_member_uses_can_be_employed_trait()
+    public function a_single_roster_member_uses_employable_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeEmployed', SingleRosterMember::class);
+        $this->assertUsesTrait('App\Models\Concerns\Employable', SingleRosterMember::class);
     }
 
     /**
      * @test
      */
-    public function a_single_roster_member_uses_can_be_booked_trait()
+    public function a_single_roster_member_uses_releasable_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\CanBeBooked', SingleRosterMember::class);
+        $this->assertUsesTrait('App\Models\Concerns\Releasable', SingleRosterMember::class);
     }
 }

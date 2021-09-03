@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\SuspendRequest;
 use App\Models\Referee;
-use App\Services\RefereeService;
+use App\Repositories\RefereeRepository;
 
 class SuspendController extends Controller
 {
@@ -14,12 +15,17 @@ class SuspendController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\SuspendRequest  $request
-     * @param  \App\Services\RefereeService $refereeService
+     * @param  \App\Repositories\RefereeRepository  $refereeRepository
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, SuspendRequest $request, RefereeService $refereeService)
+    public function __invoke(Referee $referee, SuspendRequest $request, RefereeRepository $refereeRepository)
     {
-        $refereeService->suspend($referee);
+        throw_unless($referee->canBeSuspended(), new CannotBeSuspendedException);
+
+        $suspensionDate = now()->toDateTimeString();
+
+        $refereeRepository->suspend($referee, $suspensionDate);
+        $referee->updateStatus()->save();
 
         return redirect()->route('referees.index');
     }

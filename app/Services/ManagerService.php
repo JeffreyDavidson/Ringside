@@ -4,15 +4,6 @@ namespace App\Services;
 
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
-use App\Strategies\ClearInjury\ManagerClearInjuryStrategy;
-use App\Strategies\Employment\ManagerEmploymentStrategy;
-use App\Strategies\Injure\ManagerInjuryStrategy;
-use App\Strategies\Reinstate\ManagerReinstateStrategy;
-use App\Strategies\Release\ManagerReleaseStrategy;
-use App\Strategies\Retirement\ManagerRetirementStrategy;
-use App\Strategies\Suspend\ManagerSuspendStrategy;
-use App\Strategies\Unretire\ManagerUnretireStrategy;
-use Carbon\Carbon;
 
 class ManagerService
 {
@@ -24,7 +15,7 @@ class ManagerService
     protected $managerRepository;
 
     /**
-     * Create a new manger service instance.
+     * Create a new manager service instance.
      *
      * @param \App\Repositories\ManagerRepository $managerRepository
      */
@@ -34,7 +25,7 @@ class ManagerService
     }
 
     /**
-     * Create a manager.
+     * Create a manager with given data.
      *
      * @param  array $data
      * @return \App\Models\Manager $manager
@@ -43,15 +34,15 @@ class ManagerService
     {
         $manager = $this->managerRepository->create($data);
 
-        if ($data['started_at']) {
-            (new ManagerEmploymentStrategy($manager))->employ($data['started_at']);
+        if (isset($data['started_at'])) {
+            $this->managerRepository->employ($manager, $data['started_at']);
         }
 
         return $manager;
     }
 
     /**
-     * Update a manager.
+     * Update a given manager with given data.
      *
      * @param  \App\Models\Manager $manager
      * @param  array $data
@@ -61,21 +52,28 @@ class ManagerService
     {
         $this->managerRepository->update($manager, $data);
 
-        if ($data['started_at']) {
+        if ($manager->canHaveEmploymentStartDateChanged() && isset($data['started_at'])) {
             $this->employOrUpdateEmployment($manager, $data['started_at']);
         }
 
         return $manager;
     }
 
-    public function employOrUpdateEmployment(Manager $manager, $employmentDate)
+    /**
+     * Employ a given manager or update the given manager's employment date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $employmentDate
+     * @return void
+     */
+    private function employOrUpdateEmployment(Manager $manager, string $employmentDate)
     {
         if ($manager->isNotInEmployment()) {
-            (new ManagerEmploymentStrategy($manager))->employ($employmentDate);
+            return $this->managerRepository->employ($manager, $employmentDate);
         }
 
-        if ($manager->hasFutureEmployment() && $manager->futureEmployment->started_at->ne($employmentDate)) {
-            return $manager->futureEmployment()->update(['started_at' => $employmentDate]);
+        if ($manager->hasFutureEmployment() && ! $manager->employedOn($employmentDate)) {
+            return $this->managerRepository->updateEmployment($manager, $employmentDate);
         }
     }
 
@@ -91,7 +89,7 @@ class ManagerService
     }
 
     /**
-     * Delete a given manager.
+     * Restore a given manager.
      *
      * @param  \App\Models\Manager $manager
      * @return void
@@ -99,93 +97,5 @@ class ManagerService
     public function restore(Manager $manager)
     {
         $this->managerRepository->restore($manager);
-    }
-
-    /**
-     * Clear an injury of a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function clearFromInjury(Manager $manager)
-    {
-        (new ManagerClearInjuryStrategy($manager))->clearInjury();
-    }
-
-    /**
-     * Injure a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function injure(Manager $manager)
-    {
-        (new ManagerInjuryStrategy($manager))->injure();
-    }
-
-    /**
-     * Employ a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function employ(Manager $manager)
-    {
-        (new ManagerEmploymentStrategy($manager))->employ();
-    }
-
-    /**
-     * Employ a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function reinstate(Manager $manager)
-    {
-        (new ManagerReinstateStrategy($manager))->reinstate();
-    }
-
-    /**
-     * Unretire a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function unretire(Manager $manager)
-    {
-        (new ManagerUnretireStrategy($manager))->unretire();
-    }
-
-    /**
-     * Unretire a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function suspend(Manager $manager)
-    {
-        (new ManagerSuspendStrategy($manager))->suspend();
-    }
-
-    /**
-     * Retire a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function retire(Manager $manager)
-    {
-        (new ManagerRetirementStrategy($manager))->retire();
-    }
-
-    /**
-     * Release a manager.
-     *
-     * @param  \App\Models\Manager $manager
-     * @return void
-     */
-    public function release(Manager $manager)
-    {
-        (new ManagerReleaseStrategy($manager))->release();
     }
 }

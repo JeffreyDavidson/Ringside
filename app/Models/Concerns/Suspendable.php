@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Suspension;
+use Illuminate\Database\Eloquent\Builder;
 
 trait Suspendable
 {
@@ -29,7 +30,7 @@ trait Suspendable
     }
 
     /**
-     * Get the previous suspensions of the model.
+     * Get the current suspension of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -52,12 +53,12 @@ trait Suspendable
     }
 
     /**
-     * Scope a query to only include suspended models.
+     * Scope a query to include suspended models.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSuspended($query)
+    public function scopeSuspended(Builder $query)
     {
         return $query->whereHas('currentSuspension');
     }
@@ -65,10 +66,10 @@ trait Suspendable
     /**
      * Scope a query to include current suspension date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithCurrentSuspendedAtDate($query)
+    public function scopeWithCurrentSuspendedAtDate(Builder $query)
     {
         return $query->addSelect(['current_suspended_at' => Suspension::select('started_at')
             ->whereColumn('suspendable_id', $query->qualifyColumn('id'))
@@ -81,17 +82,17 @@ trait Suspendable
     /**
      * Scope a query to order by the model's current suspension date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  string $direction
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByCurrentSuspendedAtDate($query, $direction = 'asc')
+    public function scopeOrderByCurrentSuspendedAtDate(Builder $query, string $direction = 'asc')
     {
         return $query->orderByRaw("DATE(current_suspended_at) $direction");
     }
 
     /**
-     * Check to see if the model is suspended.
+     * Check to see if the model has been suspended.
      *
      * @return bool
      */
@@ -101,7 +102,7 @@ trait Suspendable
     }
 
     /**
-     * Check to see if the model has been activated.
+     * Check to see if the model has been suspended.
      *
      * @return bool
      */

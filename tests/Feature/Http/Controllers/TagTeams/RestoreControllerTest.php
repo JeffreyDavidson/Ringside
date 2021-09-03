@@ -3,6 +3,8 @@
 namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
+use App\Http\Controllers\TagTeams\RestoreController;
+use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,18 +19,26 @@ class RestoreControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public TagTeam $tagTeam;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->tagTeam = TagTeam::factory()->softDeleted()->create();
+    }
+
     /**
      * @test
      */
     public function invoke_restores_a_deleted_tag_team_and_redirects()
     {
-        $tagTeam = TagTeam::factory()->softDeleted()->create();
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RestoreController::class], $this->tagTeam))
+            ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        $this->actAs(Role::ADMINISTRATOR)
-            ->patch(route('tag-teams.restore', $tagTeam))
-            ->assertRedirect(route('tag-teams.index'));
-
-        $this->assertNull($tagTeam->fresh()->deleted_at);
+        $this->assertNull($this->tagTeam->fresh()->deleted_at);
     }
 
     /**
@@ -36,10 +46,9 @@ class RestoreControllerTest extends TestCase
      */
     public function a_basic_user_cannot_restore_a_tag_team()
     {
-        $tagTeam = TagTeam::factory()->softDeleted()->create();
-
-        $this->actAs(Role::BASIC)
-            ->patch(route('tag-teams.restore', $tagTeam))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([RestoreController::class], $this->tagTeam))
             ->assertForbidden();
     }
 
@@ -48,9 +57,8 @@ class RestoreControllerTest extends TestCase
      */
     public function a_guest_cannot_restore_a_tag_team()
     {
-        $tagTeam = TagTeam::factory()->softDeleted()->create();
-
-        $this->patch(route('tag-teams.restore', $tagTeam))
+        $this
+            ->patch(action([RestoreController::class], $this->tagTeam))
             ->assertRedirect(route('login'));
     }
 }

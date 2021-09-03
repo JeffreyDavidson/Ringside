@@ -3,8 +3,11 @@
 namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
+use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Wrestlers\ReleaseController;
+use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\ReleaseRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -14,8 +17,6 @@ use Tests\TestCase;
 /**
  * @group wrestlers
  * @group feature-wrestlers
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-rosters
  */
@@ -25,69 +26,74 @@ class ReleaseControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_releases_a_bookable_wrestler_and_redirects($administrators)
+    public function invoke_releases_a_bookable_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler))
-            ->assertRedirect(route('wrestlers.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler))
+            ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertTrue($wrestler->isReleased());
+            $this->assertNotNull($wrestler->employments->last()->ended_at);
+            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_releases_an_injured_wrestler_and_redirects($administrators)
+    public function invoke_releases_an_injured_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler))
-            ->assertRedirect(route('wrestlers.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler))
+            ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertTrue($wrestler->isReleased());
+            $this->assertNotNull($wrestler->injuries->last()->ended_at);
+            $this->assertNotNull($wrestler->employments->last()->ended_at);
+            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_releases_a_suspended_wrestler_and_redirects($administrators)
+    public function invoke_releases_a_suspended_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler))
-            ->assertRedirect(route('wrestlers.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler))
+            ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertTrue($wrestler->isReleased());
+            $this->assertNotNull($wrestler->suspensions->last()->ended_at);
+            $this->assertNotNull($wrestler->employments->last()->ended_at);
+            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function releasing_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    public function releasing_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable()
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertTrue($tagTeam->isUnbookable());
+            $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
         });
     }
 
@@ -106,8 +112,9 @@ class ReleaseControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.release', $wrestler))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([ReleaseController::class], $wrestler))
             ->assertForbidden();
     }
 
@@ -118,67 +125,68 @@ class ReleaseControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.release', $wrestler))
+        $this
+            ->patch(action([ReleaseController::class], $wrestler))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function releasing_an_unemployed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_an_exception_for_releasing_an_unemployed_wrestler()
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function releasing_a_future_employed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_an_exception_for_releasing_a_future_employed_wrestler()
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function releasing_a_released_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_an_exception_for_releasing_a_released_wrestler()
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function releasing_a_retired_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_an_exception_for_releasing_a_retired_wrestler()
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.release', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ReleaseController::class], $wrestler));
     }
 }

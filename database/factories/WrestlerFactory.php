@@ -10,7 +10,6 @@ use App\Models\Suspension;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class WrestlerFactory extends Factory
 {
@@ -30,12 +29,11 @@ class WrestlerFactory extends Factory
     {
         return [
             'user_id' => null,
-            'current_tag_team_id' => null,
             'name' => $this->faker->name,
             'height' => $this->faker->numberBetween(60, 95),
             'weight' => $this->faker->numberBetween(180, 500),
             'hometown' => $this->faker->city.', '.$this->faker->state,
-            'signature_move' => Str::title($this->faker->words(3, true)),
+            'signature_move' => null,
             'status' => WrestlerStatus::__default,
         ];
     }
@@ -47,7 +45,7 @@ class WrestlerFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
             $wrestler->load('employments');
         });
     }
@@ -59,6 +57,7 @@ class WrestlerFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Wrestler $wrestler) {
+            $wrestler->updateStatus();
             $wrestler->save();
             $wrestler->load('employments');
         });
@@ -71,7 +70,7 @@ class WrestlerFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
             $wrestler->load('employments');
         });
     }
@@ -82,7 +81,7 @@ class WrestlerFactory extends Factory
             return ['status' => WrestlerStatus::UNEMPLOYED];
         })
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
         });
     }
 
@@ -98,7 +97,7 @@ class WrestlerFactory extends Factory
         ->has(Employment::factory()->started($start)->ended($end))
         ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
             $wrestler->load('employments');
             $wrestler->load('retirements');
         });
@@ -115,7 +114,7 @@ class WrestlerFactory extends Factory
         })
         ->has(Employment::factory()->started($start)->ended($end))
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
             $wrestler->load('employments');
         });
     }
@@ -132,7 +131,7 @@ class WrestlerFactory extends Factory
         ->has(Employment::factory()->started($start))
         ->has(Suspension::factory()->started($end))
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
             $wrestler->load('employments');
             $wrestler->load('suspensions');
         });
@@ -149,7 +148,7 @@ class WrestlerFactory extends Factory
         ->has(Employment::factory()->started($start))
         ->has(Injury::factory()->started($now))
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
             $wrestler->load('employments');
             $wrestler->load('injuries');
         });
@@ -161,7 +160,7 @@ class WrestlerFactory extends Factory
             return ['deleted_at' => now()];
         })
         ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
+            $wrestler->updateStatus()->save();
         });
     }
 }

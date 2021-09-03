@@ -4,20 +4,20 @@ namespace App\Models;
 
 use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
-use App\Models\Contracts\CanBeDisbanded;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
-use App\Models\Contracts\Unretirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Stable extends Model implements Activatable, CanBeDisbanded, Deactivatable, Retirable, Unretirable
+class Stable extends Model implements Activatable, Deactivatable, Retirable
 {
     use SoftDeletes,
         HasFactory,
         Concerns\Activatable,
         Concerns\Deactivatable,
+        Concerns\HasMembers,
+        Concerns\OwnedByUser,
         Concerns\Unguarded;
 
     /**
@@ -33,6 +33,13 @@ class Stable extends Model implements Activatable, CanBeDisbanded, Deactivatable
     }
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'stables';
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -42,157 +49,21 @@ class Stable extends Model implements Activatable, CanBeDisbanded, Deactivatable
     ];
 
     /**
-     * Get the user belonging to the tag team.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the wrestlers belonging to the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function wrestlers()
-    {
-        return $this->morphedByMany(Wrestler::class, 'member', 'stable_members')
-                    ->using(Member::class)
-                    ->withPivot(['joined_at', 'left_at']);
-    }
-
-    /**
-     * Get all current wrestlers that are members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function currentWrestlers()
-    {
-        return $this->wrestlers()->whereNull('left_at');
-    }
-
-    /**
-     * Get all previous wrestlers that were members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function previousWrestlers()
-    {
-        return $this->wrestlers()->whereNotNull('left_at');
-    }
-
-    /**
-     * Get the tag teams belonging to the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function tagTeams()
-    {
-        return $this->morphedByMany(TagTeam::class, 'member', 'stable_members')
-                    ->using(Member::class)
-                    ->withPivot(['joined_at', 'left_at']);
-    }
-
-    /**
-     * Get all current tag teams that are members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function currentTagTeams()
-    {
-        return $this->tagTeams()->whereNull('left_at');
-    }
-
-    /**
-     * Get all previous tag teams that were members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function previousTagTeams()
-    {
-        return $this->tagTeams()->whereNotNull('left_at');
-    }
-
-    /**
-     * Get the members belonging to the stable.
-     *
-     * @return \Illuminate\Support\Collection
-     */
-    public function getMembersAttribute()
-    {
-        $wrestlers = $this->wrestlers;
-        $tagTeams = $this->tagTeams;
-
-        $members = $wrestlers->merge($tagTeams);
-
-        return $members;
-    }
-
-    /**
-     * Get all current members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function currentMembers()
-    {
-        return $this->currentTagTeams()->currentWrestlers();
-    }
-
-    /**
-     * Get all previous members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphByMany
-     */
-    public function previousMembers()
-    {
-        return $this->previousTagTeams()->previousWrestlers();
-    }
-
-    /**
      * Update the status for the stable.
      *
-     * @return void
+     * @return $this
      */
     public function updateStatus()
     {
-        if ($this->isCurrentlyActivated()) {
-            $this->status = StableStatus::ACTIVE;
-        } elseif ($this->hasFutureActivation()) {
-            $this->status = StableStatus::FUTURE_ACTIVATION;
-        } elseif ($this->isDeactivated()) {
-            $this->status = StableStatus::INACTIVE;
-        } elseif ($this->isRetired()) {
-            $this->status = StableStatus::RETIRED;
-        } else {
-            $this->status = StableStatus::UNACTIVATED;
-        }
-    }
+        $this->status = match (true) {
+            $this->isCurrentlyActivated() => StableStatus::ACTIVE,
+            $this->hasFutureActivation() => StableStatus::FUTURE_ACTIVATION,
+            $this->isDeactivated() => StableStatus::INACTIVE,
+            $this->isRetired() => StableStatus::RETIRED,
+            default => StableStatus::UNACTIVATED
+        };
 
-    /**
-     * Updates a stable's status and saves.
-     *
-     * @return void
-     */
-    public function updateStatusAndSave()
-    {
-        $this->updateStatus();
-        $this->save();
-    }
-
-    /**
-     * Determine if the tag team can be disbanded.
-     *
-     * @return bool
-     */
-    public function canBeDisbanded()
-    {
-        if ($this->isNotInActivation()) {
-            return false;
-        }
-
-        return true;
+        return $this;
     }
 
     /**
@@ -307,11 +178,15 @@ class Stable extends Model implements Activatable, CanBeDisbanded, Deactivatable
      */
     public function canBeRetired()
     {
-        if ($this->isNotInActivation()) {
-            return false;
+        if ($this->isCurrentlyActivated()) {
+            return true;
         }
 
-        return true;
+        if ($this->isDeactivated()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

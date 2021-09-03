@@ -12,11 +12,12 @@
         "fideloper/proxy": "^4.0",
         "fidum/laravel-eloquent-morph-to-one": "^2.0",
         "illuminatech/validation-composite": "*",
-        "laravel/framework": "^8.10",
+        "laravel/framework": "^8.56",
         "laravel/telescope": "^4",
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.0",
         "mad-web/laravel-enum": "^2.0",
+        "staudenmeir/eloquent-has-many-deep": "^1.7",
         "vlucas/phpdotenv": "^5.2"
     },
     "require-dev": {
@@ -28,11 +29,13 @@
         "jasonmccreary/laravel-test-assertions": "master",
         "laravel/breeze": "^1.0",
         "laravel/dusk": "^6.12",
-        "laravel/sail": "^1.4",
+        "laravel/sail": "^1.10",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^5.0",
+        "nunomaduro/larastan": "^0.7.12",
         "nunomaduro/laravel-mojito": "^0.2.4",
-        "phpunit/phpunit": "^9"
+        "phpunit/phpunit": "^9",
+        "squizlabs/php_codesniffer": "*"
     },
     "config": {
         "optimize-autoloader": true,

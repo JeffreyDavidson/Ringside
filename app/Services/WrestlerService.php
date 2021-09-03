@@ -4,14 +4,6 @@ namespace App\Services;
 
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use App\Strategies\ClearInjury\WrestlerClearInjuryStrategy;
-use App\Strategies\Employment\WrestlerEmploymentStrategy;
-use App\Strategies\Injure\WrestlerInjuryStrategy;
-use App\Strategies\Reinstate\WrestlerReinstateStrategy;
-use App\Strategies\Release\WrestlerReleaseStrategy;
-use App\Strategies\Retirement\WrestlerRetirementStrategy;
-use App\Strategies\Suspend\WrestlerSuspendStrategy;
-use App\Strategies\Unretire\WrestlerUnretireStrategy;
 
 class WrestlerService
 {
@@ -33,7 +25,7 @@ class WrestlerService
     }
 
     /**
-     * Create a new wrestler.
+     * Create a new wrestler with given data.
      *
      * @param  array $data
      * @return \App\Models\Wrestler $wrestler
@@ -42,15 +34,15 @@ class WrestlerService
     {
         $wrestler = $this->wrestlerRepository->create($data);
 
-        if ($data['started_at']) {
-            (new WrestlerEmploymentStrategy($wrestler))->employ($data['started_at']);
+        if (isset($data['started_at'])) {
+            $this->wrestlerRepository->employ($wrestler, $data['started_at']);
         }
 
         return $wrestler;
     }
 
     /**
-     * Update a wrestler.
+     * Update a given wrestler with given data.
      *
      * @param  \App\Models\Wrestler $wrestler
      * @param  array $data
@@ -60,7 +52,7 @@ class WrestlerService
     {
         $this->wrestlerRepository->update($wrestler, $data);
 
-        if ($data['started_at']) {
+        if ($wrestler->canHaveEmploymentStartDateChanged() && isset($data['started_at'])) {
             $this->employOrUpdateEmployment($wrestler, $data['started_at']);
         }
 
@@ -68,7 +60,7 @@ class WrestlerService
     }
 
     /**
-     * Undocumented function.
+     * Employ a given wrestler or update the given wrestler's employment date.
      *
      * @param  \App\Models\Wrestler $wrestler
      * @param  string $employmentDate
@@ -77,99 +69,33 @@ class WrestlerService
     public function employOrUpdateEmployment(Wrestler $wrestler, string $employmentDate)
     {
         if ($wrestler->isNotInEmployment()) {
-            return (new WrestlerEmploymentStrategy($wrestler))->employ($employmentDate);
+            return $this->wrestlerRepository->employ($wrestler, $employmentDate);
         }
 
-        if ($wrestler->hasFutureEmployment() && $wrestler->futureEmployment->started_at->ne($employmentDate)) {
-            return $wrestler->futureEmployment()->update(['started_at' => $employmentDate]);
+        if ($wrestler->hasFutureEmployment() && ! $wrestler->employedOn($employmentDate)) {
+            return $this->wrestlerRepository->updateEmployment($wrestler, $employmentDate);
         }
     }
 
     /**
-     * Clear an injury of a wrestler.
+     * Delete a given wrestler.
      *
      * @param  \App\Models\Wrestler $wrestler
      * @return void
      */
-    public function clearFromInjury(Wrestler $wrestler)
+    public function delete(Wrestler $wrestler)
     {
-        (new WrestlerClearInjuryStrategy($wrestler))->clearInjury();
+        $this->wrestlerRepository->delete($wrestler);
     }
 
     /**
-     * Injure a wrestler.
+     * Restore a given wrestler.
      *
      * @param  \App\Models\Wrestler $wrestler
      * @return void
      */
-    public function injure(Wrestler $wrestler)
+    public function restore(Wrestler $wrestler)
     {
-        (new WrestlerInjuryStrategy($wrestler))->injure();
-    }
-
-    /**
-     * Employ a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function employ(Wrestler $wrestler)
-    {
-        (new WrestlerEmploymentStrategy($wrestler))->employ();
-    }
-
-    /**
-     * Unretire a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function suspend(Wrestler $wrestler)
-    {
-        (new WrestlerSuspendStrategy($wrestler))->suspend();
-    }
-
-    /**
-     * Reinstate a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function reinstate(Wrestler $wrestler)
-    {
-        (new WrestlerReinstateStrategy($wrestler))->reinstate();
-    }
-
-    /**
-     * Retire a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function retire(Wrestler $wrestler)
-    {
-        (new WrestlerRetirementStrategy($wrestler))->retire();
-    }
-
-    /**
-     * Unretire a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function unretire(Wrestler $wrestler)
-    {
-        (new WrestlerUnretireStrategy($wrestler))->unretire();
-    }
-
-    /**
-     * Release a wrestler.
-     *
-     * @param  \App\Models\Wrestler $wrestler
-     * @return void
-     */
-    public function release(Wrestler $wrestler)
-    {
-        (new WrestlerReleaseStrategy($wrestler))->release();
+        $this->wrestlerRepository->restore($wrestler);
     }
 }

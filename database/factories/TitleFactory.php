@@ -41,7 +41,7 @@ class TitleFactory extends Factory
         })
         ->has(Activation::factory()->started($activationDate))
         ->afterCreating(function (Title $title) {
-            $title->updateStatusAndSave();
+            $title->updateStatus()->save();
         });
     }
 
@@ -56,7 +56,7 @@ class TitleFactory extends Factory
         })
         ->has(Activation::factory()->started($start)->ended($end))
         ->afterCreating(function (Title $title) {
-            $title->updateStatusAndSave();
+            $title->updateStatus()->save();
         });
     }
 
@@ -67,7 +67,7 @@ class TitleFactory extends Factory
         })
         ->has(Activation::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Title $title) {
-            $title->updateStatusAndSave();
+            $title->updateStatus()->save();
         });
     }
 
@@ -83,7 +83,7 @@ class TitleFactory extends Factory
         ->has(Activation::factory()->started($start)->ended($end))
         ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Title $title) {
-            $title->updateStatusAndSave();
+            $title->updateStatus()->save();
         });
     }
 
@@ -92,7 +92,7 @@ class TitleFactory extends Factory
         return $this->state(function (array $attributes) {
             return ['status' => TitleStatus::UNACTIVATED];
         })->afterCreating(function (Title $title) {
-            $title->updateStatusAndSave();
+            $title->updateStatus()->save();
         });
     }
 
@@ -101,7 +101,7 @@ class TitleFactory extends Factory
         return $this->state(function (array $attributes) {
             return ['deleted_at' => now()];
         })->afterCreating(function (Title $title) {
-            $title->updateStatusAndSave();
+            $title->updateStatus()->save();
         });
     }
 }

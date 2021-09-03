@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\SuspendRequest;
 use App\Models\Manager;
-use App\Services\ManagerService;
+use App\Repositories\ManagerRepository;
 
 class SuspendController extends Controller
 {
@@ -14,12 +15,17 @@ class SuspendController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\SuspendRequest  $request
-     * @param  \App\Services\ManagerService $managerService
+     * @param  \App\Repositories\ManagerRepository $managerRepository
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, SuspendRequest $request, ManagerService $managerService)
+    public function __invoke(Manager $manager, SuspendRequest $request, ManagerRepository $managerRepository)
     {
-        $managerService->suspend($manager);
+        throw_unless($manager->canBeSuspended(), new CannotBeSuspendedException);
+
+        $suspensionDate = now()->toDateTimeString();
+
+        $managerRepository->suspend($manager, $suspensionDate);
+        $manager->updateStatus()->save();
 
         return redirect()->route('managers.index');
     }
