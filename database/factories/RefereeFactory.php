@@ -41,7 +41,7 @@ class RefereeFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
         });
     }
 
@@ -52,7 +52,19 @@ class RefereeFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
+        });
+    }
+
+    public function employed()
+    {
+        return $this->state(function (array $attributes) {
+            return ['status' => RefereeStatus::BOOKABLE];
+        })
+        ->has(Employment::factory()->started(Carbon::yesterday()))
+        ->afterCreating(function (Referee $referee) {
+            $referee->updateStatus()->save();
+            $referee->load('employments');
         });
     }
 
@@ -62,7 +74,7 @@ class RefereeFactory extends Factory
             return ['status' => RefereeStatus::UNEMPLOYED];
         })
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
         });
     }
 
@@ -78,7 +90,7 @@ class RefereeFactory extends Factory
         ->has(Employment::factory()->started($start)->ended($end))
         ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
         });
     }
 
@@ -93,7 +105,7 @@ class RefereeFactory extends Factory
         })
         ->has(Employment::factory()->started($start)->ended($end))
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
         });
     }
 
@@ -109,7 +121,7 @@ class RefereeFactory extends Factory
         ->has(Employment::factory()->started($start))
         ->has(Suspension::factory()->started($end))
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
         });
     }
 
@@ -124,7 +136,7 @@ class RefereeFactory extends Factory
         ->has(Employment::factory()->started($start))
         ->has(Injury::factory()->started($now))
         ->afterCreating(function (Referee $referee) {
-            $referee->updateStatus();
+            $referee->updateStatus()->save();
         });
     }
 
@@ -134,7 +146,7 @@ class RefereeFactory extends Factory
             return ['deleted_at' => now()];
         })
         ->afterCreating(function (Referee $referee) {
-            $referee->save();
+            $referee->updateStatus()->save();
         });
     }
 }

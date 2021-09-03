@@ -34,6 +34,18 @@ class ManagerFactory extends Factory
         ];
     }
 
+    public function employed()
+    {
+        return $this->state(function (array $attributes) {
+            return ['status' => ManagerStatus::AVAILABLE];
+        })
+        ->has(Employment::factory()->started(Carbon::yesterday()))
+        ->afterCreating(function (Manager $manager) {
+            $manager->updateStatus()->save();
+            $manager->load('employments');
+        });
+    }
+
     public function available()
     {
         return $this->state(function (array $attributes) {
@@ -41,7 +53,7 @@ class ManagerFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::yesterday()))
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -52,7 +64,7 @@ class ManagerFactory extends Factory
         })
         ->has(Employment::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -62,7 +74,7 @@ class ManagerFactory extends Factory
             return ['status' => ManagerStatus::UNEMPLOYED];
         })
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -77,7 +89,7 @@ class ManagerFactory extends Factory
         ->has(Employment::factory()->started($start)->ended($end))
         ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -91,7 +103,7 @@ class ManagerFactory extends Factory
         })
         ->has(Employment::factory()->started($start)->ended($end))
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -107,7 +119,7 @@ class ManagerFactory extends Factory
         ->has(Employment::factory()->started($start))
         ->has(Suspension::factory()->started($end))
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -122,7 +134,7 @@ class ManagerFactory extends Factory
         ->has(Employment::factory()->started($start))
         ->has(Injury::factory()->started($now))
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 
@@ -132,7 +144,7 @@ class ManagerFactory extends Factory
             return ['deleted_at' => now()];
         })
         ->afterCreating(function (Manager $manager) {
-            $manager->save();
+            $manager->updateStatus()->save();
         });
     }
 }

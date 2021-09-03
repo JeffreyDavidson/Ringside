@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Stables\ActivateController;
 use App\Http\Controllers\Stables\DeactivateController;
-use App\Http\Controllers\Stables\DisbandController;
 use App\Http\Controllers\Stables\RestoreController;
 use App\Http\Controllers\Stables\RetireController;
 use App\Http\Controllers\Stables\StablesController;
@@ -15,4 +14,3 @@ Route::patch('/roster/stables/{stable}/retire', RetireController::class)->name('
 Route::patch('/roster/stables/{stable}/unretire', UnretireController::class)->name('stables.unretire');
 Route::patch('/roster/stables/{stable}/activate', ActivateController::class)->name('stables.activate');
 Route::patch('/roster/stables/{stable}/deactivate', DeactivateController::class)->name('stables.deactivate');
-Route::patch('/roster/stables/{stable}/disband', DisbandController::class)->name('stables.disband');

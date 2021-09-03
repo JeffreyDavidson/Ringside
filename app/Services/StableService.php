@@ -2,13 +2,8 @@
 
 namespace App\Services;
 
-use App\Exceptions\CannotBeDisbandedException;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
-use App\Strategies\Activation\StableActivationStrategy;
-use App\Strategies\Deactivation\StableDeactivationStrategy;
-use App\Strategies\Retirement\StableRetirementStrategy;
-use App\Strategies\Unretire\StableUnretireStrategy;
 
 class StableService
 {
@@ -30,7 +25,7 @@ class StableService
     }
 
     /**
-     * Create a stable.
+     * Create a stable with given data.
      *
      * @param  array $data
      * @return \App\Models\Stable $stable
@@ -39,8 +34,8 @@ class StableService
     {
         $stable = $this->stableRepository->create($data);
 
-        if ($data['started_at']) {
-            (new StableActivationStrategy($stable))->activate($data['started_at']);
+        if (isset($data['started_at'])) {
+            $this->stableRepository->activate($stable, $data['started_at']);
         }
 
         $this->addMembers($stable, $data['wrestlers'], $data['tag_teams']);
@@ -49,7 +44,7 @@ class StableService
     }
 
     /**
-     * Update a stable.
+     * Update a given stable with given data.
      *
      * @param  \App\Models\Stable $stable
      * @param  array $data
@@ -59,7 +54,9 @@ class StableService
     {
         $this->stableRepository->update($stable, $data);
 
-        $this->updateActivation($stable, $data['started_at']);
+        if (isset($data['started_at'])) {
+            $this->activateOrUpdateActivation($stable, $data['started_at']);
+        }
 
         $this->updateMembers($stable, $data['wrestlers'], $data['tag_teams']);
 
@@ -89,134 +86,95 @@ class StableService
     }
 
     /**
-     * Add members to a stable.
+     * Add members to a given stable.
      *
      * @param  \App\Models\Stable $stable
-     * @param  array $wrestlerIds
-     * @param  array $tagTeamIds
-     * @param  string $joinedDate
-     * @return \App\Models\Stable
+     * @param  array|null $wrestlerIds
+     * @param  array|null $tagTeamIds
+     * @param  string|null $joinedDate
+     * @return \App\Models\Stable $stable
      */
-    public function addMembers(Stable $stable, array $wrestlerIds, array $tagTeamIds, $joinedDate = null): Stable
+    private function addMembers(Stable $stable, array $wrestlerIds = null, array $tagTeamIds = null, string $joinedDate = null)
     {
-        $joinedDate = $joinedDate ?? now();
+        $joinedDate ??= now();
 
         if ($wrestlerIds) {
-            $stable->addWrestlers($wrestlerIds, $joinedDate);
+            $this->stableRepository->addWrestlers($stable, $wrestlerIds, $joinedDate);
         }
 
         if ($tagTeamIds) {
-            $stable->addTagTeams($tagTeamIds, $joinedDate);
+            $this->stableRepository->addTagTeams($stable, $tagTeamIds, $joinedDate);
         }
 
         return $stable;
     }
 
     /**
-     * Update the members of a stable.
+     * Update the members of a given stable.
      *
      * @param  \App\Models\Stable $stable
      * @param  array $wrestlerIds
      * @param  array $tagTeamIds
-     * @return \App\Models\Stable
      */
-    public function updateMembers(Stable $stable, array $wrestlerIds, array $tagTeamIds): Stable
+    private function updateMembers(Stable $stable, array $wrestlerIds, array $tagTeamIds)
     {
+        $now = now()->toDateTimeString();
+
         if ($stable->currentWrestlers->isEmpty()) {
-            if ($wrestlerIds) {
-                foreach ($wrestlerIds as $wrestlerId) {
-                    $stable->currentWrestlers()->attach($wrestlerId, ['joined_at' => now()]);
-                }
-            }
+            $this->stableRepository->addWrestlers($stable, $wrestlerIds, $now);
         } else {
             $currentWrestlerIds = collect($stable->currentWrestlers->modelKeys());
             $suggestedWrestlerIds = collect($wrestlerIds);
-            $formerWrestlerIds = $currentWrestlerIds->diff($suggestedWrestlerIds);
-            $newWrestlerIds = $suggestedWrestlerIds->diff($currentWrestlerIds);
+            $formerWrestlerIds = $currentWrestlerIds->diff($suggestedWrestlerIds)->toArray();
+            $newWrestlerIds = $suggestedWrestlerIds->diff($currentWrestlerIds)->toArray();
 
-            $now = now();
-
-            foreach ($formerWrestlerIds as $formerWrestlerId) {
-                $stable->currentWrestlers()->updateExistingPivot($formerWrestlerId, ['left_at' => $now]);
-            }
-
-            foreach ($newWrestlerIds as $newWrestlerId) {
-                $stable->currentWrestlers()->attach($newWrestlerId, ['joined_at' => $now]);
-            }
+            $this->stableRepository->removeWrestlers($stable, $formerWrestlerIds, $now);
+            $this->stableRepository->addWrestlers($stable, $newWrestlerIds, $now);
         }
 
         if ($stable->currentTagTeams->isEmpty()) {
-            if ($tagTeamIds) {
-                foreach ($tagTeamIds as $tagTeamId) {
-                    $stable->currentTagTeams()->attach($tagTeamId, ['joined_at' => now()]);
-                }
-            }
+            $this->stableRepository->addTagTeams($stable, $tagTeamIds, $now);
         } else {
             $currentTagTeamIds = collect($stable->currentTagTeams->modelKeys());
             $suggestedTagTeamIds = collect($tagTeamIds);
-            $formerTagTeamIds = $currentTagTeamIds->diff($suggestedTagTeamIds);
-            $newTagTeamIds = $suggestedTagTeamIds->diff($currentTagTeamIds);
+            $formerTagTeamIds = $currentTagTeamIds->diff($suggestedTagTeamIds)->toArray();
+            $newTagTeamIds = $suggestedTagTeamIds->diff($currentTagTeamIds)->toArray();
 
-            $now = now();
-
-            foreach ($formerTagTeamIds as $formerTagTeamId) {
-                $stable->currentTagTeams()->updateExistingPivot($formerTagTeamId, ['left_at' => $now]);
-            }
-
-            foreach ($newTagTeamIds as $newTagTeamId) {
-                $stable->currentTagTeams()->attach($newTagTeamId, ['joined_at' => $now]);
-            }
+            $this->stableRepository->removeTagTeams($stable, $formerTagTeamIds, $now);
+            $this->stableRepository->addTagTeams($stable, $newTagTeamIds, $now);
         }
 
         return $stable;
     }
 
     /**
-     * Update the activation start date for a stable.
+     * Update the activation start date of a given stable.
      *
      * @param  \App\Models\Stable $stable
-     * @param  string $startDate
-     * @return \App\Models\Stable
+     * @param  string $activationDate
+     * @return \App\Models\Stable $stable
      */
-    public function updateActivation(Stable $stable, string $startDate): Stable
+    public function activateOrUpdateActivation(Stable $stable, string $activationDate)
     {
-        if ($startDate) {
-            if ($stable->currentEmployment && $stable->currentEmployment->started_at != $startDate) {
-                $stable->currentActivation()->update(['started_at' => $startDate]);
-            } elseif (! $stable->currentEmployment) {
-                $stable->activations()->create(['started_at' => $startDate]);
-            }
+        if ($stable->isNotInActivation()) {
+            return $this->stableRepository->activate($stable, $activationDate);
+        }
+
+        if ($stable->hasFutureActivation() && ! $stable->activatedOn($activationDate)) {
+            return $this->stableRepository->updateActivation($stable, $activationDate);
         }
 
         return $stable;
     }
 
     /**
-     * Disband the stable.
+     * Add given tag teams to a given stable on a given join date.
      *
      * @param  \App\Models\Stable $stable
-     * @param  string|null $disbandedDate
+     * @param  array $tagTeamIds
+     * @param  string $joinedDate
      * @return void
      */
-    public function disband($stable, $disbandedDate = null)
-    {
-        throw_unless($stable->canBeDisbanded(), new CannotBeDisbandedException);
-
-        $disbandedDate = $disbandedDate ?: now();
-
-        $stable->currentActivation()->update(['ended_at' => $disbandedDate]);
-        $stable->currentWrestlers()->detach();
-        $stable->currentTagTeams()->detach();
-        $stable->updateStatusAndSave();
-    }
-
-    public function addWrestlers($stable, $wrestlerIds, $joinedDate)
-    {
-        foreach ($wrestlerIds as $wrestlerId) {
-            $stable->wrestlers()->attach($wrestlerId, ['joined_at' => $joinedDate]);
-        }
-    }
-
     public function addTagTeams($stable, $tagTeamIds, $joinedDate)
     {
         foreach ($tagTeamIds as $tagTeamId) {
@@ -225,46 +183,26 @@ class StableService
     }
 
     /**
-     * Activate a stable.
+     * Update the wrestlers of the stable.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Stable  $stable
+     * @param  array  $wrestlerIds
      * @return void
      */
-    public function activate(Stable $stable)
+    public function updateWrestlers(Stable $stable, $wrestlerIds)
     {
-        (new StableActivationStrategy($stable))->activate();
-    }
+        $now = now()->toDateTimeString();
 
-    /**
-     * Deactivate a stable.
-     *
-     * @param  \App\Models\Stable $stable
-     * @return void
-     */
-    public function deactivate(Stable $stable)
-    {
-        (new StableDeactivationStrategy($stable))->deactivate();
-    }
+        if ($stable->currentWrestlers->isEmpty()) {
+            $this->stableRepository->addWrestlers($stable, $wrestlerIds, $now);
+        } else {
+            $currentWrestlerIds = collect($stable->currentWrestlers->modelKeys());
+            $suggestedWrestlerIds = collect($wrestlerIds);
+            $formerWrestlerIds = $currentWrestlerIds->diff($suggestedWrestlerIds)->toArray();
+            $newWrestlerIds = $suggestedWrestlerIds->diff($currentWrestlerIds)->toArray();
 
-    /**
-     * Retire a stable.
-     *
-     * @param  \App\Models\Stable $stable
-     * @return void
-     */
-    public function retire(Stable $stable)
-    {
-        (new StableRetirementStrategy($stable))->retire();
-    }
-
-    /**
-     * Unretire a stable.
-     *
-     * @param  \App\Models\Stable $stable
-     * @return void
-     */
-    public function unretire(Stable $stable)
-    {
-        (new StableUnretireStrategy($stable))->unretire();
+            $this->stableRepository->removeCurrentWrestlers($stable, $formerWrestlerIds, $now);
+            $this->stableRepository->addWrestlers($stable, $newWrestlerIds, $now);
+        }
     }
 }

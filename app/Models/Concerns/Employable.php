@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Employment;
+use Illuminate\Database\Eloquent\Builder;
 
 trait Employable
 {
@@ -17,13 +18,13 @@ trait Employable
     }
 
     /**
-     * Get the first activation of the model.
+     * Get the first employment of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function firstEmployment()
     {
-        return $this->morphOne(Employment::class, 'activatable')
+        return $this->morphOne(Employment::class, 'employable')
                     ->oldestOfMany('started_at');
     }
 
@@ -36,7 +37,7 @@ trait Employable
     {
         return $this->morphOne(Employment::class, 'employable')
                     ->where('started_at', '<=', now())
-                    ->where('ended_at', '=', null)
+                    ->whereNull('ended_at')
                     ->latestOfMany();
     }
 
@@ -78,49 +79,34 @@ trait Employable
     }
 
     /**
-     * Scope a query to only include future employed models.
+     * Scope a query to include employed models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFutureEmployed($query)
+    public function scopeEmployed(Builder $query)
+    {
+        return $query->whereHas('currentEmployment');
+    }
+
+    /**
+     * Scope a query to only include future employed models.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFutureEmployed(Builder $query)
     {
         return $query->whereHas('futureEmployment');
     }
 
     /**
-     * Scope a query to only include employed referees.
+     * Scope a query to include unemployed models.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEmployed($query)
-    {
-        return $query->whereHas('currentEmployment')
-                    ->whereDoesntHave('currentSuspension')
-                    ->whereDoesntHave('currentInjury');
-    }
-
-    /**
-     * Scope a query to only include released models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeReleased($query)
-    {
-        return $query->whereHas('previousEmployment')
-                    ->whereDoesntHave('currentEmployment')
-                    ->whereDoesntHave('currentRetirement');
-    }
-
-    /**
-     * Scope a query to only include unemployed models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeUnemployed($query)
+    public function scopeUnemployed(Builder $query)
     {
         return $query->whereDoesntHave('currentEmployment')
                     ->orWhereDoesntHave('previousEmployments');
@@ -129,10 +115,10 @@ trait Employable
     /**
      * Scope a query to include first employment date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithFirstEmployedAtDate($query)
+    public function scopeWithFirstEmployedAtDate(Builder $query)
     {
         return $query->addSelect(['first_employed_at' => Employment::select('started_at')
             ->whereColumn('employable_id', $query->qualifyColumn('id'))
@@ -149,37 +135,9 @@ trait Employable
      * @param  string $direction
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByFirstEmployedAtDate($query, $direction = 'asc')
+    public function scopeOrderByFirstEmployedAtDate(Builder $query, string $direction = 'asc')
     {
         return $query->orderByRaw("DATE(first_employed_at) $direction");
-    }
-
-    /**
-     * Scope a query to include released date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithReleasedAtDate($query)
-    {
-        return $query->addSelect(['released_at' => Employment::select('ended_at')
-            ->whereColumn('employable_id', $this->getTable().'.id')
-            ->where('employable_type', $this->getMorphClass())
-            ->latest('ended_at')
-            ->limit(1),
-        ])->withCasts(['released_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the model's current released date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  string $direction
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByCurrentReleasedAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(current_released_at) $direction");
     }
 
     /**
@@ -233,19 +191,6 @@ trait Employable
     }
 
     /**
-     * Check to see if the model has been released.
-     *
-     * @return bool
-     */
-    public function isReleased()
-    {
-        return $this->previousEmployment()->exists() &&
-                $this->futureEmployment()->doesntExist() &&
-                $this->currentEmployment()->doesntExist() &&
-                $this->currentRetirement()->doesntExist();
-    }
-
-    /**
      * Determine if the model can be employed.
      *
      * @return bool
@@ -264,20 +209,6 @@ trait Employable
     }
 
     /**
-     * Determine if the model can be released.
-     *
-     * @return bool
-     */
-    public function canBeReleased()
-    {
-        if ($this->isNotInEmployment()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Get the model's first employment date.
      *
      * @return string|null
@@ -285,5 +216,30 @@ trait Employable
     public function getStartedAtAttribute()
     {
         return optional($this->employments->first())->started_at;
+    }
+
+    /**
+     * Get the model's first employment date.
+     *
+     * @param  string $employmentDate
+     * @return bool
+     */
+    public function employedOn(string $employmentDate)
+    {
+        return $this->employments->last()->started_at->ne($employmentDate);
+    }
+
+    /**
+     * Check to see if employable can have their start date changed.
+     *
+     * @return bool
+     */
+    public function canHaveEmploymentStartDateChanged()
+    {
+        if ($this->isUnemployed() || $this->hasFutureEmployment()) {
+            return true;
+        }
+
+        return false;
     }
 }

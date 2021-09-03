@@ -2,19 +2,22 @@
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface Bookable
 {
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model is bookable.
      *
-     * @return string
+     * @return bool
      */
     public function isBookable();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include bookable models.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder  $query
      */
-    public function scopeBookable($query);
+    public function scopeBookable(Builder $query);
 }

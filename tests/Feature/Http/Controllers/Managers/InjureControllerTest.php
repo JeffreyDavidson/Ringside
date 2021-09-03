@@ -6,17 +6,15 @@ use App\Enums\ManagerStatus;
 use App\Enums\Role;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Managers\InjureController;
+use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Managers\InjureRequest;
 use App\Models\Manager;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * @group managers
  * @group feature-managers
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-roster
  */
@@ -26,23 +24,19 @@ class InjureControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_injures_an_available_manager_and_redirects($administrators)
+    public function invoke_injures_an_available_manager_and_redirects()
     {
-        $now = now();
-        Carbon::setTestNow($now);
-
         $manager = Manager::factory()->available()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('managers.injure', $manager))
-            ->assertRedirect(route('managers.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([InjureController::class], $manager))
+            ->assertRedirect(action([ManagersController::class, 'index']));
 
-        tap($manager->fresh(), function ($manager) use ($now) {
-            $this->assertEquals(ManagerStatus::INJURED, $manager->status);
+        tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->injuries);
-            $this->assertEquals($now->toDateTimeString(), $manager->injuries->first()->started_at->toDateTimeString());
+            $this->assertEquals(ManagerStatus::INJURED, $manager->status);
         });
     }
 
@@ -61,7 +55,8 @@ class InjureControllerTest extends TestCase
     {
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->actAs(Role::BASIC)
+        $this
+            ->actAs(Role::BASIC)
             ->patch(route('managers.injure', $manager))
             ->assertForbidden();
     }
@@ -73,97 +68,98 @@ class InjureControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->patch(route('managers.injure', $manager))
+        $this
+            ->patch(route('managers.injure', $manager))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_an_unemployed_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_an_unemployed_manager()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
+        $this
+            ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_suspended_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_suspended_manager()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->actAs($administrators)
+        $this
+            ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_released_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_released_manager()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->released()->create();
 
-        $this->actAs($administrators)
+        $this
+            ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_future_employed_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_future_employed_manager()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
+        $this
+            ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_a_retired_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_a_retired_manager()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->retired()->create();
 
-        $this->actAs($administrators)
+        $this
+            ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function injuring_an_injured_manager_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_injuring_an_injured_manager()
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->actAs($administrators)
+        $this
+            ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 }

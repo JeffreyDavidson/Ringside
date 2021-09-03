@@ -26,9 +26,10 @@ class EventFactory extends Factory
     {
         return [
             'name' => $this->faker->words(2, true),
+            'date' => null,
             'status' => EventStatus::__default,
-            'venue_id' => Venue::factory()->create()->id,
-            'preview' => $this->faker->paragraph(),
+            'venue_id' => null,
+            'preview' => null,
         ];
     }
 
@@ -36,6 +37,7 @@ class EventFactory extends Factory
     {
         return $this->state([
             'status' => EventStatus::UNSCHEDULED,
+            'date' => null,
         ])->afterCreating(function (Event $event) {
             $event->save();
         });
@@ -66,6 +68,33 @@ class EventFactory extends Factory
         return $this->state([
             'venue_id' => $venue->id,
         ]);
+    }
+
+    public function scheduledOn($date): self
+    {
+        return $this->state([
+            'date' => $date,
+        ])->afterCreating(function (Event $event) {
+            $event->save();
+        });
+    }
+
+    public function withName($name): self
+    {
+        return $this->state([
+            'name' => $name,
+        ])->afterCreating(function (Event $event) {
+            $event->save();
+        });
+    }
+
+    public function withPreview($preview): self
+    {
+        return $this->state([
+            'preview' => $preview,
+        ])->afterCreating(function (Event $event) {
+            $event->save();
+        });
     }
 
     public function softDeleted(): self

@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateStablesTable extends Migration
 {
@@ -15,7 +15,7 @@ class CreateStablesTable extends Migration
     {
         Schema::create('stables', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('user_id')->nullable();
+            $table->foreignId('user_id')->nullable()->constrained();
             $table->string('name');
             $table->string('status');
             $table->timestamps();

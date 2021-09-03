@@ -152,4 +152,16 @@ class RefereeRepository
     {
         return $referee->currentSuspension()->update(['ended_at' => $reinstateDate]);
     }
+
+    /**
+     * Get the model's first employment date.
+     *
+     * @param  \App\Models\Referee $referee
+     * @param  string $employmentDate
+     * @return \App\Models\Referee $referee
+     */
+    public function updateEmployment(Referee $referee, string $employmentDate)
+    {
+        return $referee->futureEmployment()->update(['started_at' => $employmentDate]);
+    }
 }

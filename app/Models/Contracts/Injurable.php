@@ -2,82 +2,87 @@
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface Injurable
 {
     /**
-     * Get the name of the unique identifier for the user.
+     * Get all of the injuries of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function injuries();
 
     /**
-     * Get the unique identifier for the user.
+     * Get the current injury of the model.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentInjury();
 
     /**
-     * Get the password for the user.
+     * Get the previous injuries of the model.
      *
-     * @return string
-     */
-    public function previousInjury();
-
-    /**
-     * Get the token value for the "remember me" session.
-     *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function previousInjuries();
 
     /**
-     * Set the token value for the "remember me" session.
+     * Get the previous injury of the model.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function scopeInjured($query);
+    public function previousInjury();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include injured models.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithCurrentInjuredAtDate($query);
+    public function scopeInjured(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include the current injured at date.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByCurrentInjuredAtDate($query);
+    public function scopeWithCurrentInjuredAtDate(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to order by the current injured at date.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentInjuredAtDate(Builder $query);
+
+    /**
+     * Check to see if the model is injured.
+     *
+     * @return bool
      */
     public function isInjured();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model has been injured.
      *
-     * @return string
+     * @return bool
      */
     public function hasInjuries();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model can be injured.
      *
-     * @return string
+     * @return bool
      */
     public function canBeInjured();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model can be cleared from an injury.
      *
-     * @return string
+     * @return bool
      */
     public function canBeClearedFromInjury();
 }

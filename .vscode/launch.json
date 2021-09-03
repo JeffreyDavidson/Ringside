@@ -8,23 +8,23 @@
           "name": "Listen for XDebug",
           "type": "php",
           "request": "launch",
-          "port": 9000,
           "log": false,
+          "externalConsole": false,
           "pathMappings": {
-            "/app/": "${workspaceFolder}/",
-          }
+              "/var/www/html": "/Users/jeffreydavidson/Projects/Ringside",
+          },
+          "ignore": [
+              "**/vendor/**/*.php"
+          ],
+          "port": 9000,
         },
         {
-            "name": "PhpUnit dummy",
+            "name": "Launch currently open script",
             "type": "php",
             "request": "launch",
-            "port": 9001,
-        },
-    ],
-    "compounds": [
-        {
-            "name": "PhpUnit",
-            "configurations": ["Listen for XDebug", "PhpUnit dummy"]
+            "progress": "${file}",
+            "port": 9000
         }
-    ]
+    ],
+
 }

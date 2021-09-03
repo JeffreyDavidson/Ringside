@@ -26,6 +26,8 @@ abstract class TestCase extends BaseTestCase
         TestResponse::macro('data', function ($key) {
             return $this->original->getData()[$key];
         });
+
+        // Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
     }
 
     public function actAs($role = Role::BASIC, $attributes = [])

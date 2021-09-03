@@ -33,15 +33,15 @@ class TagTeamCanJoinStable implements Rule
             return false;
         }
 
-        if ($tagTeam->currentStable()->exists() && $tagTeam->currentStable->isNot($this->stable)) {
-            return false;
+        if ($tagTeam->currentStable()->doesntExist()) {
+            return true;
         }
 
-        if ($tagTeam->futureEmployment()->exists() && $tagTeam->futureEmployment->started_at->gt(request()->input('started_at'))) {
-            return false;
+        if ($tagTeam->currentStable->is($this->stable)) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**

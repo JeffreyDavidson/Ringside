@@ -3,6 +3,8 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
+use App\Http\Controllers\Titles\RestoreController;
+use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,19 +17,26 @@ class RestoreControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public Title $title;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->title = Title::factory()->softDeleted()->create();
+    }
+
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_restores_a_deleted_title_and_redirects($administrators)
+    public function invoke_restores_a_deleted_title_and_redirects()
     {
-        $title = Title::factory()->softDeleted()->create();
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([RestoreController::class], $this->title))
+            ->assertRedirect(action([TitlesController::class, 'index']));
 
-        $this->actAs($administrators)
-            ->patch(route('titles.restore', $title))
-            ->assertRedirect(route('titles.index'));
-
-        tap($title->fresh(), function ($title) {
+        tap($this->title->fresh(), function ($title) {
             $this->assertNull($title->deleted_at);
         });
     }
@@ -37,10 +46,9 @@ class RestoreControllerTest extends TestCase
      */
     public function a_basic_user_cannot_restore_a_title()
     {
-        $title = Title::factory()->softDeleted()->create();
-
-        $this->actAs(Role::BASIC)
-            ->patch(route('titles.restore', $title))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([RestoreController::class], $this->title))
             ->assertForbidden();
     }
 
@@ -49,9 +57,8 @@ class RestoreControllerTest extends TestCase
      */
     public function a_guest_cannot_restore_a_title()
     {
-        $title = Title::factory()->softDeleted()->create();
-
-        $this->patch(route('titles.restore', $title))
+        $this
+            ->patch(action([RestoreController::class], $this->title))
             ->assertRedirect(route('login'));
     }
 }

@@ -15,7 +15,7 @@ class FutureActivationAndUnactivatedTitles extends Component
     public function render()
     {
         $futureActivationAndUnactivatedTitles = Title::query()
-            ->futureActivation()
+            ->withFutureActivation()
             ->orWhere
             ->unactivated()
             ->withFirstActivatedAtDate()

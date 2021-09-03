@@ -3,11 +3,12 @@
 namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
+use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Titles\ActivateController;
+use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Requests\Titles\ActivateRequest;
 use App\Models\Title;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,65 +22,57 @@ class ActivateControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_activates_an_unactivated_title_and_redirects($administrators)
+    public function invoke_activates_an_unactivated_title_and_redirects()
     {
-        $this->withoutExceptionHandling();
-        Carbon::setTestNow($now = now());
-
         $title = Title::factory()->unactivated()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.activate', $title))
-            ->assertRedirect(route('titles.index'));
+        $this->assertEquals(TitleStatus::UNACTIVATED, $title->status);
 
-        tap($title->fresh(), function ($title) use ($now) {
-            $this->assertTrue($title->hasActivations());
-            $this->assertTrue($title->isCurrentlyActivated());
-            $this->assertEquals($now->toDateTimeString(), $title->activations->first()->started_at->toDateTimeString());
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ActivateController::class], $title))
+            ->assertRedirect(action([TitlesController::class, 'index']));
+
+        tap($title->fresh(), function ($title) {
+            $this->assertCount(1, $title->activations);
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_activates_a_future_activated_title_and_redirects($administrators)
+    public function invoke_activates_a_future_activated_title_and_redirects()
     {
-        Carbon::setTestNow($now = now());
-
         $title = Title::factory()->withFutureActivation()->create();
+        $startedAt = $title->activations->last()->started_at;
 
-        $this->actAs($administrators)
-            ->patch(route('titles.activate', $title))
-            ->assertRedirect(route('titles.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ActivateController::class], $title))
+            ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) use ($now) {
-            $this->assertTrue($title->hasActivations());
-            $this->assertTrue($title->isCurrentlyActivated());
-            $this->assertEquals($now->toDateTimeString(), $title->activations->first()->started_at->toDateTimeString());
+        tap($title->fresh(), function ($title) use ($startedAt) {
+            $this->assertTrue($title->currentActivation->started_at->lt($startedAt));
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_activates_an_inactive_title_and_redirects($administrators)
+    public function invoke_activates_an_inactive_title_and_redirects()
     {
-        Carbon::setTestNow($now = now());
-
         $title = Title::factory()->inactive()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.activate', $title))
-            ->assertRedirect(route('titles.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ActivateController::class], $title))
+            ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) use ($now) {
-            $this->assertTrue($title->isCurrentlyActivated());
-            $this->assertCount(2, $title->activations);
-            $this->assertEquals($now->toDateTimeString(), $title->activations->last()->started_at->toDateTimeString());
+        tap($title->fresh(), function ($title) {
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
     }
 
@@ -98,8 +91,9 @@ class ActivateControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('titles.activate', $title))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([ActivateController::class], $title))
             ->assertForbidden();
     }
 
@@ -110,37 +104,38 @@ class ActivateControllerTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->patch(route('titles.activate', $title))
+        $this
+            ->patch(action([ActivateController::class], $title))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function activating_an_active_title_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_activating_an_active_title()
     {
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
         $title = Title::factory()->active()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.activate', $title));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ActivateController::class], $title));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function activating_a_retired_title_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_activating_a_retired_title()
     {
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
         $title = Title::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('titles.activate', $title));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([ActivateController::class], $title));
     }
 }

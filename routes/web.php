@@ -1,7 +1,7 @@
 <?php
 
-// Auth::loginUsingId(5);
 use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------

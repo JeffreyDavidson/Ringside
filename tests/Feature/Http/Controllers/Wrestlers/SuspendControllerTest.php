@@ -7,6 +7,7 @@ use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Wrestlers\SuspendController;
+use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\SuspendRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -16,8 +17,6 @@ use Tests\TestCase;
 /**
  * @group wrestlers
  * @group feature-wrestlers
- * @group srm
- * @group feature-srm
  * @group roster
  * @group feature-rosters
  */
@@ -27,35 +26,35 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function invoke_suspends_a_bookable_wrestler_and_redirects($administrators)
+    public function invoke_suspends_a_bookable_wrestler_and_redirects()
     {
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler))
-            ->assertRedirect(route('wrestlers.index'));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler))
+            ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
             $this->assertCount(1, $wrestler->suspensions);
+            $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
         });
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable($administrators)
+    public function suspending_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable()
     {
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
         $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
@@ -75,8 +74,9 @@ class SuspendControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->actAs(Role::BASIC)
-            ->patch(route('wrestlers.suspend', $wrestler))
+        $this
+            ->actAs(Role::BASIC)
+            ->patch(action([SuspendController::class], $wrestler))
             ->assertForbidden();
     }
 
@@ -87,97 +87,98 @@ class SuspendControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->patch(route('wrestlers.suspend', $wrestler))
+        $this
+            ->patch(action([SuspendController::class], $wrestler))
             ->assertRedirect(route('login'));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_an_unemployed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_suspending_an_unemployed_wrestler()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_future_employed_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_suspending_a_future_employed_wrestler()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_an_injured_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_suspending_an_injured_wrestler()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_released_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_suspending_a_released_wrestler()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_retired_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_suspending_a_retired_wrestler()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
     }
 
     /**
      * @test
-     * @dataProvider administrators
      */
-    public function suspending_a_suspended_wrestler_throws_an_exception($administrators)
+    public function invoke_throws_exception_for_suspending_a_suspended_wrestler()
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->actAs($administrators)
-            ->patch(route('wrestlers.suspend', $wrestler));
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->patch(action([SuspendController::class], $wrestler));
     }
 }

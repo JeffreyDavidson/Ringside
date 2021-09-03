@@ -6,7 +6,6 @@ use App\Models\TagTeam;
 use App\Rules\CannotBeEmployedAfterDate;
 use App\Rules\CannotBeHindered;
 use App\Rules\CannotBelongToMultipleEmployedTagTeams;
-use App\Rules\CannotBelongToTagTeam;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -33,7 +32,12 @@ class UpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', Rule::unique('tag_teams')->ignore($this->route('tag_team')->id)],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s', new EmploymentStartDateCanBeChanged($this->route('tag_team'))],
+            'started_at' => [
+                'nullable',
+                'string',
+                'date_format:Y-m-d H:i:s',
+                new EmploymentStartDateCanBeChanged($this->route('tag_team')),
+            ],
             'wrestlers' => ['array'],
             'wrestlers.*', [
                 'bail',

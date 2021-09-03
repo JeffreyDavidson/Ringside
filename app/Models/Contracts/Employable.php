@@ -2,152 +2,147 @@
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface Employable
 {
     /**
-     * Get the name of the unique identifier for the user.
+     * Get all of the employments of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function employments();
 
     /**
-     * Get the unique identifier for the user.
+     * Get the first employment of the model.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function firstEmployment();
+
+    /**
+     * Get the current employment of the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentEmployment();
 
     /**
-     * Get the unique identifier for the user.
+     * Get the future employment of the model.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function futureEmployment();
 
     /**
-     * Get the password for the user.
+     * Get the previous employments of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function previousEmployments();
 
     /**
-     * Get the token value for the "remember me" session.
+     * Get the previous employment of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousEmployment();
 
     /**
-     * Set the token value for the "remember me" session.
+     * Scope a query to include employed models.
      *
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEmployed($query);
+    public function scopeEmployed(Builder $query);
 
     /**
-     * Set the token value for the "remember me" session.
+     * Scope a query to include future employed models.
      *
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFutureEmployed($query);
+    public function scopeFutureEmployed(Builder $query);
 
     /**
-     * Set the token value for the "remember me" session.
+     * Scope a query to include unemployed models.
      *
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeReleased($query);
+    public function scopeUnemployed(Builder $query);
 
     /**
-     * Set the token value for the "remember me" session.
+     * Scope a query to include first employment date.
      *
-     * @return void
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeUnemployed($query);
+    public function scopeWithFirstEmployedAtDate(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to order by the model's first employment date.
      *
-     * @return string
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     * @param  string $direction
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithFirstEmployedAtDate($query);
+    public function scopeOrderByFirstEmployedAtDate(Builder $query, string $direction = 'asc');
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model is employed.
      *
-     * @return string
-     */
-    public function scopeOrderByFirstEmployedAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
-    public function scopeWithReleasedAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
-     */
-    public function scopeOrderByCurrentReleasedAtDate($query);
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
+     * @return bool
      */
     public function isCurrentlyEmployed();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model has been employed.
      *
-     * @return string
+     * @return bool
      */
     public function hasEmployments();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model is not in employment.
      *
-     * @return string
+     * @return bool
      */
     public function isNotInEmployment();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model is unemployed.
      *
-     * @return string
+     * @return bool
      */
     public function isUnemployed();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model has a future employment.
      *
-     * @return string
+     * @return bool
      */
     public function hasFutureEmployment();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Determine if the model can be employed.
      *
-     * @return string
-     */
-    public function isReleased();
-
-    /**
-     * Get the column name for the "remember me" token.
-     *
-     * @return string
+     * @return bool
      */
     public function canBeEmployed();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Get the model's first employment date.
      *
-     * @return string
+     * @return string|null
      */
-    public function canBeReleased();
+    public function getStartedAtAttribute();
+
+    /**
+     * Check to see if the model was employed on a given date.
+     *
+     * @param  string $employmentDate
+     * @return bool
+     */
+    public function employedOn(string $employmentDate);
 }

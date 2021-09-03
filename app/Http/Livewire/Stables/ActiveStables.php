@@ -20,7 +20,7 @@ class ActiveStables extends Component
     public function render()
     {
         $activeStables = Stable::query()
-            ->activated()
+            ->active()
             ->withFirstActivatedAtDate()
             ->orderByFirstActivatedAtDate()
             ->orderBy('name')

@@ -61,12 +61,12 @@ class ManagerRepository
      * Employ a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  string $startDate
+     * @param  string $employmentDate
      * @return \App\Models\Manager $manager
      */
-    public function employ(Manager $manager, string $startDate)
+    public function employ(Manager $manager, string $employmentDate)
     {
-        return $manager->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $startDate]);
+        return $manager->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $employmentDate]);
     }
 
     /**
@@ -102,19 +102,21 @@ class ManagerRepository
      */
     public function clearInjury(Manager $manager, string $recoveryDate)
     {
-        return $manager->currentInjury()->update(['ended_at' => $recoveryDate]);
+        $manager->currentInjury()->update(['ended_at' => $recoveryDate]);
+
+        return $manager;
     }
 
     /**
      * Retire a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  string $retireDate
+     * @param  string $retirementDate
      * @return \App\Models\Manager $manager
      */
-    public function retire(Manager $manager, string $retireDate)
+    public function retire(Manager $manager, string $retirementDate)
     {
-        return $manager->retirements()->create(['started_at' => $retireDate]);
+        return $manager->retirements()->create(['started_at' => $retirementDate]);
     }
 
     /**
@@ -151,5 +153,45 @@ class ManagerRepository
     public function reinstate(Manager $manager, string $reinstateDate)
     {
         return $manager->currentSuspension()->update(['ended_at' => $reinstateDate]);
+    }
+
+    /**
+     * Get the model's first employment date.
+     *
+     * @param  \App\Models\Manager $manager
+     * @param  string $employmentDate
+     * @return \App\Models\Manager $manager
+     */
+    public function updateEmployment(Manager $manager, string $employmentDate)
+    {
+        return $manager->futureEmployment()->update(['started_at' => $employmentDate]);
+    }
+
+    /**
+     * Updates a manager's status and saves.
+     *
+     * @return void
+     */
+    public function removeFromCurrentTagTeams($manager)
+    {
+        foreach ($manager->currentTagTeams as $tagTeam) {
+            $manager->currentTagTeams()->updateExistingPivot($tagTeam->id, [
+                'left_at' => now(),
+            ]);
+        }
+    }
+
+    /**
+     * Updates a manager's status and saves.
+     *
+     * @return void
+     */
+    public function removeFromCurrentWrestlers($manager)
+    {
+        foreach ($manager->currentWrestlers as $wrestler) {
+            $manager->currentWrestlers()->updateExistingPivot($wrestler->id, [
+                'left_at' => now(),
+            ]);
+        }
     }
 }

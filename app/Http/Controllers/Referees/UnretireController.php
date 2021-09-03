@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\UnretireRequest;
 use App\Models\Referee;
-use App\Services\RefereeService;
+use App\Repositories\RefereeRepository;
 
 class UnretireController extends Controller
 {
@@ -14,12 +15,18 @@ class UnretireController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\UnretireRequest  $request
-     * @param  \App\Services\RefereeService $refereeService
+     * @param  \App\Repositories\RefereeRepository  $refereeRepository
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, UnretireRequest $request, RefereeService $refereeService)
+    public function __invoke(Referee $referee, UnretireRequest $request, RefereeRepository $refereeRepository)
     {
-        $refereeService->unretire($referee);
+        throw_unless($referee->canBeUnretired(), new CannotBeUnretiredException);
+
+        $unretiredDate = now()->toDateTimeString();
+
+        $refereeRepository->unretire($referee, $unretiredDate);
+        $refereeRepository->employ($referee, $unretiredDate);
+        $referee->updateStatus()->save();
 
         return redirect()->route('referees.index');
     }

@@ -3,10 +3,10 @@
 namespace Tests\Unit\Http\Requests\Stables;
 
 use App\Http\Requests\Stables\StoreRequest;
+use App\Rules\StableHasEnoughMembers;
 use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Validation\Rules\Exists;
-use Illuminate\Validation\Rules\RequiredIf;
 use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
@@ -38,11 +38,10 @@ class StoreRequestTest extends TestCase
         );
 
         $this->assertValidationRuleContains($rules['name'], Unique::class);
-        $this->assertValidationRuleContains($rules['wrestlers'], RequiredIf::class);
-        $this->assertValidationRuleContains($rules['tag_teams'], RequiredIf::class);
+        $this->assertValidationRuleContains($rules['wrestlers'], StableHasEnoughMembers::class);
         $this->assertValidationRuleContains($rules['wrestlers.*'], Exists::class);
-        // $this->assertValidationRuleContains($rules['wrestlers.*'], WrestlerCanJoinStable::class);
+        $this->assertValidationRuleContains($rules['wrestlers.*'], WrestlerCanJoinStable::class);
         $this->assertValidationRuleContains($rules['tag_teams.*'], Exists::class);
-        // $this->assertValidationRuleContains($rules['tag_teams.*'], TagTeamCanJoinStable::class);
+        $this->assertValidationRuleContains($rules['tag_teams.*'], TagTeamCanJoinStable::class);
     }
 }

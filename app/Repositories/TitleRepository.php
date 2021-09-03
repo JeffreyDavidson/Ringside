@@ -68,7 +68,9 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      */
     public function activate(Activatable $title, string $activationDate)
     {
-        return $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
+        $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
+
+        return $title;
     }
 
     /**
@@ -80,7 +82,9 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      */
     public function deactivate(Deactivatable $title, string $deactivationDate)
     {
-        return $title->currentActivation()->update(['ended_at' => $deactivationDate]);
+        $title = $title->currentActivation()->update(['ended_at' => $deactivationDate]);
+
+        return $title;
     }
 
     /**
@@ -99,11 +103,11 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      * Unretire a given title on a given date.
      *
      * @param  \App\Models\Title $title
-     * @param  string $unretiredDate
+     * @param  string $unretireDate
      * @return \App\Models\Title $title
      */
-    public function unretire(Title $title, string $unretiredDate)
+    public function unretire(Title $title, string $unretireDate)
     {
-        return $title->currentRetirement()->update(['ended_at' => $unretiredDate]);
+        return $title->currentRetirement()->update(['ended_at' => $unretireDate]);
     }
 }

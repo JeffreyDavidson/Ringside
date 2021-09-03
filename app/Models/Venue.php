@@ -9,4 +9,11 @@ class Venue extends Model
 {
     use HasFactory,
         Concerns\Unguarded;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'venues';
 }

@@ -5,6 +5,7 @@
 /public/css
 /storage/*.key
 /vendor
+/report
 .env
 .phpunit.result.cache
 Homestead.json

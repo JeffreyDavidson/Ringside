@@ -16,8 +16,8 @@ class InactiveStables extends Component
     {
         $inactiveStables = Stable::query()
             ->inactive()
-            ->withCurrentDeactivatedAtDate()
-            ->orderByCurrentDeactivatedAtDate()
+            ->withLastDeactivationDate()
+            ->orderByLastDeactivationDate()
             ->orderBy('name')
             ->paginate($this->perPage);
 

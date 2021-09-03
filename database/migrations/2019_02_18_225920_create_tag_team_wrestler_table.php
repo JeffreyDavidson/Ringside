@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateTagTeamWrestlerTable extends Migration
 {
@@ -15,8 +15,8 @@ class CreateTagTeamWrestlerTable extends Migration
     {
         Schema::create('tag_team_wrestler', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('tag_team_id');
-            $table->unsignedInteger('wrestler_id');
+            $table->foreignId('tag_team_id')->constrained();
+            $table->foreignId('wrestler_id')->constrained();
             $table->datetime('joined_at')->nullable();
             $table->datetime('left_at')->nullable();
             $table->timestamps();

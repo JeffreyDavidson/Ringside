@@ -2,82 +2,87 @@
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 interface Suspendable
 {
     /**
-     * Get the name of the unique identifier for the user.
+     * Get the suspensions of the model.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function suspensions();
 
     /**
-     * Get the unique identifier for the user.
+     * Get the current suspension of the model.
      *
-     * @return mixed
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentSuspension();
 
     /**
-     * Get the password for the user.
+     * Get the previous suspensions of the model.
      *
-     * @return string
-     */
-    public function previousSuspension();
-
-    /**
-     * Get the token value for the "remember me" session.
-     *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function previousSuspensions();
 
     /**
-     * Set the token value for the "remember me" session.
+     * Get the previous suspension of the model.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function scopeSuspended($query);
+    public function previousSuspension();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include suspended models.
      *
-     * @return string
+     * @param   \Illuminate\Database\Eloquent\Builder  $query
+     * @return  \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithCurrentSuspendedAtDate($query);
+    public function scopeSuspended(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to include current suspension date.
      *
-     * @return string
+     * @param   \Illuminate\Database\Eloquent\Builder  $query
+     * @return  \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOrderByCurrentSuspendedAtDate($query);
+    public function scopeWithCurrentSuspendedAtDate(Builder $query);
 
     /**
-     * Get the column name for the "remember me" token.
+     * Scope a query to order by the model's current suspension date.
      *
-     * @return string
+     * @param   \Illuminate\Database\Eloquent\Builder  $query
+     * @return  \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByCurrentSuspendedAtDate(Builder $query);
+
+    /**
+     * Check to see if the model has been suspended.
+     *
+     * @return bool
      */
     public function isSuspended();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Check to see if the model has been suspended.
      *
-     * @return string
+     * @return bool
      */
     public function hasSuspensions();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Determine if the model can be suspended.
      *
-     * @return string
+     * @return bool
      */
     public function canBeSuspended();
 
     /**
-     * Get the column name for the "remember me" token.
+     * Determine if the model can be reinstated.
      *
-     * @return string
+     * @return bool
      */
     public function canBeReinstated();
 }

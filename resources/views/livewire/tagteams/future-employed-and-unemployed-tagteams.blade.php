@@ -10,7 +10,6 @@
             <tr>
                 <td>{{ $tagTeam->id }}</td>
                 <td>{{ $tagTeam->name }}</td>
-                <td>{{ $tagTeam->employed_at->toDateString() }}</td>
                 <td>
                     @isset($tagTeam->first_employed_at)
                         {{ $tagTeam->first_employed_at->toDateString() }}

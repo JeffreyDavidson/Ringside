@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateStableMembersTable extends Migration
 {
@@ -15,7 +15,7 @@ class CreateStableMembersTable extends Migration
     {
         Schema::create('stable_members', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('stable_id');
+            $table->foreignId('stable_id')->constrained();
             $table->morphs('member');
             $table->datetime('joined_at');
             $table->datetime('left_at')->nullable();
