@@ -31,4 +31,11 @@ class VenueFactory extends Factory
             'zip' => Str::substr($this->faker->postcode, 0, 5),
         ];
     }
+
+    public function softDeleted()
+    {
+        return $this->state(function (array $attributes) {
+            return ['deleted_at' => now()];
+        });
+    }
 }

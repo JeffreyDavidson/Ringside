@@ -10,6 +10,13 @@ use App\Services\VenueService;
 
 class VenuesController extends Controller
 {
+    public $venueService;
+
+    public function __construct(VenueService $venueService)
+    {
+        $this->venueService = $venueService;
+    }
+
     /**
      * View a list of venues.
      *
@@ -40,9 +47,9 @@ class VenuesController extends Controller
      * @param  \App\Http\Requests\Venues\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, VenueService $venueService)
+    public function store(StoreRequest $request)
     {
-        $venueService->create($request->validated());
+        $this->venueService->create($request->validated());
 
         return redirect()->route('venues.index');
     }
@@ -82,7 +89,22 @@ class VenuesController extends Controller
      */
     public function update(UpdateRequest $request, Venue $venue)
     {
-        $venue->update($request->all());
+        $this->venueService->update($venue, $request->validated());
+
+        return redirect()->route('venues.index');
+    }
+
+    /**
+     * Delete a venue.
+     *
+     * @param  \App\Models\Venue  $venue
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Venue $venue)
+    {
+        $this->authorize('delete', $venue);
+
+        $this->venueService->delete($venue);
 
         return redirect()->route('venues.index');
     }
