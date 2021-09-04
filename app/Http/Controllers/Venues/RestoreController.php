@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Venues;
 
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
-use App\Repositories\VenueRepository;
+use App\Services\VenueService;
 
 class RestoreController extends Controller
 {
@@ -12,16 +12,16 @@ class RestoreController extends Controller
      * Restore a deleted venue.
      *
      * @param  int  $venueId
-     * @param  \App\Repositories\VenueRepository  $venueRepository
+     * @param  \App\Services\VenueService  $venueService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($venueId, VenueRepository $venueRepository)
+    public function __invoke($venueId, VenueService $venueService)
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 
         $this->authorize('restore', $venue);
 
-        $venueRepository->restore($venue);
+        $venueService->restore($venue);
 
         return redirect()->route('venues.index');
     }

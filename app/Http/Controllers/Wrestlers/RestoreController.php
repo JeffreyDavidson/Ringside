@@ -11,15 +11,16 @@ class RestoreController extends Controller
      * Restore a deleted wrestler.
      *
      * @param  int  $wrestlerId
+     * @param  \App\Services\WrestlerService $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($wrestlerId)
+    public function __invoke($wrestlerId, Wrestlerervice $wrestlerService)
     {
         $wrestler = Wrestler::onlyTrashed()->findOrFail($wrestlerId);
 
         $this->authorize('restore', $wrestler);
 
-        $wrestler->restore();
+        $wrestlerService->restore($wrestler);
 
         return redirect()->route('wrestlers.index');
     }
