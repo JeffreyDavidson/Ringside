@@ -3,7 +3,9 @@
 namespace Tests\Unit\Services;
 
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use App\Repositories\TagTeamRepository;
+use App\Repositories\WrestlerRepository;
 use App\Services\TagTeamService;
 use Tests\TestCase;
 
@@ -22,10 +24,16 @@ class TagTeamServiceTest extends TestCase
         $data = ['started_at' => now()->toDateTimeString(), 'wrestlers' => ['1', '2']];
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $wrestlerMock = $this->mock(Wrestler::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->create($data)->once()->andReturns($tagTeamMock);
         $repositoryMock->expects()->employ($tagTeamMock, $data['started_at'])->once();
+        $wrestlerRepositoryMock->expects()->findById($data['wrestlers'][0])->andReturns($wrestlerMock);
+        $wrestlerRepositoryMock->expects()->employ($wrestlerMock, $data['started_at'])->once();
+        $wrestlerRepositoryMock->expects()->findById($data['wrestlers'][1])->andReturns($wrestlerMock);
+        $wrestlerRepositoryMock->expects()->employ($wrestlerMock, $data['started_at'])->once();
         $repositoryMock->expects()->addWrestlers($tagTeamMock, $data['wrestlers'], $data['started_at'])->once();
 
         $service->create($data);
@@ -39,7 +47,8 @@ class TagTeamServiceTest extends TestCase
         $data = ['wrestlers' => ['1', '2']];
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->create($data)->once()->andReturns($tagTeamMock);
         $repositoryMock->expects()->addWrestlers($tagTeamMock, $data['wrestlers'])->once();
@@ -55,7 +64,8 @@ class TagTeamServiceTest extends TestCase
         $data = [];
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->create($data)->once()->andReturns($tagTeamMock);
         $repositoryMock->shouldNotHaveReceived('employ');
@@ -72,7 +82,8 @@ class TagTeamServiceTest extends TestCase
         $data = ['started_at' => now()->toDateTimeString(), 'wrestlers' => [1, 2]];
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->update($tagTeamMock, $data)->once()->andReturns($tagTeamMock);
         $tagTeamMock->expects()->canHaveEmploymentStartDateChanged()->once()->andReturns(true);
@@ -92,7 +103,8 @@ class TagTeamServiceTest extends TestCase
         $data = ['started_at' => now()->toDateTimeString(), 'wrestlers' => [1, 2]];
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->update($tagTeamMock, $data)->once()->andReturns($tagTeamMock);
         $tagTeamMock->expects()->canHaveEmploymentStartDateChanged()->once()->andReturns(true);
@@ -113,7 +125,8 @@ class TagTeamServiceTest extends TestCase
     {
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->delete($tagTeamMock)->once();
 
@@ -127,7 +140,8 @@ class TagTeamServiceTest extends TestCase
     {
         $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(TagTeamRepository::class);
-        $service = new TagTeamService($repositoryMock);
+        $wrestlerRepositoryMock = $this->mock(WrestlerRepository::class);
+        $service = new TagTeamService($repositoryMock, $wrestlerRepositoryMock);
 
         $repositoryMock->expects()->restore($tagTeamMock)->once();
 
