@@ -42,6 +42,28 @@ class WrestlerRepository
     }
 
     /**
+     * Delete a given wrestler.
+     *
+     * @param  \App\Models\Wrestler $wrestler
+     * @return void
+     */
+    public function delete(Wrestler $wrestler)
+    {
+        $wrestler->delete();
+    }
+
+    /**
+     * Restore a given wrestler.
+     *
+     * @param  \App\Models\Wrestler $wrestler
+     * @return void
+     */
+    public function restore(Wrestler $wrestler)
+    {
+        $wrestler->restore();
+    }
+
+    /**
      * Employ a given wrestler on a given date.
      *
      * @param  \App\Models\Wrestler $wrestler
