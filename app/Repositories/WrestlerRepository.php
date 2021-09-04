@@ -162,4 +162,15 @@ class WrestlerRepository
             'left_at' => $removalDate,
         ]);
     }
+
+    /**
+     * Retrieve the model instance by the id field.
+     *
+     * @param  int $wrestlerId
+     * @return \App\Models\Wrestler
+     */
+    public function findById(int $wrestlerId)
+    {
+        return Wrestler::find($wrestlerId);
+    }
 }

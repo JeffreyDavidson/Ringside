@@ -46,7 +46,8 @@ class TagTeamService
 
         if (isset($data['started_at'])) {
             $this->tagTeamRepository->employ($tagTeam, $data['started_at']);
-            foreach ($data['wrestlers'] as $wrestler) {
+            foreach ($data['wrestlers'] as $wrestlerId) {
+                $wrestler = $this->wrestlerRepository->findById($wrestlerId);
                 $this->wrestlerRepository->employ($wrestler, $data['started_at']);
             }
             $this->tagTeamRepository->addWrestlers($tagTeam, $data['wrestlers'], $data['started_at']);
