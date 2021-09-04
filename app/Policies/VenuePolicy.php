@@ -33,6 +33,28 @@ class VenuePolicy
     }
 
     /**
+     * Determine whether the user can delete a venue.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function delete(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can restore a venue.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function restore(User $user)
+    {
+        return $user->isSuperAdministrator() || $user->isAdministrator();
+    }
+
+    /**
      * Determine whether the user can view all venues.
      *
      * @param  \App\Models\User  $user

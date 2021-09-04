@@ -87,4 +87,44 @@ class VenuesControllerTest extends TestCase
             ->get(action([VenuesController::class, 'show'], $venue))
             ->assertRedirect(route('login'));
     }
+
+    /**
+     * @test
+     */
+    public function deletes_a_venue_and_redirects()
+    {
+        $venue = Venue::factory()->create();
+
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->delete(action([VenuesController::class, 'destroy'], $venue))
+            ->assertRedirect(action([VenuesController::class, 'index']));
+
+        $this->assertSoftDeleted($venue);
+    }
+
+    /**
+     * @test
+     */
+    public function a_basic_user_cannot_delete_a_venue()
+    {
+        $venue = Venue::factory()->create();
+
+        $this
+            ->actAs(Role::BASIC)
+            ->delete(action([VenuesController::class, 'destroy'], $venue))
+            ->assertForbidden();
+    }
+
+    /**
+     * @test
+     */
+    public function a_guest_cannot_delete_a_venue()
+    {
+        $venue = Venue::factory()->create();
+
+        $this
+            ->delete(action([VenuesController::class, 'destroy'], $venue))
+            ->assertRedirect(route('login'));
+    }
 }

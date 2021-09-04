@@ -82,7 +82,7 @@ class VenuesControllerUpdateMethodTest extends TestCase
                 'state' => 'New York',
                 'zip' => '12345',
             ]))
-            ->assertRedirect(route('venues.index'));
+            ->assertRedirect(action([VenuesController::class, 'index']));
 
         tap(Venue::first(), function ($venue) {
             $this->assertEquals('New Venue Name', $venue->name);
