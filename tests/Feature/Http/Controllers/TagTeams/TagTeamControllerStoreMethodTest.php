@@ -109,7 +109,7 @@ class TagTeamControllerStoreMethodTest extends TestCase
                 $this->assertSame($startDate, $wrestler->pivot->joined_at);
                 $this->assertInstanceOf(Wrestler::class, $wrestler);
                 $this->assertCount(1, $wrestler->employments);
-                $this->assertSame($startDate, $wrestler->employments->first()->started_at);
+                $this->assertSame($startDate, $wrestler->employments->first()->started_at->toDateTimeString());
             }
         });
     }
