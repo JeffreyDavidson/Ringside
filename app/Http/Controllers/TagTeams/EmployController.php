@@ -28,11 +28,9 @@ class EmployController extends Controller
 
         $tagTeamRepository->employ($tagTeam, $employmentDate);
 
-        if ($tagTeam->currentWrestlers->every->isNotInEmployment()) {
-            foreach ($tagTeam->currentWrestlers as $wrestler) {
-                $wrestlerRepository->employ($wrestler, $tagTeam->currentEmployment->started_at);
-                $wrestler->updateStatus()->save();
-            }
+        foreach ($tagTeam->currentWrestlers as $wrestler) {
+            $wrestlerRepository->employ($wrestler, $employmentDate);
+            $wrestler->updateStatus()->save();
         }
 
         $tagTeam->updateStatus()->save();

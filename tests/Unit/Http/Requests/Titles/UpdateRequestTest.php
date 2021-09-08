@@ -4,6 +4,7 @@ namespace Tests\Unit\Http\Requests\Titles;
 
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
+use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
 use Illuminate\Validation\Rules\Unique;
@@ -37,13 +38,13 @@ class UpdateRequestTest extends TestCase
 
         $this->assertValidationRules(
             [
-                'name' => ['required', 'min:3', 'ends_with:Title,Titles'],
-                'activated_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+                'name' => ['required', 'string', 'min:3', 'ends_with:Title,Titles'],
+                'activated_at' => ['nullable', 'string', 'date'],
             ],
             $rules
         );
 
         $this->assertValidationRuleContains($rules['name'], Unique::class);
-        // $this->assertValidationRuleContains($rules['activated_at'], ActivationStartDateCanBeChanged::class);
+        $this->assertValidationRuleContains($rules['activated_at'], ActivationStartDateCanBeChanged::class);
     }
 }

@@ -8,9 +8,9 @@ use Illuminate\Contracts\Validation\Rule;
 class CannotBeEmployedAfterDate implements Rule
 {
     protected $wrestler;
-    protected $startedAt;
+    protected ?string $startedAt;
 
-    public function __construct($startedAt)
+    public function __construct(string $startedAt = null)
     {
         $this->startedAt = $startedAt;
     }
@@ -42,7 +42,7 @@ class CannotBeEmployedAfterDate implements Rule
             return $this->wrestler->futureEmployment->startedBefore($this->startedAt);
         }
 
-        return true;
+        return false;
     }
 
     /**

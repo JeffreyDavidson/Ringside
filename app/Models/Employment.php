@@ -35,7 +35,7 @@ class Employment extends Model
     }
 
     /**
-     * Retrieve an employment started before a given date.
+     * Determine if employment start date was started before a given date.
      *
      * @param  string $date
      * @return bool
@@ -43,5 +43,16 @@ class Employment extends Model
     public function startedBefore($date)
     {
         return $this->started_at->lte($date);
+    }
+
+    /**
+     * Determine if employment start date was started after a given date.
+     *
+     * @param  string $date
+     * @return bool
+     */
+    public function startedAfter(string $date)
+    {
+        return $this->started_at->gt($date);
     }
 }

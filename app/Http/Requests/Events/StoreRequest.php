@@ -26,10 +26,10 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', Rule::unique('events', 'name')],
-            'date' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+            'name' => ['required', 'string', 'min:3', Rule::unique('events', 'name')],
+            'date' => ['nullable', 'string', 'date'],
             'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
-            'preview' => ['nullable'],
+            'preview' => ['nullable', 'string', 'min:3'],
         ];
     }
 }

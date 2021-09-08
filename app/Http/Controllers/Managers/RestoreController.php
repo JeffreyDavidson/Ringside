@@ -12,9 +12,10 @@ class RestoreController extends Controller
      * Restore a manager.
      *
      * @param  int  $managerId
+     * @param  \App\Services\ManagerService $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($managerId, ManagerService $managerService)
+    public function __invoke(int $managerId, ManagerService $managerService)
     {
         $manager = Manager::onlyTrashed()->findOrFail($managerId);
 

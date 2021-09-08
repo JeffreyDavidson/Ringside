@@ -18,9 +18,8 @@ class InjureControllerTest extends TestCase
     /**
      * @test
      */
-    public function an_injured_wrestler_can_be_cleared_from_an_injury_with_a_given_date()
+    public function a_wrestler_can_be_injured_with_a_given_date()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new InjureController;
@@ -29,6 +28,29 @@ class InjureControllerTest extends TestCase
         $repositoryMock->expects()->injure($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns(null);
+
+        $controller->__invoke($wrestlerMock, new InjureRequest, $repositoryMock);
+    }
+
+    /**
+     * @test
+     */
+    public function a_wrestler_can_be_injured_from_a_tag_team()
+    {
+        $wrestlerMock = $this->mock(Wrestler::class);
+        $tagTeamMock = $this->mock(TagTeam::class);
+        $repositoryMock = $this->mock(WrestlerRepository::class);
+        $controller = new InjureController;
+
+        $wrestlerMock->expects()->canBeInjured()->andReturns(true);
+        $repositoryMock->expects()->injure($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->times(3)->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->exists()->once()->andReturns(true);
+        $tagTeamMock->expects()->updateStatus()->once()->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->save()->once()->andReturns(true);
 
         $controller->__invoke($wrestlerMock, new InjureRequest, $repositoryMock);
     }

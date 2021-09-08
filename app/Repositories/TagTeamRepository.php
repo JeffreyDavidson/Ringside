@@ -152,7 +152,7 @@ class TagTeamRepository
      */
     public function addWrestlers(TagTeam $tagTeam, array $wrestlerIds, string $joinDate = null)
     {
-        $joinDate ??= now()->toDateTimeString();
+        $joinDate ??= now()->toDateString();
 
         foreach ($wrestlerIds as $wrestlerId) {
             $tagTeam->wrestlers()->attach($wrestlerId, ['joined_at' => $joinDate]);

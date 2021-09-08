@@ -10,8 +10,13 @@ use App\Services\VenueService;
 
 class VenuesController extends Controller
 {
-    public $venueService;
+    public VenueService $venueService;
 
+    /**
+     * Create a new venues controller instance.
+     *
+     * @param  \App\Services\VenueService $venueService
+     */
     public function __construct(VenueService $venueService)
     {
         $this->venueService = $venueService;

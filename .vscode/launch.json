@@ -23,7 +23,8 @@
             "type": "php",
             "request": "launch",
             "progress": "${file}",
-            "port": 9000
+            "cwd": "${fileDirname}",
+            "port": 9000,
         }
     ],
 

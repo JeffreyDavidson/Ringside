@@ -11,6 +11,18 @@ use App\Services\TagTeamService;
 
 class TagTeamsController extends Controller
 {
+    public TagTeamService $tagTeamService;
+
+    /**
+     * Create a new tag teams controller instance.
+     *
+     * @param  \App\Services\TagTeamService $tagTeamService
+     */
+    public function __construct(TagTeamService $tagTeamService)
+    {
+        $this->tagTeamService = $tagTeamService;
+    }
+
     /**
      * View a list of tag teams.
      *
@@ -41,12 +53,11 @@ class TagTeamsController extends Controller
      * Create a new tag team.
      *
      * @param  \App\Http\Requests\TagTeams\StoreRequest  $request
-     * @param  \App\Services\TagTeamService  $tagTeamService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, TagTeamService $tagTeamService)
+    public function store(StoreRequest $request)
     {
-        $tagTeamService->create($request->only(['name', 'signature_move', 'started_at', 'wrestlers']));
+        $this->tagTeamService->create($request->only(['name', 'signature_move', 'started_at', 'wrestlers']));
 
         return redirect()->route('tag-teams.index');
     }
@@ -84,12 +95,14 @@ class TagTeamsController extends Controller
      *
      * @param  \App\Http\Requests\TagTeams\UpdateRequest  $request
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \App\Services\TagTeamService  $tagTeamService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, TagTeam $tagTeam, TagTeamService $tagTeamService)
+    public function update(UpdateRequest $request, TagTeam $tagTeam)
     {
-        $tagTeamService->update($tagTeam, $request->only(['name', 'signature_move', 'started_at', 'wrestlers']));
+        $this->tagTeamService->update(
+            $tagTeam,
+            $request->only(['name', 'signature_move', 'started_at', 'wrestlers'])
+        );
 
         return redirect()->route('tag-teams.index');
     }
@@ -98,14 +111,13 @@ class TagTeamsController extends Controller
      * Delete a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \App\Services\TagTeamService  $tagTeamService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(TagTeam $tagTeam, TagTeamService $tagTeamService)
+    public function destroy(TagTeam $tagTeam)
     {
         $this->authorize('delete', $tagTeam);
 
-        $tagTeamService->delete($tagTeam);
+        $this->tagTeamService->delete($tagTeam);
 
         return redirect()->route('tag-teams.index');
     }

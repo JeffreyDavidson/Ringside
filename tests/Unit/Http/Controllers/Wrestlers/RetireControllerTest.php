@@ -20,22 +20,24 @@ class RetireControllerTest extends TestCase
      */
     public function a_retirable_wrestler_can_be_retired_with_a_given_date()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new RetireController;
 
-        $currentTagTeamRelationMock = $this->mock(Relation::class);
-        $currentTagTeamRelationMock->expects()->exists()->andReturns(false);
-        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns($currentTagTeamRelationMock);
-
         $wrestlerMock->expects()->canBeRetired()->andReturns(true);
         $wrestlerMock->expects()->isSuspended()->andReturns(false);
         $wrestlerMock->expects()->isInjured()->andReturns(false);
-        $repositoryMock->expects()->release($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
-        $repositoryMock->expects()->retire($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
+        $repositoryMock->expects()->release(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
+        $repositoryMock->expects()->retire(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns(null);
 
         $controller->__invoke($wrestlerMock, new RetireRequest, $repositoryMock);
     }
@@ -45,22 +47,24 @@ class RetireControllerTest extends TestCase
      */
     public function a_retirable_wrestler_that_is_suspended_needs_to_be_reinstated_before_retiring()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new RetireController;
 
-        $currentTagTeamRelationMock = $this->mock(Relation::class);
-        $currentTagTeamRelationMock->expects()->exists()->andReturns(false);
-        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns($currentTagTeamRelationMock);
-
         $wrestlerMock->expects()->canBeRetired()->andReturns(true);
         $wrestlerMock->expects()->isSuspended()->andReturns(false);
         $wrestlerMock->expects()->isInjured()->andReturns(false);
-        $repositoryMock->expects()->release($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
-        $repositoryMock->expects()->retire($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
+        $repositoryMock->expects()->release(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
+        $repositoryMock->expects()->retire(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns(null);
 
         $controller->__invoke($wrestlerMock, new RetireRequest, $repositoryMock);
     }
@@ -70,21 +74,18 @@ class RetireControllerTest extends TestCase
      */
     public function a_retirable_manager_that_is_injured_needs_to_be_cleared_before_retiring()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new RetireController;
-
-        $currentTagTeamRelationMock = $this->mock(Relation::class);
-        $currentTagTeamRelationMock->expects()->exists()->andReturns(false);
-        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns($currentTagTeamRelationMock);
 
         $wrestlerMock->expects()->canBeRetired()->andReturns(true);
         $wrestlerMock->expects()->isSuspended()->andReturns(false);
         $wrestlerMock->expects()->isInjured()->andReturns(false);
         $repositoryMock->expects()->release($wrestlerMock, now()->toDateTimeString())->once()->andReturns();
         $repositoryMock->expects()->retire($wrestlerMock, now()->toDateTimeString())->once()->andReturns();
-        $wrestlerMock->expects()->updateStatus()->save()->once();
+        $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->save()->once()->andReturns(true);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns(null);
 
         $controller->__invoke($wrestlerMock, new RetireRequest, $repositoryMock);
     }
@@ -94,23 +95,28 @@ class RetireControllerTest extends TestCase
      */
     public function a_retirable_wrestler_that_is_on_a_tag_team_can_be_retired()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
+        $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new RetireController;
-
-        $tagTeamMock = $this->mock(TagTeam::class);
-        $currentTagTeamRelationMock = $this->mock(Relation::class);
-        $currentTagTeamRelationMock->expects()->exists()->andReturns(true);
-        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns($currentTagTeamRelationMock);
 
         $wrestlerMock->expects()->canBeRetired()->andReturns(true);
         $wrestlerMock->expects()->isSuspended()->andReturns(false);
         $wrestlerMock->expects()->isInjured()->andReturns(false);
-        $repositoryMock->expects()->release($wrestlerMock, now()->toDateTimeString())->once()->andReturns();
-        $repositoryMock->expects()->retire($wrestlerMock, now()->toDateTimeString())->once()->andReturns();
-        $wrestlerMock->expects()->updateStatus()->save()->once();
-        $wrestlerMock->expects()->removeFromCurrentTagTeam();
+        $repositoryMock->expects()->release(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns();
+        $repositoryMock->expects()->retire(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns();
+        $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->save()->once()->andReturns(true);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->times(3)->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->exists()->once()->andReturns(true);
+        $tagTeamMock->expects()->updateStatus()->once()->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->save()->once()->andReturns(true);
 
         $controller->__invoke($wrestlerMock, new RetireRequest, $repositoryMock);
     }

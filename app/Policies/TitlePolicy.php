@@ -41,10 +41,6 @@ class TitlePolicy
      */
     public function delete(User $user, Title $title)
     {
-        if ($title->trashed()) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 
@@ -57,10 +53,6 @@ class TitlePolicy
      */
     public function restore(User $user, Title $title)
     {
-        if (! $title->trashed()) {
-            return false;
-        }
-
         return $user->isSuperAdministrator() || $user->isAdministrator();
     }
 

@@ -20,11 +20,11 @@ class CannotBeHindered implements Rule
     {
         $this->wrestler = Wrestler::find($value);
 
-        if ($this->wrestler->isSuspended() || $this->wrestler->isRetired() || $this->wrestler->isInjured()) {
-            return false;
+        if ($this->wrestler->isUnemployed() || $this->wrestler->isBookable()) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -34,6 +34,6 @@ class CannotBeHindered implements Rule
      */
     public function message()
     {
-        return $this->wreslter->name.' is not allowed to join this tag team.';
+        return $this->wrestler->name.' is not allowed to join this tag team.';
     }
 }

@@ -10,6 +10,18 @@ use App\Services\StableService;
 
 class StablesController extends Controller
 {
+    public StableService $stableService;
+
+    /**
+     * Create a new stables controller instance.
+     *
+     * @param  \App\Services\StableService $stableService
+     */
+    public function __construct(StableService $stableService)
+    {
+        $this->stableService = $stableService;
+    }
+
     /**
      * View a list of stables.
      *
@@ -38,12 +50,11 @@ class StablesController extends Controller
      * Create a new stable.
      *
      * @param  \App\Http\Requests\Stables\StoreRequest  $request
-     * @param  \App\Services\StableService $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, StableService $stableService)
+    public function store(StoreRequest $request)
     {
-        $stableService->create($request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
+        $this->stableService->create($request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
 
         return redirect()->route('stables.index');
     }
@@ -79,12 +90,11 @@ class StablesController extends Controller
      *
      * @param  \App\Http\Requests\UpdateStableRequest  $request
      * @param  \App\Models\Stable  $stable
-     * @param  \App\Services\StableService  $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Stable $stable, StableService $stableService)
+    public function update(UpdateRequest $request, Stable $stable)
     {
-        $stableService->update($stable, $request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
+        $this->stableService->update($stable, $request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
 
         return redirect()->route('stables.index');
     }
@@ -93,14 +103,13 @@ class StablesController extends Controller
      * Delete a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \App\Services\StableService  $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Stable $stable, StableService $stableService)
+    public function destroy(Stable $stable)
     {
         $this->authorize('delete', Stable::class);
 
-        $stableService->delete($stable);
+        $this->stableService->delete($stable);
 
         return redirect()->route('stables.index');
     }

@@ -28,7 +28,7 @@ class StoreRequestTest extends TestCase
         $this->assertValidationRules([
             'name' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+            'started_at' => ['nullable', 'string', 'date'],
             'wrestlers' => ['nullable', 'array'],
             'wrestlers.*' => ['nullable', 'bail', 'integer', 'distinct'],
         ], $rules);

@@ -18,6 +18,8 @@ class RetireController extends Controller
      * @param  \App\Models\Stable  $stable
      * @param  \App\Http\Requests\Stables\RetireRequest  $request
      * @param  \App\Repositories\StableRepository  $stableRepository
+     * @param  \App\Repositories\TagTeamRepository  $tagTeamRepository
+     * @param  \App\Repositories\WrestlerRepository  $wrestlerRepository
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(

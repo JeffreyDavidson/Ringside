@@ -29,6 +29,7 @@ class UpdateRequest extends FormRequest
         return [
             'name' => [
                 'required',
+                'string',
                 'min:3',
                 'ends_with:Title,Titles',
                 Rule::unique('titles')->ignore($this->route('title')->id),
@@ -36,7 +37,7 @@ class UpdateRequest extends FormRequest
             'activated_at' => [
                 'nullable',
                 'string',
-                'date_format:Y-m-d H:i:s',
+                'date',
                 new ActivationStartDateCanBeChanged($this->route('title')),
             ],
         ];

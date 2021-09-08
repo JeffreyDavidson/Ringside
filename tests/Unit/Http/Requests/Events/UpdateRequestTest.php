@@ -38,10 +38,10 @@ class UpdateRequestTest extends TestCase
 
         $this->assertValidationRules(
             [
-                'name' => ['filled', 'string'],
-                'date' => ['sometimes', 'string', 'date_format:Y-m-d H:i:s'],
+                'name' => ['required', 'string', 'min:3'],
+                'date' => ['nullable', 'string', 'date'],
                 'venue_id' => ['nullable', 'integer'],
-                'preview' => ['nullable'],
+                'preview' => ['nullable', 'string'],
             ],
             $rules
         );

@@ -10,6 +10,18 @@ use App\Services\RefereeService;
 
 class RefereesController extends Controller
 {
+    public RefereeService $refereeService;
+
+    /**
+     * Create a new referees controller instance.
+     *
+     * @param \App\Services\RefereeService $refereeService
+     */
+    public function __construct(RefereeService $refereeService)
+    {
+        $this->refereeService = $refereeService;
+    }
+
     /**
      * View a list of referees.
      *
@@ -25,6 +37,7 @@ class RefereesController extends Controller
     /**
      * Show the form for creating a new referee.
      *
+     * @param  \App\Models\Referee $referee
      * @return \Illuminate\Http\Response
      */
     public function create(Referee $referee)
@@ -38,12 +51,11 @@ class RefereesController extends Controller
      * Create a new referee.
      *
      * @param  \App\Http\Requests\Referees\StoreRequest  $request
-     * @param  \App\Services\RefereeService  $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, RefereeService $refereeService)
+    public function store(StoreRequest $request)
     {
-        $refereeService->create($request->validated());
+        $this->refereeService->create($request->validated());
 
         return redirect()->route('referees.index');
     }
@@ -79,12 +91,11 @@ class RefereesController extends Controller
      *
      * @param  \App\Http\Requests\Referees\UpdateRequest  $request
      * @param  \App\Models\Referee  $referee
-     * @param  \App\Services\RefereeService  $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Referee $referee, RefereeService $refereeService)
+    public function update(UpdateRequest $request, Referee $referee)
     {
-        $refereeService->update($referee, $request->validated());
+        $this->refereeService->update($referee, $request->validated());
 
         return redirect()->route('referees.index');
     }
@@ -95,11 +106,11 @@ class RefereesController extends Controller
      * @param  \App\Models\Referee  $referee
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Referee $referee, RefereeService $refereeService)
+    public function destroy(Referee $referee)
     {
         $this->authorize('delete', $referee);
 
-        $refereeService->delete($referee);
+        $this->refereeService->delete($referee);
 
         return redirect()->route('referees.index');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Events;
 
+use App\Rules\EventDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,10 +29,15 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['filled', 'string', Rule::unique('events')->ignore($this->route('event')->id)],
-            'date' => ['sometimes', 'string', 'date_format:Y-m-d H:i:s'],
+            'name' => ['required', 'string', 'min:3', Rule::unique('events')->ignore($this->route('event')->id)],
+            'date' => [
+                'nullable',
+                'string',
+                'date',
+                new EventDateCanBeChanged($this->route('event')),
+            ],
             'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
-            'preview' => ['nullable'],
+            'preview' => ['nullable', 'string'],
         ];
     }
 }

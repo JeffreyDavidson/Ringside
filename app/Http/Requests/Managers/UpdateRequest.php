@@ -31,7 +31,7 @@ class UpdateRequest extends FormRequest
             'started_at' => [
                 'nullable',
                 'string',
-                'date_format:Y-m-d H:i:s',
+                'date',
                 new EmploymentStartDateCanBeChanged($this->route('manager')),
             ],
         ];

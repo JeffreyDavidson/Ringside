@@ -5,7 +5,6 @@ namespace Tests\Unit\Http\Requests\Wrestlers;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
 use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
@@ -17,21 +16,20 @@ use Tests\TestCase;
  */
 class UpdateRequestTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */
     public function rules_returns_validation_requirements()
     {
-        $this->markTestIncomplete();
-        $wrestler = Wrestler::factory()->create();
+        $wrestlerMock = $this->createMock(Wrestler::class);
+        $wrestlerMock->method('__get')->with('id')->willReturn(1);
 
         $subject = $this->createFormRequest(UpdateRequest::class);
-        $subject->setRouteResolver(function () use ($wrestler) {
+
+        $subject->setRouteResolver(function () use ($wrestlerMock) {
             $stub = $this->createStub(Route::class);
             $stub->expects($this->any())->method('hasParameter')->with('wrestler')->willReturn(true);
-            $stub->expects($this->any())->method('parameter')->with('wrestler')->willReturn($wrestler);
+            $stub->expects($this->any())->method('parameter')->with('wrestler')->willReturn($wrestlerMock);
 
             return $stub;
         });
@@ -41,12 +39,12 @@ class UpdateRequestTest extends TestCase
         $this->assertValidationRules(
             [
                 'name' => ['required', 'string', 'min:3'],
-                'feet' => ['required', 'integer', 'min:5', 'max:7'],
+                'feet' => ['required', 'integer'],
                 'inches' => ['required', 'integer', 'max:11'],
                 'weight' => ['required', 'integer'],
                 'hometown' => ['required', 'string'],
                 'signature_move' => ['nullable', 'string'],
-                'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+                'started_at' => ['nullable', 'string', 'date'],
             ],
             $rules
         );

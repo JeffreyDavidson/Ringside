@@ -20,15 +20,44 @@ class ReinstateControllerTest extends TestCase
      */
     public function a_reinstatable_wrestler_can_be_reinstated_with_a_given_date()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
+        $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new ReinstateController;
 
         $wrestlerMock->expects()->canBeReinstated()->andReturns(true);
-        $repositoryMock->expects()->reinstate($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
+        $repositoryMock->expects()->reinstate(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns(null);
+
+        $controller->__invoke($wrestlerMock, new ReinstateRequest, $repositoryMock);
+    }
+
+    /**
+     * @test
+     */
+    public function a_reinstatable_wrestler_on_a_tag_team_can_be_reinstated()
+    {
+        $wrestlerMock = $this->mock(Wrestler::class);
+        $tagTeamMock = $this->mock(TagTeam::class);
+        $repositoryMock = $this->mock(WrestlerRepository::class);
+        $controller = new ReinstateController;
+
+        $wrestlerMock->expects()->canBeReinstated()->andReturns(true);
+        $repositoryMock->expects()->reinstate(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->times(3)->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->exists()->once()->andReturns(true);
+        $tagTeamMock->expects()->updateStatus()->once()->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->save()->once()->andReturns(true);
 
         $controller->__invoke($wrestlerMock, new ReinstateRequest, $repositoryMock);
     }

@@ -10,6 +10,18 @@ use App\Services\EventService;
 
 class EventsController extends Controller
 {
+    public EventService $eventService;
+
+    /**
+     * Create a new events controller instance.
+     *
+     * @param \App\Services\EventService $eventService
+     */
+    public function __construct(EventService $eventService)
+    {
+        $this->eventService = $eventService;
+    }
+
     /**
      * View a list of events.
      *
@@ -25,6 +37,7 @@ class EventsController extends Controller
     /**
      * Show the form for creating a new event.
      *
+     * @param  \App\Models\Event $event
      * @return \Illuminate\View\View
      */
     public function create(Event $event)
@@ -38,12 +51,11 @@ class EventsController extends Controller
      * Create a new event.
      *
      * @param  \App\Http\Requests\StoreRequest  $request
-     * @param  \App\Services\EventService  $eventService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, EventService $eventService)
+    public function store(StoreRequest $request)
     {
-        $eventService->create($request->validated());
+        $this->eventService->create($request->validated());
 
         return redirect()->route('events.index');
     }
@@ -83,12 +95,11 @@ class EventsController extends Controller
      *
      * @param  \App\Http\Requests\Events\UpdateRequest  $request
      * @param  \App\Models\Event  $event
-     * @param  \App\Services\EventService  $eventService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Event $event, EventService $eventService)
+    public function update(UpdateRequest $request, Event $event)
     {
-        $eventService->update($event, $request->validated());
+        $this->eventService->update($event, $request->validated());
 
         return redirect()->route('events.index');
     }
@@ -97,14 +108,13 @@ class EventsController extends Controller
      * Delete an event.
      *
      * @param  \App\Models\Event  $event
-     * @param  \App\Services\EventService  $eventService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Event $event, EventService $eventService)
+    public function destroy(Event $event)
     {
         $this->authorize('delete', $event);
 
-        $eventService->delete($event);
+        $this->eventService->delete($event);
 
         return redirect()->route('events.index');
     }

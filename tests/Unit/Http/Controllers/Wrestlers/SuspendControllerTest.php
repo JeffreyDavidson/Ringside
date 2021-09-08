@@ -20,19 +20,18 @@ class SuspendControllerTest extends TestCase
      */
     public function a_suspendable_wrestler_can_be_suspended_with_a_given_date()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new SuspendController;
 
-        $currentTagTeamRelationMock = $this->mock(Relation::class);
-        $currentTagTeamRelationMock->expects()->exists()->andReturns(false);
-        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns($currentTagTeamRelationMock);
-
         $wrestlerMock->expects()->canBeSuspended()->andReturns(true);
-        $repositoryMock->expects()->suspend($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
+        $repositoryMock->expects()->suspend(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
         $wrestlerMock->expects()->save()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns(null);
 
         $controller->__invoke($wrestlerMock, new SuspendRequest, $repositoryMock);
     }
@@ -42,19 +41,22 @@ class SuspendControllerTest extends TestCase
      */
     public function a_suspendable_wrestler_that_is_on_a_tag_team_can_be_suspended()
     {
-        $this->markTestIncomplete();
         $wrestlerMock = $this->mock(Wrestler::class);
+        $tagTeamMock = $this->mock(TagTeam::class);
         $repositoryMock = $this->mock(WrestlerRepository::class);
         $controller = new SuspendController;
 
-        $currentTagTeamRelationMock = $this->mock(Relation::class);
-        $currentTagTeamRelationMock->expects()->exists()->andReturns(true);
-        $wrestlerMock->expects()->getAttribute('currentTagTeam')->andReturns($currentTagTeamRelationMock);
-
         $wrestlerMock->expects()->canBeSuspended()->andReturns(true);
-        $repositoryMock->expects()->suspend($wrestlerMock, now()->toDateTimeString())->once()->andReturns($wrestlerMock);
-        $wrestlerMock->expects()->updateStatus()->save()->once();
-        $currentTagTeamRelationMock->expects()->updateStatus()->save()->once();
+        $repositoryMock->expects()->suspend(
+            $wrestlerMock,
+            now()->toDateTimeString()
+        )->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->updateStatus()->once()->andReturns($wrestlerMock);
+        $wrestlerMock->expects()->save()->once()->andReturns(true);
+        $wrestlerMock->expects()->getAttribute('currentTagTeam')->times(3)->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->exists()->once()->andReturns(true);
+        $tagTeamMock->expects()->updateStatus()->once()->andReturns($tagTeamMock);
+        $tagTeamMock->expects()->save()->once()->andReturns(true);
 
         $controller->__invoke($wrestlerMock, new SuspendRequest, $repositoryMock);
     }

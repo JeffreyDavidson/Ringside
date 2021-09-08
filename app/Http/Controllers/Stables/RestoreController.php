@@ -15,7 +15,7 @@ class RestoreController extends Controller
      * @param  \App\Services\StableService $stableService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($stableId, StableService $stableService)
+    public function __invoke(int $stableId, StableService $stableService)
     {
         $stable = Stable::onlyTrashed()->findOrFail($stableId);
 
