@@ -27,8 +27,8 @@ class StoreRequestTest extends TestCase
 
         $this->assertValidationRules(
             [
-                'name' => ['required', 'string'],
-                'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+                'name' => ['required', 'string', 'min:3'],
+                'started_at' => ['nullable', 'string', 'date'],
                 'wrestlers' => ['array'],
                 'tag_teams' => ['array'],
                 'wrestlers.*' => ['bail', 'integer'],
@@ -38,7 +38,6 @@ class StoreRequestTest extends TestCase
         );
 
         $this->assertValidationRuleContains($rules['name'], Unique::class);
-        $this->assertValidationRuleContains($rules['wrestlers'], StableHasEnoughMembers::class);
         $this->assertValidationRuleContains($rules['wrestlers.*'], Exists::class);
         $this->assertValidationRuleContains($rules['wrestlers.*'], WrestlerCanJoinStable::class);
         $this->assertValidationRuleContains($rules['tag_teams.*'], Exists::class);

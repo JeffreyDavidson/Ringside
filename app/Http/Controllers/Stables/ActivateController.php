@@ -16,8 +16,10 @@ class ActivateController extends Controller
      * Activate a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \App\Http\Requests\Stables\ActivateRequest  $stable
+     * @param  \App\Http\Requests\Stables\ActivateRequest  $request
      * @param  \App\Repositories\StableRepository  $stableRepository
+     * @param  \App\Repositories\WrestlerRepository  $wrestlerRepository
+     * @param  \App\Repositories\TagTeamRepository  $tagTeamRepository
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(
@@ -31,14 +33,14 @@ class ActivateController extends Controller
 
         $activationDate = now()->toDateTimeString();
 
-        if ($stable->currentWrestlers->every->isNotInEmployment()) {
+        if ($stable->currentWrestlers->isNotEmpty()) {
             foreach ($stable->currentWrestlers as $wrestler) {
                 $wrestlerRepository->employ($wrestler, $activationDate);
                 $wrestler->updateStatus()->save();
             }
         }
 
-        if ($stable->currentTagTeams->every->isNotInEmployment()) {
+        if ($stable->currentTagTeams->isNotEmpty()) {
             foreach ($stable->currentTagTeams as $tagTeam) {
                 foreach ($tagTeam->currentWrestlers as $wrestler) {
                     $wrestlerRepository->employ($wrestler, $activationDate);

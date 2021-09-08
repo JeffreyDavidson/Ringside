@@ -10,6 +10,18 @@ use App\Services\WrestlerService;
 
 class WrestlersController extends Controller
 {
+    public WrestlerService $wrestlerService;
+
+    /**
+     * Create a new wrestlers controller instance.
+     *
+     * @param  \App\Services\WrestlerService $wrestlerService
+     */
+    public function __construct(WrestlerService $wrestlerService)
+    {
+        $this->wrestlerService = $wrestlerService;
+    }
+
     /**
      * View a list of employed wrestlers.
      *
@@ -38,12 +50,13 @@ class WrestlersController extends Controller
      * Create a new wrestler.
      *
      * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
-     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, WrestlerService $wrestlerService)
+    public function store(StoreRequest $request)
     {
-        $wrestlerService->create($request->only('name', 'height', 'weight', 'hometown', 'signature_move', 'started_at'));
+        $this->wrestlerService->create(
+            $request->only('name', 'height', 'weight', 'hometown', 'signature_move', 'started_at')
+        );
 
         return redirect()->route('wrestlers.index');
     }
@@ -79,12 +92,14 @@ class WrestlersController extends Controller
      *
      * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
      * @param  \App\Models\Wrestler  $wrestler
-     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Wrestler $wrestler, WrestlerService $wrestlerService)
+    public function update(UpdateRequest $request, Wrestler $wrestler)
     {
-        $wrestlerService->update($wrestler, $request->only('name', 'height', 'weight', 'hometown', 'signature_move', 'started_at'));
+        $this->wrestlerService->update(
+            $wrestler,
+            $request->only('name', 'height', 'weight', 'hometown', 'signature_move', 'started_at')
+        );
 
         return redirect()->route('wrestlers.index');
     }
@@ -99,7 +114,7 @@ class WrestlersController extends Controller
     {
         $this->authorize('delete', $wrestler);
 
-        $wrestler->delete();
+        $this->wrestlerService->delete($wrestler);
 
         return redirect()->route('wrestlers.index');
     }

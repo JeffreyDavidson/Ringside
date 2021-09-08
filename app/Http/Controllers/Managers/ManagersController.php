@@ -10,6 +10,18 @@ use App\Services\ManagerService;
 
 class ManagersController extends Controller
 {
+    public ManagerService $managerService;
+
+    /**
+     * Create a new managers controller instance.
+     *
+     * @param \App\Services\ManagerService $managerService
+     */
+    public function __construct(ManagerService $managerService)
+    {
+        $this->managerService = $managerService;
+    }
+
     /**
      * View a list of managers.
      *
@@ -25,6 +37,7 @@ class ManagersController extends Controller
     /**
      * Show the form for creating a manager.
      *
+     * @param  \App\Models\Manager $manager
      * @return \Illuminate\Http\Response
      */
     public function create(Manager $manager)
@@ -38,12 +51,11 @@ class ManagersController extends Controller
      * Create a new manager.
      *
      * @param  \App\Http\Requests\Managers\StoreRequest  $request
-     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, ManagerService $managerService)
+    public function store(StoreRequest $request)
     {
-        $managerService->create($request->validated());
+        $this->managerService->create($request->validated());
 
         return redirect()->route('managers.index');
     }
@@ -79,12 +91,11 @@ class ManagersController extends Controller
      *
      * @param  \App\Http\Requests\Managers\UpdateRequest  $request
      * @param  \App\Models\Manager  $manager
-     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Manager $manager, ManagerService $managerService)
+    public function update(UpdateRequest $request, Manager $manager)
     {
-        $managerService->update($manager, $request->validated());
+        $this->managerService->update($manager, $request->validated());
 
         return redirect()->route('managers.index');
     }
@@ -93,14 +104,13 @@ class ManagersController extends Controller
      * Delete a manager.
      *
      * @param  \App\Models\Manager  $manager
-     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Manager $manager, ManagerService $managerService)
+    public function destroy(Manager $manager)
     {
         $this->authorize('delete', $manager);
 
-        $managerService->delete($manager);
+        $this->managerService->delete($manager);
 
         return redirect()->route('managers.index');
     }

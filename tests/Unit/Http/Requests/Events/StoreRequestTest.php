@@ -23,8 +23,8 @@ class StoreRequestTest extends TestCase
 
         $this->assertValidationRules(
             [
-                'name' => ['required', 'string'],
-                'date' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+                'name' => ['required', 'string', 'min:3'],
+                'date' => ['nullable', 'string', 'date'],
                 'venue_id' => ['nullable', 'integer'],
                 'preview' => ['nullable'],
             ],

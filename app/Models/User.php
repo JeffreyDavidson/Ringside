@@ -68,15 +68,4 @@ class User extends Authenticatable
     {
         return $this->hasOne(Wrestler::class);
     }
-
-    /**
-     * Undocumented function.
-     *
-     * @param  string $password
-     * @return void
-     */
-    public function setPasswordAttribute($password)
-    {
-        $this->attributes['password'] = Hash::make($password);
-    }
 }

@@ -12,9 +12,10 @@ class RestoreController extends Controller
      * Restore a deleted referee.
      *
      * @param  int  $refereeId
+     * @param  \App\Services\RefereeService $refereeService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($refereeId, RefereeService $refereeService)
+    public function __invoke(int $refereeId, RefereeService $refereeService)
     {
         $referee = Referee::onlyTrashed()->findOrFail($refereeId);
 

@@ -9,7 +9,9 @@ use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Routing\Route;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\RequiredIf;
 use Illuminate\Validation\Rules\Unique;
 use Tests\TestCase;
 
@@ -41,15 +43,16 @@ class UpdateRequestTest extends TestCase
         $rules = $subject->rules();
 
         $this->assertValidationRules([
-            'name' => ['filled'],
-            'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+            'name' => ['required', 'string', 'min:3'],
+            'started_at' => ['nullable', 'string', 'date'],
             'wrestlers' => ['array'],
-            'wrestlers.*' => ['bail ', 'integer'],
+            'wrestlers.*' => ['bail ', 'integer', 'distinct'],
             'tag_teams' => ['array'],
-            'tag_teams.*' => ['bail', 'integer'],
+            'tag_teams.*' => ['bail', 'integer', 'distinct'],
         ], $rules);
 
         $this->assertValidationRuleContains($rules['name'], Unique::class);
+        $this->assertValidationRuleContains($rules['started_at'], RequiredIf::class);
         $this->assertValidationRuleContains($rules['started_at'], ActivationStartDateCanBeChanged::class);
         $this->assertValidationRuleContains($rules['wrestlers.*'], Exists::class);
         $this->assertValidationRuleContains($rules['wrestlers.*'], WrestlerCanJoinStable::class);

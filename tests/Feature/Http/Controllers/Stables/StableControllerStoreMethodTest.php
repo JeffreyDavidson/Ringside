@@ -72,7 +72,7 @@ class StableControllerStoreMethodTest extends TestCase
             ]))
             ->assertRedirect(action([StablesController::class, 'index']));
 
-        tap(Stable::all()->last(), function ($stable) {
+        tap(Stable::first(), function ($stable) {
             $this->assertEquals('Example Stable Name', $stable->name);
             $this->assertCount(0, $stable->activations);
             $this->assertCount(0, $stable->wrestlers);
@@ -99,7 +99,7 @@ class StableControllerStoreMethodTest extends TestCase
                 ])
             );
 
-        tap(Stable::all()->last(), function ($stable) use ($startedAt) {
+        tap(Stable::first(), function ($stable) use ($startedAt) {
             $this->assertCount(1, $stable->activations);
             $this->assertEquals($startedAt, $stable->activations->first()->started_at->toDateTimeString());
         });
@@ -120,7 +120,7 @@ class StableControllerStoreMethodTest extends TestCase
                 StableRequestDataFactory::new()->withWrestlers($createdWrestlers)->create()
             );
 
-        tap(Stable::all()->last()->currentWrestlers, function ($wrestlers) use ($createdWrestlers) {
+        tap(Stable::first()->currentWrestlers, function ($wrestlers) use ($createdWrestlers) {
             $this->assertCount(3, $wrestlers);
             $this->assertEquals($wrestlers->modelKeys(), $createdWrestlers);
         });
@@ -131,7 +131,7 @@ class StableControllerStoreMethodTest extends TestCase
      */
     public function tag_teams_are_added_to_stable_if_present()
     {
-        $createdTagTeams = TagTeam::factory()->times(1)->create()->pluck('id')->toArray();
+        $createdTagTeams = TagTeam::factory()->count(2)->create()->pluck('id')->toArray();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
@@ -141,8 +141,8 @@ class StableControllerStoreMethodTest extends TestCase
                 StableRequestDataFactory::new()->withTagTeams($createdTagTeams)->create()
             );
 
-        tap(Stable::all()->last()->currentTagTeams, function ($tagTeams) use ($createdTagTeams) {
-            $this->assertCount(1, $tagTeams);
+        tap(Stable::first()->currentTagTeams, function ($tagTeams) use ($createdTagTeams) {
+            $this->assertCount(2, $tagTeams);
             $this->assertEquals($tagTeams->modelKeys(), $createdTagTeams);
         });
     }
@@ -164,7 +164,7 @@ class StableControllerStoreMethodTest extends TestCase
                 ])
             );
 
-        tap(Stable::all()->last(), function ($stable) {
+        tap(Stable::first(), function ($stable) {
             $wrestlers = $stable->currentWrestlers;
             foreach ($wrestlers as $wrestler) {
                 $this->assertNotNull($wrestler->pivot->joined_at);
@@ -192,7 +192,7 @@ class StableControllerStoreMethodTest extends TestCase
                 ])
             );
 
-        tap(Stable::all()->last(), function ($stable) use ($wrestler, $tagTeam, $now) {
+        tap(Stable::first(), function ($stable) use ($wrestler, $tagTeam, $now) {
             $wrestlers = $stable->currentWrestlers;
             $tagTeams = $stable->currentTagTeams;
 

@@ -463,10 +463,6 @@ class TagTeam extends Model implements Bookable, Employable, Releasable, Retirab
             return false;
         }
 
-        // if (! $this->partnersAreBookable()) {
-        //     return false;
-        // }
-
         return true;
     }
 

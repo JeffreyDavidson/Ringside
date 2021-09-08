@@ -9,18 +9,31 @@ use Illuminate\Contracts\Validation\Rule;
 class WrestlerCanJoinStable implements Rule
 {
     /**
+     * @var string
+     */
+    protected string $message;
+
+    /**
      * @var \App\Models\Stable
      */
     protected $stable;
 
     /**
-     * Undocumented function.
+     * @var string|null
+     */
+    protected ?string $startedAt;
+
+    /**
+     * Create a new rule instance.
      *
      * @param \App\Models\Stable $stable
+     * @param string|null $startedAt
+     * @return void
      */
-    public function __construct(Stable $stable)
+    public function __construct(Stable $stable, string $startedAt = null)
     {
         $this->stable = $stable;
+        $this->startedAt = $startedAt;
     }
 
     /**
@@ -32,21 +45,30 @@ class WrestlerCanJoinStable implements Rule
      */
     public function passes($attribute, $value)
     {
-        $wrestler = Wrestler::find($value);
+        $wrestler = Wrestler::with('currentStable', 'futureEmployment')->find($value);
 
         if (! $wrestler) {
             return false;
         }
 
-        if ($wrestler->currentStable()->exists() && $wrestler->currentStable->isNot($this->stable)) {
-            return false;
+        if ($wrestler->currentStable && $wrestler->currentStable->isNot($this->stable)) {
+            return $this->fail('This wrestler is already a member of an active stable.');
         }
 
-        if ($wrestler->futureEmployment()->exists() && $wrestler->futureEmployment->started_at->gt(request()->input('started_at'))) {
-            return false;
+        if (is_string($this->startedAt)) {
+            if ($wrestler->futureEmployment && $wrestler->futureEmployment->startedAfter($this->startedAt)) {
+                return $this->fail("This wrestler's future employment starts after stable's start date.");
+            }
         }
 
         return true;
+    }
+
+    protected function fail(string $message)
+    {
+        $this->message = $message;
+
+        return false;
     }
 
     /**
@@ -56,6 +78,6 @@ class WrestlerCanJoinStable implements Rule
      */
     public function message()
     {
-        return 'This wrestler cannot join this stable.';
+        return $this->message;
     }
 }

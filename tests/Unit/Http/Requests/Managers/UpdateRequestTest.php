@@ -23,8 +23,7 @@ class UpdateRequestTest extends TestCase
      */
     public function rules_returns_validation_requirements()
     {
-        $this->markTestIncomplete();
-        $manager = Manager::factory()->create();
+        $manager = $this->createMock(Manager::class);
 
         $subject = $this->createFormRequest(UpdateRequest::class);
         $subject->setRouteResolver(function () use ($manager) {
@@ -41,7 +40,7 @@ class UpdateRequestTest extends TestCase
             [
                 'first_name' => ['required', 'string', 'min:3'],
                 'last_name' => ['required', 'string', 'min:3'],
-                'started_at' => ['nullable', 'string', 'date_format:Y-m-d H:i:s'],
+                'started_at' => ['nullable', 'string', 'date'],
             ],
             $rules
         );

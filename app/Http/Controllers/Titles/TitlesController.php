@@ -10,6 +10,18 @@ use App\Services\TitleService;
 
 class TitlesController extends Controller
 {
+    public TitleService $titleService;
+
+    /**
+     * Create a new titles controller instance.
+     *
+     * @param  \App\Services\TitleService $titleService
+     */
+    public function __construct(TitleService $titleService)
+    {
+        $this->titleService = $titleService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -38,12 +50,11 @@ class TitlesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\Titles\StoreRequest  $request
-     * @param  \App\Services\TitleService $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, TitleService $titleService)
+    public function store(StoreRequest $request)
     {
-        $titleService->create($request->validated());
+        $this->titleService->create($request->validated());
 
         return redirect()->route('titles.index');
     }
@@ -78,12 +89,11 @@ class TitlesController extends Controller
      *
      * @param  \App\Http\Requests\Titles\UpdateRequest  $request
      * @param  \App\Models\Title  $title
-     * @param  \App\Services\TitleService $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Title $title, TitleService $titleService)
+    public function update(UpdateRequest $request, Title $title)
     {
-        $titleService->update($title, $request->validated());
+        $this->titleService->update($title, $request->validated());
 
         return redirect()->route('titles.index');
     }
@@ -92,14 +102,13 @@ class TitlesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Title  $title
-     * @param  \App\Services\TitleService  $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Title $title, TitleService $titleService)
+    public function destroy(Title $title)
     {
         $this->authorize('delete', $title);
 
-        $titleService->delete($title);
+        $this->titleService->delete($title);
 
         return redirect()->route('titles.index');
     }

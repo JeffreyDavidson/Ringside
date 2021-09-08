@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($this->route('wrestler')->id)],
-            'feet' => ['required', 'integer', 'min:5', 'max:7'],
+            'feet' => ['required', 'integer'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer'],
             'hometown' => ['required', 'string'],
@@ -37,7 +37,7 @@ class UpdateRequest extends FormRequest
             'started_at' => [
                 'nullable',
                 'string',
-                'date_format:Y-m-d H:i:s',
+                'date',
                 new EmploymentStartDateCanBeChanged($this->route('wrestler')),
             ],
         ];

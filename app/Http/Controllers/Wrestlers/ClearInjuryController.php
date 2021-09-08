@@ -27,6 +27,10 @@ class ClearInjuryController extends Controller
         $wrestlerRepository->clearInjury($wrestler, $recoveryDate);
         $wrestler->updateStatus()->save();
 
+        if (! is_null($wrestler->currentTagTeam) && $wrestler->currentTagTeam->exists()) {
+            $wrestler->currentTagTeam->updateStatus()->save();
+        }
+
         return redirect()->route('wrestlers.index');
     }
 }

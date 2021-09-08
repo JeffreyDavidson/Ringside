@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers\TagTeams;
 use App\Enums\Role;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Requests\TagTeams\StoreRequest;
+use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
@@ -85,10 +86,13 @@ class TagTeamControllerStoreMethodTest extends TestCase
     /**
      * @test
      */
-    public function an_employment_is_created_for_the_tag_team_if_started_at_is_filled_in_request()
+    public function an_employment_is_created_only_for_the_tag_team_if_started_at_is_filled_in_request()
     {
-        $startDate = now()->toDateTimeString();
-        $wrestlers = Wrestler::factory()->count(2)->create();
+        $startDate = now();
+        $wrestlers = Wrestler::factory()
+            ->has(Employment::factory()->started($startDate->copy()->subWeek()))
+            ->count(2)
+            ->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
@@ -96,20 +100,19 @@ class TagTeamControllerStoreMethodTest extends TestCase
             ->post(
                 action([TagTeamsController::class, 'store']),
                 TagTeamRequestDataFactory::new()->create([
-                    'started_at' => $startDate,
+                    'started_at' => $startDate->toDateString(),
                     'wrestlers' => $wrestlers->pluck('id')->toArray(),
                 ])
             );
 
         tap(TagTeam::first(), function ($tagTeam) use ($startDate) {
             $this->assertCount(1, $tagTeam->employments);
-            $this->assertEquals($startDate, $tagTeam->employments->first()->started_at->toDateTimeString());
+            $this->assertEquals($startDate->toDateString(), $tagTeam->employments->first()->started_at->toDateString());
 
             foreach ($tagTeam->wrestlers as $wrestler) {
-                $this->assertSame($startDate, $wrestler->pivot->joined_at);
+                $this->assertSame($startDate->toDateString(), $wrestler->pivot->joined_at);
                 $this->assertInstanceOf(Wrestler::class, $wrestler);
                 $this->assertCount(1, $wrestler->employments);
-                $this->assertSame($startDate, $wrestler->employments->first()->started_at->toDateTimeString());
             }
         });
     }
@@ -117,11 +120,46 @@ class TagTeamControllerStoreMethodTest extends TestCase
     /**
      * @test
      */
-    public function wrestlers_are_joined_on_a_tag_team_at_the_current_datetime_if_started_at_is_not_filled_in_request()
+    public function unemployed_wrestlers_are_employed_on_the_same_date_if_started_at_is_filled_in_request()
     {
-        $startDate = now()->toDateTimeString();
-        Carbon::setTestNow($startDate);
-        $wrestlers = Wrestler::factory()->count(2)->create();
+        $startDate = now();
+        $wrestlers = Wrestler::factory()
+            ->unemployed()
+            ->count(2)
+            ->create();
+
+        $this
+            ->actAs(Role::ADMINISTRATOR)
+            ->from(action([TagTeamsController::class, 'create']))
+            ->post(
+                action([TagTeamsController::class, 'store']),
+                TagTeamRequestDataFactory::new()->create([
+                    'started_at' => $startDate->toDateString(),
+                    'wrestlers' => $wrestlers->pluck('id')->toArray(),
+                ])
+            );
+
+        tap(TagTeam::first(), function ($tagTeam) use ($startDate) {
+            $this->assertCount(1, $tagTeam->employments);
+
+            foreach ($tagTeam->wrestlers as $wrestler) {
+                $this->assertSame($startDate->toDateString(), $wrestler->pivot->joined_at);
+                $this->assertInstanceOf(Wrestler::class, $wrestler);
+                $this->assertCount(1, $wrestler->employments);
+            }
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function unemployed_wrestlers_are_joined_at_the_current_date_if_started_at_is_not_filled_in_request()
+    {
+        $startDate = now();
+        $wrestlers = Wrestler::factory()
+            ->unemployed()
+            ->count(2)
+            ->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
@@ -137,9 +175,8 @@ class TagTeamControllerStoreMethodTest extends TestCase
             $this->assertCount(0, $tagTeam->employments);
 
             foreach ($tagTeam->wrestlers as $wrestler) {
-                $this->assertSame($startDate, $wrestler->pivot->joined_at);
+                $this->assertSame($startDate->toDateString(), $wrestler->pivot->joined_at);
                 $this->assertInstanceOf(Wrestler::class, $wrestler);
-                $this->assertCount(0, $wrestler->employments);
             }
         });
     }
