@@ -14,7 +14,7 @@ class CreateStableMembersTable extends Migration
     public function up()
     {
         Schema::create('stable_members', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('stable_id')->constrained();
             $table->morphs('member');
             $table->datetime('joined_at');

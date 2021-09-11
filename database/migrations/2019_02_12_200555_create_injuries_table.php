@@ -14,7 +14,7 @@ class CreateInjuriesTable extends Migration
     public function up()
     {
         Schema::create('injuries', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->morphs('injurable');
             $table->datetime('started_at');
             $table->datetime('ended_at')->nullable();
