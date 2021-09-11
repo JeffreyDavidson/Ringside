@@ -14,7 +14,7 @@ class CreateSuspensionsTable extends Migration
     public function up()
     {
         Schema::create('suspensions', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->morphs('suspendable');
             $table->datetime('started_at');
             $table->datetime('ended_at')->nullable();

@@ -14,7 +14,7 @@ class CreateTagTeamWrestlerTable extends Migration
     public function up()
     {
         Schema::create('tag_team_wrestler', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('tag_team_id')->constrained();
             $table->foreignId('wrestler_id')->constrained();
             $table->datetime('joined_at')->nullable();

@@ -14,7 +14,7 @@ class CreateRefereesTable extends Migration
     public function up()
     {
         Schema::create('referees', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('status');

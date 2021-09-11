@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateRetirementsTable extends Migration
 {
@@ -14,7 +14,7 @@ class CreateRetirementsTable extends Migration
     public function up()
     {
         Schema::create('retirements', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->morphs('retiree');
             $table->datetime('started_at');
             $table->datetime('ended_at')->nullable();

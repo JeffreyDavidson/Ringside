@@ -14,7 +14,7 @@ class CreateStablesTable extends Migration
     public function up()
     {
         Schema::create('stables', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('user_id')->nullable()->constrained();
             $table->string('name');
             $table->string('status');

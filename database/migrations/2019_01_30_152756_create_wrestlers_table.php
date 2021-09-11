@@ -14,7 +14,7 @@ class CreateWrestlersTable extends Migration
     public function up()
     {
         Schema::create('wrestlers', function (Blueprint $table) {
-            $table->increments('id');
+            $table->id();
             $table->foreignId('user_id')->nullable()->constrained();
             $table->string('name');
             $table->integer('height');
