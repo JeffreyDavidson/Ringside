@@ -120,61 +120,27 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonemployableManagerTypes
      */
-    public function invoke_throws_exception_for_employing_an_available_manager()
+    public function invoke_throws_exception_for_employing_a_non_employable_manager($factoryState)
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->available()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([EmployController::class], $manager));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_employing_a_retired_manager()
+    public function nonemployableManagerTypes()
     {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_employing_a_suspended_manager()
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_employing_an_injured_manager()
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager));
+        return [
+            'suspended manager' => ['suspended'],
+            'injured manager' => ['injured'],
+            'available manager' => ['available'],
+            'retired manager' => ['retired'],
+        ];
     }
 }

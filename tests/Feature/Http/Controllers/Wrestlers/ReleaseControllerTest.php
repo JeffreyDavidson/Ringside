@@ -132,61 +132,27 @@ class ReleaseControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreleasableWrestlerTypes
      */
-    public function invoke_throws_an_exception_for_releasing_an_unemployed_wrestler()
+    public function invoke_throws_an_exception_for_releasing_a_non_releasable_wrestler($factoryState)
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->unemployed()->create();
+        $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReleaseController::class], $wrestler));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_an_exception_for_releasing_a_future_employed_wrestler()
+    public function nonreleasableWrestlerTypes()
     {
-        $this->expectException(CannotBeReleasedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReleaseController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_an_exception_for_releasing_a_released_wrestler()
-    {
-        $this->expectException(CannotBeReleasedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReleaseController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_an_exception_for_releasing_a_retired_wrestler()
-    {
-        $this->expectException(CannotBeReleasedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReleaseController::class], $wrestler));
+        return [
+            'unemployed wrestler' => ['unemployed'],
+            'with future employed wrestler' => ['withFutureEmployment'],
+            'released wrestler' => ['released'],
+            'retired wrestler' => ['retired'],
+        ];
     }
 }

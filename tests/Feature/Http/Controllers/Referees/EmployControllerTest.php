@@ -120,16 +120,27 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonemployableRefereeTypes
      */
-    public function invoke_throws_exception_for_employing_an_employed_referee()
+    public function invoke_throws_exception_for_employing_a_non_employable_referee($factoryState)
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->employed()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([EmployController::class], $referee));
+    }
+
+    public function nonemployableRefereeTypes()
+    {
+        return [
+            'suspended referee' => ['suspended'],
+            'injured referee' => ['injured'],
+            'bookable referee' => ['bookable'],
+            'retired referee' => ['retired'],
+        ];
     }
 }

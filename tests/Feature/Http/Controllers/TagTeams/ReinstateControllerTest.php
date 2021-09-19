@@ -81,76 +81,28 @@ class ReinstateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreinstatableTagTeamTypes
      */
-    public function invoke_throws_exception_for_reinstating_a_bookable_tag_team()
+    public function invoke_throws_exception_for_reinstating_a_non_reinstatable_tag_team($factoryState)
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $tagTeam));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_future_employed_tag_team()
+    public function nonreinstatableTagTeamTypes()
     {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_unemployed_tag_team()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_released_tag_team()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_retired_tag_team()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $tagTeam));
+        return [
+            'bookable tag team' => ['bookable'],
+            'with future employed tag team' => ['withFutureEmployment'],
+            'unemployed tag team' => ['unemployed'],
+            'released tag team' => ['released'],
+            'retired tag team' => ['retired'],
+        ];
     }
 }

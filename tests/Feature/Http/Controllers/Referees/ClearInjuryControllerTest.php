@@ -76,91 +76,29 @@ class ClearInjuryControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonclearableRefereeTypes
      */
-    public function invoke_throws_exception_for_clearing_an_injury_from_an_unemployed_referee()
+    public function invoke_throws_exception_for_clearing_an_injury_from_a_non_clearable_referee($factoryState)
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->unemployed()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $referee));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_bookable_referee()
+    public function nonclearableRefereeTypes()
     {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->bookable()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_future_employed_referee()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_suspended_referee()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_retired_referee()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_released_referee()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $referee));
+        return [
+            'unemployed referee' => ['unemployed'],
+            'bookable referee' => ['bookable'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'suspended referee' => ['suspended'],
+            'retired referee' => ['retired'],
+            'released referee' => ['released'],
+        ];
     }
 }

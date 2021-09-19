@@ -81,76 +81,28 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonunretirableTagTeamTypes
      */
-    public function invoke_throws_exception_for_unretiring_a_bookable_tag_team()
+    public function invoke_throws_exception_for_unretiring_a_non_unretirable_tag_team($factoryState)
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $tagTeam));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_future_employed_tag_team()
+    public function nonunretirableTagTeamTypes()
     {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_released_tag_team()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_suspended_tag_team()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_an_unemployed_tag_team()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $tagTeam));
+        return [
+            'bookable tag team' => ['bookable'],
+            'with future employed tag team' => ['withFutureEmployment'],
+            'released tag team' => ['released'],
+            'suspended tag team' => ['suspended'],
+            'unemployed tag team' => ['unemployed'],
+        ];
     }
 }

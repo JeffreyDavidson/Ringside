@@ -94,91 +94,29 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonsuspendableWrestlerTypes
      */
-    public function invoke_throws_exception_for_suspending_an_unemployed_wrestler()
+    public function invoke_throws_exception_for_suspending_a_non_suspendable_wrestler($factoryState)
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->unemployed()->create();
+        $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $wrestler));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_future_employed_wrestler()
+    public function nonsuspendableWrestlerTypes()
     {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_an_injured_wrestler()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_released_wrestler()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_retired_wrestler()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_suspended_wrestler()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $wrestler));
+        return [
+            'unemployed wrestler' => ['unemployed'],
+            'with future employed wrestler' => ['withFutureEmployment'],
+            'injured wrestler' => ['injured'],
+            'released wrestler' => ['released'],
+            'retired wrestler' => ['retired'],
+            'suspended wrestler' => ['suspended'],
+        ];
     }
 }

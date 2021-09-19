@@ -72,61 +72,27 @@ class DeactivateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nondeactivatableTitleTypes
      */
-    public function invoke_throws_exception_for_deactivating_an_unactivated_title()
+    public function invoke_throws_exception_for_deactivating_a_non_deactivatable_title($factoryState)
     {
         $this->expectException(CannotBeDeactivatedException::class);
         $this->withoutExceptionHandling();
 
-        $title = Title::factory()->unactivated()->create();
+        $title = Title::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([DeactivateController::class], $title));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_deactivating_a_future_activated_title()
+    public function nondeactivatableTitleTypes()
     {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->withFutureActivation()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $title));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_deactivating_an_inactive_title()
-    {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->inactive()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $title));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_deactivating_a_retired_title()
-    {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $title));
+        return [
+            'unactivated title' => ['unactivated'],
+            'with future activation title' => ['withFutureActivation'],
+            'inactive title' => ['inactive'],
+            'retired title' => ['retired'],
+        ];
     }
 }

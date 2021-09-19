@@ -114,46 +114,26 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonretirableStableTypes
      */
-    public function invoke_throws_exception_for_retiring_a_retired_stable()
+    public function invoke_throws_exception_for_retiring_a_non_retirable_stable($factoryState)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $stable = Stable::factory()->retired()->create();
+        $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([RetireController::class], $stable));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_a_future_activated_stable()
+    public function nonretirableStableTypes()
     {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->withFutureActivation()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $stable));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_an_unactivated_stable()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->unactivated()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $stable));
+        return [
+            'retired stable' => ['retired'],
+            'with future activated stable' => ['withFutureActivation'],
+            'unactivated stable' => ['unactivated'],
+        ];
     }
 }

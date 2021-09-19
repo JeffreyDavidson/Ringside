@@ -75,91 +75,29 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonsuspendableManagerTypes
      */
-    public function invoke_throws_exception_for_suspending_an_unemployed_manager()
+    public function invoke_throws_exception_for_suspending_a_non_suspendable_manager($factoryState)
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->unemployed()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $manager));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_future_employed_manager()
+    public function nonsuspendableManagerTypes()
     {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_an_injured_manager()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_released_manager()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_retired_manager()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_suspending_a_suspended_manager()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager));
+        return [
+            'unemployed manager' => ['unemployed'],
+            'with future employed manager' => ['withFutureEmployment'],
+            'injured manager' => ['injured'],
+            'released manager' => ['released'],
+            'retired manager' => ['retired'],
+            'suspended manager' => ['suspended'],
+        ];
     }
 }

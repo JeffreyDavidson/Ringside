@@ -138,61 +138,27 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonretirableManagerTypes
      */
-    public function invoke_throws_exception_for_retiring_a_retired_manager()
+    public function invoke_throws_exception_for_retiring_a_non_retirable_manager($factoryState)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->retired()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([RetireController::class], $manager));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_a_future_employed_manager()
+    public function nonretirableManagerTypes()
     {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_a_released_manager()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_an_unemployed_manager()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $manager));
+        return [
+            'retired manager' => ['retired'],
+            'with future employed manager' => ['withFutureEmployment'],
+            'released manager' => ['released'],
+            'unemployed manager' => ['unemployed'],
+        ];
     }
 }

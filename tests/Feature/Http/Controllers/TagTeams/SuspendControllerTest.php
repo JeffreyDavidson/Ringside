@@ -75,76 +75,28 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonsuspendableTagTeamTypes
      */
-    public function suspending_a_suspended_tag_team_throws_an_exception()
+    public function invoke_throws_exception_for_suspending_a_non_suspendable_tag_team($factoryState)
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->suspended()->create();
+        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $tagTeam));
     }
 
-    /**
-     * @test
-     */
-    public function suspending_an_unemployed_tag_team_throws_an_exception()
+    public function nonsuspendableTagTeamTypes()
     {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function suspending_a_released_tag_team_throws_an_exception()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function suspending_a_future_employed_tag_team_throws_an_exception()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function suspending_a_retired_tag_team_throws_an_exception()
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $tagTeam));
+        return [
+            'suspended tag team' => ['suspended'],
+            'unemployed tag team' => ['unemployed'],
+            'released tag team' => ['released'],
+            'with future employed tag team' => ['withFutureEmployment'],
+            'retired tag team' => ['retired'],
+        ];
     }
 }

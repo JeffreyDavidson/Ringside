@@ -135,43 +135,25 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonemployableTagTeamTypes
      */
-    public function invoke_throws_exception_for_employing_a_bookable_tag_team()
+    public function invoke_throws_exception_for_employing_a_non_employable_tag_team($factoryState)
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this->actAs(Role::ADMINISTRATOR)
             ->patch(action([EmployController::class], $tagTeam));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_employing_a_retired_tag_team()
+    public function nonemployableTagTeamTypes()
     {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->retired()->create();
-
-        $this->actAs(Role::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_employing_a_suspended_tag_team()
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->suspended()->create();
-
-        $this->actAs(Role::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $tagTeam));
+        return [
+            'bookable tag team' => ['bookable'],
+            'retired tag team' => ['retired'],
+            'suspended tag team' => ['suspended'],
+        ];
     }
 }

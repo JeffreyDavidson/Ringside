@@ -77,91 +77,29 @@ class ReinstateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreinstatableManagerTypes
      */
-    public function invoke_throws_exception_for_reinstating_an_available_manager()
+    public function invoke_throws_exception_for_reinstating_a_non_reinstatable_manager($factoryState)
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->available()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $manager));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_unemployed_manager()
+    public function nonreinstatableManagerTypes()
     {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_injured_manager()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_released_manager()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_future_employed_manager()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_retired_manager()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager));
+        return [
+            'available manager' => ['available'],
+            'unemployed manager' => ['unemployed'],
+            'injured manager' => ['injured'],
+            'released manager' => ['released'],
+            'with future employed manager' => ['withFutureEmployment'],
+            'retired manager' => ['retired'],
+        ];
     }
 }

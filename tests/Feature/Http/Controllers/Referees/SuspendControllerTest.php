@@ -150,16 +150,29 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonsuspendableRefereeTypes
      */
-    public function invoke_throws_exception_for_suspending_a_suspended_referee()
+    public function invoke_throws_exception_for_suspending_a_non_suspendable_referee($factoryState)
     {
         $this->expectException(CannotBeSuspendedException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->suspended()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $referee));
+    }
+
+    public function nonsuspendableRefereeTypes()
+    {
+        return [
+            'unemployed referee' => ['unemployed'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'injured referee' => ['injured'],
+            'released referee' => ['released'],
+            'retired referee' => ['retired'],
+            'suspended referee' => ['suspended'],
+        ];
     }
 }

@@ -96,91 +96,29 @@ class ReinstateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreinstatableWrestlerTypes
      */
-    public function invoke_throws_exception_for_reinstating_a_bookable_wrestler()
+    public function invoke_throws_exception_for_reinstating_a_non_reinstatable_wrestler($factoryState)
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->bookable()->create();
+        $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $wrestler));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_unemployed_wrestler()
+    public function nonreinstatableWrestlerTypes()
     {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_injured_wrestler()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_released_wrestler()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_future_employed_wrestler()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_retired_wrestler()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
+        return [
+            'bookable wrestler' => ['bookable'],
+            'unemployed wrestler' => ['unemployed'],
+            'injured wrestler' => ['injured'],
+            'released wrestler' => ['released'],
+            'with future employed wrestler' => ['withFutureEmployment'],
+            'retired wrestler' => ['retired'],
+        ];
     }
 }

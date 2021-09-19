@@ -150,16 +150,29 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonunretirableRefereeTypes
      */
-    public function invoke_throws_exception_for_unretiring_an_unemployed_referee()
+    public function invoke_throws_exception_for_unretiring_a_non_unretirable_referee($factoryState)
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->unemployed()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $referee));
+    }
+
+    public function nonunretirableRefereeTypes()
+    {
+        return [
+            'bookable referee' => ['bookable'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'injured referee' => ['injured'],
+            'released referee' => ['released'],
+            'suspended referee' => ['suspended'],
+            'unemployed referee' => ['unemployed'],
+        ];
     }
 }

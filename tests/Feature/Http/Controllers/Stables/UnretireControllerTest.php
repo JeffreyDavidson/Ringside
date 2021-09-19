@@ -80,61 +80,27 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonunretirableStableTypes
      */
-    public function unretiring_an_active_stable_throws_an_exception()
+    public function invoke_throws_exception_for_unretiring_a_non_unretirable_stable($factoryState)
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $stable = Stable::factory()->active()->create();
+        $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $stable));
     }
 
-    /**
-     * @test
-     */
-    public function unretiring_a_future_activated_stable_throws_an_exception()
+    public function nonunretirableStableTypes()
     {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->withFutureActivation()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $stable));
-    }
-
-    /**
-     * @test
-     */
-    public function unretiring_an_inactive_stable_throws_an_exception()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->inactive()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $stable));
-    }
-
-    /**
-     * @test
-     */
-    public function unretiring_an_unactivated_stable_throws_an_exception()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->unactivated()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $stable));
+        return [
+            'active stable' => ['active'],
+            'with future activated stable' => ['withFutureActivation'],
+            'inactive stable' => ['inactive'],
+            'unactivated stable' => ['unactivated'],
+        ];
     }
 }

@@ -76,91 +76,29 @@ class ClearInjuryControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonclearableManagerTypes
      */
-    public function invoke_throws_exception_for_clearing_an_injury_from_an_unemployed_manager()
+    public function invoke_throws_exception_for_clearing_an_injury_from_a_non_clearable_manager($factoryState)
     {
         $this->expectException(CannotBeClearedFromInjuryException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->unemployed()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $manager));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_available_manager()
+    public function nonclearableManagerTypes()
     {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->available()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_future_employed_manager()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_suspended_manager()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_retired_manager()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_released_manager()
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager));
+        return [
+            'unemployed manager' => ['unemployed'],
+            'available manager' => ['available'],
+            'with future employed manager' => ['withFutureEmployment'],
+            'suspended manager' => ['suspended'],
+            'retired manager' => ['retired'],
+            'released manager' => ['released'],
+        ];
     }
 }
