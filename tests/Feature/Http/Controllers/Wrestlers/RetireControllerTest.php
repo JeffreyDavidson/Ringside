@@ -130,61 +130,27 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonretirableWrestlerTypes
      */
-    public function invoke_throws_an_exception_for_retiring_a_retired_wrestler()
+    public function invoke_throws_an_exception_for_retiring_a_non_retirable_wrestler($factoryState)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->retired()->create();
+        $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([RetireController::class], $wrestler));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_an_exception_for_retiring_a_future_employed_wrestler()
+    public function nonretirableWrestlerTypes()
     {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_an_exception_for_retiring_a_released_wrestler()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_an_exception_for_retiring_an_unemployed_wrestler()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler));
+        return [
+            'retired wrestler' => ['retired'],
+            'with future employed wrestler' => ['withFutureEmployment'],
+            'released wrestler' => ['released'],
+            'unemployed wrestler' => ['unemployed'],
+        ];
     }
 }

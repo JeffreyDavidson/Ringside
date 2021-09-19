@@ -75,91 +75,29 @@ class ReinstateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreinstatableRefereeTypes
      */
-    public function invoke_throws_exception_for_reinstating_a_bookable_referee()
+    public function invoke_throws_exception_for_reinstating_a_non_reinstatable_referee($factoryState)
     {
         $this->expectException(CannotBeReinstatedException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->bookable()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $referee));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_unemployed_referee()
+    public function nonreinstatableRefereeTypes()
     {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_an_injured_referee()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_released_referee()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_future_employed_referee()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_reinstating_a_retired_referee()
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $referee));
+        return [
+            'bookable referee' => ['bookable'],
+            'unemployed referee' => ['unemployed'],
+            'injured referee' => ['injured'],
+            'released referee' => ['released'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'retired referee' => ['retired'],
+        ];
     }
 }

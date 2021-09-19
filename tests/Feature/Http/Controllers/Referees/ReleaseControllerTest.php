@@ -158,16 +158,27 @@ class ReleaseControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreleasableRefereeTypes
      */
-    public function invoke_throws_exception_for_releasing_a_retired_referee()
+    public function invoke_throws_exception_for_releasing_a_non_releasable_referee($factoryState)
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->retired()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReleaseController::class], $referee));
+    }
+
+    public function nonreleasableRefereeTypes()
+    {
+        return [
+            'unemployed referee' => ['unemployed'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'released referee' => ['released'],
+            'retired referee' => ['retired'],
+        ];
     }
 }

@@ -91,46 +91,26 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonretirableTitleTypes
      */
-    public function retiring_a_retired_title_throws_an_exception()
+    public function invoke_throws_exception_for_retiring_a_non_retirable_title($factoryState)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $title = Title::factory()->retired()->create();
+        $title = Title::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([RetireController::class], $title));
     }
 
-    /**
-     * @test
-     */
-    public function retiring_a_future_activated_title_throws_an_exception()
+    public function nonretirableTitleTypes()
     {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->withFutureActivation()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $title));
-    }
-
-    /**
-     * @test
-     */
-    public function retiring_an_unactivated_title_throws_an_exception()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->unactivated()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $title));
+        return [
+            'retired title' => ['retired'],
+            'with future activation title' => ['withFutureActivation'],
+            'unactivated title' => ['unactivated'],
+        ];
     }
 }

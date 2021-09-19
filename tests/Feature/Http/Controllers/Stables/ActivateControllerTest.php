@@ -149,31 +149,25 @@ class ActivateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonactivatableStableTypes
      */
-    public function invoke_throws_exception_for_activating_an_retired_stable()
+    public function invoke_throws_exception_for_activating_a_non_activatable_stable($factoryState)
     {
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
-        $stable = Stable::factory()->retired()->create();
+        $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ActivateController::class], $stable));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_activating_an_active_stable()
+    public function nonactivatableStableTypes()
     {
-        $this->expectException(CannotBeActivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->active()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $stable));
+        return [
+            'retired stable' => ['retired'],
+            'active stable' => ['active'],
+        ];
     }
 }

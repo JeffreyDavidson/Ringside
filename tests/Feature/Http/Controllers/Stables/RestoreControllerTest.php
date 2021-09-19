@@ -3,7 +3,6 @@
 namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
-use App\Enums\StableStatus;
 use App\Http\Controllers\Stables\RestoreController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;

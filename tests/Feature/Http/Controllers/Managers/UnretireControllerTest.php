@@ -142,15 +142,28 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonunretirableManagerTypes
      */
-    public function invoke_throws_exception_for_unretiring_an_unemployed_manager()
+    public function invoke_throws_exception_for_unretiring_a_non_unretirable_manager($factoryState)
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->unemployed()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this->actAs(Role::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
+    }
+
+    public function nonunretirableManagerTypes()
+    {
+        return [
+            'available manager' => ['available'],
+            'with future employed manager' => ['withFutureEmployment'],
+            'injured manager' => ['injured'],
+            'released manager' => ['released'],
+            'suspended manager' => ['suspended'],
+            'unemployed manager' => ['unemployed'],
+        ];
     }
 }

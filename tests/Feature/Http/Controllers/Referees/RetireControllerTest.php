@@ -111,61 +111,27 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonretirableRefereeTypes
      */
-    public function invoke_throws_exception_for_retiring_a_retired_referee()
+    public function invoke_throws_exception_for_retiring_a_non_retirable_referee($factoryState)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->retired()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([RetireController::class], $referee));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_a_future_employed_referee()
+    public function nonretirableRefereeTypes()
     {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_an_released_referee()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_an_unemployed_referee()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $referee));
+        return [
+            'retired referee' => ['retired'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'released referee' => ['released'],
+            'unemployed referee' => ['unemployed'],
+        ];
     }
 }

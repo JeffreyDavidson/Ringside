@@ -148,16 +148,29 @@ class InjureControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider noninjurableRefereeTypes
      */
-    public function invoke_throws_exception_for_injuring_an_injured_referee()
+    public function invoke_throws_exception_for_injuring_a_non_injurable_referee($factoryState)
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $referee = Referee::factory()->injured()->create();
+        $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
+    }
+
+    public function noninjurableRefereeTypes()
+    {
+        return [
+            'unemployed referee' => ['unemployed'],
+            'suspended referee' => ['suspended'],
+            'released referee' => ['released'],
+            'with future employed referee' => ['withFutureEmployment'],
+            'retired referee' => ['retired'],
+            'injured referee' => ['injured'],
+        ];
     }
 }

@@ -98,91 +98,29 @@ class InjureControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider noninjurableWrestlerTypes
      */
-    public function invoke_throws_exception_for_injuring_an_unemployed_wrestler()
+    public function invoke_throws_exception_for_injuring_a_non_injurable_wrestler($factoryState)
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->unemployed()->create();
+        $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([InjureController::class], $wrestler));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_suspended_wrestler()
+    public function noninjurableWrestlerTypes()
     {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_released_wrestler()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_future_employed_wrestler()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_injuring_a_retired_wrestler_throws()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_an_injured_wrestler()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $wrestler));
+        return [
+            'unemployed wrestler' => ['unemployed'],
+            'suspended wrestler' => ['suspended'],
+            'released wrestler' => ['released'],
+            'with future employed wrestler' => ['withFutureEmployment'],
+            'retired wrestler' => ['retired'],
+            'injured wrestler' => ['injured'],
+        ];
     }
 }

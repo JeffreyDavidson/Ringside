@@ -111,31 +111,25 @@ class ActivateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonactivatableTitleTypes
      */
-    public function invoke_throws_exception_for_activating_an_active_title()
+    public function invoke_throws_exception_for_activating_a_non_activatable_title($factoryState)
     {
         $this->expectException(CannotBeActivatedException::class);
         $this->withoutExceptionHandling();
 
-        $title = Title::factory()->active()->create();
+        $title = Title::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ActivateController::class], $title));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_activating_a_retired_title()
+    public function nonactivatableTitleTypes()
     {
-        $this->expectException(CannotBeActivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $title));
+        return [
+            'active title' => ['active'],
+            'retired title' => ['retired'],
+        ];
     }
 }

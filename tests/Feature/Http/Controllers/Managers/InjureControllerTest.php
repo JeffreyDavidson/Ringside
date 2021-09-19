@@ -75,91 +75,29 @@ class InjureControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider noninjurablemanagerTypes
      */
-    public function invoke_throws_exception_for_injuring_an_unemployed_manager()
+    public function invoke_throws_exception_for_injuring_a_non_injurable_manager($factoryState)
     {
         $this->expectException(CannotBeInjuredException::class);
         $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->unemployed()->create();
+        $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(route('managers.injure', $manager));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_suspended_manager()
+    public function noninjurablemanagerTypes()
     {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->suspended()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(route('managers.injure', $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_released_manager()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(route('managers.injure', $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_future_employed_manager()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(route('managers.injure', $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_retired_manager()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(route('managers.injure', $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_an_injured_manager()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->injured()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(route('managers.injure', $manager));
+        return [
+            'unemployed manager' => ['unemployed'],
+            'suspended manager' => ['suspended'],
+            'released manager' => ['released'],
+            'with future employed manager' => ['withFutureEmployment'],
+            'retired manager' => ['retired'],
+            'injured manager' => ['injured'],
+        ];
     }
 }

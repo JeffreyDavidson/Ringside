@@ -73,58 +73,26 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonunretirableTitleTypes
      */
-    public function invoke_throws_exception_for_unretiring_an_active_title()
+    public function invoke_throws_exception_for_unretiring_a_non_unretirable_title($factoryState)
     {
         $this->expectException(CannotBeUnretiredException::class);
         $this->withoutExceptionHandling();
 
-        $title = Title::factory()->active()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $title));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_an_inactive_title()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->inactive()->create();
+        $title = Title::factory()->{$factoryState}()->create();
 
         $this->actAs(Role::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $title));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_future_activated_title()
+    public function nonunretirableTitleTypes()
     {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->withFutureActivation()->create();
-
-        $this->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $title));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_an_unactivated_title()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->unactivated()->create();
-
-        $this->actAs(Role::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $title));
+        return [
+            'active title' => ['active'],
+            'inactive title' => ['inactive'],
+            'with future activation title' => ['withFutureActivation'],
+            'unactivated title' => ['unactivated'],
+        ];
     }
 }

@@ -120,30 +120,26 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonemployableWrestlerTypes
      */
-    public function invoke_throws_exception_for_employing_an_employed_wrestler()
+    public function invoke_throws_exception_for_employing_a_non_employable_wrestler($factoryState)
     {
         $this->expectException(CannotBeEmployedException::class);
         $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->employed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $wrestler));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_employing_a_retired_wrestler()
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->retired()->create();
+        $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this->actAs(Role::ADMINISTRATOR)
             ->patch(action([EmployController::class], $wrestler));
+    }
+
+    public function nonemployableWrestlerTypes()
+    {
+        return [
+            'suspended wrestler' => ['suspended'],
+            'injured wrestler' => ['injured'],
+            'bookable wrestler' => ['bookable'],
+            'retired wrestler' => ['retired'],
+        ];
     }
 }

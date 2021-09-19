@@ -123,61 +123,27 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonretirableTagTeamTypes
      */
-    public function invoke_throws_exception_for_retiring_a_retired_tag_team()
+    public function invoke_throws_exception_for_retiring_a_non_retirable_tag_team($factoryState)
     {
         $this->expectException(CannotBeRetiredException::class);
         $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->retired()->create();
+        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([RetireController::class], $tagTeam));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_a_future_employed_tag_team()
+    public function nonretirableTagTeamTypes()
     {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_a_released_tag_team()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->released()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $tagTeam));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_retiring_an_unemployed_tag_team()
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
-
-        $tagTeam = TagTeam::factory()->unemployed()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $tagTeam));
+        return [
+            'retired tag team' => ['retired'],
+            'with future employed tag team' => ['withFutureEmployment'],
+            'released tag team' => ['released'],
+            'unemployed tag team' => ['unemployed'],
+        ];
     }
 }

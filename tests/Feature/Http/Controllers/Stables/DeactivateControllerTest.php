@@ -85,61 +85,27 @@ class DeactivateControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nondeactivatableStableTypes
      */
-    public function invoke_throws_exception_for_deactivating_an_inactive_stable()
+    public function invoke_throws_exception_for_deactivating_a_non_deactivatable_stable($factoryState)
     {
         $this->expectException(CannotBeDeactivatedException::class);
         $this->withoutExceptionHandling();
 
-        $stable = Stable::factory()->inactive()->create();
+        $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([DeactivateController::class], $stable));
     }
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_deactivating_an_retired_stable()
+    public function nondeactivatableStableTypes()
     {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->retired()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $stable));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_deactivating_an_unactivated_stable()
-    {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->unactivated()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $stable));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_deactivating_a_future_activated_stable()
-    {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->withFutureActivation()->create();
-
-        $this
-            ->actAs(Role::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $stable));
+        return [
+            'inactive stable' => ['inactive'],
+            'retired stable' => ['retired'],
+            'unactivated stable' => ['unactivated'],
+            'with future activated stable' => ['withFutureActivation'],
+        ];
     }
 }

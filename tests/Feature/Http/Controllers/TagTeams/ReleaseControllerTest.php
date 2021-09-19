@@ -148,16 +148,27 @@ class ReleaseControllerTest extends TestCase
 
     /**
      * @test
+     * @dataProvider nonreleasableTagTeamTypes
      */
-    public function invoke_throws_an_exception_for_releasing_a_retired_tag_team()
+    public function invoke_throws_an_exception_for_releasing_a_non_releasable_tag_team($factoryState)
     {
         $this->expectException(CannotBeReleasedException::class);
         $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->retired()->create();
+        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
             ->actAs(Role::ADMINISTRATOR)
             ->patch(action([ReleaseController::class], $tagTeam));
+    }
+
+    public function nonreleasableTagTeamTypes()
+    {
+        return [
+            'unemployed tag team' => ['unemployed'],
+            'with future employed tag team' => ['withFutureEmployment'],
+            'released tag team' => ['released'],
+            'retired tag team' => ['retired'],
+        ];
     }
 }
