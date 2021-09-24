@@ -5,6 +5,7 @@ namespace Tests\Integration\Http\Requests\Events;
 use App\Http\Requests\Events\StoreRequest;
 use App\Models\Event;
 use App\Models\User;
+use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
@@ -19,6 +20,13 @@ class StoreRequestTest extends TestCase
 {
     use RefreshDatabase,
         ValidatesRequests;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(MatchTypesTableSeeder::class);
+    }
 
     /**
      * @test

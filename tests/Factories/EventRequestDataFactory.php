@@ -3,7 +3,6 @@
 namespace Tests\Factories;
 
 use App\Models\Event;
-use App\Models\Venue;
 
 class EventRequestDataFactory
 {
@@ -11,6 +10,7 @@ class EventRequestDataFactory
     private ?string $date = null;
     private ?int $venue_id = null;
     private ?string $preview = null;
+    private array $matches = [];
 
     public static function new(): self
     {
@@ -24,6 +24,7 @@ class EventRequestDataFactory
             'date' => $this->date,
             'venue_id' => $this->venue_id,
             'preview' => $this->preview,
+            'matches' => $this->matches,
         ], $overrides);
     }
 

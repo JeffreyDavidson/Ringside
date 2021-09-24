@@ -50,6 +50,16 @@ class Event extends Model
     }
 
     /**
+     * Retrieve the matches for the event.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function matches()
+    {
+        return $this->hasMany(EventMatch::class);
+    }
+
+    /**
      * Scope a query to include scheduled events.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
