@@ -14,7 +14,12 @@ class EventRepository
      */
     public function create(array $data)
     {
-        return Event::create($data);
+        return Event::create([
+            'name' => $data['name'],
+            'date' => $data['date'],
+            'venue_id' => $data['venue_id'],
+            'preview' => $data['preview'],
+        ]);
     }
 
     /**
@@ -54,5 +59,20 @@ class EventRepository
     public function restore(Event $event)
     {
         $event->restore($event);
+    }
+
+    /**
+     * Restore a given event.
+     *
+     * @param  \App\Models\Event $event
+     * @return void
+     */
+    public function addMatch(Event $event, $matches)
+    {
+        foreach ($matches as $match) {
+            $event->matches()->create([
+
+            ]);
+        }
     }
 }

@@ -115,7 +115,7 @@ class EventControllerStoreMethodTest extends TestCase
     /**
      * @test
      */
-    public function store_creates_an_event_with_a_prveview_and_redirects()
+    public function store_creates_an_event_with_a_preview_and_redirects()
     {
         $this
             ->actAs(Role::ADMINISTRATOR)
