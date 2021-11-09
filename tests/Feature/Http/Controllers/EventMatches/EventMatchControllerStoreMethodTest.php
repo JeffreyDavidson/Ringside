@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Http\Controllers\EventMatch;
+namespace Tests\Feature\Http\Controllers\EventMatches;
 
 use App\Enums\Role;
 use App\Http\Controllers\EventMatches\EventMatchesController;
