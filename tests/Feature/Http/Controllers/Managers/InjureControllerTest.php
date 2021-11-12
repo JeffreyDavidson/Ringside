@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Managers\InjureController;
 use App\Http\Controllers\Managers\ManagersController;
-use App\Http\Requests\Managers\InjureRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -38,14 +37,6 @@ class InjureControllerTest extends TestCase
             $this->assertCount(1, $manager->injuries);
             $this->assertEquals(ManagerStatus::INJURED, $manager->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(InjureController::class, '__invoke', InjureRequest::class);
     }
 
     /**

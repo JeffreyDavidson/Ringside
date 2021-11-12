@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\TagTeams\EmployController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Requests\TagTeams\EmployRequest;
 use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -99,14 +98,6 @@ class EmployControllerTest extends TestCase
                 $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             }
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /**

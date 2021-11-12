@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Titles\DeactivateController;
-use App\Http\Requests\Titles\DeactivateRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -35,14 +34,6 @@ class DeactivateControllerTest extends TestCase
             $this->assertNotNull($title->activations->last()->ended_at);
             $this->assertEquals(TitleStatus::INACTIVE, $title->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(DeactivateController::class, '__invoke', DeactivateRequest::class);
     }
 
     /**

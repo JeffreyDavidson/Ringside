@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Referees;
 
 use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
-use App\Http\Requests\Referees\StoreRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\RefereeRequestDataFactory;
@@ -134,13 +133,5 @@ class RefereeControllerStoreMethodTest extends TestCase
             ->from(action([RefereesController::class, 'create']))
             ->post(action([RefereesController::class, 'store']), RefereeRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RefereesController::class, 'store', StoreRequest::class);
     }
 }

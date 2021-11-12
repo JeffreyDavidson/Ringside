@@ -137,12 +137,4 @@ class TagTeamControllerUpdateMethodTest extends TestCase
             ->put(action([TagTeamsController::class, 'update'], $tagTeam), TagTeamRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
     }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(TagTeamsController::class, 'update', UpdateRequest::class);
-    }
 }

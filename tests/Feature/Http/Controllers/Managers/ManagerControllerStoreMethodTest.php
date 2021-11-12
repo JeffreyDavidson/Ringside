@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Managers;
 
 use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
-use App\Http\Requests\Managers\StoreRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\ManagerRequestDataFactory;
@@ -134,13 +133,5 @@ class ManagerControllerStoreMethodTest extends TestCase
             ->from(action([ManagersController::class, 'create']))
             ->post(action([ManagersController::class, 'store'], ManagerRequestDataFactory::new()->create()))
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ManagersController::class, 'store', StoreRequest::class);
     }
 }

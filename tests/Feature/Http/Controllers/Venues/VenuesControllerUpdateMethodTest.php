@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Venues;
 
 use App\Enums\Role;
 use App\Http\Controllers\Venues\VenuesController;
-use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\VenueRequestDataFactory;
@@ -119,13 +118,5 @@ class VenuesControllerUpdateMethodTest extends TestCase
             ->from(action([VenuesController::class, 'edit'], $venue))
             ->put(action([VenuesController::class, 'update'], $venue), VenueRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(VenuesController::class, 'update', UpdateRequest::class);
     }
 }

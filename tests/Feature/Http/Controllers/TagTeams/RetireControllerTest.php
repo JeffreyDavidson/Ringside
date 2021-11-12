@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\TagTeams\RetireController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Requests\TagTeams\RetireRequest;
 use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -87,14 +86,6 @@ class RetireControllerTest extends TestCase
                 $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
             }
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /**

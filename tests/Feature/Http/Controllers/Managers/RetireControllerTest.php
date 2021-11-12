@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\RetireController;
-use App\Http\Requests\Managers\RetireRequest;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -101,14 +100,6 @@ class RetireControllerTest extends TestCase
                 $manager->wrestlers()->where('manageable_id', $wrestler->id)->get()->last()->pivot->left_at
             );
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /**

@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Managers\EmployController;
 use App\Http\Controllers\Managers\ManagersController;
-use App\Http\Requests\Managers\EmployRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,14 +82,6 @@ class EmployControllerTest extends TestCase
             $this->assertCount(2, $manager->employments);
             $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /**

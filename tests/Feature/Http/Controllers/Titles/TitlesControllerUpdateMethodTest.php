@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
 use App\Http\Controllers\Titles\TitlesController;
-use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TitleRequestDataFactory;
@@ -201,13 +200,5 @@ class TitlesControllerUpdateMethodTest extends TestCase
                 TitleRequestDataFactory::new()->withTitle($title)->create()
             )
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(TitlesController::class, 'update', UpdateRequest::class);
     }
 }

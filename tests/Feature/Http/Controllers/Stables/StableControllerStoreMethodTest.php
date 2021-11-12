@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Http\Controllers\Stables\StablesController;
-use App\Http\Requests\Stables\StoreRequest;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -225,13 +224,5 @@ class StableControllerStoreMethodTest extends TestCase
             ->from(action([StablesController::class, 'create']))
             ->post(action([StablesController::class, 'store']), StableRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(StablesController::class, 'store', StoreRequest::class);
     }
 }

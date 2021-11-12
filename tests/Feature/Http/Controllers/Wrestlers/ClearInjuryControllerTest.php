@@ -7,7 +7,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\ClearInjuryRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -65,14 +64,6 @@ class ClearInjuryControllerTest extends TestCase
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertTrue($tagTeam->isBookable());
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
     /**

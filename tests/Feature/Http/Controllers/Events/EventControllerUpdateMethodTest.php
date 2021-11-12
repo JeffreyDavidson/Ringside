@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
-use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
 use App\Models\Venue;
 use Carbon\Carbon;
@@ -185,13 +184,5 @@ class EventControllerUpdateMethodTest extends TestCase
                 EventRequestDataFactory::new()->withEvent($event)->create()
             )
             ->assertForbidden();
-    }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EventsController::class, 'update', UpdateRequest::class);
     }
 }

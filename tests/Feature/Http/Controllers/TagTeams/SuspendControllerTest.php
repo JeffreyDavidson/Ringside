@@ -7,7 +7,6 @@ use App\Enums\TagTeamStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\TagTeams\SuspendController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Requests\TagTeams\SuspendRequest;
 use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -38,14 +37,6 @@ class SuspendControllerTest extends TestCase
             $this->assertCount(1, $tagTeam->suspensions);
             $this->assertEquals(TagTeamStatus::SUSPENDED, $tagTeam->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(SuspendController::class, '__invoke', SuspendRequest::class);
     }
 
     /**

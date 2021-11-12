@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Requests\TagTeams\StoreRequest;
 use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -220,13 +219,5 @@ class TagTeamControllerStoreMethodTest extends TestCase
             ->from(action([TagTeamsController::class, 'create']))
             ->post(action([TagTeamsController::class, 'store']), TagTeamRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(TagTeamsController::class, 'store', StoreRequest::class);
     }
 }

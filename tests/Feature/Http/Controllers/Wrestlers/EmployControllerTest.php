@@ -7,7 +7,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Wrestlers\EmployController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\EmployRequest;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,14 +82,6 @@ class EmployControllerTest extends TestCase
             $this->assertCount(2, $wrestler->employments);
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /**

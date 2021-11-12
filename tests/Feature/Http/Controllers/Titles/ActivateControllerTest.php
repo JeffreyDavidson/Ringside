@@ -7,7 +7,6 @@ use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\TitlesController;
-use App\Http\Requests\Titles\ActivateRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -74,14 +73,6 @@ class ActivateControllerTest extends TestCase
         tap($title->fresh(), function ($title) {
             $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ActivateController::class, '__invoke', ActivateRequest::class);
     }
 
     /**

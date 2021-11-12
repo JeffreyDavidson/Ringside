@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Referees\ClearInjuryController;
 use App\Http\Controllers\Referees\RefereesController;
-use App\Http\Requests\Referees\ClearInjuryRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -40,14 +39,6 @@ class ClearInjuryControllerTest extends TestCase
             $this->assertNotNull($referee->injuries->last()->ended_at);
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
     /**

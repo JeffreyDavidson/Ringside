@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Managers\ClearInjuryController;
 use App\Http\Controllers\Managers\ManagersController;
-use App\Http\Requests\Managers\ClearInjuryRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -41,14 +40,6 @@ class ClearInjuryControllerTest extends TestCase
             $this->assertNotNull($manager->injuries->last()->ended_at);
             $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ClearInjuryController::class, '__invoke', ClearInjuryRequest::class);
     }
 
     /**

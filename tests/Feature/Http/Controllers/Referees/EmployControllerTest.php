@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Referees\EmployController;
 use App\Http\Controllers\Referees\RefereesController;
-use App\Http\Requests\Referees\EmployRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -83,14 +82,6 @@ class EmployControllerTest extends TestCase
             $this->assertCount(2, $referee->employments);
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EmployController::class, '__invoke', EmployRequest::class);
     }
 
     /**

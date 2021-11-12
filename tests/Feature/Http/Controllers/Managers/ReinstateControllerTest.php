@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\ReinstateController;
-use App\Http\Requests\Managers\ReinstateRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -40,14 +39,6 @@ class ReinstateControllerTest extends TestCase
             $this->assertNotNull($manager->suspensions->last()->ended_at);
             $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /**

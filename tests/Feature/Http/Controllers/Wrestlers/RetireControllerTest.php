@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Wrestlers\RetireController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\RetireRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -93,14 +92,6 @@ class RetireControllerTest extends TestCase
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /**

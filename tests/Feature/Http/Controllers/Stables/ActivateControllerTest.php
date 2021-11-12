@@ -9,7 +9,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Stables\ActivateController;
 use App\Http\Controllers\Stables\StablesController;
-use App\Http\Requests\Stables\ActivateRequest;
 use App\Models\Stable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -112,14 +111,6 @@ class ActivateControllerTest extends TestCase
                 $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
             }
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ActivateController::class, '__invoke', ActivateRequest::class);
     }
 
     /**

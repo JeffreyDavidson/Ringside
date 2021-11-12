@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Wrestlers\ReleaseController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\ReleaseRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -95,14 +94,6 @@ class ReleaseControllerTest extends TestCase
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReleaseController::class, '__invoke', ReleaseRequest::class);
     }
 
     /**

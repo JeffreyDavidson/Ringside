@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
-use App\Http\Requests\Events\StoreRequest;
 use App\Models\Event;
 use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -150,13 +149,5 @@ class EventControllerStoreMethodTest extends TestCase
             ->from(action([EventsController::class, 'create']))
             ->post(action([EventsController::class, 'store']), EventRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EventsController::class, 'store', StoreRequest::class);
     }
 }
