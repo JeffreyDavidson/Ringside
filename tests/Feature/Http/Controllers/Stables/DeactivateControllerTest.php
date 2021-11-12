@@ -9,7 +9,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Stables\DeactivateController;
 use App\Http\Controllers\Stables\StablesController;
-use App\Http\Requests\Stables\DeactivateRequest;
 use App\Models\Stable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -48,14 +47,6 @@ class DeactivateControllerTest extends TestCase
                 $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
             }
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(DeactivateController::class, '__invoke', DeactivateRequest::class);
     }
 
     /**

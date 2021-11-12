@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Wrestlers\SuspendController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\SuspendRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -57,14 +56,6 @@ class SuspendControllerTest extends TestCase
             ->patch(action([SuspendController::class], $wrestler));
 
         $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(SuspendController::class, '__invoke', SuspendRequest::class);
     }
 
     /**

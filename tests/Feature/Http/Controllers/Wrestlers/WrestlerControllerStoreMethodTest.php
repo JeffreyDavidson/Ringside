@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Wrestlers;
 
 use App\Enums\Role;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\WrestlerRequestDataFactory;
@@ -157,13 +156,5 @@ class WrestlerControllerStoreMethodTest extends TestCase
             ->from(action([WrestlersController::class, 'create']))
             ->post(action([WrestlersController::class, 'store']), WrestlerRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(WrestlersController::class, 'store', StoreRequest::class);
     }
 }

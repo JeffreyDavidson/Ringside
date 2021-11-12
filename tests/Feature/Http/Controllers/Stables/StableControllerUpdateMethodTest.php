@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Stables;
 
 use App\Enums\Role;
 use App\Http\Controllers\Stables\StablesController;
-use App\Http\Requests\Stables\UpdateRequest;
 use App\Models\Stable;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -132,13 +131,5 @@ class StableControllerUpdateMethodTest extends TestCase
                 StableRequestDataFactory::new()->withStable($stable)->create()
             )
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(StablesController::class, 'update', UpdateRequest::class);
     }
 }

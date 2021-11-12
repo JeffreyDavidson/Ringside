@@ -7,7 +7,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Wrestlers\UnretireController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\UnretireRequest;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -38,14 +37,6 @@ class UnretireControllerTest extends TestCase
             $this->assertNotNull($wrestler->retirements->last()->ended_at);
             $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /**

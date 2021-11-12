@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\TagTeams\ReleaseController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Requests\TagTeams\ReleaseRequest;
 use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -66,14 +65,6 @@ class ReleaseControllerTest extends TestCase
                 $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
             }
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReleaseController::class, '__invoke', ReleaseRequest::class);
     }
 
     /**

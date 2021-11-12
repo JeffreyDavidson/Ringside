@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Venues;
 
 use App\Enums\Role;
 use App\Http\Controllers\Venues\VenuesController;
-use App\Http\Requests\Venues\StoreRequest;
 use App\Models\Venue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\VenueRequestDataFactory;
@@ -100,13 +99,5 @@ class VenuesControllerStoreMethodTest extends TestCase
             ->from(action([VenuesController::class, 'create']))
             ->post(action([VenuesController::class, 'store']), VenueRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(VenuesController::class, 'store', StoreRequest::class);
     }
 }

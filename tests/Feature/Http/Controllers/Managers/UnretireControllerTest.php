@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\UnretireController;
-use App\Http\Requests\Managers\UnretireRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -37,14 +36,6 @@ class UnretireControllerTest extends TestCase
             $this->assertNotNull($manager->retirements->last()->ended_at);
             $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /**

@@ -7,7 +7,6 @@ use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Titles\UnretireController;
-use App\Http\Requests\Titles\UnretireRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,14 +35,6 @@ class UnretireControllerTest extends TestCase
             $this->assertNotNull($title->retirements->last()->ended_at);
             $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /**

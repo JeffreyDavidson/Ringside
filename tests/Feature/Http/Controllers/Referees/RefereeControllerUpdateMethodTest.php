@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Referees;
 
 use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
-use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\RefereeRequestDataFactory;
@@ -209,13 +208,5 @@ class RefereeControllerUpdateMethodTest extends TestCase
                 RefereeRequestDataFactory::new()->withReferee($referee)->create()
             )
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RefereesController::class, 'update', UpdateRequest::class);
     }
 }

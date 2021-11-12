@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Wrestlers\ReinstateController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Http\Requests\Wrestlers\ReinstateRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,14 +58,6 @@ class ReinstateControllerTest extends TestCase
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /**

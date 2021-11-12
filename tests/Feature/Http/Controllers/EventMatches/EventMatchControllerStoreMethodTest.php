@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\EventMatches;
 
 use App\Enums\Role;
 use App\Http\Controllers\EventMatches\EventMatchesController;
-use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
 use App\Models\Referee;
 use App\Models\Title;
@@ -124,13 +123,5 @@ class EventMatchControllerStoreMethodTest extends TestCase
                 EventMatchRequestDataFactory::new()->create()
             )
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(EventMatchesController::class, 'store', StoreRequest::class);
     }
 }

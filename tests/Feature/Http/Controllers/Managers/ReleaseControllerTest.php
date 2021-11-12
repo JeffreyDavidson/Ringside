@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\ReleaseController;
-use App\Http\Requests\Managers\ReleaseRequest;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -103,14 +102,6 @@ class ReleaseControllerTest extends TestCase
             $this->assertNotNull($manager->tagTeams()->where('manageable_id', $tagTeam->id)->get()->last()->pivot->left_at);
             $this->assertNotNull($manager->wrestlers()->where('manageable_id', $wrestler->id)->get()->last()->pivot->left_at);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReleaseController::class, '__invoke', ReleaseRequest::class);
     }
 
     /**

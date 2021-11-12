@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReinstateController;
-use App\Http\Requests\Referees\ReinstateRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -40,14 +39,6 @@ class ReinstateControllerTest extends TestCase
             $this->assertNotNull($referee->suspensions->last()->ended_at);
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReinstateController::class, '__invoke', ReinstateRequest::class);
     }
 
     /**

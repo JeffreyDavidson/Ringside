@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReleaseController;
-use App\Http\Requests\Referees\ReleaseRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -76,14 +75,6 @@ class ReleaseControllerTest extends TestCase
             $this->assertNotNull($referee->employments->last()->ended_at);
             $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ReleaseController::class, '__invoke', ReleaseRequest::class);
     }
 
     /**

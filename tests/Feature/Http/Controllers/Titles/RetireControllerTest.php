@@ -7,7 +7,6 @@ use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Controllers\Titles\TitlesController;
-use App\Http\Requests\Titles\RetireRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -54,14 +53,6 @@ class RetireControllerTest extends TestCase
             $this->assertCount(1, $title->retirements);
             $this->assertEquals(TitleStatus::RETIRED, $title->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /**

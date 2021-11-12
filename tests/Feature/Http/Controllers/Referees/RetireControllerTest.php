@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\RetireController;
-use App\Http\Requests\Referees\RetireRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -74,14 +73,6 @@ class RetireControllerTest extends TestCase
             $this->assertCount(1, $referee->retirements);
             $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(RetireController::class, '__invoke', RetireRequest::class);
     }
 
     /**

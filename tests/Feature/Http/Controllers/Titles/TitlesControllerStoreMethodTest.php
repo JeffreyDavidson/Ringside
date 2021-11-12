@@ -131,12 +131,4 @@ class TitlesControllerStoreMethodTest extends TestCase
             ->post(action([TitlesController::class, 'store']), TitleRequestDataFactory::new()->create())
             ->assertRedirect(route('login'));
     }
-
-    /**
-     * @test
-     */
-    public function store_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(TitlesController::class, 'store', StoreRequest::class);
-    }
 }

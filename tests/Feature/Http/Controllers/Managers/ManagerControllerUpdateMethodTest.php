@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Managers;
 
 use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
-use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\ManagerRequestDataFactory;
@@ -215,13 +214,5 @@ class ManagerControllerUpdateMethodTest extends TestCase
                 ManagerRequestDataFactory::new()->withManager($manager)->create()
             )
             ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function update_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(ManagersController::class, 'update', UpdateRequest::class);
     }
 }

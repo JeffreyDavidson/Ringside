@@ -8,7 +8,6 @@ use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\TagTeams\UnretireController;
-use App\Http\Requests\TagTeams\UnretireRequest;
 use App\Models\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -44,14 +43,6 @@ class UnretireControllerTest extends TestCase
                 $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             }
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /**

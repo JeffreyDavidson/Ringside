@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\UnretireController;
-use App\Http\Requests\Referees\UnretireRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -38,14 +37,6 @@ class UnretireControllerTest extends TestCase
             $this->assertNotNull($referee->retirements->last()->ended_at);
             $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_validates_using_a_form_request()
-    {
-        $this->assertActionUsesFormRequest(UnretireController::class, '__invoke', UnretireRequest::class);
     }
 
     /**
