@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\ActivationFactory;
-use Tests\Factories\RetirementFactory;
 use Tests\Factories\TitleFactory;
 
 class TitlesTableSeeder extends Seeder

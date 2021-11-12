@@ -2,7 +2,6 @@
 
 namespace App\Rules;
 
-use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Database\Eloquent\Model;
 

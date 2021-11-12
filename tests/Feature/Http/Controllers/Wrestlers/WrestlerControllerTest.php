@@ -7,7 +7,6 @@ use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Factories\WrestlerRequestDataFactory;
 use Tests\TestCase;
 
 /**

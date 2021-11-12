@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Requests\TagTeams;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\Employment;
 use App\Models\TagTeam;
-use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TagTeamRequestDataFactory;

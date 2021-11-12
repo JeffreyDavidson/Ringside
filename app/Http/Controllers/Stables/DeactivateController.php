@@ -7,8 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\DeactivateRequest;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
-use App\Repositories\TagTeamRepository;
-use App\Repositories\WrestlerRepository;
 
 class DeactivateController extends Controller
 {
