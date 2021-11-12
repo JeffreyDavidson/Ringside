@@ -26,7 +26,6 @@
         "fakerphp/faker": "^1.9.1",
         "filp/whoops": "^2.0",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "jasonmccreary/laravel-test-assertions": "^2.0",
         "laravel/breeze": "^1.0",
         "laravel/dusk": "^6.12",
         "laravel/sail": "^1.10",
