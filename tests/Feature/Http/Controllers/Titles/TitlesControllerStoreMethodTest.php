@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\Titles;
 
 use App\Enums\Role;
 use App\Http\Controllers\Titles\TitlesController;
-use App\Http\Requests\Titles\StoreRequest;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TitleRequestDataFactory;

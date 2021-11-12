@@ -4,7 +4,6 @@ namespace Tests\Feature\Http\Controllers\TagTeams;
 
 use App\Enums\Role;
 use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;

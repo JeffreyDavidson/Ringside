@@ -2,7 +2,6 @@
 
 namespace Tests\Integration\Models;
 
-use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

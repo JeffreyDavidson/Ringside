@@ -2,11 +2,9 @@
 
 namespace Tests\Integration\Rules;
 
-use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Rules\WrestlerJoinedStableInTagTeam;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

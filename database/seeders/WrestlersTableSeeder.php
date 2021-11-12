@@ -8,7 +8,6 @@ use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Tests\Factories\EmploymentFactory;
-use Tests\Factories\RetirementFactory;
 
 class WrestlersTableSeeder extends Seeder
 {

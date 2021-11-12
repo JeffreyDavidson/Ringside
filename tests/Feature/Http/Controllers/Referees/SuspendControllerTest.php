@@ -7,7 +7,6 @@ use App\Enums\Role;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\SuspendController;
-use App\Http\Requests\Referees\SuspendRequest;
 use App\Models\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
