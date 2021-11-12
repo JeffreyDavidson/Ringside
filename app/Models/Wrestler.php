@@ -62,14 +62,14 @@ class Wrestler extends SingleRosterMember implements Bookable, Manageable, Stabl
     {
         $this->status = match (true) {
             $this->isCurrentlyEmployed() => match (true) {
-                $this->isInjured() => WrestlerStatus::INJURED,
-                $this->isSuspended() => WrestlerStatus::SUSPENDED,
-                $this->isBookable() => WrestlerStatus::BOOKABLE,
+                $this->isInjured() => WrestlerStatus::injured(),
+                $this->isSuspended() => WrestlerStatus::suspended(),
+                $this->isBookable() => WrestlerStatus::bookable(),
             },
-            $this->hasFutureEmployment() => WrestlerStatus::FUTURE_EMPLOYMENT,
-            $this->isReleased() => WrestlerStatus::RELEASED,
-            $this->isRetired() => WrestlerStatus::RETIRED,
-            default => WrestlerStatus::UNEMPLOYED
+            $this->hasFutureEmployment() => WrestlerStatus::future_employment(),
+            $this->isReleased() => WrestlerStatus::released(),
+            $this->isRetired() => WrestlerStatus::retired(),
+            default => WrestlerStatus::unemployed()
         };
 
         return $this;

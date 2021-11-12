@@ -30,25 +30,25 @@ class ActivateControllerTest extends TestCase
     {
         $stable = Stable::factory()->unactivated()->create();
 
-        $this->assertEquals(StableStatus::UNACTIVATED, $stable->status);
+        $this->assertEquals(StableStatus::unactivated(), $stable->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ActivateController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) {
             $this->assertCount(1, $stable->activations);
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+            $this->assertEquals(StableStatus::active(), $stable->status);
 
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->assertCount(1, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+                $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
             }
 
             foreach ($stable->currentTagTeams as $tagTeam) {
                 $this->assertCount(1, $tagTeam->employments);
-                $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+                $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
             }
         });
     }
@@ -62,25 +62,25 @@ class ActivateControllerTest extends TestCase
         $startedAt = $stable->activations->last()->started_at;
 
         $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(StableStatus::FUTURE_ACTIVATION, $stable->status);
+        $this->assertEquals(StableStatus::future_activation(), $stable->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ActivateController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) use ($startedAt) {
             $this->assertTrue($stable->currentActivation->started_at->lt($startedAt));
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+            $this->assertEquals(StableStatus::active(), $stable->status);
 
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->assertCount(1, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+                $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
             }
 
             foreach ($stable->currentTagTeams as $tagTeam) {
                 $this->assertCount(1, $tagTeam->employments);
-                $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+                $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
             }
         });
     }
@@ -93,22 +93,22 @@ class ActivateControllerTest extends TestCase
         $stable = Stable::factory()->inactive()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ActivateController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) {
             $this->assertCount(2, $stable->activations);
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+            $this->assertEquals(StableStatus::active(), $stable->status);
 
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->assertCount(2, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+                $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
             }
 
             foreach ($stable->currentTagTeams as $tagTeam) {
                 $this->assertCount(2, $tagTeam->employments);
-                $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+                $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
             }
         });
     }
@@ -121,7 +121,7 @@ class ActivateControllerTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([ActivateController::class], $stable))
             ->assertForbidden();
     }
@@ -150,7 +150,7 @@ class ActivateControllerTest extends TestCase
         $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ActivateController::class], $stable));
     }
 

@@ -28,7 +28,7 @@ class TitleFactory extends Factory
     {
         return [
             'name' => Str::title($this->faker->unique()->words(2, true)).' Title',
-            'status' => TitleStatus::__default,
+            'status' => TitleStatus::unactivated(),
         ];
     }
 
@@ -37,7 +37,7 @@ class TitleFactory extends Factory
         $activationDate = Carbon::yesterday();
 
         return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::ACTIVE];
+            return ['status' => TitleStatus::active()];
         })
         ->has(Activation::factory()->started($activationDate))
         ->afterCreating(function (Title $title) {
@@ -52,7 +52,7 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays(1);
 
         return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::INACTIVE];
+            return ['status' => TitleStatus::inactive()];
         })
         ->has(Activation::factory()->started($start)->ended($end))
         ->afterCreating(function (Title $title) {
@@ -63,7 +63,7 @@ class TitleFactory extends Factory
     public function withFutureActivation()
     {
         return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::FUTURE_ACTIVATION];
+            return ['status' => TitleStatus::future_activation()];
         })
         ->has(Activation::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Title $title) {
@@ -78,7 +78,7 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays(1);
 
         return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::RETIRED];
+            return ['status' => TitleStatus::retired()];
         })
         ->has(Activation::factory()->started($start)->ended($end))
         ->has(Retirement::factory()->started($end))
@@ -90,7 +90,7 @@ class TitleFactory extends Factory
     public function unactivated()
     {
         return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::UNACTIVATED];
+            return ['status' => TitleStatus::unactivated()];
         })->afterCreating(function (Title $title) {
             $title->updateStatus()->save();
         });

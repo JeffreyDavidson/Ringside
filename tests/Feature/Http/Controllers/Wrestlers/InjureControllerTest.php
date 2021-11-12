@@ -33,13 +33,13 @@ class InjureControllerTest extends TestCase
         $this->assertCount(0, $wrestler->injuries);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([InjureController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertCount(1, $wrestler->injuries);
-            $this->assertEquals(WrestlerStatus::INJURED, $wrestler->status);
+            $this->assertEquals(WrestlerStatus::injured(), $wrestler->status);
         });
     }
 
@@ -51,14 +51,14 @@ class InjureControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+        $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([InjureController::class], $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::UNbookable(), $tagTeam->status);
         });
     }
 
@@ -70,7 +70,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([InjureController::class], $wrestler))
             ->assertForbidden();
     }
@@ -99,7 +99,7 @@ class InjureControllerTest extends TestCase
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([InjureController::class], $wrestler));
     }
 

@@ -31,13 +31,13 @@ class ReleaseControllerTest extends TestCase
         $manager = Manager::factory()->available()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertNotNull($manager->employments->last()->ended_at);
-            $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
+            $this->assertEquals(ManagerStatus::released(), $manager->status);
         });
     }
 
@@ -49,14 +49,14 @@ class ReleaseControllerTest extends TestCase
         $manager = Manager::factory()->injured()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertNotNull($manager->injuries->last()->ended_at);
             $this->assertNotNull($manager->employments->last()->ended_at);
-            $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
+            $this->assertEquals(ManagerStatus::released(), $manager->status);
         });
     }
 
@@ -68,14 +68,14 @@ class ReleaseControllerTest extends TestCase
         $manager = Manager::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertNotNull($manager->suspensions->last()->ended_at);
             $this->assertNotNull($manager->employments->last()->ended_at);
-            $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
+            $this->assertEquals(ManagerStatus::released(), $manager->status);
         });
     }
 
@@ -94,7 +94,7 @@ class ReleaseControllerTest extends TestCase
             ->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
@@ -112,7 +112,7 @@ class ReleaseControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([ReleaseController::class], $manager))
             ->assertForbidden();
     }
@@ -141,7 +141,7 @@ class ReleaseControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $manager));
     }
 

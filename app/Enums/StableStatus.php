@@ -2,22 +2,13 @@
 
 namespace App\Enums;
 
-use MadWeb\Enum\Enum;
-
 /**
- * @method static StableStatus ACTIVE()
- * @method static StableStatus FUTURE_ACTIVATION()
- * @method static StableStatus INACTIVE()
- * @method static StableStatus RETIRED()
- * @method static StableStatus UNACTIVATED()
+ * @method static self active()
+ * @method static self future_activation()
+ * @method static self inactive()
+ * @method static self retired()
+ * @method static self unactivated()
  */
-final class StableStatus extends Enum
+final class StableStatus extends BaseEnum
 {
-    const __default = self::UNACTIVATED;
-
-    const ACTIVE = 'active';
-    const FUTURE_ACTIVATION = 'future-activation';
-    const INACTIVE = 'inactive';
-    const RETIRED = 'retired';
-    const UNACTIVATED = 'unactivated';
 }

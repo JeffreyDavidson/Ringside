@@ -53,7 +53,7 @@ class Manager extends SingleRosterMember implements StableMember
      */
     public function scopeAvailable($query)
     {
-        return $query->where('status', ManagerStatus::AVAILABLE);
+        return $query->where('status', ManagerStatus::available());
     }
 
     /**
@@ -75,14 +75,14 @@ class Manager extends SingleRosterMember implements StableMember
     {
         $this->status = match (true) {
             $this->isCurrentlyEmployed() => match (true) {
-                $this->isInjured() => ManagerStatus::INJURED,
-                $this->isSuspended() => ManagerStatus::SUSPENDED,
-                $this->isAvailable() => ManagerStatus::AVAILABLE,
+                $this->isInjured() => ManagerStatus::injured(),
+                $this->isSuspended() => ManagerStatus::suspended(),
+                $this->isAvailable() => ManagerStatus::available(),
             },
-            $this->hasFutureEmployment() => ManagerStatus::FUTURE_EMPLOYMENT,
-            $this->isReleased() => ManagerStatus::RELEASED,
-            $this->isRetired() => ManagerStatus::RETIRED,
-            default => ManagerStatus::UNEMPLOYED
+            $this->hasFutureEmployment() => ManagerStatus::future_employment(),
+            $this->isReleased() => ManagerStatus::released(),
+            $this->isRetired() => ManagerStatus::retired(),
+            default => ManagerStatus::unemployed()
         };
 
         return $this;

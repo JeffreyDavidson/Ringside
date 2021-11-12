@@ -29,16 +29,16 @@ class EmployControllerTest extends TestCase
         $referee = Referee::factory()->unemployed()->create();
 
         $this->assertCount(0, $referee->employments);
-        $this->assertEquals(RefereeStatus::UNEMPLOYED, $referee->status);
+        $this->assertEquals(RefereeStatus::unemployed(), $referee->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->employments);
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
+            $this->assertEquals(RefereeStatus::bookable(), $referee->status);
         });
     }
 
@@ -51,16 +51,16 @@ class EmployControllerTest extends TestCase
         $startedAt = $referee->employments->last()->started_at;
 
         $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(RefereeStatus::FUTURE_EMPLOYMENT, $referee->status);
+        $this->assertEquals(RefereeStatus::future_employment(), $referee->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) use ($startedAt) {
             $this->assertTrue($referee->currentEmployment->started_at->lt($startedAt));
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
+            $this->assertEquals(RefereeStatus::bookable(), $referee->status);
         });
     }
 
@@ -71,16 +71,16 @@ class EmployControllerTest extends TestCase
     {
         $referee = Referee::factory()->released()->create();
 
-        $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
+        $this->assertEquals(RefereeStatus::released(), $referee->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(2, $referee->employments);
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
+            $this->assertEquals(RefereeStatus::bookable(), $referee->status);
         });
     }
 
@@ -92,7 +92,7 @@ class EmployControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([EmployController::class], $referee))
             ->assertForbidden();
     }
@@ -121,7 +121,7 @@ class EmployControllerTest extends TestCase
         $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $referee));
     }
 

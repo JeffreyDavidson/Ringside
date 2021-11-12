@@ -2,18 +2,11 @@
 
 namespace App\Enums;
 
-use MadWeb\Enum\Enum;
-
 /**
- * @method static Role ADMINISTRATOR()
- * @method static Role BASIC()
- * @method static Role SUPER_ADMINISTRATOR()
+ * @method static self administrator()
+ * @method static self basic()
+ * @method static self super_administrator()
  */
-final class Role extends Enum
+final class Role extends BaseEnum
 {
-    const __default = self::BASIC;
-
-    const BASIC = 'basic';
-    const ADMINISTRATOR = 'admin';
-    const SUPER_ADMINISTRATOR = 'super_admin';
 }

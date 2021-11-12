@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Models;
 
+use App\Enums\TitleStatus;
 use App\Models\Title;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -55,9 +56,8 @@ class TitleTest extends TestCase
     public function a_title_has_a_status()
     {
         $title = Title::factory()->create();
-        $title->setRawAttributes(['status' => 'example'], true);
 
-        $this->assertEquals('example', $title->getRawOriginal('status'));
+        $this->assertInstanceOf(TitleStatus::class, $title->status);
     }
 
     /**

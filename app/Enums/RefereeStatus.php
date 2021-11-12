@@ -2,26 +2,15 @@
 
 namespace App\Enums;
 
-use MadWeb\Enum\Enum;
-
 /**
- * @method static RefereeStatus BOOKABLE()
- * @method static RefereeStatus INJURED()
- * @method static RefereeStatus FUTURE_EMPLOYMENT()
- * @method static RefereeStatus RELEASED()
- * @method static RefereeStatus RETIRED()
- * @method static RefereeStatus SUSPENDED()
- * @method static RefereeStatus UNEMPLOYED()
+ * @method static self bookable()
+ * @method static self injured()
+ * @method static self future_employment()
+ * @method static self released()
+ * @method static self retired()
+ * @method static self suspended()
+ * @method static self unemployed()
  */
-final class RefereeStatus extends Enum
+final class RefereeStatus extends BaseEnum
 {
-    const __default = self::UNEMPLOYED;
-
-    const BOOKABLE = 'bookable';
-    const INJURED = 'injured';
-    const FUTURE_EMPLOYMENT = 'future-employment';
-    const RELEASED = 'released';
-    const RETIRED = 'retired';
-    const SUSPENDED = 'suspended';
-    const UNEMPLOYED = 'unemployed';
 }

@@ -7,10 +7,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Collection;
 use Illuminate\Testing\TestResponse;
+use Spatie\Enum\Phpunit\EnumAssertions;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use EnumAssertions;
 
     /**
      * Setup the test environment.
@@ -28,7 +30,7 @@ abstract class TestCase extends BaseTestCase
         // Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
     }
 
-    public function actAs($role = Role::BASIC, $attributes = [])
+    public function actAs($role, $attributes = [])
     {
         $user = User::factory()->withRole($role)->create($attributes);
 
@@ -82,8 +84,8 @@ abstract class TestCase extends BaseTestCase
     public function administrators()
     {
         return [
-            'administrator' => [Role::ADMINISTRATOR],
-            'super_administrator' => [Role::SUPER_ADMINISTRATOR],
+            'administrator' => [Role::administrator()],
+            'super_administrator' => [Role::super_administrator()],
         ];
     }
 }

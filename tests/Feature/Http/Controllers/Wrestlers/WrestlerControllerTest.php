@@ -25,7 +25,7 @@ class WrestlerControllerTest extends TestCase
     public function index_returns_a_view()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([WrestlersController::class, 'index']))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
@@ -43,7 +43,7 @@ class WrestlerControllerTest extends TestCase
     public function a_basic_user_cannot_view_wrestlers_index_page()
     {
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([WrestlersController::class, 'index']))
             ->assertForbidden();
     }
@@ -66,7 +66,7 @@ class WrestlerControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([WrestlersController::class, 'show'], $wrestler))
             ->assertViewIs('wrestlers.show')
             ->assertViewHas('wrestler', $wrestler);
@@ -77,7 +77,7 @@ class WrestlerControllerTest extends TestCase
      */
     public function a_basic_user_can_view_their_wrestler_profile()
     {
-        $this->actAs(Role::BASIC);
+        $this->actAs(Role::basic());
         $wrestler = Wrestler::factory()->create(['user_id' => auth()->user()]);
 
         $this
@@ -94,7 +94,7 @@ class WrestlerControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create(['user_id' => $otherUser->id]);
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([WrestlersController::class, 'show'], $wrestler))
             ->assertForbidden();
     }
@@ -119,7 +119,7 @@ class WrestlerControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->delete(action([WrestlersController::class, 'destroy'], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
@@ -134,7 +134,7 @@ class WrestlerControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->delete(action([WrestlersController::class, 'destroy'], $wrestler))
             ->assertForbidden();
     }

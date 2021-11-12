@@ -22,7 +22,7 @@ class TitlesControllerTest extends TestCase
     public function index_returns_a_view()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([TitlesController::class, 'index']))
             ->assertOk()
             ->assertViewIs('titles.index')
@@ -38,7 +38,7 @@ class TitlesControllerTest extends TestCase
     public function a_basic_user_cannot_view_titles_index_page()
     {
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([TitlesController::class, 'index']))
             ->assertForbidden();
     }
@@ -61,7 +61,7 @@ class TitlesControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([TitlesController::class, 'show'], $title))
             ->assertViewIs('titles.show')
             ->assertViewHas('title', $title);
@@ -75,7 +75,7 @@ class TitlesControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([TitlesController::class, 'show'], $title))
             ->assertForbidden();
     }
@@ -100,7 +100,7 @@ class TitlesControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->delete(action([TitlesController::class, 'destroy'], $title))
             ->assertRedirect(action([TitlesController::class, 'index']));
 
@@ -115,7 +115,7 @@ class TitlesControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->delete(action([TitlesController::class, 'destroy'], $title))
             ->assertForbidden();
     }
