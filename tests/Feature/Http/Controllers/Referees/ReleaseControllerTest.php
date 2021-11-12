@@ -29,13 +29,13 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->employments->last()->ended_at);
-            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
+            $this->assertEquals(RefereeStatus::released(), $referee->status);
         });
     }
 
@@ -47,14 +47,14 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->injured()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->injuries->last()->ended_at);
             $this->assertNotNull($referee->employments->last()->ended_at);
-            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
+            $this->assertEquals(RefereeStatus::released(), $referee->status);
         });
     }
 
@@ -66,14 +66,14 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->suspensions->last()->ended_at);
             $this->assertNotNull($referee->employments->last()->ended_at);
-            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
+            $this->assertEquals(RefereeStatus::released(), $referee->status);
         });
     }
 
@@ -85,7 +85,7 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([ReleaseController::class], $referee))
             ->assertForbidden();
     }
@@ -113,7 +113,7 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->unemployed()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee));
     }
 
@@ -128,7 +128,7 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee));
     }
 
@@ -143,7 +143,7 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->released()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee));
     }
 
@@ -159,7 +159,7 @@ class ReleaseControllerTest extends TestCase
         $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $referee));
     }
 

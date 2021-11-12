@@ -30,28 +30,28 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
             'remember_token' => Str::random(10),
-            'role' => Role::__default,
+            'role' => Role::basic(),
         ];
     }
 
     public function superAdministrator(): self
     {
         return $this->state([
-            'role' => Role::SUPER_ADMINISTRATOR,
+            'role' => Role::super_administrator()(),
         ]);
     }
 
     public function administrator(): self
     {
         return $this->state([
-            'role' => Role::ADMINISTRATOR,
+            'role' => Role::administrator(),
         ]);
     }
 
     public function basicUser(): self
     {
         return $this->state([
-            'role' => Role::BASIC,
+            'role' => Role::basic(),
         ]);
     }
 

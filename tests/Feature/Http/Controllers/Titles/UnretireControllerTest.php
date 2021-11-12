@@ -27,13 +27,13 @@ class UnretireControllerTest extends TestCase
         $title = Title::factory()->retired()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([UnretireController::class], $title))
             ->assertRedirect(action([TitlesController::class, 'index']));
 
         tap($title->fresh(), function ($title) {
             $this->assertNotNull($title->retirements->last()->ended_at);
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
+            $this->assertEquals(TitleStatus::active(), $title->status);
         });
     }
 
@@ -45,7 +45,7 @@ class UnretireControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([UnretireController::class], $title))
             ->assertForbidden();
     }
@@ -73,7 +73,7 @@ class UnretireControllerTest extends TestCase
 
         $title = Title::factory()->{$factoryState}()->create();
 
-        $this->actAs(Role::ADMINISTRATOR)
+        $this->actAs(Role::administrator())
             ->patch(action([UnretireController::class], $title));
     }
 

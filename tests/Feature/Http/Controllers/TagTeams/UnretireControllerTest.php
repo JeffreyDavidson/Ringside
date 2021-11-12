@@ -30,17 +30,17 @@ class UnretireControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->retired()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([UnretireController::class], $tagTeam))
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertNotNull($tagTeam->retirements->last()->ended_at);
-            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
 
             foreach ($tagTeam->currentWrestlers as $wrestler) {
                 $this->assertNotNull($wrestler->retirements->last()->ended_at);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
+                $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
             }
         });
     }
@@ -53,7 +53,7 @@ class UnretireControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([UnretireController::class], $tagTeam))
             ->assertForbidden();
     }
@@ -82,7 +82,7 @@ class UnretireControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([UnretireController::class], $tagTeam));
     }
 

@@ -67,7 +67,7 @@ class Event extends Model
      */
     public function scopeScheduled($query)
     {
-        return $query->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
+        return $query->where('status', EventStatus::scheduled())->whereNotNull('date');
     }
 
     /**
@@ -78,7 +78,7 @@ class Event extends Model
      */
     public function scopeUnscheduled($query)
     {
-        return $query->where('status', EventStatus::UNSCHEDULED)->whereNull('date');
+        return $query->where('status', EventStatus::unscheduled())->whereNull('date');
     }
 
     /**
@@ -89,7 +89,7 @@ class Event extends Model
      */
     public function scopePast($query)
     {
-        return $query->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
+        return $query->where('status', EventStatus::past())->where('date', '<', now()->toDateString());
     }
 
     /**
@@ -140,9 +140,9 @@ class Event extends Model
     public function updateStatus()
     {
         $this->status = match (true) {
-            $this->isScheduled() => EventStatus::SCHEDULED,
-            $this->isPast() => EventStatus::PAST,
-            default => EventStatus::UNSCHEDULED
+            $this->isScheduled() => EventStatus::scheduled(),
+            $this->isPast() => EventStatus::past(),
+            default => EventStatus::unscheduled()
         };
 
         return $this;

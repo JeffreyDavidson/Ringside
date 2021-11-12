@@ -31,13 +31,13 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertNotNull($wrestler->employments->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
+            $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
         });
     }
 
@@ -49,14 +49,14 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertNotNull($wrestler->injuries->last()->ended_at);
             $this->assertNotNull($wrestler->employments->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
+            $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
         });
     }
 
@@ -68,14 +68,14 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertNotNull($wrestler->suspensions->last()->ended_at);
             $this->assertNotNull($wrestler->employments->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
+            $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
         });
     }
 
@@ -88,11 +88,11 @@ class ReleaseControllerTest extends TestCase
         $wrestler = $tagTeam->currentWrestlers()->first();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::UNbookable(), $tagTeam->status);
         });
     }
 
@@ -104,7 +104,7 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([ReleaseController::class], $wrestler))
             ->assertForbidden();
     }
@@ -133,7 +133,7 @@ class ReleaseControllerTest extends TestCase
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $wrestler));
     }
 

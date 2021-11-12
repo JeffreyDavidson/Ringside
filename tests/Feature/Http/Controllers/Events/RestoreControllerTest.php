@@ -31,7 +31,7 @@ class RestoreControllerTest extends TestCase
      */
     public function invoke_restores_a_soft_deleted_event_and_redirects()
     {
-        $this->actAs(Role::ADMINISTRATOR)
+        $this->actAs(Role::administrator())
             ->patch(action([RestoreController::class], $this->event))
             ->assertRedirect(action([EventsController::class, 'index']));
 
@@ -43,7 +43,7 @@ class RestoreControllerTest extends TestCase
      */
     public function a_basic_user_cannot_restore_a_deleted_event()
     {
-        $this->actAs(Role::BASIC)
+        $this->actAs(Role::basic())
             ->patch(action([RestoreController::class], $this->event))
             ->assertForbidden();
     }

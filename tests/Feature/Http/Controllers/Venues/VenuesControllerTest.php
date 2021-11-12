@@ -22,7 +22,7 @@ class VenuesControllerTest extends TestCase
     public function index_returns_a_view()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([VenuesController::class, 'index']))
             ->assertOk()
             ->assertViewIs('venues.index');
@@ -34,7 +34,7 @@ class VenuesControllerTest extends TestCase
     public function a_basic_user_cannot_view_venues_index_page()
     {
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([VenuesController::class, 'index']))
             ->assertForbidden();
     }
@@ -57,7 +57,7 @@ class VenuesControllerTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([VenuesController::class, 'show'], $venue))
             ->assertViewIs('venues.show')
             ->assertViewHas('venue', $venue);
@@ -71,7 +71,7 @@ class VenuesControllerTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([VenuesController::class, 'show'], $venue))
             ->assertForbidden();
     }
@@ -96,7 +96,7 @@ class VenuesControllerTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->delete(action([VenuesController::class, 'destroy'], $venue))
             ->assertRedirect(action([VenuesController::class, 'index']));
 
@@ -111,7 +111,7 @@ class VenuesControllerTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->delete(action([VenuesController::class, 'destroy'], $venue))
             ->assertForbidden();
     }

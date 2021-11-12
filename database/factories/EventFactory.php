@@ -26,7 +26,7 @@ class EventFactory extends Factory
         return [
             'name' => $this->faker->words(2, true),
             'date' => null,
-            'status' => EventStatus::__default,
+            'status' => EventStatus::unscheduled(),
             'venue_id' => null,
             'preview' => null,
         ];
@@ -35,7 +35,7 @@ class EventFactory extends Factory
     public function unscheduled(): self
     {
         return $this->state([
-            'status' => EventStatus::UNSCHEDULED,
+            'status' => EventStatus::unscheduled(),
             'date' => null,
         ])->afterCreating(function (Event $event) {
             $event->save();
@@ -45,7 +45,7 @@ class EventFactory extends Factory
     public function scheduled(): self
     {
         return $this->state([
-            'status' => EventStatus::SCHEDULED,
+            'status' => EventStatus::scheduled(),
             'date' => Carbon::tomorrow(),
         ])->afterCreating(function (Event $event) {
             $event->save();
@@ -55,7 +55,7 @@ class EventFactory extends Factory
     public function past(): self
     {
         return $this->state([
-            'status' => EventStatus::PAST,
+            'status' => EventStatus::past(),
             'date' => Carbon::yesterday(),
         ])->afterCreating(function (Event $event) {
             $event->save();

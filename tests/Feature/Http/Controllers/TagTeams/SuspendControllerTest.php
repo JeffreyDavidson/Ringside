@@ -29,13 +29,13 @@ class SuspendControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([SuspendController::class], $tagTeam))
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertCount(1, $tagTeam->suspensions);
-            $this->assertEquals(TagTeamStatus::SUSPENDED, $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::suspended(), $tagTeam->status);
         });
     }
 
@@ -47,7 +47,7 @@ class SuspendControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([SuspendController::class], $tagTeam))
             ->assertForbidden();
     }
@@ -76,7 +76,7 @@ class SuspendControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([SuspendController::class], $tagTeam));
     }
 

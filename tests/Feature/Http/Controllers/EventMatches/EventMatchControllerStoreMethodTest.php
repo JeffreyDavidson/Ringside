@@ -39,7 +39,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
         $wrestlerB = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([EventMatchesController::class, 'create'], $event))
             ->post(
                 action([EventMatchesController::class, 'store'], $event),
@@ -74,7 +74,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
         $wrestlerB = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([EventMatchesController::class, 'create'], $event))
             ->post(
                 action([EventMatchesController::class, 'store'], $event),
@@ -100,7 +100,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
         $event = Event::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->from(action([EventMatchesController::class, 'create'], $event))
             ->post(
                 action([EventMatchesController::class, 'store'], $event),

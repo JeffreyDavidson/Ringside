@@ -28,7 +28,7 @@ class StableControllerUpdateMethodTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([StablesController::class, 'edit'], $stable))
             ->assertViewIs('stables.edit')
             ->assertViewHas('stable', $stable);
@@ -42,7 +42,7 @@ class StableControllerUpdateMethodTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([StablesController::class, 'edit'], $stable))
             ->assertForbidden();
     }
@@ -67,7 +67,7 @@ class StableControllerUpdateMethodTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'edit'], $stable))
             ->put(
                 action([StablesController::class, 'update'], $stable),
@@ -86,7 +86,7 @@ class StableControllerUpdateMethodTest extends TestCase
         $wrestlers = Wrestler::factory()->bookable()->times(2)->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'edit'], $stable))
             ->put(
                 action([StablesController::class, 'update'], $stable),
@@ -108,7 +108,7 @@ class StableControllerUpdateMethodTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->from(action([StablesController::class, 'edit'], $stable))
             ->put(
                 action([StablesController::class, 'update'], $stable),

@@ -33,12 +33,12 @@ class UnretireControllerTest extends TestCase
         $stable = Stable::factory()->retired()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([UnretireController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) use ($now) {
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
+            $this->assertEquals(StableStatus::active(), $stable->status);
             $this->assertCount(1, $stable->retirements);
             $this->assertEquals($now->toDateTimeString(), $stable->fresh()->retirements()->latest()->first()->ended_at);
         });
@@ -52,7 +52,7 @@ class UnretireControllerTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([UnretireController::class], $stable))
             ->assertForbidden();
     }
@@ -81,7 +81,7 @@ class UnretireControllerTest extends TestCase
         $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([UnretireController::class], $stable));
     }
 

@@ -34,7 +34,7 @@ class RestoreControllerTest extends TestCase
     public function invoke_restores_a_soft_deleted_referee_and_redirects()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([RestoreController::class], $this->referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
@@ -47,7 +47,7 @@ class RestoreControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_referee()
     {
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([RestoreController::class], $this->referee))
             ->assertForbidden();
     }

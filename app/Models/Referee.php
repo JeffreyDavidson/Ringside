@@ -52,14 +52,14 @@ class Referee extends SingleRosterMember implements Bookable
     {
         $this->status = match (true) {
             $this->isCurrentlyEmployed() => match (true) {
-                $this->isInjured() => RefereeStatus::INJURED,
-                $this->isSuspended() => RefereeStatus::SUSPENDED,
-                $this->isBookable() => RefereeStatus::BOOKABLE,
+                $this->isInjured() => RefereeStatus::injured(),
+                $this->isSuspended() => RefereeStatus::suspended(),
+                $this->isBookable() => RefereeStatus::bookable(),
             },
-            $this->hasFutureEmployment() => RefereeStatus::FUTURE_EMPLOYMENT,
-            $this->isReleased() => RefereeStatus::RELEASED,
-            $this->isRetired() => RefereeStatus::RETIRED,
-            default => RefereeStatus::UNEMPLOYED
+            $this->hasFutureEmployment() => RefereeStatus::future_employment(),
+            $this->isReleased() => RefereeStatus::released(),
+            $this->isRetired() => RefereeStatus::retired(),
+            default => RefereeStatus::unemployed()
         };
 
         return $this;

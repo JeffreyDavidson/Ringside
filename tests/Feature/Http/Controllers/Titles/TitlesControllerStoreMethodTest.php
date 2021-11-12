@@ -23,7 +23,7 @@ class TitlesControllerStoreMethodTest extends TestCase
     public function create_returns_a_view()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->get(action([TitlesController::class, 'create']))
             ->assertViewIs('titles.create')
             ->assertViewHas('title', new Title);
@@ -35,7 +35,7 @@ class TitlesControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_creating_a_title()
     {
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->get(action([TitlesController::class, 'create']))
             ->assertForbidden();
     }
@@ -56,7 +56,7 @@ class TitlesControllerStoreMethodTest extends TestCase
     public function store_creates_a_title_and_redirects()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([TitlesController::class, 'create']))
             ->post(action([TitlesController::class, 'store']), TitleRequestDataFactory::new()->create([
                 'name' => 'Example Title',
@@ -75,7 +75,7 @@ class TitlesControllerStoreMethodTest extends TestCase
     public function an_activation_is_not_created_for_the_title_if_activated_at_is_filled_in_request()
     {
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([TitlesController::class, 'create']))
             ->post(
                 action([TitlesController::class, 'store']),
@@ -95,7 +95,7 @@ class TitlesControllerStoreMethodTest extends TestCase
         $activatedAt = now()->toDateTimeString();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->from(action([TitlesController::class, 'create']))
             ->post(
                 action([TitlesController::class, 'store']),
@@ -114,7 +114,7 @@ class TitlesControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_create_a_title()
     {
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->from(action([TitlesController::class, 'create']))
             ->post(action([TitlesController::class, 'store']), TitleRequestDataFactory::new()->create())
             ->assertForbidden();

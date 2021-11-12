@@ -15,7 +15,7 @@ trait Competable
      */
     public function scopeCompetable(Builder $query)
     {
-        return $query->where('status', TitleStatus::ACTIVE);
+        return $query->where('status', TitleStatus::active());
     }
 
     /**

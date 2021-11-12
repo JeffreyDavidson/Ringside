@@ -29,13 +29,13 @@ class RetireControllerTest extends TestCase
         $referee = Referee::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([RetireController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->retirements);
-            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
+            $this->assertEquals(RefereeStatus::retired(), $referee->status);
         });
     }
 
@@ -47,13 +47,13 @@ class RetireControllerTest extends TestCase
         $referee = Referee::factory()->injured()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([RetireController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->retirements);
-            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
+            $this->assertEquals(RefereeStatus::retired(), $referee->status);
         });
     }
 
@@ -65,13 +65,13 @@ class RetireControllerTest extends TestCase
         $referee = Referee::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([RetireController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->retirements);
-            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
+            $this->assertEquals(RefereeStatus::retired(), $referee->status);
         });
     }
 
@@ -83,7 +83,7 @@ class RetireControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([RetireController::class], $referee))
             ->assertForbidden();
     }
@@ -112,7 +112,7 @@ class RetireControllerTest extends TestCase
         $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([RetireController::class], $referee));
     }
 

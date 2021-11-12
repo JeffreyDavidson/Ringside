@@ -30,16 +30,16 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $tagTeam))
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertNotNull($tagTeam->employments->last()->ended_at);
-            $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::released(), $tagTeam->status);
 
             foreach ($tagTeam->currentWrestlers as $wrestler) {
-                $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
+                $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
             }
         });
     }
@@ -52,17 +52,17 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $tagTeam))
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertNotNull($tagTeam->suspensions->last()->ended_at);
             $this->assertNotNull($tagTeam->employments->last()->ended_at);
-            $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::released(), $tagTeam->status);
 
             foreach ($tagTeam->currentWrestlers as $wrestler) {
-                $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
+                $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
             }
         });
     }
@@ -75,7 +75,7 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([ReleaseController::class], $tagTeam))
             ->assertForbidden();
     }
@@ -103,7 +103,7 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->unemployed()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $tagTeam));
     }
 
@@ -118,7 +118,7 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $tagTeam));
     }
 
@@ -133,7 +133,7 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->released()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $tagTeam));
     }
 
@@ -149,7 +149,7 @@ class ReleaseControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([ReleaseController::class], $tagTeam));
     }
 

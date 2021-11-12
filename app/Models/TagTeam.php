@@ -501,14 +501,14 @@ class TagTeam extends Model implements Bookable, Employable, Releasable, Retirab
     {
         $this->status = match (true) {
             $this->isCurrentlyEmployed() => match (true) {
-                $this->isSuspended() => TagTeamStatus::SUSPENDED,
-                $this->isUnbookable() => TagTeamStatus::UNBOOKABLE,
-                $this->isBookable() => TagTeamStatus::BOOKABLE,
+                $this->isSuspended() => TagTeamStatus::suspended(),
+                $this->isUnbookable() => TagTeamStatus::UNbookable(),
+                $this->isBookable() => TagTeamStatus::bookable(),
             },
-            $this->hasFutureEmployment() => TagTeamStatus::FUTURE_EMPLOYMENT,
-            $this->isReleased() => TagTeamStatus::RELEASED,
-            $this->isRetired() => TagTeamStatus::RETIRED,
-            default => TagTeamStatus::UNEMPLOYED
+            $this->hasFutureEmployment() => TagTeamStatus::future_employment(),
+            $this->isReleased() => TagTeamStatus::released(),
+            $this->isRetired() => TagTeamStatus::retired(),
+            default => TagTeamStatus::unemployed()
         };
 
         return $this;

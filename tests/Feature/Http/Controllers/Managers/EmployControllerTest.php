@@ -29,16 +29,16 @@ class EmployControllerTest extends TestCase
         $manager = Manager::factory()->unemployed()->create();
 
         $this->assertCount(0, $manager->employments);
-        $this->assertEquals(ManagerStatus::UNEMPLOYED, $manager->status);
+        $this->assertEquals(ManagerStatus::unemployed(), $manager->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->employments);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+            $this->assertEquals(ManagerStatus::available(), $manager->status);
         });
     }
 
@@ -51,16 +51,16 @@ class EmployControllerTest extends TestCase
         $startedAt = $manager->employments->last()->started_at;
 
         $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(ManagerStatus::FUTURE_EMPLOYMENT, $manager->status);
+        $this->assertEquals(ManagerStatus::future_employment(), $manager->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) use ($startedAt) {
             $this->assertTrue($manager->currentEmployment->started_at->lt($startedAt));
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+            $this->assertEquals(ManagerStatus::available(), $manager->status);
         });
     }
 
@@ -71,16 +71,16 @@ class EmployControllerTest extends TestCase
     {
         $manager = Manager::factory()->released()->create();
 
-        $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
+        $this->assertEquals(ManagerStatus::released(), $manager->status);
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(2, $manager->employments);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
+            $this->assertEquals(ManagerStatus::available(), $manager->status);
         });
     }
 
@@ -92,7 +92,7 @@ class EmployControllerTest extends TestCase
         $manager = Manager::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::BASIC)
+            ->actAs(Role::basic())
             ->patch(action([EmployController::class], $manager))
             ->assertForbidden();
     }
@@ -121,7 +121,7 @@ class EmployControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::ADMINISTRATOR)
+            ->actAs(Role::administrator())
             ->patch(action([EmployController::class], $manager));
     }
 

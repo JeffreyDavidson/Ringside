@@ -56,11 +56,11 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     public function updateStatus()
     {
         $this->status = match (true) {
-            $this->isCurrentlyActivated() => StableStatus::ACTIVE,
-            $this->hasFutureActivation() => StableStatus::FUTURE_ACTIVATION,
-            $this->isDeactivated() => StableStatus::INACTIVE,
-            $this->isRetired() => StableStatus::RETIRED,
-            default => StableStatus::UNACTIVATED
+            $this->isCurrentlyActivated() => StableStatus::active(),
+            $this->hasFutureActivation() => StableStatus::future_activation(),
+            $this->isDeactivated() => StableStatus::inactive(),
+            $this->isRetired() => StableStatus::retired(),
+            default => StableStatus::unactivated()
         };
 
         return $this;

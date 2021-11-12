@@ -74,11 +74,11 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     public function updateStatus()
     {
         $this->status = match (true) {
-            $this->isCurrentlyActivated() => TitleStatus::ACTIVE,
-            $this->hasFutureActivation() => TitleStatus::FUTURE_ACTIVATION,
-            $this->isDeactivated() => TitleStatus::INACTIVE,
-            $this->isRetired() => TitleStatus::RETIRED,
-            default => TitleStatus::UNACTIVATED
+            $this->isCurrentlyActivated() => TitleStatus::active(),
+            $this->hasFutureActivation() => TitleStatus::future_activation(),
+            $this->isDeactivated() => TitleStatus::inactive(),
+            $this->isRetired() => TitleStatus::retired(),
+            default => TitleStatus::unactivated()
         };
 
         return $this;

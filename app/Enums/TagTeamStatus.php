@@ -2,26 +2,15 @@
 
 namespace App\Enums;
 
-use MadWeb\Enum\Enum;
-
 /**
- * @method static TagTeamStatus BOOKABLE()
- * @method static TagTeamStatus UNBOOKABLE()
- * @method static TagTeamStatus FUTURE_EMPLOYMENT()
- * @method static TagTeamStatus RELEASED()
- * @method static TagTeamStatus RETIRED()
- * @method static TagTeamStatus SUSPENDED()
- * @method static TagTeamStatus UNEMPLOYED()
+ * @method static self bookable()
+ * @method static self unbookable()
+ * @method static self future_employment()
+ * @method static self released()
+ * @method static self retired()
+ * @method static self suspended()
+ * @method static self unemployed()
  */
-final class TagTeamStatus extends Enum
+final class TagTeamStatus extends BaseEnum
 {
-    const __default = self::UNEMPLOYED;
-
-    const BOOKABLE = 'bookable';
-    const UNBOOKABLE = 'unbookable';
-    const FUTURE_EMPLOYMENT = 'future-employment';
-    const RELEASED = 'released';
-    const RETIRED = 'retired';
-    const SUSPENDED = 'suspended';
-    const UNEMPLOYED = 'unemployed';
 }

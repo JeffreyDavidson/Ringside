@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Models;
 
+use App\Enums\ManagerStatus;
 use App\Models\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -82,9 +83,8 @@ class ManagerTest extends TestCase
     public function a_manager_has_a_status()
     {
         $manager = Manager::factory()->create();
-        $manager->setRawAttributes(['status' => 'example'], true);
 
-        $this->assertEquals('example', $manager->getRawOriginal('status'));
+        $this->assertInstanceOf(ManagerStatus::class, $manager->status);
     }
 
     /**

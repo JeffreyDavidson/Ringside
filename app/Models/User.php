@@ -45,7 +45,7 @@ class User extends Authenticatable
      */
     public function isSuperAdministrator()
     {
-        return $this->role->is(Role::SUPER_ADMINISTRATOR);
+        return $this->role->equals(Role::super_administrator());
     }
 
     /**
@@ -55,7 +55,7 @@ class User extends Authenticatable
      */
     public function isAdministrator()
     {
-        return $this->role->is(Role::ADMINISTRATOR);
+        return $this->role->equals(Role::administrator());
     }
 
     /**
