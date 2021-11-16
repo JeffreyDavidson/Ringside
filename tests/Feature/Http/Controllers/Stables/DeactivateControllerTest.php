@@ -10,7 +10,6 @@ use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Stables\DeactivateController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -21,8 +20,6 @@ use Tests\TestCase;
  */
 class DeactivateControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

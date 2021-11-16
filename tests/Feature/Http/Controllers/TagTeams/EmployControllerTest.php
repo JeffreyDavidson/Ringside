@@ -9,7 +9,6 @@ use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\TagTeams\EmployController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -20,8 +19,6 @@ use Tests\TestCase;
  */
 class EmployControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

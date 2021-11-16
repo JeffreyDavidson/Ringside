@@ -9,7 +9,6 @@ use App\Models\TagTeam;
 use App\Models\User;
 use App\Models\Wrestler;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Rule;
 use Tests\Factories\TagTeamRequestDataFactory;
 use Tests\TestCase;
@@ -22,8 +21,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

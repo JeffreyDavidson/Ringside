@@ -5,7 +5,6 @@ namespace Tests\Integration\Models;
 use App\Models\Event;
 use App\Models\Venue;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -14,8 +13,6 @@ use Tests\TestCase;
  */
 class EventTest extends TestCase
 {
-    use RefreshDatabase;
-
     private $scheduledEvent;
     private $unscheduledEvent;
     private $pastEvent;

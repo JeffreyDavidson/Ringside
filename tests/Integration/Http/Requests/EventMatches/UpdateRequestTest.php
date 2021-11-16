@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Requests\EventMatches;
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -17,8 +16,7 @@ use Tests\ValidatesRequests;
  */
 class UpdateRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\RestoreController;
 use App\Models\Event;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -15,8 +14,6 @@ use Tests\TestCase;
  */
 class RestoreControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public Event $event;
 
     public function setUp(): void

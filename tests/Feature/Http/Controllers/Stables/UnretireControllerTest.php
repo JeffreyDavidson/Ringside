@@ -9,7 +9,6 @@ use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\Stables\UnretireController;
 use App\Models\Stable;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -20,8 +19,6 @@ use Tests\TestCase;
  */
 class UnretireControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\TagTeams\RestoreController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class RestoreControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public TagTeam $tagTeam;
 
     public function setUp(): void

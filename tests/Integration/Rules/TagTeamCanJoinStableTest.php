@@ -5,7 +5,6 @@ namespace Tests\Integration\Rules;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Rules\TagTeamCanJoinStable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -13,8 +12,6 @@ use Tests\TestCase;
  */
 class TagTeamCanJoinStableTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

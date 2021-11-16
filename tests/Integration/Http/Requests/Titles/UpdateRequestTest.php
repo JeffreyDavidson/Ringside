@@ -6,7 +6,6 @@ use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Activation;
 use App\Models\Title;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TitleRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -18,8 +17,7 @@ use Tests\ValidatesRequests;
  */
 class UpdateRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

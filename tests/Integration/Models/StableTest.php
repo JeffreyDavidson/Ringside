@@ -3,7 +3,6 @@
 namespace Tests\Integration\Models;
 
 use App\Models\Stable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -11,8 +10,7 @@ use Tests\TestCase;
  */
 class StableTest extends TestCase
 {
-    use RefreshDatabase,
-        Concerns\RetirableContractTests;
+    use Concerns\RetirableContractTests;
 
     private $activeStable;
     private $futureActivatedStable;

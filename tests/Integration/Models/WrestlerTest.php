@@ -4,7 +4,6 @@ namespace Tests\Integration\Models;
 
 use App\Enums\WrestlerStatus;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -12,8 +11,7 @@ use Tests\TestCase;
  */
 class WrestlerTest extends TestCase
 {
-    use RefreshDatabase,
-        Concerns\EmployableContractTests,
+    use Concerns\EmployableContractTests,
         Concerns\InjurableContractTests,
         Concerns\RetirableContractTests,
         Concerns\StableMemberContractTests,

@@ -4,7 +4,6 @@ namespace Tests\Integration\Models;
 
 use App\Enums\TagTeamStatus;
 use App\Models\TagTeam;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -12,8 +11,7 @@ use Tests\TestCase;
  */
 class TagTeamTest extends TestCase
 {
-    use RefreshDatabase,
-        Concerns\EmployableContractTests,
+    use Concerns\EmployableContractTests,
         Concerns\RetirableContractTests,
         Concerns\StableMemberContractTests,
         Concerns\SuspendableContractTests;

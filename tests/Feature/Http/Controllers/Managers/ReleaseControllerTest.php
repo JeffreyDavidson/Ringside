@@ -10,7 +10,6 @@ use App\Http\Controllers\Managers\ReleaseController;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -21,8 +20,6 @@ use Tests\TestCase;
  */
 class ReleaseControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
 use App\Models\Event;
 use App\Models\Venue;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -15,8 +14,6 @@ use Tests\TestCase;
  */
 class EventControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     private Event $event;
 
     public function setUp(): void
@@ -114,7 +111,6 @@ class EventControllerTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
     public function deletes_an_event_and_redirects()
     {

@@ -8,7 +8,6 @@ use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\StableRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -20,8 +19,7 @@ use Tests\ValidatesRequests;
  */
 class UpdateRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

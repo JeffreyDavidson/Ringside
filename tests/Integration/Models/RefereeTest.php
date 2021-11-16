@@ -4,7 +4,6 @@ namespace Tests\Integration\Models;
 
 use App\Enums\RefereeStatus;
 use App\Models\Referee;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -12,8 +11,7 @@ use Tests\TestCase;
  */
 class RefereeTest extends TestCase
 {
-    use RefreshDatabase,
-        Concerns\EmployableContractTests,
+    use Concerns\EmployableContractTests,
         Concerns\InjurableContractTests,
         Concerns\RetirableContractTests,
         Concerns\SuspendableContractTests;

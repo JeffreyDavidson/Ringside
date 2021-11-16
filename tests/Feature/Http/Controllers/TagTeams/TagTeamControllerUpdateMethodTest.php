@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TagTeamRequestDataFactory;
 use Tests\TestCase;
 
@@ -18,8 +17,6 @@ use Tests\TestCase;
  */
 class TagTeamControllerUpdateMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

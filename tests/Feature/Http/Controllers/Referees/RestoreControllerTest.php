@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\RestoreController;
 use App\Models\Referee;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class RestoreControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public Referee $referee;
 
     public function setUp(): void

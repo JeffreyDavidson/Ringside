@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class ManagerControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */
