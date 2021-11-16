@@ -8,7 +8,6 @@ use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Titles\UnretireController;
 use App\Models\Title;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class UnretireControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

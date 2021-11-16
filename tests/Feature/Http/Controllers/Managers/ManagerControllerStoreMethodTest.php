@@ -5,7 +5,6 @@ namespace Tests\Feature\Http\Controllers\Managers;
 use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\ManagerRequestDataFactory;
 use Tests\TestCase;
 
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class ManagerControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

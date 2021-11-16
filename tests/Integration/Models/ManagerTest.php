@@ -4,7 +4,6 @@ namespace Tests\Integration\Models;
 
 use App\Enums\ManagerStatus;
 use App\Models\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -12,8 +11,7 @@ use Tests\TestCase;
  */
 class ManagerTest extends TestCase
 {
-    use RefreshDatabase,
-        Concerns\EmployableContractTests,
+    use Concerns\EmployableContractTests,
         Concerns\InjurableContractTests,
         Concerns\RetirableContractTests,
         Concerns\SuspendableContractTests;

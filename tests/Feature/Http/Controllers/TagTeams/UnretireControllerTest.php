@@ -9,7 +9,6 @@ use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\TagTeams\UnretireController;
 use App\Models\TagTeam;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**ss
@@ -20,8 +19,6 @@ use Tests\TestCase;
  */
 class UnretireControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

@@ -7,7 +7,6 @@ use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Titles\DeactivateController;
 use App\Models\Title;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -16,8 +15,6 @@ use Tests\TestCase;
  */
 class DeactivateControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

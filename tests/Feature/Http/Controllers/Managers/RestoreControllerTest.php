@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\RestoreController;
 use App\Models\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class RestoreControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public Manager $manager;
 
     public function setUp(): void

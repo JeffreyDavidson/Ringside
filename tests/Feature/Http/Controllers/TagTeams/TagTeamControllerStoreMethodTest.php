@@ -7,7 +7,6 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TagTeamRequestDataFactory;
 use Tests\TestCase;
 
@@ -19,8 +18,6 @@ use Tests\TestCase;
  */
 class TagTeamControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

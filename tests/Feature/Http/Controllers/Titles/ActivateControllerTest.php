@@ -8,7 +8,6 @@ use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class ActivateControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

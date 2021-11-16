@@ -8,7 +8,6 @@ use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\SuspendController;
 use App\Models\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -19,8 +18,6 @@ use Tests\TestCase;
  */
 class SuspendControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

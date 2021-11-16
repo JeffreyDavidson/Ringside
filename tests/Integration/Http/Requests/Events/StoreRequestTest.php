@@ -6,7 +6,6 @@ use App\Http\Requests\Events\StoreRequest;
 use App\Models\Event;
 use App\Models\User;
 use Database\Seeders\MatchTypesTableSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -18,8 +17,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     public function setUp(): void
     {

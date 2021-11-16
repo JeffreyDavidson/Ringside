@@ -6,7 +6,6 @@ use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Employment;
 use App\Models\Referee;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\RefereeRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -18,8 +17,7 @@ use Tests\ValidatesRequests;
  */
 class UpdateRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

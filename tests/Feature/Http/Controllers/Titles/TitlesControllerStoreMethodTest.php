@@ -5,7 +5,6 @@ namespace Tests\Feature\Http\Controllers\Titles;
 use App\Enums\Role;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TitleRequestDataFactory;
 use Tests\TestCase;
 
@@ -15,8 +14,6 @@ use Tests\TestCase;
  */
 class TitlesControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

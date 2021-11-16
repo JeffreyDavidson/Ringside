@@ -5,7 +5,6 @@ namespace Tests\Feature\Http\Controllers\Venues;
 use App\Enums\Role;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Models\Venue;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\VenueRequestDataFactory;
 use Tests\TestCase;
 
@@ -15,8 +14,6 @@ use Tests\TestCase;
  */
 class VenuesControllerUpdateMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

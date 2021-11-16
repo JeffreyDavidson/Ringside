@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Requests\Wrestlers;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Models\User;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\Rule;
 use Tests\Factories\WrestlerRequestDataFactory;
 use Tests\TestCase;
@@ -18,8 +17,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

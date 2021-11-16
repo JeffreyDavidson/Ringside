@@ -9,7 +9,6 @@ use App\Models\Referee;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Database\Seeders\MatchTypesTableSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventMatchRequestDataFactory;
 use Tests\TestCase;
 
@@ -19,8 +18,6 @@ use Tests\TestCase;
  */
 class EventMatchControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function setUp(): void
     {
         parent::setUp();

@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Requests\EventMatches;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\User;
 use Database\Seeders\MatchTypesTableSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventMatchRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -17,8 +16,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     public function setUp(): void
     {

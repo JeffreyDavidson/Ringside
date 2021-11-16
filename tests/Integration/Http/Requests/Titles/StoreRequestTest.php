@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Requests\Titles;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Models\Title;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\TitleRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -17,8 +16,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

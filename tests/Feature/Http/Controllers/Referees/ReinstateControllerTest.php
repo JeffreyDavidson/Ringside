@@ -8,7 +8,6 @@ use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReinstateController;
 use App\Models\Referee;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -19,8 +18,6 @@ use Tests\TestCase;
  */
 class ReinstateControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

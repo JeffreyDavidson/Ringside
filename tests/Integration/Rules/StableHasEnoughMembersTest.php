@@ -3,7 +3,6 @@
 namespace Tests\Integration\Rules;
 
 use App\Rules\StableHasEnoughMembers;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -11,8 +10,6 @@ use Tests\TestCase;
  */
 class StableHasEnoughMembersTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

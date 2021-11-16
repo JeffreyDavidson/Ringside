@@ -10,7 +10,6 @@ use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Stables\ActivateController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -21,8 +20,6 @@ use Tests\TestCase;
  */
 class ActivateControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

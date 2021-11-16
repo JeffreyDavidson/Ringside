@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\StableRequestDataFactory;
 use Tests\TestCase;
 
@@ -18,8 +17,6 @@ use Tests\TestCase;
  */
 class StableControllerUpdateMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

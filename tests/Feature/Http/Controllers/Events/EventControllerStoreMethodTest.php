@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
 use App\Models\Event;
 use App\Models\Venue;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
 
@@ -16,8 +15,6 @@ use Tests\TestCase;
  */
 class EventControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

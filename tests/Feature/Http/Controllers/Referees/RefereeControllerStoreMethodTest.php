@@ -5,7 +5,6 @@ namespace Tests\Feature\Http\Controllers\Referees;
 use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\RefereeRequestDataFactory;
 use Tests\TestCase;
 
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class RefereeControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

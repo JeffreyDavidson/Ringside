@@ -8,7 +8,6 @@ use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\StableRequestDataFactory;
 use Tests\TestCase;
 
@@ -20,8 +19,6 @@ use Tests\TestCase;
  */
 class StableControllerStoreMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

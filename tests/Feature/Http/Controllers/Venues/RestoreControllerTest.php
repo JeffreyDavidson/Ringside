@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Venues\RestoreController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Models\Venue;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -15,8 +14,6 @@ use Tests\TestCase;
  */
 class RestoreControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public Venue $venue;
 
     public function setUp(): void

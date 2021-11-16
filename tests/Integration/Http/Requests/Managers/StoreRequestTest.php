@@ -4,7 +4,6 @@ namespace Tests\Integration\Http\Requests\Managers;
 
 use App\Http\Requests\Managers\StoreRequest;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\ManagerRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -16,8 +15,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class TagTeamControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

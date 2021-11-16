@@ -8,7 +8,6 @@ use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Managers\InjureController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -19,8 +18,6 @@ use Tests\TestCase;
  */
 class InjureControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

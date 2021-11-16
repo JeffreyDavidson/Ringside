@@ -5,7 +5,6 @@ namespace Tests\Feature\Http\Controllers\Wrestlers;
 use App\Enums\Role;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\WrestlerRequestDataFactory;
 use Tests\TestCase;
 
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class WrestlerControllerUpdateMethodTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */
@@ -60,7 +57,6 @@ class WrestlerControllerUpdateMethodTest extends TestCase
 
     /**
      * @test
-     * @dataProvider administrators
      */
     public function updates_a_wrestler_and_redirects()
     {

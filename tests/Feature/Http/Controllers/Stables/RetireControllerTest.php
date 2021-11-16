@@ -10,7 +10,6 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Stables\RetireController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -21,8 +20,6 @@ use Tests\TestCase;
  */
 class RetireControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

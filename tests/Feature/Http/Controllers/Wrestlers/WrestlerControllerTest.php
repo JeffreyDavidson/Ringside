@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\User;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -17,8 +16,6 @@ use Tests\TestCase;
  */
 class WrestlerControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

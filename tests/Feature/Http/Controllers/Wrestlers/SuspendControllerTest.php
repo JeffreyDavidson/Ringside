@@ -10,7 +10,6 @@ use App\Http\Controllers\Wrestlers\SuspendController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -21,8 +20,6 @@ use Tests\TestCase;
  */
 class SuspendControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

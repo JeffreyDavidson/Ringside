@@ -7,7 +7,6 @@ use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\User;
 use App\Models\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Factories\StableRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;
@@ -19,8 +18,7 @@ use Tests\ValidatesRequests;
  */
 class StoreRequestTest extends TestCase
 {
-    use RefreshDatabase,
-        ValidatesRequests;
+    use ValidatesRequests;
 
     /**
      * @test

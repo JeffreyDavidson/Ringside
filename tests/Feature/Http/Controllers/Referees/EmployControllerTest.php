@@ -8,7 +8,6 @@ use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Referees\EmployController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -19,8 +18,6 @@ use Tests\TestCase;
  */
 class EmployControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

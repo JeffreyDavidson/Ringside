@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Http\Controllers\Titles\RestoreController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -15,8 +14,6 @@ use Tests\TestCase;
  */
 class RestoreControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public Title $title;
 
     public function setUp(): void
