@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Titles;
 
+use App\Actions\Titles\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\UnretireRequest;
 use App\Models\Title;
-use App\Repositories\TitleRepository;
 
 class UnretireController extends Controller
 {
@@ -15,18 +15,14 @@ class UnretireController extends Controller
      *
      * @param  \App\Models\Title $title
      * @param  \App\Http\Requests\Titles\UnretireRequest $request
-     * @param  \App\Repositories\TitleRepository $titleRepository
+     * @param  \App\Actions\Titles\UnretireAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title, UnretireRequest $request, TitleRepository $titleRepository)
+    public function __invoke(Title $title, UnretireRequest $request, UnretireAction $action)
     {
         throw_unless($title->canBeUnretired(), new CannotBeUnretiredException);
 
-        $unretiredDate = now()->toDateTimeString();
-
-        $titleRepository->unretire($title, $unretiredDate);
-        $titleRepository->activate($title, $unretiredDate);
-        $title->updateStatus()->save();
+        $action->handle($title);
 
         return redirect()->route('titles.index');
     }

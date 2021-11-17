@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Titles;
 
+use App\Actions\Titles\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\DeactivateRequest;
 use App\Models\Title;
-use App\Repositories\TitleRepository;
 
 class DeactivateController extends Controller
 {
@@ -15,17 +15,14 @@ class DeactivateController extends Controller
      *
      * @param  \App\Models\Title  $title
      * @param  \App\Http\Requests\Titles\DeactivateRequest  $request
-     * @param  \App\Repositories\TitleRepository  $titleRepository
+     * @param  \App\Actions\Titles\DeactivateAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title, DeactivateRequest $request, TitleRepository $titleRepository)
+    public function __invoke(Title $title, DeactivateRequest $request, DeactivateAction $action)
     {
         throw_unless($title->canBeDeactivated(), new CannotBeDeactivatedException);
 
-        $deactivationDate = now()->toDateTimeString();
-
-        $titleRepository->deactivate($title, $deactivationDate);
-        $title->updateStatus()->save();
+        $action->handle($title);
 
         return redirect()->route('titles.index');
     }

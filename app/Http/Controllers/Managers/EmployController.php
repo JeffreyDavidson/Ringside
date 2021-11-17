@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\EmployRequest;
 use App\Models\Manager;
-use App\Repositories\ManagerRepository;
 
 class EmployController extends Controller
 {
@@ -15,17 +15,14 @@ class EmployController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\EmployRequest  $request
-     * @param  \App\Repositories\ManagerRepository  $managerRepository
+     * @param  \App\Actions\Managers\EmployAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, EmployRequest $request, ManagerRepository $managerRepository)
+    public function __invoke(Manager $manager, EmployRequest $request, EmployAction $action)
     {
         throw_unless($manager->canBeEmployed(), new CannotBeEmployedException);
 
-        $employmentDate = now()->toDateTimeString();
-
-        $managerRepository->employ($manager, $employmentDate);
-        $manager->updateStatus()->save();
+        $action->handle($manager);
 
         return redirect()->route('managers.index');
     }

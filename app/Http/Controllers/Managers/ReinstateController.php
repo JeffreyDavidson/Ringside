@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\ReinstateRequest;
 use App\Models\Manager;
-use App\Repositories\ManagerRepository;
 
 class ReinstateController extends Controller
 {
@@ -15,17 +15,14 @@ class ReinstateController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\ReinstateRequest  $request
-     * @param  \App\Repositories\ManagerRepository  $managerRepository
+     * @param  \App\Actions\Managers\ReinstateAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, ReinstateRequest $request, ManagerRepository $managerRepository)
+    public function __invoke(Manager $manager, ReinstateRequest $request, ReinstateAction $action)
     {
         throw_unless($manager->canBeReinstated(), new CannotBeReinstatedException);
 
-        $reinstatementDate = now()->toDateTimeString();
-
-        $managerRepository->reinstate($manager, $reinstatementDate);
-        $manager->updateStatus()->save();
+        $action->handle($manager);
 
         return redirect()->route('managers.index');
     }

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Titles;
 
+use App\Actions\Titles\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\RetireRequest;
 use App\Models\Title;
-use App\Repositories\TitleRepository;
 
 class RetireController extends Controller
 {
@@ -15,18 +15,14 @@ class RetireController extends Controller
      *
      * @param  \App\Models\Title $title
      * @param  \App\Http\Requests\Titles\RetireRequest $request
-     * @param  \App\Repositories\TitleRepository $titleRepository
+     * @param  \App\Actions\Titles\RetireAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title, RetireRequest $request, TitleRepository $titleRepository)
+    public function __invoke(Title $title, RetireRequest $request, RetireAction $action)
     {
         throw_unless($title->canBeRetired(), new CannotBeRetiredException);
 
-        $retirementDate = now()->toDateTimeString();
-
-        $titleRepository->deactivate($title, $retirementDate);
-        $titleRepository->retire($title, $retirementDate);
-        $title->updateStatus()->save();
+        $action->handle($title);
 
         return redirect()->route('titles.index');
     }

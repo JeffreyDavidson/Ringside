@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Actions\Referees\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\InjureRequest;
 use App\Models\Referee;
-use App\Repositories\RefereeRepository;
 
 class InjureController extends Controller
 {
@@ -15,17 +15,14 @@ class InjureController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\InjureRequest  $request
-     * @param  \App\Repositories\RefereeRepository $refereeRepository
+     * @param  \App\Actions\Referees\InjureAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, InjureRequest $request, RefereeRepository $refereeRepository)
+    public function __invoke(Referee $referee, InjureRequest $request, InjureAction $action)
     {
         throw_unless($referee->canBeInjured(), new CannotBeInjuredException);
 
-        $injureDate = now()->toDateTimeString();
-
-        $refereeRepository->injure($referee, $injureDate);
-        $referee->updateStatus()->save();
+        $action->handle($referee);
 
         return redirect()->route('referees.index');
     }

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\ClearInjuryRequest;
 use App\Models\Manager;
-use App\Repositories\ManagerRepository;
 
 class ClearInjuryController extends Controller
 {
@@ -15,18 +15,14 @@ class ClearInjuryController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\ClearInjuryRequest  $request
-     * @param  \App\Repositories\ManagerRepository  $managerRepository
+     * @param  \App\Actions\Managers\ClearInjuryAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, ClearInjuryRequest $request, ManagerRepository $managerRepository)
+    public function __invoke(Manager $manager, ClearInjuryRequest $request, ClearInjuryAction $action)
     {
         throw_unless($manager->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
 
-        $recoveryDate = now()->toDateTimeString();
-
-        $manager = $managerRepository->clearInjury($manager, $recoveryDate);
-
-        $manager->updateStatus()->save();
+        $action->handle($manager);
 
         return redirect()->route('managers.index');
     }

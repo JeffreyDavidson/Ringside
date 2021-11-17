@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\RetireRequest;
 use App\Models\Manager;
-use App\Repositories\ManagerRepository;
 
 class RetireController extends Controller
 {
@@ -15,34 +15,14 @@ class RetireController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\RetireRequest  $request
-     * @param  \App\Repositories\ManagerRepository $managerRepository
+     * @param  \App\Actions\Managers\RetireAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, RetireRequest $request, ManagerRepository $managerRepository)
+    public function __invoke(Manager $manager, RetireRequest $request, RetireAction $action)
     {
         throw_unless($manager->canBeRetired(), new CannotBeRetiredException);
 
-        $retirementDate = now()->toDateTimeString();
-
-        if ($manager->isSuspended()) {
-            $managerRepository->reinstate($manager, $retirementDate);
-        }
-
-        if ($manager->isInjured()) {
-            $managerRepository->clearInjury($manager, $retirementDate);
-        }
-
-        $managerRepository->release($manager, $retirementDate);
-        $managerRepository->retire($manager, $retirementDate);
-        $manager->updateStatus()->save();
-
-        if ($manager->has('currentTagTeams')) {
-            $managerRepository->removeFromCurrentTagTeams($manager);
-        }
-
-        if ($manager->has('currentWrestlers')) {
-            $managerRepository->removeFromCurrentWrestlers($manager);
-        }
+        $action->handle($manager);
 
         return redirect()->route('managers.index');
     }
