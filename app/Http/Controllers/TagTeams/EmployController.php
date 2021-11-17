@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\TagTeams;
 
+use App\Actions\TagTeams\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TagTeams\EmployRequest;
 use App\Models\TagTeam;
-use App\Repositories\TagTeamRepository;
-use App\Repositories\WrestlerRepository;
 
 class EmployController extends Controller
 {
@@ -16,24 +15,14 @@ class EmployController extends Controller
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \App\Http\Requests\TagTeams\EmployReqeust  $request
-     * @param  \App\Repositories\TagTeamRepository  $tagTeamRepository
-     * @param  \App\Repositories\WrestlerRepository  $wrestlerRepository
+     * @param  \App\Actions\TagTeams\EmployAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(TagTeam $tagTeam, EmployRequest $request, TagTeamRepository $tagTeamRepository, WrestlerRepository $wrestlerRepository)
+    public function __invoke(TagTeam $tagTeam, EmployRequest $request, EmployAction $action)
     {
         throw_unless($tagTeam->canBeEmployed(), new CannotBeEmployedException);
 
-        $employmentDate = now()->toDateTimeString();
-
-        $tagTeamRepository->employ($tagTeam, $employmentDate);
-
-        foreach ($tagTeam->currentWrestlers as $wrestler) {
-            $wrestlerRepository->employ($wrestler, $employmentDate);
-            $wrestler->updateStatus()->save();
-        }
-
-        $tagTeam->updateStatus()->save();
+        $action->handle($tagTeam);
 
         return redirect()->route('tag-teams.index');
     }

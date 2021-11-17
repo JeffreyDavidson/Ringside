@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Actions\Referees\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\RetireRequest;
 use App\Models\Referee;
-use App\Repositories\RefereeRepository;
 
 class RetireController extends Controller
 {
@@ -15,26 +15,14 @@ class RetireController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\RetireRequest  $request
-     * @param  \App\Repositories\RefereeRepository  $refereeRepository
+     * @param  \App\Actions\Referees\RetireAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, RetireRequest $request, RefereeRepository $refereeRepository)
+    public function __invoke(Referee $referee, RetireRequest $request, RetireAction $action)
     {
         throw_unless($referee->canBeRetired(), new CannotBeRetiredException);
 
-        $retirementDate = now()->toDateTimeString();
-
-        if ($referee->isSuspended()) {
-            $refereeRepository->reinstate($referee, $retirementDate);
-        }
-
-        if ($referee->isInjured()) {
-            $refereeRepository->clearInjury($referee, $retirementDate);
-        }
-
-        $refereeRepository->release($referee, $retirementDate);
-        $refereeRepository->retire($referee, $retirementDate);
-        $referee->updateStatus()->save();
+        $action->handle($referee);
 
         return redirect()->route('referees.index');
     }

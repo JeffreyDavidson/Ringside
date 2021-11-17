@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\UnretireRequest;
 use App\Models\Manager;
-use App\Repositories\ManagerRepository;
 
 class UnretireController extends Controller
 {
@@ -15,18 +15,14 @@ class UnretireController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\UnretireRequest  $request
-     * @param  \App\Repositories\ManagerRepository  $managerRepository
+     * @param  \App\Actions\Managers\UnretireAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, UnretireRequest $request, ManagerRepository $managerRepository)
+    public function __invoke(Manager $manager, UnretireRequest $request, UnretireAction $action)
     {
         throw_unless($manager->canBeUnretired(), new CannotBeUnretiredException);
 
-        $unretiredDate = now()->toDateTimeString();
-
-        $managerRepository->unretire($manager, $unretiredDate);
-        $managerRepository->employ($manager, $unretiredDate);
-        $manager->updateStatus()->save();
+        $action->handle($manager);
 
         return redirect()->route('managers.index');
     }

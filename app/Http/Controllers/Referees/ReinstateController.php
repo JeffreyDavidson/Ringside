@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Referees;
 
+use App\Actions\Referees\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\ReinstateRequest;
 use App\Models\Referee;
-use App\Repositories\RefereeRepository;
 
 class ReinstateController extends Controller
 {
@@ -15,17 +15,14 @@ class ReinstateController extends Controller
      *
      * @param  \App\Models\Referee  $referee
      * @param  \App\Http\Requests\Referees\ReinstateRequest  $request
-     * @param  \App\Repositories\RefereeRepository  $refereeRepository
+     * @param  \App\Actions\Referees\ReinstateAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee, ReinstateRequest $request, RefereeRepository $refereeRepository)
+    public function __invoke(Referee $referee, ReinstateRequest $request, ReinstateAction $action)
     {
         throw_unless($referee->canBeReinstated(), new CannotBeReinstatedException);
 
-        $reinstatementDate = now()->toDateTimeString();
-
-        $refereeRepository->reinstate($referee, $reinstatementDate);
-        $referee->updateStatus()->save();
+        $action->handle($referee);
 
         return redirect()->route('referees.index');
     }

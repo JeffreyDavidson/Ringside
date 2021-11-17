@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\InjureRequest;
 use App\Models\Manager;
-use App\Repositories\ManagerRepository;
 
 class InjureController extends Controller
 {
@@ -15,17 +15,14 @@ class InjureController extends Controller
      *
      * @param  \App\Models\Manager  $manager
      * @param  \App\Http\Requests\Managers\InjureRequest  $request
-     * @param  \App\Repositories\ManagerRepository  $managerRepository
+     * @param  \App\Actions\Managers\InjureAction  $action
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, InjureRequest $request, ManagerRepository $managerRepository)
+    public function __invoke(Manager $manager, InjureRequest $request, InjureAction $action)
     {
         throw_unless($manager->canBeInjured(), new CannotBeInjuredException);
 
-        $injureDate = now()->toDateTimeString();
-
-        $managerRepository->injure($manager, $injureDate);
-        $manager->updateStatus()->save();
+        $action->handle($manager);
 
         return redirect()->route('managers.index');
     }

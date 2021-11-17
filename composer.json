@@ -16,6 +16,7 @@
         "laravel/telescope": "^4",
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.0",
+        "lorisleiva/laravel-actions": "^2.2",
         "spatie/laravel-enum": "^2.5",
         "staudenmeir/eloquent-has-many-deep": "^1.7",
         "vlucas/phpdotenv": "^5.2"
