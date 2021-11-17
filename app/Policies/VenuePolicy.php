@@ -18,7 +18,7 @@ class VenuePolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class VenuePolicy
      */
     public function update(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class VenuePolicy
      */
     public function delete(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -51,7 +51,7 @@ class VenuePolicy
      */
     public function restore(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -62,7 +62,7 @@ class VenuePolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -74,6 +74,6 @@ class VenuePolicy
      */
     public function view(User $user, Venue $venue)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }

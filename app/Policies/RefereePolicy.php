@@ -17,7 +17,7 @@ class RefereePolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -28,7 +28,7 @@ class RefereePolicy
      */
     public function update(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -39,7 +39,7 @@ class RefereePolicy
      */
     public function delete(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -50,7 +50,7 @@ class RefereePolicy
      */
     public function restore(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -61,7 +61,7 @@ class RefereePolicy
      */
     public function retire(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -72,7 +72,7 @@ class RefereePolicy
      */
     public function unretire(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -83,7 +83,7 @@ class RefereePolicy
      */
     public function injure(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -94,7 +94,7 @@ class RefereePolicy
      */
     public function clearFromInjury(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -105,7 +105,7 @@ class RefereePolicy
      */
     public function suspend(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -116,7 +116,7 @@ class RefereePolicy
      */
     public function reinstate(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -127,7 +127,7 @@ class RefereePolicy
      */
     public function employ(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -138,7 +138,7 @@ class RefereePolicy
      */
     public function release(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -149,7 +149,7 @@ class RefereePolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -160,6 +160,6 @@ class RefereePolicy
      */
     public function view(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }

@@ -18,7 +18,7 @@ class TitlePolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class TitlePolicy
      */
     public function update(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -41,7 +41,7 @@ class TitlePolicy
      */
     public function delete(User $user, Title $title)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -53,7 +53,7 @@ class TitlePolicy
      */
     public function restore(User $user, Title $title)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -64,7 +64,7 @@ class TitlePolicy
      */
     public function retire(User $user, Title $title)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -75,7 +75,7 @@ class TitlePolicy
      */
     public function unretire(User $user, Title $title)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -87,7 +87,7 @@ class TitlePolicy
      */
     public function activate(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -99,7 +99,7 @@ class TitlePolicy
      */
     public function deactivate(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -110,7 +110,7 @@ class TitlePolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -121,6 +121,6 @@ class TitlePolicy
      */
     public function view(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }

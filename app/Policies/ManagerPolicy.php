@@ -18,7 +18,7 @@ class ManagerPolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class ManagerPolicy
      */
     public function update(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class ManagerPolicy
      */
     public function delete(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -51,7 +51,7 @@ class ManagerPolicy
      */
     public function restore(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -62,7 +62,7 @@ class ManagerPolicy
      */
     public function retire(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -73,7 +73,7 @@ class ManagerPolicy
      */
     public function unretire(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -84,7 +84,7 @@ class ManagerPolicy
      */
     public function suspend(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -95,7 +95,7 @@ class ManagerPolicy
      */
     public function reinstate(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -106,7 +106,7 @@ class ManagerPolicy
      */
     public function injure(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -117,7 +117,7 @@ class ManagerPolicy
      */
     public function clearFromInjury(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -128,7 +128,7 @@ class ManagerPolicy
      */
     public function employ(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -139,7 +139,7 @@ class ManagerPolicy
      */
     public function release(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -150,7 +150,7 @@ class ManagerPolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -166,6 +166,6 @@ class ManagerPolicy
             return true;
         }
 
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }

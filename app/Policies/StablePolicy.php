@@ -18,7 +18,7 @@ class StablePolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class StablePolicy
      */
     public function update(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class StablePolicy
      */
     public function delete(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -51,7 +51,7 @@ class StablePolicy
      */
     public function restore(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -63,7 +63,7 @@ class StablePolicy
      */
     public function activate(User $user, Stable $stable)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -75,7 +75,7 @@ class StablePolicy
      */
     public function deactivate(User $user, Stable $stable)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -87,7 +87,7 @@ class StablePolicy
      */
     public function retire(User $user, Stable $stable)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -99,7 +99,7 @@ class StablePolicy
      */
     public function unretire(User $user, Stable $stable)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -110,7 +110,7 @@ class StablePolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -126,6 +126,6 @@ class StablePolicy
             return true;
         }
 
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }
