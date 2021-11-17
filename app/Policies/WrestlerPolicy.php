@@ -18,7 +18,7 @@ class WrestlerPolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -29,7 +29,7 @@ class WrestlerPolicy
      */
     public function update(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -40,7 +40,7 @@ class WrestlerPolicy
      */
     public function delete(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -51,7 +51,7 @@ class WrestlerPolicy
      */
     public function restore(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -62,7 +62,7 @@ class WrestlerPolicy
      */
     public function retire(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -73,7 +73,7 @@ class WrestlerPolicy
      */
     public function unretire(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -84,7 +84,7 @@ class WrestlerPolicy
      */
     public function suspend(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -95,7 +95,7 @@ class WrestlerPolicy
      */
     public function reinstate(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -106,7 +106,7 @@ class WrestlerPolicy
      */
     public function injure(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -118,7 +118,7 @@ class WrestlerPolicy
      */
     public function clearFromInjury(User $user, Wrestler $wrestler)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -129,7 +129,7 @@ class WrestlerPolicy
      */
     public function employ(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -140,7 +140,7 @@ class WrestlerPolicy
      */
     public function release(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -151,7 +151,7 @@ class WrestlerPolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -167,6 +167,6 @@ class WrestlerPolicy
             return true;
         }
 
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }

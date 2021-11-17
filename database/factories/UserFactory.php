@@ -34,13 +34,6 @@ class UserFactory extends Factory
         ];
     }
 
-    public function superAdministrator(): self
-    {
-        return $this->state([
-            'role' => Role::super_administrator()(),
-        ]);
-    }
-
     public function administrator(): self
     {
         return $this->state([

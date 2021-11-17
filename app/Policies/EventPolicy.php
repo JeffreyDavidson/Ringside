@@ -18,7 +18,7 @@ class EventPolicy
      */
     public function create(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -30,7 +30,7 @@ class EventPolicy
      */
     public function update(User $user, Event $event)
     {
-        if (! ($user->isSuperAdministrator() || $user->isAdministrator())) {
+        if (! ($user->isAdministrator())) {
             return false;
         }
 
@@ -50,7 +50,7 @@ class EventPolicy
      */
     public function delete(User $user, Event $event)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -62,7 +62,7 @@ class EventPolicy
      */
     public function restore(User $user, Event $event)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -73,7 +73,7 @@ class EventPolicy
      */
     public function viewList(User $user)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 
     /**
@@ -85,6 +85,6 @@ class EventPolicy
      */
     public function view(User $user, Event $event)
     {
-        return $user->isSuperAdministrator() || $user->isAdministrator();
+        return $user->isAdministrator();
     }
 }
