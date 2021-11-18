@@ -10,7 +10,7 @@ class EmployAction extends BaseRefereeAction
     use AsAction;
 
     /**
-     * Unretire a referee.
+     * Employ a referee.
      *
      * @param  \App\Models\Referee  $referee
      * @return void
