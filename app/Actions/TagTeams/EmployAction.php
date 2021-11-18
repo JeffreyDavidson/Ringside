@@ -10,7 +10,7 @@ class EmployAction extends BaseTagTeamAction
     use AsAction;
 
     /**
-     * Unretire a tagTeam.
+     * Employ a tagTeam.
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @return void

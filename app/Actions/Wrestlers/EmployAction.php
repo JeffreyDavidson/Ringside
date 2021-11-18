@@ -10,7 +10,7 @@ class EmployAction extends BaseWrestlerAction
     use AsAction;
 
     /**
-     * Unretire a wrestler.
+     * Employ a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @return void
