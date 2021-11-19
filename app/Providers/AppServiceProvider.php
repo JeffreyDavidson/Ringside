@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->isLocal()) {
+        if ($this->app->environment('local')) {
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
         }
@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Builder::macro('orderByNullsLast', function ($column, $direction = 'asc') {
+            /** @var Builder $this */
             $column = $this->getGrammar()->wrap($column);
             $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
