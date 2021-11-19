@@ -54,7 +54,9 @@ trait Manageables
      */
     public function currentTagTeams()
     {
-        return $this->morphedByMany(TagTeam::class, 'manageable')->withPivot(['hired_at', 'left_at'])->wherePivotNull('left_at');
+        return $this->morphedByMany(TagTeam::class, 'manageable')
+            ->withPivot(['hired_at', 'left_at'])
+            ->wherePivotNull('left_at');
     }
 
     /**
@@ -64,6 +66,8 @@ trait Manageables
      */
     public function previousTagTeams()
     {
-        return $this->morphedByMany(TagTeam::class, 'manageable')->withPivot(['hired_at', 'left_at'])->wherePivotNotNull('left_at');
+        return $this->morphedByMany(TagTeam::class, 'manageable')
+            ->withPivot(['hired_at', 'left_at'])
+            ->wherePivotNotNull('left_at');
     }
 }
