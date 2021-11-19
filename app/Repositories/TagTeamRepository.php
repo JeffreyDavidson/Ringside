@@ -168,8 +168,12 @@ class TagTeamRepository
      * @param  string|null $date
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function syncTagTeamPartners(TagTeam $tagTeam, Collection $formerTagTeamPartners, Collection $newTagTeamPartners, string $date = null)
-    {
+    public function syncTagTeamPartners(
+        TagTeam $tagTeam,
+        Collection $formerTagTeamPartners,
+        Collection $newTagTeamPartners,
+        string $date = null
+    ) {
         $date ??= now()->toDateTimeString();
 
         foreach ($formerTagTeamPartners as $tagTeamPartner) {
@@ -182,5 +186,7 @@ class TagTeamRepository
                 ['joined_at' => $date]
             );
         }
+
+        return $tagTeam;
     }
 }

@@ -94,8 +94,12 @@ class StableService
      * @param  string|null $joinedDate
      * @return \App\Models\Stable $stable
      */
-    private function addMembers(Stable $stable, array $wrestlerIds = null, array $tagTeamIds = null, string $joinedDate = null)
-    {
+    private function addMembers(
+        Stable $stable,
+        array $wrestlerIds = null,
+        array $tagTeamIds = null,
+        string $joinedDate = null
+    ) {
         $joinedDate ??= now();
 
         if ($wrestlerIds) {
