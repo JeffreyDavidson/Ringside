@@ -44,7 +44,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
                     'match_type_id' => 1,
                     'titles' => [],
                     'referees' => [$referee->id],
-                    'competitors' => [$wrestlerA->id, $wrestlerB->id],
+                    'competitors' => [[$wrestlerA->id], [$wrestlerB->id]],
                     'preview' => 'This is a general match preview.',
                 ])
             );
@@ -79,7 +79,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
                     'match_type_id' => 1,
                     'titles' => [$title->id],
                     'referees' => [$referee->id],
-                    'competitors' => [$wrestlerA->id, $wrestlerB->id],
+                    'competitors' => [[$wrestlerA->id], [$wrestlerB->id]],
                 ])
             );
 
