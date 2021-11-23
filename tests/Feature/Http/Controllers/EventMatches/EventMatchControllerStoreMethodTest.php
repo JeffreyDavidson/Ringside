@@ -28,7 +28,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
     /**
      * @test
      */
-    public function store_creates_matches_for_an_event_and_redirects()
+    public function store_creates_a_match_for_an_event_and_redirects()
     {
         $event = Event::factory()->create();
         $referee = Referee::factory()->create();

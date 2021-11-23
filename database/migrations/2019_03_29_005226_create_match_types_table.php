@@ -17,6 +17,7 @@ class CreateMatchTypesTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('slug');
+            $table->tinyInteger('number_of_sides')->nullable();
             $table->timestamps();
         });
     }

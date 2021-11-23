@@ -10,11 +10,11 @@ class EventMatchRequestDataFactory
 {
     private const DEFAULT_MATCH_TYPE = 1;
     private const DEFAULT_REFEREE_ID = [1];
-    private const DEFAULT_COMPETITORS = [1, 2];
+    private const DEFAULT_COMPETITORS = [[1], [2]];
 
     public function __construct()
     {
-        Wrestler::factory()->count(2)->create();
+        Wrestler::factory()->count(4)->create();
         $this->match_type_id = MatchType::first()->id ?? self::DEFAULT_MATCH_TYPE;
         $this->referees = [Referee::factory()->create()->id] ?? self::DEFAULT_REFEREE_ID;
         $this->titles = null;
