@@ -16,7 +16,7 @@ class EventControllerTest extends TestCase
 {
     private Event $event;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

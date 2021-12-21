@@ -18,7 +18,7 @@ class RestoreControllerTest extends TestCase
 {
     public Stable $stable;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

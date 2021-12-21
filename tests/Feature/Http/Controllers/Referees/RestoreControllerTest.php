@@ -18,7 +18,7 @@ class RestoreControllerTest extends TestCase
 {
     public Referee $referee;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

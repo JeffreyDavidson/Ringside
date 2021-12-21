@@ -36,9 +36,7 @@ class TitleFactory extends Factory
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::active()];
-        })
+        return $this->state(fn (array $attributes) => ['status' => TitleStatus::active()])
         ->has(Activation::factory()->started($activationDate))
         ->afterCreating(function (Title $title) {
             $title->updateStatus()->save();
@@ -51,9 +49,7 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::inactive()];
-        })
+        return $this->state(fn (array $attributes) => ['status' => TitleStatus::inactive()])
         ->has(Activation::factory()->started($start)->ended($end))
         ->afterCreating(function (Title $title) {
             $title->updateStatus()->save();
@@ -62,9 +58,7 @@ class TitleFactory extends Factory
 
     public function withFutureActivation()
     {
-        return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::future_activation()];
-        })
+        return $this->state(fn (array $attributes) => ['status' => TitleStatus::future_activation()])
         ->has(Activation::factory()->started(Carbon::tomorrow()))
         ->afterCreating(function (Title $title) {
             $title->updateStatus()->save();
@@ -77,9 +71,7 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::retired()];
-        })
+        return $this->state(fn (array $attributes) => ['status' => TitleStatus::retired()])
         ->has(Activation::factory()->started($start)->ended($end))
         ->has(Retirement::factory()->started($end))
         ->afterCreating(function (Title $title) {
@@ -89,18 +81,14 @@ class TitleFactory extends Factory
 
     public function unactivated()
     {
-        return $this->state(function (array $attributes) {
-            return ['status' => TitleStatus::unactivated()];
-        })->afterCreating(function (Title $title) {
+        return $this->state(fn (array $attributes) => ['status' => TitleStatus::unactivated()])->afterCreating(function (Title $title) {
             $title->updateStatus()->save();
         });
     }
 
     public function softDeleted($delete = true)
     {
-        return $this->state(function (array $attributes) {
-            return ['deleted_at' => now()];
-        })->afterCreating(function (Title $title) {
+        return $this->state(fn (array $attributes) => ['deleted_at' => now()])->afterCreating(function (Title $title) {
             $title->updateStatus()->save();
         });
     }

@@ -18,7 +18,7 @@ class TitleTest extends TestCase
     private $inactiveTitle;
     private $retiredTitle;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

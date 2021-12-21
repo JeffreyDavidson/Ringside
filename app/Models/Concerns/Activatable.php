@@ -219,7 +219,7 @@ trait Activatable
      */
     public function getActivatedAtAttribute()
     {
-        return optional($this->activations->first())->started_at;
+        return $this->activations->first()?->started_at;
     }
 
     /**

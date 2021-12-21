@@ -11,11 +11,4 @@ class Venue extends Model
     use Concerns\Unguarded,
         HasFactory,
         SoftDeletes;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'venues';
 }

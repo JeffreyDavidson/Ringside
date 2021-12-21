@@ -37,13 +37,6 @@ class Wrestler extends SingleRosterMember implements Bookable, Manageable, Stabl
     }
 
     /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'wrestlers';
-
-    /**
      * The attributes that should be cast to native types.
      *
      * @var array

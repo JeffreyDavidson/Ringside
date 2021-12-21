@@ -17,9 +17,12 @@ class Member extends MorphPivot
     protected $table = 'stable_members';
 
     /**
-     * The attributes that should be mutated to dates.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    protected $dates = ['joined_at', 'left_at'];
+    protected $casts = [
+        'joined_at' => 'datetime',
+        'left_at' => 'datetime',
+    ];
 }
