@@ -17,7 +17,7 @@ class EventTest extends TestCase
     private $unscheduledEvent;
     private $pastEvent;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

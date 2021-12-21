@@ -30,7 +30,7 @@ trait Deactivatable
         return $query->addSelect(['last_deactivated_at' => Activation::select('ended_at')
             ->whereColumn('activatable_id', $query->qualifyColumn('id'))
             ->where('activatable_type', $this->getMorphClass())
-            ->orderBy('ended_at', 'desc')
+            ->orderByDesc('ended_at')
             ->limit(1),
         ])->withCasts(['last_deactivated_at' => 'datetime']);
     }

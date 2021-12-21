@@ -14,13 +14,6 @@ class User extends Authenticatable
         Concerns\Unguarded;
 
     /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'users';
-
-    /**
      * The attributes that should be hidden for arrays.
      *
      * @var array

@@ -215,7 +215,7 @@ trait Employable
      */
     public function getStartedAtAttribute()
     {
-        return optional($this->employments->first())->started_at;
+        return $this->employments->first()?->started_at;
     }
 
     /**

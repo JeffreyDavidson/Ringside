@@ -22,7 +22,7 @@ class TagTeamTest extends TestCase
     private $retiredTagTeam;
     private $releasedTagTeam;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

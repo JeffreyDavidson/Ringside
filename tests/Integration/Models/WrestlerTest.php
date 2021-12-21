@@ -25,7 +25,7 @@ class WrestlerTest extends TestCase
     private $retiredWrestler;
     private $releasedWrestler;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

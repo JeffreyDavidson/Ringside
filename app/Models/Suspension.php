@@ -11,18 +11,14 @@ class Suspension extends Model
         Concerns\Unguarded;
 
     /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'suspensions';
-
-    /**
-     * The attributes that should be mutated to dates.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    protected $dates = ['started_at', 'ended_at'];
+    protected $casts = [
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime',
+    ];
 
     /**
      * Retrieve the suspended model.

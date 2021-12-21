@@ -23,7 +23,7 @@ class ManagerTest extends TestCase
     private $retiredManager;
     private $releasedManager;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -41,9 +41,7 @@ class UpdateRequest extends FormRequest
             ],
             'started_at' => [
                 'nullable',
-                Rule::requiredIf(function () {
-                    return  ! $this->route('stable')->isUnactivated();
-                }),
+                Rule::requiredIf(fn () => ! $this->route('stable')->isUnactivated()),
                 'string',
                 'date',
                 new ActivationStartDateCanBeChanged($this->route('stable')),

@@ -17,7 +17,7 @@ class StableTest extends TestCase
     private $retiredStable;
     private $unactivatedStable;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

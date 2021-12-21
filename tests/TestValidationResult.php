@@ -61,7 +61,7 @@ class TestValidationResult
             // dd($expectedFailedRule, $constraints);
             // ^ 0
             // ^ "matches.0"
-            if (str_contains($constraints, '.')) {
+            if (Str::contains($constraints, '.')) {
                 // dd($failedRules->all());
                 // ^ array:1 [
                 //     "matches.0" => "array"
@@ -114,17 +114,15 @@ class TestValidationResult
         }
 
         $failedRules = collect($this->validator->failed())
-            ->map(function ($details) {
-                return collect($details)->reduce(function ($aggregateRule, $constraints, $ruleName) {
-                    $failedRule = Str::lower($ruleName);
+            ->map(fn ($details) => collect($details)->reduce(function ($aggregateRule, $constraints, $ruleName) {
+                $failedRule = Str::lower($ruleName);
 
-                    if (count($constraints)) {
-                        $failedRule .= ':'.implode(',', $constraints);
-                    }
+                if (count($constraints)) {
+                    $failedRule .= ':'.implode(',', $constraints);
+                }
 
-                    return $aggregateRule.$failedRule;
-                });
-            });
+                return $aggregateRule.$failedRule;
+            }));
 
         return $failedRules;
     }
