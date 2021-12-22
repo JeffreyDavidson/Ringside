@@ -9,7 +9,6 @@ use App\Models\Contracts\Manageable;
 use App\Models\Contracts\StableMember;
 use App\Models\Contracts\TagTeamMember;
 use App\Observers\WrestlerObserver;
-use Illuminate\Database\Eloquent\Concerns\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,7 +21,6 @@ class Wrestler extends SingleRosterMember implements Bookable, Manageable, Stabl
         Concerns\TagTeamMember,
         Concerns\Unguarded,
         HasFactory,
-        HasRelationships,
         SoftDeletes;
 
     /**
