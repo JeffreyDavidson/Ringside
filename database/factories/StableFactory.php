@@ -35,16 +35,6 @@ class StableFactory extends Factory
         ];
     }
 
-    /**
-     * Configure the model factory.
-     *
-     * @return $this
-     */
-    public function configure()
-    {
-        return $this;
-    }
-
     public function withFutureActivation()
     {
         return $this->state(fn (array $attributes) => ['status' => StableStatus::future_activation()])
