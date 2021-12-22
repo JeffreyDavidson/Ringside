@@ -2,7 +2,7 @@
 
 namespace App\Models\Concerns;
 
-use App\Models\Member;
+use App\Models\StableMember;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 
@@ -16,7 +16,7 @@ trait HasMembers
     public function wrestlers()
     {
         return $this->morphedByMany(Wrestler::class, 'member', 'stable_members')
-                    ->using(Member::class)
+                    ->using(StableMember::class)
                     ->withPivot(['joined_at', 'left_at']);
     }
 
@@ -48,7 +48,7 @@ trait HasMembers
     public function tagTeams()
     {
         return $this->morphedByMany(TagTeam::class, 'member', 'stable_members')
-                    ->using(Member::class)
+                    ->using(StableMember::class)
                     ->withPivot(['joined_at', 'left_at']);
     }
 
