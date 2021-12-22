@@ -14,6 +14,6 @@ class EventTest extends TestCase
     {
         $event = new Event(['date' => '2020-03-05 00:00:00']);
 
-        $this->assertEquals('March 5, 2020', $event->formatted_date);
+        $this->assertEquals('March 5, 2020', $event->present()->date);
     }
 }

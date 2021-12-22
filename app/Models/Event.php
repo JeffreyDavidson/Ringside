@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Builders\EventQueryBuilder;
 use App\Observers\EventObserver;
+use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,6 +45,16 @@ class Event extends Model
     public function newEloquentBuilder($query)
     {
         return new EventQueryBuilder($query);
+    }
+
+    /**
+     * Present the event model.
+     *
+     * @return App\Presenters\EventPresenter
+     */
+    public function present()
+    {
+        return new EventPresenter($this);
     }
 
     /**
@@ -94,15 +105,5 @@ class Event extends Model
     public function isUnscheduled()
     {
         return $this->date === null;
-    }
-
-    /**
-     * Retrieve the formatted event date.
-     *
-     * @return string
-     */
-    public function getFormattedDateAttribute()
-    {
-        return $this->date->format('F j, Y');
     }
 }
