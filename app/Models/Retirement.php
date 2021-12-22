@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Retirement extends Model
 {
-    use Concerns\Unguarded, HasFactory;
+    use Concerns\Unguarded,
+        HasFactory;
 
     /**
      * The attributes that should be cast to native types.

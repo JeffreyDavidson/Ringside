@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Title extends Model implements Activatable, Deactivatable, Retirable
 {
-    use SoftDeletes,
-        HasFactory,
-        Concerns\Activatable,
+    use Concerns\Activatable,
         Concerns\Competable,
         Concerns\Deactivatable,
         Concerns\Retirable,
-        Concerns\Unguarded;
+        Concerns\Unguarded,
+        HasFactory,
+        SoftDeletes;
 
     /**
      * The "boot" method of the model.
@@ -34,6 +34,12 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
         self::observe(TitleObserver::class);
     }
 
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
     public function newEloquentBuilder($query)
     {
         return new TitleQueryBuilder($query);
