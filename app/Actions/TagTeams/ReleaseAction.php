@@ -27,11 +27,11 @@ class ReleaseAction extends BaseTagTeamAction
         }
 
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
-        $tagTeam->updateStatus()->save();
+        $tagTeam->save();
 
         foreach ($tagTeam->currentWrestlers as $wrestler) {
             $this->wrestlerRepository->release($wrestler, $releaseDate);
-            $wrestler->updateStatus()->save();
+            $wrestler->save();
         }
     }
 }

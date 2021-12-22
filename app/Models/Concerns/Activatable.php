@@ -3,7 +3,6 @@
 namespace App\Models\Concerns;
 
 use App\Models\Activation;
-use Illuminate\Database\Eloquent\Builder;
 
 trait Activatable
 {
@@ -75,81 +74,6 @@ trait Activatable
     {
         return $this->activations()
                     ->whereNotNull('ended_at');
-    }
-
-    /**
-     * Scope a query to only include active models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeActive(Builder $query)
-    {
-        return $query->whereHas('currentActivation');
-    }
-
-    /**
-     * Scope a query to only include future activated models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithFutureActivation(Builder $query)
-    {
-        return $query->whereHas('futureActivation');
-    }
-
-    /**
-     * Scope a query to only include inactive models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeInactive(Builder $query)
-    {
-        return $query->whereHas('previousActivation')
-                    ->whereDoesntHave('futureActivation')
-                    ->whereDoesntHave('currentActivation')
-                    ->whereDoesntHave('currentRetirement');
-    }
-
-    /**
-     * Scope a query to only include inactive models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeUnactivated(Builder $query)
-    {
-        return $query->whereDoesntHave('activations');
-    }
-
-    /**
-     * Scope a query to include current activation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithFirstActivatedAtDate(Builder $query)
-    {
-        return $query->addSelect(['first_activated_at' => Activation::select('started_at')
-            ->whereColumn('activatable_id', $query->qualifyColumn('id'))
-            ->where('activatable_type', $this->getMorphClass())
-            ->oldest('started_at')
-            ->limit(1),
-        ])->withCasts(['first_activated_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the models first activation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  string $direction
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByFirstActivatedAtDate(Builder $query, string $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(first_activated_at) $direction");
     }
 
     /**

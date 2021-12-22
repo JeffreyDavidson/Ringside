@@ -23,6 +23,7 @@ class InjureControllerTest extends TestCase
      */
     public function invoke_injures_an_available_manager_and_redirects()
     {
+        $this->withoutExceptionHandling();
         $manager = Manager::factory()->available()->create();
 
         $this

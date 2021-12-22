@@ -24,10 +24,10 @@ class UnretireAction extends BaseTagTeamAction
         foreach ($tagTeam->currentWrestlers as $wrestler) {
             $this->wrestlerRepository->unretire($wrestler, $unretiredDate);
             $this->wrestlerRepository->employ($wrestler, $unretiredDate);
-            $wrestler->updateStatus()->save();
+            $wrestler->save();
         }
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
-        $tagTeam->updateStatus()->save();
+        $tagTeam->save();
     }
 }

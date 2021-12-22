@@ -20,6 +20,6 @@ class ReinstateAction extends BaseManagerAction
         $reinstatementDate = now()->toDateTimeString();
 
         $this->managerRepository->reinstate($manager, $reinstatementDate);
-        $manager->updateStatus()->save();
+        $manager->save();
     }
 }

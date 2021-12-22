@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Builders\ManagerQueryBuilder;
 use App\Enums\ManagerStatus;
 use App\Models\Contracts\StableMember;
+use App\Observers\ManagerObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,15 +20,20 @@ class Manager extends SingleRosterMember implements StableMember
         SoftDeletes;
 
     /**
-     * The "booted" method of the model.
+     * The "boot" method of the model.
      *
      * @return void
      */
-    protected static function booted()
+    protected static function boot()
     {
-        static::saving(function ($manager) {
-            $manager->updateStatus();
-        });
+        parent::boot();
+
+        self::observe(ManagerObserver::class);
+    }
+
+    public function newEloquentBuilder($query)
+    {
+        return new ManagerQueryBuilder($query);
     }
 
     /**
@@ -38,46 +45,8 @@ class Manager extends SingleRosterMember implements StableMember
         'status' => ManagerStatus::class,
     ];
 
-    /**
-     * Scope a query to only include available managers.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeAvailable($query)
-    {
-        return $query->where('status', ManagerStatus::available());
-    }
-
-    /**
-     * Check to see if the manager is available.
-     *
-     * @return bool
-     */
     public function isAvailable()
     {
         return $this->currentEmployment()->exists();
-    }
-
-    /**
-     * Update the status for the manager.
-     *
-     * @return $this
-     */
-    public function updateStatus()
-    {
-        $this->status = match (true) {
-            $this->isCurrentlyEmployed() => match (true) {
-                $this->isInjured() => ManagerStatus::injured(),
-                $this->isSuspended() => ManagerStatus::suspended(),
-                $this->isAvailable() => ManagerStatus::available(),
-            },
-            $this->hasFutureEmployment() => ManagerStatus::future_employment(),
-            $this->isReleased() => ManagerStatus::released(),
-            $this->isRetired() => ManagerStatus::retired(),
-            default => ManagerStatus::unemployed()
-        };
-
-        return $this;
     }
 }

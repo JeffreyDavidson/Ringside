@@ -22,7 +22,7 @@ class ActivateAction extends BaseStableAction
         if ($stable->currentWrestlers->isNotEmpty()) {
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->wrestlerRepository->employ($wrestler, $activationDate);
-                $wrestler->updateStatus()->save();
+                $wrestler->save();
             }
         }
 
@@ -30,14 +30,14 @@ class ActivateAction extends BaseStableAction
             foreach ($stable->currentTagTeams as $tagTeam) {
                 foreach ($tagTeam->currentWrestlers as $wrestler) {
                     $this->wrestlerRepository->employ($wrestler, $activationDate);
-                    $wrestler->updateStatus()->save();
+                    $wrestler->save();
                 }
                 $this->tagTeamRepository->employ($tagTeam, $activationDate);
-                $tagTeam->updateStatus()->save();
+                $tagTeam->save();
             }
         }
 
         $this->stableRepository->activate($stable, $activationDate);
-        $stable->updateStatus()->save();
+        $stable->save();
     }
 }

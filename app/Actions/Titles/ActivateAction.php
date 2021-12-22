@@ -20,6 +20,6 @@ class ActivateAction extends BaseTitleAction
         $activationDate = now()->toDateTimeString();
 
         $this->titleRepository->activate($title, $activationDate);
-        $title->updateStatus()->save();
+        $title->save();
     }
 }

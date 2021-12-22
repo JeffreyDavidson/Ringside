@@ -21,6 +21,6 @@ class UnretireAction extends BaseRefereeAction
 
         $this->refereeRepository->unretire($referee, $unretiredDate);
         $this->refereeRepository->employ($referee, $unretiredDate);
-        $referee->updateStatus()->save();
+        $referee->save();
     }
 }

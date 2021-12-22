@@ -30,11 +30,11 @@ class RetireAction extends BaseTagTeamAction
         foreach ($tagTeam->currentWrestlers as $wrestler) {
             $this->wrestlerRepository->release($wrestler, $retirementDate);
             $this->wrestlerRepository->retire($wrestler, $retirementDate);
-            $wrestler->updateStatus()->save();
+            $wrestler->save();
         }
 
         $this->tagTeamRepository->release($tagTeam, $retirementDate);
         $this->tagTeamRepository->retire($tagTeam, $retirementDate);
-        $tagTeam->updateStatus()->save();
+        $tagTeam->save();
     }
 }

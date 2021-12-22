@@ -20,6 +20,6 @@ class DeactivateAction extends BaseTitleAction
         $deactivationDate = now()->toDateTimeString();
 
         $this->titleRepository->deactivate($title, $deactivationDate);
-        $title->updateStatus()->save();
+        $title->save();
     }
 }

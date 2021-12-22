@@ -55,7 +55,7 @@ class InjureControllerTest extends TestCase
             ->patch(action([InjureController::class], $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::UNbookable(), $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::unbookable(), $tagTeam->status);
         });
     }
 

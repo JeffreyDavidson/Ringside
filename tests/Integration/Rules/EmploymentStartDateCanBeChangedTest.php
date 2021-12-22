@@ -40,9 +40,9 @@ class EmploymentStartDateCanBeChangedTest extends TestCase
     /**
      * @test
      */
-    public function an_employed_wrestler_start_date_cannot_be_changed()
+    public function a_bookable_wrestler_start_date_cannot_be_changed()
     {
-        $wrestler = Wrestler::factory()->employed()->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
 
         $this->assertFalse((new EmploymentStartDateCanBeChanged($wrestler))->passes(null, now()->toDateTimeString()));
     }
@@ -70,9 +70,9 @@ class EmploymentStartDateCanBeChangedTest extends TestCase
     /**
      * @test
      */
-    public function an_employed_manager_start_date_cannot_be_changed()
+    public function an_available_manager_start_date_cannot_be_changed()
     {
-        $manager = Manager::factory()->employed()->create();
+        $manager = Manager::factory()->available()->create();
 
         $this->assertFalse((new EmploymentStartDateCanBeChanged($manager))->passes(null, now()->toDateTimeString()));
     }
@@ -100,9 +100,9 @@ class EmploymentStartDateCanBeChangedTest extends TestCase
     /**
      * @test
      */
-    public function an_employed_referee_start_date_cannot_be_changed()
+    public function a_bookable_referee_start_date_cannot_be_changed()
     {
-        $referee = Referee::factory()->employed()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         $this->assertFalse((new EmploymentStartDateCanBeChanged($referee))->passes(null, now()->toDateTimeString()));
     }
@@ -130,9 +130,9 @@ class EmploymentStartDateCanBeChangedTest extends TestCase
     /**
      * @test
      */
-    public function an_employed_tag_teams_start_date_cannot_be_changed()
+    public function a_bookable_tag_teams_start_date_cannot_be_changed()
     {
-        $tagTeam = TagTeam::factory()->employed()->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
         $this->assertFalse((new EmploymentStartDateCanBeChanged($tagTeam))->passes(null, now()->toDateTimeString()));
     }

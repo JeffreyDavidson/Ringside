@@ -118,12 +118,12 @@ class StableRepository implements ActivationRepositoryInterface, DeactivationRep
     {
         foreach ($stable->currentWrestlers as $wrestler) {
             $stable->currentWrestlers()->updateExistingPivot($wrestler, ['left_at' => $deactivationDate]);
-            $wrestler->updateStatus()->save();
+            $wrestler->save();
         }
 
         foreach ($stable->currentTagTeams as $tagTeam) {
             $stable->currentTagTeams()->updateExistingPivot($wrestler, ['left_at' => $deactivationDate]);
-            $tagTeam->updateStatus()->save();
+            $tagTeam->save();
         }
 
         return $stable;
