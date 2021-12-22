@@ -11,16 +11,31 @@ class EventMatch extends Model
     use HasFactory,
         Unguarded;
 
+    /**
+     * Get the referees assigned to the match.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function referees()
     {
         return $this->belongsToMany(Referee::class);
     }
 
+    /**
+     * Get the titles being competed for in the event match.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function titles()
     {
         return $this->belongsToMany(Title::class);
     }
 
+    /**
+     * Get the competitors of the match.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
     public function competitors()
     {
         return $this->morphTo();

@@ -31,6 +31,12 @@ class Manager extends SingleRosterMember implements StableMember
         self::observe(ManagerObserver::class);
     }
 
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
     public function newEloquentBuilder($query)
     {
         return new ManagerQueryBuilder($query);
@@ -45,6 +51,11 @@ class Manager extends SingleRosterMember implements StableMember
         'status' => ManagerStatus::class,
     ];
 
+    /**
+     * Determine if the manager is available.
+     *
+     * @return bool
+     */
     public function isAvailable()
     {
         return $this->currentEmployment()->exists();

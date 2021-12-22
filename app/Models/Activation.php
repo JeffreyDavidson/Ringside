@@ -21,7 +21,7 @@ class Activation extends Model
     ];
 
     /**
-     * Get the owning activated model.
+     * Get the activated model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
@@ -31,7 +31,7 @@ class Activation extends Model
     }
 
     /**
-     * Retrieve an activation started before a given date.
+     * Determine an activation started before a given date.
      *
      * @param  string $date
      * @return bool

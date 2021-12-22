@@ -77,7 +77,7 @@ class Event extends Model
     }
 
     /**
-     * Checks to see if the event has taken place.
+     * Checks to see if the event has already taken place.
      *
      * @return bool
      */
@@ -87,7 +87,7 @@ class Event extends Model
     }
 
     /**
-     * Checks to see if the event has a scheduled date.
+     * Checks to see if the event is unscheduled.
      *
      * @return bool
      */

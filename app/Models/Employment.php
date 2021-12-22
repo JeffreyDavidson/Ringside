@@ -21,7 +21,7 @@ class Employment extends Model
     ];
 
     /**
-     * Get the owning employed model.
+     * Get the employed model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
