@@ -21,10 +21,10 @@ class SuspendAction extends BaseTagTeamAction
 
         foreach ($tagTeam->currentWrestlers as $wrestler) {
             $this->wrestlerRepository->suspend($wrestler, $suspensionDate);
-            $wrestler->updateStatus()->save();
+            $wrestler->save();
         }
 
         $this->tagTeamRepository->suspend($tagTeam, $suspensionDate);
-        $tagTeam->updateStatus()->save();
+        $tagTeam->save();
     }
 }

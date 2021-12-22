@@ -20,6 +20,6 @@ class EmployAction extends BaseRefereeAction
         $employmentDate = now()->toDateTimeString();
 
         $this->refereeRepository->employ($referee, $employmentDate);
-        $referee->updateStatus()->save();
+        $referee->save();
     }
 }

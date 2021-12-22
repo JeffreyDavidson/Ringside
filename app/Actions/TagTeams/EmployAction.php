@@ -23,9 +23,9 @@ class EmployAction extends BaseTagTeamAction
 
         foreach ($tagTeam->currentWrestlers as $wrestler) {
             $this->wrestlerRepository->employ($wrestler, $employmentDate);
-            $wrestler->updateStatus()->save();
+            $wrestler->save();
         }
 
-        $tagTeam->updateStatus()->save();
+        $tagTeam->save();
     }
 }

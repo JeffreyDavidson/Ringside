@@ -20,6 +20,6 @@ class EmployAction extends BaseWrestlerAction
         $employmentDate = now()->toDateTimeString();
 
         $this->wrestlerRepository->employ($wrestler, $employmentDate);
-        $wrestler->updateStatus()->save();
+        $wrestler->save();
     }
 }

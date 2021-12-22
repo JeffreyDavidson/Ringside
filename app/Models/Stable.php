@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Builders\StableQueryBuilder;
 use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
+use App\Observers\StableObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,15 +23,20 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
         Concerns\Unguarded;
 
     /**
-     * The "booted" method of the model.
+     * The "boot" method of the model.
      *
      * @return void
      */
-    protected static function booted()
+    protected static function boot()
     {
-        static::saving(function ($stable) {
-            $stable->updateStatus();
-        });
+        parent::boot();
+
+        self::observe(StableObserver::class);
+    }
+
+    public function newEloquentBuilder($query)
+    {
+        return new StableQueryBuilder($query);
     }
 
     /**
@@ -40,24 +47,6 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     protected $casts = [
         'status' => StableStatus::class,
     ];
-
-    /**
-     * Update the status for the stable.
-     *
-     * @return $this
-     */
-    public function updateStatus()
-    {
-        $this->status = match (true) {
-            $this->isCurrentlyActivated() => StableStatus::active(),
-            $this->hasFutureActivation() => StableStatus::future_activation(),
-            $this->isDeactivated() => StableStatus::inactive(),
-            $this->isRetired() => StableStatus::retired(),
-            default => StableStatus::unactivated()
-        };
-
-        return $this;
-    }
 
     /**
      * Get the retirements of the model.
@@ -103,45 +92,6 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
         return $this->morphOne(Retirement::class, 'retiree')
                     ->latest('ended_at')
                     ->limit(1);
-    }
-
-    /**
-     * Scope a query to only include retired models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeRetired($query)
-    {
-        return $query->whereHas('currentRetirement');
-    }
-
-    /**
-     * Scope a query to include current retirement date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithCurrentRetiredAtDate($query)
-    {
-        return $query->addSelect(['current_retired_at' => Retirement::select('started_at')
-            ->whereColumn('retiree_id', $this->getTable().'.id')
-            ->where('retiree_type', $this->getMorphClass())
-            ->latest('started_at')
-            ->limit(1),
-        ])->withCasts(['current_retired_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the model's current retirement date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  string $direction
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByCurrentRetiredAtDate($query, $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(current_retired_at) $direction");
     }
 
     /**

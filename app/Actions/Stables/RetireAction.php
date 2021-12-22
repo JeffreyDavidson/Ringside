@@ -23,7 +23,7 @@ class RetireAction extends BaseStableAction
             foreach ($stable->currentTagTeams as $tagTeam) {
                 $this->tagTeamRepository->release($tagTeam, $retirementDate);
                 $this->tagTeamRepository->retire($tagTeam, $retirementDate);
-                $tagTeam->updateStatus()->save();
+                $tagTeam->save();
             }
         }
 
@@ -31,12 +31,12 @@ class RetireAction extends BaseStableAction
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->wrestlerRepository->release($wrestler, $retirementDate);
                 $this->wrestlerRepository->retire($wrestler, $retirementDate);
-                $wrestler->updateStatus()->save();
+                $wrestler->save();
             }
         }
 
         $this->stableRepository->deactivate($stable, $retirementDate);
         $this->stableRepository->retire($stable, $retirementDate);
-        $stable->updateStatus()->save();
+        $stable->save();
     }
 }

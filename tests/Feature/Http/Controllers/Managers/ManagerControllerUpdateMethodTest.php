@@ -60,6 +60,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
      */
     public function update_a_manager_and_redirects()
     {
+        $this->withoutExceptionHandling();
         $manager = Manager::factory()->create(['first_name' => 'John', 'last_name' => 'Smith']);
 
         $this

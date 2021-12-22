@@ -2,8 +2,6 @@
 
 namespace App\Models\Contracts;
 
-use Illuminate\Database\Eloquent\Builder;
-
 interface Activatable
 {
     /**
@@ -47,54 +45,6 @@ interface Activatable
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function previousActivations();
-
-    /**
-     * Scope a query to include active models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder  $query
-     */
-    public function scopeActive(Builder $query);
-
-    /**
-     * Scope a query to include future activated models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder  $query
-     */
-    public function scopeWithFutureActivation(Builder $scope);
-
-    /**
-     * Scope a query to include inactive models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder  $query
-     */
-    public function scopeInactive(Builder $query);
-
-    /**
-     * Scope a query to include unactivated models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder  $query
-     */
-    public function scopeUnactivated(Builder $query);
-
-    /**
-     * Scope a query to include current activation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder  $query
-     */
-    public function scopeWithFirstActivatedAtDate(Builder $query);
-
-    /**
-     * Scope a query to order by the models first activation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder  $query
-     */
-    public function scopeOrderByFirstActivatedAtDate(Builder $query);
 
     /**
      * Check to see if the model is currently active.

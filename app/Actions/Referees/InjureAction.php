@@ -20,6 +20,6 @@ class InjureAction extends BaseRefereeAction
         $injureDate = now()->toDateTimeString();
 
         $this->refereeRepository->injure($referee, $injureDate);
-        $referee->updateStatus()->save();
+        $referee->save();
     }
 }

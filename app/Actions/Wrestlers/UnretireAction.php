@@ -21,6 +21,6 @@ class UnretireAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->unretire($wrestler, $unretiredDate);
         $this->wrestlerRepository->employ($wrestler, $unretiredDate);
-        $wrestler->updateStatus()->save();
+        $wrestler->save();
     }
 }

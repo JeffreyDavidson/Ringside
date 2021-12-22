@@ -20,6 +20,6 @@ class EmployAction extends BaseManagerAction
         $employmentDate = now()->toDateTimeString();
 
         $this->managerRepository->employ($manager, $employmentDate);
-        $manager->updateStatus()->save();
+        $manager->save();
     }
 }

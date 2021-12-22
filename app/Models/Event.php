@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\EventStatus;
+use App\Builders\EventQueryBuilder;
+use App\Observers\EventObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,15 +15,15 @@ class Event extends Model
         SoftDeletes;
 
     /**
-     * The "booted" method of the model.
+     * The "boot" method of the model.
      *
      * @return void
      */
-    protected static function booted()
+    protected static function boot()
     {
-        static::saving(function ($event) {
-            $event->updateStatus();
-        });
+        parent::boot();
+
+        self::observe(EventObserver::class);
     }
 
     /**
@@ -33,6 +34,17 @@ class Event extends Model
     protected $casts = [
         'date' => 'datetime',
     ];
+
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
+    public function newEloquentBuilder($query)
+    {
+        return new EventQueryBuilder($query);
+    }
 
     /**
      * Retrieve the venue of the event.
@@ -52,39 +64,6 @@ class Event extends Model
     public function matches()
     {
         return $this->hasMany(EventMatch::class);
-    }
-
-    /**
-     * Scope a query to include scheduled events.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeScheduled($query)
-    {
-        return $query->where('status', EventStatus::scheduled())->whereNotNull('date');
-    }
-
-    /**
-     * Scope a query to include unscheduled events.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeUnscheduled($query)
-    {
-        return $query->where('status', EventStatus::unscheduled())->whereNull('date');
-    }
-
-    /**
-     * Scope a query to include past events.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopePast($query)
-    {
-        return $query->where('status', EventStatus::past())->where('date', '<', now()->toDateString());
     }
 
     /**
@@ -125,21 +104,5 @@ class Event extends Model
     public function getFormattedDateAttribute()
     {
         return $this->date->format('F j, Y');
-    }
-
-    /**
-     * Update the status for the event.
-     *
-     * @return $this
-     */
-    public function updateStatus()
-    {
-        $this->status = match (true) {
-            $this->isScheduled() => EventStatus::scheduled(),
-            $this->isPast() => EventStatus::past(),
-            default => EventStatus::unscheduled()
-        };
-
-        return $this;
     }
 }

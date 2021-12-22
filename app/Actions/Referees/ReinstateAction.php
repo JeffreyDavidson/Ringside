@@ -20,6 +20,6 @@ class ReinstateAction extends BaseRefereeAction
         $reinstatementDate = now()->toDateTimeString();
 
         $this->refereeRepository->reinstate($referee, $reinstatementDate);
-        $referee->updateStatus()->save();
+        $referee->save();
     }
 }

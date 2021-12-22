@@ -20,10 +20,10 @@ class ClearInjuryAction extends BaseWrestlerAction
         $recoveryDate = now()->toDateTimeString();
 
         $this->wrestlerRepository->clearInjury($wrestler, $recoveryDate);
-        $wrestler->updateStatus()->save();
+        $wrestler->save();
 
         if (! is_null($wrestler->currentTagTeam) && $wrestler->currentTagTeam->exists()) {
-            $wrestler->currentTagTeam->updateStatus()->save();
+            $wrestler->currentTagTeam->save();
         }
     }
 }

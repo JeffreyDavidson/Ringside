@@ -21,6 +21,6 @@ class UnretireAction extends BaseStableAction
 
         $this->stableRepository->unretire($stable, $unretiredDate);
         $this->stableRepository->activate($stable, $unretiredDate);
-        $stable->updateStatus()->save();
+        $stable->save();
     }
 }

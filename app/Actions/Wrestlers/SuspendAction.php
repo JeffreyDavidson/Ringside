@@ -20,10 +20,10 @@ class SuspendAction extends BaseWrestlerAction
         $suspensionDate = now()->toDateTimeString();
 
         $this->wrestlerRepository->suspend($wrestler, $suspensionDate);
-        $wrestler->updateStatus()->save();
+        $wrestler->save();
 
         if (! is_null($wrestler->currentTagTeam) && $wrestler->currentTagTeam->exists()) {
-            $wrestler->currentTagTeam->updateStatus()->save();
+            $wrestler->currentTagTeam->save();
         }
     }
 }

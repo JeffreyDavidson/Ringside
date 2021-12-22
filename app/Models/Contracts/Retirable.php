@@ -2,8 +2,6 @@
 
 namespace App\Models\Contracts;
 
-use Illuminate\Database\Eloquent\Builder;
-
 interface Retirable
 {
     /**
@@ -35,31 +33,7 @@ interface Retirable
     public function previousRetirement();
 
     /**
-     * Scope a query to include retired models.
-     *
-     * @param   \Illuminate\Database\Eloquent\Builder  $query
-     * @return  \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeRetired(Builder $query);
-
-    /**
-     * Scope a query to include model's current retired at date.
-     *
-     * @param   \Illuminate\Database\Eloquent\Builder  $query
-     * @return  \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithCurrentRetiredAtDate(Builder $query);
-
-    /**
-     * Scope a query to order models by current retired at date.
-     *
-     * @param   \Illuminate\Database\Eloquent\Builder  $query
-     * @return  \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByCurrentRetiredAtDate(Builder $query);
-
-    /**
-     * Get the column name for the "remember me" token.
+     * Determine if the model is retired.
      *
      * @return bool
      */

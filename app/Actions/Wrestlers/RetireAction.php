@@ -29,10 +29,10 @@ class RetireAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->release($wrestler, $retirementDate);
         $this->wrestlerRepository->retire($wrestler, $retirementDate);
-        $wrestler->updateStatus()->save();
+        $wrestler->save();
 
         if (! is_null($wrestler->currentTagTeam) && $wrestler->currentTagTeam->exists()) {
-            $wrestler->currentTagTeam->updateStatus()->save();
+            $wrestler->currentTagTeam->save();
         }
     }
 }

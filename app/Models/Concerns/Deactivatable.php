@@ -3,50 +3,9 @@
 namespace App\Models\Concerns;
 
 use App\Models\Activation;
-use Illuminate\Database\Eloquent\Builder;
 
 trait Deactivatable
 {
-    /**
-     * Scope a query to only include unactivated models.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeDeactivated(Builder $query)
-    {
-        return $query->whereDoesntHave('currentActivation')
-                    ->orWhereDoesntHave('previousActivations');
-    }
-
-    /**
-     * Scope a query to include current deactivation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeWithLastDeactivationDate(Builder $query)
-    {
-        return $query->addSelect(['last_deactivated_at' => Activation::select('ended_at')
-            ->whereColumn('activatable_id', $query->qualifyColumn('id'))
-            ->where('activatable_type', $this->getMorphClass())
-            ->orderByDesc('ended_at')
-            ->limit(1),
-        ])->withCasts(['last_deactivated_at' => 'datetime']);
-    }
-
-    /**
-     * Scope a query to order by the models current deactivation date.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  string $direction
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOrderByLastDeactivationDate(Builder $query, string $direction = 'asc')
-    {
-        return $query->orderByRaw("DATE(last_deactivated_at) $direction");
-    }
-
     /**
      * Check to see if the model is deactivated.
      *
