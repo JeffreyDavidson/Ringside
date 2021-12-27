@@ -12,7 +12,7 @@ class ManagerRequestDataFactory
 
     public static function new(): self
     {
-        return new self();
+        return new self;
     }
 
     public function create(array $overrides = []): array

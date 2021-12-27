@@ -21,7 +21,7 @@ class CannotBeHinderedTest extends TestCase
     {
         $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
+        $this->assertFalse((new CannotBeHindered)->passes(null, $wrestler->id));
     }
 
     /**
@@ -31,7 +31,7 @@ class CannotBeHinderedTest extends TestCase
     {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
+        $this->assertFalse((new CannotBeHindered)->passes(null, $wrestler->id));
     }
 
     /**
@@ -41,6 +41,6 @@ class CannotBeHinderedTest extends TestCase
     {
         $wrestler = Wrestler::factory()->retired()->create();
 
-        $this->assertFalse((new CannotBeHindered())->passes(null, $wrestler->id));
+        $this->assertFalse((new CannotBeHindered)->passes(null, $wrestler->id));
     }
 }

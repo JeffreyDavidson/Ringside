@@ -12,7 +12,7 @@
     @endcan
 
     @if ($actions->contains('retire'))
-        @if($stable->canBeRetired())
+        @if ($stable->canBeRetired())
             @can('retire', $stable)
                 <x-buttons.retire :route="route('stables.retire', $stable)" />
             @endcan
@@ -20,7 +20,7 @@
     @endif
 
     @if ($actions->contains('unretire'))
-        @if($stable->canBeUnretired())
+        @if ($stable->canBeUnretired())
             @can('unretire', $stable)
                 <x-buttons.unretire :route="route('stables.unretire', $stable)" />
             @endcan
@@ -28,7 +28,7 @@
     @endif
 
     @if ($actions->contains('activate'))
-        @if($stable->canBeActivated())
+        @if ($stable->canBeActivated())
             @can('activate', $stable)
                 <x-buttons.activate :route="route('stables.activate', $stable)" />
             @endcan
@@ -36,7 +36,7 @@
     @endif
 
     @if ($actions->contains('deactivate'))
-        @if($stable->canBeDeactivated())
+        @if ($stable->canBeDeactivated())
             @can('release', $stable)
                 <x-buttons.deactivate :route="route('stables.deactivate', $stable)" />
             @endcan

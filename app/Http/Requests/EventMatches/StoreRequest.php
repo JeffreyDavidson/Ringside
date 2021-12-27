@@ -52,7 +52,10 @@ class StoreRequest extends FormRequest
                 $rule = new CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType($this->input('match_type_id'));
 
                 if (! $rule->passes('competitors', $this->input('competitors'))) {
-                    $validator->addFailure('competitors', CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType::class);
+                    $validator->addFailure(
+                        'competitors',
+                        CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType::class
+                    );
                 }
             }
         });

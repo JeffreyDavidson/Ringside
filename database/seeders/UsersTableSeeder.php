@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -15,14 +16,14 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         $userData = [];
-        collect(\App\Enums\Role::toArray())->each(function ($value, $key) use (&$userData): void {
+        collect(Role::toArray())->each(function ($value, $key) use (&$userData): void {
             for ($i = 0; $i <= 1; $i++) {
-                $user = new User();
+                $user = new User;
                 $user->first_name = ($i ? 'Second ' : '').ucwords($value);
                 $user->last_name = 'User';
                 $user->email = $value.($i ? '2' : '').'@example.com';
                 $user->password = 'password';
-                $user->role = new \App\Enums\Role($value);
+                $user->role = new Role($value);
                 $user->save();
                 $user->refresh();
                 $userData[] = [

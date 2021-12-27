@@ -4,6 +4,7 @@ namespace Tests\Integration\Models;
 
 use App\Enums\TitleStatus;
 use App\Models\Title;
+use Tests\Integration\Models\Concerns\RetirableContractTests;
 use Tests\TestCase;
 
 /**
@@ -11,7 +12,7 @@ use Tests\TestCase;
  */
 class TitleTest extends TestCase
 {
-    use Concerns\RetirableContractTests;
+    use RetirableContractTests;
 
     private $activeTitle;
     private $futureActivatedTitle;

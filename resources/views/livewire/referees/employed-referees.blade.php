@@ -6,7 +6,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($employedReferees as $referee)
+        @forelse ($employedReferees as $referee)
             <tr>
                 <td>{{ $referee->id }}</td>
                 <td>{{ $referee->full_name }}</td>

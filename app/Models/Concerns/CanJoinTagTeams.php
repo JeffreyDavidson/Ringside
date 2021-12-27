@@ -4,7 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\TagTeam;
 
-trait TagTeamMember
+trait CanJoinTagTeams
 {
     /**
      * Get the tag teams the model has been belonged to.

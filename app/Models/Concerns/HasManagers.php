@@ -2,7 +2,7 @@
 
 namespace App\Models\Concerns;
 
-trait Manageable
+trait HasManagers
 {
     public function managers()
     {

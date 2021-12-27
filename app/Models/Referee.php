@@ -2,19 +2,29 @@
 
 namespace App\Models;
 
+use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
 use App\Models\Contracts\Bookable;
+use App\Models\SingleRosterMember;
 use App\Observers\RefereeObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends SingleRosterMember implements Bookable
 {
-    use Concerns\Bookable,
-        Concerns\HasFullName,
-        Concerns\Unguarded,
-        HasFactory,
-        SoftDeletes;
+    use HasFactory,
+        HasFullName,
+        SoftDeletes,
+        Unguarded;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => RefereeStatus::class,
+    ];
 
     /**
      * The "boot" method of the model.
@@ -29,11 +39,13 @@ class Referee extends SingleRosterMember implements Bookable
     }
 
     /**
-     * The attributes that should be cast to native types.
+     * Create a new Eloquent query builder for the model.
      *
-     * @var array
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
      */
-    protected $casts = [
-        'status' => RefereeStatus::class,
-    ];
+    public function newEloquentBuilder($query)
+    {
+        return new RefereeQueryBuilder($query);
+    }
 }

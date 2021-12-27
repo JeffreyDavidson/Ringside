@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Builders\EventQueryBuilder;
+use App\Models\Concerns\Unguarded;
 use App\Observers\EventObserver;
 use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,9 +12,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use Concerns\Unguarded,
-        HasFactory,
-        SoftDeletes;
+    use HasFactory,
+        SoftDeletes,
+        Unguarded;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'date' => 'datetime',
+    ];
 
     /**
      * The "boot" method of the model.
@@ -26,15 +36,6 @@ class Event extends Model
 
         self::observe(EventObserver::class);
     }
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'date' => 'datetime',
-    ];
 
     /**
      * Create a new Eloquent query builder for the model.

@@ -12,16 +12,33 @@ use App\Observers\TagTeamObserver;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Staudenmeir\EloquentHasManyDeep\HasTableAlias;
 
 class TagTeam extends RosterMember implements Bookable, StableMember
 {
-    use SoftDeletes,
-        HasFactory,
+    use HasFactory,
         HasMorphToOne,
-        Concerns\OwnedByUser,
-        Concerns\StableMember,
-        Concerns\Unguarded,
-        \Staudenmeir\EloquentHasManyDeep\HasTableAlias;
+        HasTableAlias,
+        OwnedByUser,
+        SoftDeletes,
+        StableMember,
+        Unguarded;
+
+    /**
+     * The number of the wrestlers allowed on a tag team.
+     *
+     * @var int
+     */
+    const MAX_WRESTLERS_COUNT = 2;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => TagTeamStatus::class,
+    ];
 
     /**
      * The "boot" method of the model.
@@ -45,22 +62,6 @@ class TagTeam extends RosterMember implements Bookable, StableMember
     {
         return new TagTeamQueryBuilder($query);
     }
-
-    /**
-     * The number of the wrestlers allowed on a tag team.
-     *
-     * @var int
-     */
-    const MAX_WRESTLERS_COUNT = 2;
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'status' => TagTeamStatus::class,
-    ];
 
     /**
      * Get the wrestlers that have been tag team partners of the tag team.

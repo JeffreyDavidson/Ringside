@@ -14,13 +14,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stable extends Model implements Activatable, Deactivatable, Retirable
 {
-    use SoftDeletes,
+    use Activatable,
+        Deactivatable,
         HasFactory,
-        Concerns\Activatable,
-        Concerns\Deactivatable,
-        Concerns\HasMembers,
-        Concerns\OwnedByUser,
-        Concerns\Unguarded;
+        HasMembers,
+        OwnedByUser,
+        SoftDeletes,
+        Unguarded;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => StableStatus::class,
+    ];
 
     /**
      * The "boot" method of the model.
@@ -44,15 +53,6 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     {
         return new StableQueryBuilder($query);
     }
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'status' => StableStatus::class,
-    ];
 
     /**
      * Get the retirements of the model.

@@ -44,7 +44,9 @@ class RefereesController extends Controller
     {
         $this->authorize('create', Referee::class);
 
-        return view('referees.create', compact('referee'));
+        return view('referees.create', [
+            'referee' => $referee,
+        ]);
     }
 
     /**
@@ -70,7 +72,9 @@ class RefereesController extends Controller
     {
         $this->authorize('view', $referee);
 
-        return view('referees.show', compact('referee'));
+        return view('referees.show', [
+            'referee' => $referee,
+        ]);
     }
 
     /**
@@ -83,7 +87,9 @@ class RefereesController extends Controller
     {
         $this->authorize('update', $referee);
 
-        return view('referees.edit', compact('referee'));
+        return view('referees.edit', [
+            'referee' => $referee,
+        ]);
     }
 
     /**

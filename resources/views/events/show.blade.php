@@ -10,10 +10,10 @@
         </x-slot>
     </x-subheader>
     <x-content>
-        @if($event->isUnscheduled())
-        <div class="alert alert-warning" role="alert">
-            <strong>Warning!</strong>&nbsp;This event is not scheduled!
-        </div>
+        @if ($event->isUnscheduled())
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning!</strong>&nbsp;This event is not scheduled!
+            </div>
         @endif
         <div
             class="kt-grid kt-grid--desktop kt-grid--ver kt-grid--ver-desktop kt-app"
@@ -49,7 +49,7 @@
                             </div>
                             <div class="kt-widget__body">
                                 <div class="kt-widget__content">
-                                    @if($event->isScheduled() || $event->isPast())
+                                    @if ($event->isScheduled() || $event->isPast())
                                         <div class="kt-widget__info">
                                             <span class="kt-widget__label"
                                                 >Date:</span
@@ -60,7 +60,7 @@
                                             >
                                         </div>
                                     @endif
-                                    @isset($event->venue)
+                                    @isset ($event->venue)
                                         <div class="kt-widget__info">
                                             <span class="kt-widget__label"
                                                 >Venue:</span

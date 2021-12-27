@@ -4,6 +4,12 @@ namespace Tests\Integration\Models;
 
 use App\Enums\WrestlerStatus;
 use App\Models\Wrestler;
+use Tests\Integration\Models\Concerns\EmployableContractTests;
+use Tests\Integration\Models\Concerns\InjurableContractTests;
+use Tests\Integration\Models\Concerns\RetirableContractTests;
+use Tests\Integration\Models\Concerns\StableMemberContractTests;
+use Tests\Integration\Models\Concerns\SuspendableContractTests;
+use Tests\Integration\Models\Concerns\TagTeamMemberContractTests;
 use Tests\TestCase;
 
 /**
@@ -11,12 +17,12 @@ use Tests\TestCase;
  */
 class WrestlerTest extends TestCase
 {
-    use Concerns\EmployableContractTests,
-        Concerns\InjurableContractTests,
-        Concerns\RetirableContractTests,
-        Concerns\StableMemberContractTests,
-        Concerns\SuspendableContractTests,
-        Concerns\TagTeamMemberContractTests;
+    use EmployableContractTests,
+        InjurableContractTests,
+        RetirableContractTests,
+        StableMemberContractTests,
+        SuspendableContractTests,
+        TagTeamMemberContractTests;
 
     private $bookableWrestler;
     private $futureEmployedWrestler;

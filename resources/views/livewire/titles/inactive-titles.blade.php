@@ -6,7 +6,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($inactiveTitles as $title)
+        @forelse ($inactiveTitles as $title)
             <tr>
                 <td>{{ $title->id }}</td>
                 <td>{{ $title->name }}</td>

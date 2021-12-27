@@ -7,7 +7,7 @@
         </x-slot>
     </x-subheader>
     <x-content>
-        @if($referee->isUnemployed())
+        @if ($referee->isUnemployed())
             <div class="alert alert-warning" role="alert">
                 <strong>Warning!</strong>&nbsp;This referee is not employed!
             </div>

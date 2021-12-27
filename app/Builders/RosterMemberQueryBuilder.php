@@ -42,7 +42,7 @@ class RosterMemberQueryBuilder extends Builder
      */
     public function orderByCurrentSuspendedAtDate(string $direction = 'asc')
     {
-        return $this->orderByRaw("DATE(current_suspended_at) $direction");
+        return $this->orderByRaw("DATE(current_suspended_at) {$direction}");
     }
 
     /**
@@ -78,7 +78,7 @@ class RosterMemberQueryBuilder extends Builder
      */
     public function orderByCurrentRetiredAtDate(string $direction = 'asc')
     {
-        return $this->orderByRaw("DATE(current_retired_at) $direction");
+        return $this->orderByRaw("DATE(current_retired_at) {$direction}");
     }
 
     /**
@@ -116,7 +116,7 @@ class RosterMemberQueryBuilder extends Builder
      */
     public function orderByCurrentReleasedAtDate(string $direction = 'asc')
     {
-        return $this->orderByRaw("DATE(current_released_at) $direction");
+        return $this->orderByRaw("DATE(current_released_at) {$direction}");
     }
 
     /**
@@ -173,6 +173,6 @@ class RosterMemberQueryBuilder extends Builder
      */
     public function orderByFirstEmployedAtDate(string $direction = 'asc')
     {
-        return $this->orderByRaw("DATE(first_employed_at) $direction");
+        return $this->orderByRaw("DATE(first_employed_at) {$direction}");
     }
 }

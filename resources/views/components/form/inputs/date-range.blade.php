@@ -3,7 +3,7 @@
 <div class="input-group flatpickr kt-input-icon kt-input-icon--right">
     <div class="kt-input-icon kt-input-icon--right">
         {{-- <x-form.inputs.text
-            id="{{$name}}_start"
+            id="{{ $name }}_start"
             name="{$name}.start"
             data-datetimepicker
             data-input
@@ -20,7 +20,7 @@
         <span class="kt-input-icon__icon kt-input-icon__icon--right">
             <span><i class="flaticon-calendar-with-a-clock-time-tools"></i></span>
         </span>
-        @error("{$name}.start")
+        @error("{ $name }.start")
             <x-form.validation-error name="{{ $name }}['start']" :message="$message" />
         @enderror
     </div>
@@ -30,7 +30,7 @@
     <div class="kt-input-icon kt-input-icon--right">
         <input
             type="text"
-            class="form-control @error("{$name}.end") is-invalid @enderror"
+            class="form-control @error("{ $name }.end") is-invalid @enderror"
             name="{{ $name }}[end]"
             id="{{ $name }}_end"
             placeholder="Enter {{ $label }} End"

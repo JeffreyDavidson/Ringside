@@ -6,5 +6,5 @@ use App\Http\Controllers\Events\RestoreController;
 use Illuminate\Support\Facades\Route;
 
 Route::resource('events', EventsController::class);
-Route::patch('/events/{event}/restore', RestoreController::class)->name('events.restore');
+Route::patch('events/{event}/restore', RestoreController::class)->name('events.restore');
 Route::resource('events.matches', EventMatchesController::class);

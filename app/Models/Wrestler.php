@@ -2,26 +2,39 @@
 
 namespace App\Models;
 
+use App\Builders\WrestlerQueryBuilder;
 use App\Casts\HeightCast;
 use App\Enums\WrestlerStatus;
+use App\Models\Concerns\CanJoinStables;
+use App\Models\Concerns\CanJoinTagTeams;
+use App\Models\Concerns\HasManagers;
 use App\Models\Contracts\Bookable;
+use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Manageable;
-use App\Models\Contracts\StableMember;
 use App\Models\Contracts\TagTeamMember;
 use App\Observers\WrestlerObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Wrestler extends SingleRosterMember implements Bookable, Manageable, StableMember, TagTeamMember
+class Wrestler extends SingleRosterMember implements Bookable, Manageable, CanBeAStableMember, TagTeamMember
 {
-    use Concerns\Bookable,
-        Concerns\Manageable,
-        Concerns\OwnedByUser,
-        Concerns\StableMember,
-        Concerns\TagTeamMember,
-        Concerns\Unguarded,
-        HasFactory,
-        SoftDeletes;
+    use HasFactory,
+        HasManagers,
+        OwnedByUser,
+        SoftDeletes,
+        CanJoinStables,
+        CanJoinTagTeams,
+        Unguarded;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => WrestlerStatus::class,
+        'height' => HeightCast::class,
+    ];
 
     /**
      * The "boot" method of the model.
@@ -36,12 +49,13 @@ class Wrestler extends SingleRosterMember implements Bookable, Manageable, Stabl
     }
 
     /**
-     * The attributes that should be cast to native types.
+     * Create a new Eloquent query builder for the model.
      *
-     * @var array
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
      */
-    protected $casts = [
-        'status' => WrestlerStatus::class,
-        'height' => HeightCast::class,
-    ];
+    public function newEloquentBuilder($query)
+    {
+        return new WrestlerQueryBuilder($query);
+    }
 }

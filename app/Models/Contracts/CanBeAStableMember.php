@@ -2,7 +2,7 @@
 
 namespace App\Models\Contracts;
 
-interface StableMember
+interface CanBeAStableMember
 {
     /**
      * Get the stables the stable member has been a member of.

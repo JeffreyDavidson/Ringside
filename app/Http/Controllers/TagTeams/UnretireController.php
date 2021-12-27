@@ -20,7 +20,7 @@ class UnretireController extends Controller
      */
     public function __invoke(TagTeam $tagTeam, UnretireRequest $request, UnretireAction $action)
     {
-        throw_unless($tagTeam->canBeUnretired(), new CannotBeUnretiredException);
+        throw_unless($tagTeam->canBeUnretired(), (new CannotBeUnretiredException));
 
         $action->handle($tagTeam);
 

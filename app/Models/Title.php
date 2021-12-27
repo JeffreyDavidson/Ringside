@@ -14,13 +14,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Title extends Model implements Activatable, Deactivatable, Retirable
 {
-    use Concerns\Activatable,
-        Concerns\Competable,
-        Concerns\Deactivatable,
-        Concerns\Retirable,
-        Concerns\Unguarded,
+    use Activatable,
+        Competable,
+        Deactivatable,
+        Retirable,
+        Unguarded,
         HasFactory,
         SoftDeletes;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => TitleStatus::class,
+    ];
 
     /**
      * The "boot" method of the model.
@@ -44,15 +53,6 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     {
         return new TitleQueryBuilder($query);
     }
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'status' => TitleStatus::class,
-    ];
 
     /**
      * Determine if the model can be retired.

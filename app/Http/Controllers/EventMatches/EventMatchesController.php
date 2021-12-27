@@ -20,7 +20,9 @@ class EventMatchesController extends Controller
     {
         $this->authorize('create', EventMatch::class);
 
-        return view('matches.create', compact('event'));
+        return view('matches.create', [
+            'event' => $event,
+        ]);
     }
 
     /**

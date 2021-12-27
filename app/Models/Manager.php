@@ -4,20 +4,31 @@ namespace App\Models;
 
 use App\Builders\ManagerQueryBuilder;
 use App\Enums\ManagerStatus;
-use App\Models\Contracts\StableMember;
+use App\Models\Concerns\StableMember;
+use App\Models\Contracts\CanBeAStableMember;
+use App\Models\SingleRosterMember;
 use App\Observers\ManagerObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manager extends SingleRosterMember implements StableMember
+class Manager extends SingleRosterMember implements CanBeAStableMember
 {
-    use Concerns\HasFullName,
-        Concerns\Manageables,
-        Concerns\OwnedByUser,
-        Concerns\StableMember,
-        Concerns\Unguarded,
-        HasFactory,
-        SoftDeletes;
+    use HasFactory,
+        HasFullName,
+        Manageables,
+        OwnedByUser,
+        SoftDeletes,
+        StableMember,
+        Unguarded;
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => ManagerStatus::class,
+    ];
 
     /**
      * The "boot" method of the model.
@@ -41,15 +52,6 @@ class Manager extends SingleRosterMember implements StableMember
     {
         return new ManagerQueryBuilder($query);
     }
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'status' => ManagerStatus::class,
-    ];
 
     /**
      * Determine if the manager is available.
