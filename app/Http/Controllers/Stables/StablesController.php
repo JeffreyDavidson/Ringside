@@ -43,7 +43,9 @@ class StablesController extends Controller
     {
         $this->authorize('create', Stable::class);
 
-        return view('stables.create', compact('stable'));
+        return view('stables.create', [
+            'stable' => $stable,
+        ]);
     }
 
     /**
@@ -69,7 +71,9 @@ class StablesController extends Controller
     {
         $this->authorize('view', $stable);
 
-        return view('stables.show', compact('stable'));
+        return view('stables.show', [
+            'stable' => $stable,
+        ]);
     }
 
     /**
@@ -82,7 +86,9 @@ class StablesController extends Controller
     {
         $this->authorize('update', $stable);
 
-        return view('stables.edit', compact('stable'));
+        return view('stables.edit', [
+            'stable' => $stable,
+        ]);
     }
 
     /**

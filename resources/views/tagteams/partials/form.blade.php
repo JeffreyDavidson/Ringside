@@ -24,7 +24,7 @@
     </div>
 </x-kt-section>
 <x-kt-section>
-    @if($wrestlers->isNotEmpty())
+    @if ($wrestlers->isNotEmpty())
         <div class="row">
             <div class="col-lg-6">
                 <div class="form-group">

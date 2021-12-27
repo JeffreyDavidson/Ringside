@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class EventMatch extends Model
 {
-    use Concerns\Unguarded,
-        HasFactory;
+    use HasFactory,
+        Unguarded;
 
     /**
      * Get the referees assigned to the match.

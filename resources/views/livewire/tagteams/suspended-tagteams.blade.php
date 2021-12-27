@@ -1,12 +1,12 @@
 <x-data-table :collection="$suspendedTagTeams">
     <thead>
         <th>Id</th>
-        <th>tagTeam Name</th>
+        <th>Tag Team Name</th>
         <th>Date Suspended</th>
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($suspendedTagTeams as $tagTeam)
+        @forelse ($suspendedTagTeams as $tagTeam)
             <tr>
                 <td>{{ $tagTeam->id }}</td>
                 <td>{{ $tagTeam->full_name }}</td>

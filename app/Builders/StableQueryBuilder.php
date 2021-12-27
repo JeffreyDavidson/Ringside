@@ -41,7 +41,7 @@ class StableQueryBuilder extends Builder
      */
     public function orderByCurrentRetiredAtDate($direction = 'asc')
     {
-        return $this->orderByRaw("DATE(current_retired_at) $direction");
+        return $this->orderByRaw("DATE(current_retired_at) {$direction}");
     }
 
     /**
@@ -78,7 +78,7 @@ class StableQueryBuilder extends Builder
      */
     public function orderByLastDeactivationDate(string $direction = 'asc')
     {
-        return $this->orderByRaw("DATE(last_deactivated_at) $direction");
+        return $this->orderByRaw("DATE(last_deactivated_at) {$direction}");
     }
 
     /**
@@ -147,6 +147,6 @@ class StableQueryBuilder extends Builder
      */
     public function orderByFirstActivatedAtDate(string $direction = 'asc')
     {
-        return $this->orderByRaw("DATE(first_activated_at) $direction");
+        return $this->orderByRaw("DATE(first_activated_at) {$direction}");
     }
 }

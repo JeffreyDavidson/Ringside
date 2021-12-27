@@ -44,7 +44,9 @@ class EventsController extends Controller
     {
         $this->authorize('create', Event::class);
 
-        return view('events.create', compact('event'));
+        return view('events.create', [
+            'event' => $event,
+        ]);
     }
 
     /**
@@ -74,7 +76,9 @@ class EventsController extends Controller
             $event->load('venue');
         }
 
-        return response()->view('events.show', compact('event'));
+        return response()->view('events.show', [
+            'event' => $event,
+        ]);
     }
 
     /**
@@ -87,7 +91,9 @@ class EventsController extends Controller
     {
         $this->authorize('update', $event);
 
-        return view('events.edit', compact('event'));
+        return view('events.edit', [
+            'event' => $event,
+        ]);
     }
 
     /**

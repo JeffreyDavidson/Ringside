@@ -21,7 +21,7 @@ class TitleServiceTest extends TestCase
         $repositoryMock = $this->mock(TitleRepository::class);
         $service = new TitleService($repositoryMock);
 
-        $repositoryMock->expects()->create(\Mockery::type('array'))->once();
+        $repositoryMock->expects()->create(Mockery::type('array'))->once();
 
         $service->create([]);
     }
@@ -36,8 +36,8 @@ class TitleServiceTest extends TestCase
         $repositoryMock = $this->mock(TitleRepository::class);
         $service = new TitleService($repositoryMock);
 
-        $repositoryMock->expects()->create(\Mockery::type('array'))->once()->andReturns($titleMock);
-        $repositoryMock->expects()->activate($titleMock, \Mockery::type('string'))->once()->andReturns($titleMock);
+        $repositoryMock->expects()->create(Mockery::type('array'))->once()->andReturns($titleMock);
+        $repositoryMock->expects()->activate($titleMock, Mockery::type('string'))->once()->andReturns($titleMock);
 
         $service->create(array_merge(['activated_at' => now()->toDateTimeString()], $data));
     }

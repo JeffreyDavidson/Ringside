@@ -44,7 +44,9 @@ class ManagersController extends Controller
     {
         $this->authorize('create', Manager::class);
 
-        return view('managers.create', compact('manager'));
+        return view('managers.create', [
+            'manager' => $manager,
+        ]);
     }
 
     /**
@@ -70,7 +72,9 @@ class ManagersController extends Controller
     {
         $this->authorize('view', $manager);
 
-        return view('managers.show', compact('manager'));
+        return view('managers.show', [
+            'manager' => $manager,
+        ]);
     }
 
     /**
@@ -83,7 +87,9 @@ class ManagersController extends Controller
     {
         $this->authorize('update', $manager);
 
-        return view('managers.edit', compact('manager'));
+        return view('managers.edit', [
+            'manager' => $manager,
+        ]);
     }
 
     /**

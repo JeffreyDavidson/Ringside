@@ -7,7 +7,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($activeStables as $stable)
+        @forelse ($activeStables as $stable)
             <tr>
                 <td>{{ $stable->id }}</td>
                 <td>{{ $stable->name }}</td>

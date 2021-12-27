@@ -7,7 +7,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($injuredWrestlers as $wrestler)
+        @forelse ($injuredWrestlers as $wrestler)
             <tr>
                 <td>{{ $wrestler->id }}</td>
                 <td>{{ $wrestler->name }}</td>

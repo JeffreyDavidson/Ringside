@@ -3,6 +3,7 @@
 namespace Tests\Integration\Models;
 
 use App\Models\Stable;
+use Tests\Integration\Models\Concerns\RetirableContractTests;
 use Tests\TestCase;
 
 /**
@@ -10,7 +11,7 @@ use Tests\TestCase;
  */
 class StableTest extends TestCase
 {
-    use Concerns\RetirableContractTests;
+    use RetirableContractTests;
 
     private $activeStable;
     private $futureActivatedStable;

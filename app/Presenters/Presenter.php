@@ -2,6 +2,7 @@
 
 namespace App\Presenters;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class Presenter
@@ -31,6 +32,6 @@ abstract class Presenter
 
         $message = '%s does not respond to the "%s" property or method.';
 
-        throw new \Exception(sprintf($message, static::class, $property));
+        throw new Exception(sprintf($message, static::class, $property));
     }
 }

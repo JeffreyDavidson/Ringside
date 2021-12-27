@@ -43,7 +43,9 @@ class VenuesController extends Controller
     {
         $this->authorize('create', Venue::class);
 
-        return view('venues.create', compact('venue'));
+        return view('venues.create', [
+            'venue' => $venue,
+        ]);
     }
 
     /**
@@ -69,7 +71,9 @@ class VenuesController extends Controller
     {
         $this->authorize('view', $venue);
 
-        return view('venues.show', compact('venue'));
+        return view('venues.show', [
+            'venue' => $venue,
+        ]);
     }
 
     /**
@@ -82,7 +86,9 @@ class VenuesController extends Controller
     {
         $this->authorize('update', Venue::class);
 
-        return view('venues.edit', compact('venue'));
+        return view('venues.edit', [
+            'venue' => $venue,
+        ]);
     }
 
     /**

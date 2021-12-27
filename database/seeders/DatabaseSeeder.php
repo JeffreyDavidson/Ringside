@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         $this->resolve($class)->run($extra);
 
         if (isset($this->command)) {
-            $this->command->getOutput()->writeln("<info>Seeded:</info> $class");
+            $this->command->getOutput()->writeln("<info>Seeded:</info> {$class}");
         }
     }
 }

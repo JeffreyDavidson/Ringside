@@ -7,7 +7,7 @@
         </x-slot>
     </x-subheader>
     <x-content>
-        @if($stable->isNotActivation())
+        @if ($stable->isNotActivation())
             <div class="alert alert-warning" role="alert">
                 <strong>Warning!</strong>&nbsp;This stable is not activated!
             </div>

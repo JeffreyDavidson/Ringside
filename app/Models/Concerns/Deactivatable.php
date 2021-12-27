@@ -2,8 +2,6 @@
 
 namespace App\Models\Concerns;
 
-use App\Models\Activation;
-
 trait Deactivatable
 {
     /**

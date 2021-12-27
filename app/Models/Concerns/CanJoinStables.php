@@ -3,10 +3,11 @@
 namespace App\Models\Concerns;
 
 use App\Models\Stable;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
-trait StableMember
+trait CanJoinStables
 {
-    use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
+    use HasRelationships;
 
     /**
      * Get the stables the model has been belonged to.

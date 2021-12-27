@@ -4,6 +4,10 @@ namespace Tests\Integration\Models;
 
 use App\Enums\TagTeamStatus;
 use App\Models\TagTeam;
+use Tests\Integration\Models\Concerns\EmployableContractTests;
+use Tests\Integration\Models\Concerns\RetirableContractTests;
+use Tests\Integration\Models\Concerns\StableMemberContractTests;
+use Tests\Integration\Models\Concerns\SuspendableContractTests;
 use Tests\TestCase;
 
 /**
@@ -11,10 +15,10 @@ use Tests\TestCase;
  */
 class TagTeamTest extends TestCase
 {
-    use Concerns\EmployableContractTests,
-        Concerns\RetirableContractTests,
-        Concerns\StableMemberContractTests,
-        Concerns\SuspendableContractTests;
+    use EmployableContractTests,
+        RetirableContractTests,
+        StableMemberContractTests,
+        SuspendableContractTests;
 
     private $futureEmployedTagTeam;
     private $bookableTagTeam;

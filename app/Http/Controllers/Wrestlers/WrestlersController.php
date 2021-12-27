@@ -43,7 +43,9 @@ class WrestlersController extends Controller
     {
         $this->authorize('create', Wrestler::class);
 
-        return view('wrestlers.create', compact('wrestler'));
+        return view('wrestlers.create', [
+            'wrestler' => $wrestler,
+        ]);
     }
 
     /**
@@ -71,7 +73,9 @@ class WrestlersController extends Controller
     {
         $this->authorize('view', $wrestler);
 
-        return view('wrestlers.show', compact('wrestler'));
+        return view('wrestlers.show', [
+            'wrestler' => $wrestler,
+        ]);
     }
 
     /**
@@ -84,7 +88,9 @@ class WrestlersController extends Controller
     {
         $this->authorize('update', $wrestler);
 
-        return view('wrestlers.edit', compact('wrestler'));
+        return view('wrestlers.edit', [
+            'wrestler' => $wrestler,
+        ]);
     }
 
     /**

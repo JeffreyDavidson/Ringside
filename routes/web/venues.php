@@ -5,4 +5,4 @@ use App\Http\Controllers\Venues\VenuesController;
 use Illuminate\Support\Facades\Route;
 
 Route::resource('venues', VenuesController::class);
-Route::patch('/venues/{venue}/restore', RestoreController::class)->name('venues.restore');
+Route::patch('venues/{venue}/restore', RestoreController::class)->name('venues.restore');

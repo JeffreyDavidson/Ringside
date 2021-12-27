@@ -46,7 +46,10 @@ class TagTeamsController extends Controller
 
         $wrestlers = Wrestler::get()->pluck('name', 'id');
 
-        return view('tagteams.create', compact('tagTeam', 'wrestlers'));
+        return view('tagteams.create', [
+            'tagTeam' => $tagTeam,
+            'wrestlers' => $wrestlers,
+        ]);
     }
 
     /**
@@ -72,7 +75,9 @@ class TagTeamsController extends Controller
     {
         $this->authorize('view', $tagTeam);
 
-        return view('tagteams.show', compact('tagTeam'));
+        return view('tagteams.show', [
+            'tagTeam' => $tagTeam,
+        ]);
     }
 
     /**
@@ -87,7 +92,10 @@ class TagTeamsController extends Controller
 
         $wrestlers = Wrestler::all();
 
-        return view('tagteams.edit', compact('tagTeam', 'wrestlers'));
+        return view('tagteams.edit', [
+            'tagTeam' => $tagTeam,
+            'wrestlers' => $wrestlers,
+        ]);
     }
 
     /**

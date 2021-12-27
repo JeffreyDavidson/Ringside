@@ -4,6 +4,10 @@ namespace Tests\Integration\Models;
 
 use App\Enums\RefereeStatus;
 use App\Models\Referee;
+use Tests\Integration\Models\Concerns\EmployableContractTests;
+use Tests\Integration\Models\Concerns\InjurableContractTests;
+use Tests\Integration\Models\Concerns\RetirableContractTests;
+use Tests\Integration\Models\Concerns\SuspendableContractTests;
 use Tests\TestCase;
 
 /**
@@ -11,10 +15,10 @@ use Tests\TestCase;
  */
 class RefereeTest extends TestCase
 {
-    use Concerns\EmployableContractTests,
-        Concerns\InjurableContractTests,
-        Concerns\RetirableContractTests,
-        Concerns\SuspendableContractTests;
+    use EmployableContractTests,
+        InjurableContractTests,
+        RetirableContractTests,
+        SuspendableContractTests;
 
     private $futureEmployedReferee;
     private $bookableReferee;

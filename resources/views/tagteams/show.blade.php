@@ -7,7 +7,7 @@
         </x-slot>
     </x-subheader>
     <x-content>
-        @if($tagTeam->isUnemployed())
+        @if ($tagTeam->isUnemployed())
             <div class="alert alert-warning" role="alert">
                 <strong>Warning!</strong>&nbsp;This tag team is not employed!
             </div>

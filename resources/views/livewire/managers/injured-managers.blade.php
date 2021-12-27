@@ -6,7 +6,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($injuredManagers as $manager)
+        @forelse ($injuredManagers as $manager)
             <tr>
                 <td>{{ $manager->id }}</td>
                 <td>{{ $manager->full_name }}</td>

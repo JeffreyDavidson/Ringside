@@ -5,7 +5,7 @@
         <th>Actions</th>
     </thead>
     <tbody>
-        @forelse($unscheduledEvents as $event)
+        @forelse ($unscheduledEvents as $event)
             <tr>
                 <td>{{ $event->id }}</td>
                 <td>{{ $event->name }}</td>

@@ -43,7 +43,9 @@ class TitlesController extends Controller
     {
         $this->authorize('create', Title::class);
 
-        return view('titles.create', compact('title'));
+        return view('titles.create', [
+            'title' => $title,
+        ]);
     }
 
     /**
@@ -68,7 +70,9 @@ class TitlesController extends Controller
     {
         $this->authorize('view', Title::class);
 
-        return view('titles.show', compact('title'));
+        return view('titles.show', [
+            'title' => $title,
+        ]);
     }
 
     /**
@@ -81,7 +85,9 @@ class TitlesController extends Controller
     {
         $this->authorize('update', Title::class);
 
-        return view('titles.edit', compact('title'));
+        return view('titles.edit', [
+            'title' => $title,
+        ]);
     }
 
     /**
