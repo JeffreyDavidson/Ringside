@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 
@@ -27,15 +28,15 @@ class RefereeService
     /**
      * Create a referee with given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\RefereeData $refereeData
      * @return \App\Models\Referee $referee
      */
-    public function create(array $data)
+    public function create(RefereeData $refereeData)
     {
-        $referee = $this->refereeRepository->create($data);
+        $referee = $this->refereeRepository->create($refereeData);
 
         if (isset($data['started_at'])) {
-            $this->refereeRepository->employ($referee, $data['started_at']);
+            $this->refereeRepository->employ($referee, $refereeData->start_date);
         }
 
         return $referee;
@@ -45,15 +46,15 @@ class RefereeService
      * Update a given referee with given data.
      *
      * @param  \App\Models\Referee $referee
-     * @param  array $data
+     * @param  \App\DataTransferObjects\RefereeData $refereeData
      * @return \App\Models\Referee $referee
      */
-    public function update(Referee $referee, array $data)
+    public function update(Referee $referee, RefereeData $refereeData)
     {
-        $this->refereeRepository->update($referee, $data);
+        $this->refereeRepository->update($referee, $refereeData);
 
-        if ($referee->canHaveEmploymentStartDateChanged() && isset($data['started_at'])) {
-            $this->employOrUpdateEmployment($referee, $data['started_at']);
+        if ($referee->canHaveEmploymentStartDateChanged() && isset($refereeData->start_date)) {
+            $this->employOrUpdateEmployment($referee, $refereeData->start_date);
         }
 
         return $referee;

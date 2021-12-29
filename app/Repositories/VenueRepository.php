@@ -9,30 +9,37 @@ class VenueRepository
     /**
      * Create a new venue with the given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\VenueData $venueData
      * @return \App\Models\Venue
      */
-    public function create(array $data)
+    public function create(VenueData $venueData)
     {
-        return Venue::create($data);
+        return Venue::create([
+            'name' => $venueData->name,
+            'address1' => $venueData->address1,
+            'address2' => $venueData->address2,
+            'city' => $venueData->city,
+            'state' => $venueData->state,
+            'zip' => $venueData->zip,
+        ]);
     }
 
     /**
      * Update the given venue with the given data.
      *
      * @param  \App\Models\Venue $venue
-     * @param  array $data
+     * @param  \App\DataTransferObjects\VenueData $venueData
      * @return \App\Models\Venue $venue
      */
-    public function update(Venue $venue, array $data)
+    public function update(Venue $venue, VenueData $venueData)
     {
         return $venue->update([
-            'name' => $data['name'],
-            'address1' => $data['address1'],
-            'address2' => $data['address2'],
-            'city' => $data['city'],
-            'state' => $data['state'],
-            'zip' => $data['zip'],
+            'name' => $venueData->name,
+            'address1' => $venueData->address1,
+            'address2' => $venueData->address2,
+            'city' => $venueData->city,
+            'state' => $venueData->state,
+            'zip' => $venueData->zip,
         ]);
     }
 

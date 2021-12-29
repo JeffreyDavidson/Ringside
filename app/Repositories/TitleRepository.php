@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\DataTransferObjects\TitleData;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Title;
@@ -13,13 +14,13 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
     /**
      * Create a new title with the given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\TitleData $titleData
      * @return \App\Models\Title
      */
-    public function create(array $data)
+    public function create(TitleData $titleData)
     {
         return Title::create([
-            'name' => $data['name'],
+            'name' => $titleData->name,
         ]);
     }
 
@@ -27,13 +28,13 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      * Update the given title with the given data.
      *
      * @param  \App\Models\Title $title
-     * @param  array $data
+     * @param  \App\DataTransferObjects\TitleData $titleData
      * @return \App\Models\Title $title
      */
-    public function update(Title $title, array $data)
+    public function update(Title $title, TitleData $titleData)
     {
         return $title->update([
-            'name' => $data['name'],
+            'name' => $titleData->name,
         ]);
     }
 

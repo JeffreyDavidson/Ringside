@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\ManagerData;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 
@@ -27,15 +28,15 @@ class ManagerService
     /**
      * Create a manager with given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\ManagerData $managerData
      * @return \App\Models\Manager $manager
      */
-    public function create(array $data)
+    public function create(ManagerData $managerData)
     {
-        $manager = $this->managerRepository->create($data);
+        $manager = $this->managerRepository->create($managerData);
 
-        if (isset($data['started_at'])) {
-            $this->managerRepository->employ($manager, $data['started_at']);
+        if (isset($managerData->start_date)) {
+            $this->managerRepository->employ($manager, $managerData->start_date);
         }
 
         return $manager;
@@ -45,15 +46,15 @@ class ManagerService
      * Update a given manager with given data.
      *
      * @param  \App\Models\Manager $manager
-     * @param  array $data
+     * @param  \App\DataTransferObjects\ManagerData $managerData
      * @return \App\Models\Manager $manager
      */
-    public function update(Manager $manager, array $data)
+    public function update(Manager $manager, ManagerData $managerData)
     {
-        $this->managerRepository->update($manager, $data);
+        $this->managerRepository->update($manager, $managerData);
 
-        if ($manager->canHaveEmploymentStartDateChanged() && isset($data['started_at'])) {
-            $this->employOrUpdateEmployment($manager, $data['started_at']);
+        if ($manager->canHaveEmploymentStartDateChanged() && isset($managerData->start_date)) {
+            $this->employOrUpdateEmployment($manager, $managerData->start_date);
         }
 
         return $manager;

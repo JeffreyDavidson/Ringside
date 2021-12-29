@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\DataTransferObjects\RefereeData;
 use App\Models\Referee;
 
 class RefereeRepository
@@ -9,14 +10,14 @@ class RefereeRepository
     /**
      * Create a new referee with the given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\RefereeData $refereeData
      * @return \App\Models\Referee
      */
-    public function create(array $data)
+    public function create(RefereeData $refereeData)
     {
         return Referee::create([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
+            'first_name' => $refereeData->first_name,
+            'last_name' => $refereeData->last_name,
         ]);
     }
 
@@ -24,14 +25,14 @@ class RefereeRepository
      * Update a given referee with the given data.
      *
      * @param  \App\Models\Referee $referee
-     * @param  array $data
+     * @param  \App\DataTransferObjects\RefereeData $refereData
      * @return \App\Models\Referee $referee
      */
-    public function update(Referee $referee, array $data)
+    public function update(Referee $referee, RefereeData $refereeData)
     {
         return $referee->update([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
+            'first_name' => $refereeData->first_name,
+            'last_name' => $refereeData->last_name,
         ]);
     }
 

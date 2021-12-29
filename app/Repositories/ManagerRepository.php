@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\DataTransferObjects\ManagerData;
 use App\Models\Manager;
 
 class ManagerRepository
@@ -9,14 +10,14 @@ class ManagerRepository
     /**
      * Create a new manager with the given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\ManagerData $managerData
      * @return \App\Models\Manager
      */
-    public function create(array $data)
+    public function create(ManagerData $managerData)
     {
         return Manager::create([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
+            'first_name' => $managerData->first_name,
+            'last_name' => $managerData->last_name,
         ]);
     }
 
@@ -24,14 +25,14 @@ class ManagerRepository
      * Update a given manager with the given data.
      *
      * @param  \App\Models\Manager $manager
-     * @param  array $data
+     * @param  \App\DataTransferObjects\ManagerData $managerData
      * @return \App\Models\Manager $manager
      */
-    public function update(Manager $manager, array $data)
+    public function update(Manager $manager, ManagerData $managerData)
     {
         return $manager->update([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
+            'first_name' => $managerData->first_name,
+            'last_name' => $managerData->last_name,
         ]);
     }
 

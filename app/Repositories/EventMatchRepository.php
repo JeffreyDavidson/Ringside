@@ -11,14 +11,14 @@ class EventMatchRepository
      * Create a new event with the given data.
      *
      * @param  \App\Models\Event $event
-     * @param  array $data
+     * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
      * @return \App\Models\EventMatch
      */
-    public function createForEvent(Event $event, array $data)
+    public function createForEvent(Event $event, EventMatchData $eventMatchData)
     {
         return $event->matches()->create([
-            'match_type_id' => $data['match_type_id'],
-            'preview' => $data['preview'],
+            'match_type_id' => $eventMatchData->match_type_id,
+            'preview' => $eventMatchData->preview,
         ]);
     }
 

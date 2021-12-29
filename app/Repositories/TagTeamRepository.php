@@ -10,14 +10,14 @@ class TagTeamRepository
     /**
      * Create a new tag team with the given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
      * @return \App\Models\TagTeam
      */
-    public function create(array $data)
+    public function create(TagTeamData $tagTeamData)
     {
         return TagTeam::create([
-            'name' => $data['name'],
-            'signature_move' => $data['signature_move'],
+            'name' => $tagTeamData->name,
+            'signature_move' => $tagTeamData->signature_move,
         ]);
     }
 
@@ -25,14 +25,14 @@ class TagTeamRepository
      * Update a given tag team with the given data.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  array $data
+     * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function update(TagTeam $tagTeam, array $data)
+    public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
     {
         return $tagTeam->update([
-            'name' => $data['name'],
-            'signature_move' => $data['signature_move'],
+            'name' => $tagTeamData->name,
+            'signature_move' => $tagTeamData->signature_move,
         ]);
     }
 

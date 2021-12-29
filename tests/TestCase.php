@@ -7,12 +7,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Collection;
 use Illuminate\Testing\TestResponse;
-use Spatie\Enum\Phpunit\EnumAssertions;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
-    use EnumAssertions;
     use RefreshDatabase;
 
     /**
