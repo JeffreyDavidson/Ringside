@@ -9,17 +9,17 @@ class WrestlerRepository
     /**
      * Create a new wrestler with the given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
      * @return \App\Models\Wrestler
      */
-    public function create($data)
+    public function create(WrestlerData $wrestlerData)
     {
         return Wrestler::create([
-            'name' => $data['name'],
-            'height' => $data['height'],
-            'weight' => $data['weight'],
-            'hometown' => $data['hometown'],
-            'signature_move' => $data['signature_move'],
+            'name' => $wrestlerData->name,
+            'height' => $wrestlerData->height,
+            'weight' => $wrestlerData->weight,
+            'hometown' => $wrestlerData->hometown,
+            'signature_move' => $wrestlerData->signature_move,
         ]);
     }
 
@@ -27,17 +27,17 @@ class WrestlerRepository
      * Update a given wrestler with given data.
      *
      * @param  \App\Models\Wrestler $wrestler
-     * @param  array $data
+     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
      * @return \App\Models\Wrestler $wrestler
      */
-    public function update(Wrestler $wrestler, array $data)
+    public function update(Wrestler $wrestler, WrestlerData $wrestlerData)
     {
         return $wrestler->update([
-            'name' => $data['name'],
-            'height' => $data['height'],
-            'weight' => $data['weight'],
-            'hometown' => $data['hometown'],
-            'signature_move' => $data['signature_move'],
+            'name' => $wrestlerData->name,
+            'height' => $wrestlerData->height,
+            'weight' => $wrestlerData->weight,
+            'hometown' => $wrestlerData->hometown,
+            'signature_move' => $wrestlerData->signature_move,
         ]);
     }
 

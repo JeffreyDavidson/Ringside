@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\StableData;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
+use Illuminate\Support\Collection;
 
 class StableService
 {
@@ -27,18 +29,18 @@ class StableService
     /**
      * Create a stable with given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\StableData $stableData
      * @return \App\Models\Stable $stable
      */
-    public function create(array $data)
+    public function create(StableData $stableData)
     {
-        $stable = $this->stableRepository->create($data);
+        $stable = $this->stableRepository->create($stableData);
 
-        if (isset($data['started_at'])) {
-            $this->stableRepository->activate($stable, $data['started_at']);
+        if (isset($stableData->start_date)) {
+            $this->stableRepository->activate($stable, $stableData->start_date);
         }
 
-        $this->addMembers($stable, $data['wrestlers'], $data['tag_teams']);
+        $this->addMembers($stable, $stableData->wrestlers, $stableData->tagTeams);
 
         return $stable;
     }
@@ -47,18 +49,18 @@ class StableService
      * Update a given stable with given data.
      *
      * @param  \App\Models\Stable $stable
-     * @param  array $data
+     * @param  \App\DataTransferObjects\StableData $stableData
      * @return \App\Models\Stable $stable
      */
-    public function update(Stable $stable, array $data)
+    public function update(Stable $stable, StableData $stableData)
     {
-        $this->stableRepository->update($stable, $data);
+        $this->stableRepository->update($stable, $stableData);
 
-        if (isset($data['started_at'])) {
-            $this->activateOrUpdateActivation($stable, $data['started_at']);
+        if (isset($stableData->start_date)) {
+            $this->activateOrUpdateActivation($stable, $stableData->start_date);
         }
 
-        $this->updateMembers($stable, $data['wrestlers'], $data['tag_teams']);
+        $this->updateMembers($stable, $stableData->wrestlers, $stableData->tagTeams);
 
         return $stable;
     }
@@ -89,25 +91,25 @@ class StableService
      * Add members to a given stable.
      *
      * @param  \App\Models\Stable $stable
-     * @param  array|null $wrestlerIds
-     * @param  array|null $tagTeamIds
+     * @param  \Illuminate\Support\Collection|null $wrestlers
+     * @param  \Illuminate\Support\Collection|null $tagTeams
      * @param  string|null $joinedDate
      * @return \App\Models\Stable $stable
      */
     private function addMembers(
         Stable $stable,
-        array $wrestlerIds = null,
-        array $tagTeamIds = null,
+        Collection $wrestlers = null,
+        Collection $tagTeams = null,
         string $joinedDate = null
     ) {
         $joinedDate ??= now();
 
-        if ($wrestlerIds) {
-            $this->stableRepository->addWrestlers($stable, $wrestlerIds, $joinedDate);
+        if ($wrestlers) {
+            $this->stableRepository->addWrestlers($stable, $wrestlers, $joinedDate);
         }
 
-        if ($tagTeamIds) {
-            $this->stableRepository->addTagTeams($stable, $tagTeamIds, $joinedDate);
+        if ($tagTeams) {
+            $this->stableRepository->addTagTeams($stable, $tagTeams, $joinedDate);
         }
 
         return $stable;
@@ -117,27 +119,26 @@ class StableService
      * Update the members of a given stable.
      *
      * @param  \App\Models\Stable $stable
-     * @param  array $wrestlerIds
-     * @param  array $tagTeamIds
+     * @param  \Illuminate\Support\Collection $wrestlers
+     * @param  \Illuminate\Support\Collection $tagTeams
      */
-    private function updateMembers(Stable $stable, array $wrestlerIds, array $tagTeamIds)
+    private function updateMembers(Stable $stable, Collection $suggestedWrestlers, Collection $tagTeams)
     {
         $now = now()->toDateTimeString();
 
         if ($stable->currentWrestlers->isEmpty()) {
-            $this->stableRepository->addWrestlers($stable, $wrestlerIds, $now);
+            $this->stableRepository->addWrestlers($stable, $suggestedWrestlers, $now);
         } else {
             $currentWrestlerIds = collect($stable->currentWrestlers->modelKeys());
-            $suggestedWrestlerIds = collect($wrestlerIds);
-            $formerWrestlerIds = $currentWrestlerIds->diff($suggestedWrestlerIds)->toArray();
-            $newWrestlerIds = $suggestedWrestlerIds->diff($currentWrestlerIds)->toArray();
+            $formerWrestlerIds = $currentWrestlerIds->diff($suggestedWrestlers)->toArray();
+            $newWrestlerIds = $suggestedWrestlers->diff($currentWrestlerIds)->toArray();
 
             $this->stableRepository->removeWrestlers($stable, $formerWrestlerIds, $now);
             $this->stableRepository->addWrestlers($stable, $newWrestlerIds, $now);
         }
 
         if ($stable->currentTagTeams->isEmpty()) {
-            $this->stableRepository->addTagTeams($stable, $tagTeamIds, $now);
+            $this->stableRepository->addTagTeams($stable, $tagTeams, $now);
         } else {
             $currentTagTeamIds = collect($stable->currentTagTeams->modelKeys());
             $suggestedTagTeamIds = collect($tagTeamIds);
@@ -190,23 +191,22 @@ class StableService
      * Update the wrestlers of the stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  array  $wrestlerIds
+     * @param  \Illuminate\Support\Collection  $wrestlers
      * @return void
      */
-    public function updateWrestlers(Stable $stable, $wrestlerIds)
+    public function updateWrestlers(Stable $stable, Collection $wrestlers)
     {
         $now = now()->toDateTimeString();
 
         if ($stable->currentWrestlers->isEmpty()) {
-            $this->stableRepository->addWrestlers($stable, $wrestlerIds, $now);
+            $this->stableRepository->addWrestlers($stable, $wrestlers, $now);
         } else {
-            $currentWrestlerIds = collect($stable->currentWrestlers->modelKeys());
-            $suggestedWrestlerIds = collect($wrestlerIds);
-            $formerWrestlerIds = $currentWrestlerIds->diff($suggestedWrestlerIds)->toArray();
-            $newWrestlerIds = $suggestedWrestlerIds->diff($currentWrestlerIds)->toArray();
+            $currentWrestlers = $stable->currentWrestlers;
+            $formerWrestlers = $currentWrestlers->diff($wrestlers)->toArray();
+            $newWrestlers = $wrestlers->diff($currentWrestlers);
 
-            $this->stableRepository->removeCurrentWrestlers($stable, $formerWrestlerIds, $now);
-            $this->stableRepository->addWrestlers($stable, $newWrestlerIds, $now);
+            $this->stableRepository->removeCurrentWrestlers($stable, $formerWrestlers, $now);
+            $this->stableRepository->addWrestlers($stable, $newWrestlers, $now);
         }
     }
 }
