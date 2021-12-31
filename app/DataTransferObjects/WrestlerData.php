@@ -2,19 +2,19 @@
 
 namespace App\DataTransferObjects;
 
-use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Http\Requests\Wrestlers\StoreRequest;
+use App\Http\Requests\Wrestlers\UpdateRequest;
 
 class WrestlerData
 {
     public string $name;
-    public integer $height;
-    public integer $weight;
+    public int $height;
+    public int $weight;
     public string $hometown;
     public ?string $signature_move;
     public ?string $start_date;
 
-    public static function fromStoreRequest(StoreRequest $request): WrestlerData
+    public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self();
 
@@ -27,7 +27,7 @@ class WrestlerData
         return $dto;
     }
 
-    public static function fromUpdateRequest(UpdateRequest $request): WrestlerData
+    public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self();
 
