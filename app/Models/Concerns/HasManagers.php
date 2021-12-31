@@ -2,6 +2,8 @@
 
 namespace App\Models\Concerns;
 
+use App\Models\Manager;
+
 trait HasManagers
 {
     public function managers()

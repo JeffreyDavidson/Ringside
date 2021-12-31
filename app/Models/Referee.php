@@ -4,8 +4,9 @@ namespace App\Models;
 
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
+use App\Models\Concerns\HasFullName;
+use App\Models\Concerns\Unguarded;
 use App\Models\Contracts\Bookable;
-use App\Models\SingleRosterMember;
 use App\Observers\RefereeObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;

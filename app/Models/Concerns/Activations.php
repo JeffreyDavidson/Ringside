@@ -4,7 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\Activation;
 
-trait Activatable
+trait Activations
 {
     /**
      * Get all of the activations of the model.

@@ -6,22 +6,25 @@ use App\Builders\TagTeamQueryBuilder;
 use App\Enums\TagTeamStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Exceptions\NotEnoughMembersException;
+use App\Models\Concerns\CanJoinStables;
+use App\Models\Concerns\OwnedByUser;
+use App\Models\Concerns\Unguarded;
 use App\Models\Contracts\Bookable;
-use App\Models\Contracts\StableMember;
+use App\Models\Contracts\CanBeAStableMember;
 use App\Observers\TagTeamObserver;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasTableAlias;
 
-class TagTeam extends RosterMember implements Bookable, StableMember
+class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
 {
     use HasFactory,
         HasMorphToOne,
         HasTableAlias,
         OwnedByUser,
         SoftDeletes,
-        StableMember,
+        CanJoinStables,
         Unguarded;
 
     /**

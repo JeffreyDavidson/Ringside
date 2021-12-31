@@ -2,7 +2,7 @@
 
 namespace App\Models\Concerns;
 
-trait Deactivatable
+trait Deactivations
 {
     /**
      * Check to see if the model is deactivated.

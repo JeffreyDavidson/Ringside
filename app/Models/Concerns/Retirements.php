@@ -4,7 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\Retirement;
 
-trait Retirable
+trait Retirements
 {
     /**
      * Get the retirements of the model.
