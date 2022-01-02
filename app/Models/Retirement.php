@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Retirement extends Model
 {
-    use HasFactory,
-        Unguarded;
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['retiree_id', 'retiree_type', 'started_at', 'ended_at'];
 
     /**
      * The attributes that should be cast to native types.

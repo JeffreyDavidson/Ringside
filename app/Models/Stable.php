@@ -8,7 +8,6 @@ use App\Models\Concerns\Activations;
 use App\Models\Concerns\Deactivations;
 use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\OwnedByUser;
-use App\Models\Concerns\Unguarded;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
@@ -24,8 +23,14 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
         HasFactory,
         HasMembers,
         OwnedByUser,
-        SoftDeletes,
-        Unguarded;
+        SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['user_id', 'name', 'status'];
 
     /**
      * The attributes that should be cast to native types.

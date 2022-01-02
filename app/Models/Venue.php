@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * @property int $id
- */
 class Venue extends Model
 {
     use HasFactory,
-        SoftDeletes,
-        Unguarded;
+        SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['name', 'address1', 'address2', 'city', 'state', 'zip'];
 }

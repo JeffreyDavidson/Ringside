@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Employment extends Model
 {
-    use HasFactory,
-        Unguarded;
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['employable_id', 'employable_type', 'started_at', 'ended_at'];
 
     /**
      * The attributes that should be cast to native types.

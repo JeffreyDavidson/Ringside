@@ -8,7 +8,6 @@ use App\Models\Concerns\Activations;
 use App\Models\Concerns\Competable;
 use App\Models\Concerns\Deactivations;
 use App\Models\Concerns\Retirements;
-use App\Models\Concerns\Unguarded;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
@@ -22,10 +21,16 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     use Activations,
         Competable,
         Deactivations,
-        Retirements,
-        Unguarded,
         HasFactory,
+        Retirements,
         SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['name', 'status'];
 
     /**
      * The attributes that should be cast to native types.

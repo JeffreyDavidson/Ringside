@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
 use App\Models\Concerns\HasFullName;
-use App\Models\Concerns\Unguarded;
 use App\Models\Contracts\Bookable;
 use App\Observers\RefereeObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,8 +14,14 @@ class Referee extends SingleRosterMember implements Bookable
 {
     use HasFactory,
         HasFullName,
-        SoftDeletes,
-        Unguarded;
+        SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['first_name', 'last_name', 'status'];
 
     /**
      * The attributes that should be cast to native types.
