@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Builders\EventQueryBuilder;
-use App\Models\Concerns\Unguarded;
 use App\Observers\EventObserver;
 use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,8 +12,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Event extends Model
 {
     use HasFactory,
-        SoftDeletes,
-        Unguarded;
+        SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['name', 'date', 'venue_id', 'preview', 'status'];
 
     /**
      * The attributes that should be cast to native types.

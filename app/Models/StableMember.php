@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\Unguarded;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 class StableMember extends MorphPivot
 {
-    use Unguarded;
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var string[]
+     */
+    protected $fillable = ['stable_id', 'member_id', 'member_type', 'joined_at', 'left_at'];
 
     /**
      * The attributes that should be cast to native types.
