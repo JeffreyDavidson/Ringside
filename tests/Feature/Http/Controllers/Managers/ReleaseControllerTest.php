@@ -96,8 +96,12 @@ class ReleaseControllerTest extends TestCase
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) use ($tagTeam, $wrestler) {
-            $this->assertNotNull($manager->tagTeams()->where('manageable_id', $tagTeam->id)->get()->last()->pivot->left_at);
-            $this->assertNotNull($manager->wrestlers()->where('manageable_id', $wrestler->id)->get()->last()->pivot->left_at);
+            $this->assertNotNull(
+                $manager->tagTeams()->where('manageable_id', $tagTeam->id)->get()->last()->pivot->left_at
+            );
+            $this->assertNotNull(
+                $manager->wrestlers()->where('manageable_id', $wrestler->id)->get()->last()->pivot->left_at
+            );
         });
     }
 
@@ -128,6 +132,7 @@ class ReleaseControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonreleasableManagerTypes
      */
     public function invoke_throws_exception_for_releasing_a_non_releasable_manager($factoryState)

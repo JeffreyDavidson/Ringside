@@ -29,18 +29,23 @@ class EventService
      * Create an event with given data.
      *
      * @param  \App\DataTransferObjects\EventData $eventData
+     *
      * @return \App\Models\Event
      */
     public function create(EventData $eventData)
     {
-        return $this->eventRepository->create($eventData);
+        /* @var \App\Models\Event $event */
+        $event = $this->eventRepository->create($eventData);
+
+        return $event;
     }
 
     /**
      * Update a given event.
      *
      * @param  \App\Models\Event $event
-     * @param  array $data
+     * @param  \App\DataTransferObjects\EventData $eventData
+     *
      * @return \App\Models\Event $event
      */
     public function update(Event $event, EventData $eventData)
@@ -52,6 +57,7 @@ class EventService
      * Delete an event.
      *
      * @param  \App\Models\Event $event
+     *
      * @return void
      */
     public function delete($event)
@@ -63,6 +69,7 @@ class EventService
      * Restore an event.
      *
      * @param  \App\Models\Event $event
+     *
      * @return void
      */
     public function restore(Event $event)

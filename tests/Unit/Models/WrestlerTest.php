@@ -5,7 +5,7 @@ namespace Tests\Unit\Models;
 use App\Enums\WrestlerStatus;
 use App\Height;
 use App\Models\Contracts\Bookable;
-use App\Models\Contracts\StableMember;
+use App\Models\Contracts\CanBeAStableMember;
 use App\Models\SingleRosterMember;
 use App\Models\Wrestler;
 use Tests\TestCase;
@@ -48,14 +48,6 @@ class WrestlerTest extends TestCase
     /**
      * @test
      */
-    public function a_wrestler_uses_has_a_unguarded_trait()
-    {
-        $this->assertUsesTrait('App\Models\Concerns\Unguarded', Wrestler::class);
-    }
-
-    /**
-     * @test
-     */
     public function a_wrestler_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Wrestler::class);
@@ -64,9 +56,9 @@ class WrestlerTest extends TestCase
     /**
      * @test
      */
-    public function a_wrestler_uses_can_be_stable_member_trait()
+    public function a_wrestler_uses_can_join_stables_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\StableMember', Wrestler::class);
+        $this->assertUsesTrait('App\Models\Concerns\CanJoinStables', Wrestler::class);
     }
 
     /**
@@ -80,8 +72,8 @@ class WrestlerTest extends TestCase
     /**
      * @test
      */
-    public function a_wrestler_implements_stable_member_interface()
+    public function a_wrestler_implements_can_be_stable_member_interface()
     {
-        $this->assertContains(StableMember::class, class_implements(Wrestler::class));
+        $this->assertContains(CanBeAStableMember::class, class_implements(Wrestler::class));
     }
 }

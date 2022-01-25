@@ -13,13 +13,12 @@ class ReinstateAction extends BaseRefereeAction
      * Reinstate a referee.
      *
      * @param  \App\Models\Referee  $referee
+     *
      * @return void
      */
     public function handle(Referee $referee): void
     {
-        $reinstatementDate = now()->toDateTimeString();
-
-        $this->refereeRepository->reinstate($referee, $reinstatementDate);
+        $this->refereeRepository->reinstate($referee, now());
         $referee->save();
     }
 }

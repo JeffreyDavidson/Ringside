@@ -2,25 +2,24 @@
 
 namespace App\Http\Livewire\Events;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Event;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class UnscheduledEvents extends Component
+class UnscheduledEvents extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
+        $unscheduledEvents = Event::query()
+            ->unscheduled()
+            ->paginate($this->perPage);
+
         return view('livewire.events.unscheduled-events', [
-            'unscheduledEvents' => Event::unscheduled()->paginate($this->perPage),
+            'unscheduledEvents' => $unscheduledEvents,
         ]);
     }
 }

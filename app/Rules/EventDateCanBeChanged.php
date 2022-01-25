@@ -8,8 +8,18 @@ use Illuminate\Contracts\Validation\Rule;
 
 class EventDateCanBeChanged implements Rule
 {
+    /**
+     * The event to be checked against.
+     *
+     * @var \App\Models\Event
+     */
     protected $event;
 
+    /**
+     * Create a new event date can be changed rule instance.
+     *
+     * @param \App\Models\Event $event
+     */
     public function __construct(Event $event)
     {
         $this->event = $event;
@@ -20,11 +30,12 @@ class EventDateCanBeChanged implements Rule
      *
      * @param  string  $attribute
      * @param  mixed  $value
+     *
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        if (is_null($this->event->date)) {
+        if ($this->event->date === null) {
             return true;
         }
 

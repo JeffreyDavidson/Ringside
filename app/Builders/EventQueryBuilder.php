@@ -10,7 +10,7 @@ class EventQueryBuilder extends Builder
     /**
      * Scope a query to include scheduled events.
      *
-     * @return $this
+     * @return \App\Builders\EventQueryBuilder
      */
     public function scheduled()
     {
@@ -20,7 +20,7 @@ class EventQueryBuilder extends Builder
     /**
      * Scope a query to include unscheduled events.
      *
-     * @return $this
+     * @return \App\Builders\EventQueryBuilder
      */
     public function unscheduled()
     {
@@ -30,12 +30,10 @@ class EventQueryBuilder extends Builder
     /**
      * Scope a query to include past events.
      *
-     * @return $this
+     * @return \App\Builders\EventQueryBuilder
      */
     public function past()
     {
-        return $this->where(function () {
-            $this->where('status', EventStatus::past())->where('date', '<', now()->toDateString());
-        });
+        return $this->where('status', EventStatus::past())->where('date', '<', now()->toDateString());
     }
 }

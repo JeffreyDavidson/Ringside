@@ -5,14 +5,14 @@ namespace App\Builders;
 class WrestlerQueryBuilder extends SingleRosterMemberQueryBuilder
 {
     /**
-     * Scope a query to only include bookable models.
+     * Scope a query to only include bookable wrestlers.
      *
-     * @return $this
+     * @return \App\Builders\WrestlerQueryBuilder
      */
     public function bookable()
     {
         return $this->whereHas('currentEmployment')
-                    ->whereDoesntHave('currentSuspension')
-                    ->whereDoesntHave('currentInjury');
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentInjury');
     }
 }

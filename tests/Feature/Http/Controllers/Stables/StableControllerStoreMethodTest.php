@@ -60,19 +60,16 @@ class StableControllerStoreMethodTest extends TestCase
         $this
             ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'create']))
-            ->post(action([StablesController::class, 'store']), StableRequestDataFactory::new()->create([
-                'name' => 'Example Stable Name',
-                'started_at' => null,
-                'wrestlers' => [],
-                'tag_teams' => [],
-            ]))
+            ->post(
+                action([StablesController::class, 'store']),
+                StableRequestDataFactory::new()->create([
+                    'name' => 'Example Stable Name',
+                ])
+            )
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap(Stable::first(), function ($stable) {
             $this->assertEquals('Example Stable Name', $stable->name);
-            $this->assertCount(0, $stable->activations);
-            $this->assertCount(0, $stable->wrestlers);
-            $this->assertCount(0, $stable->tagteams);
         });
     }
 
@@ -81,23 +78,23 @@ class StableControllerStoreMethodTest extends TestCase
      */
     public function an_activation_is_created_for_the_stable_if_started_at_is_filled_in_request()
     {
-        $startedAt = now()->toDateTimeString();
-        $wrestlers = Wrestler::factory()->times(3)->create();
+        $startedAt = now();
+        $wrestlers = Wrestler::factory()->count(3)->create();
 
         $this
             ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()->create([
-                    'started_at' => $startedAt,
-                    'wrestlers' => $wrestlers->pluck('id')->toArray(),
-                ])
+                StableRequestDataFactory::new()
+                    ->withStartDate($startedAt)
+                    ->withWrestlers($wrestlers->modelKeys())
+                    ->create()
             );
 
         tap(Stable::first(), function ($stable) use ($startedAt) {
             $this->assertCount(1, $stable->activations);
-            $this->assertEquals($startedAt, $stable->activations->first()->started_at->toDateTimeString());
+            $this->assertEquals($startedAt, $stable->activatedAt->toDateTimeString());
         });
     }
 
@@ -148,16 +145,17 @@ class StableControllerStoreMethodTest extends TestCase
      */
     public function a_stables_members_join_when_stable_is_started_if_filled()
     {
-        $createdWrestlers = Wrestler::factory()->count(3)->create()->pluck('id')->toArray();
+        $createdWrestlers = Wrestler::factory()->count(3)->create();
 
         $this
             ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()->withStartDate(now()->toDateTimeString())->create([
-                    'wrestlers' => $createdWrestlers,
-                ])
+                StableRequestDataFactory::new()
+                    ->withStartDate(Carbon::now())
+                    ->withWrestlers($createdWrestlers->modelKeys())
+                    ->create()
             );
 
         tap(Stable::first(), function ($stable) {

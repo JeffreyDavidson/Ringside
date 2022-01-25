@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Actions\Titles\ActivateAction;
+use App\DataTransferObjects\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 
@@ -27,15 +29,17 @@ class TitleService
     /**
      * Create a title with given data.
      *
-     * @param  array $data
+     * @param  \App\DataTransferObjects\TitleData $titleData
+     *
      * @return \App\Models\Title
      */
-    public function create(array $data)
+    public function create(TitleData $titleData)
     {
-        $title = $this->titleRepository->create($data);
+        /* @var \App\Models\Title */
+        $title = $this->titleRepository->create($titleData);
 
-        if (isset($data['activated_at'])) {
-            $this->titleRepository->activate($title, $data['activated_at']);
+        if (isset($titleData->activation_date)) {
+            ActivateAction::run($title, $titleData->activation_date);
         }
 
         return $title;
@@ -45,42 +49,28 @@ class TitleService
      * Update a given title with given data.
      *
      * @param  \App\Models\Title $title
-     * @param  array $data
+     * @param  \App\DataTransferObjects\TitleData $titleData
+     *
      * @return \App\Models\Title $title
      */
-    public function update(Title $title, array $data)
+    public function update(Title $title, TitleData $titleData)
     {
-        $this->titleRepository->update($title, $data);
+        $this->titleRepository->update($title, $titleData);
 
-        if ($title->canHaveActivationStartDateChanged() && isset($data['activated_at'])) {
-            $this->activateOrUpdateActivation($title, $data['activated_at']);
+        if (isset($titleData->activation_date)) {
+            if ($title->canBeActivated() || $title->canHaveActivationStartDateChanged($titleData->activation_date)) {
+                ActivateAction::run($title, $titleData->activation_date);
+            }
         }
 
         return $title;
     }
 
     /**
-     * Activate a given manager or update the given title's activation date.
-     *
-     * @param  \App\Models\Title $title
-     * @param  string $activationDate
-     * @return \App\Models\Stable
-     */
-    public function activateOrUpdateActivation(Title $title, string $activationDate)
-    {
-        if ($title->isUnactivated()) {
-            return $this->titleRepository->activate($title, $activationDate);
-        }
-
-        if ($title->hasFutureActivation() && ! $title->activatedOn($activationDate)) {
-            return $this->titleRepository->updateActivation($title, $activationDate);
-        }
-    }
-
-    /**
      * Delete a given title.
      *
      * @param  \App\Models\Title $title
+     *
      * @return void
      */
     public function delete(Title $title)
@@ -92,6 +82,7 @@ class TitleService
      * Restore a given title.
      *
      * @param  \App\Models\Title $title
+     *
      * @return void
      */
     public function restore(Title $title)

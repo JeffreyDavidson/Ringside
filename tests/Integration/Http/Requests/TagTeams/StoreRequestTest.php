@@ -233,65 +233,52 @@ class StoreRequestTest extends TestCase
     /**
      * @test
      */
-    public function each_tag_team_wrestler_must_be_employed_before_tag_team_start_date()
+    public function each_tag_team_wrestler_cannot_be_suspended_to_join_a_tag_team()
     {
-        $wrestlerA = Wrestler::factory()
-            ->has(Employment::factory()->started(Carbon::tomorrow()->toDateString()))
-            ->create();
-
-        $wrestlerB = Wrestler::factory()
-            ->has(Employment::factory()->started(Carbon::tomorrow()->toDateString()))
-            ->create();
-
-        $this->createRequest(StoreRequest::class)
-            ->validate(TagTeamRequestDataFactory::new()->create([
-                'started_at' => Carbon::now()->toDateString(),
-                'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
-            ]))
-            ->assertFailsValidation(['wrestlers.0' => 'app\rules\cannotbeemployedafterdate'])
-            ->assertFailsValidation(['wrestlers.1' => 'app\rules\cannotbeemployedafterdate']);
-    }
-
-    /**
-     * @test
-     */
-    public function each_tag_team_wrestler_must_be_bookable_to_join_a_tag_team()
-    {
-        $wrestlerA = Wrestler::factory()
-            ->has(Employment::factory()->started(Carbon::yesterday()->toDateString()))
-            ->has(Suspension::factory()->started(Carbon::now()->toDateString()))
-            ->create();
-
-        $wrestlerB = Wrestler::factory()
-            ->has(Employment::factory()->started(Carbon::yesterday()->toDateString()))
-            ->create();
+        $wrestlerA = Wrestler::factory()->suspended()->create();
+        $wrestlerB = Wrestler::factory()->bookable()->create();
 
         $this->createRequest(StoreRequest::class)
             ->validate(TagTeamRequestDataFactory::new()->create([
                 'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
             ]))
-            ->assertFailsValidation(['wrestlers.0' => 'app\rules\cannotbehindered']);
+            ->assertFailsValidation(['wrestlers.0' => 'cannot_be_suspended_to_join_tag_team']);
     }
 
     /**
      * @test
      */
-    public function each_tag_team_wrestler_cannot_join_multiple_tag_team()
+    public function each_tag_team_wrestler_cannot_be_injured_to_join_a_tag_team()
+    {
+        $wrestlerA = Wrestler::factory()->injured()->create();
+        $wrestlerB = Wrestler::factory()->bookable()->create();
+
+        $this->createRequest(StoreRequest::class)
+            ->validate(TagTeamRequestDataFactory::new()->create([
+                'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
+            ]))
+            ->assertFailsValidation(['wrestlers.0' => 'cannot_be_injured_to_join_tag_team']);
+    }
+
+    /**
+     * @test
+     */
+    public function each_tag_team_wrestler_cannot_join_multiple_bookable_tag_team()
     {
         $tagTeam = TagTeam::factory()
-            ->has(Employment::factory()->started(Carbon::yesterday()->toDateString()))
+            ->bookable()
             ->has(Wrestler::factory()->bookable()->count(2))
             ->bookable()
             ->create();
 
         $wrestlerB = Wrestler::factory()
-            ->has(Employment::factory()->started(Carbon::yesterday()->toDateString()))
+            ->bookable()
             ->create();
 
         $this->createRequest(StoreRequest::class)
             ->validate(TagTeamRequestDataFactory::new()->create([
-                'wrestlers' => [$tagTeam->currentWrestlers->first()->id, $wrestlerB->id],
+                'wrestlers' => [$tagTeam->currentWrestlers->first()->getKey(), $wrestlerB->getKey()],
             ]))
-            ->assertFailsValidation(['wrestlers.0' => 'app\rules\cannotbelongtomultipleemployedtagteams']);
+            ->assertFailsValidation(['wrestlers.0' => 'cannot_belong_to_multiple_employed_tag_teams']);
     }
 }

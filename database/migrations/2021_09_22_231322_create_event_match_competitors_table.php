@@ -17,6 +17,7 @@ class CreateEventMatchCompetitorsTable extends Migration
             $table->id();
             $table->foreignId('event_match_id')->constrained();
             $table->morphs('competitor');
+            $table->tinyInteger('side_number');
             $table->timestamps();
         });
     }

@@ -2,21 +2,16 @@
 
 namespace App\Http\Livewire\Wrestlers;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Wrestler;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class InjuredWrestlers extends Component
+class InjuredWrestlers extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $injuredWrestlers = Wrestler::query()

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\DataTransferObjects\EventData;
 use App\Models\Event;
 use App\Repositories\EventRepository;
 use App\Services\EventService;
@@ -18,7 +19,7 @@ class EventServiceTest extends TestCase
      */
     public function it_can_create_a_event()
     {
-        $data = [];
+        $data = $this->mock(EventData::class);
         $eventMock = $this->mock(Event::class);
         $repositoryMock = $this->mock(EventRepository::class);
         $service = new EventService($repositoryMock);
@@ -33,7 +34,7 @@ class EventServiceTest extends TestCase
      */
     public function it_can_update_a_event()
     {
-        $data = [];
+        $data = $this->mock(EventData::class);
         $eventMock = $this->mock(Event::class);
         $repositoryMock = $this->mock(EventRepository::class);
         $service = new EventService($repositoryMock);

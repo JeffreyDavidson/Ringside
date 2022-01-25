@@ -35,14 +35,6 @@ class ManagerTest extends TestCase
     /**
      * @test
      */
-    public function a_manager_uses_has_a_unguarded_trait()
-    {
-        $this->assertUsesTrait('App\Models\Concerns\Unguarded', Manager::class);
-    }
-
-    /**
-     * @test
-     */
     public function a_manager_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Manager::class);

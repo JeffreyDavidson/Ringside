@@ -3,11 +3,10 @@
 namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
-use App\Rules\CannotBeEmployedAfterDate;
-use App\Rules\CannotBeHindered;
-use App\Rules\CannotBelongToMultipleEmployedTagTeams;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreRequest extends FormRequest
 {
@@ -39,10 +38,64 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new CannotBeEmployedAfterDate($this->input('started_at')),
-                new CannotBeHindered,
-                new CannotBelongToMultipleEmployedTagTeams,
             ],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     *
+     * @return void
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if ($validator->errors()->isEmpty()) {
+                $this->collect('wrestlers')->each(function ($wrestlerId, $key) use ($validator) {
+                    $wrestler = Wrestler::query()
+                        ->with(['currentTagTeam', 'currentEmployment', 'futureEmployment'])
+                        ->whereKey($wrestlerId)
+                        ->sole();
+
+                    if ($wrestler->isSuspended()) {
+                        $validator->errors()->add(
+                            'wrestlers',
+                            "{$wrestler->name} is suspended and cannot join a tag team."
+                        );
+
+                        $validator->addFailure(
+                            'wrestlers.'.$key,
+                            'cannot_be_suspended_to_join_tag_team'
+                        );
+                    }
+
+                    if ($wrestler->isInjured()) {
+                        $validator->errors()->add(
+                            'wrestlers',
+                            "{$wrestler->name} is injured and cannot join a tag team."
+                        );
+
+                        $validator->addFailure(
+                            'wrestlers.'.$key,
+                            'cannot_be_injured_to_join_tag_team'
+                        );
+                    }
+
+                    if ($wrestler->currentTagTeam !== null) {
+                        $validator->errors()->add(
+                            'wrestlers',
+                            "{$wrestler->name} is already a part of a bookable tag team."
+                        );
+
+                        $validator->addFailure(
+                            'wrestlers.'.$key,
+                            'cannot_belong_to_multiple_employed_tag_teams'
+                        );
+                    }
+                });
+            }
+        });
     }
 }

@@ -63,6 +63,7 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonsuspendableTagTeamTypes
      */
     public function invoke_throws_exception_for_suspending_a_non_suspendable_tag_team($factoryState)

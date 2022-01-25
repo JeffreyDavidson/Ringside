@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers\Stables;
 use App\Enums\Role;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Tests\Factories\StableRequestDataFactory;
 use Tests\TestCase;
@@ -61,14 +62,14 @@ class StableControllerUpdateMethodTest extends TestCase
      */
     public function updates_a_stable_and_redirects()
     {
-        $stable = Stable::factory()->create();
+        $stable = Stable::factory()->withNoMembers()->create();
 
         $this
             ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'edit'], $stable))
             ->put(
                 action([StablesController::class, 'update'], $stable),
-                StableRequestDataFactory::new()->withStable($stable)->create()
+                StableRequestDataFactory::new()->withStable($stable)->create(['name' => 'Example Stable Name'])
             )
             ->assertRedirect(action([StablesController::class, 'index']));
 
@@ -77,23 +78,55 @@ class StableControllerUpdateMethodTest extends TestCase
         });
     }
 
+    /**
+     * @test
+     */
     public function wrestlers_of_stable_are_synced_when_stable_is_updated()
     {
-        $stable = Stable::factory()->active()->create();
-        $wrestlers = Wrestler::factory()->bookable()->times(2)->create();
+        $stable = Stable::factory()->withFutureActivation()->withNoMembers()->create();
+        $wrestlers = Wrestler::factory()->bookable()->count(3)->create();
 
         $this
             ->actAs(Role::administrator())
             ->from(action([StablesController::class, 'edit'], $stable))
             ->put(
                 action([StablesController::class, 'update'], $stable),
-                StableRequestDataFactory::new()->withStable($stable)->withWrestlers([$wrestlers])->create()
+                StableRequestDataFactory::new()
+                    ->withStable($stable)
+                    ->withWrestlers($wrestlers->modelKeys())
+                    ->create()
             )
             ->assertRedirect(action([StablesController::class, 'index']));
 
-        tap($stable->currentWrestlers->fresh(), function ($stableWrestlers) use ($wrestlers) {
-            $this->assertCount(2, $stableWrestlers);
-            $this->assertEquals($stableWrestlers->modelKeys(), $wrestlers->modelKeys());
+        tap($stable->fresh(), function ($stable) use ($wrestlers) {
+            $this->assertCount(3, $stable->currentWrestlers);
+            $this->assertEquals($stable->currentWrestlers->modelKeys(), $wrestlers->modelKeys());
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_teams_of_stable_are_synced_when_stable_is_updated()
+    {
+        $stable = Stable::factory()->withFutureActivation()->withNoMembers()->create();
+        $tagTeams = TagTeam::factory()->bookable()->count(2)->create();
+
+        $this
+            ->actAs(Role::administrator())
+            ->from(action([StablesController::class, 'edit'], $stable))
+            ->put(
+                action([StablesController::class, 'update'], $stable),
+                StableRequestDataFactory::new()
+                    ->withStable($stable)
+                    ->withTagTeams($tagTeams->modelKeys())
+                    ->create()
+            )
+            ->assertRedirect(action([StablesController::class, 'index']));
+
+        tap($stable->fresh(), function ($stable) use ($tagTeams) {
+            $this->assertCount(2, $stable->currentTagTeams);
+            $this->assertEquals($stable->currentTagTeams->modelKeys(), $tagTeams->modelKeys());
         });
     }
 

@@ -24,9 +24,9 @@ trait Retirements
     public function currentRetirement()
     {
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
+            ->where('started_at', '<=', now())
+            ->whereNull('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -37,7 +37,7 @@ trait Retirements
     public function previousRetirements()
     {
         return $this->retirements()
-                    ->whereNotNull('ended_at');
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -48,8 +48,8 @@ trait Retirements
     public function previousRetirement()
     {
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->latest('ended_at')
-                    ->limit(1);
+            ->latest('ended_at')
+            ->limit(1);
     }
 
     /**

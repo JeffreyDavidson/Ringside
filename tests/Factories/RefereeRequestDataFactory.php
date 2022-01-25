@@ -8,7 +8,9 @@ use Carbon\Carbon;
 class RefereeRequestDataFactory
 {
     private string $first_name = 'James';
+
     private string $last_name = 'Williams';
+
     private ?string $started_at = null;
 
     public static function new(): self
@@ -25,13 +27,11 @@ class RefereeRequestDataFactory
         ], $overrides);
     }
 
-    public function withStartDate(string | Carbon $startedAt): self
+    public function withStartDate(Carbon $startedAt): self
     {
         $clone = clone $this;
 
-        $clone->started_at = $startedAt instanceof Carbon
-            ? $startedAt->format('Y-m-d H:i:a')
-            : $startedAt;
+        $clone->started_at = $startedAt;
 
         return $clone;
     }
@@ -40,8 +40,9 @@ class RefereeRequestDataFactory
     {
         $clone = clone $this;
 
-        $this->first_name = $referee->first_name;
-        $this->last_name = $referee->last_name;
+        $clone->first_name = $referee->first_name;
+        $clone->last_name = $referee->last_name;
+        $clone->started_at = $referee->startedAt?->toDateTimeString();
 
         return $clone;
     }

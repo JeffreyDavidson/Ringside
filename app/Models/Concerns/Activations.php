@@ -3,6 +3,8 @@
 namespace App\Models\Concerns;
 
 use App\Models\Activation;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait Activations
 {
@@ -24,9 +26,9 @@ trait Activations
     public function currentActivation()
     {
         return $this->morphOne(Activation::class, 'activatable')
-                        ->where('started_at', '<=', now())
-                        ->where('ended_at', '=', null)
-                        ->latestOfMany();
+            ->where('started_at', '<=', now())
+            ->whereNull('ended_at')
+            ->latestOfMany();
     }
 
     /**
@@ -37,7 +39,7 @@ trait Activations
     public function firstActivation()
     {
         return $this->morphOne(Activation::class, 'activatable')
-                    ->oldestOfMany('started_at');
+            ->oldestOfMany('started_at');
     }
 
     /**
@@ -48,9 +50,9 @@ trait Activations
     public function futureActivation()
     {
         return $this->morphOne(Activation::class, 'activatable')
-                    ->where('started_at', '>', now())
-                    ->whereNull('ended_at')
-                    ->latestOfMany();
+            ->where('started_at', '>', now())
+            ->whereNull('ended_at')
+            ->latestOfMany();
     }
 
     /**
@@ -61,8 +63,8 @@ trait Activations
     public function previousActivation()
     {
         return $this->morphOne(Activation::class, 'activatable')
-                    ->latest('ended_at')
-                    ->oldestOfMany();
+            ->latest('ended_at')
+            ->oldestOfMany();
     }
 
     /**
@@ -73,7 +75,7 @@ trait Activations
     public function previousActivations()
     {
         return $this->activations()
-                    ->whereNotNull('ended_at');
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -123,27 +125,19 @@ trait Activations
      */
     public function canBeActivated()
     {
-        if ($this->isCurrentlyActivated()) {
-            // throw new CannotBeActivatedException('Entity cannot be activated. This entity is active.');
-            return false;
-        }
-
-        if ($this->isRetired()) {
-            // throw new CannotBeActivatedException('Entity cannot be activated. This entity is retired.');
-            return false;
-        }
-
-        return true;
+        return $this->isUnactivated() || $this->hasFutureActivation();
     }
 
     /**
      * Retrieve the model's first activation date.
      *
-     * @return string|null
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getActivatedAtAttribute()
+    public function activatedAt(): Attribute
     {
-        return $this->activations->first()?->started_at;
+        return new Attribute(
+            get: fn () => $this->activations->first()?->started_at
+        );
     }
 
     /**
@@ -159,25 +153,23 @@ trait Activations
     /**
      * Get the model's first activation date.
      *
-     * @param  string $activationDate
-     * @return bool
+     * @param  \Carbon\Carbon $activationDate
+     *
+     * @return bool|null
      */
-    public function activatedOn(string $activationDate)
+    public function activatedOn(Carbon $activationDate)
     {
-        return $this->activations->last()->started_at->ne($activationDate);
+        return $this->currentActivation?->started_at->eq($activationDate);
     }
 
     /**
      * Check to see if activatable can have their start date changed.
      *
+     * @param  \Carbon\Carbon $activationDate
      * @return bool
      */
-    public function canHaveActivationStartDateChanged()
+    public function canHaveActivationStartDateChanged(Carbon $activationDate)
     {
-        if ($this->isUnactivated() || $this->hasFutureActivation()) {
-            return true;
-        }
-
-        return false;
+        return $this->hasFutureActivation() && ! $this->activatedOn($activationDate);
     }
 }

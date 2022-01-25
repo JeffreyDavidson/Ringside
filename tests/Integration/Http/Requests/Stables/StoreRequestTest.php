@@ -193,18 +193,28 @@ class StoreRequestTest extends TestCase
     /**
      * @test
      */
-    public function each_wrestler_must_be_able_to_join_the_stable()
+    public function each_wrestler_must_not_already_be_in_stable_to_join_stable()
     {
         $stable = Stable::factory()
-            ->hasAttached(Wrestler::factory(), ['joined_at' => now()->toDateTimeString()])
+            ->hasAttached(
+                $wrestlerAlreadyInDifferentStable = Wrestler::factory()->bookable()->create(),
+                ['joined_at' => now()->toDateTimeString()]
+            )
             ->create();
-        $wrestlerToJoinStable = $stable->currentWrestlers->first();
+        $wrestlerNotInStableA = Wrestler::factory()->bookable()->create();
+        $wrestlerNotInStableB = Wrestler::factory()->bookable()->create();
+        $wrestlerNotInStableC = Wrestler::factory()->bookable()->create();
 
         $this->createRequest(StoreRequest::class)
             ->validate(StableRequestDataFactory::new()->create([
-                'wrestlers' => [$wrestlerToJoinStable->id, 2],
+                'wrestlers' => [
+                    $wrestlerAlreadyInDifferentStable->getKey(),
+                    $wrestlerNotInStableA->getKey(),
+                    $wrestlerNotInStableB->getKey(),
+                    $wrestlerNotInStableC->getKey(),
+                ],
             ]))
-            ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinstable']);
+            ->assertFailsValidation(['wrestlers.0' => 'wrestler_already_in_different_stable']);
     }
 
     /**
@@ -246,18 +256,22 @@ class StoreRequestTest extends TestCase
     /**
      * @test
      */
-    public function each_tag_teams_must_be_able_to_join_the_stable()
+    public function each_tag_teams_must_not_be_in_any_other_active_stable()
     {
-        $stable = Stable::factory()
-            ->hasAttached(TagTeam::factory(), ['joined_at' => now()->toDateTimeString()])
+        Stable::factory()
+            ->hasAttached(
+                $tagTeamA = TagTeam::factory()->bookable()->create(),
+                ['joined_at' => now()->toDateTimeString()]
+            )
             ->create();
-        $tagTeamToJoinStable = $stable->currentTagTeams->first();
+
+        $tagTeamB = TagTeam::factory()->bookable()->create();
 
         $this->createRequest(StoreRequest::class)
             ->validate(StableRequestDataFactory::new()->create([
-                'tag_teams' => [$tagTeamToJoinStable->id, 2],
+                'tag_teams' => [$tagTeamA->getKey(), $tagTeamB->getKey()],
             ]))
-            ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinstable']);
+            ->assertFailsValidation(['tag_teams.0' => 'tag_team_already_in_different_stable']);
     }
 
     /**
@@ -265,16 +279,14 @@ class StoreRequestTest extends TestCase
      */
     public function stable_must_have_a_minimum_number_of_3_members()
     {
-        $wrestlerA = Wrestler::factory()->create();
-        $wrestlerB = Wrestler::factory()->create();
+        $wrestlers = Wrestler::factory()->count(2)->create();
 
         $this->createRequest(StoreRequest::class)
             ->validate(StableRequestDataFactory::new()->create([
-                'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
+                'wrestlers' => $wrestlers->modelKeys(),
                 'tag_teams' => [],
             ]))
-            ->assertFailsValidation(['tag_teams' => 'app\rules\stablehasenoughmembers'])
-            ->assertFailsValidation(['tag_teams' => 'app\rules\stablehasenoughmembers']);
+            ->assertFailsValidation(['*' => 'not_enough_members']);
     }
 
     /**
@@ -305,8 +317,7 @@ class StoreRequestTest extends TestCase
                 'wrestlers' => [],
                 'tag_teams' => [$tagTeam->id],
             ]))
-            ->assertFailsValidation(['wrestlers' => 'app\rules\stablehasenoughmembers'])
-            ->assertFailsValidation(['tag_teams' => 'app\rules\stablehasenoughmembers']);
+            ->assertFailsValidation(['*' => 'not_enough_members']);
     }
 
     /**
@@ -347,17 +358,18 @@ class StoreRequestTest extends TestCase
      */
     public function a_stable_cannot_contain_a_wrestler_that_is_added_in_a_tag_team()
     {
-        $wrestler = Wrestler::factory()->create();
-        $tagTeam = TagTeam::factory()
-            ->hasAttached($wrestler, ['joined_at' => now()->toDateTimeString()])
-            ->hasAttached(Wrestler::factory(), ['joined_at' => now()->toDateTimeString()])
-            ->create();
+        [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
         $this->createRequest(StoreRequest::class)
             ->validate(StableRequestDataFactory::new()->create([
-                'wrestlers' => [$wrestler->id],
-                'tag_teams' => [$tagTeam->id],
+                'wrestlers' => [
+                    $wrestlerA->getKey(),
+                    $wrestlerB->getKey(),
+                    $tagTeam->currentWrestlers->first()->getKey(),
+                ],
+                'tag_teams' => [$tagTeam->getKey()],
             ]))
-            ->assertFailsValidation(['wrestlers' => 'app\rules\wrestlerjoinedstableintagteam']);
+            ->assertFailsValidation(['wrestlers' => 'wrestlers_added_that_are_inside_tag_teams']);
     }
 }

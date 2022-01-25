@@ -13,6 +13,5 @@ class EventMatchSeeder extends Seeder
      */
     public function run()
     {
-        //
     }
 }

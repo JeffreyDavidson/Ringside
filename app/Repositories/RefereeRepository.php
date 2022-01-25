@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\DataTransferObjects\RefereeData;
 use App\Models\Referee;
+use Carbon\Carbon;
 
 class RefereeRepository
 {
@@ -11,6 +12,7 @@ class RefereeRepository
      * Create a new referee with the given data.
      *
      * @param  \App\DataTransferObjects\RefereeData $refereeData
+     *
      * @return \App\Models\Referee
      */
     public function create(RefereeData $refereeData)
@@ -25,21 +27,25 @@ class RefereeRepository
      * Update a given referee with the given data.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \App\DataTransferObjects\RefereeData $refereData
+     * @param  \App\DataTransferObjects\RefereeData $refereeData
+     *
      * @return \App\Models\Referee $referee
      */
     public function update(Referee $referee, RefereeData $refereeData)
     {
-        return $referee->update([
+        $referee->update([
             'first_name' => $refereeData->first_name,
             'last_name' => $refereeData->last_name,
         ]);
+
+        return $referee;
     }
 
     /**
      * Delete a given referee.
      *
      * @param  \App\Models\Referee $referee
+     *
      * @return void
      */
     public function delete(Referee $referee)
@@ -51,6 +57,7 @@ class RefereeRepository
      * Restore a given referee.
      *
      * @param  \App\Models\Referee $referee
+     *
      * @return void
      */
     public function restore(Referee $referee)
@@ -62,107 +69,137 @@ class RefereeRepository
      * Employ a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $employmentDate
+     * @param  \Carbon\Carbon $employmentDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function employ(Referee $referee, string $employmentDate)
+    public function employ(Referee $referee, Carbon $employmentDate)
     {
-        return $referee->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $employmentDate]);
+        $referee->employments()->updateOrCreate(
+            ['ended_at' => null],
+            ['started_at' => $employmentDate->toDateTimeString()]
+        );
+
+        return $referee;
     }
 
     /**
      * Release a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $releaseDate
+     * @param  \Carbon\Carbon $releaseDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function release(Referee $referee, string $releaseDate)
+    public function release(Referee $referee, Carbon $releaseDate)
     {
-        return $referee->currentEmployment()->update(['ended_at' => $releaseDate]);
+        $referee->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Injure a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $injureDate
+     * @param  \Carbon\Carbon $injureDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function injure(Referee $referee, string $injureDate)
+    public function injure(Referee $referee, Carbon $injureDate)
     {
-        return $referee->injuries()->create(['started_at' => $injureDate]);
+        $referee->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Clear the current injury of a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $recoveryDate
+     * @param  \Carbon\Carbon $recoveryDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function clearInjury(Referee $referee, string $recoveryDate)
+    public function clearInjury(Referee $referee, Carbon $recoveryDate)
     {
-        return $referee->currentInjury()->update(['ended_at' => $recoveryDate]);
+        $referee->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Retire a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $retirementDate
+     * @param  \Carbon\Carbon $retirementDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function retire(Referee $referee, string $retirementDate)
+    public function retire(Referee $referee, Carbon $retirementDate)
     {
-        return $referee->retirements()->create(['started_at' => $retirementDate]);
+        $referee->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Unretire a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $unretireDate
+     * @param  \Carbon\Carbon $unretireDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function unretire(Referee $referee, string $unretireDate)
+    public function unretire(Referee $referee, Carbon $unretireDate)
     {
-        return $referee->currentRetirement()->update(['ended_at' => $unretireDate]);
+        $referee->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Suspend a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $suspensionDate
+     * @param  \Carbon\Carbon $suspensionDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function suspend(Referee $referee, string $suspensionDate)
+    public function suspend(Referee $referee, Carbon $suspensionDate)
     {
-        return $referee->suspensions()->create(['started_at' => $suspensionDate]);
+        $referee->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Reinstate a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $reinstateDate
+     * @param  \Carbon\Carbon $reinstateDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function reinstate(Referee $referee, string $reinstateDate)
+    public function reinstate(Referee $referee, Carbon $reinstateDate)
     {
-        return $referee->currentSuspension()->update(['ended_at' => $reinstateDate]);
+        $referee->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
+
+        return $referee;
     }
 
     /**
      * Get the model's first employment date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  string $employmentDate
+     * @param  \Carbon\Carbon $employmentDate
+     *
      * @return \App\Models\Referee $referee
      */
-    public function updateEmployment(Referee $referee, string $employmentDate)
+    public function updateEmployment(Referee $referee, Carbon $employmentDate)
     {
-        return $referee->futureEmployment()->update(['started_at' => $employmentDate]);
+        $referee->futureEmployment()->update(['started_at' => $employmentDate->toDateTimeString()]);
+
+        return $referee;
     }
 }

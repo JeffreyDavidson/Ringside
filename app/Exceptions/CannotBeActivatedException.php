@@ -6,13 +6,19 @@ use Exception;
 
 class CannotBeActivatedException extends Exception
 {
+    /**
+     * The default message for sending with exception.
+     *
+     * @var string
+     */
     protected $message = 'This entity cannot be activated. This entity is currently active.';
 
     /**
      * Render the exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function render($request)
     {

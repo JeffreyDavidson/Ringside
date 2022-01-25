@@ -13,11 +13,13 @@ class EmployAction extends BaseWrestlerAction
      * Employ a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
+     * @param  \Carbon\Carbon|null  $employmentDate
+     *
      * @return void
      */
-    public function handle(Wrestler $wrestler): void
+    public function handle(Wrestler $wrestler, $employmentDate = null): void
     {
-        $employmentDate = now()->toDateTimeString();
+        $employmentDate ??= now();
 
         $this->wrestlerRepository->employ($wrestler, $employmentDate);
         $wrestler->save();

@@ -2,21 +2,16 @@
 
 namespace App\Http\Livewire\Managers;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Manager;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class InjuredManagers extends Component
+class InjuredManagers extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $injuredManagers = Manager::query()

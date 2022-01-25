@@ -13,25 +13,27 @@ class ReleaseAction extends BaseTagTeamAction
      * Release a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
+     *
      * @return void
      */
     public function handle(TagTeam $tagTeam): void
     {
-        $releaseDate = now()->toDateTimeString();
+        $releaseDate = now();
 
         if ($tagTeam->isSuspended()) {
             $this->tagTeamRepository->reinstate($tagTeam, $releaseDate);
-            foreach ($tagTeam->currentWrestlers as $wrestler) {
+
+            $tagTeam->currentWrestlers->each(function ($wrestler) use ($releaseDate) {
                 $this->wrestlerRepository->reinstate($wrestler, $releaseDate);
-            }
+            });
         }
 
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
         $tagTeam->save();
 
-        foreach ($tagTeam->currentWrestlers as $wrestler) {
+        $tagTeam->currentWrestlers->each(function ($wrestler) use ($releaseDate) {
             $this->wrestlerRepository->release($wrestler, $releaseDate);
             $wrestler->save();
-        }
+        });
     }
 }

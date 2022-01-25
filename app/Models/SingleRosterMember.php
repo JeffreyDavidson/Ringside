@@ -10,7 +10,8 @@ abstract class SingleRosterMember extends RosterMember
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\SingleRosterMemberQueryBuilder
      */
     public function newEloquentBuilder($query)
     {
@@ -42,7 +43,7 @@ abstract class SingleRosterMember extends RosterMember
      */
     public function canBeSuspended()
     {
-        if ($this->isNotInEmployment()) {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
         }
 
@@ -89,8 +90,8 @@ abstract class SingleRosterMember extends RosterMember
     public function currentInjury()
     {
         return $this->morphOne(Injury::class, 'injurable')
-                    ->whereNull('ended_at')
-                    ->limit(1);
+            ->whereNull('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -101,7 +102,7 @@ abstract class SingleRosterMember extends RosterMember
     public function previousInjuries()
     {
         return $this->injuries()
-                    ->whereNotNull('ended_at');
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -112,8 +113,8 @@ abstract class SingleRosterMember extends RosterMember
     public function previousInjury()
     {
         return $this->morphOne(Injury::class, 'injurable')
-                    ->latest('ended_at')
-                    ->limit(1);
+            ->latest('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -143,7 +144,7 @@ abstract class SingleRosterMember extends RosterMember
      */
     public function canBeInjured()
     {
-        if ($this->isNotInEmployment()) {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
         }
 

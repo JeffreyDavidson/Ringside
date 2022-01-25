@@ -60,7 +60,6 @@ class ManagerControllerUpdateMethodTest extends TestCase
      */
     public function update_a_manager_and_redirects()
     {
-        $this->withoutExceptionHandling();
         $manager = Manager::factory()->create(['first_name' => 'John', 'last_name' => 'Smith']);
 
         $this
@@ -86,7 +85,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
      */
     public function update_can_employ_an_unemployed_manager_when_started_at_is_filled()
     {
-        $now = now()->toDateTimeString();
+        $now = now();
         $manager = Manager::factory()->unemployed()->create();
 
         $this->assertCount(0, $manager->employments);
@@ -96,7 +95,9 @@ class ManagerControllerUpdateMethodTest extends TestCase
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
-                ManagerRequestDataFactory::new()->withManager($manager)->create(['started_at' => $now])
+                ManagerRequestDataFactory::new()
+                    ->withManager($manager)
+                    ->create(['started_at' => $now->toDateTimeString()])
             )
             ->assertRedirect(action([ManagersController::class, 'index']));
 
@@ -111,7 +112,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
      */
     public function update_can_employ_a_future_employed_manager_when_started_at_is_filled()
     {
-        $now = now()->toDateTimeString();
+        $now = now();
         $manager = Manager::factory()->withFutureEmployment()->create();
 
         $this->assertTrue($manager->employments()->first()->started_at->isFuture());
@@ -121,13 +122,18 @@ class ManagerControllerUpdateMethodTest extends TestCase
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
-                ManagerRequestDataFactory::new()->withManager($manager)->create(['started_at' => $now])
+                ManagerRequestDataFactory::new()
+                    ->withManager($manager)
+                    ->create(['started_at' => $now->toDateTimeString()])
             )
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) use ($now) {
             $this->assertCount(1, $manager->employments);
-            $this->assertEquals($now, $manager->employments()->first()->started_at->toDateTimeString());
+            $this->assertEquals(
+                $now->toDateTimeString(),
+                $manager->employments()->first()->started_at->toDateTimeString()
+            );
         });
     }
 
@@ -146,9 +152,11 @@ class ManagerControllerUpdateMethodTest extends TestCase
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
-                ManagerRequestDataFactory::new()->withManager($manager)->create([
-                    'started_at' => now()->toDateTimeString(),
-                ])
+                ManagerRequestDataFactory::new()
+                    ->withManager($manager)
+                    ->create([
+                        'started_at' => now()->toDateTimeString(),
+                    ])
             )
             ->assertSessionHasErrors(['started_at']);
 
@@ -163,16 +171,18 @@ class ManagerControllerUpdateMethodTest extends TestCase
     public function updating_cannot_employ_an_available_manager_when_started_at_is_filled()
     {
         $manager = Manager::factory()->available()->create();
-        $startDate = $manager->employments()->first()->started_at->toDateTimeString();
+        $startDate = $manager->startedAt->toDateTimeString();
 
         $this
             ->actAs(Role::administrator())
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
-                ManagerRequestDataFactory::new()->withManager($manager)->create([
-                    'started_at' => now()->toDateTimeString(),
-                ])
+                ManagerRequestDataFactory::new()
+                    ->withManager($manager)
+                    ->create([
+                        'started_at' => now()->toDateTimeString(),
+                    ])
             )
             ->assertSessionHasErrors(['started_at']);
 
@@ -193,7 +203,9 @@ class ManagerControllerUpdateMethodTest extends TestCase
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
-                ManagerRequestDataFactory::new()->withManager($manager)->create()
+                ManagerRequestDataFactory::new()
+                    ->withManager($manager)
+                    ->create()
             )
             ->assertForbidden();
     }
@@ -209,7 +221,9 @@ class ManagerControllerUpdateMethodTest extends TestCase
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
-                ManagerRequestDataFactory::new()->withManager($manager)->create()
+                ManagerRequestDataFactory::new()
+                    ->withManager($manager)
+                    ->create()
             )
             ->assertRedirect(route('login'));
     }

@@ -3,12 +3,10 @@
 namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
-use App\Rules\CannotBeEmployedAfterDate;
-use App\Rules\CannotBeHindered;
-use App\Rules\CannotBelongToMultipleEmployedTagTeams;
-use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateRequest extends FormRequest
 {
@@ -30,13 +28,17 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams')->ignore($this->route('tag_team')->id)],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                Rule::unique('tag_teams')->ignore($this->route()->parameter('tag_team')->id),
+            ],
             'signature_move' => ['nullable', 'string'],
             'started_at' => [
                 'nullable',
                 'string',
                 'date',
-                new EmploymentStartDateCanBeChanged($this->route('tag_team')),
             ],
             'wrestlers' => ['nullable', 'array'],
             'wrestlers.*', [
@@ -44,10 +46,54 @@ class UpdateRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new CannotBeEmployedAfterDate($this->input('started_at')),
-                new CannotBeHindered,
-                new CannotBelongToMultipleEmployedTagTeams($this->route('tag_team')),
             ],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     *
+     * @return void
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if ($validator->errors()->isEmpty()) {
+                $tagTeam = $this->route()->parameter('tag_team');
+
+                if ($tagTeam->isCurrentlyEmployed() && ! $tagTeam->employedOn($this->date('started_at'))) {
+                    $validator->errors()->add(
+                        'started_at',
+                        "{$tagTeam->name} is currently employed and the employment date cannot be changed."
+                    );
+
+                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
+                }
+
+                if ($this->collect('wrestlers')->isNotEmpty()) {
+                    $this->collect('wrestlers')->each(function ($wrestlerId) use ($validator) {
+                        $wrestler = Wrestler::whereKey($wrestlerId)->sole();
+
+                        if ($wrestler->isCurrentlyEmployed() && $wrestler->employedAfter($this->date('started_at'))) {
+                            $validator->errors()->add(
+                                'wrestlers',
+                                "{$wrestler->name} is currently employed and tag team employment start date has past."
+                            );
+                        }
+
+                        if ($wrestler->currentTagTeam !== null
+                            && ! $wrestler->currentTagTeam->isNot($this->route()->parameter('tag_team'))
+                        ) {
+                            $validator->errors()->add(
+                                'wrestlers',
+                                "{$wrestler->name} is already a member of a tag team."
+                            );
+                        }
+                    });
+                }
+            }
+        });
     }
 }

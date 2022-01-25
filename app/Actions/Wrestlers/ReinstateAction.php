@@ -13,17 +13,18 @@ class ReinstateAction extends BaseWrestlerAction
      * Reinstate a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
+     *
      * @return void
      */
     public function handle(Wrestler $wrestler): void
     {
-        $reinstatementDate = now()->toDateTimeString();
+        $reinstatementDate = now();
 
         $this->wrestlerRepository->reinstate($wrestler, $reinstatementDate);
         $wrestler->save();
 
-        if (! is_null($wrestler->currentTagTeam) && $wrestler->currentTagTeam->exists()) {
-            $wrestler->currentTagTeam->save();
+        if ($wrestler->currentTagTeam() !== null && $wrestler->currentTagTeam()->exists()) {
+            $wrestler->currentTagTeam()->touch();
         }
     }
 }

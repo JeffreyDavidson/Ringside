@@ -64,6 +64,7 @@ class ClearInjuryControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonclearableManagerTypes
      */
     public function invoke_throws_exception_for_clearing_an_injury_from_a_non_clearable_manager($factoryState)

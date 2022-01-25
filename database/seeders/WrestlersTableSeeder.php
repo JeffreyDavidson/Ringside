@@ -14,6 +14,8 @@ class WrestlersTableSeeder extends Seeder
     /**
      * Run the database seeds.
      *
+     * @param mixed|null $dateToStart
+     *
      * @return void
      */
     public function run($dateToStart = null)
@@ -21,7 +23,7 @@ class WrestlersTableSeeder extends Seeder
         $eNum = 1;
         $now = Carbon::now();
 
-        if (is_null($dateToStart)) {
+        if (null === $dateToStart) {
             $dateToStart = Carbon::now()->subYears(5);
         }
 
@@ -31,7 +33,7 @@ class WrestlersTableSeeder extends Seeder
         $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
-        /*
+        /**
          * We need to create 30 wrestlers at this time X years ago but since by
          * the time we reach the current date these wrestlers should be
          * released so we need to make them released and figure out
@@ -54,7 +56,7 @@ class WrestlersTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 10 wrestlers that have been retired. We need to
          * make sure that their employment end date is the same as their
          * start of their retirement date.
@@ -72,7 +74,7 @@ class WrestlersTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 5 wrestlers at this time x years ago for each
          * additional month but since by the time we reach the current
          * date these wrestlers should be released so we need to
@@ -100,7 +102,7 @@ class WrestlersTableSeeder extends Seeder
             $startDate->addMonth();
         }
 
-        /*
+        /**
          * We need to create 5 wrestlers for the next 3 months and all
          * wrestlers should be Future Employment and should NOT
          * have an ended employment date.
@@ -117,7 +119,7 @@ class WrestlersTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 5 wrestlers that do not have an employment date.
          * These wrestlers should be marked as being Unemployed.
          */

@@ -2,18 +2,26 @@
 
 namespace App\View\Components;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\Component;
 
 class DataTable extends Component
 {
+    /**
+     * The collection of models to be passed to view.
+     *
+     * @var \Illuminate\Pagination\LengthAwarePaginator
+     */
     public $collection;
 
     /**
      * Create a new component instance.
      *
+     * @param  \Illuminate\Pagination\LengthAwarePaginator $collection
+     *
      * @return void
      */
-    public function __construct($collection)
+    public function __construct(LengthAwarePaginator $collection)
     {
         $this->collection = $collection;
     }

@@ -10,7 +10,8 @@ class ManagerObserver
     /**
      * Handle the Manager "saved" event.
      *
-     * @param  App\Models\Manager $manager
+     * @param  \App\Models\Manager $manager
+     *
      * @return void
      */
     public function saving(Manager $manager)
@@ -19,7 +20,7 @@ class ManagerObserver
             $manager->isCurrentlyEmployed() => match (true) {
                 $manager->isInjured() => ManagerStatus::injured(),
                 $manager->isSuspended() => ManagerStatus::suspended(),
-                $manager->isAvailable() => ManagerStatus::available(),
+                default => ManagerStatus::available(),
             },
             $manager->hasFutureEmployment() => ManagerStatus::future_employment(),
             $manager->isReleased() => ManagerStatus::released(),

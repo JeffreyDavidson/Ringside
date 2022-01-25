@@ -28,7 +28,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'name' => null,
             ]))
             ->assertFailsValidation(['name' => 'required']);
@@ -43,7 +43,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'name' => 123,
             ]))
             ->assertFailsValidation(['name' => 'string']);
@@ -58,7 +58,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'name' => 'ab',
             ]))
             ->assertFailsValidation(['name' => 'min:3']);
@@ -73,7 +73,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'name' => 'Example',
             ]))
             ->assertFailsValidation(['name' => 'endswith:Title,Titles']);
@@ -85,11 +85,11 @@ class UpdateRequestTest extends TestCase
     public function title_name_must_be_unique()
     {
         $titleA = Title::factory()->create();
-        $titleB = Title::factory()->create(['name' => 'Example Title']);
+        Title::factory()->create(['name' => 'Example Title']);
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $titleA)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($titleA)->create([
                 'name' => 'Example Title',
             ]))
             ->assertFailsValidation(['name' => 'unique:titles,NULL,1,id']);
@@ -104,7 +104,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'activated_at' => null,
             ]))
             ->assertPassesValidation();
@@ -119,7 +119,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'activated_at' => 12345,
             ]))
             ->assertFailsValidation(['activated_at' => 'string']);
@@ -134,7 +134,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'activated_at' => 'not-a-date-format',
             ]))
             ->assertFailsValidation(['activated_at' => 'date']);
@@ -143,28 +143,28 @@ class UpdateRequestTest extends TestCase
     /**
      * @test
      */
-    public function title_activated_at_cannot_be_changed_if_employment_start_date_has_past()
+    public function title_activated_at_cannot_be_changed_if_activation_start_date_has_past()
     {
-        $title = Title::factory()->has(Activation::factory()->started('2021-01-01'))->create();
+        $title = Title::factory()->active()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
-                'activated_at' => '2021-01-01',
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
+                'activated_at' => Carbon::now()->toDateTimeString(),
             ]))
-            ->assertFailsValidation(['activated_at' => 'app\rules\activationstartdatecanbechanged']);
+            ->assertFailsValidation(['activated_at' => 'activation_date_cannot_be_changed']);
     }
 
     /**
      * @test
      */
-    public function title_activated_at_can_be_changed_if_employment_start_date_is_in_the_future()
+    public function title_activated_at_can_be_changed_if_activation_start_date_is_in_the_future()
     {
         $title = Title::factory()->has(Activation::factory()->started(Carbon::parse('+2 weeks')))->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('title', $title)
-            ->validate(TitleRequestDataFactory::new()->create([
+            ->validate(TitleRequestDataFactory::new()->withTitle($title)->create([
                 'activated_at' => Carbon::tomorrow()->toDateString(),
             ]))
             ->assertPassesValidation();

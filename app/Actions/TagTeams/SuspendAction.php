@@ -13,16 +13,17 @@ class SuspendAction extends BaseTagTeamAction
      * Suspend a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
+     *
      * @return void
      */
     public function handle(TagTeam $tagTeam): void
     {
-        $suspensionDate = now()->toDateTimeString();
+        $suspensionDate = now();
 
-        foreach ($tagTeam->currentWrestlers as $wrestler) {
+        $tagTeam->currentWrestlers->each(function ($wrestler) use ($suspensionDate) {
             $this->wrestlerRepository->suspend($wrestler, $suspensionDate);
             $wrestler->save();
-        }
+        });
 
         $this->tagTeamRepository->suspend($tagTeam, $suspensionDate);
         $tagTeam->save();

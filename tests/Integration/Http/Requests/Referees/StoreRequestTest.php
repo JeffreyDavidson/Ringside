@@ -68,7 +68,7 @@ class StoreRequestTest extends TestCase
     /**
      * @test
      */
-    public function Referee_first_name_must_be_at_least_3_characters()
+    public function referee_first_name_must_be_at_least_3_characters()
     {
         $this->createRequest(StoreRequest::class)
             ->validate(RefereeRequestDataFactory::new()->create([
@@ -104,7 +104,7 @@ class StoreRequestTest extends TestCase
     /**
      * @test
      */
-    public function Referee_last_name_must_be_at_least_3_characters()
+    public function referee_last_name_must_be_at_least_3_characters()
     {
         $this->createRequest(StoreRequest::class)
             ->validate(RefereeRequestDataFactory::new()->create([

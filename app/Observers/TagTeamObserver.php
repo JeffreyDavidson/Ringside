@@ -10,7 +10,8 @@ class TagTeamObserver
     /**
      * Handle the TagTeam "saved" event.
      *
-     * @param  App\Models\TagTeam $tagTeam
+     * @param  \App\Models\TagTeam $tagTeam
+     *
      * @return void
      */
     public function saving(TagTeam $tagTeam)
@@ -18,8 +19,8 @@ class TagTeamObserver
         $tagTeam->status = match (true) {
             $tagTeam->isCurrentlyEmployed() => match (true) {
                 $tagTeam->isSuspended() => TagTeamStatus::suspended(),
-                $tagTeam->isUnbookable() => TagTeamStatus::UNbookable(),
-                $tagTeam->isBookable() => TagTeamStatus::bookable(),
+                $tagTeam->isUnbookable() => TagTeamStatus::unbookable(),
+                default => TagTeamStatus::bookable(),
             },
             $tagTeam->hasFutureEmployment() => TagTeamStatus::future_employment(),
             $tagTeam->isReleased() => TagTeamStatus::released(),

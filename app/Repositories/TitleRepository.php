@@ -3,18 +3,16 @@
 namespace App\Repositories;
 
 use App\DataTransferObjects\TitleData;
-use App\Models\Contracts\Activatable;
-use App\Models\Contracts\Deactivatable;
 use App\Models\Title;
-use App\Repositories\Contracts\ActivationRepositoryInterface;
-use App\Repositories\Contracts\DeactivationRepositoryInterface;
+use Carbon\Carbon;
 
-class TitleRepository implements ActivationRepositoryInterface, DeactivationRepositoryInterface
+class TitleRepository
 {
     /**
      * Create a new title with the given data.
      *
      * @param  \App\DataTransferObjects\TitleData $titleData
+     *
      * @return \App\Models\Title
      */
     public function create(TitleData $titleData)
@@ -29,19 +27,23 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      *
      * @param  \App\Models\Title $title
      * @param  \App\DataTransferObjects\TitleData $titleData
+     *
      * @return \App\Models\Title $title
      */
     public function update(Title $title, TitleData $titleData)
     {
-        return $title->update([
+        $title->update([
             'name' => $titleData->name,
         ]);
+
+        return $title;
     }
 
     /**
      * Delete a given title.
      *
      * @param  \App\Models\Title $title
+     *
      * @return void
      */
     public function delete(Title $title)
@@ -53,6 +55,7 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      * Restore a given title.
      *
      * @param  \App\Models\Title $title
+     *
      * @return void
      */
     public function restore(Title $title)
@@ -63,13 +66,17 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
     /**
      * Activate a given title on a given date.
      *
-     * @param  \App\Models\Contracts\Activatable $title
-     * @param  string $activationDate
+     * @param  \App\Models\Title $title
+     * @param  \Carbon\Carbon $activationDate
+     *
      * @return \App\Models\Title $title
      */
-    public function activate(Activatable $title, string $activationDate)
+    public function activate(Title $title, Carbon $activationDate)
     {
-        $title->activations()->updateOrCreate(['ended_at' => null], ['started_at' => $activationDate]);
+        $title->activations()->updateOrCreate(
+            ['ended_at' => null],
+            ['started_at' => $activationDate->toDateTimeString()]
+        );
 
         return $title;
     }
@@ -77,13 +84,14 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
     /**
      * Deactivate a given title on a given date.
      *
-     * @param  \App\Models\Contracts\Deactivatable $title
-     * @param  string $deactivationDate
+     * @param  \App\Models\Title $title
+     * @param  \Carbon\Carbon $deactivationDate
+     *
      * @return \App\Models\Title $title
      */
-    public function deactivate(Deactivatable $title, string $deactivationDate)
+    public function deactivate(Title $title, Carbon $deactivationDate)
     {
-        $title = $title->currentActivation()->update(['ended_at' => $deactivationDate]);
+        $title->currentActivation()->update(['ended_at' => $deactivationDate->toDateTimeString()]);
 
         return $title;
     }
@@ -92,23 +100,29 @@ class TitleRepository implements ActivationRepositoryInterface, DeactivationRepo
      * Retire a given title on a given date.
      *
      * @param  \App\Models\Title $title
-     * @param  string $retirementDate
+     * @param  \Carbon\Carbon $retirementDate
+     *
      * @return \App\Models\Title $title
      */
-    public function retire(Title $title, string $retirementDate)
+    public function retire(Title $title, Carbon $retirementDate)
     {
-        return $title->retirements()->create(['started_at' => $retirementDate]);
+        $title->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+
+        return $title;
     }
 
     /**
      * Unretire a given title on a given date.
      *
      * @param  \App\Models\Title $title
-     * @param  string $unretireDate
+     * @param  \Carbon\Carbon $unretireDate
+     *
      * @return \App\Models\Title $title
      */
-    public function unretire(Title $title, string $unretireDate)
+    public function unretire(Title $title, Carbon $unretireDate)
     {
-        return $title->currentRetirement()->update(['ended_at' => $unretireDate]);
+        $title->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
+
+        return $title;
     }
 }

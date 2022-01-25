@@ -102,6 +102,7 @@ class RetireControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonretirableStableTypes
      */
     public function invoke_throws_exception_for_retiring_a_non_retirable_stable($factoryState)

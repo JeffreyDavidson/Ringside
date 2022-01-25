@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Titles;
 use App\Actions\Titles\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Titles\RetireRequest;
 use App\Models\Title;
 
 class RetireController extends Controller
@@ -14,15 +13,16 @@ class RetireController extends Controller
      * Retires a title.
      *
      * @param  \App\Models\Title $title
-     * @param  \App\Http\Requests\Titles\RetireRequest $request
-     * @param  \App\Actions\Titles\RetireAction  $action
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title, RetireRequest $request, RetireAction $action)
+    public function __invoke(Title $title)
     {
+        $this->authorize('retire', $title);
+
         throw_unless($title->canBeRetired(), new CannotBeRetiredException);
 
-        $action->handle($title);
+        RetireAction::run($title);
 
         return redirect()->route('titles.index');
     }

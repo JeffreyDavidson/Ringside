@@ -24,10 +24,21 @@ abstract class Presenter
         $this->model = $model;
     }
 
-    public function __get($property)
+    /**
+     * Undocumented function.
+     *
+     * @param  string $property
+     *
+     * @throws \Exception
+     *
+     * @return mixed
+     */
+    public function __get(string $property)
     {
-        if (method_exists($this, $property)) {
-            return call_user_func([$this, $property]);
+        $callable = [$this, $property];
+
+        if (is_callable($callable)) {
+            return call_user_func($callable);
         }
 
         $message = '%s does not respond to the "%s" property or method.';

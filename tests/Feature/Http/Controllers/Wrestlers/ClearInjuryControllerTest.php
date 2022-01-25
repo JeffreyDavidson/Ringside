@@ -90,6 +90,7 @@ class ClearInjuryControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonclearableWrestlerTypes
      */
     public function invoke_throws_an_exception_for_clearing_an_injury_from_a_non_clearable_wrestler($factoryState)

@@ -14,6 +14,7 @@ class TagTeamPolicy
      * Determine whether the user can create tag teams.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function create(User $user)
@@ -25,6 +26,7 @@ class TagTeamPolicy
      * Determine whether the user can update a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function update(User $user)
@@ -36,6 +38,7 @@ class TagTeamPolicy
      * Determine whether the user can delete a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function delete(User $user)
@@ -47,6 +50,7 @@ class TagTeamPolicy
      * Determine whether the user can restore a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function restore(User $user)
@@ -58,6 +62,7 @@ class TagTeamPolicy
      * Determine whether the user can suspend a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function suspend(User $user)
@@ -69,6 +74,7 @@ class TagTeamPolicy
      * Determine whether the user can reinstate a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function reinstate(User $user)
@@ -80,6 +86,7 @@ class TagTeamPolicy
      * Determine whether the user can employ a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function employ(User $user)
@@ -91,6 +98,7 @@ class TagTeamPolicy
      * Determine whether the user can release a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function release(User $user)
@@ -102,6 +110,7 @@ class TagTeamPolicy
      * Determine whether the user can retire a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function retire(User $user)
@@ -113,6 +122,7 @@ class TagTeamPolicy
      * Determine whether the user can unretire a tag team.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function unretire(User $user)
@@ -124,6 +134,7 @@ class TagTeamPolicy
      * Determine whether the user can view a list of tag teams.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function viewList(User $user)
@@ -136,11 +147,12 @@ class TagTeamPolicy
      *
      * @param  \App\Models\User  $user
      * @param  \App\Models\TagTeam  $tagTeam
+     *
      * @return bool
      */
     public function view(User $user, TagTeam $tagTeam)
     {
-        if (! is_null($tagTeam->user) && $tagTeam->user->is($user)) {
+        if ($tagTeam->user !== null && $tagTeam->user->is($user)) {
             return true;
         }
 

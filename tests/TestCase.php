@@ -23,8 +23,6 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         TestResponse::macro('data', fn ($key) => $this->original->getData()[$key]);
-
-        // Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
     }
 
     public function actAs($role, $attributes = [])
@@ -41,6 +39,7 @@ abstract class TestCase extends BaseTestCase
      *
      * @param  string  $trait
      * @param  mixed   $class
+     *
      * @return void
      */
     public function assertUsesTrait($trait, $class)

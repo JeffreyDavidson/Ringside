@@ -7,30 +7,33 @@ use App\Enums\TagTeamStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Exceptions\NotEnoughMembersException;
 use App\Models\Concerns\CanJoinStables;
+use App\Models\Concerns\HasManagers;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
+use App\Models\Contracts\Competitor;
+use App\Models\Contracts\Manageable;
 use App\Observers\TagTeamObserver;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Staudenmeir\EloquentHasManyDeep\HasTableAlias;
 
-class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
+class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Competitor, Manageable
 {
-    use HasFactory,
+    use CanJoinStables,
+        HasFactory,
+        HasManagers,
         HasMorphToOne,
         HasTableAlias,
         OwnedByUser,
-        SoftDeletes,
-        CanJoinStables;
+        SoftDeletes;
 
     /**
      * The number of the wrestlers allowed on a tag team.
-     *
-     * @var int
      */
-    const MAX_WRESTLERS_COUNT = 2;
+    public const MAX_WRESTLERS_COUNT = 2;
 
     /**
      * The attributes that are mass assignable.
@@ -64,7 +67,8 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\TagTeamQueryBuilder
      */
     public function newEloquentBuilder($query)
     {
@@ -79,20 +83,19 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
     public function wrestlers()
     {
         return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
-                    ->withPivot('joined_at', 'left_at');
+            ->withPivot('joined_at', 'left_at');
     }
 
     /**
-     * Get current tag team partners of the tag team.
+     * Get current wrestlers of the tag team.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function currentWrestlers()
     {
         return $this->wrestlers()
-                    ->wherePivot('joined_at', '<=', now())
-                    ->wherePivot('left_at', '=', null)
-                    ->limit(2);
+            ->wherePivot('joined_at', '<=', now())
+            ->wherePivotNull('left_at');
     }
 
     /**
@@ -103,17 +106,19 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
     public function previousWrestlers()
     {
         return $this->wrestlers()
-                    ->whereNotNull('left_at');
+            ->wherePivotNotNull('left_at');
     }
 
     /**
      * Get the combined weight of both tag team partners in a tag team.
      *
-     * @return int
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getCombinedWeightAttribute()
+    public function combinedWeight(): Attribute
     {
-        return $this->currentWrestlers->sum('weight');
+        return new Attribute(
+            get: fn () => $this->currentWrestlers->sum('weight')
+        );
     }
 
     /**
@@ -145,7 +150,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
      */
     public function canBeReleased()
     {
-        if ($this->isNotInEmployment()) {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
         }
 
@@ -163,11 +168,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
             return false;
         }
 
-        if ($this->currentWrestlers->count() != 2 || ! $this->currentWrestlers->each->canBeReinstated()) {
-            return false;
-        }
-
-        return true;
+        return $this->partnersAreBookable();
     }
 
     /**
@@ -201,13 +202,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
      */
     public function partnersAreBookable()
     {
-        foreach ($this->currentWrestlers as $wrestler) {
-            if (! $wrestler->isBookable()) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->currentWrestlers->every->isBookable();
     }
 
     /**
@@ -217,7 +212,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
      */
     public function canBeSuspended()
     {
-        if ($this->isNotInEmployment()) {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
         }
 
@@ -240,5 +235,15 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember
         }
 
         return true;
+    }
+
+    /**
+     * Undocumented function.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     */
+    public function eventMatches()
+    {
+        return $this->morphToMany(EventMatch::class, 'event_match_competitor');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\DataTransferObjects\VenueData;
 use App\Models\Venue;
 use App\Repositories\VenueRepository;
 use App\Services\VenueService;
@@ -18,7 +19,7 @@ class VenueServiceTest extends TestCase
      */
     public function it_can_create_a_venue()
     {
-        $data = [];
+        $data = $this->mock(VenueData::class);
         $venueMock = $this->mock(Venue::class);
         $repositoryMock = $this->mock(VenueRepository::class);
         $service = new VenueService($repositoryMock);
@@ -33,15 +34,15 @@ class VenueServiceTest extends TestCase
      */
     public function it_can_update_a_venue()
     {
-        $data = [
+        $data = $this->mock(VenueData::class);
+        $venue = Venue::factory()->make([
             'name' => 'Example Venue',
             'address1' => '123 Main Street',
-            'address2' => 'Suite 456',
+            'address2' => 'Suite 123',
             'city' => 'Laraville',
             'state' => 'California',
             'zip' => '12345',
-        ];
-        $venue = Venue::factory()->make(['name' => 'Example Venue', 'address1' => '123 Main Street', 'address2' => 'Suite 123', 'city' => 'Laraville', 'state' => 'California', 'zip' => '12345']);
+        ]);
         $repositoryMock = $this->mock(VenueRepository::class);
         $service = new VenueService($repositoryMock);
 

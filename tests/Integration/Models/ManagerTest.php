@@ -21,10 +21,15 @@ class ManagerTest extends TestCase
         SuspendableContractTests;
 
     private $futureEmployedManager;
+
     private $availableManager;
+
     private $injuredManager;
+
     private $suspendedManager;
+
     private $retiredManager;
+
     private $releasedManager;
 
     protected function setUp(): void

@@ -14,6 +14,7 @@ use function PHPUnit\Framework\assertTrue;
 class TestValidationResult
 {
     private Validator $validator;
+
     private ?ValidationException $failed;
 
     public function __construct(Validator $validator, ?ValidationException $failed = null)

@@ -93,6 +93,7 @@ class RefereeControllerStoreMethodTest extends TestCase
      */
     public function an_employment_is_created_for_the_referee_if_started_at_is_filled_in_request()
     {
+        $this->withoutExceptionHandling();
         $startedAt = now()->toDateTimeString();
 
         $this

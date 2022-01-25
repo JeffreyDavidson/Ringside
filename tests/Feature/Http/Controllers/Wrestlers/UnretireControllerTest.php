@@ -63,6 +63,7 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonunretirableWrestlerTypes
      */
     public function invoke_throws_exception_for_unretiring_a_non_unretirable_wrestler($factoryState)

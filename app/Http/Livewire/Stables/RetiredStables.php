@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Stables;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Stable;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class RetiredStables extends Component
+class RetiredStables extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $retiredStables = Stable::query()

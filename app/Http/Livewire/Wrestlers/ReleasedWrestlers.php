@@ -2,22 +2,22 @@
 
 namespace App\Http\Livewire\Wrestlers;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Wrestler;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class ReleasedWrestlers extends Component
+class ReleasedWrestlers extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $releasedWrestlers = Wrestler::query()
-                ->released()
-                ->withReleasedAtDate()
-                ->paginate($this->perPage);
+            ->released()
+            ->withReleasedAtDate()
+            ->paginate($this->perPage);
 
         return view('livewire.wrestlers.released-wrestlers', [
             'releasedWrestlers' => $releasedWrestlers,

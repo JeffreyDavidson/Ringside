@@ -40,36 +40,30 @@ class TagTeamPartnerFactory extends Factory
 
     public function bookable()
     {
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::bookable()];
-        })
-        ->has(Employment::factory()->started(Carbon::yesterday()))
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-            $wrestler->load('employments');
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::bookable()])
+            ->has(Employment::factory()->started(Carbon::yesterday()))
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+                $wrestler->load('employments');
+            });
     }
 
     public function withFutureEmployment()
     {
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::future_employment()];
-        })
-        ->has(Employment::factory()->started(Carbon::tomorrow()))
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-            $wrestler->load('employments');
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::future_employment()])
+            ->has(Employment::factory()->started(Carbon::tomorrow()))
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+                $wrestler->load('employments');
+            });
     }
 
     public function unemployed()
     {
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::unemployed()];
-        })
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::unemployed()])
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+            });
     }
 
     public function retired()
@@ -78,16 +72,14 @@ class TagTeamPartnerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::retired()];
-        })
-        ->has(Employment::factory()->started($start)->ended($end))
-        ->has(Retirement::factory()->started($end))
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-            $wrestler->load('employments');
-            $wrestler->load('retirements');
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::retired()])
+            ->has(Employment::factory()->started($start)->ended($end))
+            ->has(Retirement::factory()->started($end))
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+                $wrestler->load('employments');
+                $wrestler->load('retirements');
+            });
     }
 
     public function released()
@@ -96,14 +88,12 @@ class TagTeamPartnerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::released()];
-        })
-        ->has(Employment::factory()->started($start)->ended($end))
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-            $wrestler->load('employments');
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::released()])
+            ->has(Employment::factory()->started($start)->ended($end))
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+                $wrestler->load('employments');
+            });
     }
 
     public function suspended()
@@ -112,16 +102,14 @@ class TagTeamPartnerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::suspended()];
-        })
-        ->has(Employment::factory()->started($start))
-        ->has(Suspension::factory()->started($end))
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-            $wrestler->load('employments');
-            $wrestler->load('suspensions');
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::suspended()])
+            ->has(Employment::factory()->started($start))
+            ->has(Suspension::factory()->started($end))
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+                $wrestler->load('employments');
+                $wrestler->load('suspensions');
+            });
     }
 
     public function injured()
@@ -129,25 +117,21 @@ class TagTeamPartnerFactory extends Factory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state(function (array $attributes) {
-            return ['status' => WrestlerStatus::injured()];
-        })
-        ->has(Employment::factory()->started($start))
-        ->has(Injury::factory()->started($now))
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-            $wrestler->load('employments');
-            $wrestler->load('injuries');
-        });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::injured()])
+            ->has(Employment::factory()->started($start))
+            ->has(Injury::factory()->started($now))
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+                $wrestler->load('employments');
+                $wrestler->load('injuries');
+            });
     }
 
     public function softDeleted()
     {
-        return $this->state(function (array $attributes) {
-            return ['deleted_at' => now()];
-        })
-        ->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-        });
+        return $this->state(fn (array $attributes) => ['deleted_at' => now()])
+            ->afterCreating(function (Wrestler $wrestler) {
+                $wrestler->save();
+            });
     }
 }

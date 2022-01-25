@@ -2,9 +2,12 @@
 
 namespace Tests\Unit\Services;
 
+use App\DataTransferObjects\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 use App\Services\TitleService;
+use Carbon\Carbon;
+use Mockery;
 use Tests\TestCase;
 
 /**
@@ -18,12 +21,13 @@ class TitleServiceTest extends TestCase
      */
     public function it_can_create_a_title_without_an_activation()
     {
+        $data = $this->mock(TitleData::class);
         $repositoryMock = $this->mock(TitleRepository::class);
         $service = new TitleService($repositoryMock);
 
-        $repositoryMock->expects()->create(Mockery::type('array'))->once();
+        $repositoryMock->expects()->create($data)->once();
 
-        $service->create([]);
+        $service->create($data);
     }
 
     /**
@@ -31,15 +35,16 @@ class TitleServiceTest extends TestCase
      */
     public function it_can_create_a_title_with_an_activation()
     {
-        $data = [];
+        $data = $this->mock(TitleData::class);
+        $data->activation_date = Carbon::now();
         $titleMock = $this->mock(Title::class);
         $repositoryMock = $this->mock(TitleRepository::class);
         $service = new TitleService($repositoryMock);
 
-        $repositoryMock->expects()->create(Mockery::type('array'))->once()->andReturns($titleMock);
-        $repositoryMock->expects()->activate($titleMock, Mockery::type('string'))->once()->andReturns($titleMock);
+        $repositoryMock->expects()->create($data)->once()->andReturns($titleMock);
+        $repositoryMock->expects()->activate($titleMock, $data->activation_date)->once()->andReturns($titleMock);
 
-        $service->create(array_merge(['activated_at' => now()->toDateTimeString()], $data));
+        $service->create($data);
     }
 
     /**
@@ -47,7 +52,7 @@ class TitleServiceTest extends TestCase
      */
     public function it_can_update_a_title_without_an_activation_start_date()
     {
-        $data = [];
+        $data = $this->mock(TitleData::class);
         $titleMock = $this->mock(Title::class);
         $repositoryMock = $this->mock(TitleRepository::class);
         $service = new TitleService($repositoryMock);
@@ -63,7 +68,8 @@ class TitleServiceTest extends TestCase
      */
     public function it_can_update_a_title_and_activate_if_started_at_is_filled()
     {
-        $data = ['activated_at' => now()->toDateTimeString()];
+        $data = $this->mock(TitleData::class);
+        $data->activation_date = now();
         $titleMock = $this->mock(Title::class);
         $repositoryMock = $this->mock(TitleRepository::class);
         $service = new TitleService($repositoryMock);
@@ -71,7 +77,7 @@ class TitleServiceTest extends TestCase
         $repositoryMock->expects()->update($titleMock, $data)->once()->andReturns($titleMock);
         $titleMock->expects()->canHaveActivationStartDateChanged()->once()->andReturns(true);
         $titleMock->expects()->isUnactivated()->once()->andReturns(true);
-        $repositoryMock->expects()->activate($titleMock, $data['activated_at']);
+        $repositoryMock->expects()->activate($titleMock, $data->activation_date);
 
         $service->update($titleMock, $data);
     }

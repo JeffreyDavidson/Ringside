@@ -12,7 +12,7 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to include suspended models.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function suspended()
     {
@@ -22,15 +22,16 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to include current suspension date.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function withCurrentSuspendedAtDate()
     {
-        return $this->addSelect(['current_suspended_at' => Suspension::select('started_at')
-            ->whereColumn('suspendable_id', $this->qualifyColumn('id'))
-            ->where('suspendable_type', $this->getModel())
-            ->latest('started_at')
-            ->limit(1),
+        return $this->addSelect([
+            'current_suspended_at' => Suspension::select('started_at')
+                ->whereColumn('suspendable_id', $this->qualifyColumn('id'))
+                ->where('suspendable_type', $this->getModel())
+                ->latest('started_at')
+                ->limit(1),
         ])->withCasts(['current_suspended_at' => 'datetime']);
     }
 
@@ -38,7 +39,8 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's current suspension date.
      *
      * @param  string  $direction
-     * @return $this
+     *
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByCurrentSuspendedAtDate(string $direction = 'asc')
     {
@@ -48,7 +50,7 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to only include retired models.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function retired()
     {
@@ -58,15 +60,16 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to include current retirement date.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function withCurrentRetiredAtDate()
     {
-        return $this->addSelect(['current_retired_at' => Retirement::select('started_at')
-            ->whereColumn('retiree_id', $this->getModel()->getTable().'.id')
-            ->where('retiree_type', $this->getModel())
-            ->latest('started_at')
-            ->limit(1),
+        return $this->addSelect([
+            'current_retired_at' => Retirement::select('started_at')
+                ->whereColumn('retiree_id', $this->getModel()->getTable().'.id')
+                ->where('retiree_type', $this->getModel())
+                ->latest('started_at')
+                ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
     }
 
@@ -74,7 +77,8 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's current retirement date.
      *
      * @param  string  $direction
-     * @return $this
+     *
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByCurrentRetiredAtDate(string $direction = 'asc')
     {
@@ -84,27 +88,28 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to include released models.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function released()
     {
         return $this->whereHas('previousEmployment')
-                    ->whereDoesntHave('currentEmployment')
-                    ->whereDoesntHave('currentRetirement');
+            ->whereDoesntHave('currentEmployment')
+            ->whereDoesntHave('currentRetirement');
     }
 
     /**
      * Scope a query to include released date.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function withReleasedAtDate()
     {
-        return $this->addSelect(['released_at' => Employment::select('ended_at')
-            ->whereColumn('employable_id', $this->getModel()->getTable().'.id')
-            ->where('employable_type', $this->getModel())
-            ->latest('ended_at')
-            ->limit(1),
+        return $this->addSelect([
+            'released_at' => Employment::select('ended_at')
+                ->whereColumn('employable_id', $this->getModel()->getTable().'.id')
+                ->where('employable_type', $this->getModel())
+                ->latest('ended_at')
+                ->limit(1),
         ])->withCasts(['released_at' => 'datetime']);
     }
 
@@ -112,7 +117,8 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's current released date.
      *
      * @param  string  $direction
-     * @return $this
+     *
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByCurrentReleasedAtDate(string $direction = 'asc')
     {
@@ -122,7 +128,7 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to include employed models.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function employed()
     {
@@ -132,7 +138,7 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to only include future employed models.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function futureEmployed()
     {
@@ -142,26 +148,27 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to include unemployed models.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function unemployed()
     {
         return $this->whereDoesntHave('currentEmployment')
-                    ->orWhereDoesntHave('previousEmployments');
+            ->orWhereDoesntHave('previousEmployments');
     }
 
     /**
      * Scope a query to include first employment date.
      *
-     * @return $this
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function withFirstEmployedAtDate()
     {
-        return $this->addSelect(['first_employed_at' => Employment::select('started_at')
-            ->whereColumn('employable_id', $this->qualifyColumn('id'))
-            ->where('employable_type', $this->getModel())
-            ->oldest('started_at')
-            ->limit(1),
+        return $this->addSelect([
+            'first_employed_at' => Employment::select('started_at')
+                ->whereColumn('employable_id', $this->qualifyColumn('id'))
+                ->where('employable_type', $this->getModel())
+                ->oldest('started_at')
+                ->limit(1),
         ])->withCasts(['first_employed_at' => 'datetime']);
     }
 
@@ -169,7 +176,8 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's first employment date.
      *
      * @param  string $direction
-     * @return $this
+     *
+     * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByFirstEmployedAtDate(string $direction = 'asc')
     {

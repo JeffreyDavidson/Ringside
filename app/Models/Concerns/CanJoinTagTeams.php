@@ -13,18 +13,20 @@ trait CanJoinTagTeams
      */
     public function tagTeams()
     {
-        return $this->belongsToMany(TagTeam::class, 'tag_team_wrestler')->withPivot(['joined_at', 'left_at']);
+        return $this->belongsToMany(TagTeam::class, 'tag_team_wrestler')
+            ->withPivot(['joined_at', 'left_at']);
     }
 
     /**
      * Get the current tag team the member belongs to.
      *
-     * @return \Staudenmeir\EloquentHasManyDeep\HasRelationships\HasOneDeep
+     * @return \App\Models\TagTeam|null
      */
     public function currentTagTeam()
     {
-        return $this->hasOneDeep(TagTeam::class, ['tag_team_wrestler'])
-                ->whereNull('tag_team_wrestler.left_at');
+        return $this->tagTeams()
+            ->wherePivotNull('left_at')
+            ->first();
     }
 
     /**
@@ -34,6 +36,8 @@ trait CanJoinTagTeams
      */
     public function previousTagTeams()
     {
-        return $this->tagTeams()->whereNotNull('ended_at');
+        return $this->tagTeams()
+            ->withPivot(['joined_at', 'left_at'])
+            ->wherePivotNotNull('left_at');
     }
 }

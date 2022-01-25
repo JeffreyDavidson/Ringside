@@ -60,6 +60,7 @@ class DeactivateControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nondeactivatableTitleTypes
      */
     public function invoke_throws_exception_for_deactivating_a_non_deactivatable_title($factoryState)

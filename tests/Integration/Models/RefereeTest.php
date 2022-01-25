@@ -21,10 +21,15 @@ class RefereeTest extends TestCase
         SuspendableContractTests;
 
     private $futureEmployedReferee;
+
     private $bookableReferee;
+
     private $injuredReferee;
+
     private $suspendedReferee;
+
     private $retiredReferee;
+
     private $releasedReferee;
 
     protected function setUp(): void

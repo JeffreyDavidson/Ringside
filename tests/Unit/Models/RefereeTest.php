@@ -35,14 +35,6 @@ class RefereeTest extends TestCase
     /**
      * @test
      */
-    public function a_referee_uses_has_a_unguarded_trait()
-    {
-        $this->assertUsesTrait('App\Models\Concerns\Unguarded', Referee::class);
-    }
-
-    /**
-     * @test
-     */
     public function a_referee_uses_soft_deleted_trait()
     {
         $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Referee::class);

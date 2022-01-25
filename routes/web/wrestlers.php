@@ -21,7 +21,5 @@ Route::patch('wrestlers/{wrestler}/unretire', UnretireController::class)->name('
 Route::patch('wrestlers/{wrestler}/suspend', SuspendController::class)->name('wrestlers.suspend');
 Route::patch('wrestlers/{wrestler}/reinstate', ReinstateController::class)->name('wrestlers.reinstate');
 Route::patch('wrestlers/{wrestler}/injure', InjureController::class)->name('wrestlers.injure');
-Route::patch(
-    'wrestlers/{wrestler}/clear-from-injury',
-    ClearInjuryController::class
-)->name('wrestlers.clear-from-injury');
+Route::patch('wrestlers/{wrestler}/clear-from-injury', ClearInjuryController::class)
+    ->name('wrestlers.clear-from-injury');

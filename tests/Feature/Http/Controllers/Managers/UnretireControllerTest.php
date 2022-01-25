@@ -130,6 +130,7 @@ class UnretireControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonunretirableManagerTypes
      */
     public function invoke_throws_exception_for_unretiring_a_non_unretirable_manager($factoryState)

@@ -2,8 +2,11 @@
 
 namespace App\Repositories;
 
+use App\DataTransferObjects\TagTeamData;
 use App\Models\TagTeam;
-use Illuminate\Support\Collection;
+use App\Models\Wrestler;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class TagTeamRepository
 {
@@ -11,6 +14,7 @@ class TagTeamRepository
      * Create a new tag team with the given data.
      *
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
+     *
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -26,20 +30,24 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
     {
-        return $tagTeam->update([
+        $tagTeam->update([
             'name' => $tagTeamData->name,
             'signature_move' => $tagTeamData->signature_move,
         ]);
+
+        return $tagTeam;
     }
 
     /**
      * Delete a given tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
+     *
      * @return void
      */
     public function delete(TagTeam $tagTeam)
@@ -51,6 +59,7 @@ class TagTeamRepository
      * Restore a given tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
+     *
      * @return void
      */
     public function restore(TagTeam $tagTeam)
@@ -62,131 +71,198 @@ class TagTeamRepository
      * Employ a given tag team on a given date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $employmentDate
+     * @param  \Carbon\Carbon $employmentDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function employ(TagTeam $tagTeam, string $employmentDate)
+    public function employ(TagTeam $tagTeam, Carbon $employmentDate)
     {
-        return $tagTeam->employments()->updateOrCreate(['ended_at' => null], ['started_at' => $employmentDate]);
+        $tagTeam->employments()->updateOrCreate(
+            ['ended_at' => null],
+            ['started_at' => $employmentDate->toDateTimeString()]
+        );
+
+        return $tagTeam;
     }
 
     /**
      * Release a given tag team on a given date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $releaseDate
+     * @param  \Carbon\Carbon $releaseDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function release(TagTeam $tagTeam, string $releaseDate)
+    public function release(TagTeam $tagTeam, Carbon $releaseDate)
     {
-        return $tagTeam->currentEmployment()->update(['ended_at' => $releaseDate]);
+        $tagTeam->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
+
+        return $tagTeam;
     }
 
     /**
      * Retire a given tag team on a given date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $retirementDate
+     * @param  \Carbon\Carbon $retirementDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function retire(TagTeam $tagTeam, string $retirementDate)
+    public function retire(TagTeam $tagTeam, Carbon $retirementDate)
     {
-        return $tagTeam->retirements()->create(['started_at' => $retirementDate]);
+        $tagTeam->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+
+        return $tagTeam;
     }
 
     /**
      * Unretire a given tag team on a given date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $unretireDate
+     * @param  \Carbon\Carbon $unretireDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function unretire(TagTeam $tagTeam, string $unretireDate)
+    public function unretire(TagTeam $tagTeam, Carbon $unretireDate)
     {
-        return $tagTeam->currentRetirement()->update(['ended_at' => $unretireDate]);
+        $tagTeam->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
+
+        return $tagTeam;
     }
 
     /**
      * Suspend a given tag team on a given date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $suspensionDate
-     * @return App\Models\TagTeam $tagTeam
+     * @param  \Carbon\Carbon $suspensionDate
+     *
+     * @return \App\Models\TagTeam $tagTeam
      */
-    public function suspend(TagTeam $tagTeam, string $suspensionDate)
+    public function suspend(TagTeam $tagTeam, Carbon $suspensionDate)
     {
-        return $tagTeam->suspensions()->create(['started_at' => $suspensionDate]);
+        $tagTeam->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
+
+        return $tagTeam;
     }
 
     /**
      * Reinstate a given tag team on a given date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $reinstateDate
+     * @param  \Carbon\Carbon $reinstateDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function reinstate(TagTeam $tagTeam, string $reinstateDate)
+    public function reinstate(TagTeam $tagTeam, Carbon $reinstateDate)
     {
-        return $tagTeam->currentSuspension()->update(['ended_at' => $reinstateDate]);
+        $tagTeam->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
+
+        return $tagTeam;
     }
 
     /**
      * Get the model's first employment date.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  string $employmentDate
+     * @param  \Carbon\Carbon $employmentDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function updateEmployment(TagTeam $tagTeam, string $employmentDate)
+    public function updateEmployment(TagTeam $tagTeam, Carbon $employmentDate)
     {
-        return $tagTeam->futureEmployment()->update(['started_at' => $employmentDate]);
+        $tagTeam->futureEmployment()->update(['started_at' => $employmentDate->toDateTimeString()]);
+
+        return $tagTeam;
     }
 
     /**
      * Add wrestlers to a tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  array $wrestlerIds
-     * @param  string|null $joinDate
+     * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
+     * @param  \Carbon\Carbon|null $joinDate
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
-    public function addWrestlers(TagTeam $tagTeam, array $wrestlerIds, string $joinDate = null)
+    public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate = null)
     {
-        $joinDate ??= now()->toDateString();
+        $joinDate ??= now();
 
-        foreach ($wrestlerIds as $wrestlerId) {
-            $tagTeam->wrestlers()->attach($wrestlerId, ['joined_at' => $joinDate]);
-        }
+        $wrestlers->each(
+            fn (Wrestler $wrestler) => $this->addTagTeamPartner($tagTeam, $wrestler->id, $joinDate)
+        );
+
+        return $tagTeam;
     }
 
     /**
      * Add wrestlers to a tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  array $formerTagTeamPartners
-     * @param  array $newTagTeamPartners
-     * @param  string|null $date
+     * @param  \Illuminate\Database\Eloquent\Collection $formerTagTeamPartners
+     * @param  \Illuminate\Database\Eloquent\Collection $newTagTeamPartners
+     * @param  \Carbon\Carbon|null $date
+     *
      * @return \App\Models\TagTeam $tagTeam
      */
     public function syncTagTeamPartners(
         TagTeam $tagTeam,
         Collection $formerTagTeamPartners,
         Collection $newTagTeamPartners,
-        string $date = null
+        Carbon $date = null
     ) {
-        $date ??= now()->toDateTimeString();
+        $date ??= now();
 
-        foreach ($formerTagTeamPartners as $tagTeamPartner) {
-            $tagTeam->currentWrestlers()->updateExistingPivot($tagTeamPartner, ['left_at' => $date]);
-        }
+        $formerTagTeamPartners->each(
+            fn (Wrestler $formerTagTeamPartner) => $this->removeTagTeamPartner(
+                $tagTeam,
+                $formerTagTeamPartner->id,
+                $date
+            )
+        );
 
-        foreach ($newTagTeamPartners as $newTagTeamPartner) {
-            $tagTeam->currentWrestlers()->attach(
-                $newTagTeamPartner,
-                ['joined_at' => $date]
-            );
-        }
+        $newTagTeamPartners->each(
+            fn (Wrestler $newTagTeamPartner) => $this->addTagTeamPartner(
+                $tagTeam,
+                $newTagTeamPartner->id,
+                $date
+            )
+        );
 
         return $tagTeam;
+    }
+
+    /**
+     * Remove wrestler from a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @param  int $tagTeamPartnerId
+     * @param  \Carbon\Carbon $date
+     *
+     * @return void
+     */
+    public function removeTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)
+    {
+        $tagTeam->currentWrestlers()->updateExistingPivot(
+            $tagTeamPartnerId,
+            ['left_at' => $date->toDateTimeString()]
+        );
+    }
+
+    /**
+     * Add wrestler to a tag team.
+     *
+     * @param  \App\Models\TagTeam $tagTeam
+     * @param  int $tagTeamPartnerId
+     * @param  \Carbon\Carbon $date
+     *
+     * @return void
+     */
+    public function addTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)
+    {
+        $tagTeam->currentWrestlers()->attach(
+            $tagTeamPartnerId,
+            ['joined_at' => $date->toDateTimeString()]
+        );
     }
 }

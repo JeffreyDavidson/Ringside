@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Actions\Referees\EmployAction;
 use App\DataTransferObjects\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
@@ -29,14 +30,16 @@ class RefereeService
      * Create a referee with given data.
      *
      * @param  \App\DataTransferObjects\RefereeData $refereeData
+     *
      * @return \App\Models\Referee $referee
      */
     public function create(RefereeData $refereeData)
     {
+        /* @var \App\Models\Referee $referee */
         $referee = $this->refereeRepository->create($refereeData);
 
-        if (isset($data['started_at'])) {
-            $this->refereeRepository->employ($referee, $refereeData->start_date);
+        if (isset($refereeData->start_date)) {
+            EmployAction::run($referee, $refereeData->start_date);
         }
 
         return $referee;
@@ -47,41 +50,29 @@ class RefereeService
      *
      * @param  \App\Models\Referee $referee
      * @param  \App\DataTransferObjects\RefereeData $refereeData
+     *
      * @return \App\Models\Referee $referee
      */
     public function update(Referee $referee, RefereeData $refereeData)
     {
         $this->refereeRepository->update($referee, $refereeData);
 
-        if ($referee->canHaveEmploymentStartDateChanged() && isset($refereeData->start_date)) {
-            $this->employOrUpdateEmployment($referee, $refereeData->start_date);
+        if (isset($refereeData->start_date)) {
+            if ($referee->canBeEmployed()
+                || $referee->canHaveEmploymentStartDateChanged($refereeData->start_date)
+            ) {
+                EmployAction::run($referee, $refereeData->start_date);
+            }
         }
 
         return $referee;
     }
 
     /**
-     * Employ a given referee or update the given referee's employment date.
-     *
-     * @param  \App\Models\Referee $referee
-     * @param  string $employmentDate
-     * @return void
-     */
-    public function employOrUpdateEmployment(Referee $referee, string $employmentDate)
-    {
-        if ($referee->isNotInEmployment()) {
-            return $this->refereeRepository->employ($referee, $employmentDate);
-        }
-
-        if ($referee->hasFutureEmployment() && ! $referee->employedOn($employmentDate)) {
-            return $this->refereeRepository->updateEmployment($referee, $employmentDate);
-        }
-    }
-
-    /**
      * Delete a given referee.
      *
      * @param  \App\Models\Referee $referee
+     *
      * @return void
      */
     public function delete(Referee $referee)
@@ -93,6 +84,7 @@ class RefereeService
      * Restore a given referee.
      *
      * @param  \App\Models\Referee $referee
+     *
      * @return void
      */
     public function restore(Referee $referee)

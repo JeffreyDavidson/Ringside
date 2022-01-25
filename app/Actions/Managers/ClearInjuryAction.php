@@ -13,13 +13,12 @@ class ClearInjuryAction extends BaseManagerAction
      * Clear an injury of a manager.
      *
      * @param  \App\Models\Manager  $manager
+     *
      * @return void
      */
     public function handle(Manager $manager): void
     {
-        $recoveryDate = now()->toDateTimeString();
-
-        $this->managerRepository->clearInjury($manager, $recoveryDate);
+        $this->managerRepository->clearInjury($manager, now());
         $manager->save();
     }
 }

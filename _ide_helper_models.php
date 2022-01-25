@@ -1,6 +1,6 @@
 <?php
 
-// @formatter:off
+// @formatter:on
 /**
  * A helper file for your Eloquent Models
  * Copy the phpDocs from this file to the correct Model,
@@ -11,7 +11,7 @@
 
 namespace App\Models{
     /**
-     * App\Models\Activation.
+     * App\Models\Activation
      *
      * @property int $id
      * @property string $activatable_type
@@ -25,13 +25,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|Activation newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Activation newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Activation query()
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereActivatableId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereActivatableType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereEndedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereStartedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Activation whereUpdatedAt($value)
      */
     class Activation extends \Eloquent
     {
@@ -40,20 +33,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Competitor.
-     *
-     * @method static \Illuminate\Database\Eloquent\Builder|Competitor newModelQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder|Competitor newQuery()
-     * @method static \Illuminate\Database\Eloquent\Builder|Competitor query()
-     */
-    class Competitor extends \Eloquent
-    {
-    }
-}
-
-namespace App\Models{
-    /**
-     * App\Models\Employment.
+     * App\Models\Employment
      *
      * @property int $id
      * @property string $employable_type
@@ -67,13 +47,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|Employment newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Employment newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Employment query()
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereEmployableId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereEmployableType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereEndedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereStartedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Employment whereUpdatedAt($value)
      */
     class Employment extends \Eloquent
     {
@@ -82,7 +55,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Event.
+     * App\Models\Event
      *
      * @property int $id
      * @property string $name
@@ -94,7 +67,6 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $deleted_at
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\EventMatch[] $matches
-     * @property-read int|null $matches_count
      * @property-read \App\Models\Venue|null $venue
      * @method static \Database\Factories\EventFactory factory(...$parameters)
      * @method static \App\Builders\EventQueryBuilder|Event newModelQuery()
@@ -104,15 +76,6 @@ namespace App\Models{
      * @method static \App\Builders\EventQueryBuilder|Event query()
      * @method static \App\Builders\EventQueryBuilder|Event scheduled()
      * @method static \App\Builders\EventQueryBuilder|Event unscheduled()
-     * @method static \App\Builders\EventQueryBuilder|Event whereCreatedAt($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereDate($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereDeletedAt($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereId($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereName($value)
-     * @method static \App\Builders\EventQueryBuilder|Event wherePreview($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereStatus($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereUpdatedAt($value)
-     * @method static \App\Builders\EventQueryBuilder|Event whereVenueId($value)
      * @method static \Illuminate\Database\Query\Builder|Event withTrashed()
      * @method static \Illuminate\Database\Query\Builder|Event withoutTrashed()
      */
@@ -123,7 +86,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\EventMatch.
+     * App\Models\EventMatch
      *
      * @property int $id
      * @property int $event_id
@@ -131,21 +94,15 @@ namespace App\Models{
      * @property string|null $preview
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
-     * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $competitors
+     * @property-read \App\Collections\EventMatchCompetitorsCollection|\App\Models\EventMatchCompetitor[] $competitors
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Referee[] $referees
-     * @property-read int|null $referees_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $tagTeams
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Title[] $titles
-     * @property-read int|null $titles_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $wrestlers
      * @method static \Database\Factories\EventMatchFactory factory(...$parameters)
      * @method static \Illuminate\Database\Eloquent\Builder|EventMatch newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|EventMatch newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|EventMatch query()
-     * @method static \Illuminate\Database\Eloquent\Builder|EventMatch whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|EventMatch whereEventId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|EventMatch whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|EventMatch whereMatchTypeId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|EventMatch wherePreview($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|EventMatch whereUpdatedAt($value)
      */
     class EventMatch extends \Eloquent
     {
@@ -154,7 +111,29 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Injury.
+     * App\Models\EventMatchCompetitor
+     *
+     * @property int $id
+     * @property int $event_match_id
+     * @property string $competitor_type
+     * @property int $competitor_id
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $competitor
+     * @method static \App\Collections\EventMatchCompetitorsCollection|static[] all($columns = ['*'])
+     * @method static \App\Collections\EventMatchCompetitorsCollection|static[] get($columns = ['*'])
+     * @method static \Illuminate\Database\Eloquent\Builder|EventMatchCompetitor newModelQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|EventMatchCompetitor newQuery()
+     * @method static \Illuminate\Database\Eloquent\Builder|EventMatchCompetitor query()
+     */
+    class EventMatchCompetitor extends \Eloquent
+    {
+    }
+}
+
+namespace App\Models{
+    /**
+     * App\Models\Injury
      *
      * @property int $id
      * @property string $injurable_type
@@ -168,13 +147,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|Injury newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Injury newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Injury query()
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereEndedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereInjurableId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereInjurableType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereStartedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Injury whereUpdatedAt($value)
      */
     class Injury extends \Eloquent
     {
@@ -183,7 +155,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Manager.
+     * App\Models\Manager
      *
      * @property int $id
      * @property int|null $user_id
@@ -196,48 +168,33 @@ namespace App\Models{
      * @property-read \App\Models\Employment|null $currentEmployment
      * @property-read \App\Models\Injury|null $currentInjury
      * @property-read \App\Models\Retirement|null $currentRetirement
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $currentStable
      * @property-read \App\Models\Suspension|null $currentSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $currentTagTeams
-     * @property-read int|null $current_tag_teams_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $currentWrestlers
-     * @property-read int|null $current_wrestlers_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $employments
-     * @property-read int|null $employments_count
      * @property-read \App\Models\Employment|null $firstEmployment
      * @property-read \App\Models\Employment|null $futureEmployment
      * @property-read string $full_name
      * @property-read string|null $started_at
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Injury[] $injuries
-     * @property-read int|null $injuries_count
      * @property-read \App\Models\Employment|null $previousEmployment
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $previousEmployments
-     * @property-read int|null $previous_employments_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Injury[] $previousInjuries
-     * @property-read int|null $previous_injuries_count
      * @property-read \App\Models\Injury|null $previousInjury
      * @property-read \App\Models\Retirement|null $previousRetirement
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $previousRetirements
-     * @property-read int|null $previous_retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $previousStables
-     * @property-read int|null $previous_stables_count
      * @property-read \App\Models\Suspension|null $previousSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $previousSuspensions
-     * @property-read int|null $previous_suspensions_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $previousTagTeams
-     * @property-read int|null $previous_tag_teams_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $previousWrestlers
-     * @property-read int|null $previous_wrestlers_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $retirements
-     * @property-read int|null $retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $stables
-     * @property-read int|null $stables_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $suspensions
-     * @property-read int|null $suspensions_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $tagTeams
-     * @property-read int|null $tag_teams_count
      * @property-read \App\Models\User|null $user
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $wrestlers
-     * @property-read int|null $wrestlers_count
      * @method static \App\Builders\ManagerQueryBuilder|Manager available()
      * @method static \App\Builders\ManagerQueryBuilder|Manager bookable()
      * @method static \App\Builders\ManagerQueryBuilder|Manager employed()
@@ -257,14 +214,6 @@ namespace App\Models{
      * @method static \App\Builders\ManagerQueryBuilder|Manager retired()
      * @method static \App\Builders\ManagerQueryBuilder|Manager suspended()
      * @method static \App\Builders\ManagerQueryBuilder|Manager unemployed()
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereCreatedAt($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereDeletedAt($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereFirstName($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereId($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereLastName($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereStatus($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereUpdatedAt($value)
-     * @method static \App\Builders\ManagerQueryBuilder|Manager whereUserId($value)
      * @method static \App\Builders\ManagerQueryBuilder|Manager withCurrentInjuredAtDate()
      * @method static \App\Builders\ManagerQueryBuilder|Manager withCurrentRetiredAtDate()
      * @method static \App\Builders\ManagerQueryBuilder|Manager withCurrentSuspendedAtDate()
@@ -280,7 +229,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\MatchDecision.
+     * App\Models\MatchDecision
      *
      * @property int $id
      * @property string $name
@@ -290,11 +239,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision query()
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision whereName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision whereSlug($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchDecision whereUpdatedAt($value)
      */
     class MatchDecision extends \Eloquent
     {
@@ -303,7 +247,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\MatchType.
+     * App\Models\MatchType
      *
      * @property int $id
      * @property string $name
@@ -315,12 +259,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|MatchType newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MatchType newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|MatchType query()
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchType whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchType whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchType whereName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchType whereNumberOfSides($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchType whereSlug($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|MatchType whereUpdatedAt($value)
      */
     class MatchType extends \Eloquent
     {
@@ -329,7 +267,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Referee.
+     * App\Models\Referee
      *
      * @property int $id
      * @property string $first_name
@@ -343,29 +281,21 @@ namespace App\Models{
      * @property-read \App\Models\Retirement|null $currentRetirement
      * @property-read \App\Models\Suspension|null $currentSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $employments
-     * @property-read int|null $employments_count
      * @property-read \App\Models\Employment|null $firstEmployment
      * @property-read \App\Models\Employment|null $futureEmployment
      * @property-read string $full_name
      * @property-read string|null $started_at
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Injury[] $injuries
-     * @property-read int|null $injuries_count
      * @property-read \App\Models\Employment|null $previousEmployment
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $previousEmployments
-     * @property-read int|null $previous_employments_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Injury[] $previousInjuries
-     * @property-read int|null $previous_injuries_count
      * @property-read \App\Models\Injury|null $previousInjury
      * @property-read \App\Models\Retirement|null $previousRetirement
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $previousRetirements
-     * @property-read int|null $previous_retirements_count
      * @property-read \App\Models\Suspension|null $previousSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $previousSuspensions
-     * @property-read int|null $previous_suspensions_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $retirements
-     * @property-read int|null $retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $suspensions
-     * @property-read int|null $suspensions_count
      * @method static \App\Builders\RefereeQueryBuilder|Referee bookable()
      * @method static \App\Builders\RefereeQueryBuilder|Referee employed()
      * @method static \Database\Factories\RefereeFactory factory(...$parameters)
@@ -384,13 +314,6 @@ namespace App\Models{
      * @method static \App\Builders\RefereeQueryBuilder|Referee retired()
      * @method static \App\Builders\RefereeQueryBuilder|Referee suspended()
      * @method static \App\Builders\RefereeQueryBuilder|Referee unemployed()
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereCreatedAt($value)
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereDeletedAt($value)
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereFirstName($value)
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereId($value)
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereLastName($value)
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereStatus($value)
-     * @method static \App\Builders\RefereeQueryBuilder|Referee whereUpdatedAt($value)
      * @method static \App\Builders\RefereeQueryBuilder|Referee withCurrentInjuredAtDate()
      * @method static \App\Builders\RefereeQueryBuilder|Referee withCurrentRetiredAtDate()
      * @method static \App\Builders\RefereeQueryBuilder|Referee withCurrentSuspendedAtDate()
@@ -406,7 +329,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Retirement.
+     * App\Models\Retirement
      *
      * @property int $id
      * @property string $retiree_type
@@ -420,13 +343,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|Retirement newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Retirement newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Retirement query()
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereEndedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereRetireeId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereRetireeType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereStartedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Retirement whereUpdatedAt($value)
      */
     class Retirement extends \Eloquent
     {
@@ -435,7 +351,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Stable.
+     * App\Models\Stable
      *
      * @property int $id
      * @property int|null $user_id
@@ -445,26 +361,23 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $deleted_at
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Activation[] $activations
-     * @property-read int|null $activations_count
      * @property-read \App\Models\Activation|null $currentActivation
      * @property-read \App\Models\Retirement|null $currentRetirement
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $currentTagTeams
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $currentWrestlers
      * @property-read \App\Models\Activation|null $firstActivation
      * @property-read \App\Models\Activation|null $futureActivation
-     * @property-read string|null $activated_at
      * @property-read \Illuminate\Support\Collection $members
      * @property-read \App\Models\Activation|null $previousActivation
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Activation[] $previousActivations
-     * @property-read int|null $previous_activations_count
      * @property-read \App\Models\Retirement|null $previousRetirement
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $previousRetirements
-     * @property-read int|null $previous_retirements_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $previousTagTeams
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $previousWrestlers
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $retirements
-     * @property-read int|null $retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $tagTeams
-     * @property-read int|null $tag_teams_count
      * @property-read \App\Models\User|null $user
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $wrestlers
-     * @property-read int|null $wrestlers_count
      * @method static \App\Builders\StableQueryBuilder|Stable active()
      * @method static \App\Builders\StableQueryBuilder|Stable deactivated()
      * @method static \Database\Factories\StableFactory factory(...$parameters)
@@ -478,13 +391,6 @@ namespace App\Models{
      * @method static \App\Builders\StableQueryBuilder|Stable query()
      * @method static \App\Builders\StableQueryBuilder|Stable retired()
      * @method static \App\Builders\StableQueryBuilder|Stable unactivated()
-     * @method static \App\Builders\StableQueryBuilder|Stable whereCreatedAt($value)
-     * @method static \App\Builders\StableQueryBuilder|Stable whereDeletedAt($value)
-     * @method static \App\Builders\StableQueryBuilder|Stable whereId($value)
-     * @method static \App\Builders\StableQueryBuilder|Stable whereName($value)
-     * @method static \App\Builders\StableQueryBuilder|Stable whereStatus($value)
-     * @method static \App\Builders\StableQueryBuilder|Stable whereUpdatedAt($value)
-     * @method static \App\Builders\StableQueryBuilder|Stable whereUserId($value)
      * @method static \App\Builders\StableQueryBuilder|Stable withCurrentRetiredAtDate()
      * @method static \App\Builders\StableQueryBuilder|Stable withFirstActivatedAtDate()
      * @method static \App\Builders\StableQueryBuilder|Stable withFutureActivation()
@@ -499,8 +405,10 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\StableMember.
+     * App\Models\StableMember
      *
+     * @property string $joined_at
+     * @property string|null $left_at
      * @method static \Illuminate\Database\Eloquent\Builder|StableMember newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|StableMember newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|StableMember query()
@@ -512,7 +420,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Suspension.
+     * App\Models\Suspension
      *
      * @property int $id
      * @property string $suspendable_type
@@ -526,13 +434,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|Suspension newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Suspension newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|Suspension query()
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereEndedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereStartedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereSuspendableId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereSuspendableType($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Suspension whereUpdatedAt($value)
      */
     class Suspension extends \Eloquent
     {
@@ -541,7 +442,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\TagTeam.
+     * App\Models\TagTeam
      *
      * @property int $id
      * @property int|null $user_id
@@ -552,38 +453,31 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $deleted_at
      * @property-read \App\Models\Employment|null $currentEmployment
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Manager[] $currentManagers
      * @property-read \App\Models\Retirement|null $currentRetirement
+     * @property-read \App\Models\Stable|null $currentStable
      * @property-read \App\Models\Suspension|null $currentSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $currentWrestlers
-     * @property-read int|null $current_wrestlers_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $employments
-     * @property-read int|null $employments_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\EventMatch[] $eventMatches
      * @property-read \App\Models\Employment|null $firstEmployment
      * @property-read \App\Models\Employment|null $futureEmployment
-     * @property-read int $combined_weight
      * @property-read string|null $started_at
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Manager[] $managers
      * @property-read \App\Models\Employment|null $previousEmployment
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $previousEmployments
-     * @property-read int|null $previous_employments_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Manager[] $previousManagers
      * @property-read \App\Models\Retirement|null $previousRetirement
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $previousRetirements
-     * @property-read int|null $previous_retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $previousStables
-     * @property-read int|null $previous_stables_count
      * @property-read \App\Models\Suspension|null $previousSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $previousSuspensions
-     * @property-read int|null $previous_suspensions_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $previousWrestlers
-     * @property-read int|null $previous_wrestlers_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $retirements
-     * @property-read int|null $retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $stables
-     * @property-read int|null $stables_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $suspensions
-     * @property-read int|null $suspensions_count
      * @property-read \App\Models\User|null $user
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Wrestler[] $wrestlers
-     * @property-read int|null $wrestlers_count
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam bookable()
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam employed()
      * @method static \Database\Factories\TagTeamFactory factory(...$parameters)
@@ -600,14 +494,6 @@ namespace App\Models{
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam retired()
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam suspended()
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam unemployed()
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereCreatedAt($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereDeletedAt($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereId($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereName($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereSignatureMove($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereStatus($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereUpdatedAt($value)
-     * @method static \App\Builders\TagTeamQueryBuilder|TagTeam whereUserId($value)
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam withCurrentRetiredAtDate()
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam withCurrentSuspendedAtDate()
      * @method static \App\Builders\TagTeamQueryBuilder|TagTeam withFirstEmployedAtDate()
@@ -615,14 +501,14 @@ namespace App\Models{
      * @method static \Illuminate\Database\Query\Builder|TagTeam withTrashed()
      * @method static \Illuminate\Database\Query\Builder|TagTeam withoutTrashed()
      */
-    class TagTeam extends \Eloquent implements \App\Models\Contracts\Bookable, \App\Models\Contracts\CanBeAStableMember
+    class TagTeam extends \Eloquent implements \App\Models\Contracts\Bookable, \App\Models\Contracts\CanBeAStableMember, \App\Models\Contracts\Competitor, \App\Models\Contracts\Manageable
     {
     }
 }
 
 namespace App\Models{
     /**
-     * App\Models\Title.
+     * App\Models\Title
      *
      * @property int $id
      * @property string $name
@@ -631,25 +517,19 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $deleted_at
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Activation[] $activations
-     * @property-read int|null $activations_count
      * @property-read \App\Models\Activation|null $currentActivation
      * @property-read \App\Models\Retirement|null $currentRetirement
      * @property-read \App\Models\Activation|null $firstActivation
      * @property-read \App\Models\Activation|null $futureActivation
-     * @property-read string|null $activated_at
      * @property-read \App\Models\Activation|null $previousActivation
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Activation[] $previousActivations
-     * @property-read int|null $previous_activations_count
      * @property-read \App\Models\Retirement|null $previousRetirement
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $previousRetirements
-     * @property-read int|null $previous_retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $retirements
-     * @property-read int|null $retirements_count
      * @method static \App\Builders\TitleQueryBuilder|Title active()
      * @method static \App\Builders\TitleQueryBuilder|Title competable()
      * @method static \App\Builders\TitleQueryBuilder|Title deactivated()
      * @method static \Database\Factories\TitleFactory factory(...$parameters)
-     * @method static \App\Builders\TitleQueryBuilder|Title inactive()
      * @method static \App\Builders\TitleQueryBuilder|Title newModelQuery()
      * @method static \App\Builders\TitleQueryBuilder|Title newQuery()
      * @method static \Illuminate\Database\Query\Builder|Title onlyTrashed()
@@ -658,13 +538,8 @@ namespace App\Models{
      * @method static \App\Builders\TitleQueryBuilder|Title orderByLastDeactivationDate(string $direction = 'asc')
      * @method static \App\Builders\TitleQueryBuilder|Title query()
      * @method static \App\Builders\TitleQueryBuilder|Title retired()
+     * @method static \App\Builders\TitleQueryBuilder|Title static()
      * @method static \App\Builders\TitleQueryBuilder|Title unactivated()
-     * @method static \App\Builders\TitleQueryBuilder|Title whereCreatedAt($value)
-     * @method static \App\Builders\TitleQueryBuilder|Title whereDeletedAt($value)
-     * @method static \App\Builders\TitleQueryBuilder|Title whereId($value)
-     * @method static \App\Builders\TitleQueryBuilder|Title whereName($value)
-     * @method static \App\Builders\TitleQueryBuilder|Title whereStatus($value)
-     * @method static \App\Builders\TitleQueryBuilder|Title whereUpdatedAt($value)
      * @method static \App\Builders\TitleQueryBuilder|Title withCurrentRetiredAtDate()
      * @method static \App\Builders\TitleQueryBuilder|Title withFirstActivatedAtDate()
      * @method static \App\Builders\TitleQueryBuilder|Title withFutureActivation()
@@ -679,7 +554,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\User.
+     * App\Models\User
      *
      * @property int $id
      * @property string $first_name
@@ -692,22 +567,11 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $created_at
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
-     * @property-read int|null $notifications_count
      * @property-read \App\Models\Wrestler|null $wrestler
      * @method static \Database\Factories\UserFactory factory(...$parameters)
      * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder|User query()
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereEmail($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereEmailVerifiedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereFirstName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereLastName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereRole($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
      */
     class User extends \Eloquent
     {
@@ -716,7 +580,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Venue.
+     * App\Models\Venue
      *
      * @property int $id
      * @property string $name
@@ -733,16 +597,6 @@ namespace App\Models{
      * @method static \Illuminate\Database\Eloquent\Builder|Venue newQuery()
      * @method static \Illuminate\Database\Query\Builder|Venue onlyTrashed()
      * @method static \Illuminate\Database\Eloquent\Builder|Venue query()
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereAddress1($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereAddress2($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereCity($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereDeletedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereId($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereName($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereState($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereUpdatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder|Venue whereZip($value)
      * @method static \Illuminate\Database\Query\Builder|Venue withTrashed()
      * @method static \Illuminate\Database\Query\Builder|Venue withoutTrashed()
      */
@@ -753,7 +607,7 @@ namespace App\Models{
 
 namespace App\Models{
     /**
-     * App\Models\Wrestler.
+     * App\Models\Wrestler
      *
      * @property int $id
      * @property int|null $user_id
@@ -768,41 +622,33 @@ namespace App\Models{
      * @property \Illuminate\Support\Carbon|null $deleted_at
      * @property-read \App\Models\Employment|null $currentEmployment
      * @property-read \App\Models\Injury|null $currentInjury
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Manager[] $currentManagers
      * @property-read \App\Models\Retirement|null $currentRetirement
+     * @property-read \App\Models\Stable|null $currentStable
      * @property-read \App\Models\Suspension|null $currentSuspension
+     * @property-read \App\Models\TagTeam|null $currentTagTeam
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $employments
-     * @property-read int|null $employments_count
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\EventMatch[] $eventMatches
      * @property-read \App\Models\Employment|null $firstEmployment
      * @property-read \App\Models\Employment|null $futureEmployment
      * @property-read string|null $started_at
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Injury[] $injuries
-     * @property-read int|null $injuries_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Manager[] $managers
-     * @property-read int|null $managers_count
      * @property-read \App\Models\Employment|null $previousEmployment
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $previousEmployments
-     * @property-read int|null $previous_employments_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Injury[] $previousInjuries
-     * @property-read int|null $previous_injuries_count
      * @property-read \App\Models\Injury|null $previousInjury
+     * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Manager[] $previousManagers
      * @property-read \App\Models\Retirement|null $previousRetirement
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $previousRetirements
-     * @property-read int|null $previous_retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $previousStables
-     * @property-read int|null $previous_stables_count
      * @property-read \App\Models\Suspension|null $previousSuspension
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $previousSuspensions
-     * @property-read int|null $previous_suspensions_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $previousTagTeams
-     * @property-read int|null $previous_tag_teams_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Retirement[] $retirements
-     * @property-read int|null $retirements_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stable[] $stables
-     * @property-read int|null $stables_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Suspension[] $suspensions
-     * @property-read int|null $suspensions_count
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagTeam[] $tagTeams
-     * @property-read int|null $tag_teams_count
      * @property-read \App\Models\User|null $user
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler bookable()
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler employed()
@@ -822,17 +668,6 @@ namespace App\Models{
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler retired()
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler suspended()
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler unemployed()
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereCreatedAt($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereDeletedAt($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereHeight($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereHometown($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereId($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereName($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereSignatureMove($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereStatus($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereUpdatedAt($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereUserId($value)
-     * @method static \App\Builders\WrestlerQueryBuilder|Wrestler whereWeight($value)
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler withCurrentInjuredAtDate()
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler withCurrentRetiredAtDate()
      * @method static \App\Builders\WrestlerQueryBuilder|Wrestler withCurrentSuspendedAtDate()
@@ -841,7 +676,7 @@ namespace App\Models{
      * @method static \Illuminate\Database\Query\Builder|Wrestler withTrashed()
      * @method static \Illuminate\Database\Query\Builder|Wrestler withoutTrashed()
      */
-    class Wrestler extends \Eloquent implements \App\Models\Contracts\Bookable, \App\Models\Contracts\Manageable, \App\Models\Contracts\CanBeAStableMember, \App\Models\Contracts\TagTeamMember
+    class Wrestler extends \Eloquent implements \App\Models\Contracts\Bookable, \App\Models\Contracts\CanBeAStableMember, \App\Models\Contracts\Manageable, \App\Models\Contracts\TagTeamMember
     {
     }
 }

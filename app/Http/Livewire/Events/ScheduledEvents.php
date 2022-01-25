@@ -2,25 +2,24 @@
 
 namespace App\Http\Livewire\Events;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Event;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class ScheduledEvents extends Component
+class ScheduledEvents extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
+        $scheduledEvents = Event::query()
+            ->scheduled()
+            ->paginate($this->perPage);
+
         return view('livewire.events.scheduled-events', [
-            'scheduledEvents' => Event::scheduled()->paginate($this->perPage),
+            'scheduledEvents' => $scheduledEvents,
         ]);
     }
 }

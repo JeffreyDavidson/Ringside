@@ -3,6 +3,8 @@
 namespace App\Enums;
 
 /**
+ * These are the statuses a referee can have at any given time.
+ *
  * @method static self bookable()
  * @method static self injured()
  * @method static self future_employment()
@@ -11,6 +13,6 @@ namespace App\Enums;
  * @method static self suspended()
  * @method static self unemployed()
  */
-final class RefereeStatus extends BaseEnum
+class RefereeStatus extends BaseEnum
 {
 }

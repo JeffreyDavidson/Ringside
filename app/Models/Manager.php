@@ -15,12 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Manager extends SingleRosterMember implements CanBeAStableMember
 {
-    use HasFactory,
+    use CanJoinStables,
+        HasFactory,
         HasFullName,
         Manageables,
         OwnedByUser,
-        SoftDeletes,
-        CanJoinStables;
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -54,7 +54,8 @@ class Manager extends SingleRosterMember implements CanBeAStableMember
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\ManagerQueryBuilder
      */
     public function newEloquentBuilder($query)
     {

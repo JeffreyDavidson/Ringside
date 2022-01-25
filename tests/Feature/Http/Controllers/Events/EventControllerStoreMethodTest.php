@@ -53,15 +53,19 @@ class EventControllerStoreMethodTest extends TestCase
      */
     public function store_creates_an_event_and_redirects()
     {
+        $this->withoutExceptionHandling();
         $this
             ->actAs(Role::administrator())
             ->from(action([EventsController::class, 'create']))
-            ->post(action([EventsController::class, 'store']), EventRequestDataFactory::new()->create([
-                'name' => 'Example Event Name',
-                'date' => null,
-                'venue_id' => null,
-                'preview' => null,
-            ]))
+            ->post(
+                action([EventsController::class, 'store']),
+                EventRequestDataFactory::new()->create([
+                    'name' => 'Example Event Name',
+                    'date' => null,
+                    'venue_id' => null,
+                    'preview' => null,
+                ])
+            )
             ->assertRedirect(action([EventsController::class, 'index']));
 
         tap(Event::first(), function ($event) {

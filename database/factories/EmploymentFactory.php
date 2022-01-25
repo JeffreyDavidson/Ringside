@@ -32,16 +32,17 @@ class EmploymentFactory extends Factory
             'employable_id' => $employable::factory(),
             'employable_type' => $employable,
             'started_at' => now()->toDateTimeString(),
+            'ended_at' => null,
         ];
     }
 
     /**
-     * @param string|Carbon $employmentDate
+     * @param \Carbon\Carbon $employmentDate
      */
-    public function started($employmentDate = 'now')
+    public function started(Carbon $employmentDate)
     {
         return $this->state([
-            'started_at' => $employmentDate instanceof Carbon ? $employmentDate : new Carbon($employmentDate),
+            'started_at' => $employmentDate->toDateTimeString() ?? now()->toDateTimeString(),
         ]);
     }
 

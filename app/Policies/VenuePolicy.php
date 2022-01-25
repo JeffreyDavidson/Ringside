@@ -14,6 +14,7 @@ class VenuePolicy
      * Determine whether the user can create venues.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function create(User $user)
@@ -25,6 +26,7 @@ class VenuePolicy
      * Determine whether the user can update a venue.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function update(User $user)
@@ -36,6 +38,7 @@ class VenuePolicy
      * Determine whether the user can delete a venue.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function delete(User $user)
@@ -47,6 +50,7 @@ class VenuePolicy
      * Determine whether the user can restore a venue.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function restore(User $user)
@@ -58,6 +62,7 @@ class VenuePolicy
      * Determine whether the user can view all venues.
      *
      * @param  \App\Models\User  $user
+     *
      * @return bool
      */
     public function viewList(User $user)
@@ -69,10 +74,10 @@ class VenuePolicy
      * Determine whether the user can view a venue.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Venue  $venue
+     *
      * @return bool
      */
-    public function view(User $user, Venue $venue)
+    public function view(User $user)
     {
         return $user->isAdministrator();
     }

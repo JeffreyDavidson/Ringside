@@ -10,7 +10,8 @@ class WrestlerObserver
     /**
      * Handle the Wrestler "saved" event.
      *
-     * @param  App\Models\Wrestler $wrestler
+     * @param  \App\Models\Wrestler $wrestler
+     *
      * @return void
      */
     public function saving(Wrestler $wrestler)
@@ -19,7 +20,7 @@ class WrestlerObserver
             $wrestler->isCurrentlyEmployed() => match (true) {
                 $wrestler->isInjured() => WrestlerStatus::injured(),
                 $wrestler->isSuspended() => WrestlerStatus::suspended(),
-                $wrestler->isBookable() => WrestlerStatus::bookable(),
+                default => WrestlerStatus::bookable(),
             },
             $wrestler->hasFutureEmployment() => WrestlerStatus::future_employment(),
             $wrestler->isReleased() => WrestlerStatus::released(),

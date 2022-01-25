@@ -7,8 +7,18 @@ use App\Repositories\WrestlerRepository;
 
 abstract class BaseTagTeamAction
 {
+    /**
+     * The repository to be used for tag teams.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
     protected TagTeamRepository $tagTeamRepository;
 
+    /**
+     * The repository to be used for wrestlers.
+     *
+     * @var \App\Repositories\WrestlerRepository
+     */
     protected WrestlerRepository $wrestlerRepository;
 
     /**

@@ -28,7 +28,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'name' => null,
             ]))
             ->assertFailsValidation(['name' => 'required']);
@@ -43,7 +43,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'name' => 123,
             ]))
             ->assertFailsValidation(['name' => 'string']);
@@ -58,7 +58,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'name' => 'ab',
             ]))
             ->assertFailsValidation(['name' => 'min:3']);
@@ -70,11 +70,11 @@ class UpdateRequestTest extends TestCase
     public function tag_team_name_must_be_unique()
     {
         $tagTeamA = TagTeam::factory()->create(['name' => 'Example Tag Team Name A']);
-        $tagTeamB = TagTeam::factory()->create(['name' => 'Example Tag Team Name B']);
+        TagTeam::factory()->create(['name' => 'Example Tag Team Name B']);
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeamA)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeamA)->create([
                 'name' => 'Example Tag Team Name B',
             ]))
             ->assertFailsValidation(['name' => 'unique:tag_teams,NULL,1,id']);
@@ -89,7 +89,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'signature_move' => null,
                 'wrestlers' => [],
             ]))
@@ -105,7 +105,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'signature_move' => 12345,
             ]))
             ->assertFailsValidation(['signature_move' => 'string']);
@@ -120,7 +120,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'started_at' => null,
             ]))
             ->assertPassesValidation();
@@ -135,7 +135,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'started_at' => 12345,
             ]))
             ->assertFailsValidation(['started_at' => 'string']);
@@ -150,7 +150,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'started_at' => 'not-a-date-format',
             ]))
             ->assertFailsValidation(['started_at' => 'date']);
@@ -161,14 +161,14 @@ class UpdateRequestTest extends TestCase
      */
     public function tag_team_started_at_cannot_be_changed_if_employment_start_date_has_past()
     {
-        $tagTeam = TagTeam::factory()->has(Employment::factory()->started('2021-01-01'))->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
-                'started_at' => '2021-01-01',
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
+                'started_at' => Carbon::now()->toDateTImeString(),
             ]))
-            ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
+            ->assertFailsValidation(['started_at' => 'employment_date_cannot_be_changed']);
     }
 
     /**
@@ -180,7 +180,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('tag_team', $tagTeam)
-            ->validate(TagTeamRequestDataFactory::new()->create([
+            ->validate(TagTeamRequestDataFactory::new()->withTagTeam($tagTeam)->create([
                 'started_at' => Carbon::tomorrow()->toDateString(),
             ]))
             ->assertPassesValidation();

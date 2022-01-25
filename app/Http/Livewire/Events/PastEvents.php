@@ -2,20 +2,24 @@
 
 namespace App\Http\Livewire\Events;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Event;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class PastEvents extends Component
+class PastEvents extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
+        $pastEvents = Event::query()
+            ->past()
+            ->paginate($this->perPage);
+
         return view('livewire.events.past-events', [
-            'pastEvents' => Event::past()->paginate($this->perPage),
+            'pastEvents' => $pastEvents,
         ]);
     }
 }

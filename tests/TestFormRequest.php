@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +24,9 @@ class TestFormRequest
     {
         $this->request->request = new ParameterBag($data);
 
-        /** @var Validator $validator */
+        /**
+         * @var Validator $validator
+         */
         $validator = Closure::fromCallable(fn () => $this->getValidatorInstance())->call($this->request);
 
         try {

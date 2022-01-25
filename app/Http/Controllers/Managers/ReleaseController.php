@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Managers;
 use App\Actions\Managers\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Managers\ReleaseRequest;
 use App\Models\Manager;
 
 class ReleaseController extends Controller
@@ -14,15 +13,16 @@ class ReleaseController extends Controller
      * Release a manager.
      *
      * @param  \App\Models\Manager  $manager
-     * @param  \App\Http\Requests\Managers\ReleaseRequest  $request
-     * @param  \App\Actions\Managers\ReleaseAction  $action
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager, ReleaseRequest $request, ReleaseAction $action)
+    public function __invoke(Manager $manager)
     {
+        $this->authorize('release', $manager);
+
         throw_unless($manager->canBeReleased(), new CannotBeReleasedException);
 
-        $action->handle($manager);
+        ReleaseAction::run($manager);
 
         return redirect()->route('managers.index');
     }

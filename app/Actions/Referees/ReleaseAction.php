@@ -13,11 +13,12 @@ class ReleaseAction extends BaseRefereeAction
      * Release a referee.
      *
      * @param  \App\Models\Referee  $referee
+     *
      * @return void
      */
     public function handle(Referee $referee): void
     {
-        $releaseDate ??= now()->toDateTimeString();
+        $releaseDate = now();
 
         if ($referee->isSuspended()) {
             $this->refereeRepository->reinstate($referee, $releaseDate);

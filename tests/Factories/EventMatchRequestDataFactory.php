@@ -9,8 +9,13 @@ use App\Models\Wrestler;
 class EventMatchRequestDataFactory
 {
     private const DEFAULT_MATCH_TYPE = 1;
+
     private const DEFAULT_REFEREE_ID = [1];
-    private const DEFAULT_COMPETITORS = [[1], [2]];
+
+    private const DEFAULT_COMPETITORS = [
+        ['competitor_id' => 1, 'competitor_type' => 'wrestler'],
+        ['competitor_id' => 2, 'competitor_type' => 'wrestler'],
+    ];
 
     public function __construct()
     {

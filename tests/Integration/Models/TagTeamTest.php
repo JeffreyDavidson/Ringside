@@ -21,9 +21,13 @@ class TagTeamTest extends TestCase
         SuspendableContractTests;
 
     private $futureEmployedTagTeam;
+
     private $bookableTagTeam;
+
     private $suspendedTagTeam;
+
     private $retiredTagTeam;
+
     private $releasedTagTeam;
 
     protected function setUp(): void

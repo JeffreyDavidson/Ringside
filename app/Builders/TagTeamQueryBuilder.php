@@ -7,7 +7,7 @@ class TagTeamQueryBuilder extends RosterMemberQueryBuilder
     /**
      * Scope a query to only include bookable tag teams.
      *
-     * @return $this
+     * @return \App\Builders\TagTeamQueryBuilder
      */
     public function bookable()
     {

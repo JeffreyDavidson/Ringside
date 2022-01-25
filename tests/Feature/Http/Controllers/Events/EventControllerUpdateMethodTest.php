@@ -99,6 +99,7 @@ class EventControllerUpdateMethodTest extends TestCase
      */
     public function an_administrator_can_update_a_scheduled_event()
     {
+        $this->withoutExceptionHandling();
         $venue = Venue::factory()->create();
         $newVenue = Venue::factory()->create();
         $oldDate = Carbon::parse('+2 weeks');
