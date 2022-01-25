@@ -13,13 +13,12 @@ class ReinstateAction extends BaseManagerAction
      * Reinstate a manager.
      *
      * @param  \App\Models\Manager  $manager
+     *
      * @return void
      */
     public function handle(Manager $manager): void
     {
-        $reinstatementDate = now()->toDateTimeString();
-
-        $this->managerRepository->reinstate($manager, $reinstatementDate);
+        $this->managerRepository->reinstate($manager, now());
         $manager->save();
     }
 }

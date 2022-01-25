@@ -7,6 +7,7 @@ use App\Models\Title;
 class TitleRequestDataFactory
 {
     private string $name = 'Example Title';
+
     private ?string $activated_at = null;
 
     public static function new(): self
@@ -26,7 +27,8 @@ class TitleRequestDataFactory
     {
         $clone = clone $this;
 
-        $this->name = $title->name;
+        $clone->name = $title->name;
+        $clone->activated_at = $title->activatedAt?->toDateTimeString();
 
         return $clone;
     }

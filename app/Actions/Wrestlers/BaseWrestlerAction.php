@@ -6,6 +6,11 @@ use App\Repositories\WrestlerRepository;
 
 abstract class BaseWrestlerAction
 {
+    /**
+     * The repository to be used for wrestlers.
+     *
+     * @var \App\Repositories\WrestlerRepository
+     */
     protected WrestlerRepository $wrestlerRepository;
 
     /**

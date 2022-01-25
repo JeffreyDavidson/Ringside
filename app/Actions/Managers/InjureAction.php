@@ -13,13 +13,12 @@ class InjureAction extends BaseManagerAction
      * Injure a manager.
      *
      * @param  \App\Models\Manager  $manager
+     *
      * @return void
      */
     public function handle(Manager $manager): void
     {
-        $injureDate = now()->toDateTimeString();
-
-        $this->managerRepository->injure($manager, $injureDate);
+        $this->managerRepository->injure($manager, now());
         $manager->save();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Stables;
 
+use App\DataTransferObjects\StableData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
@@ -37,7 +38,9 @@ class StablesController extends Controller
     /**
      * Show the form for creating a stable.
      *
-     * @return \Illuminate\Http\Response
+     * @param Stable $stable
+     *
+     * @return \Illuminate\View\View
      */
     public function create(Stable $stable)
     {
@@ -52,11 +55,13 @@ class StablesController extends Controller
      * Create a new stable.
      *
      * @param  \App\Http\Requests\Stables\StoreRequest  $request
+     * @param  \App\DataTransferObjects\StableData $stableData
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, StableData $stableData)
     {
-        $this->stableService->create($request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
+        $this->stableService->create($stableData->fromStoreRequest($request));
 
         return redirect()->route('stables.index');
     }
@@ -65,7 +70,8 @@ class StablesController extends Controller
      * Show the profile of a tag team.
      *
      * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\View\View
      */
     public function show(Stable $stable)
     {
@@ -80,7 +86,8 @@ class StablesController extends Controller
      * Show the form for editing a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\View\View
      */
     public function edit(Stable $stable)
     {
@@ -94,13 +101,15 @@ class StablesController extends Controller
     /**
      * Update a given stable.
      *
-     * @param  \App\Http\Requests\UpdateStableRequest  $request
+     * @param  \App\Http\Requests\Stables\UpdateRequest  $request
      * @param  \App\Models\Stable  $stable
+     * @param  \App\DataTransferObjects\StableData $stableData
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Stable $stable)
+    public function update(UpdateRequest $request, Stable $stable, StableData $stableData)
     {
-        $this->stableService->update($stable, $request->only(['name', 'started_at', 'wrestlers', 'tag_teams']));
+        $this->stableService->update($stable, $stableData->fromUpdateRequest($request));
 
         return redirect()->route('stables.index');
     }
@@ -109,6 +118,7 @@ class StablesController extends Controller
      * Delete a stable.
      *
      * @param  \App\Models\Stable  $stable
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Stable $stable)

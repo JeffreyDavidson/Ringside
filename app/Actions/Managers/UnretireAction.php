@@ -13,11 +13,12 @@ class UnretireAction extends BaseManagerAction
      * Unretire a manager.
      *
      * @param  \App\Models\Manager  $manager
+     *
      * @return void
      */
     public function handle(Manager $manager): void
     {
-        $unretiredDate = now()->toDateTimeString();
+        $unretiredDate = now();
 
         $this->managerRepository->unretire($manager, $unretiredDate);
         $this->managerRepository->employ($manager, $unretiredDate);

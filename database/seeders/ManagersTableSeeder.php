@@ -13,6 +13,8 @@ class ManagersTableSeeder extends Seeder
     /**
      * Run the database seeds.
      *
+     * @param mixed|null $dateToStart
+     *
      * @return void
      */
     public function run($dateToStart = null)
@@ -20,7 +22,7 @@ class ManagersTableSeeder extends Seeder
         $eNum = 1;
         $now = Carbon::now();
 
-        if (is_null($dateToStart)) {
+        if (null === $dateToStart) {
             $dateToStart = Carbon::now()->subYears(5);
         }
 
@@ -30,7 +32,7 @@ class ManagersTableSeeder extends Seeder
         $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
-        /*
+        /**
          * We need to create 30 managers at this time X years ago but since by
          * the time we reach the current date these managers should be
          * released so we need to make them released and figure out
@@ -53,7 +55,7 @@ class ManagersTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 10 managers that have been retired. We need to
          * make sure that their employment end date is the same as their
          * start of their retirement date.
@@ -71,7 +73,7 @@ class ManagersTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 5 managers at this time x years ago for each
          * additional month but since by the time we reach the current
          * date these managers should be released so we need to
@@ -99,7 +101,7 @@ class ManagersTableSeeder extends Seeder
             $startDate->addMonth();
         }
 
-        /*
+        /**
          * We need to create 5 managers for the next 3 months and all
          * managers should be Future Employment and should NOT
          * have an ended employment date.
@@ -116,7 +118,7 @@ class ManagersTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 5 managers that do not have an employment date.
          * These managers should be marked as being Unemployed.
          */

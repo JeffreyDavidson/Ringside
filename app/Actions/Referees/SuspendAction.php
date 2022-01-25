@@ -13,11 +13,12 @@ class SuspendAction extends BaseRefereeAction
      * Suspend a referee.
      *
      * @param  \App\Models\Referee  $referee
+     *
      * @return void
      */
     public function handle(Referee $referee): void
     {
-        $suspensionDate = now()->toDateTimeString();
+        $suspensionDate = now();
 
         $this->refereeRepository->suspend($referee, $suspensionDate);
         $referee->save();

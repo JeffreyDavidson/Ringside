@@ -120,6 +120,7 @@ class ReleaseControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonreleasableWrestlerTypes
      */
     public function invoke_throws_an_exception_for_releasing_a_non_releasable_wrestler($factoryState)

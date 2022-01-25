@@ -48,7 +48,8 @@ class Referee extends SingleRosterMember implements Bookable
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\RefereeQueryBuilder
      */
     public function newEloquentBuilder($query)
     {

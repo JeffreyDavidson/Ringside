@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Titles;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Title;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class InactiveTitles extends Component
+class InactiveTitles extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $inactiveTitles = Title::query()

@@ -57,7 +57,8 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\StableQueryBuilder
      */
     public function newEloquentBuilder($query)
     {
@@ -82,9 +83,9 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     public function currentRetirement()
     {
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
+            ->where('started_at', '<=', now())
+            ->whereNull('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -94,8 +95,8 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      */
     public function previousRetirements()
     {
-        return $this->retirements()
-                    ->whereNotNull('ended_at');
+        return $this->morphMany(Retirement::class, 'retiree')
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -106,8 +107,8 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     public function previousRetirement()
     {
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->latest('ended_at')
-                    ->limit(1);
+            ->latest('ended_at')
+            ->limit(1);
     }
 
     /**

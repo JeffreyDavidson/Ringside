@@ -14,6 +14,8 @@ class NewPasswordController extends Controller
     /**
      * Display the password reset view.
      *
+     * @param Request $request
+     *
      * @return \Illuminate\View\View
      */
     public function create(Request $request)
@@ -25,9 +27,10 @@ class NewPasswordController extends Controller
      * Handle an incoming new password request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      *
      * @throws \Illuminate\Validation\ValidationException
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -55,9 +58,8 @@ class NewPasswordController extends Controller
         // If the password was successfully reset, we will redirect the user back to
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
+        return $status === Password::PASSWORD_RESET
                     ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                            ->withErrors(['email' => __($status)]);
+                    : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
     }
 }

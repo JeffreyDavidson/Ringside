@@ -108,6 +108,7 @@ class EmployControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonemployableWrestlerTypes
      */
     public function invoke_throws_exception_for_employing_a_non_employable_wrestler($factoryState)

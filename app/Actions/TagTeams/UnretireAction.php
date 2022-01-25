@@ -13,19 +13,20 @@ class UnretireAction extends BaseTagTeamAction
      * Unretire a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
+     *
      * @return void
      */
     public function handle(TagTeam $tagTeam): void
     {
-        $unretiredDate = now()->toDateTimeString();
+        $unretiredDate = now();
 
         $this->tagTeamRepository->unretire($tagTeam, $unretiredDate);
 
-        foreach ($tagTeam->currentWrestlers as $wrestler) {
+        $tagTeam->currentWrestlers->each(function ($wrestler) use ($unretiredDate) {
             $this->wrestlerRepository->unretire($wrestler, $unretiredDate);
             $this->wrestlerRepository->employ($wrestler, $unretiredDate);
             $wrestler->save();
-        }
+        });
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
         $tagTeam->save();

@@ -14,7 +14,7 @@ class EventMatch extends Model
      *
      * @var string[]
      */
-    protected $fillable = ['event_id', 'event_match_id', 'preview'];
+    protected $fillable = ['event_id', 'match_type_id', 'preview'];
 
     /**
      * Get the referees assigned to the match.
@@ -37,12 +37,34 @@ class EventMatch extends Model
     }
 
     /**
-     * Get the competitors of the match.
+     * Get all fo the event match competitors for the match.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function competitors()
     {
-        return $this->morphTo();
+        return $this->hasMany(EventMatchCompetitor::class);
+    }
+
+    /**
+     * Get the wrestlers involved in the match.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     */
+    public function wrestlers()
+    {
+        return $this->morphedByMany(Wrestler::class, 'event_match_competitor', 'event_match_competitors')
+            ->using(EventMatchCompetitor::class);
+    }
+
+    /**
+     * Get the tag teams involved in the match.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     */
+    public function tagTeams()
+    {
+        return $this->morphedByMany(Wrestler::class, 'event_match_competitor', 'event_match_competitors')
+            ->using(EventMatchCompetitor::class);
     }
 }

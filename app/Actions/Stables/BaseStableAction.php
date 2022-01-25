@@ -8,10 +8,25 @@ use App\Repositories\WrestlerRepository;
 
 abstract class BaseStableAction
 {
+    /**
+     * The repository to be used for stables.
+     *
+     * @var \App\Repositories\StableRepository
+     */
     protected StableRepository $stableRepository;
 
+    /**
+     * The repository to be used for tag teams.
+     *
+     * @var \App\Repositories\TagTeamRepository
+     */
     protected TagTeamRepository $tagTeamRepository;
 
+    /**
+     * The repository to be used for wrestlers.
+     *
+     * @var \App\Repositories\WrestlerRepository
+     */
     protected WrestlerRepository $wrestlerRepository;
 
     /**

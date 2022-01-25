@@ -2,11 +2,26 @@
 
 namespace App\Models;
 
+use App\Builders\RosterMemberQueryBuilder;
 use App\Models\Contracts\Employable;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class RosterMember extends Model implements Employable
 {
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     *
+     * @return \App\Builders\RosterMemberQueryBuilder
+     */
+    public function newEloquentBuilder($query)
+    {
+        return new RosterMemberQueryBuilder($query);
+    }
+
     /**
      * Get all of the employments of the model.
      *
@@ -25,7 +40,7 @@ abstract class RosterMember extends Model implements Employable
     public function firstEmployment()
     {
         return $this->morphOne(Employment::class, 'employable')
-                    ->oldestOfMany('started_at');
+            ->oldestOfMany('started_at');
     }
 
     /**
@@ -36,9 +51,9 @@ abstract class RosterMember extends Model implements Employable
     public function currentEmployment()
     {
         return $this->morphOne(Employment::class, 'employable')
-                    ->where('started_at', '<=', now())
-                    ->where('ended_at', '=', null)
-                    ->latestOfMany();
+            ->where('started_at', '<=', now())
+            ->whereNull('ended_at')
+            ->latestOfMany();
     }
 
     /**
@@ -49,9 +64,9 @@ abstract class RosterMember extends Model implements Employable
     public function futureEmployment()
     {
         return $this->morphOne(Employment::class, 'employable')
-                    ->where('started_at', '>', now())
-                    ->whereNull('ended_at')
-                    ->latestOfMany();
+            ->where('started_at', '>', now())
+            ->whereNull('ended_at')
+            ->latestOfMany();
     }
 
     /**
@@ -62,7 +77,7 @@ abstract class RosterMember extends Model implements Employable
     public function previousEmployments()
     {
         return $this->employments()
-                    ->whereNotNull('ended_at');
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -73,9 +88,9 @@ abstract class RosterMember extends Model implements Employable
     public function previousEmployment()
     {
         return $this->morphOne(Employment::class, 'employable')
-                    ->whereNotNull('ended_at')
-                    ->latest('ended_at')
-                    ->latestOfMany();
+            ->whereNotNull('ended_at')
+            ->latest('ended_at')
+            ->latestOfMany();
     }
 
     /**
@@ -86,6 +101,17 @@ abstract class RosterMember extends Model implements Employable
     public function isCurrentlyEmployed()
     {
         return $this->currentEmployment()->exists();
+    }
+
+    /**
+     * Check to see if the model is employed.
+     *
+     * @param  \Carbon\Carbon $startDate
+     * @return bool
+     */
+    public function startDateWas(Carbon $startDate)
+    {
+        return $this->firstEmployment->started_at->ne($startDate);
     }
 
     /**
@@ -105,7 +131,7 @@ abstract class RosterMember extends Model implements Employable
      */
     public function isNotInEmployment()
     {
-        return $this->isUnemployed() || $this->isReleased() || $this->hasFutureEmployment() || $this->isRetired();
+        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
     }
 
     /**
@@ -135,10 +161,10 @@ abstract class RosterMember extends Model implements Employable
      */
     public function isReleased()
     {
-        return $this->previousEmployment()->exists() &&
-                $this->futureEmployment()->doesntExist() &&
-                $this->currentEmployment()->doesntExist() &&
-                $this->currentRetirement()->doesntExist();
+        return $this->previousEmployment()->exists()
+                && $this->futureEmployment()->doesntExist()
+                && $this->currentEmployment()->doesntExist()
+                && $this->currentRetirement()->doesntExist();
     }
 
     /**
@@ -148,7 +174,7 @@ abstract class RosterMember extends Model implements Employable
      */
     public function canBeReleased()
     {
-        if ($this->isNotInEmployment()) {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
         }
 
@@ -158,36 +184,85 @@ abstract class RosterMember extends Model implements Employable
     /**
      * Get the model's first employment date.
      *
-     * @return string|null
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getStartedAtAttribute()
+    public function startedAt(): Attribute
     {
-        return optional($this->employments->first())->started_at;
+        return new Attribute(
+            get: fn () => $this->firstEmployment?->started_at
+        );
     }
 
     /**
-     * Get the model's first employment date.
+     * Determine if the roster member was employed on a given date.
      *
-     * @param  string $employmentDate
+     * @param  \Carbon\Carbon $employmentDate
+     *
      * @return bool
      */
-    public function employedOn(string $employmentDate)
+    public function employedOn(Carbon $employmentDate)
     {
-        return $this->employments->last()->started_at->ne($employmentDate);
+        return $this->currentEmployment->started_at->eq($employmentDate);
+    }
+
+    /**
+     * Determine if the roster member is to be employed on a given date.
+     *
+     * @param  \Carbon\Carbon $employmentDate
+     *
+     * @return bool
+     */
+    public function scheduledToBeEmployedOn(Carbon $employmentDate)
+    {
+        return $this->futureEmployment->started_at->eq($employmentDate);
+    }
+
+    /**
+     * Determine if the roster member is to be employed on a given date.
+     *
+     * @param  \Carbon\Carbon $employmentDate
+     *
+     * @return bool
+     */
+    public function employedBefore(Carbon $employmentDate)
+    {
+        return $this->currentEmployment->started_at->lte($employmentDate);
+    }
+
+    /**
+     * Determine if the roster member is employed after a given date.
+     *
+     * @param  \Carbon\Carbon $employmentDate
+     *
+     * @return bool
+     */
+    public function employedAfter(Carbon $employmentDate)
+    {
+        return $this->currentEmployment->started_at->gt($employmentDate);
+    }
+
+    /**
+     * Determine if the roster member future start date is before the given date.
+     *
+     * @param  \Carbon\Carbon $date
+     *
+     * @return bool
+     */
+    public function futureEmploymentIsBefore(Carbon $date)
+    {
+        return $this->futureEmployment->started_at->lt($date);
     }
 
     /**
      * Check to see if employable can have their start date changed.
      *
+     * @param  \Carbon\Carbon $employmentDate
+     *
      * @return bool
      */
-    public function canHaveEmploymentStartDateChanged()
+    public function canHaveEmploymentStartDateChanged(Carbon $employmentDate)
     {
-        if ($this->isUnemployed() || $this->hasFutureEmployment()) {
-            return true;
-        }
-
-        return false;
+        return $this->hasFutureEmployment() && ! $this->scheduledToBeEmployedOn($employmentDate);
     }
 
     /**
@@ -208,8 +283,8 @@ abstract class RosterMember extends Model implements Employable
     public function currentSuspension()
     {
         return $this->morphOne(Suspension::class, 'suspendable')
-                    ->whereNull('ended_at')
-                    ->limit(1);
+            ->whereNull('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -220,7 +295,7 @@ abstract class RosterMember extends Model implements Employable
     public function previousSuspensions()
     {
         return $this->suspensions()
-                    ->whereNotNull('ended_at');
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -231,8 +306,8 @@ abstract class RosterMember extends Model implements Employable
     public function previousSuspension()
     {
         return $this->morphOne(Suspension::class, 'suspendable')
-                    ->latest('ended_at')
-                    ->limit(1);
+            ->latest('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -287,9 +362,9 @@ abstract class RosterMember extends Model implements Employable
     public function currentRetirement()
     {
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->where('started_at', '<=', now())
-                    ->whereNull('ended_at')
-                    ->limit(1);
+            ->where('started_at', '<=', now())
+            ->whereNull('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -300,7 +375,7 @@ abstract class RosterMember extends Model implements Employable
     public function previousRetirements()
     {
         return $this->retirements()
-                    ->whereNotNull('ended_at');
+            ->whereNotNull('ended_at');
     }
 
     /**
@@ -311,8 +386,8 @@ abstract class RosterMember extends Model implements Employable
     public function previousRetirement()
     {
         return $this->morphOne(Retirement::class, 'retiree')
-                    ->latest('ended_at')
-                    ->limit(1);
+            ->latest('ended_at')
+            ->limit(1);
     }
 
     /**
@@ -342,7 +417,7 @@ abstract class RosterMember extends Model implements Employable
      */
     public function canBeRetired()
     {
-        if ($this->isNotInEmployment()) {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
         }
 

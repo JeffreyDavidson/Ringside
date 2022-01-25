@@ -8,8 +8,11 @@ use Carbon\Carbon;
 class StableRequestDataFactory
 {
     private string $name = 'Example Stable Name';
+
     private ?string $started_at = null;
+
     private array $wrestlers = [];
+
     private array $tagTeams = [];
 
     public static function new(): self
@@ -27,13 +30,11 @@ class StableRequestDataFactory
         ], $overrides);
     }
 
-    public function withStartDate(string | Carbon $startedAt): self
+    public function withStartDate(Carbon $startedAt): self
     {
         $clone = clone $this;
 
-        $clone->started_at = $startedAt instanceof Carbon
-            ? $startedAt->format('Y-m-d H:i:a')
-            : $startedAt;
+        $clone->started_at = $startedAt;
 
         return $clone;
     }
@@ -60,7 +61,10 @@ class StableRequestDataFactory
     {
         $clone = clone $this;
 
-        $this->name = $stable->name;
+        $clone->name = $stable->name;
+        $clone->started_at = $stable->activatedAt?->toDateTimeString();
+        $clone->wrestlers = $stable->currentWrestlers->modelKeys();
+        $clone->tagTeams = $stable->currentTagTeams->modelKeys();
 
         return $clone;
     }

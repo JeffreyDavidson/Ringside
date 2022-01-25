@@ -33,9 +33,9 @@ class TitleTest extends TestCase
     /**
      * @test
      */
-    public function a_title_uses_can_be_activated_trait()
+    public function a_title_uses_activations_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\Activatable', Title::class);
+        $this->assertUsesTrait('App\Models\Concerns\Activations', Title::class);
     }
 
     /**
@@ -49,8 +49,8 @@ class TitleTest extends TestCase
     /**
      * @test
      */
-    public function a_title_uses_can_be_retired_trait()
+    public function a_title_uses_retirements_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\Retirable', Title::class);
+        $this->assertUsesTrait('App\Models\Concerns\Retirements', Title::class);
     }
 }

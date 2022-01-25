@@ -13,11 +13,12 @@ class ReleaseAction extends BaseWrestlerAction
      * Release a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
+     *
      * @return void
      */
     public function handle(Wrestler $wrestler): void
     {
-        $releaseDate ??= now()->toDateTimeString();
+        $releaseDate = now();
 
         if ($wrestler->isSuspended()) {
             $this->wrestlerRepository->reinstate($wrestler, $releaseDate);
@@ -30,8 +31,8 @@ class ReleaseAction extends BaseWrestlerAction
         $this->wrestlerRepository->release($wrestler, $releaseDate);
         $wrestler->save();
 
-        if (! is_null($wrestler->currentTagTeam) && $wrestler->currentTagTeam->exists()) {
-            $wrestler->currentTagTeam->save();
+        if ($wrestler->currentTagTeam() !== null && $wrestler->currentTagTeam()->exists()) {
+            $wrestler->currentTagTeam()->touch();
             $this->wrestlerRepository->removeFromCurrentTagTeam($wrestler, $releaseDate);
         }
     }

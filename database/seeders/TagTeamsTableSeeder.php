@@ -13,6 +13,8 @@ class TagTeamsTableSeeder extends Seeder
     /**
      * Run the database seeds.
      *
+     * @param mixed|null $dateToStart
+     *
      * @return void
      */
     public function run($dateToStart = null)
@@ -20,7 +22,7 @@ class TagTeamsTableSeeder extends Seeder
         $eNum = 1;
         $now = Carbon::now();
 
-        if (is_null($dateToStart)) {
+        if (null === $dateToStart) {
             $dateToStart = Carbon::now()->subYears(5);
         }
 
@@ -30,7 +32,7 @@ class TagTeamsTableSeeder extends Seeder
         $maxYears = floor($diffInYears * .75);
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
-        /*
+        /**
          * We need to create 15 tag teams at this time X years ago but since by
          * the time we reach the current date these tag teams should be
          * released so we need to make them released and figure out
@@ -53,7 +55,7 @@ class TagTeamsTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 10 tag teams that have been retired. We need to
          * make sure that their employment end date is the same as their
          * start of their retirement date.
@@ -71,7 +73,7 @@ class TagTeamsTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 5 tag teams at this time x years ago for each
          * additional month but since by the time we reach the current
          * date these tag teams should be released so we need to
@@ -99,7 +101,7 @@ class TagTeamsTableSeeder extends Seeder
             $startDate->addMonth();
         }
 
-        /*
+        /**
          * We need to create 3 tag teams for the next 3 months and all
          * tag teams should be Future Employment and should NOT
          * have an ended employment date.
@@ -116,7 +118,7 @@ class TagTeamsTableSeeder extends Seeder
             $eNum++;
         }
 
-        /*
+        /**
          * We need to create 3 tag teams that do not have an employment date.
          * These tag teams should be marked as being Unemployed.
          */

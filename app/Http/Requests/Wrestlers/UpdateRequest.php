@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
-use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -28,7 +27,12 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($this->route('wrestler')->id)],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                Rule::unique('wrestlers')->ignore($this->route()->parameter('wrestler')->id),
+            ],
             'feet' => ['required', 'integer'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer'],
@@ -38,7 +42,6 @@ class UpdateRequest extends FormRequest
                 'nullable',
                 'string',
                 'date',
-                new EmploymentStartDateCanBeChanged($this->route('wrestler')),
             ],
         ];
     }
@@ -60,12 +63,31 @@ class UpdateRequest extends FormRequest
      * Configure the validator instance.
      *
      * @param  \Illuminate\Validation\Validator  $validator
+     *
      * @return void
      */
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
             if ($validator->errors()->isEmpty()) {
+                $wrestler = $this->route()->parameter('wrestler');
+
+                if ($wrestler->isReleased() && ! $wrestler->employedOn($this->date('started_at'))) {
+                    $validator->errors()->add(
+                        'started_at',
+                        "{$wrestler->name} was released and the employment date cannot be changed."
+                    );
+                }
+
+                if ($wrestler->isCurrentlyEmployed() && ! $wrestler->employedOn($this->date('started_at'))) {
+                    $validator->errors()->add(
+                        'started_at',
+                        "{$wrestler->name} is currently employed and the employment date cannot be changed."
+                    );
+
+                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
+                }
+
                 $this->merge(['height' => ($this->input('feet') * 12) + $this->input('inches')]);
             }
         });

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\DataTransferObjects\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 use App\Services\RefereeService;
@@ -19,7 +20,7 @@ class RefereeServiceTest extends TestCase
      */
     public function it_can_create_a_referee_without_an_employment()
     {
-        $data = [];
+        $data = $this->mock(RefereeData::class);
         $repositoryMock = $this->mock(RefereeRepository::class);
         $service = new RefereeService($repositoryMock);
 
@@ -34,13 +35,14 @@ class RefereeServiceTest extends TestCase
      */
     public function it_can_create_a_referee_with_an_employment()
     {
-        $data = ['started_at' => now()->toDateTimeString()];
+        $data = $this->mock(RefereeData::class);
+        $data->start_date = now();
         $refereeMock = $this->mock(Referee::class);
         $repositoryMock = $this->mock(RefereeRepository::class);
         $service = new RefereeService($repositoryMock);
 
         $repositoryMock->expects()->create($data)->once()->andReturns($refereeMock);
-        $repositoryMock->expects()->employ($refereeMock, $data['started_at']);
+        $repositoryMock->expects()->employ($refereeMock, $data->start_date);
 
         $service->create($data);
     }
@@ -50,7 +52,8 @@ class RefereeServiceTest extends TestCase
      */
     public function it_can_update_a_referee_without_an_employment_start_date()
     {
-        $data = ['started_at' => null];
+        $data = $this->mock(RefereeData::class);
+        $data->start_date = null;
         $refereeMock = $this->mock(Referee::class);
         $repositoryMock = $this->mock(RefereeRepository::class);
         $service = new RefereeService($repositoryMock);
@@ -66,7 +69,8 @@ class RefereeServiceTest extends TestCase
      */
     public function it_can_update_a_referee_and_employ_if_started_at_is_filled()
     {
-        $data = ['started_at' => now()->toDateTimeString()];
+        $data = $this->mock(RefereeData::class);
+        $data->start_date = now();
         $refereeMock = $this->mock(Referee::class);
         $repositoryMock = $this->mock(RefereeRepository::class);
         $service = new RefereeService($repositoryMock);
@@ -74,7 +78,7 @@ class RefereeServiceTest extends TestCase
         $repositoryMock->expects()->update($refereeMock, $data)->once()->andReturns($refereeMock);
         $refereeMock->expects()->canHaveEmploymentStartDateChanged()->once()->andReturns(true);
         $refereeMock->expects()->isNotInEmployment()->once()->andReturns(true);
-        $repositoryMock->expects()->employ($refereeMock, $data['started_at'])->once()->andReturns($refereeMock);
+        $repositoryMock->expects()->employ($refereeMock, $data->start_date)->once()->andReturns($refereeMock);
 
         $service->update($refereeMock, $data);
     }

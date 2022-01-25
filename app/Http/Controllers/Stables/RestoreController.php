@@ -13,6 +13,7 @@ class RestoreController extends Controller
      *
      * @param  int  $stableId
      * @param  \App\Services\StableService $stableService
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(int $stableId, StableService $stableService)

@@ -8,10 +8,17 @@ use Illuminate\Contracts\Validation\Rule;
 class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
 {
     /**
+     * The match type to check against.
+     *
      * @var int
      */
     protected $matchTypeId;
 
+    /**
+     * Create a new rule instance.
+     *
+     * @param int $matchTypeId
+     */
     public function __construct(int $matchTypeId)
     {
         $this->matchTypeId = $matchTypeId;
@@ -22,11 +29,12 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
      *
      * @param  string  $attribute
      * @param  mixed  $value
+     *
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        return MatchType::find($this->matchTypeId)->number_of_sides === count($value);
+        return MatchType::find($this->matchTypeId)?->number_of_sides === count($value);
     }
 
     /**

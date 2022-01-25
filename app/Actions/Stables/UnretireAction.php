@@ -13,11 +13,12 @@ class UnretireAction extends BaseStableAction
      * Unretire a stable.
      *
      * @param  \App\Models\Stable  $stable
+     *
      * @return void
      */
     public function handle(Stable $stable): void
     {
-        $unretiredDate = now()->toDateTimeString();
+        $unretiredDate = now();
 
         $this->stableRepository->unretire($stable, $unretiredDate);
         $this->stableRepository->activate($stable, $unretiredDate);

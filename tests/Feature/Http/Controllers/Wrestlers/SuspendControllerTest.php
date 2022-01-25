@@ -52,7 +52,7 @@ class SuspendControllerTest extends TestCase
             ->actAs(Role::administrator())
             ->patch(action([SuspendController::class], $wrestler));
 
-        $this->assertEquals(TagTeamStatus::UNbookable(), $tagTeam->fresh()->status);
+        $this->assertEquals(TagTeamStatus::unbookable(), $tagTeam->fresh()->status);
     }
 
     /**
@@ -82,6 +82,7 @@ class SuspendControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonsuspendableWrestlerTypes
      */
     public function invoke_throws_exception_for_suspending_a_non_suspendable_wrestler($factoryState)

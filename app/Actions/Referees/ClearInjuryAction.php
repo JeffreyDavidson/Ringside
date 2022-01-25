@@ -13,13 +13,12 @@ class ClearInjuryAction extends BaseRefereeAction
      * Clear an injury of a referee.
      *
      * @param  \App\Models\Referee  $referee
+     *
      * @return void
      */
     public function handle(Referee $referee): void
     {
-        $recoveryDate = now()->toDateTimeString();
-
-        $this->refereeRepository->clearInjury($referee, $recoveryDate);
+        $this->refereeRepository->clearInjury($referee, now());
         $referee->save();
     }
 }

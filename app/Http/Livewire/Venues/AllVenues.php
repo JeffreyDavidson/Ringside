@@ -2,21 +2,16 @@
 
 namespace App\Http\Livewire\Venues;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Venue;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class AllVenues extends Component
+class AllVenues extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $venues = Venue::query()

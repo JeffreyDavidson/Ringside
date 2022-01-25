@@ -86,7 +86,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertEquals('New Wrestler Name', $wrestler->name);
-            $this->assertEquals(74, $wrestler->height->inInches());
+            $this->assertEquals(74, $wrestler->height);
             $this->assertEquals(240, $wrestler->weight);
             $this->assertEquals('Laraville, FL', $wrestler->hometown);
             $this->assertEquals('New Signature Move', $wrestler->signature_move);
@@ -102,14 +102,18 @@ class WrestlerControllerUpdateMethodTest extends TestCase
 
         $wrestler = Wrestler::factory()->unemployed()->create();
 
+        $this->assertCount(0, $wrestler->employments);
+
         $this
             ->actAs(Role::administrator())
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create([
-                    'started_at' => $now->toDateTimeString(),
-                ])
+                WrestlerRequestDataFactory::new()
+                    ->withWrestler($wrestler)
+                    ->create([
+                        'started_at' => $now->toDateTimeString(),
+                    ])
             )
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
@@ -162,39 +166,16 @@ class WrestlerControllerUpdateMethodTest extends TestCase
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create(
-                    ['started_at' => $wrestler->employments()->first()->started_at->toDateTimeString()]
-                )
-            )
-            ->assertRedirect(action([WrestlersController::class, 'index']));
-
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertCount(1, $wrestler->employments);
-        });
-    }
-
-    /**
-     * @test
-     */
-    public function updating_cannot_reemploy_a_released_wrestler()
-    {
-        $wrestler = Wrestler::factory()->released()->create();
-        $startDate = $wrestler->employments->last()->started_at->toDateTimeString();
-
-        $this
-            ->actAs(Role::administrator())
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create([
-                    'started_at' => now()->toDateTimeString(),
-                ])
+                WrestlerRequestDataFactory::new()
+                    ->withWrestler($wrestler)
+                    ->create([
+                        'started_at' => now()->toDateTimeString(),
+                    ])
             )
             ->assertSessionHasErrors(['started_at']);
 
-        tap($wrestler->fresh(), function ($wrestler) use ($startDate) {
+        tap($wrestler->fresh(), function ($wrestler) {
             $this->assertCount(1, $wrestler->employments);
-            $this->assertSame($startDate, $wrestler->employments->last()->started_at->toDateTimeString());
         });
     }
 

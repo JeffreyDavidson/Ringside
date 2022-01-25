@@ -2,8 +2,13 @@
 
 namespace App\Repositories;
 
+use App\DataTransferObjects\EventMatchData;
 use App\Models\Event;
 use App\Models\EventMatch;
+use App\Models\Referee;
+use App\Models\TagTeam;
+use App\Models\Title;
+use App\Models\Wrestler;
 
 class EventMatchRepository
 {
@@ -12,12 +17,13 @@ class EventMatchRepository
      *
      * @param  \App\Models\Event $event
      * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
+     *
      * @return \App\Models\EventMatch
      */
     public function createForEvent(Event $event, EventMatchData $eventMatchData)
     {
         return $event->matches()->create([
-            'match_type_id' => $eventMatchData->match_type_id,
+            'match_type_id' => $eventMatchData->matchType->id,
             'preview' => $eventMatchData->preview,
         ]);
     }
@@ -25,36 +31,62 @@ class EventMatchRepository
     /**
      * Create a new event with the given data.
      *
-     * @param  \App\MOdels\EventMatch $match
-     * @param  int $titleId
-     * @return \App\Models\Event
+     * @param  \App\Models\EventMatch $match
+     * @param  \App\Models\Title $title
+     *
+     * @return \App\Models\EventMatch $match
      */
-    public function addTitleToMatch(EventMatch $match, int $titleId)
+    public function addTitleToMatch(EventMatch $match, Title $title)
     {
-        return $match->titles()->attach($titleId);
+        $match->titles()->attach($title);
+
+        return $match;
     }
 
     /**
      * Create a new event with the given data.
      *
      * @param  \App\Models\EventMatch $match
-     * @param  int $refereeId
-     * @return \App\Models\EventMatch
+     * @param  \App\Models\Referee $referee
+     *
+     * @return \App\Models\EventMatch $match
      */
-    public function addRefereeToMatch(EventMatch $match, int $refereeId)
+    public function addRefereeToMatch(EventMatch $match, Referee $referee)
     {
-        return $match->referees()->attach($refereeId);
+        $match->referees()->attach($referee);
+
+        return $match;
     }
 
     /**
      * Create a new event with the given data.
      *
      * @param  \App\Models\EventMatch $match
-     * @param  int $competitorId
-     * @return \App\Models\Event
+     * @param  \App\Models\Wrestler $wrestler
+     * @param  int $sideNumber
+     *
+     * @return \App\Models\EventMatch $match
      */
-    public function addCompetitorToMatch(EventMatch $match, int $competitorId)
+    public function addWrestlerToMatch(EventMatch $match, Wrestler $wrestler, int $sideNumber)
     {
-        return $match->competitors()->attach($competitorId);
+        $match->wrestlers()->attach($wrestler, ['side_number' => $sideNumber]);
+
+        return $match;
+    }
+
+    /**
+     * Create a new event with the given data.
+     *
+     * @param  \App\Models\EventMatch $match
+     * @param  \App\Models\TagTeam $tagTeam
+     * @param  int $sideNumber
+     *
+     * @return \App\Models\EventMatch $match
+     */
+    public function addTagTeamToMatch(EventMatch $match, TagTeam $tagTeam, int $sideNumber)
+    {
+        $match->tagTeams()->attach($tagTeam, ['side_number' => $sideNumber]);
+
+        return $match;
     }
 }

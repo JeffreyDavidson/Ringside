@@ -37,27 +37,27 @@ class ManagerFactory extends Factory
     public function available()
     {
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::available()])
-        ->has(Employment::factory()->started(Carbon::yesterday()))
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->has(Employment::factory()->started(Carbon::yesterday()))
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function withFutureEmployment()
     {
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::future_employment()])
-        ->has(Employment::factory()->started(Carbon::tomorrow()))
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->has(Employment::factory()->started(Carbon::tomorrow()))
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function unemployed()
     {
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::unemployed()])
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function retired()
@@ -66,11 +66,11 @@ class ManagerFactory extends Factory
         $end = now()->subDays(3);
 
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::retired()])
-        ->has(Employment::factory()->started($start)->ended($end))
-        ->has(Retirement::factory()->started($end))
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->has(Employment::factory()->started($start)->ended($end))
+            ->has(Retirement::factory()->started($end))
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function released()
@@ -79,10 +79,10 @@ class ManagerFactory extends Factory
         $end = now()->subDays(3);
 
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::released()])
-        ->has(Employment::factory()->started($start)->ended($end))
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->has(Employment::factory()->started($start)->ended($end))
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function suspended()
@@ -92,11 +92,11 @@ class ManagerFactory extends Factory
         $end = $now->copy()->subDays(1);
 
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::suspended()])
-        ->has(Employment::factory()->started($start))
-        ->has(Suspension::factory()->started($end))
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->has(Employment::factory()->started($start))
+            ->has(Suspension::factory()->started($end))
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function injured()
@@ -105,18 +105,18 @@ class ManagerFactory extends Factory
         $start = $now->copy()->subDays(2);
 
         return $this->state(fn (array $attributes) => ['status' => ManagerStatus::injured()])
-        ->has(Employment::factory()->started($start))
-        ->has(Injury::factory()->started($now))
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->has(Employment::factory()->started($start))
+            ->has(Injury::factory()->started($now))
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 
     public function softDeleted()
     {
         return $this->state(fn (array $attributes) => ['deleted_at' => now()])
-        ->afterCreating(function (Manager $manager) {
-            $manager->save();
-        });
+            ->afterCreating(function (Manager $manager) {
+                $manager->save();
+            });
     }
 }

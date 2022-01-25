@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Builders\WrestlerQueryBuilder;
-use App\Casts\HeightCast;
 use App\Enums\WrestlerStatus;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
@@ -17,14 +16,14 @@ use App\Observers\WrestlerObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Wrestler extends SingleRosterMember implements Bookable, Manageable, CanBeAStableMember, TagTeamMember
+class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMember, Manageable, TagTeamMember
 {
-    use HasFactory,
+    use CanJoinStables,
+        CanJoinTagTeams,
+        HasFactory,
         HasManagers,
         OwnedByUser,
-        SoftDeletes,
-        CanJoinStables,
-        CanJoinTagTeams;
+        SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -40,7 +39,6 @@ class Wrestler extends SingleRosterMember implements Bookable, Manageable, CanBe
      */
     protected $casts = [
         'status' => WrestlerStatus::class,
-        'height' => HeightCast::class,
     ];
 
     /**
@@ -59,10 +57,21 @@ class Wrestler extends SingleRosterMember implements Bookable, Manageable, CanBe
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\WrestlerQueryBuilder
      */
     public function newEloquentBuilder($query)
     {
         return new WrestlerQueryBuilder($query);
+    }
+
+    /**
+     * Retrieve the event matches participated by the wrestler.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     */
+    public function eventMatches()
+    {
+        return $this->morphToMany(EventMatch::class, 'event_match_competitor');
     }
 }

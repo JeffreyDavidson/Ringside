@@ -10,7 +10,8 @@ class RefereeObserver
     /**
      * Handle the Referee "saved" event.
      *
-     * @param  App\Models\Referee $referee
+     * @param  \App\Models\Referee $referee
+     *
      * @return void
      */
     public function saving(Referee $referee)
@@ -19,7 +20,7 @@ class RefereeObserver
             $referee->isCurrentlyEmployed() => match (true) {
                 $referee->isInjured() => RefereeStatus::injured(),
                 $referee->isSuspended() => RefereeStatus::suspended(),
-                $referee->isBookable() => RefereeStatus::bookable(),
+                default => RefereeStatus::bookable(),
             },
             $referee->hasFutureEmployment() => RefereeStatus::future_employment(),
             $referee->isReleased() => RefereeStatus::released(),

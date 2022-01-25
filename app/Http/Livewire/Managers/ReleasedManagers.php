@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Managers;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Manager;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class ReleasedManagers extends Component
+class ReleasedManagers extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $releasedManagers = Manager::query()

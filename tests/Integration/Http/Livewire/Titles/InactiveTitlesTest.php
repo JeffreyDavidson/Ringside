@@ -30,6 +30,6 @@ class InactiveTitlesTest extends TestCase
     public function component_should_pass_correct_data()
     {
         Livewire::test(InactiveTitles::class)
-                ->assertViewHas('inactiveTitles');
+            ->assertViewHas('inactiveTitles');
     }
 }

@@ -23,7 +23,6 @@ class ClearInjuryControllerTest extends TestCase
      */
     public function invoke_marks_an_injured_referee_as_being_cleared_and_redirects()
     {
-        // $this->withoutExceptionHandling();
         $referee = Referee::factory()->injured()->create();
 
         $this->assertNull($referee->injuries->last()->ended_at);
@@ -65,6 +64,7 @@ class ClearInjuryControllerTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider nonclearableRefereeTypes
      */
     public function invoke_throws_exception_for_clearing_an_injury_from_a_non_clearable_referee($factoryState)

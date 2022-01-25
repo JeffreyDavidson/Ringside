@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Referees;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Referee;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class FutureEmployedAndUnemployedReferees extends Component
+class FutureEmployedAndUnemployedReferees extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $futureEmployedAndUnemployedReferees = Referee::query()

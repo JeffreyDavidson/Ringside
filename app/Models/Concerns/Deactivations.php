@@ -11,10 +11,10 @@ trait Deactivations
      */
     public function isDeactivated()
     {
-        return $this->previousActivation()->exists() &&
-                $this->currentActivation()->doesntExist() &&
-                $this->futureActivation()->doesntExist() &&
-                $this->currentRetirement()->doesntExist();
+        return $this->previousActivation()->exists()
+                && $this->currentActivation()->doesntExist()
+                && $this->futureActivation()->doesntExist()
+                && $this->currentRetirement()->doesntExist();
     }
 
     /**

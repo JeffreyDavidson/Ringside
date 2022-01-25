@@ -30,7 +30,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'name' => null,
             ]))
             ->assertFailsValidation(['name' => 'required']);
@@ -45,7 +45,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'name' => 123,
             ]))
             ->assertFailsValidation(['name' => 'string']);
@@ -60,7 +60,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'name' => 'ab',
             ]))
             ->assertFailsValidation(['name' => 'min:3']);
@@ -72,11 +72,11 @@ class UpdateRequestTest extends TestCase
     public function stable_name_must_be_unique()
     {
         $stableA = Stable::factory()->create();
-        $stableB = Stable::factory()->create(['name' => 'Example Stable']);
+        Stable::factory()->create(['name' => 'Example Stable']);
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stableA)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stableA)->create([
                 'name' => 'Example Stable',
             ]))
             ->assertFailsValidation(['name' => 'unique:stables,NULL,1,id']);
@@ -87,11 +87,11 @@ class UpdateRequestTest extends TestCase
      */
     public function stable_started_at_is_optional_if_not_activated()
     {
-        $stable = Stable::factory()->unactivated()->create();
+        $stable = Stable::factory()->unactivated()->withNoMembers()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'started_at' => null,
             ]))
             ->assertPassesValidation();
@@ -106,7 +106,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'started_at' => null,
             ]))
             ->assertFailsValidation(['started_at' => 'required']);
@@ -121,7 +121,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'started_at' => 12345,
             ]))
             ->assertFailsValidation(['started_at' => 'string']);
@@ -136,7 +136,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'started_at' => 'not-a-date-format',
             ]))
             ->assertFailsValidation(['started_at' => 'date']);
@@ -147,14 +147,14 @@ class UpdateRequestTest extends TestCase
      */
     public function stable_started_at_cannot_be_changed_if_stable_date_has_past()
     {
-        $stable = Stable::factory()->has(Activation::factory()->started('2021-01-01'))->create();
+        $stable = Stable::factory()->active()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
-                'started_at' => '2021-02-01',
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
+                'started_at' => Carbon::now()->toDateTimeString(),
             ]))
-            ->assertFailsValidation(['started_at' => 'app\rules\activationstartdatecanbechanged']);
+            ->assertFailsValidation(['activated_at' => 'activation_date_cannot_be_changed']);
     }
 
     /**
@@ -162,11 +162,11 @@ class UpdateRequestTest extends TestCase
      */
     public function stable_started_at_can_be_changed_if_activation_start_date_is_in_the_future()
     {
-        $stable = Stable::factory()->has(Activation::factory()->started(Carbon::parse('+2 weeks')))->create();
+        $stable = Stable::factory()->withFutureActivation()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'started_at' => Carbon::tomorrow()->toDateString(),
             ]))
             ->assertPassesValidation();
@@ -181,7 +181,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'wrestlers' => 'not-an-array',
             ]))
             ->assertFailsValidation(['wrestlers' => 'array']);
@@ -196,7 +196,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'tag_teams' => 'not-an-array',
             ]))
             ->assertFailsValidation(['tag_teams' => 'array']);
@@ -211,7 +211,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'wrestlers' => ['not-an-integer'],
             ]))
             ->assertFailsValidation(['wrestlers.0' => 'integer']);
@@ -229,7 +229,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'wrestlers' => [$currentWrestlers->first()->id, $currentWrestlers->first()->id],
             ]))
             ->assertFailsValidation(['wrestlers.0' => 'distinct']);
@@ -244,7 +244,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'wrestlers' => [1, 2],
             ]))
             ->assertFailsValidation(['wrestlers.0' => 'exists']);
@@ -253,21 +253,35 @@ class UpdateRequestTest extends TestCase
     /**
      * @test
      */
-    public function each_wrestler_must_be_able_to_join_the_stable()
+    public function a_suspended_wrestler_cannot_join_the_stable()
     {
-        $stable = Stable::factory()
-            ->hasAttached(Wrestler::factory(), ['joined_at' => now()->toDateTimeString()])
-            ->create();
-        $wrestlerToJoinStable = $stable->currentWrestlers->first();
-
-        $stable = Stable::factory()->create();
+        $stable = Stable::factory()->withEmployedDefaultMembers()->create();
+        $wrestlerNotInStable = Wrestler::factory()->suspended()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
-                'wrestlers' => [$wrestlerToJoinStable->id, 2],
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
+                'wrestlers' => [$stable->currentWrestlers->first()->getKey(), $wrestlerNotInStable->getKey()],
+                'tag_teams' => $stable->currentTagTeams->modelKeys(),
             ]))
-            ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinstable']);
+            ->assertFailsValidation(['wrestlers.1' => 'cannot_join_stable']);
+    }
+
+    /**
+     * @test
+     */
+    public function an_injured_wrestler_cannot_join_the_stable()
+    {
+        $stable = Stable::factory()->withEmployedDefaultMembers()->create();
+        $wrestlerNotInStable = Wrestler::factory()->injured()->create();
+
+        $this->createRequest(UpdateRequest::class)
+            ->withParam('stable', $stable)
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
+                'wrestlers' => [$stable->currentWrestlers->first()->getKey(), $wrestlerNotInStable->getKey()],
+                'tag_teams' => $stable->currentTagTeams->modelKeys(),
+            ]))
+            ->assertFailsValidation(['wrestlers.1' => 'cannot_join_stable']);
     }
 
     /**
@@ -279,7 +293,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'tag_teams' => ['not-an-integer'],
             ]))
             ->assertFailsValidation(['tag_teams.0' => 'integer']);
@@ -288,13 +302,13 @@ class UpdateRequestTest extends TestCase
     /**
      * @test
      */
-    public function each_tagTeams_in_a_stable_must_be_distinct()
+    public function each_tag_teams_in_a_stable_must_be_distinct()
     {
         $stable = Stable::factory()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'tag_teams' => [1, 1],
             ]))
             ->assertFailsValidation(['tag_teams.0' => 'distinct']);
@@ -309,7 +323,7 @@ class UpdateRequestTest extends TestCase
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
                 'tag_teams' => [1, 2],
             ]))
             ->assertFailsValidation(['tag_teams.0' => 'exists']);
@@ -318,21 +332,22 @@ class UpdateRequestTest extends TestCase
     /**
      * @test
      */
-    public function each_tag_teams_must_be_able_to_join_the_stable()
+    public function suspended_tag_teams_cannot_join_a_stable()
     {
         $stable = Stable::factory()
             ->hasAttached(TagTeam::factory(), ['joined_at' => now()->toDateTimeString()])
             ->create();
         $tagTeamToJoinStable = $stable->currentTagTeams->first();
+        $tagTeamNotInStable = TagTeam::factory()->suspended()->create();
 
         $stable = Stable::factory()->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
-                'tag_teams' => [$tagTeamToJoinStable->id, 2],
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
+                'tag_teams' => [$tagTeamToJoinStable->getKey(), $tagTeamNotInStable->getKey()],
             ]))
-            ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinstable']);
+            ->assertFailsValidation(['tag_teams.1' => 'cannot_join_stable']);
     }
 
     /**
@@ -340,17 +355,15 @@ class UpdateRequestTest extends TestCase
      */
     public function stable_must_have_a_minimum_number_of_members()
     {
-        $stable = Stable::factory()->create();
-        $wrestlerA = Wrestler::factory()->create();
-        $wrestlerB = Wrestler::factory()->create();
+        $stable = Stable::factory()->active()->withEmployedDefaultMembers()->create();
+        $wrestlersToJoinStable = Wrestler::factory()->bookable()->count(2)->create();
 
         $this->createRequest(UpdateRequest::class)
             ->withParam('stable', $stable)
-            ->validate(StableRequestDataFactory::new()->create([
-                'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
+            ->validate(StableRequestDataFactory::new()->withStable($stable)->create([
+                'wrestlers' => $wrestlersToJoinStable->modelKeys(),
                 'tag_teams' => [],
             ]))
-            ->assertFailsValidation(['wrestlers' => 'app\rules\stablehasenoughmembers'])
-            ->assertFailsValidation(['tag_teams' => 'app\rules\stablehasenoughmembers']);
+            ->assertFailsValidation(['*' => 'not_enough_members']);
     }
 }

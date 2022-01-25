@@ -15,8 +15,11 @@ class TitleTest extends TestCase
     use RetirableContractTests;
 
     private $activeTitle;
+
     private $futureActivatedTitle;
+
     private $inactiveTitle;
+
     private $retiredTitle;
 
     protected function setUp(): void

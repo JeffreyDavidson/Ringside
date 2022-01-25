@@ -13,11 +13,12 @@ class DeactivateAction extends BaseStableAction
      * Deactivate a stable.
      *
      * @param  \App\Models\Stable  $stable
+     *
      * @return void
      */
     public function handle(Stable $stable): void
     {
-        $deactivationDate = now()->toDateTimeString();
+        $deactivationDate = now();
 
         $this->stableRepository->deactivate($stable, $deactivationDate);
         $this->stableRepository->disassemble($stable, $deactivationDate);

@@ -13,11 +13,12 @@ class RetireAction extends BaseTitleAction
      * Retire a title.
      *
      * @param  \App\Models\Title  $title
+     *
      * @return void
      */
     public function handle(Title $title): void
     {
-        $retirementDate = now()->toDateTimeString();
+        $retirementDate = now();
 
         $this->titleRepository->deactivate($title, $retirementDate);
         $this->titleRepository->retire($title, $retirementDate);

@@ -14,8 +14,11 @@ class StableTest extends TestCase
     use RetirableContractTests;
 
     private $activeStable;
+
     private $futureActivatedStable;
+
     private $retiredStable;
+
     private $unactivatedStable;
 
     protected function setUp(): void

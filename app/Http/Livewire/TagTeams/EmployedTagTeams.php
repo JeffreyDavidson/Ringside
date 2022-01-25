@@ -2,21 +2,16 @@
 
 namespace App\Http\Livewire\TagTeams;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\TagTeam;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class EmployedTagTeams extends Component
+class EmployedTagTeams extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $employedTagTeams = TagTeam::query()

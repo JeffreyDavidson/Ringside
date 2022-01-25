@@ -25,10 +25,15 @@ class WrestlerTest extends TestCase
         TagTeamMemberContractTests;
 
     private $bookableWrestler;
+
     private $futureEmployedWrestler;
+
     private $injuredWrestler;
+
     private $suspendedWrestler;
+
     private $retiredWrestler;
+
     private $releasedWrestler;
 
     protected function setUp(): void

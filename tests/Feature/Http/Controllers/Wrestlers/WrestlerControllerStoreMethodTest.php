@@ -54,6 +54,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
      */
     public function store_creates_a_wrestler_and_redirects()
     {
+        $this->withoutExceptionHandling();
         $this
             ->actAs(Role::administrator())
             ->from(action([WrestlersController::class, 'create']))
@@ -68,7 +69,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
 
         tap(Wrestler::first(), function ($wrestler) {
             $this->assertEquals('Example Wrestler Name', $wrestler->name);
-            $this->assertEquals(76, $wrestler->height->height);
+            $this->assertEquals(76, $wrestler->height);
             $this->assertEquals(240, $wrestler->weight);
             $this->assertEquals('Laraville, FL', $wrestler->hometown);
             $this->assertNull($wrestler->signature_move);

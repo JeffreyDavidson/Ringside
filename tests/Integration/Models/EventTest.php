@@ -14,7 +14,9 @@ use Tests\TestCase;
 class EventTest extends TestCase
 {
     private $scheduledEvent;
+
     private $unscheduledEvent;
+
     private $pastEvent;
 
     protected function setUp(): void

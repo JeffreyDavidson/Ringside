@@ -13,11 +13,12 @@ class RetireAction extends BaseRefereeAction
      * Retire a referee.
      *
      * @param  \App\Models\Referee  $referee
+     *
      * @return void
      */
     public function handle(Referee $referee): void
     {
-        $retirementDate = now()->toDateTimeString();
+        $retirementDate = now();
 
         if ($referee->isSuspended()) {
             $this->refereeRepository->reinstate($referee, $retirementDate);

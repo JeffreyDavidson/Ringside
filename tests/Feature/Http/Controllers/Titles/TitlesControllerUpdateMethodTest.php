@@ -103,6 +103,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
     {
         $title = Title::factory()->withFutureActivation()->create();
         $startDate = $title->activations->last()->started_at->toDateTimeString();
+        $now = now()->toDateTimeString();
 
         $this
             ->actAs(Role::administrator())
@@ -113,9 +114,9 @@ class TitlesControllerUpdateMethodTest extends TestCase
             )
             ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) use ($startDate) {
+        tap($title->fresh(), function ($title) use ($startDate, $now) {
             $this->assertCount(1, $title->activations);
-            $this->assertEquals($startDate, $title->activations()->first()->started_at->toDateTimeString());
+            $this->assertEquals($now, $title->activations()->first()->started_at->toDateTimeString());
         });
     }
 
@@ -144,7 +145,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
     /**
      * @test
      */
-    public function updating_cannot_activate_an_active_title()
+    public function update_cannot_activate_an_active_title()
     {
         $title = Title::factory()->active()->create();
         $startDate = $title->activations->last()->started_at->toDateTimeString();

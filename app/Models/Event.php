@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory,
-        SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -46,7 +46,8 @@ class Event extends Model
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder|static
+     *
+     * @return \App\Builders\EventQueryBuilder
      */
     public function newEloquentBuilder($query)
     {
@@ -56,7 +57,7 @@ class Event extends Model
     /**
      * Present the event model.
      *
-     * @return App\Presenters\EventPresenter
+     * @return \App\Presenters\EventPresenter
      */
     public function present()
     {

@@ -10,7 +10,8 @@ class TitleObserver
     /**
      * Handle the Title "saved" event.
      *
-     * @param  App\Models\Title $title
+     * @param  \App\Models\Title $title
+     *
      * @return void
      */
     public function saving(Title $title)

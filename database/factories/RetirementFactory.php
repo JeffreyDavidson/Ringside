@@ -28,11 +28,11 @@ class RetirementFactory extends Factory
      */
     public function definition(): array
     {
-        // $retiree = $this->retirable();
+        $retiree = $this->retirable();
 
         return [
-            // 'retiree_id' => $retiree::factory(),
-            // 'retiree_type' => $retiree,
+            'retiree_id' => $retiree::factory(),
+            'retiree_type' => $retiree,
             'started_at' => now()->toDateTimeString(),
         ];
     }

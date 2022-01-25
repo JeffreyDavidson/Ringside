@@ -22,7 +22,6 @@ class EventMatchFactory extends Factory
     public function definition()
     {
         return [
-            //
         ];
     }
 }

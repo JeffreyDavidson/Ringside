@@ -2,21 +2,16 @@
 
 namespace App\Http\Livewire\Stables;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Stable;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class ActiveStables extends Component
+class ActiveStables extends BaseComponent
 {
-    use WithPagination;
-
-    public $perPage = 10;
-
-    public function paginationView()
-    {
-        return 'pagination.datatables';
-    }
-
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         $activeStables = Stable::query()

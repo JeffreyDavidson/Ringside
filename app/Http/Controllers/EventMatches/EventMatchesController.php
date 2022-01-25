@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\EventMatches;
 
 use App\Actions\AddMatchForEvent;
+use App\DataTransferObjects\EventMatchData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
@@ -14,6 +15,7 @@ class EventMatchesController extends Controller
      * Show the form for creating a new match for a given event.
      *
      * @param  \App\Models\Event $event
+     *
      * @return \Illuminate\View\View
      */
     public function create(Event $event)
@@ -29,13 +31,19 @@ class EventMatchesController extends Controller
      * Create a new match for a given event.
      *
      * @param  \App\Models\Event  $event
-     * @param  \App\Http\Requests\StoreRequest  $request
+     * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
      * @param  \App\Actions\AddMatchForEvent $addMatchForEvent
+     * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Event $event, StoreRequest $request, AddMatchForEvent $addMatchForEvent)
-    {
-        $addMatchForEvent($event, $request->validated());
+    public function store(
+        Event $event,
+        StoreRequest $request,
+        AddMatchForEvent $addMatchForEvent,
+        EventMatchData $eventMatchData
+    ) {
+        $addMatchForEvent($event, $eventMatchData->fromStoreRequest($request));
 
         return redirect()->route('events.index');
     }

@@ -61,7 +61,10 @@ class TagTeamControllerUpdateMethodTest extends TestCase
      */
     public function updates_a_tag_team_and_redirects()
     {
-        $tagTeam = TagTeam::factory()->create(['name' => 'Old Tag Team Name']);
+        $tagTeam = TagTeam::factory()
+            ->unemployed()
+            ->withoutTagTeamPartners()
+            ->create(['name' => 'Old Tag Team Name']);
 
         $this
             ->actAs(Role::administrator())
@@ -84,7 +87,7 @@ class TagTeamControllerUpdateMethodTest extends TestCase
      */
     public function wrestlers_of_tag_team_are_synced_when_tag_team_is_updated()
     {
-        $tagTeam = TagTeam::factory()->create();
+        $tagTeam = TagTeam::factory()->withTagTeamPartners()->create();
         $formerTagTeamPartners = $tagTeam->currentWrestlers;
         $newTagTeamPartners = Wrestler::factory()->count(2)->create();
 
@@ -93,7 +96,8 @@ class TagTeamControllerUpdateMethodTest extends TestCase
             ->from(action([TagTeamsController::class, 'edit'], $tagTeam))
             ->put(
                 action([TagTeamsController::class, 'update'], $tagTeam),
-                TagTeamRequestDataFactory::new()->create(['wrestlers' => $newTagTeamPartners->pluck('id')->toArray()])
+                TagTeamRequestDataFactory::new()
+                    ->create(['wrestlers' => $newTagTeamPartners->modelKeys()])
             )
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 

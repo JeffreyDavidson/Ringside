@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Stables;
 
 use App\Models\Stable;
-use App\Rules\StableHasEnoughMembers;
-use App\Rules\TagTeamCanJoinStable;
-use App\Rules\WrestlerCanJoinStable;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use App\Rules\WrestlerJoinedStableInTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -48,14 +47,12 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinStable(new Stable),
             ],
             'tag_teams.*' => [
                 'bail',
                 'integer',
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
-                new TagTeamCanJoinStable(new Stable),
             ],
         ];
     }
@@ -64,34 +61,76 @@ class StoreRequest extends FormRequest
      * Configure the validator instance.
      *
      * @param  \Illuminate\Validation\Validator  $validator
+     *
      * @return void
      */
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
             if ($validator->errors()->isEmpty()) {
-                $membersWereAdded = count($this->input('tag_teams')) > 0 || count($this->input('wrestlers')) > 0;
-                if ($membersWereAdded) {
-                    $stableHasEnoughMembersResult = (new StableHasEnoughMembers(
-                        $this->input('tag_teams'),
-                        $this->input('wrestlers')
-                    ))->passes();
+                if ($this->requestHasMembers() || $this->date('started_at')) {
+                    $tagTeamIds = $this->collect('tag_teams');
+                    $wrestlerIds = $this->collect('wrestlers');
 
-                    if (! $stableHasEnoughMembersResult) {
-                        $validator->addFailure('wrestlers', StableHasEnoughMembers::class);
-                        $validator->addFailure('tag_teams', StableHasEnoughMembers::class);
+                    if ($tagTeamIds->count() * 2 + $wrestlerIds->count() < 3) {
+                        $validator->errors()->add(
+                            '*',
+                            'Stable must does not contain at least 3 members.'
+                        );
+
+                        $validator->addFailure('*', 'not_enough_members');
                     }
 
-                    $wrestlerJoinedStableInTagTeamResult = (new WrestlerJoinedStableInTagTeam(
-                        $this->input('tag_teams'),
-                        $this->input('wrestlers')
-                    ))->passes();
+                    if ($this->collect('wrestlers')->isNotEmpty()) {
+                        $this->collect('wrestlers')->each(function ($wrestlerId, $key) use ($validator) {
+                            $wrestler = Wrestler::with('currentStable')->whereKey($wrestlerId)->sole();
 
-                    if (! $wrestlerJoinedStableInTagTeamResult) {
-                        $validator->addFailure('wrestlers', WrestlerJoinedStableInTagTeam::class);
+                            if ($wrestler->currentStable !== null) {
+                                $validator->errors()->add(
+                                    'wrestlers.'.$key,
+                                    "{$wrestler->name} is already a member of a stable."
+                                );
+
+                                $validator->addFailure('wrestlers.'.$key, 'wrestler_already_in_different_stable');
+                            }
+                        });
+                    }
+
+                    if ($tagTeamIds->isNotEmpty()) {
+                        $tagTeamIds->each(function ($tagTeamId, $key) use ($validator) {
+                            $tagTeam = TagTeam::with('currentWrestlers')->whereKey($tagTeamId)->sole();
+
+                            if ($tagTeam->currentStable !== null) {
+                                $validator->errors()->add(
+                                    'tag_teams.'.$key,
+                                    "{$tagTeam->name} is already a member of a stable."
+                                );
+
+                                $validator->addFailure('tag_teams.'.$key, 'tag_team_already_in_different_stable');
+                            }
+
+                            $wrestlersFromRequest = $this->collect('wrestlers'); // 1, 2, 3
+                            $tagTeamPartnerIds = $tagTeam->currentWrestlers->pluck('id'); // 3, 4
+
+                            $wrestlersInTagTeam = $tagTeamPartnerIds->intersect($wrestlersFromRequest);
+
+                            if ($wrestlersInTagTeam->isNotEmpty()) {
+                                $validator->errors()->add(
+                                    'wrestlers',
+                                    'There are wrestlers that are added to the stable that were added from a tag team.'
+                                );
+
+                                $validator->addFailure('wrestlers', 'wrestlers_added_that_are_inside_tag_teams');
+                            }
+                        });
                     }
                 }
             }
         });
+    }
+
+    protected function requestHasMembers()
+    {
+        return $this->collect('tag_teams')->isNotEmpty() || $this->collect('wrestlers')->isNotEmpty();
     }
 }
