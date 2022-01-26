@@ -143,7 +143,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
     public function update_cannot_reemploy_a_released_manager()
     {
         $manager = Manager::factory()->released()->create();
-        $startDate = $manager->employments->last()->started_at->toDateTimeString();
+        $startDate = $manager->startedAt->toDateTimeString();
 
         $this->assertCount(1, $manager->employments);
 

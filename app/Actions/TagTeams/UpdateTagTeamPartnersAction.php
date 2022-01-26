@@ -25,15 +25,12 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
                 $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlers);
             }
         } else {
-            $formerTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotIn(
+            $formerTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotNotIn(
                 'wrestler_id',
                 $wrestlers->modelKeys()
             )->get();
 
-            $newTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotNotIn(
-                'wrestler_id',
-                $wrestlers->modelKeys()
-            )->get();
+            $newTagTeamPartners = $wrestlers->except($formerTagTeamPartners->modelKeys());
 
             $this->tagTeamRepository->syncTagTeamPartners($tagTeam, $formerTagTeamPartners, $newTagTeamPartners);
         }

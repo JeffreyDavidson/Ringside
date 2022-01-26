@@ -55,7 +55,7 @@ class StoreRequest extends FormRequest
             if ($validator->errors()->isEmpty()) {
                 $this->collect('wrestlers')->each(function ($wrestlerId, $key) use ($validator) {
                     $wrestler = Wrestler::query()
-                        ->with(['currentTagTeam', 'currentEmployment', 'futureEmployment'])
+                        ->with(['currentEmployment', 'futureEmployment'])
                         ->whereKey($wrestlerId)
                         ->sole();
 
@@ -83,7 +83,7 @@ class StoreRequest extends FormRequest
                         );
                     }
 
-                    if ($wrestler->currentTagTeam !== null) {
+                    if ($wrestler->currentTagTeam() !== null && $wrestler->currentTagTeam()->exists()) {
                         $validator->errors()->add(
                             'wrestlers',
                             "{$wrestler->name} is already a part of a bookable tag team."

@@ -180,7 +180,7 @@ abstract class SingleRosterMember extends RosterMember
      */
     public function isBookable()
     {
-        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured()) {
+        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment()) {
             return false;
         }
 

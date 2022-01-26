@@ -134,6 +134,8 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->released()->create();
         $startDate = $referee->startedAt->toDateTimeString();
 
+        $this->assertCount(1, $referee->employments);
+
         $this
             ->actAs(Role::administrator())
             ->from(action([RefereesController::class, 'edit'], $referee))
@@ -148,7 +150,6 @@ class RefereeControllerUpdateMethodTest extends TestCase
             ->assertSessionHasErrors(['started_at']);
 
         tap($referee->fresh(), function ($referee) use ($startDate) {
-            $this->assertCount(1, $referee->employments);
             $this->assertSame($startDate, $referee->employments->last()->started_at->toDateTimeString());
         });
     }
