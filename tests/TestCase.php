@@ -13,6 +13,8 @@ abstract class TestCase extends BaseTestCase
     use CreatesApplication;
     use RefreshDatabase;
 
+    protected bool $dropViews = true;
+
     /**
      * Setup the test environment.
      *

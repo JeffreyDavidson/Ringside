@@ -4,9 +4,11 @@ namespace App\Actions;
 
 use App\DataTransferObjects\EventMatchData;
 use App\Models\Event;
+use App\Models\EventMatchCompetitor;
 use App\Models\Referee;
 use App\Models\Title;
 use App\Repositories\EventMatchRepository;
+use Illuminate\Support\Facades\Log;
 
 class AddMatchForEvent
 {
@@ -58,16 +60,12 @@ class AddMatchForEvent
 
         $eventMatchData->competitors->each(function ($sideCompetitors, $sideNumber) use ($createdMatch) {
             if (array_key_exists('wrestlers', $sideCompetitors)) {
-                foreach ($sideCompetitors as $wrestlers) {
-                    $wrestlers->each(
-                        fn ($wrestler) => $this->eventMatchRepository->addWrestlerToMatch($createdMatch, $wrestler, $sideNumber)
-                    );
+                foreach ($sideCompetitors['wrestlers'] as $wrestler) {
+                    $this->eventMatchRepository->addWrestlerToMatch($createdMatch, $wrestler, $sideNumber);
                 }
-            } elseif (array_key_exists('tag_teams', $sideCompetitors)) {
-                foreach ($sideCompetitors as $tagTeams) {
-                    $tagTeams->each(
-                        fn ($tagTeam) => $this->eventMatchRepository->addTagTeamToMatch($createdMatch, $tagTeam, $sideNumber)
-                    );
+            } elseif (array_key_exists('wrestlers', $sideCompetitors)) {
+                foreach ($sideCompetitors['tag_teams'] as $wrestler) {
+                    $this->eventMatchRepository->addTagTeamToMatch($createdMatch, $wrestler, $sideNumber);
                 }
             }
         });

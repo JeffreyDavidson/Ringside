@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
 class EventMatch extends Model
 {
-    use HasFactory;
+    use HasFactory,
+        HasMergedRelationships;
 
     /**
      * The attributes that are mass assignable.
@@ -43,7 +45,7 @@ class EventMatch extends Model
      */
     public function competitors()
     {
-        return $this->hasMany(EventMatchCompetitor::class);
+        return $this->mergedRelationWithModel(EventMatchCompetitor::class, 'all_match_competitors');
     }
 
     /**
@@ -53,7 +55,7 @@ class EventMatch extends Model
      */
     public function wrestlers()
     {
-        return $this->morphedByMany(Wrestler::class, 'event_match_competitor', 'event_match_competitors')
+        return $this->morphedByMany(Wrestler::class, 'competitor', 'event_match_competitors')
             ->using(EventMatchCompetitor::class);
     }
 
@@ -64,7 +66,7 @@ class EventMatch extends Model
      */
     public function tagTeams()
     {
-        return $this->morphedByMany(Wrestler::class, 'event_match_competitor', 'event_match_competitors')
+        return $this->morphedByMany(TagTeam::class, 'competitor', 'event_match_competitors')
             ->using(EventMatchCompetitor::class);
     }
 }
