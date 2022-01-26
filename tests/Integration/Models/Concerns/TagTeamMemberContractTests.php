@@ -19,6 +19,6 @@ trait TagTeamMemberContractTests
             ->hasAttached($tagTeamMember, ['joined_at' => now()->toDateTimeString()])
             ->create();
 
-        $this->assertInstanceOf(TagTeam::class, $tagTeamMember->currentTagTeam);
+        $this->assertInstanceOf(TagTeam::class, $tagTeamMember->currentTagTeam());
     }
 }
