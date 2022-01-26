@@ -13,12 +13,15 @@ class EmployAction extends BaseManagerAction
      * Employ a manager.
      *
      * @param  \App\Models\Manager  $manager
+     * @param  \Carbon\Carbon|null  $startDate
      *
      * @return void
      */
-    public function handle(Manager $manager): void
+    public function handle(Manager $manager, $startDate = null): void
     {
-        $this->managerRepository->employ($manager, now());
+        $startDate ??= now();
+
+        $this->managerRepository->employ($manager, $startDate);
         $manager->save();
     }
 }
