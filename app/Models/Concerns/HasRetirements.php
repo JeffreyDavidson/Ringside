@@ -4,7 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\Retirement;
 
-trait Retirements
+trait HasRetirements
 {
     /**
      * Get the retirements of the model.
@@ -70,33 +70,5 @@ trait Retirements
     public function hasRetirements()
     {
         return $this->retirements()->count() > 0;
-    }
-
-    /**
-     * Determine if the model can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired()
-    {
-        if ($this->isNotInEmployment()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Determine if the model can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired()
-    {
-        if (! $this->isRetired()) {
-            return false;
-        }
-
-        return true;
     }
 }
