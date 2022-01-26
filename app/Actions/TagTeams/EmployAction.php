@@ -13,7 +13,7 @@ class EmployAction extends BaseTagTeamAction
      * Employ a tagTeam.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Carbon\Carbon|null  $startDater
+     * @param  \Carbon\Carbon|null  $startDate
      *
      * @return void
      */

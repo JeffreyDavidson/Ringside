@@ -51,6 +51,6 @@ class TitleTest extends TestCase
      */
     public function a_title_uses_retirements_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\Retirements', Title::class);
+        $this->assertUsesTrait('App\Models\Concerns\HasRetirements', Title::class);
     }
 }

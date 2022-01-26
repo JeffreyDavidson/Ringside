@@ -59,6 +59,16 @@ abstract class SingleRosterMember extends RosterMember
     }
 
     /**
+     * Determine if the tag team can be reinstated.
+     *
+     * @return bool
+     */
+    public function canBeReinstated()
+    {
+        return $this->isSuspended();
+    }
+
+    /**
      * Determine if the model can be unretired.
      *
      * @return bool

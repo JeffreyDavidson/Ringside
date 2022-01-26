@@ -101,20 +101,21 @@ class TitlesControllerUpdateMethodTest extends TestCase
      */
     public function update_can_activate_a_future_activated_title_when_activated_at_is_filled()
     {
+        $now = now();
         $title = Title::factory()->withFutureActivation()->create();
-        $startDate = $title->activations->last()->started_at->toDateTimeString();
-        $now = now()->toDateTimeString();
 
         $this
             ->actAs(Role::administrator())
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create()
+                TitleRequestDataFactory::new()->withTitle($title)->create([
+                    'activated_at' => $now->toDateTimeString(),
+                ])
             )
             ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) use ($startDate, $now) {
+        tap($title->fresh(), function ($title) use ($now) {
             $this->assertCount(1, $title->activations);
             $this->assertEquals($now, $title->activations()->first()->started_at->toDateTimeString());
         });
