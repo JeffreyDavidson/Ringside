@@ -71,4 +71,24 @@ class Manager extends SingleRosterMember implements CanBeAStableMember
     {
         return $this->currentEmployment()->exists();
     }
+
+    /**
+     * Determine if the model can be retired.
+     *
+     * @return bool
+     */
+    public function canBeRetired()
+    {
+        return $this->isAvailable() || $this->isInjured();
+    }
+
+    /**
+     * Determine if the model can be unretired.
+     *
+     * @return bool
+     */
+    public function canBeUnretired()
+    {
+        return $this->isRetired();
+    }
 }

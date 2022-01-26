@@ -72,14 +72,16 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
      */
     public function canBeRetired()
     {
-        if ($this->isCurrentlyActivated()) {
-            return true;
-        }
+        return $this->isCurrentlyActivated() || $this->isDeactivated();
+    }
 
-        if ($this->isDeactivated()) {
-            return true;
-        }
-
-        return false;
+    /**
+     * Determine if the model can be unretired.
+     *
+     * @return bool
+     */
+    public function canBeUnretired()
+    {
+        return $this->isRetired();
     }
 }

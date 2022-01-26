@@ -224,17 +224,23 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     }
 
     /**
+     * Determine if the model can be retired.
+     *
+     * @return bool
+     */
+    public function canBeRetired()
+    {
+        return $this->isBookable();
+    }
+
+    /**
      * Determine if the model can be unretired.
      *
      * @return bool
      */
     public function canBeUnretired()
     {
-        if (! $this->isRetired()) {
-            return false;
-        }
-
-        return true;
+        return $this->isRetired();
     }
 
     /**

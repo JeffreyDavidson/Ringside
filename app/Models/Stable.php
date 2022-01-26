@@ -138,15 +138,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      */
     public function canBeRetired()
     {
-        if ($this->isCurrentlyActivated()) {
-            return true;
-        }
-
-        if ($this->isDeactivated()) {
-            return true;
-        }
-
-        return false;
+        return $this->isCurrentlyActivated() || $this->isDeactivated();
     }
 
     /**
@@ -156,10 +148,6 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      */
     public function canBeUnretired()
     {
-        if (! $this->isRetired()) {
-            return false;
-        }
-
-        return true;
+        return $this->isRetired();
     }
 }
