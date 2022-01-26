@@ -13,19 +13,20 @@ class EmployAction extends BaseTagTeamAction
      * Employ a tagTeam.
      *
      * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Carbon\Carbon|null  $startDater
      *
      * @return void
      */
-    public function handle(TagTeam $tagTeam): void
+    public function handle(TagTeam $tagTeam, $startDate = null): void
     {
-        $employmentDate = now();
+        $startDate ??= now();
 
-        $tagTeam->currentWrestlers->each(function ($wrestler) use ($employmentDate) {
-            $this->wrestlerRepository->employ($wrestler, $employmentDate);
+        $tagTeam->currentWrestlers->each(function ($wrestler) use ($startDate) {
+            $this->wrestlerRepository->employ($wrestler, $startDate);
             $wrestler->save();
         });
 
-        $this->tagTeamRepository->employ($tagTeam, $employmentDate);
+        $this->tagTeamRepository->employ($tagTeam, $startDate);
         $tagTeam->save();
     }
 }

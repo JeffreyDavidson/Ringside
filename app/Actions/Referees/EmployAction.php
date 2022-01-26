@@ -13,12 +13,15 @@ class EmployAction extends BaseRefereeAction
      * Employ a referee.
      *
      * @param  \App\Models\Referee  $referee
+     * @param  \Carbon\Carbon|null  $startDate
      *
      * @return void
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, $startDate = null): void
     {
-        $this->refereeRepository->employ($referee, now());
+        $startDate ??= now();
+
+        $this->refereeRepository->employ($referee, $startDate);
         $referee->save();
     }
 }

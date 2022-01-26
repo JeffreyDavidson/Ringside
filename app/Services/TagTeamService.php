@@ -55,7 +55,7 @@ class TagTeamService
         }
 
         if (isset($tagTeamData->start_date)) {
-            EmployAction::run($tagTeam);
+            EmployAction::run($tagTeam, $tagTeamData->start_date);
         }
 
         return $tagTeam;
