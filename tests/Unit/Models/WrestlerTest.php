@@ -20,16 +20,6 @@ class WrestlerTest extends TestCase
     /**
      * @test
      */
-    public function a_wrestler_height_gets_cast_as_a_height_enum()
-    {
-        $wrestler = Wrestler::factory()->make();
-
-        $this->assertInstanceOf(Height::class, $wrestler->height);
-    }
-
-    /**
-     * @test
-     */
     public function a_wrestler_is_a_single_roster_member()
     {
         $this->assertEquals(SingleRosterMember::class, get_parent_class(Wrestler::class));
