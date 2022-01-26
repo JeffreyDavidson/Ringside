@@ -74,4 +74,24 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
     {
         return $this->morphToMany(EventMatch::class, 'event_match_competitor');
     }
+
+    /**
+     * Determine if the model can be retired.
+     *
+     * @return bool
+     */
+    public function canBeRetired()
+    {
+        return $this->isBookable() || $this->isInjured() || $this->isSuspended();
+    }
+
+    /**
+     * Determine if the model can be unretired.
+     *
+     * @return bool
+     */
+    public function canBeUnretired()
+    {
+        return $this->isRetired();
+    }
 }

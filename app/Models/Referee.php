@@ -55,4 +55,24 @@ class Referee extends SingleRosterMember implements Bookable
     {
         return new RefereeQueryBuilder($query);
     }
+
+    /**
+     * Determine if the model can be retired.
+     *
+     * @return bool
+     */
+    public function canBeRetired()
+    {
+        return $this->isBookable() || $this->isInjured() || $this->isSuspended();
+    }
+
+    /**
+     * Determine if the model can be unretired.
+     *
+     * @return bool
+     */
+    public function canBeUnretired()
+    {
+        return $this->isRetired();
+    }
 }

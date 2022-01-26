@@ -70,18 +70,4 @@ trait HasSuspensions
     {
         return $this->suspensions()->count() > 0;
     }
-
-    /**
-     * Determine if the model can be reinstated.
-     *
-     * @return bool
-     */
-    public function canBeReinstated()
-    {
-        if (! $this->isSuspended()) {
-            return false;
-        }
-
-        return true;
-    }
 }
