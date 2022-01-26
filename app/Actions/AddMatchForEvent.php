@@ -56,21 +56,21 @@ class AddMatchForEvent
             )
         );
 
-        foreach ($eventMatchData->competitors as $sideNumber => $sideCompetitors) {
+        $eventMatchData->competitors->each(function ($sideCompetitors, $sideNumber) use ($createdMatch) {
             if (array_key_exists('wrestlers', $sideCompetitors)) {
                 foreach ($sideCompetitors as $wrestlers) {
-                    foreach ($wrestlers as $wrestler) {
-                        $this->eventMatchRepository->addWrestlerToMatch($createdMatch, $wrestler, $sideNumber);
-                    }
+                    $wrestlers->each(
+                        fn ($wrestler) => $this->eventMatchRepository->addWrestlerToMatch($createdMatch, $wrestler, $sideNumber)
+                    );
                 }
             } elseif (array_key_exists('tag_teams', $sideCompetitors)) {
                 foreach ($sideCompetitors as $tagTeams) {
-                    foreach ($tagTeams as $tagTeam) {
-                        $this->eventMatchRepository->addTagTeamToMatch($createdMatch, $tagTeam, $sideNumber);
-                    }
+                    $tagTeams->each(
+                        fn ($tagTeam) => $this->eventMatchRepository->addTagTeamToMatch($createdMatch, $tagTeam, $sideNumber)
+                    );
                 }
             }
-        }
+        });
 
         return $createdMatch;
     }

@@ -47,19 +47,29 @@ class UpdateRequest extends FormRequest
     {
         $validator->after(function (Validator $validator) {
             if ($validator->errors()->isEmpty()) {
+                /* @var \App\Models\Manager $manager */
                 $manager = $this->route()->parameter('manager');
 
-                if ($manager->isReleased() && ! $manager->employedOn($this->date('started_at'))) {
+                if ($manager->isCurrentlyEmployed()) {
                     $validator->errors()->add(
                         'started_at',
-                        "{$manager->full_name} was released and the employment date cannot be changed."
+                        "{$manager->full_name} is currently employed and cannot have their original start date changed."
                     );
+                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
                 }
 
-                if ($manager->isCurrentlyEmployed() && ! $manager->employedOn($this->date('started_at'))) {
+                if ($manager->isReleased()) {
                     $validator->errors()->add(
                         'started_at',
-                        "{$manager->full_name} is currently employed and the employment date cannot be changed."
+                        "{$manager->full_name} has been released and cannot have their original start date changed."
+                    );
+                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
+                }
+
+                if ($manager->isRetired()) {
+                    $validator->errors()->add(
+                        'started_at',
+                        "{$manager->full_name} is currently retired and cannot have their original start date changed."
                     );
                     $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
                 }

@@ -27,10 +27,9 @@ trait CanJoinStables
      */
     public function currentStable()
     {
-        return $this->stables()
+        return $this->morphToOne(Stable::class, 'member', 'stable_members')
             ->withPivot(['joined_at', 'left_at'])
-            ->wherePivotNull('left_at')
-            ->first();
+            ->wherePivotNull('left_at');
     }
 
     /**
@@ -53,6 +52,6 @@ trait CanJoinStables
      */
     public function isNotCurrentlyInStable(Stable $stable)
     {
-        return ! $this->currentStable() || $this->currentStable()->isNot($stable);
+        return ! $this->currentStable || $this->currentStable->isNot($stable);
     }
 }

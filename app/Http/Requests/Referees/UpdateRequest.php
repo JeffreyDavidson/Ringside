@@ -49,17 +49,26 @@ class UpdateRequest extends FormRequest
             if ($validator->errors()->isEmpty()) {
                 $referee = $this->route()->parameter('referee');
 
-                if ($referee->isReleased() && ! $referee->employedOn($this->date('started_at'))) {
+                if ($referee->isCurrentlyEmployed()) {
                     $validator->errors()->add(
                         'started_at',
-                        "{$referee->full_name} was released and the employment date cannot be changed."
+                        "{$referee->full_name} is currently employed and cannot have their original start date changed."
                     );
+                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
                 }
 
-                if ($referee->isCurrentlyEmployed() && ! $referee->employedOn($this->date('started_at'))) {
+                if ($referee->isReleased()) {
                     $validator->errors()->add(
                         'started_at',
-                        "{$referee->full_name} is currently employed and the employment date cannot be changed."
+                        "{$referee->full_name} has been released and cannot have their original start date changed."
+                    );
+                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
+                }
+
+                if ($referee->isRetired()) {
+                    $validator->errors()->add(
+                        'started_at',
+                        "{$referee->full_name} is currently retired and cannot have their original start date changed."
                     );
                     $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
                 }

@@ -85,7 +85,7 @@ class StoreRequest extends FormRequest
                         $this->collect('wrestlers')->each(function ($wrestlerId, $key) use ($validator) {
                             $wrestler = Wrestler::with('currentStable')->whereKey($wrestlerId)->sole();
 
-                            if ($wrestler->currentStable !== null) {
+                            if ($wrestler->currentStable !== null && $wrestler->currentStable->exists()) {
                                 $validator->errors()->add(
                                     'wrestlers.'.$key,
                                     "{$wrestler->name} is already a member of a stable."
