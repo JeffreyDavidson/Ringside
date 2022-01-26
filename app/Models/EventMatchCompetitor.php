@@ -14,7 +14,7 @@ class EventMatchCompetitor extends MorphPivot
      *
      * @var string[]
      */
-    protected $fillable = ['event_match_id', 'event_match_competitor_id', 'event_match_competitor_type', 'side_number'];
+    protected $fillable = ['event_match_id', 'competitor_id', 'competitor_type', 'side_number'];
 
     /**
      * Retreive the model as the competitor.
@@ -23,7 +23,7 @@ class EventMatchCompetitor extends MorphPivot
      */
     public function competitor()
     {
-        return $this->morphTo('event_match_competitor');
+        return $this->morphTo();
     }
 
     /**

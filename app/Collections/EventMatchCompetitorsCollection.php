@@ -2,6 +2,7 @@
 
 namespace App\Collections;
 
+use App\Models\EventMatchCompetitor;
 use Illuminate\Database\Eloquent\Collection;
 
 class EventMatchCompetitorsCollection extends Collection
@@ -13,7 +14,7 @@ class EventMatchCompetitorsCollection extends Collection
      */
     public function groupedBySide()
     {
-        return $this->groupBy('side_number');
+        return EventMatchCompetitor::findMany($this->modelKeys())->groupBy('side_number');
     }
 
     /**
@@ -21,23 +22,13 @@ class EventMatchCompetitorsCollection extends Collection
      *
      * @return \Illuminate\Support\Collection
      */
-    public function groupedByType()
+    public function groupedByCompetitorType()
     {
-        return $this->keyBy('event_match_competitor_type');
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param  mixed $type
-     * @return \Illuminate\Support\Collection
-     */
-    public function filterByType($type)
-    {
-        return $this->filter(function ($value, $key) use ($type) {
-            if ($key === $type) {
-                return true;
-            }
+        return $this->groupBy(function ($group) {
+            return match ($group->competitor_type) {
+                'App\Models\Wrestler' => 'wrestlers',
+                'App\Models\TagTeam' => 'tag_teams'
+            };
         });
     }
 }

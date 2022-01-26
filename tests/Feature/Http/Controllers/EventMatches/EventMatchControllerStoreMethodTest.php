@@ -10,7 +10,6 @@ use App\Models\Referee;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Database\Seeders\MatchTypesTableSeeder;
-use Illuminate\Database\Eloquent\Collection;
 use Tests\Factories\EventMatchRequestDataFactory;
 use Tests\TestCase;
 
@@ -62,8 +61,16 @@ class EventMatchControllerStoreMethodTest extends TestCase
             $this->assertCollectionHas($match->referees, $referee);
             $this->assertInstanceOf(EventMatchCompetitorsCollection::class, $match->competitors);
             $this->assertCount(2, $match->competitors);
-            $this->assertInstanceOf(Wrestler::class, $match->competitors->first()->competitor);
-            $this->assertInstanceOf(Wrestler::class, $match->competitors->last()->competitor);
+
+            $this->assertArrayHasKey(
+                'wrestlers',
+                $match->competitors->groupedBySide()->first()->groupedByCompetitorType()
+            );
+
+            $this->assertInstanceOf(
+                Wrestler::class,
+                $match->competitors->groupedBySide()->first()->groupedByCompetitorType()->first()->first()->competitor
+            );
             $this->assertEquals('This is a general match preview.', $match->preview);
         });
     }
