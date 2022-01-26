@@ -13,7 +13,7 @@ class CreateAllStableMembersView extends Migration
      */
     public function up()
     {
-        Schema::createMergeView(
+        Schema::createOrReplaceMergeView(
             'all_stable_members',
             [(new Stable)->tagTeams(), (new Stable)->wrestlers()]
         );
