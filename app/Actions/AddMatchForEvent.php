@@ -4,11 +4,9 @@ namespace App\Actions;
 
 use App\DataTransferObjects\EventMatchData;
 use App\Models\Event;
-use App\Models\EventMatchCompetitor;
 use App\Models\Referee;
 use App\Models\Title;
 use App\Repositories\EventMatchRepository;
-use Illuminate\Support\Facades\Log;
 
 class AddMatchForEvent
 {
