@@ -15,28 +15,28 @@ class TagTeamData
      *
      * @var string
      */
-    protected string $name;
+    public string $name;
 
     /**
      * The signature move of the tag team.
      *
      * @var string|null
      */
-    protected ?string $signature_move;
+    public ?string $signature_move;
 
     /**
      * The start date of the wrestler's employment.
      *
      * @var Carbon|null
      */
-    protected ?Carbon $start_date;
+    public ?Carbon $start_date;
 
     /**
      * The wrestlers to be on the tag team.
      *
      * @var Collection|null
      */
-    protected ?Collection $wrestlers;
+    public ?Collection $wrestlers;
 
     /**
      * Create a DTO from the store request.

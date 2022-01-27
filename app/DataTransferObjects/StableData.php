@@ -16,28 +16,28 @@ class StableData
      *
      * @var string
      */
-    protected string $name;
+    public string $name;
 
     /**
      * The start date of the stable's activation.
      *
      * @var Carbon|null
      */
-    protected ?Carbon $start_date;
+    public ?Carbon $start_date;
 
     /**
      * The tag teams to be on the stable.
      *
      * @var Collection|null
      */
-    protected ?Collection $tagTeams;
+    public ?Collection $tagTeams;
 
     /**
      * The wrestlers to be on the stable.
      *
      * @var Collection|null
      */
-    protected ?Collection $wrestlers;
+    public ?Collection $wrestlers;
 
     /**
      * Create a DTO from the store request.

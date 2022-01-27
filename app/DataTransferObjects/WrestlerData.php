@@ -13,42 +13,42 @@ class WrestlerData
      *
      * @var string
      */
-    protected string $name;
+    public string $name;
 
     /**
      * The height of the wrestler in inches.
      *
      * @var int
      */
-    protected int $height;
+    public int $height;
 
     /**
      * The weight of the wrestler in pounds.
      *
      * @var int
      */
-    protected int $weight;
+    public int $weight;
 
     /**
      * The hometown of the wrestler.
      *
      * @var string
      */
-    protected string $hometown;
+    public string $hometown;
 
     /**
      * The signature move of the wrestler.
      *
      * @var string|null
      */
-    protected ?string $signature_move;
+    public ?string $signature_move;
 
     /**
      * The start date of the wrestler's employment.
      *
      * @var Carbon|null
      */
-    protected ?Carbon $start_date;
+    public ?Carbon $start_date;
 
     /**
      * Create a DTO from the update request.

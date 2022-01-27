@@ -13,21 +13,21 @@ class ManagerData
      *
      * @var string
      */
-    protected string $first_name;
+    public string $first_name;
 
     /**
      * The last name of the manager.
      *
      * @var string
      */
-    protected string $last_name;
+    public string $last_name;
 
     /**
      * The start date of the manager's employment.
      *
      * @var Carbon|null
      */
-    protected ?Carbon $start_date;
+    public ?Carbon $start_date;
 
     /**
      * Create a DTO from the store request.
