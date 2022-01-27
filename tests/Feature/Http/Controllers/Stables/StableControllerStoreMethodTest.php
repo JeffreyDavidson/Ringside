@@ -78,7 +78,7 @@ class StableControllerStoreMethodTest extends TestCase
      */
     public function an_activation_is_created_for_the_stable_if_started_at_is_filled_in_request()
     {
-        $startedAt = now();
+        $now = now();
         $wrestlers = Wrestler::factory()->count(3)->create();
 
         $this
@@ -87,14 +87,13 @@ class StableControllerStoreMethodTest extends TestCase
             ->post(
                 action([StablesController::class, 'store']),
                 StableRequestDataFactory::new()
-                    ->withStartDate($startedAt)
                     ->withWrestlers($wrestlers->modelKeys())
-                    ->create()
+                    ->create(['started_at' => $now->toDateTimeString()])
             );
 
-        tap(Stable::first(), function ($stable) use ($startedAt) {
+        tap(Stable::first(), function ($stable) use ($now) {
             $this->assertCount(1, $stable->activations);
-            $this->assertEquals($startedAt, $stable->activatedAt->toDateTimeString());
+            $this->assertEquals($now, $stable->activatedAt->toDateTimeString());
         });
     }
 
