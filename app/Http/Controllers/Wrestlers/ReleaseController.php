@@ -20,7 +20,7 @@ class ReleaseController extends Controller
     {
         $this->authorize('release', $wrestler);
 
-        throw_unless($wrestler->canBeReleased(), new CannotBeReleasedException);
+        throw_unless($wrestler->canBeReleased(), CannotBeReleasedException::class);
 
         ReleaseAction::run($wrestler);
 

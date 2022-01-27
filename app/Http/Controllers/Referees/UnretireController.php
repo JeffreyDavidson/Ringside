@@ -20,7 +20,7 @@ class UnretireController extends Controller
     {
         $this->authorize('unretire', $referee);
 
-        throw_unless($referee->canBeUnretired(), new CannotBeUnretiredException);
+        throw_unless($referee->canBeUnretired(), CannotBeUnretiredException::class);
 
         UnretireAction::run($referee);
 

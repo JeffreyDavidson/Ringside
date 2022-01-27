@@ -20,7 +20,7 @@ class SuspendController extends Controller
     {
         $this->authorize('suspend', $manager);
 
-        throw_unless($manager->canBeSuspended(), new CannotBeSuspendedException);
+        throw_unless($manager->canBeSuspended(), CannotBeSuspendedException::class);
 
         SuspendAction::run($manager);
 

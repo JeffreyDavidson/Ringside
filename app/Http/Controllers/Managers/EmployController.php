@@ -20,7 +20,7 @@ class EmployController extends Controller
     {
         $this->authorize('employ', $manager);
 
-        throw_unless($manager->canBeEmployed(), new CannotBeEmployedException);
+        throw_unless($manager->canBeEmployed(), CannotBeEmployedException::class);
 
         EmployAction::run($manager);
 

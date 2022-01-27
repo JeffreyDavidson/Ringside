@@ -20,7 +20,7 @@ class DeactivateController extends Controller
     {
         $this->authorize('deactivate', $title);
 
-        throw_unless($title->canBeDeactivated(), new CannotBeDeactivatedException);
+        throw_unless($title->canBeDeactivated(), CannotBeDeactivatedException::class);
 
         DeactivateAction::run($title);
 

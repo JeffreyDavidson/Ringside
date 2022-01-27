@@ -20,7 +20,7 @@ class InjureController extends Controller
     {
         $this->authorize('injure', $referee);
 
-        throw_unless($referee->canBeInjured(), new CannotBeInjuredException);
+        throw_unless($referee->canBeInjured(), CannotBeInjuredException::class);
 
         InjureAction::run($referee);
 

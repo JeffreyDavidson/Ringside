@@ -20,7 +20,7 @@ class UnretireController extends Controller
     {
         $this->authorize('unretire', $tagTeam);
 
-        throw_unless($tagTeam->canBeUnretired(), (new CannotBeUnretiredException));
+        throw_unless($tagTeam->canBeUnretired(), CannotBeUnretiredException::class);
 
         UnretireAction::run($tagTeam);
 

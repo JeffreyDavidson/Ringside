@@ -20,7 +20,7 @@ class EmployController extends Controller
     {
         $this->authorize('employ', $tagTeam);
 
-        throw_unless($tagTeam->canBeEmployed(), new CannotBeEmployedException);
+        throw_unless($tagTeam->canBeEmployed(), CannotBeEmployedException::class);
 
         EmployAction::run($tagTeam);
 

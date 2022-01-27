@@ -20,7 +20,7 @@ class DeactivateController extends Controller
     {
         $this->authorize('deactivate', $stable);
 
-        throw_unless($stable->canBeDeactivated(), new CannotBeDeactivatedException);
+        throw_unless($stable->canBeDeactivated(), CannotBeDeactivatedException::class);
 
         DeactivateAction::run($stable);
 

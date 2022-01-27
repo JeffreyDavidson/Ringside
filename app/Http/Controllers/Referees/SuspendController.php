@@ -20,7 +20,7 @@ class SuspendController extends Controller
     {
         $this->authorize('suspend', $referee);
 
-        throw_unless($referee->canBeSuspended(), new CannotBeSuspendedException);
+        throw_unless($referee->canBeSuspended(), CannotBeSuspendedException::class);
 
         SuspendAction::run($referee);
 

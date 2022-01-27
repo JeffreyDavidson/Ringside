@@ -20,7 +20,7 @@ class SuspendController extends Controller
     {
         $this->authorize('suspend', $tagTeam);
 
-        throw_unless($tagTeam->canBeSuspended(), new CannotBeSuspendedException);
+        throw_unless($tagTeam->canBeSuspended(), CannotBeSuspendedException::class);
 
         SuspendAction::run($tagTeam);
 

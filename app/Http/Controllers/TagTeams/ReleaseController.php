@@ -20,7 +20,7 @@ class ReleaseController extends Controller
     {
         $this->authorize('release', $tagTeam);
 
-        throw_unless($tagTeam->canBeReleased(), new CannotBeReleasedException);
+        throw_unless($tagTeam->canBeReleased(), CannotBeReleasedException::class);
 
         ReleaseAction::run($tagTeam);
 
