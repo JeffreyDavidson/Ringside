@@ -34,10 +34,7 @@ class EventService
      */
     public function create(EventData $eventData)
     {
-        /* @var \App\Models\Event $event */
-        $event = $this->eventRepository->create($eventData);
-
-        return $event;
+        return $this->eventRepository->create($eventData);
     }
 
     /**
