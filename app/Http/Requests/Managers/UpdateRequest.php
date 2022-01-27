@@ -47,7 +47,7 @@ class UpdateRequest extends FormRequest
     {
         $validator->after(function (Validator $validator) {
             if ($validator->errors()->isEmpty()) {
-                /* @var \App\Models\Manager $manager */
+                /** @var \App\Models\Manager $manager */
                 $manager = $this->route()->parameter('manager');
 
                 if ($manager->isCurrentlyEmployed()) {

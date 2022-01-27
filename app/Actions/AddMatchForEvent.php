@@ -37,7 +37,7 @@ class AddMatchForEvent
      */
     public function __invoke(Event $event, EventMatchData $eventMatchData)
     {
-        /* @var \App\Models\EventMatch */
+        /** @var \App\Models\EventMatch $createdMatch */
         $createdMatch = $this->eventMatchRepository->createForEvent($event, $eventMatchData);
 
         if ($eventMatchData->titles) {
