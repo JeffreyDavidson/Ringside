@@ -35,7 +35,7 @@ class WrestlerService
      */
     public function create(WrestlerData $wrestlerData)
     {
-        /* @var \App\Models\Wrestler */
+        /** @var \App\Models\Wrestler $wrestler */
         $wrestler = $this->wrestlerRepository->create($wrestlerData);
 
         if (isset($wrestlerData->start_date)) {
