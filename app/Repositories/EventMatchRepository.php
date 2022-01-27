@@ -34,7 +34,7 @@ class EventMatchRepository
      * @param  \App\Models\EventMatch $match
      * @param  \App\Models\Title $title
      *
-     * @return \App\Models\EventMatch $match
+     * @return \App\Models\EventMatch
      */
     public function addTitleToMatch(EventMatch $match, Title $title)
     {
@@ -49,7 +49,7 @@ class EventMatchRepository
      * @param  \App\Models\EventMatch $match
      * @param  \App\Models\Referee $referee
      *
-     * @return \App\Models\EventMatch $match
+     * @return \App\Models\EventMatch
      */
     public function addRefereeToMatch(EventMatch $match, Referee $referee)
     {
@@ -79,7 +79,7 @@ class EventMatchRepository
      * @param  \App\Models\TagTeam $tagTeam
      * @param  int $sideNumber
      *
-     * @return \App\Models\EventMatch $match
+     * @return \App\Models\EventMatch
      */
     public function addTagTeamToMatch(EventMatch $match, TagTeam $tagTeam, int $sideNumber)
     {

@@ -46,7 +46,7 @@ class EventService
      * @param  \App\Models\Event $event
      * @param  \App\DataTransferObjects\EventData $eventData
      *
-     * @return \App\Models\Event $event
+     * @return \App\Models\Event
      */
     public function update(Event $event, EventData $eventData)
     {

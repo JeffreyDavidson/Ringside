@@ -43,7 +43,7 @@ class TagTeamService
      *
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
      *
-     * @return \App\Models\TagTeam $tagTeam
+     * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
     {
@@ -67,7 +67,7 @@ class TagTeamService
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
      *
-     * @return \App\Models\TagTeam $tagTeam
+     * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
     {

@@ -33,7 +33,7 @@ class StableService
      *
      * @param  \App\DataTransferObjects\StableData $stableData
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function create(StableData $stableData)
     {
@@ -55,7 +55,7 @@ class StableService
      * @param  \App\Models\Stable $stable
      * @param  \App\DataTransferObjects\StableData $stableData
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)
     {
