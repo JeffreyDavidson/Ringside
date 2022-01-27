@@ -98,6 +98,19 @@ return [
             'lineLimit' => 120,
             'absoluteLineLimit' => 120,
         ],
+        PhpCsFixer\Fixer\Operator\NewWithBracesFixer::class => [
+            'exclude' => [
+                'app/DataTransferObjects/EventData.php',
+                'app/DataTransferObjects/EventMatchData.php',
+                'app/DataTransferObjects/ManagerData.php',
+                'app/DataTransferObjects/RefereeData.php',
+                'app/DataTransferObjects/StableData.php',
+                'app/DataTransferObjects/TagTeamData.php',
+                'app/DataTransferObjects/TitleData.php',
+                'app/DataTransferObjects/VenueData.php',
+                'app/DataTransferObjects/WrestlerData.php',
+            ],
+        ],
     ],
 
     /*
