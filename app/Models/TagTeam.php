@@ -31,7 +31,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     /**
      * The number of the wrestlers allowed on a tag team.
      */
-    public const MAX_WRESTLERS_COUNT = 2;
+    public const NUMBER_OF_WRESTLERS_ON_TEAM = 2;
 
     /**
      * The attributes that are mass assignable.
@@ -138,7 +138,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
             );
         }
 
-        if ($this->currentWrestlers->count() !== self::MAX_WRESTLERS_COUNT) {
+        if ($this->currentWrestlers->count() !== self::NUMBER_OF_WRESTLERS_ON_TEAM) {
             throw NotEnoughMembersException::forTagTeam();
         }
 
