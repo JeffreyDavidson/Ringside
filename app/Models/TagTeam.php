@@ -18,7 +18,6 @@ use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Staudenmeir\EloquentHasManyDeep\HasTableAlias;
 
 class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Competitor, Manageable
 {
@@ -26,7 +25,6 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
         HasFactory,
         HasManagers,
         HasMorphToOne,
-        HasTableAlias,
         OwnedByUser,
         SoftDeletes;
 
