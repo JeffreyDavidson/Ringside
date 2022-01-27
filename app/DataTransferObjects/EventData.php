@@ -14,28 +14,28 @@ class EventData
      *
      * @var string
      */
-    protected string $name;
+    public string $name;
 
     /**
      * The date of the event.
      *
      * @var \Carbon\Carbon|null
      */
-    protected ?Carbon $date;
+    public ?Carbon $date;
 
     /**
      * The venue to hold the event.
      *
      * @var \App\Models\Venue|null
      */
-    protected ?Venue $venue;
+    public ?Venue $venue;
 
     /**
      * The preview description for the event.
      *
      * @var string|null
      */
-    protected ?string $preview;
+    public ?string $preview;
 
     /**
      * Retrieve data from the store request.
