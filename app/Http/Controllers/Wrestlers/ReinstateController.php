@@ -20,7 +20,7 @@ class ReinstateController extends Controller
     {
         $this->authorize('reinstate', $wrestler);
 
-        throw_unless($wrestler->canBeReinstated(), new CannotBeReinstatedException);
+        throw_unless($wrestler->canBeReinstated(), CannotBeReinstatedException::class);
 
         ReinstateAction::run($wrestler);
 

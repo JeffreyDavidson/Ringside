@@ -20,7 +20,7 @@ class RetireController extends Controller
     {
         $this->authorize('retire', $stable);
 
-        throw_unless($stable->canBeRetired(), new CannotBeRetiredException);
+        throw_unless($stable->canBeRetired(), CannotBeRetiredException::class);
 
         RetireAction::run($stable);
 

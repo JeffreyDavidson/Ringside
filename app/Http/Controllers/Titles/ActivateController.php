@@ -20,7 +20,7 @@ class ActivateController extends Controller
     {
         $this->authorize('activate', $title);
 
-        throw_unless($title->canBeActivated(), new CannotBeActivatedException);
+        throw_unless($title->canBeActivated(), CannotBeActivatedException::class);
 
         ActivateAction::run($title);
 

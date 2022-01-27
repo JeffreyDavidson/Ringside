@@ -20,7 +20,7 @@ class ClearInjuryController extends Controller
     {
         $this->authorize('clearFromInjury', $wrestler);
 
-        throw_unless($wrestler->canBeClearedFromInjury(), new CannotBeClearedFromInjuryException);
+        throw_unless($wrestler->canBeClearedFromInjury(), CannotBeClearedFromInjuryException::class);
 
         ClearInjuryAction::run($wrestler);
 

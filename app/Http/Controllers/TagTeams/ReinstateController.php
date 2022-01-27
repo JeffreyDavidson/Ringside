@@ -20,7 +20,7 @@ class ReinstateController extends Controller
     {
         $this->authorize('reinstate', $tagTeam);
 
-        throw_unless($tagTeam->canBeReinstated(), new CannotBeReinstatedException);
+        throw_unless($tagTeam->canBeReinstated(), CannotBeReinstatedException::class);
 
         ReinstateAction::run($tagTeam);
 
