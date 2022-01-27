@@ -20,8 +20,7 @@
         "spatie/laravel-enum": "^2.5",
         "staudenmeir/eloquent-has-many-deep": "^1.7",
         "staudenmeir/laravel-merged-relations": "^1.0",
-        "tightenco/tlint": "^6.2",
-        "vlucas/phpdotenv": "^5.2"
+        "tightenco/tlint": "^6.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2",
