@@ -13,21 +13,21 @@ class RefereeData
      *
      * @var string
      */
-    public string $first_name;
+    protected string $first_name;
 
     /**
      * The last name of the referee.
      *
      * @var string
      */
-    public string $last_name;
+    protected string $last_name;
 
     /**
      * The start date of the referee's employment.
      *
      * @var Carbon|null
      */
-    public ?Carbon $start_date;
+    protected ?Carbon $start_date;
 
     /**
      * Create a DTO from the store request.

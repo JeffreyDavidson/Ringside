@@ -13,14 +13,14 @@ class TitleData
      *
      * @var string
      */
-    public string $name;
+    protected string $name;
 
     /**
      * The date to activate the title.
      *
      * @var Carbon|null
      */
-    public ?Carbon $activation_date;
+    protected ?Carbon $activation_date;
 
     /**
      * Create a DTO from the store request.
