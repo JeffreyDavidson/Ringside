@@ -8,10 +8,27 @@ use Carbon\Carbon;
 
 class TitleData
 {
-    public mixed $name = 'Example Title';
+    /**
+     * The name of the title.
+     *
+     * @var string
+     */
+    public string $name;
 
+    /**
+     * The date to activate the title.
+     *
+     * @var Carbon|null
+     */
     public ?Carbon $activation_date;
 
+    /**
+     * Create a DTO from the store request.
+     *
+     * @param  \App\Http\Requests\Titles\StoreRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -22,6 +39,13 @@ class TitleData
         return $dto;
     }
 
+    /**
+     * Create a DTO from the update request.
+     *
+     * @param  \App\Http\Requests\Titles\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;

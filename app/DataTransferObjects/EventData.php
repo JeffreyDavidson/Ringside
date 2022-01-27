@@ -9,14 +9,41 @@ use Carbon\Carbon;
 
 class EventData
 {
-    public mixed $name;
+    /**
+     * The name of the event.
+     *
+     * @var string
+     */
+    public string $name;
 
+    /**
+     * The date of the event.
+     *
+     * @var \Carbon\Carbon|null
+     */
     public ?Carbon $date;
 
+    /**
+     * The venue to hold the event.
+     *
+     * @var \App\Models\Venue|null
+     */
     public ?Venue $venue;
 
-    public mixed $preview;
+    /**
+     * The preview description for the event.
+     *
+     * @var string|null
+     */
+    public ?string $preview;
 
+    /**
+     * Retrieve data from the store request.
+     *
+     * @param  \App\Http\Requests\Events\StoreRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -29,6 +56,13 @@ class EventData
         return $dto;
     }
 
+    /**
+     * Retrieve data from the update request.
+     *
+     * @param  \App\Http\Requests\Events\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;

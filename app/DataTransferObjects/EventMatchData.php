@@ -12,19 +12,40 @@ use Illuminate\Support\Collection;
 
 class EventMatchData
 {
+    /**
+     * The match type for the match.
+     *
+     * @var \App\Models\MatchType
+     */
     public MatchType $matchType;
 
+    /**
+     * The referees assigned to the match.
+     *
+     * @var \Illuminate\Database\Eloquent\Collection
+     */
     public Collection $referees;
 
+    /**
+     * The titles being contended for the match.
+     *
+     * @var \Illuminate\Database\Eloquent\Collection|null
+     */
     public ?Collection $titles;
 
+    /**
+     * The competitors competing in the event match.
+     *
+     * @var \Illuminate\Database\Eloquent\Collection
+     */
     public Collection $competitors;
 
-    public Collection $wrestlers;
-
-    public Collection $tagTeams;
-
-    public mixed $preview;
+    /**
+     * The preview description for the match.
+     *
+     * @var string|null
+     */
+    public ?string $preview;
 
     /**
      * Retrieve data from the store request.
@@ -70,43 +91,5 @@ class EventMatchData
         }
 
         return $formattedCompetitors;
-    }
-
-    /**
-     * Retrieve the competitors that are wrestlers.
-     *
-     * @param  array $competitors
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public static function getWrestlers($competitors)
-    {
-        $wrestlers = array_filter(
-            $competitors,
-            static fn ($contestant) => $contestant['competitor_type'] === 'wrestler'
-        );
-
-        $wrestler_ids = array_column($wrestlers, 'competitor_id');
-
-        return Wrestler::findMany($wrestler_ids);
-    }
-
-    /**
-     * Retrieve the competitors that are tag teams.
-     *
-     * @param  array $competitors
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public static function getTagTeams($competitors)
-    {
-        $tagTeams = array_filter(
-            $competitors,
-            static fn ($contestant) => $contestant['competitor_type'] === 'tag_teams'
-        );
-
-        $tag_team_ids = array_column($tagTeams, 'competitor_id');
-
-        return TagTeam::findMany($tag_team_ids);
     }
 }

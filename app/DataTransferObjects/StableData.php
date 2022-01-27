@@ -11,16 +11,41 @@ use Illuminate\Support\Collection;
 
 class StableData
 {
-    public mixed $name;
+    /**
+     * The name of the stable.
+     *
+     * @var string
+     */
+    public string $name;
 
-    public mixed $signature_move;
-
+    /**
+     * The start date of the stable's activation.
+     *
+     * @var Carbon|null
+     */
     public ?Carbon $start_date;
 
-    public Collection $tagTeams;
+    /**
+     * The tag teams to be on the stable.
+     *
+     * @var Collection|null
+     */
+    public ?Collection $tagTeams;
 
-    public Collection $wrestlers;
+    /**
+     * The wrestlers to be on the stable.
+     *
+     * @var Collection|null
+     */
+    public ?Collection $wrestlers;
 
+    /**
+     * Create a DTO from the store request.
+     *
+     * @param  \App\Http\Requests\Stables\StoreRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -33,6 +58,13 @@ class StableData
         return $dto;
     }
 
+    /**
+     * Create a DTO from the update request.
+     *
+     * @param  \App\Http\Requests\Stables\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;
