@@ -18,7 +18,7 @@ class ActivateAction extends BaseTitleAction
      *
      * @return void
      */
-    public function handle(Title $title, Carbon $activationDate = null): void
+    public function handle(Title $title, ?Carbon $activationDate = null): void
     {
         $activationDate ??= now();
 

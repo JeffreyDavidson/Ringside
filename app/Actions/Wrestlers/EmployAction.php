@@ -17,7 +17,7 @@ class EmployAction extends BaseWrestlerAction
      *
      * @return void
      */
-    public function handle(Wrestler $wrestler, $startDate = null): void
+    public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void
     {
         $startDate ??= now();
 

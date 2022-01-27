@@ -17,12 +17,16 @@ class AddMembersAction extends BaseStableAction
      * @param  \App\Models\Stable  $stable
      * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
      * @param  \Illuminate\Database\Eloquent\Collection  $tagTeams
-     * @param  \Carbon\Carbon  $joinedDate
+     * @param  \Carbon\Carbon|null  $joinedDate
      *
      * @return void
      */
-    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams, Carbon $joinedDate = null): void
-    {
+    public function handle(
+        Stable $stable,
+        Collection $wrestlers,
+        Collection $tagTeams,
+        ?Carbon $joinedDate = null
+    ): void {
         $joinedDate ??= now();
 
         if ($wrestlers->isNotEmpty()) {
