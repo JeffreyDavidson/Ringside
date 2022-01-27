@@ -184,7 +184,7 @@ class TagTeamRepository
      *
      * @return \App\Models\TagTeam
      */
-    public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate = null)
+    public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null)
     {
         $joinDate ??= now();
 
@@ -209,7 +209,7 @@ class TagTeamRepository
         TagTeam $tagTeam,
         Collection $formerTagTeamPartners,
         Collection $newTagTeamPartners,
-        Carbon $date = null
+        ?Carbon $date = null
     ) {
         $date ??= now();
 
