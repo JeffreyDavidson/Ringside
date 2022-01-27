@@ -30,7 +30,7 @@ class VenueService
      *
      * @param  \App\DataTransferObjects\VenueData $venueData
      *
-     * @return \App\Models\Venue $venue
+     * @return \App\Models\Venue
      */
     public function create(VenueData $venueData)
     {
@@ -46,7 +46,7 @@ class VenueService
      * @param  \App\Models\Venue $venue
      * @param  \App\DataTransferObjects\VenueData $venueData
      *
-     * @return \App\Models\Venue $venue
+     * @return \App\Models\Venue
      */
     public function update(Venue $venue, VenueData $venueData)
     {

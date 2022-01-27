@@ -28,7 +28,7 @@ class TitleRepository
      * @param  \App\Models\Title $title
      * @param  \App\DataTransferObjects\TitleData $titleData
      *
-     * @return \App\Models\Title $title
+     * @return \App\Models\Title
      */
     public function update(Title $title, TitleData $titleData)
     {
@@ -69,7 +69,7 @@ class TitleRepository
      * @param  \App\Models\Title $title
      * @param  \Carbon\Carbon $activationDate
      *
-     * @return \App\Models\Title $title
+     * @return \App\Models\Title
      */
     public function activate(Title $title, Carbon $activationDate)
     {
@@ -87,7 +87,7 @@ class TitleRepository
      * @param  \App\Models\Title $title
      * @param  \Carbon\Carbon $deactivationDate
      *
-     * @return \App\Models\Title $title
+     * @return \App\Models\Title
      */
     public function deactivate(Title $title, Carbon $deactivationDate)
     {
@@ -102,7 +102,7 @@ class TitleRepository
      * @param  \App\Models\Title $title
      * @param  \Carbon\Carbon $retirementDate
      *
-     * @return \App\Models\Title $title
+     * @return \App\Models\Title
      */
     public function retire(Title $title, Carbon $retirementDate)
     {
@@ -117,7 +117,7 @@ class TitleRepository
      * @param  \App\Models\Title $title
      * @param  \Carbon\Carbon $unretireDate
      *
-     * @return \App\Models\Title $title
+     * @return \App\Models\Title
      */
     public function unretire(Title $title, Carbon $unretireDate)
     {

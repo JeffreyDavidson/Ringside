@@ -31,7 +31,7 @@ class WrestlerService
      *
      * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
      *
-     * @return \App\Models\Wrestler $wrestler
+     * @return \App\Models\Wrestler
      */
     public function create(WrestlerData $wrestlerData)
     {
@@ -51,7 +51,7 @@ class WrestlerService
      * @param  \App\Models\Wrestler $wrestler
      * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
      *
-     * @return \App\Models\Wrestler $wrestler
+     * @return \App\Models\Wrestler
      */
     public function update(Wrestler $wrestler, WrestlerData $wrestlerData)
     {

@@ -31,7 +31,7 @@ class StableRepository
      * @param  \App\Models\Stable $stable
      * @param  \App\DataTransferObjects\StableData $stableData
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)
     {
@@ -72,7 +72,7 @@ class StableRepository
      * @param  \App\Models\Stable $stable
      * @param  \Carbon\Carbon $activationDate
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function activate(Stable $stable, Carbon $activationDate)
     {
@@ -90,7 +90,7 @@ class StableRepository
      * @param  \App\Models\Stable $stable
      * @param  \Carbon\Carbon $deactivationDate
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function deactivate(Stable $stable, Carbon $deactivationDate)
     {
@@ -105,7 +105,7 @@ class StableRepository
      * @param  \App\Models\Stable $stable
      * @param  \Carbon\Carbon $retirementDate
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function retire(Stable $stable, Carbon $retirementDate)
     {
@@ -120,7 +120,7 @@ class StableRepository
      * @param  \App\Models\Stable $stable
      * @param  \Carbon\Carbon $unretireDate
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function unretire(Stable $stable, Carbon $unretireDate)
     {
@@ -135,7 +135,7 @@ class StableRepository
      * @param  \App\Models\Stable $stable
      * @param  \Carbon\Carbon $disassembleDate
      *
-     * @return \App\Models\Stable $stable
+     * @return \App\Models\Stable
      */
     public function disassemble(Stable $stable, Carbon $disassembleDate)
     {

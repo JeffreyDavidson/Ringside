@@ -31,7 +31,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \App\DataTransferObjects\ManagerData $managerData
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function update(Manager $manager, ManagerData $managerData)
     {
@@ -73,7 +73,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $employmentDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function employ(Manager $manager, Carbon $employmentDate)
     {
@@ -91,7 +91,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $releaseDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function release(Manager $manager, Carbon $releaseDate)
     {
@@ -106,7 +106,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $injureDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function injure(Manager $manager, Carbon $injureDate)
     {
@@ -121,7 +121,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $recoveryDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function clearInjury(Manager $manager, Carbon $recoveryDate)
     {
@@ -136,7 +136,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $retirementDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function retire(Manager $manager, Carbon $retirementDate)
     {
@@ -151,7 +151,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $unretireDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function unretire(Manager $manager, Carbon $unretireDate)
     {
@@ -166,7 +166,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $suspensionDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function suspend(Manager $manager, Carbon $suspensionDate)
     {
@@ -181,7 +181,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $reinstateDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function reinstate(Manager $manager, Carbon $reinstateDate)
     {
@@ -196,7 +196,7 @@ class ManagerRepository
      * @param  \App\Models\Manager $manager
      * @param  \Carbon\Carbon $employmentDate
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function updateEmployment(Manager $manager, Carbon $employmentDate)
     {

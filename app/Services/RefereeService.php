@@ -31,7 +31,7 @@ class RefereeService
      *
      * @param  \App\DataTransferObjects\RefereeData $refereeData
      *
-     * @return \App\Models\Referee $referee
+     * @return \App\Models\Referee
      */
     public function create(RefereeData $refereeData)
     {
@@ -51,7 +51,7 @@ class RefereeService
      * @param  \App\Models\Referee $referee
      * @param  \App\DataTransferObjects\RefereeData $refereeData
      *
-     * @return \App\Models\Referee $referee
+     * @return \App\Models\Referee
      */
     public function update(Referee $referee, RefereeData $refereeData)
     {

@@ -51,7 +51,7 @@ class TitleService
      * @param  \App\Models\Title $title
      * @param  \App\DataTransferObjects\TitleData $titleData
      *
-     * @return \App\Models\Title $title
+     * @return \App\Models\Title
      */
     public function update(Title $title, TitleData $titleData)
     {

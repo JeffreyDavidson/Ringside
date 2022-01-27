@@ -31,7 +31,7 @@ class ManagerService
      *
      * @param  \App\DataTransferObjects\ManagerData $managerData
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function create(ManagerData $managerData)
     {
@@ -51,7 +51,7 @@ class ManagerService
      * @param  \App\Models\Manager $manager
      * @param  \App\DataTransferObjects\ManagerData $managerData
      *
-     * @return \App\Models\Manager $manager
+     * @return \App\Models\Manager
      */
     public function update(Manager $manager, ManagerData $managerData)
     {
