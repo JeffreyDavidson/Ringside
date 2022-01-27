@@ -12,42 +12,42 @@ class VenueData
      *
      * @var string
      */
-    public string $name;
+    protected string $name;
 
     /**
      * The first line of the address for the venue.
      *
      * @var string
      */
-    public string $address1;
+    protected string $address1;
 
     /**
      * The second line of the address for the venue.
      *
      * @var string|null
      */
-    public ?string $address2;
+    protected ?string $address2;
 
     /**
      * The city where the venue is located.
      *
      * @var string
      */
-    public string $city;
+    protected string $city;
 
     /**
      * The state where the venue is located
      *
      * @var string
      */
-    public string $state;
+    protected string $state;
 
     /**
      * The zip code where the venue is located.
      *
      * @var string
      */
-    public string $zip;
+    protected string $zip;
 
     /**
      * Create a DTO from the store request.
