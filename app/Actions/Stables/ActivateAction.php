@@ -7,6 +7,7 @@ use App\Actions\Wrestlers\EmployAction as WrestlerEmployAction;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ActivateAction extends BaseStableAction

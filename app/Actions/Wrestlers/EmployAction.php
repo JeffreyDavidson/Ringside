@@ -3,6 +3,7 @@
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction extends BaseWrestlerAction
