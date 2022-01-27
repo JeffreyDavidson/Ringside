@@ -17,7 +17,7 @@ class EmployAction extends BaseRefereeAction
      *
      * @return void
      */
-    public function handle(Referee $referee, $startDate = null): void
+    public function handle(Referee $referee, ?Carbon $startDate = null): void
     {
         $startDate ??= now();
 

@@ -17,7 +17,7 @@ class EmployAction extends BaseManagerAction
      *
      * @return void
      */
-    public function handle(Manager $manager, $startDate = null): void
+    public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
         $startDate ??= now();
 

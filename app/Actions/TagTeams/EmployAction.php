@@ -17,7 +17,7 @@ class EmployAction extends BaseTagTeamAction
      *
      * @return void
      */
-    public function handle(TagTeam $tagTeam, $startDate = null): void
+    public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void
     {
         $startDate ??= now();
 

@@ -17,12 +17,13 @@ class ActivateAction extends BaseStableAction
      * Activate a stable.
      *
      * @param  \App\Models\Stable  $stable
+     * @param  \Carbon\Carbon|null  $activationDate
      *
      * @return void
      */
-    public function handle(Stable $stable): void
+    public function handle(Stable $stable, ?Carbon $activationDate = null): void
     {
-        $activationDate = now();
+        $activationDate ??= now();
 
         if ($stable->currentWrestlers->isNotEmpty()) {
             $stable->currentWrestlers->each(
