@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Models\TagTeam;
 use Exception;
 
 class NotEnoughMembersException extends Exception
@@ -13,7 +14,10 @@ class NotEnoughMembersException extends Exception
      */
     public static function forTagTeam()
     {
-        return new self('Tag team does not contain enough wrestlers.');
+        return new self(sprintf(
+            'A tag team must contain %u wrestlers to be on a tag team.',
+            [TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM]
+        ));
     }
 
     /**
