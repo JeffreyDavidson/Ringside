@@ -7,6 +7,7 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Tests\Factories\TagTeamRequestDataFactory;
 use Tests\TestCase;
 
@@ -108,7 +109,7 @@ class TagTeamControllerStoreMethodTest extends TestCase
             );
 
             foreach ($tagTeam->wrestlers as $wrestler) {
-                $this->assertSame($startDate->toDateTimeString(), $wrestler->pivot->joined_at);
+                $this->assertEquals($startDate->toDateTimeString(), $wrestler->pivot->joined_at);
                 $this->assertInstanceOf(Wrestler::class, $wrestler);
                 $this->assertCount(1, $wrestler->employments);
             }
@@ -141,7 +142,7 @@ class TagTeamControllerStoreMethodTest extends TestCase
             $this->assertCount(1, $tagTeam->employments);
 
             foreach ($tagTeam->wrestlers as $wrestler) {
-                $this->assertSame($startDate->toDateTimeString(), $wrestler->pivot->joined_at);
+                $this->assertEquals($startDate->toDateTimeString(), $wrestler->pivot->joined_at);
                 $this->assertInstanceOf(Wrestler::class, $wrestler);
                 $this->assertCount(1, $wrestler->employments);
             }
@@ -154,6 +155,7 @@ class TagTeamControllerStoreMethodTest extends TestCase
     public function unemployed_wrestlers_are_joined_at_the_current_date_if_started_at_is_not_filled_in_request()
     {
         $startDate = now();
+        Carbon::setTestNow($startDate);
         $wrestlers = Wrestler::factory()
             ->unemployed()
             ->count(2)
@@ -173,7 +175,7 @@ class TagTeamControllerStoreMethodTest extends TestCase
             $this->assertCount(0, $tagTeam->employments);
 
             foreach ($tagTeam->wrestlers as $wrestler) {
-                $this->assertTrue($startDate->eq($wrestler->pivot->joined_at));
+                $this->assertEquals($startDate, $wrestler->pivot->joined_at);
                 $this->assertInstanceOf(Wrestler::class, $wrestler);
             }
         });
