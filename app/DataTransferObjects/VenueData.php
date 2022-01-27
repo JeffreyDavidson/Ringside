@@ -7,18 +7,55 @@ use App\Http\Requests\Venues\UpdateRequest;
 
 class VenueData
 {
-    public mixed $name;
+    /**
+     * The name of the venue.
+     *
+     * @var string
+     */
+    public string $name;
 
-    public mixed $address1;
+    /**
+     * The first line of the address for the venue.
+     *
+     * @var string
+     */
+    public string $address1;
 
-    public mixed $address2;
+    /**
+     * The second line of the address for the venue.
+     *
+     * @var string|null
+     */
+    public ?string $address2;
 
-    public mixed $city;
+    /**
+     * The city where the venue is located.
+     *
+     * @var string
+     */
+    public string $city;
 
-    public mixed $state;
+    /**
+     * The state where the venue is located
+     *
+     * @var string
+     */
+    public string $state;
 
-    public mixed $zip;
+    /**
+     * The zip code where the venue is located.
+     *
+     * @var string
+     */
+    public string $zip;
 
+    /**
+     * Create a DTO from the store request.
+     *
+     * @param  \App\Http\Requests\Venues\StoreRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -33,6 +70,13 @@ class VenueData
         return $dto;
     }
 
+    /**
+     * Create a DTO from the update request.
+     *
+     * @param  \App\Http\Requests\Venues\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;

@@ -8,12 +8,34 @@ use Carbon\Carbon;
 
 class RefereeData
 {
-    public mixed $first_name;
+    /**
+     * The first name of the referee.
+     *
+     * @var string
+     */
+    public string $first_name;
 
-    public mixed $last_name;
+    /**
+     * The last name of the referee.
+     *
+     * @var string
+     */
+    public string $last_name;
 
+    /**
+     * The start date of the referee's employment.
+     *
+     * @var Carbon|null
+     */
     public ?Carbon $start_date;
 
+    /**
+     * Create a DTO from the store request.
+     *
+     * @param  \App\Http\Requests\Referees\StoreRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -25,6 +47,13 @@ class RefereeData
         return $dto;
     }
 
+    /**
+     * Create a DTO from the update request.
+     *
+     * @param  \App\Http\Requests\Referees\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;

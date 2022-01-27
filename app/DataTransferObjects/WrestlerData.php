@@ -8,18 +8,55 @@ use Carbon\Carbon;
 
 class WrestlerData
 {
-    public mixed $name;
+    /**
+     * The name of the wrestler.
+     *
+     * @var string
+     */
+    public string $name;
 
-    public mixed $height;
+    /**
+     * The height of the wrestler in inches.
+     *
+     * @var int
+     */
+    public int $height;
 
-    public mixed $weight;
+    /**
+     * The weight of the wrestler in pounds.
+     *
+     * @var int
+     */
+    public int $weight;
 
-    public mixed $hometown;
+    /**
+     * The hometown of the wrestler.
+     *
+     * @var string
+     */
+    public string $hometown;
 
-    public mixed $signature_move;
+    /**
+     * The signature move of the wrestler.
+     *
+     * @var string|null
+     */
+    public ?string $signature_move;
 
+    /**
+     * The start date of the wrestler's employment.
+     *
+     * @var Carbon|null
+     */
     public ?Carbon $start_date;
 
+    /**
+     * Create a DTO from the update request.
+     *
+     * @param  \App\Http\Requests\Wrestlers\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -34,6 +71,13 @@ class WrestlerData
         return $dto;
     }
 
+    /**
+     * Create a DTO from the update request.
+     *
+     * @param  \App\Http\Requests\Wrestlers\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;

@@ -10,14 +10,41 @@ use Illuminate\Database\Eloquent\Collection;
 
 class TagTeamData
 {
-    public mixed $name;
+    /**
+     * The name of the tag team.
+     *
+     * @var string
+     */
+    public string $name;
 
-    public mixed $signature_move;
+    /**
+     * The signature move of the tag team.
+     *
+     * @var string|null
+     */
+    public ?string $signature_move;
 
+    /**
+     * The start date of the wrestler's employment.
+     *
+     * @var Carbon|null
+     */
     public ?Carbon $start_date;
 
-    public Collection $wrestlers;
+    /**
+     * The wrestlers to be on the tag team.
+     *
+     * @var Collection|null
+     */
+    public ?Collection $wrestlers;
 
+    /**
+     * Create a DTO from the store request.
+     *
+     * @param  \App\Http\Requests\TagTeams\StoreRequest $request
+     *
+     * @return self
+     */
     public static function fromStoreRequest(StoreRequest $request): self
     {
         $dto = new self;
@@ -30,6 +57,13 @@ class TagTeamData
         return $dto;
     }
 
+    /**
+     * Create a DTO from the store request.
+     *
+     * @param  \App\Http\Requests\TagTeams\UpdateRequest $request
+     *
+     * @return self
+     */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         $dto = new self;
