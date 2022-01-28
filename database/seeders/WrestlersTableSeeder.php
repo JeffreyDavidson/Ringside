@@ -7,7 +7,6 @@ use App\Models\Retirement;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\EmploymentFactory;
 
 class WrestlersTableSeeder extends Seeder
 {
@@ -43,7 +42,7 @@ class WrestlersTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $employment = EmploymentFactory::new()->started($start);
+            $employment = Employment::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $employment = $employment->ended($end);
@@ -86,7 +85,7 @@ class WrestlersTableSeeder extends Seeder
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
-                $employment = EmploymentFactory::new()->started($start);
+                $employment = Employment::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $employment = $employment->ended($end);
@@ -110,7 +109,7 @@ class WrestlersTableSeeder extends Seeder
         for ($j = 1; $j <= 5; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $employment = EmploymentFactory::new()->started($start);
+            $employment = Employment::factory()->started($start);
 
             Wrestler::factory()
                 ->withFutureEmployment($employment)

@@ -76,6 +76,31 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     }
 
     /**
+     * Undocumented function.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphedByMany
+     */
+    public function championships()
+    {
+        return $this->hasMany(TitleChampionship::class)->oldest('won_at');
+    }
+
+    /**
+     * Undocumented function.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function currentChampionship()
+    {
+        return $this->hasOne(TitleChampionship::class)->whereNull('lost_at')->latestOfMany();
+    }
+
+    public function isVacant()
+    {
+        return $this->currentChampionship?->champion === null;
+    }
+
+    /**
      * Determine if the model can be unretired.
      *
      * @return bool

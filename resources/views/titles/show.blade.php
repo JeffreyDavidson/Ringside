@@ -47,6 +47,34 @@
                     </div>
                 </x-portlet>
             </div>
+            <div class="flex-row-fluid ml-lg-8">
+                <div class="row">
+                    <x-portlet title="Championships" headBorder="false">
+                        <x-data-table :collection="$title->championships()->paginate()">
+                            <thead>
+                                <th>New Champion</th>
+                                <th>Previous Champion</th>
+                                <th>Event Name</th>
+                                <th>Event Date</th>
+                            </thead>
+                            <tbody>
+                                @forelse($title->championships as $championship)
+                                    <tr>
+                                        <td>{{ $championship->champion->name }}</td>
+                                        <td>{{ $championship->previousChampion?->name ?? 'First Champion' }}</td>
+                                        <td>{{ $championship->match->event->name }}</td>
+                                        <td>{{ $championship->match->event->date->toDateString() }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4">No matching records found</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </x-datatable>
+                    </x-portlet>
+                </div>
+            </div>
         </div>
     </x-content>
 </x-layouts.app>

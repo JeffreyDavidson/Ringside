@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employment;
+use App\Models\Referee;
+use App\Models\Retirement;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\EmploymentFactory;
-use Tests\Factories\RefereeFactory;
-use Tests\Factories\RetirementFactory;
 
 class RefereesTableSeeder extends Seeder
 {
@@ -42,13 +42,13 @@ class RefereesTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $employment = EmploymentFactory::new()->started($start);
+            $employment = Employment::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $employment = $employment->ended($end);
             }
 
-            RefereeFactory::new()
+            Referee::factory()
                 ->released($employment)
                 ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
@@ -64,9 +64,9 @@ class RefereesTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $employment = EmploymentFactory::new()->started($start)->ended($end);
-            $retirement = RetirementFactory::new()->started($end);
-            RefereeFactory::new()
+            $employment = Employment::factory()->started($start)->ended($end);
+            $retirement = Retirement::factory()->started($end);
+            Referee::factory()
                 ->retired($employment, $retirement)
                 ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
@@ -85,13 +85,13 @@ class RefereesTableSeeder extends Seeder
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
-                $employment = EmploymentFactory::new()->started($start);
+                $employment = Employment::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $employment = $employment->ended($end);
                 }
 
-                RefereeFactory::new()
+                Referee::factory()
                     ->released($employment)
                     ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
@@ -109,10 +109,10 @@ class RefereesTableSeeder extends Seeder
         for ($j = 1; $j <= 5; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $employment = EmploymentFactory::new()->started($start);
+            $employment = Employment::factory()->started($start);
 
-            RefereeFactory::new()
-                ->pendingEmployment($employment)
+            Referee::factory()
+                ->withFutureEmployment($employment)
                 ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 
             $eNum++;
@@ -123,7 +123,7 @@ class RefereesTableSeeder extends Seeder
          * These referees should be marked as being Unemployed.
          */
         for ($i = 1; $i <= 5; $i++) {
-            RefereeFactory::new()
+            Referee::factory()
                 ->unemployed()
                 ->create(['first_name' => 'Referee', 'last_name' => $eNum]);
 

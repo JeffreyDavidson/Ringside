@@ -6,6 +6,7 @@ use App\Enums\TitleStatus;
 use App\Models\Activation;
 use App\Models\Retirement;
 use App\Models\Title;
+use App\Models\TitleChampionship;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -90,6 +91,28 @@ class TitleFactory extends Factory
     {
         return $this->state(fn (array $attributes) => ['deleted_at' => now()])->afterCreating(function (Title $title) {
             $title->save();
+        });
+    }
+
+    public function withChampion($champion)
+    {
+        return $this->has(
+            TitleChampionship::factory()->for($champion, 'champion'),
+            'championships'
+        );
+    }
+
+    public function nonActive()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => $this->faker->randomElement([
+                    TitleStatus::inactive(),
+                    TitleStatus::retired(),
+                    TitleStatus::future_activation(),
+                    TitleStatus::unactivated(),
+                ]),
+            ];
         });
     }
 }
