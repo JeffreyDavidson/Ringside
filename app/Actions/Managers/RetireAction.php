@@ -21,11 +21,11 @@ class RetireAction extends BaseManagerAction
         $retirementDate = now();
 
         if ($manager->isSuspended()) {
-            $this->managerRepository->reinstate($manager, $retirementDate);
+            ReinstateAction::run($manager, $retirementDate);
         }
 
         if ($manager->isInjured()) {
-            $this->managerRepository->clearInjury($manager, $retirementDate);
+            ClearInjuryAction::run($manager, $retirementDate);
         }
 
         $this->managerRepository->release($manager, $retirementDate);
