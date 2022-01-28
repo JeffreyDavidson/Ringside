@@ -4,7 +4,10 @@ namespace Tests\Integration\Http\Requests\EventMatches;
 
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\MatchType;
+use App\Models\Title;
+use App\Models\TitleChampionship;
 use App\Models\User;
+use App\Models\Wrestler;
 use Database\Seeders\MatchTypesTableSeeder;
 use Tests\Factories\EventMatchRequestDataFactory;
 use Tests\TestCase;
@@ -209,6 +212,20 @@ class StoreRequestTest extends TestCase
     /**
      * @test
      */
+    public function each_event_match_titles_must_be_active()
+    {
+        $title = Title::factory()->nonActive()->create();
+
+        $this->createRequest(StoreRequest::class)
+            ->validate(EventMatchRequestDataFactory::new()->create([
+                'titles' => [$title->id],
+            ]))
+            ->assertFailsValidation(['titles' => 'app\rules\titlesmustbeactive']);
+    }
+
+    /**
+     * @test
+     */
     public function each_event_match_competitors_is_required()
     {
         $this->createRequest(StoreRequest::class)
@@ -237,7 +254,9 @@ class StoreRequestTest extends TestCase
     {
         $this->createRequest(StoreRequest::class)
             ->validate(EventMatchRequestDataFactory::new()->create([
-                'competitors' => [[1]],
+                'competitors' => [
+                    [],
+                ],
             ]))
             ->assertFailsValidation(['competitors' => 'min:2']);
     }
@@ -251,9 +270,9 @@ class StoreRequestTest extends TestCase
             ->validate(EventMatchRequestDataFactory::new()->create([
                 'match_type_id' => MatchType::factory()->create(['number_of_sides' => 2])->id,
                 'competitors' => [
-                    ['competitor_id' => 1, 'competitor_type' => 'wrestler'],
-                    ['competitor_id' => 2, 'competitor_type' => 'wrestler'],
-                    ['competitor_id' => 3, 'competitor_type' => 'wrestler'],
+                    [['competitor_id' => 1, 'competitor_type' => 'wrestler']],
+                    [['competitor_id' => 2, 'competitor_type' => 'wrestler']],
+                    [['competitor_id' => 3, 'competitor_type' => 'wrestler']],
                 ],
             ]))->assertFailsValidation([
                 'competitors' => 'app\rules\competitorsgroupedintocorrectnumberofsidesformatchtype',
@@ -268,6 +287,48 @@ class StoreRequestTest extends TestCase
         $this->createRequest(StoreRequest::class)
             ->validate(EventMatchRequestDataFactory::new()->create([
                 'preview' => null,
+            ]))
+            ->assertPassesValidation();
+    }
+
+    /**
+     * @test
+     */
+    public function title_with_champion_must_be_included_in_competitors_for_title_match()
+    {
+        $champion = Wrestler::factory()->bookable()->create();
+        $title = Title::factory()->active()->withChampion($champion)->create();
+        [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
+
+        $this->createRequest(StoreRequest::class)
+            ->validate(EventMatchRequestDataFactory::new()->create([
+                'titles' => [$title->id],
+                'competitors' => [
+                    [['competitor_id' => $wrestlerA->id, 'competitor_type' => 'wrestler']],
+                    [['competitor_id' => $wrestlerB->id, 'competitor_type' => 'wrestler']],
+                ],
+            ]))
+            ->assertFailsValidation([
+                'competitors' => 'app\rules\titlechampionincludedintitlematch',
+            ]);
+    }
+
+    /**
+     * @test
+     */
+    public function title_with_champion_must_be_included_in_competitors_for_title_match_two()
+    {
+        $champion = Wrestler::factory()->bookable()->create();
+        $title = Title::factory()->active()->withChampion($champion)->create();
+        $nonChampionWrestler = Wrestler::factory()->bookable()->create();
+
+        $this->createRequest(StoreRequest::class)
+            ->validate(EventMatchRequestDataFactory::new()->create([
+                'titles' => [$title->id],
+                'competitors' => [
+                    [['competitor_id' => $champion->id, 'competitor_type' => 'wrestler']],
+                    [['competitor_id' => $nonChampionWrestler->id, 'competitor_type' => 'wrestler']],
+                ],
             ]))
             ->assertPassesValidation();
     }

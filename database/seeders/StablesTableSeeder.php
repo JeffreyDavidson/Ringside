@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Activation;
+use App\Models\Retirement;
+use App\Models\Stable;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\ActivationFactory;
-use Tests\Factories\RetirementFactory;
-use Tests\Factories\StableFactory;
 
 class StablesTableSeeder extends Seeder
 {
@@ -42,13 +42,13 @@ class StablesTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $activation = ActivationFactory::new()->started($start);
+            $activation = Activation::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $activation = $activation->ended($end);
             }
 
-            StableFactory::new()
+            Stable::factory()
                 ->inactive($activation)
                 ->create(['name' => 'Stable '.$eNum]);
 
@@ -64,9 +64,9 @@ class StablesTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $activation = ActivationFactory::new()->started($start)->ended($end);
-            $retirement = RetirementFactory::new()->started($end);
-            StableFactory::new()
+            $activation = Activation::factory()->started($start)->ended($end);
+            $retirement = Retirement::factory()->started($end);
+            Stable::factory()
                 ->retired($activation, $retirement)
                 ->create(['name' => 'Stable '.$eNum]);
 
@@ -85,13 +85,13 @@ class StablesTableSeeder extends Seeder
                 $start = $startDate->copy()->addMonths(rand(6, 11));
                 $end = $start->copy()->addMonth(rand(4, 8));
 
-                $activation = ActivationFactory::new()->started($start);
+                $activation = Activation::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $activation = $activation->ended($end);
                 }
 
-                StableFactory::new()
+                Stable::factory()
                     ->inactive($activation)
                     ->create(['name' => 'Stable '.$eNum]);
 
@@ -109,10 +109,10 @@ class StablesTableSeeder extends Seeder
         for ($j = 1; $j <= 1; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $activation = ActivationFactory::new()->started($start);
+            $activation = Activation::factory()->started($start);
 
-            StableFactory::new()
-                ->pendingActivation($activation)
+            Stable::factory()
+                ->withFutureActivation($activation)
                 ->create(['name' => 'Stable '.$eNum]);
 
             $eNum++;
@@ -123,7 +123,7 @@ class StablesTableSeeder extends Seeder
          * This stables should be marked as being unactivated.
          */
         for ($i = 1; $i <= 3; $i++) {
-            StableFactory::new()
+            Stable::factory()
                 ->unactivated()
                 ->create(['name' => 'Stable '.$eNum]);
 

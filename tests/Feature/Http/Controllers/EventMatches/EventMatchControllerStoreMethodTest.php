@@ -6,6 +6,7 @@ use App\Collections\EventMatchCompetitorsCollection;
 use App\Enums\Role;
 use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Models\Event;
+use App\Models\EventMatch;
 use App\Models\Referee;
 use App\Models\Title;
 use App\Models\Wrestler;
@@ -14,8 +15,8 @@ use Tests\Factories\EventMatchRequestDataFactory;
 use Tests\TestCase;
 
 /**
- * @group events
- * @group feature-events
+ * @group event-matches
+ * @group feature-event-matches
  */
 class EventMatchControllerStoreMethodTest extends TestCase
 {
@@ -46,8 +47,8 @@ class EventMatchControllerStoreMethodTest extends TestCase
                     'titles' => [],
                     'referees' => [$referee->id],
                     'competitors' => [
-                        ['competitor_id' => $wrestlerA->id, 'competitor_type' => 'wrestler'],
-                        ['competitor_id' => $wrestlerB->id, 'competitor_type' => 'wrestler'],
+                        [['competitor_id' => $wrestlerA->id, 'competitor_type' => 'wrestler']],
+                        [['competitor_id' => $wrestlerB->id, 'competitor_type' => 'wrestler']],
                     ],
                     'preview' => 'This is a general match preview.',
                 ])
@@ -67,10 +68,28 @@ class EventMatchControllerStoreMethodTest extends TestCase
                 $match->competitors->groupedBySide()->first()->groupedByCompetitorType()
             );
 
-            $this->assertInstanceOf(
-                Wrestler::class,
-                $match->competitors->groupedBySide()->first()->groupedByCompetitorType()->first()->first()->competitor
+            $this->assertTrue(
+                $match->competitors
+                    ->groupedBySide()
+                    ->first()
+                    ->groupedByCompetitorType()
+                    ->first()
+                    ->first()
+                    ->competitor
+                    ->is($wrestlerA)
             );
+
+            $this->assertTrue(
+                $match->competitors
+                    ->groupedBySide()
+                    ->last()
+                    ->groupedByCompetitorType()
+                    ->first()
+                    ->first()
+                    ->competitor
+                    ->is($wrestlerB)
+            );
+
             $this->assertEquals('This is a general match preview.', $match->preview);
         });
     }

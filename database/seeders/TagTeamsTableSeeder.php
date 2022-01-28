@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employment;
+use App\Models\Retirement;
+use App\Models\TagTeam;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Tests\Factories\EmploymentFactory;
-use Tests\Factories\RetirementFactory;
-use Tests\Factories\TagTeamFactory;
 
 class TagTeamsTableSeeder extends Seeder
 {
@@ -42,13 +42,13 @@ class TagTeamsTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $employment = EmploymentFactory::new()->started($start);
+            $employment = Employment::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $employment = $employment->ended($end);
             }
 
-            TagTeamFactory::new()
+            TagTeam::factory()
                 ->released($employment)
                 ->create(['name' => 'Tag Team '.$eNum]);
 
@@ -64,9 +64,9 @@ class TagTeamsTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $employment = EmploymentFactory::new()->started($start)->ended($end);
-            $retirement = RetirementFactory::new()->started($end);
-            TagTeamFactory::new()
+            $employment = Employment::factory()->started($start)->ended($end);
+            $retirement = Retirement::factory()->started($end);
+            TagTeam::factory()
                 ->retired($employment, $retirement)
                 ->create(['name' => 'Tag Team '.$eNum]);
 
@@ -85,13 +85,13 @@ class TagTeamsTableSeeder extends Seeder
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
-                $employment = EmploymentFactory::new()->started($start);
+                $employment = Employment::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $employment = $employment->ended($end);
                 }
 
-                TagTeamFactory::new()
+                TagTeam::factory()
                     ->released($employment)
                     ->create(['name' => 'Tag Team '.$eNum]);
 
@@ -109,10 +109,10 @@ class TagTeamsTableSeeder extends Seeder
         for ($j = 1; $j <= 3; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $employment = EmploymentFactory::new()->started($start);
+            $employment = Employment::factory()->started($start);
 
-            TagTeamFactory::new()
-                ->pendingEmployment($employment)
+            TagTeam::factory()
+                ->withFutureEmployment($employment)
                 ->create(['name' => 'Tag Team '.$eNum]);
 
             $eNum++;
@@ -123,7 +123,7 @@ class TagTeamsTableSeeder extends Seeder
          * These tag teams should be marked as being Unemployed.
          */
         for ($i = 1; $i <= 3; $i++) {
-            TagTeamFactory::new()
+            TagTeam::factory()
                 ->unemployed()
                 ->create(['name' => 'Tag Team '.$eNum]);
 

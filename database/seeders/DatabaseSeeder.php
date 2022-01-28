@@ -20,13 +20,13 @@ class DatabaseSeeder extends Seeder
         $this->call(MatchDecisionsTableSeeder::class);
         $this->call(VenuesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
-        // $this->call(TitlesTableSeeder::class, false, $dateToStart->copy());
-        // $this->call(WrestlersTableSeeder::class, false, $dateToStart->copy());
-        // $this->call(TagTeamsTableSeeder::class, false, $dateToStart->copy());
-        // $this->call(ManagersTableSeeder::class, false, $dateToStart->copy());
-        // $this->call(RefereesTableSeeder::class, false, $dateToStart->copy());
-        // $this->call(StablesTableSeeder::class, false, $dateToStart->copy());
-        // $this->call(EventsTableSeeder::class);
+        $this->call(TitlesTableSeeder::class, false, $dateToStart->copy());
+        $this->call(WrestlersTableSeeder::class, false, $dateToStart->copy());
+        $this->call(TagTeamsTableSeeder::class, false, $dateToStart->copy());
+        $this->call(ManagersTableSeeder::class, false, $dateToStart->copy());
+        $this->call(RefereesTableSeeder::class, false, $dateToStart->copy());
+        $this->call(StablesTableSeeder::class, false, $dateToStart->copy());
+        $this->call(EventsTableSeeder::class);
     }
 
     public function call($class, $silent = false, $extra = null)

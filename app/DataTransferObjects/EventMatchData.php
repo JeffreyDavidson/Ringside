@@ -78,15 +78,18 @@ class EventMatchData
     {
         $formattedCompetitors = collect();
 
-        foreach ($competitors as $competitor) {
+        foreach ($competitors as $sideCompetitors) {
             $wrestlers = collect();
             $tagTeams = collect();
-            if ($competitor['competitor_type'] === 'wrestler') {
-                $wrestler = Wrestler::find($competitor['competitor_id']);
-                $formattedCompetitors->push(['wrestlers' => collect($wrestlers->push($wrestler))]);
-            } elseif ($competitor['competitor_type'] === 'tag_team') {
-                $tagTeam = TagTeam::find($competitor['competitor_id']);
-                $formattedCompetitors->push(['tag_teams' => collect($tagTeams->push($tagTeam))]);
+
+            foreach ($sideCompetitors as $competitor) {
+                if ($competitor['competitor_type'] === 'wrestler') {
+                    $wrestler = Wrestler::find($competitor['competitor_id']);
+                    $formattedCompetitors->push(['wrestlers' => collect($wrestlers->push($wrestler))]);
+                } elseif ($competitor['competitor_type'] === 'tag_team') {
+                    $tagTeam = TagTeam::find($competitor['competitor_id']);
+                    $formattedCompetitors->push(['tag_teams' => collect($tagTeams->push($tagTeam))]);
+                }
             }
         }
 
