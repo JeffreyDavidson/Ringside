@@ -2,6 +2,7 @@
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Models\TagTeam;
 use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -23,8 +24,7 @@ class EmployAction extends BaseTagTeamAction
         $startDate ??= now();
 
         $tagTeam->currentWrestlers->each(function ($wrestler) use ($startDate) {
-            $this->wrestlerRepository->employ($wrestler, $startDate);
-            $wrestler->save();
+            WrestlersEmployAction::run($wrestler, $startDate);
         });
 
         $this->tagTeamRepository->employ($tagTeam, $startDate);

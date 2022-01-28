@@ -3,6 +3,7 @@
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction extends BaseWrestlerAction
@@ -13,19 +14,20 @@ class ReleaseAction extends BaseWrestlerAction
      * Release a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
+     * @param  \Carbon\Carbon|null $releaseDate
      *
      * @return void
      */
-    public function handle(Wrestler $wrestler): void
+    public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = now();
+        $releaseDate ??= now();
 
         if ($wrestler->isSuspended()) {
-            $this->wrestlerRepository->reinstate($wrestler, $releaseDate);
+            ReinstateAction::run($wrestler, $releaseDate);
         }
 
         if ($wrestler->isInjured()) {
-            $this->wrestlerRepository->clearInjury($wrestler, $releaseDate);
+            ClearInjuryAction::run($wrestler, $releaseDate);
         }
 
         $this->wrestlerRepository->release($wrestler, $releaseDate);

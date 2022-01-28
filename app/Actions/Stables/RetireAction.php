@@ -2,6 +2,8 @@
 
 namespace App\Actions\Stables;
 
+use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
+use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -24,17 +26,13 @@ class RetireAction extends BaseStableAction
 
         if ($stable->currentTagTeams->isNotEmpty()) {
             $stable->currentTagTeams->each(function (TagTeam $tagTeam) use ($retirementDate) {
-                $this->tagTeamRepository->release($tagTeam, $retirementDate);
-                $this->tagTeamRepository->retire($tagTeam, $retirementDate);
-                $tagTeam->save();
+                TagTeamsRetireAction::run($tagTeam, $retirementDate);
             });
         }
 
         if ($stable->currentWrestlers->isNotEmpty()) {
             $stable->currentWrestlers->each(function (Wrestler $wrestler) use ($retirementDate) {
-                $this->wrestlerRepository->release($wrestler, $retirementDate);
-                $this->wrestlerRepository->retire($wrestler, $retirementDate);
-                $wrestler->save();
+                WrestlersRetireAction::run($wrestler, $retirementDate);
             });
         }
 

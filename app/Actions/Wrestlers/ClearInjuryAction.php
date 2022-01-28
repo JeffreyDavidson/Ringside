@@ -3,6 +3,7 @@
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ClearInjuryAction extends BaseWrestlerAction
@@ -13,12 +14,13 @@ class ClearInjuryAction extends BaseWrestlerAction
      * Clear an injury of a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
+     * @param  \Carbon\Carbon|null $recoveryDate
      *
      * @return void
      */
-    public function handle(Wrestler $wrestler): void
+    public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
-        $recoveryDate = now();
+        $recoveryDate ??= now();
 
         $this->wrestlerRepository->clearInjury($wrestler, $recoveryDate);
         $wrestler->save();

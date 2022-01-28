@@ -3,6 +3,7 @@
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestler;
+use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction extends BaseWrestlerAction
@@ -13,12 +14,13 @@ class ReinstateAction extends BaseWrestlerAction
      * Reinstate a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
+     * @param  \Carbon\Carbon|null $reinstatementDate
      *
      * @return void
      */
-    public function handle(Wrestler $wrestler): void
+    public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
-        $reinstatementDate = now();
+        $reinstatementDate ??= now();
 
         $this->wrestlerRepository->reinstate($wrestler, $reinstatementDate);
         $wrestler->save();

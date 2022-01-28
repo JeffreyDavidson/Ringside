@@ -21,11 +21,11 @@ class ReleaseAction extends BaseManagerAction
         $releaseDate = now();
 
         if ($manager->isSuspended()) {
-            $this->managerRepository->reinstate($manager, $releaseDate);
+            ReinstateAction::run($manager, $releaseDate);
         }
 
         if ($manager->isInjured()) {
-            $this->managerRepository->clearInjury($manager, $releaseDate);
+            ClearInjuryAction::run($manager, $releaseDate);
         }
 
         $this->managerRepository->release($manager, $releaseDate);
