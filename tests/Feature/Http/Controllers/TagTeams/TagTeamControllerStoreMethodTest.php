@@ -122,6 +122,7 @@ class TagTeamControllerStoreMethodTest extends TestCase
     public function unemployed_wrestlers_are_employed_on_the_same_date_if_started_at_is_filled_in_request()
     {
         $startDate = now();
+        Carbon::setTestNow($startDate);
         $wrestlers = Wrestler::factory()
             ->unemployed()
             ->count(2)
