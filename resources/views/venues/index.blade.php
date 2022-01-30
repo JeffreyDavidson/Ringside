@@ -6,11 +6,6 @@
     </x-slot>
 
     <x-content>
-        <div class="card">
-             @include('venues.partials.table.header')
-             <div class="py-4 card-body">
-                <livewire:venues.all-venues>
-             </div>
-        </div>
+        <livewire:venues.all-venues>
     </x-content>
 </x-layouts.app>

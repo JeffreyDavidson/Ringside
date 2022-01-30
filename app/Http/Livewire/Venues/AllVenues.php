@@ -15,7 +15,9 @@ class AllVenues extends BaseComponent
 
     public $showFilters = false;
 
-    public $filters = [];
+    public $filters = [
+        'search' => '',
+    ];
 
     public function deleteSelected()
     {
@@ -31,6 +33,7 @@ class AllVenues extends BaseComponent
     public function getRowsQueryProperty()
     {
         $query = Venue::query()
+            ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
             ->orderBy('name');
 
         return $this->applySorting($query);
