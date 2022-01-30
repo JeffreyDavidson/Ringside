@@ -50,6 +50,7 @@
                         </div>
                         <!--end::Post-->
                     </div>
+                    <x-notification />
                     <!--end::Content>
 
                     <!--begin::Footer-->
