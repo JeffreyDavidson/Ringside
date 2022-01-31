@@ -1,56 +1,50 @@
-<x-guest-layout>
-    <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
-
-        <!-- Session Status -->
-        <x-auth-session-status class="mb-4" :status="session('status')" />
-
-        <!-- Validation Errors -->
-        <x-auth-validation-errors class="mb-4" :errors="$errors" />
-
-        <form method="POST" action="{{ route('login') }}">
+<x-layouts.auth>
+    <!--begin::Wrapper-->
+    <x-auth-validation-errors :errors="$errors" />
+    <div class="p-10 mx-auto rounded shadow-sm w-lg-500px bg-body p-lg-15">
+        <!--begin::Form-->
+        <form class="form w-100 fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate" id="kt_sign_in_form" action="{{ route('login') }}" method="post">
             @csrf
-
-            <!-- Email Address -->
-            <div>
-                <x-label for="email" :value="__('Email')" />
-
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+            <!--begin::Heading-->
+            <div class="mb-10 text-center">
+                <!--begin::Title-->
+                <h1 class="mb-3 text-dark">Sign In to Ringside</h1>
+                <!--end::Title-->
             </div>
-
-            <!-- Password -->
-            <div class="mt-4">
-                <x-label for="password" :value="__('Password')" />
-
-                <x-input id="password" class="block mt-1 w-full"
-                                type="password"
-                                name="password"
-                                required autocomplete="current-password" />
+            <!--begin::Heading-->
+            <!--begin::Input group-->
+            <div class="mb-10 fv-row fv-plugins-icon-container">
+                <!--begin::Label-->
+                <label class="form-label fs-6 fw-bolder text-dark">Email</label>
+                <!--end::Label-->
+                <!--begin::Input-->
+                <input class="form-control form-control-lg form-control-solid" type="text" name="email" autocomplete="off">
+                <!--end::Input-->
+            <div class="fv-plugins-message-container invalid-feedback"></div></div>
+            <!--end::Input group-->
+            <!--begin::Input group-->
+            <div class="mb-10 fv-row fv-plugins-icon-container">
+                <!--begin::Wrapper-->
+                <div class="mb-2 d-flex flex-stack">
+                    <!--begin::Label-->
+                    <label class="mb-0 form-label fw-bolder text-dark fs-6">Password</label>
+                    <!--end::Label-->
+                </div>
+                <!--end::Wrapper-->
+                <!--begin::Input-->
+                <input class="form-control form-control-lg form-control-solid" type="password" name="password" autocomplete="off">
+                <!--end::Input-->
+            <div class="fv-plugins-message-container invalid-feedback"></div></div>
+            <!--end::Input group-->
+            <!--begin::Actions-->
+            <div class="text-center">
+                <!--begin::Submit button-->
+                <button type="submit" id="kt_sign_in_submit" class="mb-5 btn btn-lg btn-primary w-100">Continue</button>
+                <!--end::Submit button-->
             </div>
-
-            <!-- Remember Me -->
-            <div class="block mt-4">
-                <label for="remember_me" class="inline-flex items-center">
-                    <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" name="remember">
-                    <span class="ml-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
-                    </a>
-                @endif
-
-                <x-button class="ml-3">
-                    {{ __('Login') }}
-                </x-button>
-            </div>
-        </form>
-    </x-auth-card>
-</x-guest-layout>
+            <!--end::Actions-->
+        <div></div></form>
+        <!--end::Form-->
+    </div>
+    <!--end::Wrapper-->
+</x-layouts.auth>

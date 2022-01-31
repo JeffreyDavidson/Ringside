@@ -2,8 +2,6 @@
     <!--begin::Container-->
     <div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
         {{ $toolbar }}
-
-        {{ $actions ?? null }}
     </div>
     <!--end::Container-->
 </div>

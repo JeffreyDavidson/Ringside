@@ -1,9 +1,9 @@
-<label class="form-label" for="{{ $name }}">{{ $label }}:</label>
+<label for="{{ $name }}">{{ $label }}:</label>
 
 <input type="text"
     class="form-control @error($name) is-invalid @enderror"
     name="{{ $name }}"
-    :placeholder="$label ?? Enter {{ $label }} : null"
+    placeholder="Enter {{ $label }}"
     value="{{ $value }}"
 >
 
