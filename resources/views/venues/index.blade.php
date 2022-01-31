@@ -1,16 +1,11 @@
 <x-layouts.app>
-    <x-sub-header title="Venues">
-        <x-slot name="actions">
-            <a href="{{ route('venues.create') }}" class="btn btn-label-brand btn-bold">
-                Create Venues
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Venues List
+        </h2>
+    </x-slot>
+
     <x-content>
-        <x-portlet title="Venues">
-            <div class="kt-portlet__body">
-                <livewire:venues.all-venues>
-            </div>
-        </x-portlet>
+        <livewire:venues.all-venues>
     </x-content>
 </x-layouts.app>

@@ -14,6 +14,7 @@
 		<link href="asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
 		<link href="asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
 		<!--end::Global Stylesheets Bundle-->
+        @livewireStyles
     </head>
     <body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px">
         <!--begin::Main-->
@@ -49,6 +50,7 @@
                         </div>
                         <!--end::Post-->
                     </div>
+                    <x-notification />
                     <!--end::Content>
 
                     <!--begin::Footer-->
@@ -63,6 +65,7 @@
 		<!--end::Main-->
         <!--begin::Javascript-->
 		<script>var hostUrl = "assets/";</script>
+        @livewireScripts
 		<!--begin::Global Javascript Bundle(used by all pages)-->
 		<script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
 		<script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
