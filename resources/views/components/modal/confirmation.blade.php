@@ -1,27 +1,13 @@
-@props(['id' => null, 'maxWidth' => null])
-
-<x-modal :id="$id" :maxWidth="$maxWidth" {{ $attributes }}>
-    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-        <div class="sm:flex sm:items-start">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-red-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-            </div>
-
-            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg">
-                    {{ $title }}
-                </h3>
-
-                <div class="mt-2">
-                    {{ $content }}
-                </div>
-            </div>
+<div class="swal2-container swal2-center swal2-backdrop-show" style="overflow-y: auto;">
+    <div aria-labelledby="swal2-title" aria-describedby="swal2-html-container" class="swal2-popup swal2-modal swal2-icon-warning swal2-show" tabindex="-1" role="dialog" aria-live="assertive" aria-modal="true" style="display: grid;">
+        <div class="swal2-icon swal2-warning swal2-icon-show" style="display: flex;">
+            <div class="swal2-icon-content">!</div>
+        </div>
+        <img class="swal2-image">
+        <div class="swal2-html-container" id="swal2-html-container" style="display: block;">Are you sure you want to delete {{ $itemName }}? This action is irreversible.</div>
+        <div class="swal2-actions" style="display: flex;">
+            <button type="button" wire:click="deleteSelected" class="swal2-confirm btn fw-bold btn-danger" style="display: inline-block;" aria-label="">Yes, delete!</button>
+            <button type="button" wire:click="cancelDeletion($model)" class="swal2-cancel btn fw-bold btn-active-light-primary" style="display: inline-block;" aria-label="">No, cancel</button>
         </div>
     </div>
-
-    <div class="px-6 py-4 bg-gray-100 text-right">
-        {{ $footer }}
-    </div>
-</x-modal>
+</div>

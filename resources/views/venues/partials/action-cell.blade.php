@@ -10,7 +10,7 @@
         <!--begin::Menu item-->
         @can('delete', $venue)
             <div class="px-3 menu-item">
-                <x-buttons.delete table="venue" :route="route('venues.destroy', $venue)" />
+                <x-buttons.delete wire:click="delete($venue)" />
             </div>
         @endcan
         <!--end::Menu item-->
