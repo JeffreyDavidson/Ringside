@@ -1,4 +1,4 @@
-<div class="form-group">
+<div class="mb-10">
     <x-form.inputs.text
         name="name"
         label="Venue Name"
@@ -8,7 +8,7 @@
 
 <div class="row">
     <div class="col-lg-8">
-        <div class="form-group">
+        <div class="mb-10">
             <x-form.inputs.text
                 name="address1"
                 label="Street Address"
@@ -17,7 +17,7 @@
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="form-group">
+        <div class="mb-10">
             <x-form.inputs.text
                 name="address2"
                 label="Suite Number"
@@ -28,7 +28,7 @@
 </div>
 <div class="row">
     <div class="col-lg-4">
-        <div class="form-group">
+        <div class="mb-10">
             <x-form.inputs.text
                 name="city"
                 label="City"
@@ -37,7 +37,7 @@
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="form-group">
+        <div class="mb-10">
             <x-form.inputs.text
                 name="state"
                 label="State"
@@ -46,7 +46,7 @@
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="form-group">
+        <div class="mb-10">
             <x-form.inputs.text
                 name="zip"
                 label="Zip"

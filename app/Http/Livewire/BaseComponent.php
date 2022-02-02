@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire;
 
+use App\Http\Livewire\DataTable\WithPerPagePagination;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class BaseComponent extends Component
 {
-    use WithPagination;
+    use WithPerPagePagination;
 
     /**
      * Number of items to display on each page.
