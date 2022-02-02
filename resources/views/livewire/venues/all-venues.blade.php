@@ -17,7 +17,7 @@
                     <th class="text-end min-w-100px sorting_disabled">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-600 fw-bold">
                 @forelse ($venues as $venue)
                     <tr>
                         <td>
@@ -31,13 +31,7 @@
                         <td>{{ $venue->state }}</td>
                         <td>{{ $venue->zip }}</td>
                         <td class="text-end">
-                            @include('venues.partials.action-cell', [
-                                'venue' => $venue,
-                                'actions' => collect([
-                                    'update',
-                                    'delete',
-                                ])
-                            ])
+                            @include('venues.partials.action-cell', ['venue' => $venue])
                         </td>
                     </tr>
                 @empty
@@ -49,22 +43,3 @@
         </x-data-table>
     </div>
 </div>
-
-@if ($showDeleteModal)
-<!-- Delete Venues Modal -->
-<form wire:submit.prevent="deleteSelected">
-    <x-modal.confirmation wire:model.defer="showDeleteModal">
-        <x-slot name="title">Delete Venue</x-slot>
-
-        <x-slot name="content">
-            <div class="py-8 text-cool-gray-700">Are you sure you? This action is irreversible.</div>
-        </x-slot>
-
-        <x-slot name="footer">
-            <x-button.secondary wire:click="$set('showDeleteModal', false)">Cancel</x-button.secondary>
-
-            <x-button.primary type="submit">Delete</x-button.primary>
-        </x-slot>
-    </x-modal.confirmation>
-</form>
-@endif
