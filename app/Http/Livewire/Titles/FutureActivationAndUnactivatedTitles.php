@@ -2,20 +2,52 @@
 
 namespace App\Http\Livewire\Titles;
 
+use App\Http\Livewire\BaseComponent;
+use App\Http\Livewire\DataTable\WithBulkActions;
+use App\Http\Livewire\DataTable\WithSorting;
 use App\Models\Title;
-use Livewire\Component;
-use Livewire\WithPagination;
 
-class FutureActivationAndUnactivatedTitles extends Component
+class FutureActivationAndUnactivatedTitles extends BaseComponent
 {
-    use WithPagination;
+    use WithBulkActions, WithSorting;
 
-    /**
-     * Number of items to display on each page.
-     *
-     * @var int
-     */
-    public $perPage = 10;
+    public $showDeleteModal = false;
+
+    public $showFilters = false;
+
+    public $filters = [
+        'search' => '',
+    ];
+
+    public function deleteSelected()
+    {
+        $deleteCount = $this->selectedRowsQuery->count();
+
+        $this->selectedRowsQuery->delete();
+
+        $this->showDeleteModal = false;
+
+        $this->notify('You\'ve deleted '.$deleteCount.' titles');
+    }
+
+    public function getRowsQueryProperty()
+    {
+        $query = Title::query()
+            ->withFutureActivation()
+            ->orWhere
+            ->unactivated()
+            ->withFirstActivatedAtDate()
+            ->orderByNullsLast('first_activated_at')
+            ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
+            ->orderBy('name');
+
+        return $this->applySorting($query);
+    }
+
+    public function getRowsProperty()
+    {
+        return $this->applyPagination($this->rowsQuery);
+    }
 
     /**
      * Display a listing of the resource.
@@ -24,17 +56,8 @@ class FutureActivationAndUnactivatedTitles extends Component
      */
     public function render()
     {
-        $futureActivationAndUnactivatedTitles = Title::query()
-            ->withFutureActivation()
-            ->orWhere
-            ->unactivated()
-            ->withFirstActivatedAtDate()
-            ->orderByNullsLast('first_activated_at')
-            ->orderBy('name')
-            ->paginate();
-
         return view('livewire.titles.future-activation-and-unactivated-titles', [
-            'futureActivationAndUnactivatedTitles' => $futureActivationAndUnactivatedTitles,
+            'futureActivationAndUnactivatedTitles' => $this->rows,
         ]);
     }
 }

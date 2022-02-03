@@ -109,6 +109,16 @@ trait Activations
     }
 
     /**
+     * Check to see if the model is unactivated.
+     *
+     * @return bool
+     */
+    public function isInactive()
+    {
+        return $this->current()->count() === 0;
+    }
+
+    /**
      * Check to see if the model has a future activation.
      *
      * @return bool
@@ -125,7 +135,7 @@ trait Activations
      */
     public function canBeActivated()
     {
-        return $this->isUnactivated() || $this->hasFutureActivation();
+        return $this->isUnactivated() || $this->hasFutureActivation() || $this->isDeactivated();
     }
 
     /**

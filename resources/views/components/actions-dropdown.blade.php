@@ -1,4 +1,4 @@
-<a href="#" class="btn btn-light btn-active-light-primary btn-sm show menu-dropdown" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions
+<a href="#" class="btn btn-light btn-active-light-primary btn-sm menu-dropdown" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Actions
     <!--begin::Svg Icon | path: icons/duotune/arrows/arr072.svg-->
     <span class="m-0 svg-icon svg-icon-5">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -8,4 +8,6 @@
     <!--end::Svg Icon-->
 </a>
 
-{{ $slot }}
+<div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px" data-kt-menu="true" style="z-index: 105; position: fixed; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(-374px, 357px, 0px);" data-popper-placement="bottom-end">
+    {{ $slot }}
+</div>

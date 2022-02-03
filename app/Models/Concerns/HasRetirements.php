@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Retirement;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait HasRetirements
 {
@@ -70,5 +71,12 @@ trait HasRetirements
     public function hasRetirements()
     {
         return $this->retirements()->count() > 0;
+    }
+
+    public function retiredAt(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->currentRetirement->started_at
+        );
     }
 }
