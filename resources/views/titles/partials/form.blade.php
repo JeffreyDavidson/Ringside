@@ -1,4 +1,4 @@
-<div class="form-group">
+<div class="mb-10">
     <x-form.inputs.text
         name="name"
         label="Name"
@@ -6,11 +6,10 @@
     />
 </div>
 
-<div class="form-group">
+<div class="mb-10">
     <x-form.inputs.date
         name="activated_at"
         label="Activation Date"
         :value="old('activated_at', $title->activated_at)"
     />
 </div>
-

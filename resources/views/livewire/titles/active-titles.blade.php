@@ -1,28 +1,35 @@
-<x-data-table :collection="$activeTitles">
-    <thead>
-        <th>Id</th>
-        <th>Title Name</th>
-        <th>Date Introduced</th>
-        <th>Actions</th>
-    </thead>
-    <tbody>
-        @forelse ($activeTitles as $title)
-            <tr>
-                <td>{{ $title->id }}</td>
-                <td>{{ $title->name }}</td>
-                <td>{{ $title->first_activated_at->toDateString() }}</td>
-                <td>
-                    <x-actions-dropdown>
-                        <x-buttons.view :route="route('titles.show', $title)" />
-                        <x-buttons.edit :route="route('titles.edit', $title)" />
-                        <x-buttons.delete :route="route('titles.destroy', $title)" />
-                        <x-buttons.retire :route="route('titles.retire', $title)" />
-                        <x-buttons.deactivate :route="route('titles.deactivate', $title)" />
-                    </x-actions-dropdown>
-                </td>
-            </tr>
-        @empty
-            <tr><td colspan="4">No matching records found</td></tr>
-        @endforelse
-    </tbody>
-</x-datatable>
+<div class="pt-3 mb-5 card card-flush mb-xl-10">
+    @include('livewire.titles.partials.header')
+
+    <div class="py-4 card-body">
+        <x-data-table :collection="$activeTitles">
+            <thead>
+                <x-table.row-heading>
+                    <x-table.checkbox-heading />
+                    <th>Title Name</th>
+                    <th>Status</th>
+                    <th>Date Introduced</th>
+                    <x-table.actions-heading />
+                </x-table.row-heading>
+            </thead>
+            <x-table.body>
+                @forelse ($activeTitles as $title)
+                    <tr>
+                        <x-table.cell-checkbox value="{{ $title->id }}" />
+                        <x-table.cell-link link="{{ route('titles.show', $title) }}" text="{{ $title->name }}" />
+                        <td><div class="badge badge-light-success">{{ $title->status->label }}</div></td>
+                        <td>{{ $title->activatedAt->toDateString() }}</td>
+                        <x-table.actions-cell>
+                            @include('titles.partials.action-cell', [
+                                'title' => $title,
+                                'actions' => collect(['retire', 'deactivate'])
+                            ])
+                        </x-table.actions-cell>
+                    </tr>
+                @empty
+                    <tr><td colspan="4">No active titles found.</td></tr>
+                @endforelse
+            </x-table.body>
+        </x-data-table>
+    </div>
+</div>

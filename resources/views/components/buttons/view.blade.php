@@ -1,6 +1,3 @@
-<li class="kt-nav__item">
-    <a href="{{ $route }}" class="kt-nav__link">
-        <i class="kt-nav__link-icon flaticon2-expand"></i>
-        <span class="kt-nav__link-text">View</span>
-    </a>
-</li>
+<x-menu-link>
+    <a href="{{ $route }}" class="px-3 menu-link">View</a>
+</x-menu-link>

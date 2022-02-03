@@ -13,4 +13,14 @@ namespace App\Enums;
  */
 class TitleStatus extends BaseEnum
 {
+    protected static function labels(): array
+    {
+        return [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+            'future_activation' => 'Awaiting Activation',
+            'retired' => 'Retired',
+            'unactivated' => 'Unactivated',
+        ];
+    }
 }

@@ -1,18 +1,25 @@
 <x-layouts.app>
-    <x-sub-header title="Titles">
-        <x-slot name="actions">
-            <a href="{{ route('titles.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Titles
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Edit Title
+        </h2>
+    </x-slot>
+
     <x-content>
-        <x-portlet title="Edit Title Form">
-            <x-form.form method="patch" :action="route('titles.update', $title)">
-                <div class="kt-portlet__body">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Title Form</h3>
+            </div>
+            <div class="card-body">
+                <x-form.form
+                    action="{{ route('titles.update', $title) }}"
+                    method="PATCH"
+                    backTo="{{ route('titles.index') }}"
+                    resource="Titles"
+                >
                     @include('titles.partials.form')
-                </div>
-            </x-form>
-        </x-portlet>
+                </x-form.form>
+            </div>
+        </div>
     </x-content>
 </x-layouts.app>

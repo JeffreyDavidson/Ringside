@@ -1,10 +1,5 @@
-<li class="kt-nav__item">
-    <form action="{{ $route }}" method="post" class="kt-nav__link">
-        @csrf
-        @method('PUT')
-        <button class="btn w-100 text-left p-0">
-            <i class="kt-nav__link-icon flaticon2-plus-1 "></i>
-            <span class="kt-nav__link-text">Injure</span>
-        </button>
-    </form>
-</li>
+<x-menu-link>
+    <x-menu-item-form action="{{ $attributes->get('route') }}>
+        <x-menu-item-button text="Injure">
+    </x-menu-item-form>
+</x-menu-link>
