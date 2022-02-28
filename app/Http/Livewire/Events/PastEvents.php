@@ -3,10 +3,46 @@
 namespace App\Http\Livewire\Events;
 
 use App\Http\Livewire\BaseComponent;
+use App\Http\Livewire\Datatable\WithBulkActions;
+use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Event;
 
 class PastEvents extends BaseComponent
 {
+    use WithBulkActions, WithSorting;
+
+    private $showDeleteModal = false;
+
+    private $showFilters = false;
+
+    private $filters = [
+        'search' => '',
+    ];
+
+    public function deleteSelected()
+    {
+        $deleteCount = $this->selectedRowsQuery->count();
+
+        $this->selectedRowsQuery->delete();
+
+        $this->showDeleteModal = false;
+
+        $this->notify('You\'ve deleted '.$deleteCount.' titles');
+    }
+
+    public function getRowsQueryProperty()
+    {
+        $query = Event::query()
+            ->past();
+
+        return $this->applySorting($query);
+    }
+
+    public function getRowsProperty()
+    {
+        return $this->applyPagination($this->rowsQuery);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,12 +50,8 @@ class PastEvents extends BaseComponent
      */
     public function render()
     {
-        $pastEvents = Event::query()
-            ->past()
-            ->paginate($this->perPage);
-
         return view('livewire.events.past-events', [
-            'pastEvents' => $pastEvents,
+            'pastEvents' => $this->rows,
         ]);
     }
 }

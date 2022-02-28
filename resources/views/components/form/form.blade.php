@@ -2,7 +2,7 @@
 
 <form class="kt-form" method="POST" action="{!! $action !!}" {{ $attributes }}>
     @csrf
-    @if ($attributes->has('method'))
+    @isset ($method)
         @method($method)
     @endif
 

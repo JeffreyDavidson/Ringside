@@ -15,7 +15,7 @@
         "laravel/telescope": "^4.7",
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.10",
-        "lorisleiva/laravel-actions": "^2.3.0-beta.2",
+        "lorisleiva/laravel-actions": "^2.3",
         "spatie/data-transfer-object": "^3.7",
         "spatie/laravel-enum": "^3.0",
         "staudenmeir/laravel-merged-relations": "^1.5",
@@ -49,7 +49,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": ["laravel/telescope"]
+            "dont-discover": [
+                "laravel/telescope",
+                "staudenmeir/laravel-migration-views"
+            ]
         }
     },
     "autoload": {

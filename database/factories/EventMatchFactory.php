@@ -8,6 +8,9 @@ use App\Models\MatchType;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EventMatch>
+ */
 class EventMatchFactory extends Factory
 {
     /**
@@ -17,6 +20,11 @@ class EventMatchFactory extends Factory
      */
     protected $model = EventMatch::class;
 
+    /**
+     * Undocumented function
+     *
+     * @return static
+     */
     public function configure()
     {
         $this->hasAttached(Wrestler::factory()->bookable(), ['side_number' => 0], 'wrestlers');
@@ -28,7 +36,7 @@ class EventMatchFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function definition()
     {

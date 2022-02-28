@@ -30,16 +30,51 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'match_type_id' => ['required', 'integer', Rule::exists('match_types', 'id')],
-            'referees' => ['required', 'array'],
-            'referees.*' => ['integer', 'distinct', Rule::exists('referees', 'id')],
-            'titles' => ['nullable', 'array'],
-            'titles.*' => ['integer', 'distinct', Rule::exists('titles', 'id')],
-            'competitors' => ['required', 'array', 'min:2'],
-            'competitors.*' => ['required', 'array', 'min:1'],
-            'competitors.*.*.competitor_id' => ['required', 'integer'],
-            'competitors.*.*.competitor_type' => ['required', Rule::in(['wrestler', 'tag_team'])],
-            'preview' => ['nullable', 'string'],
+            'match_type_id' => [
+                'required',
+                'integer',
+                Rule::exists('match_types', 'id'),
+            ],
+            'referees' => [
+                'required',
+                'array',
+            ],
+            'referees.*' => [
+                'integer',
+                'distinct',
+                Rule::exists('referees', 'id'),
+            ],
+            'titles' => [
+                'nullable',
+                'array',
+            ],
+            'titles.*' => [
+                'integer',
+                'distinct',
+                Rule::exists('titles', 'id'),
+            ],
+            'competitors' => [
+                'required',
+                'array',
+                'min:2',
+            ],
+            'competitors.*' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'competitors.*.*.competitor_id' => [
+                'required',
+                'integer',
+            ],
+            'competitors.*.*.competitor_type' => [
+                'required',
+                Rule::in(['wrestler', 'tag_team']),
+            ],
+            'preview' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 
@@ -74,7 +109,12 @@ class StoreRequest extends FormRequest
                         $validator->addFailure('titles', TitlesMustBeActive::class);
                     }
 
-                    if (! (new TitleChampionIncludedInTitleMatch($this->input('titles')))->passes('competitors', $this->input('competitors'))) {
+                    if (! (new TitleChampionIncludedInTitleMatch($this->input('titles')))
+                        ->passes(
+                            'competitors',
+                            $this->input('competitors')
+                        )
+                    ) {
                         $validator->addFailure('competitors', TitleChampionIncludedInTitleMatch::class);
                     }
                 }

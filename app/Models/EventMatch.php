@@ -19,6 +19,16 @@ class EventMatch extends Model
     protected $fillable = ['event_id', 'match_type_id', 'preview'];
 
     /**
+     * Get the match type of the match.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function matchType()
+    {
+        return $this->belongsTo(MatchType::class);
+    }
+
+    /**
      * Get the referees assigned to the match.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be4f4ee7dbacbb41a5354dbb7350e28e",
+    "content-hash": "d51ab58408d13595f342fc53ff5c1144",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -698,16 +698,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v9.0.0-beta.5",
+            "version": "v9.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "e7d67f4ae06b15e8665de7c443c5933cbf5087d2"
+                "reference": "fbe7ed828819eadabb3cb9f95847a2ffe8846fd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/e7d67f4ae06b15e8665de7c443c5933cbf5087d2",
-                "reference": "e7d67f4ae06b15e8665de7c443c5933cbf5087d2",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/fbe7ed828819eadabb3cb9f95847a2ffe8846fd6",
+                "reference": "fbe7ed828819eadabb3cb9f95847a2ffe8846fd6",
                 "shasum": ""
             },
             "require": {
@@ -873,7 +873,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2022-02-01T16:16:50+00:00"
+            "time": "2022-02-08T15:48:31+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -1475,16 +1475,16 @@
         },
         {
             "name": "lorisleiva/laravel-actions",
-            "version": "v2.3.0-beta.2",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lorisleiva/laravel-actions.git",
-                "reference": "84d1296b5d4a686cfed42ecb32f2e5e0bf883414"
+                "reference": "96bd422f7e526ba0ce32d73bebe727531c3ef9d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lorisleiva/laravel-actions/zipball/84d1296b5d4a686cfed42ecb32f2e5e0bf883414",
-                "reference": "84d1296b5d4a686cfed42ecb32f2e5e0bf883414",
+                "url": "https://api.github.com/repos/lorisleiva/laravel-actions/zipball/96bd422f7e526ba0ce32d73bebe727531c3ef9d9",
+                "reference": "96bd422f7e526ba0ce32d73bebe727531c3ef9d9",
                 "shasum": ""
             },
             "require": {
@@ -1538,7 +1538,7 @@
             ],
             "support": {
                 "issues": "https://github.com/lorisleiva/laravel-actions/issues",
-                "source": "https://github.com/lorisleiva/laravel-actions/tree/v2.3.0-beta.2"
+                "source": "https://github.com/lorisleiva/laravel-actions/tree/v2.3.0"
             },
             "funding": [
                 {
@@ -1546,7 +1546,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-02T17:28:50+00:00"
+            "time": "2022-02-08T15:54:14+00:00"
         },
         {
             "name": "lorisleiva/lody",
@@ -11056,5 +11056,5 @@
         "php": "^8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.3.0"
 }

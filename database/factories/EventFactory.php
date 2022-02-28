@@ -4,9 +4,13 @@ namespace Database\Factories;
 
 use App\Enums\EventStatus;
 use App\Models\Event;
+use App\Models\Venue;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
+ */
 class EventFactory extends Factory
 {
     /**
@@ -17,9 +21,21 @@ class EventFactory extends Factory
     protected $modelClass = Event::class;
 
     /**
+     * Configure the model factory.
+     *
+     * @return static
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Event $event) {
+            $event->save();
+        });
+    }
+
+    /**
      * Define the model's default state.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -32,74 +48,100 @@ class EventFactory extends Factory
         ];
     }
 
-    public function unscheduled(): self
+    /**
+     * Define the model's unscheduled state.
+     *
+     * @return static
+     */
+    public function unscheduled()
     {
         return $this->state([
             'status' => EventStatus::unscheduled(),
             'date' => null,
-        ])->afterCreating(function (Event $event) {
-            $event->save();
-        });
+        ]);
     }
 
-    public function scheduled(): self
+    /**
+     * Define the model's scheduled state.
+     *
+     * @return static
+     */
+    public function scheduled()
     {
         return $this->state([
             'status' => EventStatus::scheduled(),
             'date' => Carbon::tomorrow(),
-        ])->afterCreating(function (Event $event) {
-            $event->save();
-        });
+        ]);
     }
 
-    public function past(): self
+    /**
+     * Define the model's past state.
+     *
+     * @return static
+     */
+    public function past()
     {
         return $this->state([
             'status' => EventStatus::past(),
             'date' => Carbon::yesterday(),
-        ])->afterCreating(function (Event $event) {
-            $event->save();
-        });
-    }
-
-    public function atVenue($venue)
-    {
-        return $this->state([
-            'venue_id' => $venue->id,
         ]);
     }
 
-    public function scheduledOn($date): self
+    /**
+     * Define the venue the event takes place at.
+     *
+     * @param  \App\Models\Venue $venue
+     *
+     * @return static
+     */
+    public function atVenue(Venue $venue)
     {
-        return $this->state([
-            'date' => $date,
-        ])->afterCreating(function (Event $event) {
-            $event->save();
-        });
+        return $this->state(['venue_id' => $venue->id]);
     }
 
-    public function withName($name): self
+    /**
+     * Define the event's date.
+     *
+     * @param  string $date
+     *
+     * @return static
+     */
+    public function scheduledOn(string $date)
     {
-        return $this->state([
-            'name' => $name,
-        ])->afterCreating(function (Event $event) {
-            $event->save();
-        });
+        return $this->state(['date' => $date]);
     }
 
-    public function withPreview($preview): self
+    /**
+     * Define the event's name.
+     *
+     * @param  string $name
+     *
+     * @return static
+     */
+    public function withName(string $name)
     {
-        return $this->state([
-            'preview' => $preview,
-        ])->afterCreating(function (Event $event) {
-            $event->save();
-        });
+        return $this->state(['name' => $name]);
     }
 
-    public function softDeleted(): self
+    /**
+     * Define the event's preview.
+     *
+     * @param  string $preview
+     *
+     * @return static
+     */
+    public function withPreview(string $preview)
     {
-        return $this->state([
-            'deleted_at' => now(),
-        ]);
+        return $this->state(['preview' => $preview]);
+    }
+
+    /**
+     * Define the event's soft deleted state.
+     *
+     * @return static
+     */
+    public function softDeleted()
+    {
+        return $this->state(['deleted_at' => now()]);
     }
 }

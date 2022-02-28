@@ -7,7 +7,7 @@
     <x-content>
         <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
             <!--begin::Card header-->
-            <div class="cursor-pointer card-header">
+            <div class="card-header">
                 <!--begin::Card title-->
                 <div class="m-0 card-title">
                     <h3 class="m-0 fw-bolder">{{ $venue->name }} Details</h3>

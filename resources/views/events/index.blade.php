@@ -1,28 +1,13 @@
 <x-layouts.app>
-    <x-sub-header title="Events">
-        <x-slot name="actions">
-            <a href="{{ route('events.create') }}" class="btn btn-label-brand btn-bold">
-                Create Events
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Events List
+        </h2>
+    </x-slot>
+
     <x-content>
-        <x-portlet title="Scheduled Events">
-            <div class="kt-portlet__body">
-                <livewire:events.scheduled-events>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Unscheduled Events">
-            <div class="kt-portlet__body">
-                <livewire:events.unscheduled-events>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Past Events">
-            <div class="kt-portlet__body">
-                <livewire:events.past-events>
-            </div>
-        </x-portlet>
+        <livewire:events.scheduled-events>
+        <livewire:events.unscheduled-events>
+        <livewire:events.past-events>
     </x-content>
 </x-layouts.app>

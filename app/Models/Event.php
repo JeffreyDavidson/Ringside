@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Builders\EventQueryBuilder;
+use App\Enums\EventStatus;
 use App\Observers\EventObserver;
 use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,6 +29,7 @@ class Event extends Model
      */
     protected $casts = [
         'date' => 'datetime',
+        'status' => EventStatus::class,
     ];
 
     /**

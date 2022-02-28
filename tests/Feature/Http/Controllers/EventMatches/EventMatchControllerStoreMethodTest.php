@@ -6,7 +6,6 @@ use App\Collections\EventMatchCompetitorsCollection;
 use App\Enums\Role;
 use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Models\Event;
-use App\Models\EventMatch;
 use App\Models\Referee;
 use App\Models\Title;
 use App\Models\Wrestler;
@@ -34,8 +33,7 @@ class EventMatchControllerStoreMethodTest extends TestCase
     {
         $event = Event::factory()->scheduled()->create();
         $referee = Referee::factory()->bookable()->create();
-        $wrestlerA = Wrestler::factory()->bookable()->create();
-        $wrestlerB = Wrestler::factory()->bookable()->create();
+        [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
 
         $this
             ->actAs(Role::administrator())
@@ -70,23 +68,13 @@ class EventMatchControllerStoreMethodTest extends TestCase
 
             $this->assertTrue(
                 $match->competitors
-                    ->groupedBySide()
                     ->first()
-                    ->groupedByCompetitorType()
-                    ->first()
-                    ->first()
-                    ->competitor
                     ->is($wrestlerA)
             );
 
             $this->assertTrue(
                 $match->competitors
-                    ->groupedBySide()
                     ->last()
-                    ->groupedByCompetitorType()
-                    ->first()
-                    ->first()
-                    ->competitor
                     ->is($wrestlerB)
             );
 

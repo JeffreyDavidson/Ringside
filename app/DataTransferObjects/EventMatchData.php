@@ -9,6 +9,7 @@ use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class EventMatchData
 {
@@ -76,23 +77,16 @@ class EventMatchData
      */
     public static function getCompetitors(Collection $competitors)
     {
-        $formattedCompetitors = collect();
+        return $competitors->transform(function ($sideCompetitors) {
+            return collect($sideCompetitors)->transform(function ($competitor) {
+                $competitor['type'] = $competitor['competitor_type'] === 'wrestler'
+                    ? Wrestler::find($competitor['competitor_id'])
+                    : TagTeam::find($competitor['competitor_id']);
 
-        foreach ($competitors as $sideCompetitors) {
-            $wrestlers = collect();
-            $tagTeams = collect();
-
-            foreach ($sideCompetitors as $competitor) {
-                if ($competitor['competitor_type'] === 'wrestler') {
-                    $wrestler = Wrestler::find($competitor['competitor_id']);
-                    $formattedCompetitors->push(['wrestlers' => collect($wrestlers->push($wrestler))]);
-                } elseif ($competitor['competitor_type'] === 'tag_team') {
-                    $tagTeam = TagTeam::find($competitor['competitor_id']);
-                    $formattedCompetitors->push(['tag_teams' => collect($tagTeams->push($tagTeam))]);
-                }
-            }
-        }
-
-        return $formattedCompetitors;
+                return $competitor;
+            })->mapToGroups(function ($item) {
+                return [Str::plural($item['competitor_type']) => $item['type']];
+            });
+        });
     }
 }
