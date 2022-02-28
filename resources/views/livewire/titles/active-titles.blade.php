@@ -3,7 +3,7 @@
 
     <div class="py-4 card-body">
         <x-data-table :collection="$activeTitles">
-            <thead>
+            <x-table.row-heading>
                 <x-table.row-heading>
                     <x-table.checkbox-heading />
                     <th>Title Name</th>
@@ -11,7 +11,7 @@
                     <th>Date Introduced</th>
                     <x-table.actions-heading />
                 </x-table.row-heading>
-            </thead>
+            </x-table.row-heading>
             <x-table.body>
                 @forelse ($activeTitles as $title)
                     <tr>

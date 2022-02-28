@@ -32,15 +32,7 @@ class EventPolicy
      */
     public function update(User $user, Event $event)
     {
-        if (! $user->isAdministrator()) {
-            return false;
-        }
-
-        if (isset($event->date) && $event->date->isPast()) {
-            return false;
-        }
-
-        return true;
+        return $user->isAdministrator() && ! $event->isPast();
     }
 
     /**
@@ -87,6 +79,18 @@ class EventPolicy
      * @return bool
      */
     public function view(User $user)
+    {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can add matches to an event.
+     *
+     * @param  \App\Models\Event  $event
+     *
+     * @return bool
+     */
+    public function addMatches(User $user)
     {
         return $user->isAdministrator();
     }

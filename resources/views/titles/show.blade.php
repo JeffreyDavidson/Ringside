@@ -13,7 +13,7 @@
         @endempty
 
         <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
-            <div class="cursor-pointer card-header">
+            <div class="card-header">
                 <div class="m-0 card-title">
                     <h3 class="m-0 fw-bolder">{{ $title->name }} Details</h3>
                 </div>

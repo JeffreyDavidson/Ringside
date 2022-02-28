@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
 use App\Models\Event;
 use App\Models\Venue;
+use Carbon\Carbon;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
 
@@ -18,7 +19,7 @@ class EventControllerStoreMethodTest extends TestCase
     /**
      * @test
      */
-    public function create_returns_a_view_with_date()
+    public function create_returns_a_view()
     {
         $this
             ->actAs(Role::administrator())
@@ -53,7 +54,6 @@ class EventControllerStoreMethodTest extends TestCase
      */
     public function store_creates_an_event_and_redirects()
     {
-        $this->withoutExceptionHandling();
         $this
             ->actAs(Role::administrator())
             ->from(action([EventsController::class, 'create']))
@@ -86,9 +86,12 @@ class EventControllerStoreMethodTest extends TestCase
         $this
             ->actAs(Role::administrator())
             ->from(action([EventsController::class, 'create']))
-            ->post(action([EventsController::class, 'store']), EventRequestDataFactory::new()->create([
-                'venue_id' => $venue->id,
-            ]));
+            ->post(
+                action([EventsController::class, 'store']),
+                EventRequestDataFactory::new()->create([
+                    'venue_id' => $venue->id,
+                ])
+            );
 
         tap(Event::first(), function ($event) use ($venue) {
             $this->assertTrue($event->venue->is($venue));
@@ -103,12 +106,15 @@ class EventControllerStoreMethodTest extends TestCase
         $this
             ->actAs(Role::administrator())
             ->from(action([EventsController::class, 'create']))
-            ->post(action([EventsController::class, 'store']), EventRequestDataFactory::new()->create([
-                'date' => '2021-01-01 00:00:00',
-            ]));
+            ->post(
+                action([EventsController::class, 'store']),
+                EventRequestDataFactory::new()->create([
+                    'date' => Carbon::tomorrow()->toDateTimeString(),
+                ])
+            );
 
         tap(Event::first(), function ($event) {
-            $this->assertEquals('2021-01-01 00:00:00', $event->date);
+            $this->assertTrue($event->date->eq(Carbon::tomorrow()));
         });
     }
 
@@ -120,9 +126,12 @@ class EventControllerStoreMethodTest extends TestCase
         $this
             ->actAs(Role::administrator())
             ->from(action([EventsController::class, 'create']))
-            ->post(action([EventsController::class, 'store']), EventRequestDataFactory::new()->create([
-                'preview' => 'This is a general event preview.',
-            ]));
+            ->post(
+                action([EventsController::class, 'store']),
+                EventRequestDataFactory::new()->create([
+                    'preview' => 'This is a general event preview.',
+                ])
+            );
 
         tap(Event::first(), function ($event) {
             $this->assertEquals('This is a general event preview.', $event->preview);

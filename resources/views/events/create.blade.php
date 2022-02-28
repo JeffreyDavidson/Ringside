@@ -1,18 +1,24 @@
 <x-layouts.app>
-    <x-sub-header title="Events">
-        <x-slot name="actions">
-            <a href="{{ route('events.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Events
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Create Event
+        </h2>
+    </x-slot>
+
     <x-content>
-        <x-portlet title="Create Event Form">
-            <x-form.form class="kt-form" method="post" :action="route('events.store')">
-                <div class="kt-portlet__body">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Event Form</h3>
+            </div>
+            <div class="card-body">
+                <x-form.form
+                    action="{{ route('events.store') }}"
+                    backTo="{{ route('events.index') }}"
+                    resource="Events"
+                >
                     @include('events.partials.form')
-                </div>
-            </x-form>
-        </x-portlet>
+                </x-form.form>
+            </div>
+        </div>
     </x-content>
 </x-layouts.app>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire;
 
-use App\Http\Livewire\DataTable\WithPerPagePagination;
+use App\Http\Livewire\Datatable\WithPerPagePagination;
 use Livewire\Component;
 
 class BaseComponent extends Component

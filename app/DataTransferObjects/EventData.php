@@ -6,8 +6,9 @@ use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Venue;
 use Carbon\Carbon;
+use Spatie\DataTransferObject\DataTransferObject;
 
-class EventData
+class EventData extends DataTransferObject
 {
     /**
      * The name of the event.

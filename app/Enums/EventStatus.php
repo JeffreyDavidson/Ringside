@@ -11,4 +11,12 @@ namespace App\Enums;
  */
 class EventStatus extends BaseEnum
 {
+    protected static function labels(): array
+    {
+        return [
+            'past' => 'Past',
+            'scheduled' => 'Scheduled',
+            'unscheduled' => 'Unscheduled',
+        ];
+    }
 }

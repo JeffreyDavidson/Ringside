@@ -10,17 +10,17 @@ class EventRepository
     /**
      * Create a new event with the given data.
      *
-     * @param  \App\DataTransferObjects\EventData $eventData
+     * @param  array $eventData
      *
      * @return \App\Models\Event
      */
-    public function create(EventData $eventData)
+    public function create(array $eventData)
     {
         return Event::create([
-            'name' => $eventData->name,
-            'date' => $eventData->date?->toDateTimeString(),
-            'venue_id' => $eventData->venue?->id,
-            'preview' => $eventData->preview,
+            'name' => $eventData['name'],
+            'date' => $eventData['date'],
+            'venue_id' => $eventData['venue_id'],
+            'preview' => $eventData['preview'],
         ]);
     }
 
@@ -28,17 +28,17 @@ class EventRepository
      * Update a given event with given data.
      *
      * @param  \App\Models\Event $event
-     * @param  \App\DataTransferObjects\EventData $eventData
+     * @param  array $eventData
      *
      * @return \App\Models\Event
      */
-    public function update(Event $event, EventData $eventData)
+    public function update(Event $event, array $eventData)
     {
         $event->update([
-            'name' => $eventData->name,
-            'date' => $eventData->date?->toDateTimeString(),
-            'venue_id' => $eventData->venue?->id,
-            'preview' => $eventData->preview,
+            'name' => $eventData['name'],
+            'date' => $eventData['date'],
+            'venue_id' => $eventData['venue_id'],
+            'preview' => $eventData['preview'],
         ]);
 
         return $event;

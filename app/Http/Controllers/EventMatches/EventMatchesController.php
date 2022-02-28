@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\EventMatches;
 
-use App\Actions\AddMatchForEvent;
+use App\Actions\Events\AddMatchForEvent;
 use App\DataTransferObjects\EventMatchData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EventMatches\StoreRequest;
@@ -18,12 +18,13 @@ class EventMatchesController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create(Event $event)
+    public function create(Event $event, EventMatch $match)
     {
         $this->authorize('create', EventMatch::class);
 
         return view('matches.create', [
             'event' => $event,
+            'match' => $match,
         ]);
     }
 
@@ -32,7 +33,7 @@ class EventMatchesController extends Controller
      *
      * @param  \App\Models\Event  $event
      * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
-     * @param  \App\Actions\AddMatchForEvent $addMatchForEvent
+     * @param  \App\Actions\Events\AddMatchForEvent $addMatchForEvent
      * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
      *
      * @return \Illuminate\Http\RedirectResponse

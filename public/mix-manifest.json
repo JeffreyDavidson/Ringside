@@ -1,8 +1,10 @@
 {
-    "/js/app.js": "/js/app.js",
-    "/css/app.css": "/css/app.css",
-    "/js/manifest.js": "/js/manifest.js",
-    "/js/vendor.js": "/js/vendor.js",
-    "/css/theme.css": "/css/theme.css",
-    "/css/fonts.css": "/css/fonts.css"
+    "/assets/js/app.js": "/assets/js/app.js",
+    "/assets/js/scripts.bundle.js": "/assets/js/scripts.bundle.js",
+    "/assets/js/widgets.bundle.js": "/assets/js/widgets.bundle.js",
+    "/assets/plugins/global/plugins.bundle.js": "/assets/plugins/global/plugins.bundle.js",
+    "/assets/js/custom/widgets.js": "/assets/js/custom/widgets.js",
+    "/assets/js/custom/tags.js": "/assets/js/custom/tags.js",
+    "/assets/plugins/global/plugins.bundle.css": "/assets/plugins/global/plugins.bundle.css",
+    "/assets/css/style.bundle.css": "/assets/css/style.bundle.css"
 }
