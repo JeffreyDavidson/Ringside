@@ -12,7 +12,6 @@
         "fidum/laravel-eloquent-morph-to-one": "^2.1",
         "fruitcake/laravel-cors": "^2.0.5",
         "laravel/framework": "^9.0",
-        "laravel/telescope": "^4.7",
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.10",
         "lorisleiva/laravel-actions": "^2.3",
@@ -50,7 +49,6 @@
     "extra": {
         "laravel": {
             "dont-discover": [
-                "laravel/telescope",
                 "staudenmeir/laravel-migration-views"
             ]
         }
