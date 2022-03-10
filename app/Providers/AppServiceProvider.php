@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Telescope\TelescopeServiceProvider as LaravelTelescopeServiceProvider;
 use Livewire\Component;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,10 +15,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->environment('local')) {
-            $this->app->register(LaravelTelescopeServiceProvider::class);
-            $this->app->register(TelescopeServiceProvider::class);
-        }
     }
 
     /**
