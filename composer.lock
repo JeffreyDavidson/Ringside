@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c74323e97443b6baf6e857b6fd42f2c",
+    "content-hash": "6db01943ade5376ee2150eba32041c91",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2711,16 +2711,16 @@
         },
         {
             "name": "staudenmeir/laravel-merged-relations",
-            "version": "v1.5",
+            "version": "v1.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/staudenmeir/laravel-merged-relations.git",
-                "reference": "84168cb1195538d5c2726876f2f3ca90092a950e"
+                "reference": "36e5aa52f7f5d058466e3076f76e9cc5fd906bed"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/staudenmeir/laravel-merged-relations/zipball/84168cb1195538d5c2726876f2f3ca90092a950e",
-                "reference": "84168cb1195538d5c2726876f2f3ca90092a950e",
+                "url": "https://api.github.com/repos/staudenmeir/laravel-merged-relations/zipball/36e5aa52f7f5d058466e3076f76e9cc5fd906bed",
+                "reference": "36e5aa52f7f5d058466e3076f76e9cc5fd906bed",
                 "shasum": ""
             },
             "require": {
@@ -2757,9 +2757,9 @@
             "description": "Merged Laravel Eloquent relationships",
             "support": {
                 "issues": "https://github.com/staudenmeir/laravel-merged-relations/issues",
-                "source": "https://github.com/staudenmeir/laravel-merged-relations/tree/v1.5"
+                "source": "https://github.com/staudenmeir/laravel-merged-relations/tree/v1.5.1"
             },
-            "time": "2022-02-07T20:05:49+00:00"
+            "time": "2022-02-16T21:33:07+00:00"
         },
         {
             "name": "staudenmeir/laravel-migration-views",
