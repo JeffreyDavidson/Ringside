@@ -124,7 +124,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
     /**
      * @test
      */
-    public function update_cannot_activate_an_inactive_title()
+    public function update_can_activate_an_inactive_title()
     {
         $title = Title::factory()->inactive()->create();
         $startDate = $title->activations->last()->started_at->toDateTimeString();
@@ -138,8 +138,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
             ->assertRedirect(action([TitlesController::class, 'index']));
 
         tap($title->fresh(), function ($title) use ($startDate) {
-            $this->assertCount(1, $title->activations);
-            $this->assertSame($startDate, $title->activations->last()->started_at->toDateTimeString());
+            $this->assertCount(2, $title->activations);
         });
     }
 

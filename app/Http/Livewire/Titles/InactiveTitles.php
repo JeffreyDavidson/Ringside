@@ -3,8 +3,8 @@
 namespace App\Http\Livewire\Titles;
 
 use App\Http\Livewire\BaseComponent;
-use App\Http\Livewire\DataTable\WithBulkActions;
-use App\Http\Livewire\DataTable\WithSorting;
+use App\Http\Livewire\Datatable\WithBulkActions;
+use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Title;
 
 class InactiveTitles extends BaseComponent

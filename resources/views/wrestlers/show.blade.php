@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header :title="$wrestler->name">
-        <x-slot name="actions">
-            <a href="{{ route('wrestlers.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Wrestlers
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('wrestlers.index') }}" class="btn btn-label-brand btn-bold">
+            Back To Wrestlers
+        </a>
+    </x-slot>
     <x-content>
         @if ($wrestler->isUnemployed())
             <div class="alert alert-warning" role="alert">

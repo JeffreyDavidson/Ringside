@@ -24,6 +24,7 @@ class StableControllerStoreMethodTest extends TestCase
      */
     public function create_returns_a_view()
     {
+        $this->withoutExceptionHandling();
         $this
             ->actAs(Role::administrator())
             ->get(action([StablesController::class, 'create']))

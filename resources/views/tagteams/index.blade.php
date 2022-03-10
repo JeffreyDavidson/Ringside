@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header title="Tag Teams">
-        <x-slot name="actions">
-            <a href="{{ route('tag-teams.create') }}" class="btn btn-label-brand btn-bold">
-                Create Tag Teams
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('tag-teams.create') }}" class="btn btn-label-brand btn-bold">
+            Create Tag Teams
+        </a>
+    </x-slot>
     <x-content>
         <x-portlet title="Employed Tag Teams">
             <div class="kt-portlet__body">

@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header title="Managers">
-        <x-slot name="actions">
-            <a href="{{ route('managers.create') }}" class="btn btn-label-brand btn-bold">
-                Create Managers
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('managers.create') }}" class="btn btn-label-brand btn-bold">
+            Create Managers
+        </a>
+    </x-slot>
     <x-content>
         <x-portlet title="Employed Managers">
             <div class="kt-portlet__body">

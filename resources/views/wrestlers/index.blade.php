@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header title="Wrestlers">
-        <x-slot name="actions">
-            <a href="{{ route('wrestlers.create') }}" class="btn btn-label-brand btn-bold">
-                Create Wrestlers
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('wrestlers.create') }}" class="btn btn-label-brand btn-bold">
+            Create Wrestlers
+        </a>
+    </x-slot>
     <x-content>
         <x-portlet title="Bookable Wrestlers">
             <div class="kt-portlet__body">

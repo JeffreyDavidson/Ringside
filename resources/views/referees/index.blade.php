@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header title="Referees">
-        <x-slot name="actions">
-            <a href="{{ route('referees.create') }}" class="btn btn-label-brand btn-bold">
-                Create Referees
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('referees.create') }}" class="btn btn-label-brand btn-bold">
+            Create Referees
+        </a>
+    </x-slot>
     <x-content>
         <x-portlet title="Employed Referees">
             <div class="kt-portlet__body">

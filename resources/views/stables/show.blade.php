@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header :title="$stable->name">
-        <x-slot name="actions">
-            <a href="{{ route('stables.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Stables
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('stables.index') }}" class="btn btn-label-brand btn-bold">
+            Back To Stables
+        </a>
+    </x-slot>
     <x-content>
         @if ($stable->isNotActivation())
             <div class="alert alert-warning" role="alert">

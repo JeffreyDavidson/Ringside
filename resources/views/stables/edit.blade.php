@@ -1,14 +1,17 @@
 <x-layouts.app>
-    <x-sub-header title="Stables">
-        <x-slot name="actions">
-            <a href="{{ route('stables.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Stables
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('stables.index') }}" class="btn btn-label-brand btn-bold">
+            Back To Stables
+        </a>
+    </x-slot>
     <x-content>
         <x-portlet title="Edit Stable Form">
-            <x-form.form method="patch" :action="route('stables.update', $stable)">
+            <x-form.form
+                method="patch"
+                :action="route('stables.update', $stable)"
+                resource="Stables"
+                :backTo="route('stables.index')"
+            >
                 <div class="kt-portlet__body">
                     @include('stables.partials.form')
                 </div>

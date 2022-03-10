@@ -29,13 +29,15 @@
                     </div>
                 </div>
 
-                <div class="row mb-7">
-                    <label class="col-lg-4 fw-bold text-muted">Date Introduced</label>
+                @isset($title->activatedAt)
+                    <div class="row mb-7">
+                        <label class="col-lg-4 fw-bold text-muted">Date Introduced</label>
 
-                    <div class="col-lg-8">
-                        <span class="text-gray-800 fw-bolder fs-6">{{ $title->activatedAt->toDateString() }}</span>
+                        <div class="col-lg-8">
+                            <span class="text-gray-800 fw-bolder fs-6">{{ $title->activatedAt->toDateString() }}</span>
+                        </div>
                     </div>
-                </div>
+                @endisset
             </div>
         </div>
         <div class="pt-3 mb-5 card card-flush mb-xl-10">
