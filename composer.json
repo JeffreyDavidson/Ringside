@@ -46,13 +46,6 @@
             "dealerdirect/phpcodesniffer-composer-installer": false
         }
     },
-    "extra": {
-        "laravel": {
-            "dont-discover": [
-                "staudenmeir/laravel-migration-views"
-            ]
-        }
-    },
     "autoload": {
         "psr-4": {
             "App\\": "app/",
