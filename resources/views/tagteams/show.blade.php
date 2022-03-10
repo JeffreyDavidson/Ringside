@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header :title="$tagTeam->name">
-        <x-slot name="actions">
-            <a href="{{ route('tag-teams.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Tag Teams
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('tag-teams.index') }}" class="btn btn-label-brand btn-bold">
+            Back To Tag Teams
+        </a>
+    </x-slot>
     <x-content>
         @if ($tagTeam->isUnemployed())
             <div class="alert alert-warning" role="alert">

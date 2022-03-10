@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header title="Stables">
-        <x-slot name="actions">
-            <a href="{{ route('stables.create') }}" class="btn btn-label-brand btn-bold">
-                Create Stables
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('stables.create') }}" class="btn btn-label-brand btn-bold">
+            Create Stables
+        </a>
+    </x-slot>
     <x-content>
         <x-portlet title="Active Stables">
             <div class="kt-portlet__body">

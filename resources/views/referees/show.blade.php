@@ -1,11 +1,9 @@
 <x-layouts.app>
-    <x-sub-header :title="$referee->full_name">
-        <x-slot name="actions">
-            <a href="{{ route('referees.index') }}" class="btn btn-label-brand btn-bold">
-                Back To Referees
-            </a>
-        </x-slot>
-    </x-subheader>
+    <x-slot name="toolbar">
+        <a href="{{ route('referees.index') }}" class="btn btn-label-brand btn-bold">
+            Back To Referees
+        </a>
+    </x-slot>
     <x-content>
         @if ($referee->isUnemployed())
             <div class="alert alert-warning" role="alert">

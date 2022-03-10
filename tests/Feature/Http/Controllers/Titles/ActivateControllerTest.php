@@ -101,7 +101,6 @@ class ActivateControllerTest extends TestCase
     {
         return [
             'active title' => ['active'],
-            'active title' => ['inactive'],
             'retired title' => ['retired'],
         ];
     }

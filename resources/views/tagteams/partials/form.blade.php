@@ -32,7 +32,7 @@
                         name="wrestler1"
                         label="Tag Team Partner"
                         :options="$wrestlers"
-                        :isSelected="$tagTeam->currentWrestlers[0] ?? ''"
+                        :selected="$tagTeam->currentWrestlers[0] ?? ''"
                     />
                 </div>
             </div>
@@ -42,7 +42,7 @@
                         name="wrestler2"
                         label="Tag Team Partner"
                         :options="$wrestlers"
-                        :isSelected="$tagTeam->currentWrestlers[1] ?? ''"
+                        :selected="$tagTeam->currentWrestlers[1] ?? ''"
                     />
                 </div>
             </div>
