@@ -13,7 +13,6 @@ use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Competitor;
 use App\Models\Contracts\Manageable;
-use App\Observers\TagTeamObserver;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -48,18 +47,6 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     protected $casts = [
         'status' => TagTeamStatus::class,
     ];
-
-    /**
-     * The "boot" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::observe(TagTeamObserver::class);
-    }
 
     /**
      * Create a new Eloquent query builder for the model.

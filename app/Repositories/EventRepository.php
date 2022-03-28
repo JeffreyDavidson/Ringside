@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\EventData;
 use App\Models\Event;
 
 class EventRepository

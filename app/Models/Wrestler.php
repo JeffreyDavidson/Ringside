@@ -12,7 +12,6 @@ use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\TagTeamMember;
-use App\Observers\WrestlerObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -40,18 +39,6 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
     protected $casts = [
         'status' => WrestlerStatus::class,
     ];
-
-    /**
-     * The "boot" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::observe(WrestlerObserver::class);
-    }
 
     /**
      * Create a new Eloquent query builder for the model.

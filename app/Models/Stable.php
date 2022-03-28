@@ -11,7 +11,6 @@ use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
-use App\Observers\StableObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -45,18 +44,6 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     protected $casts = [
         'status' => StableStatus::class,
     ];
-
-    /**
-     * The "boot" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::observe(StableObserver::class);
-    }
 
     /**
      * Create a new Eloquent query builder for the model.

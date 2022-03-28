@@ -47,30 +47,18 @@ class CompetitorsAreValid implements Rule
         }
 
         if (count($diffWrestlers) > 0) {
-            $this->setMessage('There are wrestlers added to the match that don\'t exist in the database.');
+            $this->message = 'There are wrestlers added to the match that don\'t exist in the database.';
 
             return false;
         }
 
         if (count($diffTagTeams) > 0) {
-            $this->setMessage('There are tag teams added to the match that don\'t exist in the database.');
+            $this->message = 'There are tag teams added to the match that don\'t exist in the database.';
 
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * Set the message of the error message.
-     *
-     * @param  string $message
-     *
-     * @return void
-     */
-    protected function setMessage(string $message)
-    {
-        $this->message = $message;
     }
 
     /**
@@ -80,6 +68,6 @@ class CompetitorsAreValid implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return $this->message;
     }
 }

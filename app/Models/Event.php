@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Builders\EventQueryBuilder;
 use App\Enums\EventStatus;
-use App\Observers\EventObserver;
 use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,18 +30,6 @@ class Event extends Model
         'date' => 'datetime',
         'status' => EventStatus::class,
     ];
-
-    /**
-     * The "boot" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::observe(EventObserver::class);
-    }
 
     /**
      * Create a new Eloquent query builder for the model.
