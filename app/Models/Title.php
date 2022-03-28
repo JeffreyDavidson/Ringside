@@ -11,7 +11,6 @@ use App\Models\Concerns\HasRetirements;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
-use App\Observers\TitleObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -40,18 +39,6 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     protected $casts = [
         'status' => TitleStatus::class,
     ];
-
-    /**
-     * The "boot" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::observe(TitleObserver::class);
-    }
 
     /**
      * Create a new Eloquent query builder for the model.

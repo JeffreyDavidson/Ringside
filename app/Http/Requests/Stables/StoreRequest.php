@@ -5,7 +5,6 @@ namespace App\Http\Requests\Stables;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use App\Rules\WrestlerJoinedStableInTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

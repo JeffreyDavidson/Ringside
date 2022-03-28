@@ -4,7 +4,6 @@ namespace App\Rules;
 
 use App\Models\TagTeam;
 use App\Models\Title;
-use App\Models\TitleChampionship;
 use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
 

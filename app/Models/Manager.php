@@ -9,7 +9,6 @@ use App\Models\Concerns\HasFullName;
 use App\Models\Concerns\Manageables;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\CanBeAStableMember;
-use App\Observers\ManagerObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -37,18 +36,6 @@ class Manager extends SingleRosterMember implements CanBeAStableMember
     protected $casts = [
         'status' => ManagerStatus::class,
     ];
-
-    /**
-     * The "boot" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::observe(ManagerObserver::class);
-    }
 
     /**
      * Create a new Eloquent query builder for the model.
