@@ -12,53 +12,52 @@ class VenueData
      *
      * @var string
      */
-    public string $name;
+    protected string $name;
 
     /**
      * The first line of the address for the venue.
      *
      * @var string
      */
-    public string $address1;
+    protected string $address1;
 
     /**
      * The second line of the address for the venue.
      *
      * @var string|null
      */
-    public ?string $address2;
+    protected ?string $address2;
 
     /**
      * The city where the venue is located.
      *
      * @var string
      */
-    public string $city;
+    protected string $city;
 
     /**
      * The state where the venue is located
      *
      * @var string
      */
-    public string $state;
+    protected string $state;
 
     /**
      * The zip code where the venue is located.
      *
      * @var string
      */
-    public string $zip;
+    protected string $zip;
 
     /**
      * Create a DTO from the store request.
      *
      * @param  \App\Http\Requests\Venues\StoreRequest $request
-     *
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->name = $request->input('name');
         $dto->address1 = $request->input('address1');
@@ -74,12 +73,11 @@ class VenueData
      * Create a DTO from the update request.
      *
      * @param  \App\Http\Requests\Venues\UpdateRequest $request
-     *
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->name = $request->input('name');
         $dto->address1 = $request->input('address1');

@@ -5,20 +5,9 @@ namespace App\Rules;
 use App\Enums\TitleStatus;
 use App\Models\Title;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Database\Eloquent\Collection;
 
 class TitlesMustBeActive implements Rule
 {
-    /**
-     * @var Collection
-     */
-    private $inactiveTitleNames;
-
-    public function __construct()
-    {
-        $this->inactiveTitleNames = collect();
-    }
-
     /**
      * Determine if the validation rule passes.
      *
@@ -28,30 +17,40 @@ class TitlesMustBeActive implements Rule
      */
     public function passes($attribute, $value)
     {
-        $nonActiveTitles = Title::where('status', '!=', TitleStatus::active())->findMany($value);
+        $nonActiveTitlesNames = Title::query()
+            ->where('status', '!=', TitleStatus::active())
+            ->findMany($value)
+            ->pluck('name');
 
-        if ($nonActiveTitles->isEmpty()) {
-            return true;
+        $message = $nonActiveTitlesNames->implode(', ').' are not active titles and cannot be added to the match.';
+
+        if ($nonActiveTitlesNames->isNotEmpty()) {
+            $this->fail($message);
         }
 
-        foreach ($nonActiveTitles as $title) {
-            $this->inactiveTitleNames->push($title->name);
-        }
-
-        return false;
+        return true;
     }
 
     /**
      * Get the validation error message.
      *
-     * @return string
+     * @return array
      */
     public function message()
     {
-        if ($this->inactiveTitleNames->count() == 1) {
-            return $this->inactiveTitleNames->implode(',').' is not an active title and cannot be added to the match';
-        }
+        return $this->message;
+    }
 
-        return $this->inactiveTitleNames->implode(', ').' are not active titles and cannot be added to the match.';
+    /**
+     * Adds the given failures, and return false.
+     *
+     * @param  array|string  $messages
+     * @return bool
+     */
+    protected function fail($message)
+    {
+        $this->message = $message;
+
+        return false;
     }
 }

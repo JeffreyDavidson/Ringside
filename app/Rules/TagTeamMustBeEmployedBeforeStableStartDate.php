@@ -19,7 +19,6 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
      * Create a new rule instance.
      *
      * @param  \Carbon\Carbon $stableStartDate
-     *
      * @return void
      */
     public function __construct(Carbon $stableStartDate)
@@ -32,7 +31,6 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     *
      * @return bool
      */
     public function passes($attribute, $value)

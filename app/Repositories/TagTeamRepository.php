@@ -14,7 +14,6 @@ class TagTeamRepository
      * Create a new tag team with the given data.
      *
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
-     *
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -30,7 +29,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
-     *
      * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
@@ -47,7 +45,6 @@ class TagTeamRepository
      * Delete a given tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     *
      * @return void
      */
     public function delete(TagTeam $tagTeam)
@@ -59,7 +56,6 @@ class TagTeamRepository
      * Restore a given tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     *
      * @return void
      */
     public function restore(TagTeam $tagTeam)
@@ -72,7 +68,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return \App\Models\TagTeam
      */
     public function employ(TagTeam $tagTeam, Carbon $employmentDate)
@@ -90,7 +85,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $releaseDate
-     *
      * @return \App\Models\TagTeam
      */
     public function release(TagTeam $tagTeam, Carbon $releaseDate)
@@ -105,7 +99,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $retirementDate
-     *
      * @return \App\Models\TagTeam
      */
     public function retire(TagTeam $tagTeam, Carbon $retirementDate)
@@ -120,7 +113,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $unretireDate
-     *
      * @return \App\Models\TagTeam
      */
     public function unretire(TagTeam $tagTeam, Carbon $unretireDate)
@@ -135,7 +127,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $suspensionDate
-     *
      * @return \App\Models\TagTeam
      */
     public function suspend(TagTeam $tagTeam, Carbon $suspensionDate)
@@ -150,7 +141,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $reinstateDate
-     *
      * @return \App\Models\TagTeam
      */
     public function reinstate(TagTeam $tagTeam, Carbon $reinstateDate)
@@ -165,7 +155,6 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return \App\Models\TagTeam
      */
     public function updateEmployment(TagTeam $tagTeam, Carbon $employmentDate)
@@ -181,7 +170,6 @@ class TagTeamRepository
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
      * @param  \Carbon\Carbon|null $joinDate
-     *
      * @return \App\Models\TagTeam
      */
     public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null)
@@ -202,7 +190,6 @@ class TagTeamRepository
      * @param  \Illuminate\Database\Eloquent\Collection $formerTagTeamPartners
      * @param  \Illuminate\Database\Eloquent\Collection $newTagTeamPartners
      * @param  \Carbon\Carbon|null $date
-     *
      * @return \App\Models\TagTeam
      */
     public function syncTagTeamPartners(
@@ -238,7 +225,6 @@ class TagTeamRepository
      * @param  \App\Models\TagTeam $tagTeam
      * @param  int $tagTeamPartnerId
      * @param  \Carbon\Carbon $date
-     *
      * @return void
      */
     public function removeTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)
@@ -255,7 +241,6 @@ class TagTeamRepository
      * @param  \App\Models\TagTeam $tagTeam
      * @param  int $tagTeamPartnerId
      * @param  \Carbon\Carbon $date
-     *
      * @return void
      */
     public function addTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)

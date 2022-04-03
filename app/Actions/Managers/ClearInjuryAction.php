@@ -15,7 +15,6 @@ class ClearInjuryAction extends BaseManagerAction
      *
      * @param  \App\Models\Manager  $manager
      * @param  \Carbon\Carbon|null $recoveryDate
-     *
      * @return void
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void

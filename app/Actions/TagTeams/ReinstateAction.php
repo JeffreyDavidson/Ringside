@@ -16,7 +16,6 @@ class ReinstateAction extends BaseTagTeamAction
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \Carbon\Carbon|null  $reinstatementDate
-     *
      * @return void
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void

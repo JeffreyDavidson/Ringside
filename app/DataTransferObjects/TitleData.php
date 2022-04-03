@@ -13,25 +13,24 @@ class TitleData
      *
      * @var string
      */
-    public string $name;
+    protected string $name;
 
     /**
      * The date to activate the title.
      *
      * @var Carbon|null
      */
-    public ?Carbon $activation_date;
+    protected ?Carbon $activation_date;
 
     /**
      * Create a DTO from the store request.
      *
      * @param  \App\Http\Requests\Titles\StoreRequest $request
-     *
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->name = $request->input('name');
         $dto->activation_date = $request->date('activated_at');
@@ -43,12 +42,11 @@ class TitleData
      * Create a DTO from the update request.
      *
      * @param  \App\Http\Requests\Titles\UpdateRequest $request
-     *
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->name = $request->input('name');
         $dto->activation_date = $request->date('activated_at');

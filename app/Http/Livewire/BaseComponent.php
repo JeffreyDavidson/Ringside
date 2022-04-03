@@ -14,7 +14,7 @@ class BaseComponent extends Component
      *
      * @var int
      */
-    public $perPage = 10;
+    protected $perPage = 10;
 
     /**
      * The view type to display for pagination.

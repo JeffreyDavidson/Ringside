@@ -18,46 +18,45 @@ class EventMatchData
      *
      * @var \App\Models\MatchType
      */
-    public MatchType $matchType;
+    protected MatchType $matchType;
 
     /**
      * The referees assigned to the match.
      *
      * @var \Illuminate\Database\Eloquent\Collection
      */
-    public Collection $referees;
+    protected Collection $referees;
 
     /**
      * The titles being contended for the match.
      *
      * @var \Illuminate\Database\Eloquent\Collection|null
      */
-    public ?Collection $titles;
+    protected ?Collection $titles;
 
     /**
      * The competitors competing in the event match.
      *
      * @var \Illuminate\Database\Eloquent\Collection
      */
-    public Collection $competitors;
+    protected Collection $competitors;
 
     /**
      * The preview description for the match.
      *
      * @var string|null
      */
-    public ?string $preview;
+    protected ?string $preview;
 
     /**
      * Retrieve data from the store request.
      *
      * @param  \App\Http\Requests\EventMatches\StoreRequest $request
-     *
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->matchType = MatchType::query()->whereKey($request->input('match_type_id'))->sole();
         $dto->referees = Referee::query()->findMany($request->collect('referees'));
@@ -72,7 +71,6 @@ class EventMatchData
      * Undocumented function.
      *
      * @param  \Illuminate\Support\Collection $competitors
-     *
      * @return \Illuminate\Support\Collection
      */
     public static function getCompetitors(Collection $competitors)

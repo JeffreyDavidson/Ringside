@@ -12,7 +12,7 @@ class TitleChampionship extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['title_id', 'event_match_id', 'champion_id', 'champion_type', 'won_at', 'lost_at'];
 

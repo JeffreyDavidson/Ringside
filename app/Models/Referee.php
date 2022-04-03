@@ -18,14 +18,14 @@ class Referee extends SingleRosterMember implements Bookable
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['first_name', 'last_name', 'status'];
 
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'status' => RefereeStatus::class,
@@ -35,7 +35,6 @@ class Referee extends SingleRosterMember implements Bookable
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     *
      * @return \App\Builders\RefereeQueryBuilder
      */
     public function newEloquentBuilder($query)

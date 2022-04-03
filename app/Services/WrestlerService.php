@@ -30,7 +30,6 @@ class WrestlerService
      * Create a new wrestler with given data.
      *
      * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
-     *
      * @return \App\Models\Wrestler
      */
     public function create(WrestlerData $wrestlerData)
@@ -50,7 +49,6 @@ class WrestlerService
      *
      * @param  \App\Models\Wrestler $wrestler
      * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
-     *
      * @return \App\Models\Wrestler
      */
     public function update(Wrestler $wrestler, WrestlerData $wrestlerData)
@@ -72,7 +70,6 @@ class WrestlerService
      * Delete a given wrestler.
      *
      * @param  \App\Models\Wrestler $wrestler
-     *
      * @return void
      */
     public function delete(Wrestler $wrestler)
@@ -84,7 +81,6 @@ class WrestlerService
      * Restore a given wrestler.
      *
      * @param  \App\Models\Wrestler $wrestler
-     *
      * @return void
      */
     public function restore(Wrestler $wrestler)

@@ -15,7 +15,6 @@ class EmployAction extends BaseWrestlerAction
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \Carbon\Carbon|null  $startDate
-     *
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void

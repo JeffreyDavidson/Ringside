@@ -42,7 +42,6 @@ class TagTeamService
      * Create a tag team with given data.
      *
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
-     *
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -66,7 +65,6 @@ class TagTeamService
      *
      * @param  \App\Models\TagTeam $tagTeam
      * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
-     *
      * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
@@ -92,7 +90,6 @@ class TagTeamService
      * Delete a given tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     *
      * @return void
      */
     public function delete(TagTeam $tagTeam)
@@ -104,7 +101,6 @@ class TagTeamService
      * Restore a given tag team.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     *
      * @return void
      */
     public function restore(TagTeam $tagTeam)

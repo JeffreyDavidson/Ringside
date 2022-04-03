@@ -36,7 +36,6 @@ class SingleRosterMemberQueryBuilder extends RosterMemberQueryBuilder
      * Scope a query to order by the model's current injured date.
      *
      * @param  string  $direction
-     *
      * @return \App\Builders\SingleRosterMemberQueryBuilder
      */
     public function orderByCurrentInjuredAtDate(string $direction = 'asc')

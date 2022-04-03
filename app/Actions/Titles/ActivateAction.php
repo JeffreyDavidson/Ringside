@@ -15,7 +15,6 @@ class ActivateAction extends BaseTitleAction
      *
      * @param  \App\Models\Title  $title
      * @param  \Carbon\Carbon|null  $activationDate
-     *
      * @return void
      */
     public function handle(Title $title, ?Carbon $activationDate = null): void

@@ -15,7 +15,6 @@ class ReleaseAction extends BaseWrestlerAction
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \Carbon\Carbon|null $releaseDate
-     *
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void

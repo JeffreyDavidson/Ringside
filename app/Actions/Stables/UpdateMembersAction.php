@@ -17,7 +17,6 @@ class UpdateMembersAction extends BaseStableAction
      * @param  \App\Models\Stable  $stable
      * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
      * @param  \Illuminate\Database\Eloquent\Collection  $tagTeams
-     *
      * @return void
      */
     public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams): void
@@ -35,7 +34,6 @@ class UpdateMembersAction extends BaseStableAction
      * @param  \App\Models\Stable $stable
      * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
      * @param  \Carbon\Carbon $now
-     *
      * @return void
      */
     protected function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now)
@@ -58,7 +56,6 @@ class UpdateMembersAction extends BaseStableAction
      * @param  \App\Models\Stable $stable
      * @param  \Illuminate\Database\Eloquent\Collection $tagTeams
      * @param  \Carbon\Carbon $now
-     *
      * @return void
      */
     protected function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now)

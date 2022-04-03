@@ -13,7 +13,6 @@ class RetireController extends Controller
      * Retire a stable.
      *
      * @param  \App\Models\Stable  $stable
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Stable $stable)

@@ -183,7 +183,6 @@ trait HasEmployments
      * Determine if the roster member was employed on a given date.
      *
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return bool
      */
     public function employedOn(Carbon $employmentDate)
@@ -195,7 +194,6 @@ trait HasEmployments
      * Determine if the roster member is to be employed on a given date.
      *
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return bool
      */
     public function scheduledToBeEmployedOn(Carbon $employmentDate)
@@ -207,7 +205,6 @@ trait HasEmployments
      * Determine if the roster member is to be employed on a given date.
      *
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return bool
      */
     public function employedBefore(Carbon $employmentDate)
@@ -219,7 +216,6 @@ trait HasEmployments
      * Determine if the roster member is employed after a given date.
      *
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return bool
      */
     public function employedAfter(Carbon $employmentDate)
@@ -231,7 +227,6 @@ trait HasEmployments
      * Determine if the roster member future start date is before the given date.
      *
      * @param  \Carbon\Carbon $date
-     *
      * @return bool
      */
     public function futureEmploymentIsBefore(Carbon $date)
@@ -243,7 +238,6 @@ trait HasEmployments
      * Check to see if employable can have their start date changed.
      *
      * @param  \Carbon\Carbon $employmentDate
-     *
      * @return bool
      */
     public function canHaveEmploymentStartDateChanged(Carbon $employmentDate)

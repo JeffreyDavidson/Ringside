@@ -15,7 +15,6 @@ class EmployAction extends BaseManagerAction
      *
      * @param  \App\Models\Manager  $manager
      * @param  \Carbon\Carbon|null  $startDate
-     *
      * @return void
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void

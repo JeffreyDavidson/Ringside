@@ -4,7 +4,7 @@ namespace App\Http\Livewire\Datatable;
 
 trait WithSorting
 {
-    public $sorts = [];
+    private $sorts = [];
 
     public function sortBy($field)
     {

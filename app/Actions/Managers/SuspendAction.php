@@ -13,7 +13,6 @@ class SuspendAction extends BaseManagerAction
      * Suspend a manager.
      *
      * @param  \App\Models\Manager  $manager
-     *
      * @return void
      */
     public function handle(Manager $manager): void

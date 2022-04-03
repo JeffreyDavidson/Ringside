@@ -13,7 +13,6 @@ class RetireController extends Controller
      * Retire a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Wrestler $wrestler)

@@ -16,7 +16,6 @@ class RetireAction extends BaseTagTeamAction
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \Carbon\Carbon|null  $retirementDate
-     *
      * @return void
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void

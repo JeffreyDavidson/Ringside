@@ -14,7 +14,7 @@ class EventMatch extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['event_id', 'match_type_id', 'preview'];
 

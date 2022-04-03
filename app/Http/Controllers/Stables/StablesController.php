@@ -11,7 +11,7 @@ use App\Services\StableService;
 
 class StablesController extends Controller
 {
-    public StableService $stableService;
+    private StableService $stableService;
 
     /**
      * Create a new stables controller instance.
@@ -39,7 +39,6 @@ class StablesController extends Controller
      * Show the form for creating a stable.
      *
      * @param Stable $stable
-     *
      * @return \Illuminate\View\View
      */
     public function create(Stable $stable)
@@ -56,7 +55,6 @@ class StablesController extends Controller
      *
      * @param  \App\Http\Requests\Stables\StoreRequest  $request
      * @param  \App\DataTransferObjects\StableData $stableData
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, StableData $stableData)
@@ -70,7 +68,6 @@ class StablesController extends Controller
      * Show the profile of a tag team.
      *
      * @param  \App\Models\Stable  $stable
-     *
      * @return \Illuminate\View\View
      */
     public function show(Stable $stable)
@@ -86,7 +83,6 @@ class StablesController extends Controller
      * Show the form for editing a stable.
      *
      * @param  \App\Models\Stable  $stable
-     *
      * @return \Illuminate\View\View
      */
     public function edit(Stable $stable)
@@ -104,7 +100,6 @@ class StablesController extends Controller
      * @param  \App\Http\Requests\Stables\UpdateRequest  $request
      * @param  \App\Models\Stable  $stable
      * @param  \App\DataTransferObjects\StableData $stableData
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Stable $stable, StableData $stableData)
@@ -118,7 +113,6 @@ class StablesController extends Controller
      * Delete a stable.
      *
      * @param  \App\Models\Stable  $stable
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Stable $stable)

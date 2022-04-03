@@ -15,7 +15,6 @@ class ReinstateAction extends BaseManagerAction
      *
      * @param  \App\Models\Manager  $manager
      * @param  \Carbon\Carbon|null $reinstatementDate
-     *
      * @return void
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void

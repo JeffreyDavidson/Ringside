@@ -13,14 +13,14 @@ class Activation extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['activatable_id', 'activatable_type', 'started_at', 'ended_at'];
 
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'started_at' => 'datetime',
@@ -41,7 +41,6 @@ class Activation extends Model
      * Determine an activation started before a given date.
      *
      * @param  \Carbon\Carbon $date
-     *
      * @return bool
      */
     public function startedBefore(Carbon $date)

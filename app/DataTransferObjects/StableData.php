@@ -16,39 +16,38 @@ class StableData
      *
      * @var string
      */
-    public string $name;
+    protected string $name;
 
     /**
      * The start date of the stable's activation.
      *
      * @var Carbon|null
      */
-    public ?Carbon $start_date;
+    protected ?Carbon $start_date;
 
     /**
      * The tag teams to be on the stable.
      *
      * @var Collection|null
      */
-    public ?Collection $tagTeams;
+    protected ?Collection $tagTeams;
 
     /**
      * The wrestlers to be on the stable.
      *
      * @var Collection|null
      */
-    public ?Collection $wrestlers;
+    protected ?Collection $wrestlers;
 
     /**
      * Create a DTO from the store request.
      *
      * @param  \App\Http\Requests\Stables\StoreRequest $request
-     *
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->name = $request->input('name');
         $dto->start_date = $request->date('started_at');
@@ -62,12 +61,11 @@ class StableData
      * Create a DTO from the update request.
      *
      * @param  \App\Http\Requests\Stables\UpdateRequest $request
-     *
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
-        $dto = new self;
+        $dto = new self();
 
         $dto->name = $request->input('name');
         $dto->start_date = $request->date('started_at');

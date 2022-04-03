@@ -10,8 +10,12 @@ use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenTraits;
 use NunoMaduro\PhpInsights\Domain\Metrics\Architecture\Classes;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PHP_CodeSniffer\Standards\PSR12\Sniffs\Classes\ClassInstantiationSniff;
+use PhpCsFixer\Fixer\Operator\NewWithBracesFixer;
 use SlevomatCodingStandard\Sniffs\Commenting\DocCommentSpacingSniff;
+use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\UselessFunctionDocCommentSniff;
+use SlevomatCodingStandard\Sniffs\ControlStructures\DisallowShortTernaryOperatorSniff;
+use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\AlphabeticallySortedUsesSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\DeclareStrictTypesSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff;
@@ -89,7 +93,7 @@ return [
         PropertyTypeHintSniff::class,
         ReturnTypeHintSniff::class,
         UselessFunctionDocCommentSniff::class,
-        DocCommentSpacingSniff::class,
+        DisallowShortTernaryOperatorSniff::class,
     ],
 
     'config' => [
@@ -100,18 +104,18 @@ return [
             'lineLimit' => 120,
             'absoluteLineLimit' => 120,
         ],
-        PhpCsFixer\Fixer\Operator\NewWithBracesFixer::class => [
+        UnusedParameterSniff::class => [
             'exclude' => [
-                'app/DataTransferObjects/EventData.php',
-                'app/DataTransferObjects/EventMatchData.php',
-                'app/DataTransferObjects/ManagerData.php',
-                'app/DataTransferObjects/RefereeData.php',
-                'app/DataTransferObjects/StableData.php',
-                'app/DataTransferObjects/TagTeamData.php',
-                'app/DataTransferObjects/TitleData.php',
-                'app/DataTransferObjects/VenueData.php',
-                'app/DataTransferObjects/WrestlerData.php',
+                'app/Console/Kernel.php',
+                'app/Exceptions/Handler.php',
+                'app/Rules/',
             ],
+        ],
+        InlineDocCommentDeclarationSniff::class => [
+
+        ],
+        DocCommentSpacingSniff::class => [
+            'linesCountBetweenDifferentAnnotationsTypes' => 0,
         ],
     ],
 

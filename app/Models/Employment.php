@@ -13,14 +13,14 @@ class Employment extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['employable_id', 'employable_type', 'started_at', 'ended_at'];
 
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'started_at' => 'datetime',
@@ -41,7 +41,6 @@ class Employment extends Model
      * Determine if employment start date was started before a given date.
      *
      * @param  \Carbon\Carbon $date
-     *
      * @return bool
      */
     public function startedBefore(Carbon $date)
@@ -53,7 +52,6 @@ class Employment extends Model
      * Determine if employment start date was started after a given date.
      *
      * @param  \Carbon\Carbon $date
-     *
      * @return bool
      */
     public function startedAfter(Carbon $date)

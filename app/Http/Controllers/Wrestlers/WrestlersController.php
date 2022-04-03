@@ -11,7 +11,7 @@ use App\Services\WrestlerService;
 
 class WrestlersController extends Controller
 {
-    public WrestlerService $wrestlerService;
+    private WrestlerService $wrestlerService;
 
     /**
      * Create a new wrestlers controller instance.
@@ -39,7 +39,6 @@ class WrestlersController extends Controller
      * Show the form for creating a new wrestler.
      *
      * @param Wrestler $wrestler
-     *
      * @return \Illuminate\View\View
      */
     public function create(Wrestler $wrestler)
@@ -56,7 +55,6 @@ class WrestlersController extends Controller
      *
      * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
      * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, WrestlerData $wrestlerData)
@@ -70,7 +68,6 @@ class WrestlersController extends Controller
      * Show the profile of a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     *
      * @return \Illuminate\View\View
      */
     public function show(Wrestler $wrestler)
@@ -86,7 +83,6 @@ class WrestlersController extends Controller
      * Show the form for editing a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     *
      * @return \Illuminate\View\View
      */
     public function edit(Wrestler $wrestler)
@@ -104,7 +100,6 @@ class WrestlersController extends Controller
      * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Wrestler $wrestler, WrestlerData $wrestlerData)
@@ -118,7 +113,6 @@ class WrestlersController extends Controller
      * Delete a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Wrestler $wrestler)

@@ -16,7 +16,6 @@ class EmployAction extends BaseTagTeamAction
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \Carbon\Carbon|null  $startDate
-     *
      * @return void
      */
     public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void
