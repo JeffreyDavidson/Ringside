@@ -25,11 +25,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Builder::macro('orderByNullsLast', function ($column, $direction = 'asc') {
-            /** @var Builder $this */
-            $column = $this->getGrammar()->wrap($column);
+            /** @var Builder $builder */
+            $builder = $this;
+            $column = $builder->getGrammar()->wrap($column);
             $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
-            return $this->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
+            return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
 
         Component::macro('notify', function ($message) {
