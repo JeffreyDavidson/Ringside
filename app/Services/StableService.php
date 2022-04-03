@@ -32,7 +32,6 @@ class StableService
      * Create a stable with given data.
      *
      * @param  \App\DataTransferObjects\StableData $stableData
-     *
      * @return \App\Models\Stable
      */
     public function create(StableData $stableData)
@@ -54,7 +53,6 @@ class StableService
      *
      * @param  \App\Models\Stable $stable
      * @param  \App\DataTransferObjects\StableData $stableData
-     *
      * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)
@@ -76,7 +74,6 @@ class StableService
      * Delete a given stable.
      *
      * @param  \App\Models\Stable $stable
-     *
      * @return void
      */
     public function delete(Stable $stable)
@@ -88,7 +85,6 @@ class StableService
      * Restore a given stable.
      *
      * @param  \App\Models\Stable $stable
-     *
      * @return void
      */
     public function restore(Stable $stable)

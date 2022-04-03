@@ -13,7 +13,6 @@ class RetireController extends Controller
      * Retire a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(TagTeam $tagTeam)

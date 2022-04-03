@@ -28,7 +28,6 @@ class EventService
      * Create an event with given data.
      *
      * @param  array $eventData
-     *
      * @return \App\Models\Event
      */
     public function create(array $eventData)
@@ -41,7 +40,6 @@ class EventService
      *
      * @param  \App\Models\Event $event
      * @param  array $eventData
-     *
      * @return \App\Models\Event
      */
     public function update(Event $event, array $eventData)
@@ -53,7 +51,6 @@ class EventService
      * Delete an event.
      *
      * @param  \App\Models\Event $event
-     *
      * @return void
      */
     public function delete($event)
@@ -65,7 +62,6 @@ class EventService
      * Restore an event.
      *
      * @param  \App\Models\Event $event
-     *
      * @return void
      */
     public function restore(Event $event)

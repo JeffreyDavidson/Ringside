@@ -14,7 +14,7 @@ class Venue extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['name', 'address1', 'address2', 'city', 'state', 'zip'];
 }

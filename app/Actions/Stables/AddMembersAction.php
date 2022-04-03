@@ -18,7 +18,6 @@ class AddMembersAction extends BaseStableAction
      * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
      * @param  \Illuminate\Database\Eloquent\Collection  $tagTeams
      * @param  \Carbon\Carbon|null  $joinedDate
-     *
      * @return void
      */
     public function handle(

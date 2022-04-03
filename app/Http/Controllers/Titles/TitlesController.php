@@ -11,7 +11,7 @@ use App\Services\TitleService;
 
 class TitlesController extends Controller
 {
-    public TitleService $titleService;
+    private TitleService $titleService;
 
     /**
      * Create a new titles controller instance.
@@ -39,7 +39,6 @@ class TitlesController extends Controller
      * Show the form for creating a new resource.
      *
      * @param Title $title
-     *
      * @return \Illuminate\View\View
      */
     public function create(Title $title)
@@ -56,7 +55,6 @@ class TitlesController extends Controller
      *
      * @param  \App\Http\Requests\Titles\StoreRequest  $request
      * @param  \App\DataTransferObjects\TitleData $titleData
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, TitleData $titleData)
@@ -70,7 +68,6 @@ class TitlesController extends Controller
      * Display the specified resource.
      *
      * @param Title $title
-     *
      * @return \Illuminate\View\View
      */
     public function show(Title $title)
@@ -86,7 +83,6 @@ class TitlesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\Title  $title
-     *
      * @return \Illuminate\View\View
      */
     public function edit(Title $title)
@@ -104,7 +100,6 @@ class TitlesController extends Controller
      * @param  \App\Http\Requests\Titles\UpdateRequest  $request
      * @param  \App\Models\Title  $title
      * @param  \App\DataTransferObjects\TitleData $titleData
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Title $title, TitleData $titleData)
@@ -118,7 +113,6 @@ class TitlesController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Title  $title
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Title $title)

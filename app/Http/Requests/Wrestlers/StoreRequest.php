@@ -54,7 +54,6 @@ class StoreRequest extends FormRequest
      * Configure the validator instance.
      *
      * @param  \Illuminate\Validation\Validator  $validator
-     *
      * @return void
      */
     public function withValidator(Validator $validator): void
@@ -66,24 +65,5 @@ class StoreRequest extends FormRequest
                 $this->offsetUnset('inches');
             }
         });
-    }
-
-    /**
-     * Get the validated data from the request.
-     *
-     * @param  string|null  $key
-     * @param  string|array|null  $default
-     *
-     * @return array
-     */
-    public function validated($key = null, $default = null)
-    {
-        $validated = array_merge(parent::validated(), [
-            'height' => $this->input('height'),
-        ]);
-
-        unset($validated['feet'], $validated['inches']);
-
-        return $validated;
     }
 }

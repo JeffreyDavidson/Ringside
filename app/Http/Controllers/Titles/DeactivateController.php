@@ -13,7 +13,6 @@ class DeactivateController extends Controller
      * Deactivates a title.
      *
      * @param  \App\Models\Title  $title
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Title $title)

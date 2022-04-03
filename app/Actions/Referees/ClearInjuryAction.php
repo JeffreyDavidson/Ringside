@@ -13,7 +13,6 @@ class ClearInjuryAction extends BaseRefereeAction
      * Clear an injury of a referee.
      *
      * @param  \App\Models\Referee  $referee
-     *
      * @return void
      */
     public function handle(Referee $referee): void

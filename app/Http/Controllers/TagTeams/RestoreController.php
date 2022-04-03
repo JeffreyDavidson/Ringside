@@ -13,7 +13,6 @@ class RestoreController extends Controller
      *
      * @param  int  $tagTeamId
      * @param  \App\Services\TagTeamService $tagTeamService
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke($tagTeamId, TagTeamService $tagTeamService)

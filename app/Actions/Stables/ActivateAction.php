@@ -19,7 +19,6 @@ class ActivateAction extends BaseStableAction
      *
      * @param  \App\Models\Stable  $stable
      * @param  \Carbon\Carbon|null  $activationDate
-     *
      * @return void
      */
     public function handle(Stable $stable, ?Carbon $activationDate = null): void

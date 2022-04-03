@@ -13,7 +13,6 @@ class ClearInjuryController extends Controller
      * Clear a manager.
      *
      * @param  \App\Models\Manager  $manager
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Manager $manager)

@@ -13,7 +13,6 @@ class SuspendAction extends BaseTagTeamAction
      * Suspend a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     *
      * @return void
      */
     public function handle(TagTeam $tagTeam): void

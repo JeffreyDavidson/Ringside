@@ -15,7 +15,6 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
-     *
      * @return void
      */
     public function handle(TagTeam $tagTeam, Collection $wrestlers): void

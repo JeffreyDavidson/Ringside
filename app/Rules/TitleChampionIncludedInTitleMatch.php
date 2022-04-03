@@ -29,7 +29,6 @@ class TitleChampionIncludedInTitleMatch implements Rule
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     *
      * @return bool
      */
     public function passes($attribute, $value)

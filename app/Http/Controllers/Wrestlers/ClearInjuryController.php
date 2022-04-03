@@ -13,7 +13,6 @@ class ClearInjuryController extends Controller
      * Have a wrestler recover from an injury.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Wrestler $wrestler)

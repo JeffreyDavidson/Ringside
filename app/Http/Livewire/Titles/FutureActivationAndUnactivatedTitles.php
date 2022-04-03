@@ -11,11 +11,11 @@ class FutureActivationAndUnactivatedTitles extends BaseComponent
 {
     use WithBulkActions, WithSorting;
 
-    public $showDeleteModal = false;
+    protected $showDeleteModal = false;
 
-    public $showFilters = false;
+    protected $showFilters = false;
 
-    public $filters = [
+    protected $filters = [
         'search' => '',
     ];
 

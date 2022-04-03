@@ -39,7 +39,6 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's current suspension date.
      *
      * @param  string  $direction
-     *
      * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByCurrentSuspendedAtDate(string $direction = 'asc')
@@ -77,7 +76,6 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's current retirement date.
      *
      * @param  string  $direction
-     *
      * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByCurrentRetiredAtDate(string $direction = 'asc')
@@ -117,7 +115,6 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's current released date.
      *
      * @param  string  $direction
-     *
      * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByCurrentReleasedAtDate(string $direction = 'asc')
@@ -176,7 +173,6 @@ class RosterMemberQueryBuilder extends Builder
      * Scope a query to order by the model's first employment date.
      *
      * @param  string $direction
-     *
      * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByFirstEmployedAtDate(string $direction = 'asc')

@@ -15,7 +15,6 @@ class ClearInjuryAction extends BaseWrestlerAction
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \Carbon\Carbon|null $recoveryDate
-     *
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void

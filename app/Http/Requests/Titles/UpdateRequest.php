@@ -46,7 +46,6 @@ class UpdateRequest extends FormRequest
      * Perform additional validation.
      *
      * @param  \Illuminate\Validation\Validator  $validator
-     *
      * @return void
      */
     public function withValidator(Validator $validator)

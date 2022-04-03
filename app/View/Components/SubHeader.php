@@ -11,13 +11,12 @@ class SubHeader extends Component
      *
      * @var string
      */
-    public $title;
+    protected $title;
 
     /**
      * Create a new component instance.
      *
      * @param  string $title
-     *
      * @return void
      */
     public function __construct(string $title)

@@ -13,7 +13,6 @@ class UnretireAction extends BaseManagerAction
      * Unretire a manager.
      *
      * @param  \App\Models\Manager  $manager
-     *
      * @return void
      */
     public function handle(Manager $manager): void

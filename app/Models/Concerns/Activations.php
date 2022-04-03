@@ -164,7 +164,6 @@ trait Activations
      * Get the model's first activation date.
      *
      * @param  \Carbon\Carbon $activationDate
-     *
      * @return bool|null
      */
     public function activatedOn(Carbon $activationDate)

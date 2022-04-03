@@ -15,7 +15,6 @@ class EmployAction extends BaseRefereeAction
      *
      * @param  \App\Models\Referee  $referee
      * @param  \Carbon\Carbon|null  $startDate
-     *
      * @return void
      */
     public function handle(Referee $referee, ?Carbon $startDate = null): void

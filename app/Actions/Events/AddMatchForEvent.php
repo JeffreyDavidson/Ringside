@@ -34,7 +34,6 @@ class AddMatchForEvent
      *
      * @param  \App\Models\Event $event
      * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
-     *
      * @return \App\Models\EventMatch $cratedMatch
      */
     public function __invoke(Event $event, EventMatchData $eventMatchData)
@@ -60,7 +59,6 @@ class AddMatchForEvent
      *
      * @param \App\Models\EventMatch $eventMatch
      * @param \Illuminate\Database\Eloquent\Collection<Title> $titles
-     *
      * @return void
      */
     private function addTitlesToMatch($eventMatch, $titles)
@@ -75,7 +73,6 @@ class AddMatchForEvent
      *
      * @param \App\Models\EventMatch $eventMatch
      * @param \Illuminate\Database\Eloquent\Collection<Referee> $referees
-     *
      * @return void
      */
     private function addRefereesToMatch($eventMatch, $referees)
@@ -90,7 +87,6 @@ class AddMatchForEvent
      *
      * @param \App\Models\EventMatch $eventMatch
      * @param \Illuminate\Database\Eloquent\Collection $competitors
-     *
      * @return void
      */
     private function addCompetitorsToMatch($eventMatch, $competitors)

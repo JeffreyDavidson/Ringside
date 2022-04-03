@@ -15,7 +15,6 @@ class RetireAction extends BaseWrestlerAction
      *
      * @param  \App\Models\Wrestler  $wrestler
      * @param  \Carbon\Carbon|null  $retirementDate
-     *
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void

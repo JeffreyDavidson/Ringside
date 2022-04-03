@@ -27,14 +27,14 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = ['name', 'status'];
 
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'status' => TitleStatus::class,
@@ -44,7 +44,6 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     *
      * @return \App\Builders\TitleQueryBuilder<\App\Models\Title>
      */
     public function newEloquentBuilder($query): TitleQueryBuilder
