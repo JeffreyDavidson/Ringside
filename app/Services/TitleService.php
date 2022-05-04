@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Titles\ActivateAction;
-use App\DataTransferObjects\TitleData;
+use App\Data\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 
@@ -29,7 +29,7 @@ class TitleService
     /**
      * Create a title with given data.
      *
-     * @param  \App\DataTransferObjects\TitleData $titleData
+     * @param  \App\Data\TitleData $titleData
      * @return \App\Models\Title
      */
     public function create(TitleData $titleData)
@@ -48,7 +48,7 @@ class TitleService
      * Update a given title with given data.
      *
      * @param  \App\Models\Title $title
-     * @param  \App\DataTransferObjects\TitleData $titleData
+     * @param  \App\Data\TitleData $titleData
      * @return \App\Models\Title
      */
     public function update(Title $title, TitleData $titleData)

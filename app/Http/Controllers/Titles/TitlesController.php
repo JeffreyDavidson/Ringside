@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Titles;
 
-use App\DataTransferObjects\TitleData;
+use App\Data\TitleData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
@@ -54,7 +54,7 @@ class TitlesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\Titles\StoreRequest  $request
-     * @param  \App\DataTransferObjects\TitleData $titleData
+     * @param  \App\Data\TitleData $titleData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, TitleData $titleData)
@@ -99,7 +99,7 @@ class TitlesController extends Controller
      *
      * @param  \App\Http\Requests\Titles\UpdateRequest  $request
      * @param  \App\Models\Title  $title
-     * @param  \App\DataTransferObjects\TitleData $titleData
+     * @param  \App\Data\TitleData $titleData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Title $title, TitleData $titleData)

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Managers\EmployAction;
-use App\DataTransferObjects\ManagerData;
+use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 
@@ -29,7 +29,7 @@ class ManagerService
     /**
      * Create a manager with given data.
      *
-     * @param  \App\DataTransferObjects\ManagerData $managerData
+     * @param  \App\Data\ManagerData $managerData
      * @return \App\Models\Manager
      */
     public function create(ManagerData $managerData)
@@ -48,7 +48,7 @@ class ManagerService
      * Update a given manager with given data.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \App\DataTransferObjects\ManagerData $managerData
+     * @param  \App\Data\ManagerData $managerData
      * @return \App\Models\Manager
      */
     public function update(Manager $manager, ManagerData $managerData)

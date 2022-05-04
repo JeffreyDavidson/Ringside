@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\EventMatchData;
+use App\Data\EventMatchData;
 use App\Models\Event;
 use App\Models\EventMatch;
 use App\Models\Referee;
@@ -16,7 +16,7 @@ class EventMatchRepository
      * Create a new event with the given data.
      *
      * @param  \App\Models\Event $event
-     * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
+     * @param  \App\Data\EventMatchData $eventMatchData
      * @return \App\Models\EventMatch
      */
     public function createForEvent(Event $event, EventMatchData $eventMatchData)

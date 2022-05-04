@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\TagTeamData;
+use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
@@ -13,7 +13,7 @@ class TagTeamRepository
     /**
      * Create a new tag team with the given data.
      *
-     * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
+     * @param  \App\Data\TagTeamData $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -28,7 +28,7 @@ class TagTeamRepository
      * Update a given tag team with the given data.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
+     * @param  \App\Data\TagTeamData $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)

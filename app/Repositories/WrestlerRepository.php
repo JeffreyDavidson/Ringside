@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\WrestlerData;
+use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 
@@ -11,7 +11,7 @@ class WrestlerRepository
     /**
      * Create a new wrestler with the given data.
      *
-     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
+     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \App\Models\Wrestler
      */
     public function create(WrestlerData $wrestlerData)
@@ -29,7 +29,7 @@ class WrestlerRepository
      * Update a given wrestler with given data.
      *
      * @param  \App\Models\Wrestler $wrestler
-     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
+     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \App\Models\Wrestler
      */
     public function update(Wrestler $wrestler, WrestlerData $wrestlerData)

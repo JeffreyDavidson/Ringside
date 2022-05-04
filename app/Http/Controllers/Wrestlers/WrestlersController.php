@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Wrestlers;
 
-use App\DataTransferObjects\WrestlerData;
+use App\Data\WrestlerData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
@@ -54,7 +54,7 @@ class WrestlersController extends Controller
      * Create a new wrestler.
      *
      * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
-     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
+     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, WrestlerData $wrestlerData)
@@ -99,7 +99,7 @@ class WrestlersController extends Controller
      *
      * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
      * @param  \App\Models\Wrestler  $wrestler
-     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
+     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Wrestler $wrestler, WrestlerData $wrestlerData)

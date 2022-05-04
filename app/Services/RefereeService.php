@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Referees\EmployAction;
-use App\DataTransferObjects\RefereeData;
+use App\Data\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 
@@ -29,7 +29,7 @@ class RefereeService
     /**
      * Create a referee with given data.
      *
-     * @param  \App\DataTransferObjects\RefereeData $refereeData
+     * @param  \App\Data\RefereeData $refereeData
      * @return \App\Models\Referee
      */
     public function create(RefereeData $refereeData)
@@ -48,7 +48,7 @@ class RefereeService
      * Update a given referee with given data.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \App\DataTransferObjects\RefereeData $refereeData
+     * @param  \App\Data\RefereeData $refereeData
      * @return \App\Models\Referee
      */
     public function update(Referee $referee, RefereeData $refereeData)

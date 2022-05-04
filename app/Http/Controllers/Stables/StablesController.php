@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Stables;
 
-use App\DataTransferObjects\StableData;
+use App\Data\StableData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
@@ -54,7 +54,7 @@ class StablesController extends Controller
      * Create a new stable.
      *
      * @param  \App\Http\Requests\Stables\StoreRequest  $request
-     * @param  \App\DataTransferObjects\StableData $stableData
+     * @param  \App\Data\StableData $stableData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, StableData $stableData)
@@ -99,7 +99,7 @@ class StablesController extends Controller
      *
      * @param  \App\Http\Requests\Stables\UpdateRequest  $request
      * @param  \App\Models\Stable  $stable
-     * @param  \App\DataTransferObjects\StableData $stableData
+     * @param  \App\Data\StableData $stableData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Stable $stable, StableData $stableData)

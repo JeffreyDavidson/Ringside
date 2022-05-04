@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Actions\TagTeams\AddTagTeamPartnersAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\UpdateTagTeamPartnersAction;
-use App\DataTransferObjects\TagTeamData;
+use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
 use App\Repositories\WrestlerRepository;
@@ -41,7 +41,7 @@ class TagTeamService
     /**
      * Create a tag team with given data.
      *
-     * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
+     * @param  \App\Data\TagTeamData $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -64,7 +64,7 @@ class TagTeamService
      * Update a given tag team with given data.
      *
      * @param  \App\Models\TagTeam $tagTeam
-     * @param  \App\DataTransferObjects\TagTeamData $tagTeamData
+     * @param  \App\Data\TagTeamData $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)

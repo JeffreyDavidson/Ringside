@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\TitleData;
+use App\Data\TitleData;
 use App\Models\Title;
 use Carbon\Carbon;
 
@@ -11,7 +11,7 @@ class TitleRepository
     /**
      * Create a new title with the given data.
      *
-     * @param  \App\DataTransferObjects\TitleData $titleData
+     * @param  \App\Data\TitleData $titleData
      * @return \App\Models\Title
      */
     public function create(TitleData $titleData)
@@ -25,7 +25,7 @@ class TitleRepository
      * Update the given title with the given data.
      *
      * @param  \App\Models\Title $title
-     * @param  \App\DataTransferObjects\TitleData $titleData
+     * @param  \App\Data\TitleData $titleData
      * @return \App\Models\Title
      */
     public function update(Title $title, TitleData $titleData)
