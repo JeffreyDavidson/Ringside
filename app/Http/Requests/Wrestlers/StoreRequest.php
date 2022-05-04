@@ -49,21 +49,4 @@ class StoreRequest extends FormRequest
             'signature_move' => 'signature move',
         ];
     }
-
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function ($validator) {
-            if ($validator->errors()->isEmpty()) {
-                $this->merge(['height' => ($this->input('feet') * 12) + $this->input('inches')]);
-                $this->offsetUnset('feet');
-                $this->offsetUnset('inches');
-            }
-        });
-    }
 }
