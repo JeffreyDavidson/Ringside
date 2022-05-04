@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Referees;
 
-use App\DataTransferObjects\RefereeData;
+use App\Data\RefereeData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
@@ -54,7 +54,7 @@ class RefereesController extends Controller
      * Create a new referee.
      *
      * @param  \App\Http\Requests\Referees\StoreRequest  $request
-     * @param  \App\DataTransferObjects\RefereeData  $refereeData
+     * @param  \App\Data\RefereeData  $refereeData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, RefereeData $refereeData)
@@ -99,7 +99,7 @@ class RefereesController extends Controller
      *
      * @param  \App\Http\Requests\Referees\UpdateRequest  $request
      * @param  \App\Models\Referee  $referee
-     * @param  \App\DataTransferObjects\RefereeData  $refereeData
+     * @param  \App\Data\RefereeData  $refereeData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Referee $referee, RefereeData $refereeData)

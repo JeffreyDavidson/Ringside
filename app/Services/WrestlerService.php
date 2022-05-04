@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Actions\Wrestlers\EmployAction;
-use App\DataTransferObjects\WrestlerData;
+use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
 
@@ -29,7 +29,7 @@ class WrestlerService
     /**
      * Create a new wrestler with given data.
      *
-     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
+     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \App\Models\Wrestler
      */
     public function create(WrestlerData $wrestlerData)
@@ -48,7 +48,7 @@ class WrestlerService
      * Update a given wrestler with given data.
      *
      * @param  \App\Models\Wrestler $wrestler
-     * @param  \App\DataTransferObjects\WrestlerData $wrestlerData
+     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \App\Models\Wrestler
      */
     public function update(Wrestler $wrestler, WrestlerData $wrestlerData)

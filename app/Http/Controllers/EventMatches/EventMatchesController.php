@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\EventMatches;
 
 use App\Actions\Events\AddMatchForEvent;
-use App\DataTransferObjects\EventMatchData;
+use App\Data\EventMatchData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
@@ -33,7 +33,7 @@ class EventMatchesController extends Controller
      * @param  \App\Models\Event  $event
      * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
      * @param  \App\Actions\Events\AddMatchForEvent $addMatchForEvent
-     * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
+     * @param  \App\Data\EventMatchData $eventMatchData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(

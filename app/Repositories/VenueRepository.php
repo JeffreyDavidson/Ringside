@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\VenueData;
+use App\Data\VenueData;
 use App\Models\Venue;
 
 class VenueRepository
@@ -10,7 +10,7 @@ class VenueRepository
     /**
      * Create a new venue with the given data.
      *
-     * @param  \App\DataTransferObjects\VenueData $venueData
+     * @param  \App\Data\VenueData $venueData
      * @return \App\Models\Venue
      */
     public function create(VenueData $venueData)
@@ -29,7 +29,7 @@ class VenueRepository
      * Update the given venue with the given data.
      *
      * @param  \App\Models\Venue $venue
-     * @param  \App\DataTransferObjects\VenueData $venueData
+     * @param  \App\Data\VenueData $venueData
      * @return \App\Models\Venue $venue
      */
     public function update(Venue $venue, VenueData $venueData)

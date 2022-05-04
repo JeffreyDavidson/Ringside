@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataTransferObjects;
+namespace App\Data;
 
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\MatchType;
@@ -10,43 +10,18 @@ use App\Models\Title;
 use App\Models\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Spatie\LaravelData\Data;
 
-class EventMatchData
+class EventMatchData extends Data
 {
-    /**
-     * The match type for the match.
-     *
-     * @var \App\Models\MatchType
-     */
-    protected MatchType $matchType;
-
-    /**
-     * The referees assigned to the match.
-     *
-     * @var \Illuminate\Database\Eloquent\Collection
-     */
-    protected Collection $referees;
-
-    /**
-     * The titles being contended for the match.
-     *
-     * @var \Illuminate\Database\Eloquent\Collection|null
-     */
-    protected ?Collection $titles;
-
-    /**
-     * The competitors competing in the event match.
-     *
-     * @var \Illuminate\Database\Eloquent\Collection
-     */
-    protected Collection $competitors;
-
-    /**
-     * The preview description for the match.
-     *
-     * @var string|null
-     */
-    protected ?string $preview;
+    public function __construct(
+        public MatchType $matchType,
+        public Collection $referees,
+        public ?Collection $titles,
+        public Collection $competitors,
+        public ?string $preview
+    ) {
+    }
 
     /**
      * Retrieve data from the store request.
@@ -56,15 +31,13 @@ class EventMatchData
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
-        $dto = new self();
-
-        $dto->matchType = MatchType::query()->whereKey($request->input('match_type_id'))->sole();
-        $dto->referees = Referee::query()->findMany($request->collect('referees'));
-        $dto->titles = Title::query()->findMany($request->collect('titles'));
-        $dto->competitors = self::getCompetitors($request->collect('competitors'));
-        $dto->preview = $request->input('preview');
-
-        return $dto;
+        return new self(
+            MatchType::query()->whereKey($request->input('match_type_id'))->sole(),
+            Referee::query()->findMany($request->collect('referees')),
+            Title::query()->findMany($request->collect('titles')),
+            self::getCompetitors($request->collect('competitors')),
+            $request->input('preview')
+        );
     }
 
     /**

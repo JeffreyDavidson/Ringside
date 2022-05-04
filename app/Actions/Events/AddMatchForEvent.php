@@ -2,7 +2,7 @@
 
 namespace App\Actions\Events;
 
-use App\DataTransferObjects\EventMatchData;
+use App\Data\EventMatchData;
 use App\Models\Event;
 use App\Models\Referee;
 use App\Models\TagTeam;
@@ -33,7 +33,7 @@ class AddMatchForEvent
      * Undocumented function.
      *
      * @param  \App\Models\Event $event
-     * @param  \App\DataTransferObjects\EventMatchData $eventMatchData
+     * @param  \App\Data\EventMatchData $eventMatchData
      * @return \App\Models\EventMatch $cratedMatch
      */
     public function __invoke(Event $event, EventMatchData $eventMatchData)

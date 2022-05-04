@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\ManagerData;
+use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -13,7 +13,7 @@ class ManagerRepository
     /**
      * Create a new manager with the given data.
      *
-     * @param  \App\DataTransferObjects\ManagerData $managerData
+     * @param  \App\Data\ManagerData $managerData
      * @return \App\Models\Manager
      */
     public function create(ManagerData $managerData)
@@ -28,7 +28,7 @@ class ManagerRepository
      * Update a given manager with the given data.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \App\DataTransferObjects\ManagerData $managerData
+     * @param  \App\Data\ManagerData $managerData
      * @return \App\Models\Manager
      */
     public function update(Manager $manager, ManagerData $managerData)

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\RefereeData;
+use App\Data\RefereeData;
 use App\Models\Referee;
 use Carbon\Carbon;
 
@@ -11,7 +11,7 @@ class RefereeRepository
     /**
      * Create a new referee with the given data.
      *
-     * @param  \App\DataTransferObjects\RefereeData $refereeData
+     * @param  \App\Data\RefereeData $refereeData
      * @return \App\Models\Referee
      */
     public function create(RefereeData $refereeData)
@@ -26,7 +26,7 @@ class RefereeRepository
      * Update a given referee with the given data.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \App\DataTransferObjects\RefereeData $refereeData
+     * @param  \App\Data\RefereeData $refereeData
      * @return \App\Models\Referee
      */
     public function update(Referee $referee, RefereeData $refereeData)

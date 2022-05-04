@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Actions\Stables\ActivateAction;
 use App\Actions\Stables\AddMembersAction;
 use App\Actions\Stables\UpdateMembersAction;
-use App\DataTransferObjects\StableData;
+use App\Data\StableData;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
 
@@ -31,7 +31,7 @@ class StableService
     /**
      * Create a stable with given data.
      *
-     * @param  \App\DataTransferObjects\StableData $stableData
+     * @param  \App\Data\StableData $stableData
      * @return \App\Models\Stable
      */
     public function create(StableData $stableData)
@@ -52,7 +52,7 @@ class StableService
      * Update a given stable with given data.
      *
      * @param  \App\Models\Stable $stable
-     * @param  \App\DataTransferObjects\StableData $stableData
+     * @param  \App\Data\StableData $stableData
      * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)

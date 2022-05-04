@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\TagTeams;
 
-use App\DataTransferObjects\TagTeamData;
+use App\Data\TagTeamData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
@@ -58,7 +58,7 @@ class TagTeamsController extends Controller
      * Create a new tag team.
      *
      * @param  \App\Http\Requests\TagTeams\StoreRequest  $request
-     * @param  \App\DataTransferObjects\TagTeamData  $tagTeamData
+     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, TagTeamData $tagTeamData)
@@ -106,7 +106,7 @@ class TagTeamsController extends Controller
      *
      * @param  \App\Http\Requests\TagTeams\UpdateRequest  $request
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \App\DataTransferObjects\TagTeamData  $tagTeamData
+     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, TagTeam $tagTeam, TagTeamData $tagTeamData)

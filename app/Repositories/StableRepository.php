@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\DataTransferObjects\StableData;
+use App\Data\StableData;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -14,7 +14,7 @@ class StableRepository
     /**
      * Create a new stable with the given data.
      *
-     * @param  \App\DataTransferObjects\StableData $stableData
+     * @param  \App\Data\StableData $stableData
      * @return \App\Models\Stable
      */
     public function create(StableData $stableData)
@@ -28,7 +28,7 @@ class StableRepository
      * Update the given stable with the given data.
      *
      * @param  \App\Models\Stable $stable
-     * @param  \App\DataTransferObjects\StableData $stableData
+     * @param  \App\Data\StableData $stableData
      * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)

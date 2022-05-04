@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Integration\DataTransferObjects;
+namespace Tests\Integration\Data;
 
-use App\DataTransferObjects\EventMatchData;
+use App\Data\EventMatchData;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Tests\TestCase;
