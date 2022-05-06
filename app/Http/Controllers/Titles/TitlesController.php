@@ -57,9 +57,9 @@ class TitlesController extends Controller
      * @param  \App\Data\TitleData $titleData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, TitleData $titleData)
+    public function store(StoreRequest $request)
     {
-        $this->titleService->create($titleData->fromStoreRequest($request));
+        $this->titleService->create(TitleData::fromStoreRequest($request));
 
         return redirect()->route('titles.index');
     }
@@ -99,12 +99,11 @@ class TitlesController extends Controller
      *
      * @param  \App\Http\Requests\Titles\UpdateRequest  $request
      * @param  \App\Models\Title  $title
-     * @param  \App\Data\TitleData $titleData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Title $title, TitleData $titleData)
+    public function update(UpdateRequest $request, Title $title)
     {
-        $this->titleService->update($title, $titleData->fromUpdateRequest($request));
+        $this->titleService->update($title, TitleData::fromUpdateRequest($request));
 
         return redirect()->route('titles.index');
     }

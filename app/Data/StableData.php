@@ -8,9 +8,8 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Spatie\LaravelData\Data;
 
-class StableData extends Data
+class StableData
 {
     public function __construct(
         public string $name,

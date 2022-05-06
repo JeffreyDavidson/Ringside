@@ -5,9 +5,8 @@ namespace App\Data;
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 
-class ManagerData extends Data
+class ManagerData
 {
     public function __construct(
         public string $first_name,

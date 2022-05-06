@@ -15,7 +15,6 @@
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.10",
         "lorisleiva/laravel-actions": "^2.3",
-        "spatie/laravel-data": "^1.4",
         "spatie/laravel-enum": "^3.0",
         "staudenmeir/laravel-merged-relations": "^1.5",
         "tightenco/tlint": "^6.2"

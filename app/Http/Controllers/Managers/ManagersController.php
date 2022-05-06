@@ -99,12 +99,11 @@ class ManagersController extends Controller
      *
      * @param  \App\Http\Requests\Managers\UpdateRequest  $request
      * @param  \App\Models\Manager  $manager
-     * @param  \App\Data\ManagerData  $managerData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Manager $manager, ManagerData $managerData)
+    public function update(UpdateRequest $request, Manager $manager)
     {
-        $this->managerService->update($manager, $managerData->fromUpdateRequest($request));
+        $this->managerService->update($manager, ManagerData::fromUpdateRequest($request));
 
         return redirect()->route('managers.index');
     }

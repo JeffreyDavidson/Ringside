@@ -58,12 +58,11 @@ class TagTeamsController extends Controller
      * Create a new tag team.
      *
      * @param  \App\Http\Requests\TagTeams\StoreRequest  $request
-     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, TagTeamData $tagTeamData)
+    public function store(StoreRequest $request)
     {
-        $this->tagTeamService->create($tagTeamData->fromStoreRequest($request));
+        $this->tagTeamService->create(TagTeamData::fromStoreRequest($request));
 
         return redirect()->route('tag-teams.index');
     }
@@ -106,12 +105,11 @@ class TagTeamsController extends Controller
      *
      * @param  \App\Http\Requests\TagTeams\UpdateRequest  $request
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, TagTeam $tagTeam, TagTeamData $tagTeamData)
+    public function update(UpdateRequest $request, TagTeam $tagTeam)
     {
-        $this->tagTeamService->update($tagTeam, $tagTeamData->fromUpdateRequest($request));
+        $this->tagTeamService->update($tagTeam, TagTeamData::fromUpdateRequest($request));
 
         return redirect()->route('tag-teams.index');
     }

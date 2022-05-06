@@ -54,12 +54,11 @@ class RefereesController extends Controller
      * Create a new referee.
      *
      * @param  \App\Http\Requests\Referees\StoreRequest  $request
-     * @param  \App\Data\RefereeData  $refereeData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, RefereeData $refereeData)
+    public function store(StoreRequest $request)
     {
-        $this->refereeService->create($refereeData->fromStoreRequest($request));
+        $this->refereeService->create(RefereeData::fromStoreRequest($request));
 
         return redirect()->route('referees.index');
     }
@@ -99,12 +98,11 @@ class RefereesController extends Controller
      *
      * @param  \App\Http\Requests\Referees\UpdateRequest  $request
      * @param  \App\Models\Referee  $referee
-     * @param  \App\Data\RefereeData  $refereeData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Referee $referee, RefereeData $refereeData)
+    public function update(UpdateRequest $request, Referee $referee)
     {
-        $this->refereeService->update($referee, $refereeData->fromUpdateRequest($request));
+        $this->refereeService->update($referee, RefereeData::fromUpdateRequest($request));
 
         return redirect()->route('referees.index');
     }

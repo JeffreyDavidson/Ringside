@@ -54,12 +54,11 @@ class WrestlersController extends Controller
      * Create a new wrestler.
      *
      * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
-     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request, WrestlerData $wrestlerData)
     {
-        $this->wrestlerService->create($wrestlerData->fromStoreRequest($request));
+        $this->wrestlerService->create(WrestlerData::fromStoreRequest($request));
 
         return redirect()->route('wrestlers.index');
     }
@@ -99,12 +98,11 @@ class WrestlersController extends Controller
      *
      * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
      * @param  \App\Models\Wrestler  $wrestler
-     * @param  \App\Data\WrestlerData $wrestlerData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Wrestler $wrestler, WrestlerData $wrestlerData)
+    public function update(UpdateRequest $request, Wrestler $wrestler)
     {
-        $this->wrestlerService->update($wrestler, $wrestlerData->fromUpdateRequest($request));
+        $this->wrestlerService->update($wrestler, WrestlerData::fromUpdateRequest($request));
 
         return redirect()->route('wrestlers.index');
     }

@@ -10,9 +10,8 @@ use App\Models\Title;
 use App\Models\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Spatie\LaravelData\Data;
 
-class EventMatchData extends Data
+class EventMatchData
 {
     public function __construct(
         public MatchType $matchType,

@@ -5,9 +5,8 @@ namespace App\Data;
 use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Venue;
-use Spatie\LaravelData\Data;
 
-class EventData extends Data
+class EventData
 {
     public function __construct(
         public string $name,

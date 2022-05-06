@@ -54,12 +54,11 @@ class StablesController extends Controller
      * Create a new stable.
      *
      * @param  \App\Http\Requests\Stables\StoreRequest  $request
-     * @param  \App\Data\StableData $stableData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, StableData $stableData)
+    public function store(StoreRequest $request)
     {
-        $this->stableService->create($stableData->fromStoreRequest($request));
+        $this->stableService->create(StableData::fromStoreRequest($request));
 
         return redirect()->route('stables.index');
     }
@@ -102,9 +101,9 @@ class StablesController extends Controller
      * @param  \App\Data\StableData $stableData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Stable $stable, StableData $stableData)
+    public function update(UpdateRequest $request, Stable $stable)
     {
-        $this->stableService->update($stable, $stableData->fromUpdateRequest($request));
+        $this->stableService->update($stable, StableData::fromUpdateRequest($request));
 
         return redirect()->route('stables.index');
     }

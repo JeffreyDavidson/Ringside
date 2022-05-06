@@ -33,16 +33,11 @@ class EventMatchesController extends Controller
      * @param  \App\Models\Event  $event
      * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
      * @param  \App\Actions\Events\AddMatchForEvent $addMatchForEvent
-     * @param  \App\Data\EventMatchData $eventMatchData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(
-        Event $event,
-        StoreRequest $request,
-        AddMatchForEvent $addMatchForEvent,
-        EventMatchData $eventMatchData
-    ) {
-        $addMatchForEvent($event, $eventMatchData->fromStoreRequest($request));
+    public function store(Event $event, StoreRequest $request, AddMatchForEvent $addMatchForEvent)
+    {
+        $addMatchForEvent($event, EventMatchData::fromStoreRequest($request));
 
         return redirect()->route('events.index');
     }

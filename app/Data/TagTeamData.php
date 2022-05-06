@@ -7,9 +7,8 @@ use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Spatie\LaravelData\Data;
 
-class TagTeamData extends Data
+class TagTeamData
 {
     public function __construct(
         public string $name,
