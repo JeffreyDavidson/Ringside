@@ -57,7 +57,7 @@ class EventsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->eventService->create($request->validated());
+        $this->eventService->create(EventData::fromStoreRequest($request));
 
         return redirect()->route('events.index');
     }
@@ -101,7 +101,7 @@ class EventsController extends Controller
      */
     public function update(UpdateRequest $request, Event $event)
     {
-        $this->eventService->update($event, $request->validated());
+        $this->eventService->update($event, EventData::fromUpdateRequest($request));
 
         return redirect()->route('events.index');
     }

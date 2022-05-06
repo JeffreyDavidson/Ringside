@@ -54,12 +54,11 @@ class VenuesController extends Controller
      * Create a new venue.
      *
      * @param  \App\Http\Requests\Venues\StoreRequest  $request
-     * @param  \App\Data\VenueData $venueData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, VenueData $venueData)
+    public function store(StoreRequest $request)
     {
-        $this->venueService->create($venueData->fromStoreRequest($request));
+        $this->venueService->create(VenueData::fromStoreRequest($request));
 
         return redirect()->route('venues.index');
     }
@@ -99,12 +98,11 @@ class VenuesController extends Controller
      *
      * @param  \App\Http\Requests\Venues\UpdateRequest  $request
      * @param  \App\Models\Venue  $venue
-     * @param  \App\Data\VenueData $venueData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Venue $venue, VenueData $venueData)
+    public function update(UpdateRequest $request, Venue $venue)
     {
-        $this->venueService->update($venue, $venueData->fromUpdateRequest($request));
+        $this->venueService->update($venue, VenueData::fromUpdateRequest($request));
 
         return redirect()->route('venues.index');
     }

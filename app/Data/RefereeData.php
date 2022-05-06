@@ -5,9 +5,8 @@ namespace App\Data;
 use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 
-class RefereeData extends Data
+class RefereeData
 {
     public function __construct(
         public string $first_name,

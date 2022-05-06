@@ -5,9 +5,8 @@ namespace App\Data;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 
-class TitleData extends Data
+class TitleData
 {
     public function __construct(
         public string $name,

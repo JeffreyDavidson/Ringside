@@ -5,9 +5,8 @@ namespace App\Data;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use Carbon\Carbon;
-use Spatie\LaravelData\Data;
 
-class WrestlerData extends Data
+class WrestlerData
 {
     public function __construct(
         public string $name,

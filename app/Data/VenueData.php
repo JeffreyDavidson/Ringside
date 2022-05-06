@@ -4,9 +4,8 @@ namespace App\Data;
 
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
-use Spatie\LaravelData\Data;
 
-class VenueData extends Data
+class VenueData
 {
     public function __construct(
         public string $name,
