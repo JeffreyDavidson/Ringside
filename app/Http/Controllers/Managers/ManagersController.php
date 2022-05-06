@@ -54,12 +54,11 @@ class ManagersController extends Controller
      * Create a new manager.
      *
      * @param  \App\Http\Requests\Managers\StoreRequest  $request
-     * @param  \App\Data\ManagerData $managerData
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, ManagerData $managerData)
+    public function store(StoreRequest $request)
     {
-        $this->managerService->create($managerData->fromStoreRequest($request));
+        $this->managerService->create(ManagerData::fromStoreRequest($request));
 
         return redirect()->route('managers.index');
     }

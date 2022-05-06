@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Events;
 
+use App\Data\EventData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;

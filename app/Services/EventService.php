@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\EventData;
 use App\Models\Event;
 use App\Repositories\EventRepository;
 
@@ -27,10 +28,10 @@ class EventService
     /**
      * Create an event with given data.
      *
-     * @param  array $eventData
+     * @param  \App\Data\EventData $eventData
      * @return \App\Models\Event
      */
-    public function create(array $eventData)
+    public function create(EventData $eventData)
     {
         return $this->eventRepository->create($eventData);
     }
@@ -39,10 +40,10 @@ class EventService
      * Update a given event.
      *
      * @param  \App\Models\Event $event
-     * @param  array $eventData
+     * @param  \App\Data\EventData $eventData
      * @return \App\Models\Event
      */
-    public function update(Event $event, array $eventData)
+    public function update(Event $event, EventData $eventData)
     {
         return $this->eventRepository->update($event, $eventData);
     }
