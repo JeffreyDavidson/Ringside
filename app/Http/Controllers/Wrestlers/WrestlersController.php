@@ -56,7 +56,7 @@ class WrestlersController extends Controller
      * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request, WrestlerData $wrestlerData)
+    public function store(StoreRequest $request)
     {
         $this->wrestlerService->create(WrestlerData::fromStoreRequest($request));
 

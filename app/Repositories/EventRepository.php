@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Data\EventData;
 use App\Models\Event;
 
 class EventRepository
@@ -9,16 +10,16 @@ class EventRepository
     /**
      * Create a new event with the given data.
      *
-     * @param  array $eventData
+     * @param  \App\Data\EventData $eventData
      * @return \App\Models\Event
      */
-    public function create(array $eventData)
+    public function create(EventData $eventData)
     {
         return Event::create([
-            'name' => $eventData['name'],
-            'date' => $eventData['date'],
-            'venue_id' => $eventData['venue_id'],
-            'preview' => $eventData['preview'],
+            'name' => $eventData->name,
+            'date' => $eventData->date,
+            'venue_id' => $eventData->venue->id ?? null,
+            'preview' => $eventData->preview,
         ]);
     }
 
@@ -26,16 +27,16 @@ class EventRepository
      * Update a given event with given data.
      *
      * @param  \App\Models\Event $event
-     * @param  array $eventData
+     * @param  \App\Data\EventData $eventData
      * @return \App\Models\Event
      */
-    public function update(Event $event, array $eventData)
+    public function update(Event $event, EventData $eventData)
     {
         $event->update([
-            'name' => $eventData['name'],
-            'date' => $eventData['date'],
-            'venue_id' => $eventData['venue_id'],
-            'preview' => $eventData['preview'],
+            'name' => $eventData->name,
+            'date' => $eventData->date,
+            'venue_id' => $eventData->venue->id ?? null,
+            'preview' => $eventData->preview,
         ]);
 
         return $event;
