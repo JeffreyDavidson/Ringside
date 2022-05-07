@@ -1,44 +1,11 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <a href="{{ route('referees.create') }}" class="btn btn-label-brand btn-bold">
-            Create Referees
-        </a>
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Referees List
+        </h2>
     </x-slot>
+
     <x-content>
-        <x-portlet title="Employed Referees">
-            <div class="kt-portlet__body">
-                <livewire:referees.employed-referees>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Future Employed and Unemployed Referees">
-            <div class="kt-portlet__body">
-                <livewire:referees.future-employed-and-unemployed-referees>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Suspended Referees">
-            <div class="kt-portlet__body">
-                <livewire:referees.suspended-referees>
-            </div>
-        </x-portlet>
-
-         <x-portlet title="Injured Referees">
-            <div class="kt-portlet__body">
-                <livewire:referees.injured-referees>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Released Referees">
-            <div class="kt-portlet__body">
-                <livewire:referees.released-referees>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Retired Referees">
-            <div class="kt-portlet__body">
-                <livewire:referees.retired-referees>
-            </div>
-        </x-portlet>
+        <livewire:referees.referees-list>
     </x-content>
 </x-layouts.app>

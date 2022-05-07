@@ -15,4 +15,31 @@ namespace App\Enums;
  */
 class ManagerStatus extends BaseEnum
 {
+    public $colors = [
+        'available' => 'success',
+        'injured' => 'light',
+        'future-employment' => 'warning',
+        'released' => 'dark',
+        'retired' => 'secondary',
+        'suspended' => 'danger',
+        'unemployed' => 'info',
+    ];
+
+    protected static function labels(): array
+    {
+        return [
+            'available' => 'Available',
+            'injured' => 'Injured',
+            'future_employment' => 'Awaiting Employment',
+            'released' => 'Released',
+            'retired' => 'Retired',
+            'suspended' => 'Suspended',
+            'unemployed' => 'Unemployed',
+        ];
+    }
+
+    public function getBadgeColor()
+    {
+        return $this->colors[$this->value];
+    }
 }

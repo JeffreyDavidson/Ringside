@@ -113,19 +113,15 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     public function canBeEmployed()
     {
         if ($this->isCurrentlyEmployed()) {
-            throw new CannotBeEmployedException(
-                sprintf('%s is currently employed and cannot be re-employed.', $this->name)
-            );
+            return false;
         }
 
         if ($this->isRetired()) {
-            throw new CannotBeEmployedException(
-                sprintf('%s is currently retired and cannot be employed.', $this->name)
-            );
+            return false;
         }
 
         if ($this->currentWrestlers->count() !== self::NUMBER_OF_WRESTLERS_ON_TEAM) {
-            throw NotEnoughMembersException::forTagTeam();
+            return false;
         }
 
         return true;

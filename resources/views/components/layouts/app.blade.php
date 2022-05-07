@@ -42,6 +42,5 @@
 		<script src="{{ asset('assets/js/widgets.bundle.js') }}"></script>
 		<script src="{{ asset('assets/js/custom/widgets.js') }}"></script>
         @livewireScripts
-        <script src="{{ asset('assets/js/custom/tags.js') }}">
     </body>
 </html>

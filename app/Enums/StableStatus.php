@@ -13,4 +13,27 @@ namespace App\Enums;
  */
 class StableStatus extends BaseEnum
 {
+    public $colors = [
+        'active' => 'success',
+        'future-activation' => 'warning',
+        'inactive' => 'dark',
+        'retired' => 'secondary',
+        'unactivated' => 'info',
+    ];
+
+    protected static function labels(): array
+    {
+        return [
+            'active' => 'Active',
+            'future_activation' => 'Awaiting Employment',
+            'inactive' => 'Inactive',
+            'retired' => 'Retired',
+            'unactivated' => 'Unactivated',
+        ];
+    }
+
+    public function getBadgeColor()
+    {
+        return $this->colors[$this->value];
+    }
 }

@@ -1,38 +1,11 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <a href="{{ route('tag-teams.create') }}" class="btn btn-label-brand btn-bold">
-            Create Tag Teams
-        </a>
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+            Tag Teams List
+        </h2>
     </x-slot>
+
     <x-content>
-        <x-portlet title="Employed Tag Teams">
-            <div class="kt-portlet__body">
-                <livewire:tag-teams.employed-tag-teams>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Future Employed and Unemployed Tag Teams">
-            <div class="kt-portlet__body">
-                <livewire:tag-teams.future-employed-and-unemployed-tag-teams>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Suspended Tag Teams">
-            <div class="kt-portlet__body">
-                <livewire:tag-teams.suspended-tag-teams>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Released Tag Teams">
-            <div class="kt-portlet__body">
-                <livewire:tag-teams.released-tag-teams>
-            </div>
-        </x-portlet>
-
-        <x-portlet title="Retired Tag Teams">
-            <div class="kt-portlet__body">
-                <livewire:tag-teams.retired-tag-teams>
-            </div>
-        </x-portlet>
+        <livewire:tag-teams.tag-teams-list>
     </x-content>
 </x-layouts.app>
