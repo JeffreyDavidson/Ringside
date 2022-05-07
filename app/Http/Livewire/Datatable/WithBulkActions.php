@@ -4,11 +4,11 @@ namespace App\Http\Livewire\Datatable;
 
 trait WithBulkActions
 {
-    private $selectPage = false;
+    public $selectPage = false;
 
-    private $selectAll = false;
+    public $selectAll = false;
 
-    private $selected = [];
+    public $selected = [];
 
     public function renderingWithBulkActions()
     {

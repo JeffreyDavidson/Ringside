@@ -6,6 +6,6 @@
     </x-slot>
 
     <x-content>
-        <livewire:venues.all-venues>
+        <livewire:venues.venues-list>
     </x-content>
 </x-layouts.app>

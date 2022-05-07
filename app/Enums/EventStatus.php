@@ -11,6 +11,12 @@ namespace App\Enums;
  */
 class EventStatus extends BaseEnum
 {
+    public $colors = [
+        'past' => 'dark',
+        'scheduled' => 'success',
+        'unscheduled' => 'danger',
+    ];
+
     protected static function labels(): array
     {
         return [
@@ -18,5 +24,10 @@ class EventStatus extends BaseEnum
             'scheduled' => 'Scheduled',
             'unscheduled' => 'Unscheduled',
         ];
+    }
+
+    public function getBadgeColor()
+    {
+        return $this->colors[$this->value];
     }
 }

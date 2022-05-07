@@ -15,4 +15,31 @@ namespace App\Enums;
  */
 class RefereeStatus extends BaseEnum
 {
+    public $colors = [
+        'bookable' => 'success',
+        'injured' => 'light',
+        'future-employment' => 'warning',
+        'released' => 'dark',
+        'retired' => 'secondary',
+        'suspended' => 'danger',
+        'unemployed' => 'info',
+    ];
+
+    protected static function labels(): array
+    {
+        return [
+            'bookable' => 'Bookable',
+            'injured' => 'Injured',
+            'future_employment' => 'Awaiting Employment',
+            'released' => 'Released',
+            'retired' => 'Retired',
+            'suspended' => 'Suspended',
+            'unemployed' => 'Unemployed',
+        ];
+    }
+
+    public function getBadgeColor()
+    {
+        return $this->colors[$this->value];
+    }
 }
