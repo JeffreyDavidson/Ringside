@@ -11,11 +11,11 @@ class VenuesList extends BaseComponent
 {
     use WithBulkActions, WithSorting;
 
-    protected $showDeleteModal = false;
+    public $showDeleteModal = false;
 
-    protected $showFilters = false;
+    public $showFilters = false;
 
-    protected $filters = [
+    public $filters = [
         'search' => '',
     ];
 

@@ -11,9 +11,9 @@ class TitlesList extends BaseComponent
 {
     use WithBulkActions, WithSorting;
 
-    protected $showFilters = false;
+    public $showFilters = false;
 
-    protected $filters = [
+    public $filters = [
         'search' => '',
     ];
 
