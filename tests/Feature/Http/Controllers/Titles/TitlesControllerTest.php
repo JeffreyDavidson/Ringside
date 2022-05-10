@@ -61,45 +61,8 @@ class TitlesControllerTest extends TestCase
             ->actAs(Role::administrator())
             ->get(action([TitlesController::class, 'show'], $title))
             ->assertViewIs('titles.show')
-            ->assertViewHas('title', $title);
-    }
-
-    /**
-     * @test
-     */
-    public function a_history_list_for_a_title_can_be_viewed_for_title_show_page()
-    {
-        $title = Title::factory()
-            ->has(
-                TitleChampionship::factory()
-                    ->wonOn('2021-03-01')
-                    ->lostOn('2021-06-01')
-                    ->for(Wrestler::factory()->state(['name' => 'Example Wrestler 3']), 'champion'),
-                'championships'
-            )
-            ->has(
-                TitleChampionship::factory()
-                    ->wonOn('2021-06-01')
-                    ->lostOn(null)
-                    ->for(Wrestler::factory()->state(['name' => 'Example Wrestler 1']), 'champion'),
-                'championships'
-            )
-            ->has(
-                TitleChampionship::factory()
-                    ->wonOn('2021-01-01')
-                    ->lostOn('2021-03-01')
-                    ->for(Wrestler::factory()->state(['name' => 'Example Wrestler 2']), 'champion'),
-                'championships'
-            )
-            ->create();
-
-        $response = $this
-            ->actAs(Role::administrator())
-            ->get(action([TitlesController::class, 'show'], $title));
-
-        $response->assertSeeInOrder([
-            'Example Wrestler 2', 'Example Wrestler 3', 'Example Wrestler 1',
-        ]);
+            ->assertViewHas('title', $title)
+            ->assertSeeLivewire('titles.title-championships-list');
     }
 
     /**
