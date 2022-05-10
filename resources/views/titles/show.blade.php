@@ -40,36 +40,6 @@
                 @endisset
             </div>
         </div>
-        <div class="pt-3 mb-5 card card-flush mb-xl-10">
-            <div class="card-header">
-                <div class="card-title">
-                    <h2>Championships</h2>
-                </div>
-            </div>
-            <div class="pt-2 card-body">
-                <x-data-table :collection="$title->championships()->paginate()">
-                    <thead class="border-gray-200 border-bottom fs-7 text-uppercase fw-bolder">
-                        <th>New Champion</th>
-                        <th>Previous Champion</th>
-                        <th>Event Name</th>
-                        <th>Event Date</th>
-                    </thead>
-                    <tbody>
-                        @forelse($title->championships as $championship)
-                            <tr>
-                                <td>{{ $championship->champion->name }}</td>
-                                <td>{{ $championship->previousChampion?->name ?? 'First Champion' }}</td>
-                                <td>{{ $championship->match->event->name }}</td>
-                                <td>{{ $championship->match->event->date->toDateString() }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4">Title has not been won.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </x-data-table>
-            </div>
-        </div>
+        <livewire:titles.title-championships-list :title="$title" />
     </x-content>
 </x-layouts.app>

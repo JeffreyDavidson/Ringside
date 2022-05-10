@@ -24,6 +24,16 @@ class TitleChampionship extends Model
     protected $table = 'title_championships';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'won_at' => 'datetime',
+        'lost_at' => 'datetime',
+    ];
+
+    /**
      * Undocumented function.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
