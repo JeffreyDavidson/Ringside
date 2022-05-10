@@ -25,10 +25,7 @@ class TitlesControllerTest extends TestCase
             ->get(action([TitlesController::class, 'index']))
             ->assertOk()
             ->assertViewIs('titles.index')
-            ->assertSeeLivewire('titles.active-titles')
-            ->assertSeeLivewire('titles.future-activation-and-unactivated-titles')
-            ->assertSeeLivewire('titles.inactive-titles')
-            ->assertSeeLivewire('titles.retired-titles');
+            ->assertSeeLivewire('titles.titles-list');
     }
 
     /**

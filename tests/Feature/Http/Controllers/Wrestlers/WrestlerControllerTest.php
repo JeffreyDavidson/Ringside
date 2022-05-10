@@ -26,12 +26,7 @@ class WrestlerControllerTest extends TestCase
             ->get(action([WrestlersController::class, 'index']))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
-            ->assertSeeLivewire('wrestlers.bookable-wrestlers')
-            ->assertSeeLivewire('wrestlers.future-employed-and-unemployed-wrestlers')
-            ->assertSeeLivewire('wrestlers.released-wrestlers')
-            ->assertSeeLivewire('wrestlers.suspended-wrestlers')
-            ->assertSeeLivewire('wrestlers.injured-wrestlers')
-            ->assertSeeLivewire('wrestlers.retired-wrestlers');
+            ->assertSeeLivewire('wrestlers.wrestlers-list');
     }
 
     /**

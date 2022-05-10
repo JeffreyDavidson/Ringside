@@ -33,9 +33,7 @@ class EventControllerTest extends TestCase
             ->get(action([EventsController::class, 'index']))
             ->assertOk()
             ->assertViewIs('events.index')
-            ->assertSeeLivewire('events.scheduled-events')
-            ->assertSeeLivewire('events.unscheduled-events')
-            ->assertSeeLivewire('events.past-events');
+            ->assertSeeLivewire('events.events-list');
     }
 
     /**

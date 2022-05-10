@@ -25,12 +25,7 @@ class RefereeControllerTest extends TestCase
             ->get(action([RefereesController::class, 'index']))
             ->assertOk(Role::administrator())
             ->assertViewIs('referees.index')
-            ->assertSeeLivewire('referees.employed-referees')
-            ->assertSeeLivewire('referees.future-employed-and-unemployed-referees')
-            ->assertSeeLivewire('referees.released-referees')
-            ->assertSeeLivewire('referees.suspended-referees')
-            ->assertSeeLivewire('referees.injured-referees')
-            ->assertSeeLivewire('referees.retired-referees');
+            ->assertSeeLivewire('referees.referees-list');
     }
 
     /**

@@ -26,12 +26,7 @@ class ManagerControllerTest extends TestCase
             ->get(action([ManagersController::class, 'index']))
             ->assertOk()
             ->assertViewIs('managers.index')
-            ->assertSeeLivewire('managers.employed-managers')
-            ->assertSeeLivewire('managers.future-employed-and-unemployed-managers')
-            ->assertSeeLivewire('managers.released-managers')
-            ->assertSeeLivewire('managers.suspended-managers')
-            ->assertSeeLivewire('managers.injured-managers')
-            ->assertSeeLivewire('managers.retired-managers');
+            ->assertSeeLivewire('managers.managers-list');
     }
 
     /**
