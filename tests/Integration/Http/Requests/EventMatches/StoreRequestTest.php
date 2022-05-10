@@ -5,7 +5,6 @@ namespace Tests\Integration\Http\Requests\EventMatches;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\MatchType;
 use App\Models\Title;
-use App\Models\TitleChampionship;
 use App\Models\User;
 use App\Models\Wrestler;
 use Database\Seeders\MatchTypesTableSeeder;
