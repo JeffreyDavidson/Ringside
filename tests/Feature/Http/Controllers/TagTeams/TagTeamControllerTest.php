@@ -26,11 +26,7 @@ class TagTeamControllerTest extends TestCase
             ->get(action([TagTeamsController::class, 'index']))
             ->assertOk()
             ->assertViewIs('tagteams.index')
-            ->assertSeeLivewire('tag-teams.employed-tag-teams')
-            ->assertSeeLivewire('tag-teams.future-employed-and-unemployed-tag-teams')
-            ->assertSeeLivewire('tag-teams.released-tag-teams')
-            ->assertSeeLivewire('tag-teams.suspended-tag-teams')
-            ->assertSeeLivewire('tag-teams.retired-tag-teams');
+            ->assertSeeLivewire('tag-teams.tag-teams-list');
     }
 
     /**

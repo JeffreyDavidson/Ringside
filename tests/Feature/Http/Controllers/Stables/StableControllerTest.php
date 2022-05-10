@@ -26,10 +26,7 @@ class StableControllerTest extends TestCase
             ->get(action([StablesController::class, 'index']))
             ->assertOk()
             ->assertViewIs('stables.index')
-            ->assertSeeLivewire('stables.active-stables')
-            ->assertSeeLivewire('stables.future-activation-and-unactivated-stables')
-            ->assertSeeLivewire('stables.inactive-stables')
-            ->assertSeeLivewire('stables.retired-stables');
+            ->assertSeeLivewire('stables.stables-list');
     }
 
     /**

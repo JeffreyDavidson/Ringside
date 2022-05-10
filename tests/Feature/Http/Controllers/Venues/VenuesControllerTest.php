@@ -22,7 +22,8 @@ class VenuesControllerTest extends TestCase
             ->actAs(Role::administrator())
             ->get(action([VenuesController::class, 'index']))
             ->assertOk()
-            ->assertViewIs('venues.index');
+            ->assertViewIs('venues.index')
+            ->assertSeeLivewire('venues.venues-list');
     }
 
     /**
