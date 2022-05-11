@@ -4,8 +4,6 @@ namespace App\Models;
 
 use App\Builders\TagTeamQueryBuilder;
 use App\Enums\TagTeamStatus;
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\NotEnoughMembersException;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\HasManagers;
 use App\Models\Concerns\OwnedByUser;

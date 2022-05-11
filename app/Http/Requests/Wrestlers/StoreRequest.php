@@ -5,7 +5,6 @@ namespace App\Http\Requests\Wrestlers;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 class StoreRequest extends FormRequest
 {
