@@ -11,6 +11,8 @@ use NunoMaduro\PhpInsights\Domain\Metrics\Architecture\Classes;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PHP_CodeSniffer\Standards\PSR12\Sniffs\Classes\ClassInstantiationSniff;
 use PhpCsFixer\Fixer\Operator\NewWithBracesFixer;
+use SlevomatCodingStandard\Sniffs\Classes\ForbiddenPublicPropertySniff;
+use SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\DocCommentSpacingSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\UselessFunctionDocCommentSniff;
@@ -94,6 +96,8 @@ return [
         ReturnTypeHintSniff::class,
         UselessFunctionDocCommentSniff::class,
         DisallowShortTernaryOperatorSniff::class,
+        ForbiddenPublicPropertySniff::class,
+        SuperfluousExceptionNamingSniff::class,
     ],
 
     'config' => [
