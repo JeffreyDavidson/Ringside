@@ -37,9 +37,4 @@ class WrestlerStatus extends BaseEnum
             'unemployed' => 'Unemployed',
         ];
     }
-
-    public function getBadgeColor()
-    {
-        return $this->colors[$this->value];
-    }
 }

@@ -25,9 +25,4 @@ class EventStatus extends BaseEnum
             'unscheduled' => 'Unscheduled',
         ];
     }
-
-    public function getBadgeColor()
-    {
-        return $this->colors[$this->value];
-    }
 }
