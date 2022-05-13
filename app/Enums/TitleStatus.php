@@ -31,9 +31,4 @@ class TitleStatus extends BaseEnum
             'unactivated' => 'Unactivated',
         ];
     }
-
-    public function getBadgeColor()
-    {
-        return $this->colors[$this->value];
-    }
 }

@@ -37,9 +37,4 @@ class RefereeStatus extends BaseEnum
             'unemployed' => 'Unemployed',
         ];
     }
-
-    public function getBadgeColor()
-    {
-        return $this->colors[$this->value];
-    }
 }
