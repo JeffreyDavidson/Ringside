@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;

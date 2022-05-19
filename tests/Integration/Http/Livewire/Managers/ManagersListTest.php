@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Livewire\Managers;
 
 use App\Http\Livewire\Managers\ManagersList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -13,8 +14,6 @@ use Tests\TestCase;
  */
 class ManagersListTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

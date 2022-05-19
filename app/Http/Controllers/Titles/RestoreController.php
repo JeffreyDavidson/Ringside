@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Titles;
 
 use App\Http\Controllers\Controller;
@@ -23,6 +25,6 @@ class RestoreController extends Controller
 
         $titleService->restore($title);
 
-        return redirect()->route('titles.index');
+        return to_route('titles.index');
     }
 }

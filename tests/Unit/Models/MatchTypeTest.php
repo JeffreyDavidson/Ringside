@@ -1,15 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Models;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use MatchTypesTableSeeder;
 use Tests\TestCase;
 
 class MatchTypeTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();

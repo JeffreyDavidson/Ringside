@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Requests\TagTeams;
 
 use App\Http\Requests\TagTeams\StoreRequest;
@@ -8,7 +10,7 @@ use App\Models\Suspension;
 use App\Models\TagTeam;
 use App\Models\User;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Tests\Factories\TagTeamRequestDataFactory;
 use Tests\TestCase;

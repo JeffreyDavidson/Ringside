@@ -1,15 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Models;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 class MatchDecisionTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();

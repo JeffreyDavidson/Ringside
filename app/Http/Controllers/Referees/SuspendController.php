@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\SuspendAction;
@@ -23,6 +25,6 @@ class SuspendController extends Controller
 
         SuspendAction::run($referee);
 
-        return redirect()->route('referees.index');
+        return to_route('referees.index');
     }
 }

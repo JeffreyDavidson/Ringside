@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Factories;
 
 use App\Models\Stable;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class StableRequestDataFactory
 {

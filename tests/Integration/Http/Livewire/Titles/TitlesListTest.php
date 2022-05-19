@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Livewire\Titles;
 
 use App\Http\Livewire\Titles\TitlesList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -13,8 +14,6 @@ use Tests\TestCase;
  */
 class TitlesListTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

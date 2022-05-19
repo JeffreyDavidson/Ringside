@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class ManagerRepository
 {
@@ -67,7 +69,7 @@ class ManagerRepository
      * Employ a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon $employmentDate
      * @return \App\Models\Manager
      */
     public function employ(Manager $manager, Carbon $employmentDate)
@@ -84,7 +86,7 @@ class ManagerRepository
      * Release a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $releaseDate
+     * @param  \Illuminate\Support\Carbon $releaseDate
      * @return \App\Models\Manager
      */
     public function release(Manager $manager, Carbon $releaseDate)
@@ -98,7 +100,7 @@ class ManagerRepository
      * Injure a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $injureDate
+     * @param  \Illuminate\Support\Carbon $injureDate
      * @return \App\Models\Manager
      */
     public function injure(Manager $manager, Carbon $injureDate)
@@ -112,7 +114,7 @@ class ManagerRepository
      * Clear the current injury of a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $recoveryDate
+     * @param  \Illuminate\Support\Carbon $recoveryDate
      * @return \App\Models\Manager
      */
     public function clearInjury(Manager $manager, Carbon $recoveryDate)
@@ -126,7 +128,7 @@ class ManagerRepository
      * Retire a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $retirementDate
+     * @param  \Illuminate\Support\Carbon $retirementDate
      * @return \App\Models\Manager
      */
     public function retire(Manager $manager, Carbon $retirementDate)
@@ -140,7 +142,7 @@ class ManagerRepository
      * Unretire a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $unretireDate
+     * @param  \Illuminate\Support\Carbon $unretireDate
      * @return \App\Models\Manager
      */
     public function unretire(Manager $manager, Carbon $unretireDate)
@@ -154,7 +156,7 @@ class ManagerRepository
      * Suspend a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $suspensionDate
+     * @param  \Illuminate\Support\Carbon $suspensionDate
      * @return \App\Models\Manager
      */
     public function suspend(Manager $manager, Carbon $suspensionDate)
@@ -168,7 +170,7 @@ class ManagerRepository
      * Reinstate a given manager on a given date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $reinstateDate
+     * @param  \Illuminate\Support\Carbon $reinstateDate
      * @return \App\Models\Manager
      */
     public function reinstate(Manager $manager, Carbon $reinstateDate)
@@ -182,7 +184,7 @@ class ManagerRepository
      * Get the model's first employment date.
      *
      * @param  \App\Models\Manager $manager
-     * @param  \Carbon\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon $employmentDate
      * @return \App\Models\Manager
      */
     public function updateEmployment(Manager $manager, Carbon $employmentDate)

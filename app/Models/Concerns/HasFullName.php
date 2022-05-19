@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Concerns;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait HasFullName
 {
-    /**
-     * Get the full name of the model.
-     *
-     * @return string
-     */
-    public function getFullNameAttribute()
+    protected function fullName(): Attribute
     {
-        return "{$this->first_name} {$this->last_name}";
+        return new Attribute(
+            get: fn ($value) => "{$this->first_name} {$this->last_name}",
+        );
     }
 }

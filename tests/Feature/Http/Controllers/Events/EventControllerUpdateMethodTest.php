@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Http\Controllers\Events;
 
 use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
 use App\Models\Event;
 use App\Models\Venue;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
 

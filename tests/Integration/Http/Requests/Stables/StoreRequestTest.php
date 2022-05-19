@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Requests\Stables;
 
 use App\Http\Requests\Stables\StoreRequest;

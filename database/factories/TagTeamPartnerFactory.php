@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\WrestlerStatus;
@@ -8,18 +10,11 @@ use App\Models\Injury;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TagTeamPartnerFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = TagTeamPartner::class;
-
     /**
      * Define the model's default state.
      *
@@ -29,10 +24,10 @@ class TagTeamPartnerFactory extends Factory
     {
         return [
             'user_id' => null,
-            'name' => $this->faker->name,
+            'name' => $this->faker->name(),
             'height' => $this->faker->numberBetween(60, 95),
             'weight' => $this->faker->numberBetween(180, 500),
-            'hometown' => $this->faker->city.', '.$this->faker->state,
+            'hometown' => $this->faker->city().', '.$this->faker->state(),
             'signature_move' => null,
             'status' => WrestlerStatus::unemployed(),
         ];

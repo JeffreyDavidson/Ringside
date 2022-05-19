@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 use function PHPUnit\Framework\assertArrayHasKey;
@@ -48,7 +49,7 @@ class TestValidationResult
         $failedRules = $this->getFailedRules();
 
         foreach ($expectedFailedRules as $expectedFailedRule => $constraints) {
-            if (Str::contains($constraints, '.')) {
+            if (str($constraints)->contains('.')) {
                 if (is_array($failedRules->all()[$constraints])) {
                     foreach ($failedRules->all()[$constraints] as $key => $value) {
                         $this->assertFailsValidation($expectedFailedRule);
@@ -89,7 +90,7 @@ class TestValidationResult
 
         $failedRules = collect($this->validator->failed())
             ->map(fn ($details) => collect($details)->reduce(function ($aggregateRule, $constraints, $ruleName) {
-                $failedRule = Str::lower($ruleName);
+                $failedRule = str($ruleName)->lower();
 
                 if (count($constraints)) {
                     $failedRule .= ':'.implode(',', $constraints);

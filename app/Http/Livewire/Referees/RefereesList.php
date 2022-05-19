@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Livewire\Referees;
 
 use App\Http\Livewire\BaseComponent;
@@ -23,7 +25,7 @@ class RefereesList extends BaseComponent
             ->when($this->filters['search'], function ($query, $search) {
                 $query->where('first_name', 'like', '%'.$search.'%')->orWhere('last_name', 'like', '%'.$search.'%');
             })
-            ->orderBy('last_name');
+            ->oldest('last_name');
 
         return $this->applySorting($query);
     }

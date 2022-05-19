@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Event;
-use App\Models\EventMatch;
 use App\Models\MatchType;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -13,13 +14,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class EventMatchFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = EventMatch::class;
-
     /**
      * Undocumented function
      *

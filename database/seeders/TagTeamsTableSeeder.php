@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Employment;
 use App\Models\Retirement;
 use App\Models\TagTeam;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Seeder;
 
 class TagTeamsTableSeeder extends Seeder

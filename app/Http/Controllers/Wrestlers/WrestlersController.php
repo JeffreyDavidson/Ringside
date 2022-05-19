@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Wrestlers;
 
 use App\Data\WrestlerData;
@@ -60,7 +62,7 @@ class WrestlersController extends Controller
     {
         $this->wrestlerService->create(WrestlerData::fromStoreRequest($request));
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 
     /**
@@ -104,7 +106,7 @@ class WrestlersController extends Controller
     {
         $this->wrestlerService->update($wrestler, WrestlerData::fromUpdateRequest($request));
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 
     /**
@@ -119,6 +121,6 @@ class WrestlersController extends Controller
 
         $this->wrestlerService->delete($wrestler);
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 }

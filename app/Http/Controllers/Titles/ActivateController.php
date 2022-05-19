@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Titles;
 
 use App\Actions\Titles\ActivateAction;
@@ -23,6 +25,6 @@ class ActivateController extends Controller
 
         ActivateAction::run($title);
 
-        return redirect()->route('titles.index');
+        return to_route('titles.index');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Events;
 
 use App\Data\EventData;
@@ -60,7 +62,7 @@ class EventsController extends Controller
     {
         $this->eventService->create(EventData::fromStoreRequest($request));
 
-        return redirect()->route('events.index');
+        return to_route('events.index');
     }
 
     /**
@@ -104,7 +106,7 @@ class EventsController extends Controller
     {
         $this->eventService->update($event, EventData::fromUpdateRequest($request));
 
-        return redirect()->route('events.index');
+        return to_route('events.index');
     }
 
     /**
@@ -119,6 +121,6 @@ class EventsController extends Controller
 
         $this->eventService->delete($event);
 
-        return redirect()->route('events.index');
+        return to_route('events.index');
     }
 }

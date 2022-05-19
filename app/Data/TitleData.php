@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class TitleData
 {

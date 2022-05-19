@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\ReleaseAction;
@@ -23,6 +25,6 @@ class ReleaseController extends Controller
 
         ReleaseAction::run($referee);
 
-        return redirect()->route('referees.index');
+        return to_route('referees.index');
     }
 }

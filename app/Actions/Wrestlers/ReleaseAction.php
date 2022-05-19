@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction extends BaseWrestlerAction
@@ -14,7 +16,7 @@ class ReleaseAction extends BaseWrestlerAction
      * Release a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Carbon\Carbon|null $releaseDate
+     * @param  \Illuminate\Support\Carbon|null $releaseDate
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Stable;
 use Illuminate\Database\Migrations\Migration;
 use Staudenmeir\LaravelMergedRelations\Facades\Schema;
 
-class CreatePreviousStableMembersView extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -18,14 +20,4 @@ class CreatePreviousStableMembersView extends Migration
             [(new Stable)->previousTagTeams(), (new Stable)->previousWrestlers()]
         );
     }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropView('previous_stable_members');
-    }
-}
+};

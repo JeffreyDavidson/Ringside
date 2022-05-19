@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\EmployAction;
@@ -23,6 +25,6 @@ class EmployController extends Controller
 
         EmployAction::run($manager);
 
-        return redirect()->route('managers.index');
+        return to_route('managers.index');
     }
 }

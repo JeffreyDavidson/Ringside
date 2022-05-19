@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\EventMatches;
 
 use App\Actions\Events\AddMatchForEvent;
@@ -39,6 +41,6 @@ class EventMatchesController extends Controller
     {
         $addMatchForEvent($event, EventMatchData::fromStoreRequest($request));
 
-        return redirect()->route('events.index');
+        return to_route('events.index');
     }
 }

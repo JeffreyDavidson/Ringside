@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Requests\Events;
 
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Tests\Factories\EventRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;

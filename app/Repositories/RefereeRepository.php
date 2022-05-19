@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Data\RefereeData;
 use App\Models\Referee;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class RefereeRepository
 {
@@ -65,7 +67,7 @@ class RefereeRepository
      * Employ a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon $employmentDate
      * @return \App\Models\Referee
      */
     public function employ(Referee $referee, Carbon $employmentDate)
@@ -82,7 +84,7 @@ class RefereeRepository
      * Release a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $releaseDate
+     * @param  \Illuminate\Support\Carbon $releaseDate
      * @return \App\Models\Referee
      */
     public function release(Referee $referee, Carbon $releaseDate)
@@ -96,7 +98,7 @@ class RefereeRepository
      * Injure a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $injureDate
+     * @param  \Illuminate\Support\Carbon $injureDate
      * @return \App\Models\Referee
      */
     public function injure(Referee $referee, Carbon $injureDate)
@@ -110,7 +112,7 @@ class RefereeRepository
      * Clear the current injury of a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $recoveryDate
+     * @param  \Illuminate\Support\Carbon $recoveryDate
      * @return \App\Models\Referee
      */
     public function clearInjury(Referee $referee, Carbon $recoveryDate)
@@ -124,7 +126,7 @@ class RefereeRepository
      * Retire a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $retirementDate
+     * @param  \Illuminate\Support\Carbon $retirementDate
      * @return \App\Models\Referee
      */
     public function retire(Referee $referee, Carbon $retirementDate)
@@ -138,7 +140,7 @@ class RefereeRepository
      * Unretire a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $unretireDate
+     * @param  \Illuminate\Support\Carbon $unretireDate
      * @return \App\Models\Referee
      */
     public function unretire(Referee $referee, Carbon $unretireDate)
@@ -152,7 +154,7 @@ class RefereeRepository
      * Suspend a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $suspensionDate
+     * @param  \Illuminate\Support\Carbon $suspensionDate
      * @return \App\Models\Referee
      */
     public function suspend(Referee $referee, Carbon $suspensionDate)
@@ -166,7 +168,7 @@ class RefereeRepository
      * Reinstate a given referee on a given date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $reinstateDate
+     * @param  \Illuminate\Support\Carbon $reinstateDate
      * @return \App\Models\Referee
      */
     public function reinstate(Referee $referee, Carbon $reinstateDate)
@@ -180,7 +182,7 @@ class RefereeRepository
      * Get the model's first employment date.
      *
      * @param  \App\Models\Referee $referee
-     * @param  \Carbon\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon $employmentDate
      * @return \App\Models\Referee
      */
     public function updateEmployment(Referee $referee, Carbon $employmentDate)

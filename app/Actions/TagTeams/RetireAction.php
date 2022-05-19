@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\TagTeams;
 
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Models\TagTeam;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction extends BaseTagTeamAction
@@ -15,7 +17,7 @@ class RetireAction extends BaseTagTeamAction
      * Retire a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Carbon\Carbon|null  $retirementDate
+     * @param  \Illuminate\Support\Carbon|null  $retirementDate
      * @return void
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void

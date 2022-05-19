@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\TagTeams;
 
 use App\Actions\Wrestlers\ReinstateAction as WrestlersReinstateAction;
 use App\Models\TagTeam;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction extends BaseTagTeamAction
@@ -15,7 +17,7 @@ class ReinstateAction extends BaseTagTeamAction
      * Reinstate a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Carbon\Carbon|null  $reinstatementDate
+     * @param  \Illuminate\Support\Carbon|null  $reinstatementDate
      * @return void
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void

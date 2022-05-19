@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Livewire\Events;
 
 use App\Http\Livewire\Events\EventsList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -13,8 +14,6 @@ use Tests\TestCase;
  */
 class EventsListTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

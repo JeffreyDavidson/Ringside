@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Livewire\Wrestlers;
 
 use App\Http\Livewire\Wrestlers\WrestlersList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -13,8 +14,6 @@ use Tests\TestCase;
  */
 class WrestlersListTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * @test
      */

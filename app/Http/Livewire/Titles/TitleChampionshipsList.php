@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Livewire\Titles;
 
 use App\Http\Livewire\BaseComponent;
@@ -21,7 +23,7 @@ class TitleChampionshipsList extends BaseComponent
 
     public function getRowsQueryProperty()
     {
-        return TitleChampionship::where('title_id', $this->title->id)->orderByDesc('won_at');
+        return TitleChampionship::where('title_id', $this->title->id)->latest('won_at');
     }
 
     public function getRowsProperty()

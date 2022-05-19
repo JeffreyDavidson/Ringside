@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Referee;
 use App\Models\Title;
 use Illuminate\Http\Request;

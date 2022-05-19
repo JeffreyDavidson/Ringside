@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\RefereeStatus;
@@ -8,18 +10,11 @@ use App\Models\Injury;
 use App\Models\Referee;
 use App\Models\Retirement;
 use App\Models\Suspension;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RefereeFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = Referee::class;
-
     /**
      * Define the model's default state.
      *

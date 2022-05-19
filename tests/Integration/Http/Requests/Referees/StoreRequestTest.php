@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Requests\Referees;
 
 use App\Http\Requests\Referees\StoreRequest;

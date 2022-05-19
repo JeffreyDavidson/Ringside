@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Events;
 
 use App\Http\Controllers\Controller;
@@ -23,6 +25,6 @@ class RestoreController extends Controller
 
         $eventService->restore($event);
 
-        return redirect()->route('events.index');
+        return to_route('events.index');
     }
 }

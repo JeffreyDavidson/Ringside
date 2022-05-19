@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Livewire\TagTeams;
 
 use App\Http\Livewire\BaseComponent;
@@ -21,7 +23,7 @@ class TagTeamsList extends BaseComponent
     {
         $query = TagTeam::query()
             ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
-            ->orderBy('name');
+            ->oldest('name');
 
         return $this->applySorting($query);
     }

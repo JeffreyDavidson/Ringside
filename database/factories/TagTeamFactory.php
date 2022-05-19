@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\TagTeamStatus;
@@ -8,19 +10,11 @@ use App\Models\Retirement;
 use App\Models\Suspension;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class TagTeamFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = TagTeam::class;
-
     /**
      * Define the model's default state.
      *
@@ -29,7 +23,7 @@ class TagTeamFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => Str::title($this->faker->words(2, true)),
+            'name' => str($this->faker->words(2, true))->title(),
             'signature_move' => null,
             'status' => TagTeamStatus::unemployed(),
         ];

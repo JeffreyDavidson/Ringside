@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ChangeRoleIdFieldToRoleField extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -21,20 +23,4 @@ class ChangeRoleIdFieldToRoleField extends Migration
             $table->string('role', 15)->change();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('role', 'role_id')->change();
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('role_id')->change();
-        });
-    }
-}
+};

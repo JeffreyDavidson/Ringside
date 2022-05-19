@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\ReleaseAction;
@@ -23,6 +25,6 @@ class ReleaseController extends Controller
 
         ReleaseAction::run($tagTeam);
 
-        return redirect()->route('tag-teams.index');
+        return to_route('tag-teams.index');
     }
 }

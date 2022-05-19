@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\InjureAction;
@@ -23,6 +25,6 @@ class InjureController extends Controller
 
         InjureAction::run($wrestler);
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 }

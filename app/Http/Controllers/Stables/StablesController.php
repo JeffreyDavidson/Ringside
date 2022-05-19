@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Stables;
 
 use App\Data\StableData;
@@ -60,7 +62,7 @@ class StablesController extends Controller
     {
         $this->stableService->create(StableData::fromStoreRequest($request));
 
-        return redirect()->route('stables.index');
+        return to_route('stables.index');
     }
 
     /**
@@ -105,7 +107,7 @@ class StablesController extends Controller
     {
         $this->stableService->update($stable, StableData::fromUpdateRequest($request));
 
-        return redirect()->route('stables.index');
+        return to_route('stables.index');
     }
 
     /**
@@ -120,6 +122,6 @@ class StablesController extends Controller
 
         $this->stableService->delete($stable);
 
-        return redirect()->route('stables.index');
+        return to_route('stables.index');
     }
 }
