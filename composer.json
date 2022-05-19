@@ -15,7 +15,6 @@
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.10",
         "lorisleiva/laravel-actions": "^2.3",
-        "spatie/laravel-enum": "^3.0",
         "staudenmeir/laravel-merged-relations": "^1.5",
         "tightenco/tlint": "^6.2"
     },
@@ -33,7 +32,7 @@
         "nunomaduro/larastan": "^2.0",
         "nunomaduro/phpinsights": "^2.1",
         "phpunit/phpunit": "^9",
-        "spatie/laravel-ignition": "^1.0" ,
+        "spatie/laravel-ignition": "^1.0",
         "squizlabs/php_codesniffer": "*"
     },
     "config": {

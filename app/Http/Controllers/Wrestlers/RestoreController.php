@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Wrestlers;
 
 use App\Http\Controllers\Controller;
@@ -23,6 +25,6 @@ class RestoreController extends Controller
 
         $wrestlerService->restore($wrestler);
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 }

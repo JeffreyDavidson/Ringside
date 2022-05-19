@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\ClearInjuryAction;
@@ -23,6 +25,6 @@ class ClearInjuryController extends Controller
 
         ClearInjuryAction::run($manager);
 
-        return redirect()->route('managers.index');
+        return to_route('managers.index');
     }
 }

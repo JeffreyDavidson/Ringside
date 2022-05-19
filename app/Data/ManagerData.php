@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class ManagerData
 {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Stables;
 
 use App\Actions\Stables\UnretireAction;
@@ -23,6 +25,6 @@ class UnretireController extends Controller
 
         UnretireAction::run($stable);
 
-        return redirect()->route('stables.index');
+        return to_route('stables.index');
     }
 }

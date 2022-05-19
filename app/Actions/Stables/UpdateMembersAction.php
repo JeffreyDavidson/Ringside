@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Stables;
 
 use App\Models\Stable;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -33,7 +35,7 @@ class UpdateMembersAction extends BaseStableAction
      *
      * @param  \App\Models\Stable $stable
      * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
-     * @param  \Carbon\Carbon $now
+     * @param  \Illuminate\Support\Carbon $now
      * @return void
      */
     protected function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now)
@@ -55,7 +57,7 @@ class UpdateMembersAction extends BaseStableAction
      *
      * @param  \App\Models\Stable $stable
      * @param  \Illuminate\Database\Eloquent\Collection $tagTeams
-     * @param  \Carbon\Carbon $now
+     * @param  \Illuminate\Support\Carbon $now
      * @return void
      */
     protected function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now)

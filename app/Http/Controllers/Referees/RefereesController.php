@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Referees;
 
 use App\Data\RefereeData;
@@ -60,7 +62,7 @@ class RefereesController extends Controller
     {
         $this->refereeService->create(RefereeData::fromStoreRequest($request));
 
-        return redirect()->route('referees.index');
+        return to_route('referees.index');
     }
 
     /**
@@ -104,7 +106,7 @@ class RefereesController extends Controller
     {
         $this->refereeService->update($referee, RefereeData::fromUpdateRequest($request));
 
-        return redirect()->route('referees.index');
+        return to_route('referees.index');
     }
 
     /**
@@ -119,6 +121,6 @@ class RefereesController extends Controller
 
         $this->refereeService->delete($referee);
 
-        return redirect()->route('referees.index');
+        return to_route('referees.index');
     }
 }

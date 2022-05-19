@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ClearInjuryAction extends BaseWrestlerAction
@@ -14,7 +16,7 @@ class ClearInjuryAction extends BaseWrestlerAction
      * Clear an injury of a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Carbon\Carbon|null $recoveryDate
+     * @param  \Illuminate\Support\Carbon|null $recoveryDate
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Managers;
 
 use App\Models\Manager;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction extends BaseManagerAction
@@ -14,7 +16,7 @@ class ReinstateAction extends BaseManagerAction
      * Reinstate a manager.
      *
      * @param  \App\Models\Manager  $manager
-     * @param  \Carbon\Carbon|null $reinstatementDate
+     * @param  \Illuminate\Support\Carbon|null $reinstatementDate
      * @return void
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void

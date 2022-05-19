@@ -1,26 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Manager;
 use App\Models\Referee;
-use App\Models\Retirement;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RetirementFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = Retirement::class;
-
     /**
      * Define the model's default state.
      *

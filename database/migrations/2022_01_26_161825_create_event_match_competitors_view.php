@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\EventMatch;
 use Illuminate\Database\Migrations\Migration;
 use Staudenmeir\LaravelMergedRelations\Facades\Schema;
 
-class CreateEventMatchCompetitorsView extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -18,14 +20,4 @@ class CreateEventMatchCompetitorsView extends Migration
             [(new EventMatch)->wrestlers(), (new EventMatch)->tagTeams()]
         );
     }
-
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropView('all_match_competitors');
-    }
-}
+};

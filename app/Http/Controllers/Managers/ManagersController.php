@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Managers;
 
 use App\Data\ManagerData;
@@ -60,7 +62,7 @@ class ManagersController extends Controller
     {
         $this->managerService->create(ManagerData::fromStoreRequest($request));
 
-        return redirect()->route('managers.index');
+        return to_route('managers.index');
     }
 
     /**
@@ -104,7 +106,7 @@ class ManagersController extends Controller
     {
         $this->managerService->update($manager, ManagerData::fromUpdateRequest($request));
 
-        return redirect()->route('managers.index');
+        return to_route('managers.index');
     }
 
     /**
@@ -119,6 +121,6 @@ class ManagersController extends Controller
 
         $this->managerService->delete($manager);
 
-        return redirect()->route('managers.index');
+        return to_route('managers.index');
     }
 }

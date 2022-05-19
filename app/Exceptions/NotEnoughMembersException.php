@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exceptions;
 
 use App\Models\TagTeam;
@@ -32,6 +34,6 @@ class NotEnoughMembersException extends Exception
             return response()->json(['message' => $this->message], 400);
         }
 
-        return back()->withError($this->message);
+        return redirect()->back()->withError($this->message);
     }
 }

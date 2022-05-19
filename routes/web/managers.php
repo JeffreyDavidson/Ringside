@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Managers\ClearInjuryController;
 use App\Http\Controllers\Managers\EmployController;
 use App\Http\Controllers\Managers\InjureController;

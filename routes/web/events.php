@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\RestoreController;

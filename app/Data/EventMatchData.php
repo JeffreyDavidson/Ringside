@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Data;
 
 use App\Http\Requests\EventMatches\StoreRequest;
@@ -9,7 +11,6 @@ use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class EventMatchData
 {
@@ -55,7 +56,7 @@ class EventMatchData
 
                 return $competitor;
             })->mapToGroups(function ($item) {
-                return [Str::plural($item['competitor_type']) => $item['type']];
+                return [str($item['competitor_type'])->plural() => $item['type']];
             });
         });
     }

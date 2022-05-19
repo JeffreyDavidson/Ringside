@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\StableStatus;
@@ -9,19 +11,11 @@ use App\Models\Retirement;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class StableFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = Stable::class;
-
     /**
      * Define the model's default state.
      *
@@ -30,7 +24,7 @@ class StableFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => Str::title($this->faker->words(2, true)),
+            'name' => str($this->faker->words(2, true))->title(),
             'status' => StableStatus::unactivated(),
         ];
     }

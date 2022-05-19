@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Rules;
 
 use App\Models\TagTeam;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Contracts\Validation\Rule;
 
 class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
@@ -11,14 +13,14 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
     /**
      * The start date of the stable.
      *
-     * @var \Carbon\Carbon
+     * @var \Illuminate\Support\Carbon
      */
     private $stableStartDate;
 
     /**
      * Create a new rule instance.
      *
-     * @param  \Carbon\Carbon $stableStartDate
+     * @param  \Illuminate\Support\Carbon $stableStartDate
      * @return void
      */
     public function __construct(Carbon $stableStartDate)

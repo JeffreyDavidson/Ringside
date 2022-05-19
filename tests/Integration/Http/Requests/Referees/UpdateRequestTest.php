@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Integration\Http\Requests\Referees;
 
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Employment;
 use App\Models\Referee;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Tests\Factories\RefereeRequestDataFactory;
 use Tests\TestCase;
 use Tests\ValidatesRequests;

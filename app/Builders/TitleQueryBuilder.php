@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Builders;
 
 use App\Enums\TitleStatus;
@@ -74,7 +76,7 @@ class TitleQueryBuilder extends Builder
             'last_deactivated_at' => Activation::select('ended_at')
                 ->whereColumn('activatable_id', $this->getModel()->getTable().'.id')
                 ->where('activatable_type', $this->getModel())
-                ->orderBy('ended_at', 'desc')
+                ->latest('ended_at')
                 ->limit(1),
         ])->withCasts(['last_deactivated_at' => 'datetime']);
     }

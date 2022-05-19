@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\TitleStatus;
@@ -7,19 +9,11 @@ use App\Models\Activation;
 use App\Models\Retirement;
 use App\Models\Title;
 use App\Models\TitleChampionship;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class TitleFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = Title::class;
-
     /**
      * Define the model's default state.
      *
@@ -28,7 +22,7 @@ class TitleFactory extends Factory
     public function definition()
     {
         return [
-            'name' => Str::title($this->faker->unique()->words(2, true)).' Title',
+            'name' => str($this->faker->unique()->words(2, true))->title().' Title',
             'status' => TitleStatus::unactivated(),
         ];
     }

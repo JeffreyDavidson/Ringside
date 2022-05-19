@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\RetireAction;
@@ -23,6 +25,6 @@ class RetireController extends Controller
 
         RetireAction::run($wrestler);
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 }

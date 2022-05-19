@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\ClearInjuryAction;
@@ -23,6 +25,6 @@ class ClearInjuryController extends Controller
 
         ClearInjuryAction::run($wrestler);
 
-        return redirect()->route('wrestlers.index');
+        return to_route('wrestlers.index');
     }
 }

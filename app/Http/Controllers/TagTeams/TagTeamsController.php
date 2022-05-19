@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\TagTeams;
 
 use App\Data\TagTeamData;
@@ -64,7 +66,7 @@ class TagTeamsController extends Controller
     {
         $this->tagTeamService->create(TagTeamData::fromStoreRequest($request));
 
-        return redirect()->route('tag-teams.index');
+        return to_route('tag-teams.index');
     }
 
     /**
@@ -111,7 +113,7 @@ class TagTeamsController extends Controller
     {
         $this->tagTeamService->update($tagTeam, TagTeamData::fromUpdateRequest($request));
 
-        return redirect()->route('tag-teams.index');
+        return to_route('tag-teams.index');
     }
 
     /**
@@ -126,6 +128,6 @@ class TagTeamsController extends Controller
 
         $this->tagTeamService->delete($tagTeam);
 
-        return redirect()->route('tag-teams.index');
+        return to_route('tag-teams.index');
     }
 }

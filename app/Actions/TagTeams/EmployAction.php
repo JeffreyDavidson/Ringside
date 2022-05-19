@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\TagTeams;
 
 use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Models\TagTeam;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction extends BaseTagTeamAction
@@ -15,7 +17,7 @@ class EmployAction extends BaseTagTeamAction
      * Employ a tagTeam.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Carbon\Carbon|null  $startDate
+     * @param  \Illuminate\Support\Carbon|null  $startDate
      * @return void
      */
     public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void

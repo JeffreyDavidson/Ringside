@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Venues;
 
 use App\Data\VenueData;
@@ -60,7 +62,7 @@ class VenuesController extends Controller
     {
         $this->venueService->create(VenueData::fromStoreRequest($request));
 
-        return redirect()->route('venues.index');
+        return to_route('venues.index');
     }
 
     /**
@@ -104,7 +106,7 @@ class VenuesController extends Controller
     {
         $this->venueService->update($venue, VenueData::fromUpdateRequest($request));
 
-        return redirect()->route('venues.index');
+        return to_route('venues.index');
     }
 
     /**
@@ -119,6 +121,6 @@ class VenuesController extends Controller
 
         $this->venueService->delete($venue);
 
-        return redirect()->route('venues.index');
+        return to_route('venues.index');
     }
 }

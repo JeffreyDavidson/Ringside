@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Referees;
 
 use App\Repositories\RefereeRepository;

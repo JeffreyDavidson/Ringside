@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enums\ManagerStatus;
@@ -8,18 +10,11 @@ use App\Models\Injury;
 use App\Models\Manager;
 use App\Models\Retirement;
 use App\Models\Suspension;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ManagerFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = Manager::class;
-
     /**
      * Define the model's default state.
      *

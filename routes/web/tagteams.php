@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\TagTeams\EmployController;
 use App\Http\Controllers\TagTeams\ReinstateController;
 use App\Http\Controllers\TagTeams\ReleaseController;

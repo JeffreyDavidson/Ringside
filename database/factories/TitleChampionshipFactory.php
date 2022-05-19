@@ -1,23 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\EventMatch;
 use App\Models\Title;
-use App\Models\TitleChampionship;
 use App\Models\Wrestler;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TitleChampionshipFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $model = TitleChampionship::class;
-
     /**
      * Indicate the date the title was won.
      *

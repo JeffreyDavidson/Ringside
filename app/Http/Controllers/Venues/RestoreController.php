@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Venues;
 
 use App\Http\Controllers\Controller;
@@ -23,6 +25,6 @@ class RestoreController extends Controller
 
         $venueService->restore($venue);
 
-        return redirect()->route('venues.index');
+        return to_route('venues.index');
     }
 }

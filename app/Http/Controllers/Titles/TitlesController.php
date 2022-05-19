@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Titles;
 
 use App\Data\TitleData;
@@ -61,7 +63,7 @@ class TitlesController extends Controller
     {
         $this->titleService->create(TitleData::fromStoreRequest($request));
 
-        return redirect()->route('titles.index');
+        return to_route('titles.index');
     }
 
     /**
@@ -105,7 +107,7 @@ class TitlesController extends Controller
     {
         $this->titleService->update($title, TitleData::fromUpdateRequest($request));
 
-        return redirect()->route('titles.index');
+        return to_route('titles.index');
     }
 
     /**
@@ -120,6 +122,6 @@ class TitlesController extends Controller
 
         $this->titleService->delete($title);
 
-        return redirect()->route('titles.index');
+        return to_route('titles.index');
     }
 }

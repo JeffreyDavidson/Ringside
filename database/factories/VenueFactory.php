@@ -1,20 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use App\Models\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class VenueFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
-    protected $modelClass = Venue::class;
-
     /**
      * Define the model's default state.
      *
@@ -28,7 +21,7 @@ class VenueFactory extends Factory
             'address2' => $this->faker->optional()->secondaryAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),
-            'zip' => Str::substr($this->faker->postcode(), 0, 5),
+            'zip' => str($this->faker->postcode())->substr(0, 5),
         ];
     }
 
