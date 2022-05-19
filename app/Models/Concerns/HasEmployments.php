@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Employment;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Carbon;
 
 trait HasEmployments
 {
