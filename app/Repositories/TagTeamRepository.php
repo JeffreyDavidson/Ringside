@@ -7,8 +7,8 @@ namespace App\Repositories;
 use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 class TagTeamRepository
 {
