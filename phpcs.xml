@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <ruleset name="Laravel Standards">
     <description>PSR-2 The Laravel conventions</description>
     <rule ref="Generic.Classes.DuplicateClassName">
@@ -13,23 +14,15 @@
         <exclude-pattern>/app/Http/Resources/*\.php</exclude-pattern>
     </rule>
     <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>
-
     <rule ref="Generic.Commenting.DocComment">
-        <!-- Allow single-line doc comments. See https://github.com/squizlabs/PHP_CodeSniffer/issues/258. -->
-        <exclude name="Generic.Commenting.DocComment.ContentAfterOpen" />
-        <exclude name="Generic.Commenting.DocComment.ContentBeforeClose" />
-        <!-- Don't require short description -->
-        <exclude name="Generic.Commenting.DocComment.MissingShort" />
-        <!-- Doesn't work well with annotations -->
-        <exclude name="Generic.Commenting.DocComment.TagValueIndent" />
+        <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+        <exclude name="Generic.Commenting.DocComment.NonParamGroup"/>
     </rule>
-
     <rule ref="Generic.ControlStructures.InlineControlStructure"/>
     <rule ref="Generic.Files.ByteOrderMark"/>
     <rule ref="Generic.Files.LineEndings">
         <exclude name="Generic.Files.LineEndings.InvalidEOLChar"/>
     </rule>
-    <rule ref="Generic.Files.LineLength.TooLong"></rule>
     <rule ref="Generic.Formatting.DisallowMultipleStatements"/>
     <rule ref="Generic.Formatting.SpaceAfterCast"/>
     <rule ref="Generic.Functions.CallTimePassByReference"/>
@@ -62,7 +55,9 @@
     </rule>
     <rule ref="MySource.PHP.EvalObjectFactory"/>
     <rule ref="PSR1.Classes.ClassDeclaration"/>
-    <rule ref="PSR1.Files.SideEffects"/>
+    <rule ref="PSR1.Files.SideEffects">
+        <exclude-pattern>*/artisan</exclude-pattern>
+    </rule>
     <rule ref="PSR2.Classes.ClassDeclaration"/>
     <rule ref="PSR2.Classes.PropertyDeclaration"/>
     <rule ref="PSR2.ControlStructures.ControlStructureSpacing"/>
@@ -98,6 +93,7 @@
         <exclude name="Squiz.Arrays.ArrayDeclaration.NoKeySpecified" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.KeySpecified" />
     </rule>
+    <rule ref="Squiz.PHP.CommentedOutCode"/>
     <rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
     <rule ref="Squiz.PHP.DiscouragedFunctions">
         <properties>
@@ -163,5 +159,5 @@
 
     <arg name="colors"/>
     <arg value="spv"/>
-    <ini name="memory_limit" value="2G"/>
+    <ini name="memory_limit" value="128M"/>
 </ruleset>
