@@ -34,13 +34,7 @@ class StoreRequest extends FormRequest
             'signature_move' => ['nullable', 'string'],
             'started_at' => ['nullable', 'string', 'date'],
             'wrestlers' => ['nullable', 'array', 'required_with:signature_move'],
-            'wrestlers.*' => [
-                'nullable',
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('wrestlers', 'id'),
-            ],
+            'wrestlers.*' => ['nullable', 'bail', 'integer', 'distinct', Rule::exists('wrestlers', 'id')],
         ];
     }
 

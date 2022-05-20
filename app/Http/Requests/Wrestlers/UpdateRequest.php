@@ -28,23 +28,16 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $wrestler = $this->route()->parameter('wrestler');
+
         return [
-            'name' => [
-                'required',
-                'string',
-                'min:3',
-                Rule::unique('wrestlers')->ignore($this->route()->parameter('wrestler')->id),
-            ],
+            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($wrestler->id)],
             'feet' => ['required', 'integer'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer'],
             'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => [
-                'nullable',
-                'string',
-                'date',
-            ],
+            'started_at' => ['nullable', 'string', 'date'],
         ];
     }
 
