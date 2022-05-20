@@ -41,15 +41,13 @@ class TitleChampionIncludedInTitleMatch implements Rule
 
         $competitors = collect($value)->flatten(1);
 
-        $wrestlers = Wrestler::whereIn(
-            'id',
-            $competitors->where('competitor_type', 'wrestler')->pluck('competitor_id')
-        )->get();
+        $wrestlers = Wrestler::query()
+            ->whereIn('id', $competitors->where('competitor_type', 'wrestler')->pluck('competitor_id'))
+            ->get();
 
-        $tagTeams = TagTeam::whereIn(
-            'id',
-            $competitors->where('competitor_type', 'tag_team')->pluck('competitor_id')
-        )->get();
+        $tagTeams = TagTeam::query()
+            ->whereIn('id', $competitors->where('competitor_type', 'tag_team')->pluck('competitor_id'))
+            ->get();
 
         $competitors = $wrestlers->merge($tagTeams);
 
