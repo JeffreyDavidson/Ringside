@@ -30,31 +30,12 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [
-                'required',
-                'string',
-                'min:3',
-                Rule::unique('stables', 'name'),
-            ],
-            'started_at' => [
-                'nullable',
-                'string',
-                'date',
-            ],
+            'name' => ['required', 'string', 'min:3', Rule::unique('stables', 'name')],
+            'started_at' => ['nullable', 'string', 'date'],
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
-            'wrestlers.*' => [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('wrestlers', 'id'),
-            ],
-            'tag_teams.*' => [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('tag_teams', 'id'),
-            ],
+            'wrestlers.*' => ['bail', 'integer', 'distinct', Rule::exists('wrestlers', 'id')],
+            'tag_teams.*' => ['bail', 'integer', 'distinct', Rule::exists('tag_teams', 'id')],
         ];
     }
 

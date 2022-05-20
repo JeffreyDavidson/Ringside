@@ -30,11 +30,7 @@ class UpdateRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3'],
             'last_name' => ['required', 'string', 'min:3'],
-            'started_at' => [
-                'nullable',
-                'string',
-                'date',
-            ],
+            'started_at' => ['nullable', 'string', 'date'],
         ];
     }
 

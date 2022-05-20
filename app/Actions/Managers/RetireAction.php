@@ -33,12 +33,10 @@ class RetireAction extends BaseManagerAction
         $this->managerRepository->retire($manager, $retirementDate);
         $manager->save();
 
-        if ($manager->currentTagTeams->isNotEmpty()) {
-            $this->managerRepository->removeFromCurrentTagTeams($manager);
-        }
+        $manager->currentTagTeams
+            ->whenNotEmpty(fn () => $this->managerRepository->removeFromCurrentTagTeams($manager));
 
-        if ($manager->currentWrestlers->isNotEmpty()) {
-            $this->managerRepository->removeFromCurrentWrestlers($manager);
-        }
+        $manager->currentWrestlers
+            ->whenNotEmpty(fn () => $this->managerRepository->removeFromCurrentTagTeams($manager));
     }
 }

@@ -29,26 +29,14 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $tagTeam = $this->route()->parameter('tag_team');
+
         return [
-            'name' => [
-                'required',
-                'string',
-                'min:3',
-                Rule::unique('tag_teams')->ignore($this->route()->parameter('tag_team')->id),
-            ],
+            'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => [
-                'nullable',
-                'string',
-                'date',
-            ],
+            'started_at' => ['nullable', 'string', 'date'],
             'wrestlers' => ['nullable', 'array'],
-            'wrestlers.*', [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('wrestlers', 'id'),
-            ],
+            'wrestlers.*', ['bail', 'integer', 'distinct', Rule::exists('wrestlers', 'id')],
         ];
     }
 

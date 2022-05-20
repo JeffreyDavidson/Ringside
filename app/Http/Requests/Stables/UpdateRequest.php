@@ -30,37 +30,15 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $stable = $this->route()->parameter('stable');
+
         return [
-            'name' => [
-                'required',
-                'string',
-                'min:3',
-                Rule::unique('stables')->ignore($this->route()->parameter('stable')->id),
-            ],
-            'started_at' => [
-                'nullable',
-                Rule::requiredIf(fn () => ! $this->route()->parameter('stable')->isUnactivated()),
-                'string',
-                'date',
-            ],
-            'wrestlers' => [
-                'array',
-            ],
-            'tag_teams' => [
-                'array',
-            ],
-            'wrestlers.*' => [
-                'bail ',
-                'integer',
-                'distinct',
-                Rule::exists('wrestlers', 'id'),
-            ],
-            'tag_teams.*' => [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('tag_teams', 'id'),
-            ],
+            'name' => ['required', 'string', 'min:3', Rule::unique('stables')->ignore($stable->id)],
+            'started_at' => ['nullable', Rule::requiredIf(fn () => ! $stable->isUnactivated()), 'string', 'date'],
+            'wrestlers' => ['array'],
+            'tag_teams' => ['array'],
+            'wrestlers.*' => ['bail', 'integer', 'distinct', Rule::exists('wrestlers', 'id')],
+            'tag_teams.*' => ['bail', 'integer', 'distinct', Rule::exists('tag_teams', 'id')],
         ];
     }
 
