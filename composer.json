@@ -15,8 +15,7 @@
         "laravel/tinker": "^2.0",
         "livewire/livewire": "^2.10",
         "lorisleiva/laravel-actions": "^2.3",
-        "staudenmeir/laravel-merged-relations": "^1.5",
-        "tightenco/tlint": "^6.2"
+        "staudenmeir/laravel-merged-relations": "^1.5"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2",
