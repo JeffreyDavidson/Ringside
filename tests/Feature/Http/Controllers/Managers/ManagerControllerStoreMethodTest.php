@@ -24,7 +24,7 @@ class ManagerControllerStoreMethodTest extends TestCase
     public function create_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([ManagersController::class, 'create']))
             ->assertViewIs('managers.create')
             ->assertViewHas('manager', new Manager);
@@ -36,7 +36,7 @@ class ManagerControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_creating_a_manager()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([ManagersController::class, 'create']))
             ->assertForbidden();
     }
@@ -57,7 +57,7 @@ class ManagerControllerStoreMethodTest extends TestCase
     public function store_creates_a_manager_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'create']))
             ->post(action([ManagersController::class, 'store'], ManagerRequestDataFactory::new()->create([
                 'first_name' => 'John',
@@ -78,7 +78,7 @@ class ManagerControllerStoreMethodTest extends TestCase
     public function an_employment_is_not_created_for_the_manager_if_started_at_is_filled_in_request()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'create']))
             ->post(
                 action([ManagersController::class, 'store']),
@@ -98,7 +98,7 @@ class ManagerControllerStoreMethodTest extends TestCase
         $startedAt = now()->toDateTimeString();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'create']))
             ->post(
                 action([ManagersController::class, 'store']),
@@ -117,7 +117,7 @@ class ManagerControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_create_a_manager()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([ManagersController::class, 'create']))
             ->post(action([ManagersController::class, 'store'], ManagerRequestDataFactory::new()->create()))
             ->assertForbidden();

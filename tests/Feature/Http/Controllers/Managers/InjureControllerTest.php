@@ -29,13 +29,13 @@ class InjureControllerTest extends TestCase
         $manager = Manager::factory()->available()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->injuries);
-            $this->assertEquals(ManagerStatus::injured(), $manager->status);
+            $this->assertEquals(ManagerStatus::INJURED, $manager->status);
         });
     }
 
@@ -47,7 +47,7 @@ class InjureControllerTest extends TestCase
         $manager = Manager::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([InjureController::class], $manager))
             ->assertForbidden();
     }
@@ -77,7 +77,7 @@ class InjureControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $manager));
     }
 

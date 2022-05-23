@@ -27,13 +27,13 @@ class UnretireControllerTest extends TestCase
     {
         $manager = Manager::factory()->retired()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertNotNull($manager->retirements->last()->ended_at);
-            $this->assertEquals(ManagerStatus::available(), $manager->status);
+            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
     }
 
@@ -44,7 +44,7 @@ class UnretireControllerTest extends TestCase
     {
         $manager = Manager::factory()->create();
 
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->patch(action([UnretireController::class], $manager))
             ->assertForbidden();
     }
@@ -70,7 +70,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->available()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
     }
 
@@ -84,7 +84,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->withFutureEmployment()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
     }
 
@@ -98,7 +98,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->injured()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
     }
 
@@ -112,7 +112,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->released()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
     }
 
@@ -126,7 +126,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->suspended()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
     }
 
@@ -142,7 +142,7 @@ class UnretireControllerTest extends TestCase
 
         $manager = Manager::factory()->{$factoryState}()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $manager));
     }
 

@@ -31,7 +31,7 @@ class RestoreControllerTest extends TestCase
     public function invoke_restores_a_deleted_venue_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RestoreController::class], $this->venue))
             ->assertRedirect(action([VenuesController::class, 'index']));
 
@@ -44,7 +44,7 @@ class RestoreControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_venue()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([RestoreController::class], $this->venue))
             ->assertForbidden();
     }

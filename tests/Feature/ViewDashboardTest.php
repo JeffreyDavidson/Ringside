@@ -14,7 +14,7 @@ class ViewDashboardTest extends TestCase
      */
     public function administrators_can_view_the_dashboard()
     {
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->get(route('dashboard'))
             ->assertViewIs('dashboard');
     }
@@ -24,7 +24,7 @@ class ViewDashboardTest extends TestCase
      */
     public function basic_users_can_view_the_dashboard()
     {
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->get(route('dashboard'))
             ->assertViewIs('dashboard');
     }

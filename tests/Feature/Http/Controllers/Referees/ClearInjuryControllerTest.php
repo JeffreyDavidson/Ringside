@@ -30,7 +30,7 @@ class ClearInjuryControllerTest extends TestCase
         $this->assertNull($referee->injuries->last()->ended_at);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
@@ -47,7 +47,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $referee = Referee::factory()->injured()->create();
 
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->patch(action([ClearInjuryController::class], $referee))
             ->assertForbidden();
     }
@@ -77,7 +77,7 @@ class ClearInjuryControllerTest extends TestCase
         $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $referee));
     }
 

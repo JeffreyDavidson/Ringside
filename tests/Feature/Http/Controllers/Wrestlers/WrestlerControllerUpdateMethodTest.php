@@ -26,7 +26,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([WrestlersController::class, 'edit'], $wrestler))
             ->assertViewIs('wrestlers.edit')
             ->assertViewHas('wrestler', $wrestler);
@@ -40,7 +40,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(route('wrestlers.edit', $wrestler))
             ->assertForbidden();
     }
@@ -71,7 +71,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
         ]);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),
@@ -107,7 +107,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
         $this->assertCount(0, $wrestler->employments);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),
@@ -137,7 +137,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),
@@ -164,7 +164,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),
@@ -188,7 +188,7 @@ class WrestlerControllerUpdateMethodTest extends TestCase
     {
         $wrestler = Wrestler::factory()->create();
 
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->from(action([WrestlersController::class, 'edit'], $wrestler))
             ->patch(
                 action([WrestlersController::class, 'update'], $wrestler),

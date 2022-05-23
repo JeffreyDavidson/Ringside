@@ -31,7 +31,7 @@ class EventControllerTest extends TestCase
     public function index_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([EventsController::class, 'index']))
             ->assertOk()
             ->assertViewIs('events.index')
@@ -44,7 +44,7 @@ class EventControllerTest extends TestCase
     public function a_basic_user_cannot_view_events_index_page()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([EventsController::class, 'index']))
             ->assertForbidden();
     }
@@ -65,7 +65,7 @@ class EventControllerTest extends TestCase
     public function show_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([EventsController::class, 'show'], $this->event))
             ->assertViewIs('events.show')
             ->assertViewHas('event', $this->event)
@@ -81,7 +81,7 @@ class EventControllerTest extends TestCase
         $event = Event::factory()->create(['venue_id' => $venue->id]);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([EventsController::class, 'show'], $event))
             ->assertViewIs('events.show')
             ->assertViewHas('event', $event)
@@ -94,7 +94,7 @@ class EventControllerTest extends TestCase
     public function a_basic_user_cannot_view_an_event_page()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([EventsController::class, 'show'], $this->event))
             ->assertForbidden();
     }
@@ -115,7 +115,7 @@ class EventControllerTest extends TestCase
     public function deletes_an_event_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->delete(action([EventsController::class, 'destroy'], $this->event));
 
         $this->assertSoftDeleted($this->event);
@@ -127,7 +127,7 @@ class EventControllerTest extends TestCase
     public function a_basic_user_cannot_delete_an_event()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->delete(action([EventsController::class, 'destroy'], $this->event))
             ->assertForbidden();
     }

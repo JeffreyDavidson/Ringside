@@ -4,39 +4,39 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-/**
- * These are the statuses a wrestler can have at any given time.
- *
- * @method static self bookable()
- * @method static self injured()
- * @method static self future_employment()
- * @method static self released()
- * @method static self retired()
- * @method static self suspended()
- * @method static self unemployed()
- */
-class WrestlerStatus extends BaseEnum
+enum WrestlerStatus: string
 {
-    public $colors = [
-        'bookable' => 'success',
-        'injured' => 'light',
-        'future-employment' => 'warning',
-        'released' => 'dark',
-        'retired' => 'secondary',
-        'suspended' => 'danger',
-        'unemployed' => 'info',
-    ];
+    case BOOKABLE = 'bookable';
+    case INJURED = 'injured';
+    case FUTURE_EMPLOYMENT = 'future_employment';
+    case RELEASED = 'released';
+    case RETIRED = 'retired';
+    case SUSPENDED = 'suspended';
+    case UNEMPLOYED = 'unemployed';
 
-    protected static function labels(): array
+    public function color(): string
     {
-        return [
-            'bookable' => 'Bookable',
-            'injured' => 'Injured',
-            'future_employment' => 'Awaiting Employment',
-            'released' => 'Released',
-            'retired' => 'Retired',
-            'suspended' => 'Suspended',
-            'unemployed' => 'Unemployed',
-        ];
+        return match ($this) {
+            self::BOOKABLE => 'success',
+            self::INJURED => 'light',
+            self::FUTURE_EMPLOYMENT => 'warning',
+            self::RELEASED => 'dark',
+            self::RETIRED => 'secondary',
+            self::SUSPENDED => 'danger',
+            self::UNEMPLOYED => 'info',
+        };
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::BOOKABLE => 'Bookable',
+            self::INJURED => 'Injured',
+            self::FUTURE_EMPLOYMENT => 'Awaiting Employment',
+            self::RELEASED => 'Released',
+            self::RETIRED => 'Retired',
+            self::SUSPENDED => 'Suspended',
+            self::UNEMPLOYED => 'Unemployed',
+        };
     }
 }

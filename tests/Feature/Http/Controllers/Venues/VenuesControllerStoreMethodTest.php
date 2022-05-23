@@ -22,7 +22,7 @@ class VenuesControllerStoreMethodTest extends TestCase
     public function create_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([VenuesController::class, 'create']))
             ->assertViewIs('venues.create')
             ->assertViewHas('venue', new Venue);
@@ -34,7 +34,7 @@ class VenuesControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_creating_a_venue()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([VenuesController::class, 'create']))
             ->assertForbidden();
     }
@@ -55,7 +55,7 @@ class VenuesControllerStoreMethodTest extends TestCase
     public function store_creates_a_venue_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([VenuesController::class, 'create']))
             ->post(action([VenuesController::class, 'store']), VenueRequestDataFactory::new()->create([
                 'name' => 'Example Venue',
@@ -83,7 +83,7 @@ class VenuesControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_create_a_venue()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([VenuesController::class, 'create']))
             ->post(action([VenuesController::class, 'store']), VenueRequestDataFactory::new()->create())
             ->assertForbidden();

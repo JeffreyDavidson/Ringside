@@ -28,13 +28,13 @@ class SuspendControllerTest extends TestCase
         $manager = Manager::factory()->available()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->suspensions);
-            $this->assertEquals(ManagerStatus::suspended(), $manager->status);
+            $this->assertEquals(ManagerStatus::SUSPENDED, $manager->status);
         });
     }
 
@@ -46,7 +46,7 @@ class SuspendControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([SuspendController::class], $manager))
             ->assertForbidden();
     }
@@ -76,7 +76,7 @@ class SuspendControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $manager));
     }
 

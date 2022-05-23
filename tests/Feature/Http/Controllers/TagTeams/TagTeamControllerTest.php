@@ -24,7 +24,7 @@ class TagTeamControllerTest extends TestCase
     public function index_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([TagTeamsController::class, 'index']))
             ->assertOk()
             ->assertViewIs('tagteams.index')
@@ -37,7 +37,7 @@ class TagTeamControllerTest extends TestCase
     public function a_basic_user_cannot_view_tag_teams_index_page()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([TagTeamsController::class, 'index']))
             ->assertForbidden();
     }
@@ -60,7 +60,7 @@ class TagTeamControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([TagTeamsController::class, 'show'], $tagTeam))
             ->assertViewIs('tagteams.show')
             ->assertViewHas('tagTeam', $tagTeam);
@@ -71,7 +71,7 @@ class TagTeamControllerTest extends TestCase
      */
     public function a_basic_user_can_view_their_tag_team_profile()
     {
-        $this->actAs(Role::basic());
+        $this->actAs(ROLE::BASIC);
         $tagTeam = TagTeam::factory()->create(['user_id' => auth()->user()]);
 
         $this
@@ -87,7 +87,7 @@ class TagTeamControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create(['user_id' => User::factory()->create()->id]);
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([TagTeamsController::class, 'index'], $tagTeam))
             ->assertForbidden();
     }
@@ -112,7 +112,7 @@ class TagTeamControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->delete(action([TagTeamsController::class, 'destroy'], $tagTeam))
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 
@@ -127,7 +127,7 @@ class TagTeamControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->delete(action([TagTeamsController::class, 'destroy'], $tagTeam))
             ->assertForbidden();
     }

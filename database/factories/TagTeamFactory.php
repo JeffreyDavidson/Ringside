@@ -25,7 +25,7 @@ class TagTeamFactory extends Factory
         return [
             'name' => str($this->faker->words(2, true))->title(),
             'signature_move' => null,
-            'status' => TagTeamStatus::unemployed(),
+            'status' => TagTeamStatus::UNEMPLOYED,
         ];
     }
 
@@ -56,7 +56,7 @@ class TagTeamFactory extends Factory
             ->count(2)
             ->create();
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::bookable()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::BOOKABLE])
             ->has(Employment::factory()->started($start))
             ->hasAttached($wrestlers, ['joined_at' => $start])
             ->afterCreating(function (TagTeam $tagTeam) {
@@ -68,7 +68,7 @@ class TagTeamFactory extends Factory
     {
         $start = Carbon::yesterday();
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::unbookable()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::UNBOOKABLE])
             ->has(Employment::factory()->started($start))
             ->hasAttached(Wrestler::factory()->count(2)->has(Employment::factory()->started($start))->injured(), ['joined_at' => Carbon::yesterday()])
             ->afterCreating(function (TagTeam $tagTeam) {
@@ -80,7 +80,7 @@ class TagTeamFactory extends Factory
     {
         $start = Carbon::tomorrow();
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::future_employment()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::FUTURE_EMPLOYMENT])
             ->has(Employment::factory()->started($start))
             ->hasAttached(Wrestler::factory()->count(2)->has(Employment::factory()->started($start)), ['joined_at' => Carbon::now()])
             ->afterCreating(function (TagTeam $tagTeam) {
@@ -94,7 +94,7 @@ class TagTeamFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::suspended()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::SUSPENDED])
             ->has(Employment::factory()->started($start))
             ->has(Suspension::factory()->started($end))
             ->hasAttached(Wrestler::factory()->count(2)->suspended(), ['joined_at' => $start])
@@ -109,7 +109,7 @@ class TagTeamFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::retired()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::RETIRED])
             ->has(Employment::factory()->started($start)->ended($end))
             ->has(Retirement::factory()->started($end))
             ->hasAttached(Wrestler::factory()->count(2)->retired(), ['joined_at' => $start])
@@ -120,7 +120,7 @@ class TagTeamFactory extends Factory
 
     public function unemployed()
     {
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::unemployed()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::UNEMPLOYED])
             ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });
@@ -136,7 +136,7 @@ class TagTeamFactory extends Factory
             ->count(2)
             ->create();
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::released()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::RELEASED])
             ->has(Employment::factory()->started($start)->ended($end))
             ->hasAttached($wrestlers, ['joined_at' => $start])
             ->afterCreating(function (TagTeam $tagTeam) {
@@ -151,7 +151,7 @@ class TagTeamFactory extends Factory
         $wrestlerA = Wrestler::factory()->injured()->has(Employment::factory()->started($start));
         $wrestlerB = Wrestler::factory()->has(Employment::factory()->started($start));
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::unbookable()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::UNBOOKABLE])
             ->has(Employment::factory()->started($start))
             ->hasAttached($wrestlerA, ['joined_at' => $start])
             ->hasAttached($wrestlerB, ['joined_at' => $start])
@@ -167,7 +167,7 @@ class TagTeamFactory extends Factory
         $wrestlerA = Wrestler::factory()->suspended()->has(Employment::factory()->started($start));
         $wrestlerB = Wrestler::factory()->has(Employment::factory()->started($start));
 
-        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::unbookable()])
+        return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::UNBOOKABLE])
             ->has(Employment::factory()->started($start))
             ->hasAttached($wrestlerA, ['joined_at' => $start])
             ->hasAttached($wrestlerB, ['joined_at' => $start])

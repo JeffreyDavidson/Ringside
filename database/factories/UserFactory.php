@@ -24,21 +24,21 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => 'secret',
             'remember_token' => Str::random(10),
-            'role' => Role::basic(),
+            'role' => Role::BASIC,
         ];
     }
 
     public function administrator(): self
     {
         return $this->state([
-            'role' => Role::administrator(),
+            'role' => ROLE::ADMINISTRATOR,
         ]);
     }
 
     public function basicUser(): self
     {
         return $this->state([
-            'role' => Role::basic(),
+            'role' => ROLE::BASIC,
         ]);
     }
 

@@ -24,7 +24,7 @@ class ManagerControllerTest extends TestCase
     public function index_returns_a_views()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([ManagersController::class, 'index']))
             ->assertOk()
             ->assertViewIs('managers.index')
@@ -37,7 +37,7 @@ class ManagerControllerTest extends TestCase
     public function a_basic_user_cannot_view_managers_index_page()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([ManagersController::class, 'index']))
             ->assertForbidden();
     }
@@ -60,7 +60,7 @@ class ManagerControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([ManagersController::class, 'show'], $manager))
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $manager);
@@ -71,7 +71,7 @@ class ManagerControllerTest extends TestCase
      */
     public function a_basic_user_can_view_their_manager_profile()
     {
-        $this->actAs(Role::basic());
+        $this->actAs(ROLE::BASIC);
         $manager = Manager::factory()->create(['user_id' => auth()->user()]);
 
         $this
@@ -88,7 +88,7 @@ class ManagerControllerTest extends TestCase
         $manager = Manager::factory()->create(['user_id' => $otherUser->id]);
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([ManagersController::class, 'show'], $manager))
             ->assertForbidden();
     }
@@ -113,7 +113,7 @@ class ManagerControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->delete(action([ManagersController::class, 'destroy'], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
@@ -128,7 +128,7 @@ class ManagerControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->delete(route('managers.destroy', $manager))
             ->assertForbidden();
     }

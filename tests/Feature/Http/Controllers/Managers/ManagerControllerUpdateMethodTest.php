@@ -26,7 +26,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([ManagersController::class, 'edit'], $manager))
             ->assertViewIs('managers.edit')
             ->assertViewHas('manager', $manager);
@@ -40,7 +40,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([ManagersController::class, 'edit'], $manager))
             ->assertForbidden();
     }
@@ -65,7 +65,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $manager = Manager::factory()->create(['first_name' => 'John', 'last_name' => 'Smith']);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
@@ -93,7 +93,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $this->assertCount(0, $manager->employments);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
@@ -120,7 +120,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $this->assertTrue($manager->employments()->first()->started_at->isFuture());
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
@@ -150,7 +150,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $this->assertCount(1, $manager->employments);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
@@ -176,7 +176,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $startDate = $manager->startedAt->toDateTimeString();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),
@@ -201,7 +201,7 @@ class ManagerControllerUpdateMethodTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([ManagersController::class, 'edit'], $manager))
             ->put(
                 action([ManagersController::class, 'update'], $manager),

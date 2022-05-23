@@ -30,20 +30,20 @@ class DeactivateControllerTest extends TestCase
         $stable = Stable::factory()->active()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([DeactivateController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) {
             $this->assertNotNull($stable->activations->last()->ended_at);
-            $this->assertEquals(StableStatus::inactive(), $stable->status);
+            $this->assertEquals(StableStatus::INACTIVE, $stable->status);
 
             foreach ($stable->currentWrestlers as $wrestler) {
-                $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
+                $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
             }
 
             foreach ($stable->currentTagTeams as $tagTeam) {
-                $this->assertEquals(TagTeamStatus::released(), $tagTeam->status);
+                $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
             }
         });
     }
@@ -56,7 +56,7 @@ class DeactivateControllerTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([DeactivateController::class], $stable))
             ->assertForbidden();
     }
@@ -86,7 +86,7 @@ class DeactivateControllerTest extends TestCase
         $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([DeactivateController::class], $stable));
     }
 

@@ -20,14 +20,14 @@ class WrestlerObserver
     {
         $wrestler->status = match (true) {
             $wrestler->isCurrentlyEmployed() => match (true) {
-                $wrestler->isInjured() => WrestlerStatus::injured(),
-                $wrestler->isSuspended() => WrestlerStatus::suspended(),
-                default => WrestlerStatus::bookable(),
+                $wrestler->isInjured() => WrestlerStatus::INJURED,
+                $wrestler->isSuspended() => WrestlerStatus::SUSPENDED,
+                default => WrestlerStatus::BOOKABLE,
             },
-            $wrestler->hasFutureEmployment() => WrestlerStatus::future_employment(),
-            $wrestler->isReleased() => WrestlerStatus::released(),
-            $wrestler->isRetired() => WrestlerStatus::retired(),
-            default => WrestlerStatus::unemployed()
+            $wrestler->hasFutureEmployment() => WrestlerStatus::FUTURE_EMPLOYMENT,
+            $wrestler->isReleased() => WrestlerStatus::RELEASED,
+            $wrestler->isRetired() => WrestlerStatus::RETIRED,
+            default => WrestlerStatus::UNEMPLOYED
         };
     }
 }

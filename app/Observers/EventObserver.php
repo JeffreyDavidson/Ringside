@@ -19,9 +19,9 @@ class EventObserver
     public function saving(Event $event)
     {
         $event->status = match (true) {
-            $event->isScheduled() => EventStatus::scheduled(),
-            $event->isPast() => EventStatus::past(),
-            default => EventStatus::unscheduled()
+            $event->isScheduled() => EventStatus::SCHEDULED,
+            $event->isPast() => EventStatus::PAST,
+            default => EventStatus::UNSCHEDULED
         };
     }
 }

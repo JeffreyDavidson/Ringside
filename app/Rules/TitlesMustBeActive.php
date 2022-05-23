@@ -20,7 +20,7 @@ class TitlesMustBeActive implements Rule
     public function passes($attribute, $value)
     {
         $nonActiveTitlesNames = Title::query()
-            ->where('status', '!=', TitleStatus::active())
+            ->where('status', '!=', TitleStatus::ACTIVE)
             ->findMany($value)
             ->pluck('name');
 

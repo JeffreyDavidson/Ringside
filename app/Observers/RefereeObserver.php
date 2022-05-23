@@ -20,14 +20,14 @@ class RefereeObserver
     {
         $referee->status = match (true) {
             $referee->isCurrentlyEmployed() => match (true) {
-                $referee->isInjured() => RefereeStatus::injured(),
-                $referee->isSuspended() => RefereeStatus::suspended(),
-                default => RefereeStatus::bookable(),
+                $referee->isInjured() => RefereeStatus::INJURED,
+                $referee->isSuspended() => RefereeStatus::SUSPENDED,
+                default => RefereeStatus::BOOKABLE,
             },
-            $referee->hasFutureEmployment() => RefereeStatus::future_employment(),
-            $referee->isReleased() => RefereeStatus::released(),
-            $referee->isRetired() => RefereeStatus::retired(),
-            default => RefereeStatus::unemployed()
+            $referee->hasFutureEmployment() => RefereeStatus::FUTURE_EMPLOYMENT,
+            $referee->isReleased() => RefereeStatus::RELEASED,
+            $referee->isRetired() => RefereeStatus::RETIRED,
+            default => RefereeStatus::UNEMPLOYED
         };
     }
 }

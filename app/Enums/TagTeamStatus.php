@@ -4,39 +4,39 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-/**
- * These are the statuses a tag team can have at any given time.
- *
- * @method static self bookable()
- * @method static self unbookable()
- * @method static self future_employment()
- * @method static self released()
- * @method static self retired()
- * @method static self suspended()
- * @method static self unemployed()
- */
-class TagTeamStatus extends BaseEnum
+enum TagTeamStatus: string
 {
-    public $colors = [
-        'bookable' => 'success',
-        'unbookable' => 'light',
-        'future-employment' => 'warning',
-        'released' => 'dark',
-        'retired' => 'secondary',
-        'suspended' => 'danger',
-        'unemployed' => 'info',
-    ];
+    case BOOKABLE = 'bookable';
+    case UNBOOKABLE = 'unbookable';
+    case FUTURE_EMPLOYMENT = 'future_employment';
+    case RELEASED = 'released';
+    case RETIRED = 'retired';
+    case SUSPENDED = 'suspended';
+    case UNEMPLOYED = 'unemployed';
 
-    protected static function labels(): array
+    public function color(): string
     {
-        return [
-            'bookable' => 'Bookable',
-            'unbookable' => 'Unbookable',
-            'future_employment' => 'Awaiting Employment',
-            'released' => 'Released',
-            'retired' => 'Retired',
-            'suspended' => 'Suspended',
-            'unemployed' => 'Unemployed',
-        ];
+        return match ($this) {
+            self::BOOKABLE => 'success',
+            self::UNBOOKABLE => 'light',
+            self::FUTURE_EMPLOYMENT => 'warning',
+            self::RELEASED => 'dark',
+            self::RETIRED => 'secondary',
+            self::SUSPENDED => 'danger',
+            self::UNEMPLOYED => 'info',
+        };
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::BOOKABLE => 'Bookable',
+            self::UNBOOKABLE => 'Unbookable',
+            self::FUTURE_EMPLOYMENT => 'Awaiting Employment',
+            self::RELEASED => 'Retired',
+            self::RETIRED => 'Retired',
+            self::SUSPENDED => 'Suspended',
+            self::UNEMPLOYED => 'Unemployed',
+        };
     }
 }

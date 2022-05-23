@@ -31,7 +31,7 @@ class RestoreControllerTest extends TestCase
     public function invoke_restores_a_deleted_title_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RestoreController::class], $this->title))
             ->assertRedirect(action([TitlesController::class, 'index']));
 
@@ -46,7 +46,7 @@ class RestoreControllerTest extends TestCase
     public function a_basic_user_cannot_restore_a_title()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([RestoreController::class], $this->title))
             ->assertForbidden();
     }

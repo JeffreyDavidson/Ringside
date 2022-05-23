@@ -28,7 +28,7 @@ class StableControllerStoreMethodTest extends TestCase
     {
         $this->withoutExceptionHandling();
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([StablesController::class, 'create']))
             ->assertViewIs('stables.create')
             ->assertViewHas('stable', new Stable);
@@ -40,7 +40,7 @@ class StableControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_creating_a_stable()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([StablesController::class, 'create']))
             ->assertForbidden();
     }
@@ -61,7 +61,7 @@ class StableControllerStoreMethodTest extends TestCase
     public function store_creates_a_stable_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
@@ -85,7 +85,7 @@ class StableControllerStoreMethodTest extends TestCase
         $wrestlers = Wrestler::factory()->count(3)->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
@@ -108,7 +108,7 @@ class StableControllerStoreMethodTest extends TestCase
         $createdWrestlers = Wrestler::factory()->count(3)->create()->pluck('id')->toArray();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
@@ -129,7 +129,7 @@ class StableControllerStoreMethodTest extends TestCase
         $createdTagTeams = TagTeam::factory()->count(2)->create()->pluck('id')->toArray();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
@@ -150,7 +150,7 @@ class StableControllerStoreMethodTest extends TestCase
         $createdWrestlers = Wrestler::factory()->count(3)->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
@@ -179,7 +179,7 @@ class StableControllerStoreMethodTest extends TestCase
         Carbon::setTestNow($now);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([StablesController::class, 'create']))
             ->post(
                 action([StablesController::class, 'store']),
@@ -206,7 +206,7 @@ class StableControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_create_a_stable()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([StablesController::class, 'create']))
             ->post(action([StablesController::class, 'store']), StableRequestDataFactory::new()->create())
             ->assertForbidden();

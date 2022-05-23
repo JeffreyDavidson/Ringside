@@ -28,7 +28,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
@@ -45,7 +45,7 @@ class InjureControllerTest extends TestCase
     {
         $referee = Referee::factory()->withFutureEmployment()->create();
 
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->patch(action([InjureController::class], $referee))
             ->assertForbidden();
     }
@@ -72,7 +72,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->unemployed()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
     }
 
@@ -87,7 +87,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
     }
 
@@ -102,7 +102,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->released()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
     }
 
@@ -117,7 +117,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
     }
 
@@ -132,7 +132,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->retired()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
     }
 
@@ -149,7 +149,7 @@ class InjureControllerTest extends TestCase
         $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([InjureController::class], $referee));
     }
 

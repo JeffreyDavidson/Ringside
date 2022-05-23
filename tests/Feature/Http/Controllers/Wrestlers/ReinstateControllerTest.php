@@ -32,13 +32,13 @@ class ReinstateControllerTest extends TestCase
         $this->assertNull($wrestler->currentSuspension->ended_at);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertNotNull($wrestler->suspensions->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
     }
 
@@ -51,11 +51,11 @@ class ReinstateControllerTest extends TestCase
         $wrestler = $tagTeam->currentWrestlers()->suspended()->first();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $wrestler));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
         });
     }
 
@@ -67,7 +67,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([ReinstateController::class], $wrestler))
             ->assertForbidden();
     }
@@ -97,7 +97,7 @@ class ReinstateControllerTest extends TestCase
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $wrestler));
     }
 

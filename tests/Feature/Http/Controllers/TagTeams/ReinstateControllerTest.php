@@ -29,17 +29,17 @@ class ReinstateControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->suspended()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $tagTeam))
             ->assertRedirect(action([TagTeamsController::class, 'index']));
 
         tap($tagTeam->fresh(), function ($tagTeam) {
             $this->assertNotNull($tagTeam->suspensions->last()->ended_at);
-            $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
+            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
             foreach ($tagTeam->currentWrestlers as $wrestler) {
                 $this->assertNotNull($wrestler->suspensions->last()->ended_at);
-                $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
             }
         });
     }
@@ -52,7 +52,7 @@ class ReinstateControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([ReinstateController::class], $tagTeam))
             ->assertForbidden();
     }
@@ -82,7 +82,7 @@ class ReinstateControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $tagTeam));
     }
 

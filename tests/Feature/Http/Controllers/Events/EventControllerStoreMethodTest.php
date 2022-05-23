@@ -24,7 +24,7 @@ class EventControllerStoreMethodTest extends TestCase
     public function create_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([EventsController::class, 'create']))
             ->assertViewIs('events.create')
             ->assertViewHas('event', new Event);
@@ -36,7 +36,7 @@ class EventControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_creating_an_event()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([EventsController::class, 'create']))
             ->assertForbidden();
     }
@@ -57,7 +57,7 @@ class EventControllerStoreMethodTest extends TestCase
     public function store_creates_an_event_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([EventsController::class, 'create']))
             ->post(
                 action([EventsController::class, 'store']),
@@ -86,7 +86,7 @@ class EventControllerStoreMethodTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([EventsController::class, 'create']))
             ->post(
                 action([EventsController::class, 'store']),
@@ -106,7 +106,7 @@ class EventControllerStoreMethodTest extends TestCase
     public function store_creates_an_event_with_a_date_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([EventsController::class, 'create']))
             ->post(
                 action([EventsController::class, 'store']),
@@ -126,7 +126,7 @@ class EventControllerStoreMethodTest extends TestCase
     public function store_creates_an_event_with_a_preview_and_redirects()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([EventsController::class, 'create']))
             ->post(
                 action([EventsController::class, 'store']),
@@ -146,7 +146,7 @@ class EventControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_create_an_event()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([EventsController::class, 'create']))
             ->post(action([EventsController::class, 'store']), EventRequestDataFactory::new()->create())
             ->assertForbidden();
