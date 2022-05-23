@@ -169,6 +169,6 @@ class TitleQueryBuilder extends Builder
      */
     public function competable()
     {
-        return $this->where('status', TitleStatus::active());
+        return $this->where('status', TitleStatus::ACTIVE);
     }
 }

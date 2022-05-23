@@ -29,13 +29,13 @@ class RetireControllerTest extends TestCase
     {
         $manager = Manager::factory()->available()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->retirements);
-            $this->assertEquals(ManagerStatus::retired(), $manager->status);
+            $this->assertEquals(ManagerStatus::RETIRED, $manager->status);
         });
     }
 
@@ -46,13 +46,13 @@ class RetireControllerTest extends TestCase
     {
         $manager = Manager::factory()->injured()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->retirements);
-            $this->assertEquals(ManagerStatus::retired(), $manager->status);
+            $this->assertEquals(ManagerStatus::RETIRED, $manager->status);
         });
     }
 
@@ -63,13 +63,13 @@ class RetireControllerTest extends TestCase
     {
         $manager = Manager::factory()->suspended()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertCount(1, $manager->retirements);
-            $this->assertEquals(ManagerStatus::retired(), $manager->status);
+            $this->assertEquals(ManagerStatus::RETIRED, $manager->status);
         });
     }
 
@@ -87,7 +87,7 @@ class RetireControllerTest extends TestCase
             ->hasAttached($wrestler, ['hired_at' => now()->toDateTimeString()])
             ->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
@@ -109,7 +109,7 @@ class RetireControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([RetireController::class], $manager))
             ->assertForbidden();
     }
@@ -139,7 +139,7 @@ class RetireControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $manager));
     }
 

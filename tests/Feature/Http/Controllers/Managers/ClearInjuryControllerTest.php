@@ -28,16 +28,16 @@ class ClearInjuryControllerTest extends TestCase
         $manager = Manager::factory()->injured()->create();
 
         $this->assertNull($manager->injuries->last()->ended_at);
-        $this->assertEquals(ManagerStatus::injured(), $manager->status);
+        $this->assertEquals(ManagerStatus::INJURED, $manager->status);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertNotNull($manager->injuries->last()->ended_at);
-            $this->assertEquals(ManagerStatus::available(), $manager->status);
+            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
     }
 
@@ -48,7 +48,7 @@ class ClearInjuryControllerTest extends TestCase
     {
         $manager = Manager::factory()->injured()->create();
 
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->patch(action([ClearInjuryController::class], $manager))
             ->assertForbidden();
     }
@@ -77,7 +77,7 @@ class ClearInjuryControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $manager));
     }
 

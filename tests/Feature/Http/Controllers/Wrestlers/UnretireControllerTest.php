@@ -28,13 +28,13 @@ class UnretireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->retired()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertNotNull($wrestler->retirements->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
     }
 
@@ -46,7 +46,7 @@ class UnretireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([UnretireController::class], $wrestler))
             ->assertForbidden();
     }
@@ -76,7 +76,7 @@ class UnretireControllerTest extends TestCase
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([UnretireController::class], $wrestler));
     }
 

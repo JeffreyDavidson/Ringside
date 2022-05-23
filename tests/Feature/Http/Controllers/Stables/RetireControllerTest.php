@@ -30,22 +30,22 @@ class RetireControllerTest extends TestCase
         $stable = Stable::factory()->active()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) {
             $this->assertCount(1, $stable->retirements);
-            $this->assertEquals(StableStatus::retired(), $stable->status);
+            $this->assertEquals(StableStatus::RETIRED, $stable->status);
 
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->assertCount(1, $wrestler->retirements);
-                $this->assertEquals(WrestlerStatus::retired(), $wrestler->status);
+                $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
             }
 
             foreach ($stable->currentTagTeams as $tagTeam) {
                 $this->assertCount(1, $tagTeam->retirements);
-                $this->assertEquals(TagTeamStatus::retired(), $tagTeam->status);
+                $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
             }
         });
     }
@@ -57,22 +57,22 @@ class RetireControllerTest extends TestCase
     {
         $stable = Stable::factory()->inactive()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $stable))
             ->assertRedirect(action([StablesController::class, 'index']));
 
         tap($stable->fresh(), function ($stable) {
             $this->assertCount(1, $stable->retirements);
-            $this->assertEquals(StableStatus::retired(), $stable->status);
+            $this->assertEquals(StableStatus::RETIRED, $stable->status);
 
             foreach ($stable->currentWrestlers as $wrestler) {
                 $this->assertCount(1, $wrestler->retirements);
-                $this->assertEquals(WrestlerStatus::retired(), $wrestler->status);
+                $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
             }
 
             foreach ($stable->currentTagTeams as $tagTeam) {
                 $this->assertCount(1, $tagTeam->retirements);
-                $this->assertEquals(TagTeamStatus::retired(), $tagTeam->status);
+                $this->assertEquals(TagTeamStatus::RETIRED, $tagTeam->status);
             }
         });
     }
@@ -85,7 +85,7 @@ class RetireControllerTest extends TestCase
         $stable = Stable::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([RetireController::class], $stable))
             ->assertForbidden();
     }
@@ -115,7 +115,7 @@ class RetireControllerTest extends TestCase
         $stable = Stable::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([RetireController::class], $stable));
     }
 

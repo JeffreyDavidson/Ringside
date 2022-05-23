@@ -30,7 +30,7 @@ class ReinstateControllerTest extends TestCase
         $this->assertNull($referee->currentSuspension->ended_at);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
@@ -45,7 +45,7 @@ class ReinstateControllerTest extends TestCase
      */
     public function a_basic_user_cannot_reinstate_a_referee()
     {
-        $this->actAs(Role::basic());
+        $this->actAs(ROLE::BASIC);
         $referee = Referee::factory()->create();
 
         $this->patch(action([ReinstateController::class], $referee))
@@ -76,7 +76,7 @@ class ReinstateControllerTest extends TestCase
         $referee = Referee::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $referee));
     }
 

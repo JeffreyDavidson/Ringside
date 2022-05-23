@@ -26,7 +26,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([RefereesController::class, 'edit'], $referee))
             ->assertViewIs('referees.edit')
             ->assertViewHas('referee', $referee);
@@ -40,7 +40,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([RefereesController::class, 'edit'], $referee))
             ->assertForbidden();
     }
@@ -65,7 +65,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->create(['first_name' => 'John', 'last_name' => 'Smith']);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([RefereesController::class, 'edit'], $referee))
             ->put(
                 action([RefereesController::class, 'update'], $referee),
@@ -91,7 +91,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->unemployed()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([RefereesController::class, 'edit'], $referee))
             ->put(
                 action([RefereesController::class, 'update'], $referee),
@@ -114,7 +114,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->withFutureEmployment()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([RefereesController::class, 'edit'], $referee))
             ->put(
                 action([RefereesController::class, 'update'], $referee),
@@ -139,7 +139,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $this->assertCount(1, $referee->employments);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([RefereesController::class, 'edit'], $referee))
             ->put(
                 action([RefereesController::class, 'update'], $referee),
@@ -164,7 +164,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([RefereesController::class, 'edit'], $referee))
             ->put(
                 action([RefereesController::class, 'update'], $referee),
@@ -189,7 +189,7 @@ class RefereeControllerUpdateMethodTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([RefereesController::class, 'edit'], $referee))
             ->put(
                 action([RefereesController::class, 'update'], $referee),

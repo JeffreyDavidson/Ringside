@@ -4,33 +4,33 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-/**
- * These are the statuses a title can have at any given time.
- *
- * @method static self active()
- * @method static self inactive()
- * @method static self future_activation()
- * @method static self retired()
- * @method static self unactivated()
- */
-class TitleStatus extends BaseEnum
+enum TitleStatus: string
 {
-    public $colors = [
-        'active' => 'success',
-        'inactive' => 'light',
-        'future-activation' => 'warning',
-        'retired' => 'secondary',
-        'unactivated' => 'info',
-    ];
+    case ACTIVE = 'active';
+    case INACTIVE = 'inactive';
+    case FUTURE_ACTIVATION = 'future_activation';
+    case RETIRED = 'retired';
+    case UNACTIVATED = 'unactivated';
 
-    protected static function labels(): array
+    public function color(): string
     {
-        return [
-            'active' => 'Active',
-            'inactive' => 'Inactive',
-            'future_activation' => 'Awaiting Activation',
-            'retired' => 'Retired',
-            'unactivated' => 'Unactivated',
-        ];
+        return match ($this) {
+            self::ACTIVE => 'success',
+            self::INACTIVE => 'light',
+            self::FUTURE_ACTIVATION => 'warning',
+            self::RETIRED => 'secondary',
+            self::UNACTIVATED => 'info',
+        };
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::ACTIVE => 'Active',
+            self::INACTIVE => 'Inactive',
+            self::FUTURE_ACTIVATION => 'Awaiting Activation',
+            self::RETIRED => 'Retired',
+            self::UNACTIVATED => 'Unactived',
+        };
     }
 }

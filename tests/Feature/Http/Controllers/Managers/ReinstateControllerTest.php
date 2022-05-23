@@ -30,13 +30,13 @@ class ReinstateControllerTest extends TestCase
         $this->assertNull($manager->currentSuspension->ended_at);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $manager))
             ->assertRedirect(action([ManagersController::class, 'index']));
 
         tap($manager->fresh(), function ($manager) {
             $this->assertNotNull($manager->suspensions->last()->ended_at);
-            $this->assertEquals(ManagerStatus::available(), $manager->status);
+            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
         });
     }
 
@@ -48,7 +48,7 @@ class ReinstateControllerTest extends TestCase
         $manager = Manager::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([ReinstateController::class], $manager))
             ->assertForbidden();
     }
@@ -78,7 +78,7 @@ class ReinstateControllerTest extends TestCase
         $manager = Manager::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ReinstateController::class], $manager));
     }
 

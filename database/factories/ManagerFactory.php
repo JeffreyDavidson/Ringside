@@ -25,13 +25,13 @@ class ManagerFactory extends Factory
         return [
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
-            'status' => ManagerStatus::unemployed(),
+            'status' => ManagerStatus::UNEMPLOYED,
         ];
     }
 
     public function available()
     {
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::available()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::AVAILABLE])
             ->has(Employment::factory()->started(Carbon::yesterday()))
             ->afterCreating(function (Manager $manager) {
                 $manager->save();
@@ -40,7 +40,7 @@ class ManagerFactory extends Factory
 
     public function withFutureEmployment()
     {
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::future_employment()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::FUTURE_EMPLOYMENT])
             ->has(Employment::factory()->started(Carbon::tomorrow()))
             ->afterCreating(function (Manager $manager) {
                 $manager->save();
@@ -49,7 +49,7 @@ class ManagerFactory extends Factory
 
     public function unemployed()
     {
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::unemployed()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::UNEMPLOYED])
             ->afterCreating(function (Manager $manager) {
                 $manager->save();
             });
@@ -60,7 +60,7 @@ class ManagerFactory extends Factory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::retired()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::RETIRED])
             ->has(Employment::factory()->started($start)->ended($end))
             ->has(Retirement::factory()->started($end))
             ->afterCreating(function (Manager $manager) {
@@ -73,7 +73,7 @@ class ManagerFactory extends Factory
         $start = now()->subMonths(1);
         $end = now()->subDays(3);
 
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::released()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::RELEASED])
             ->has(Employment::factory()->started($start)->ended($end))
             ->afterCreating(function (Manager $manager) {
                 $manager->save();
@@ -86,7 +86,7 @@ class ManagerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays(1);
 
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::suspended()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::SUSPENDED])
             ->has(Employment::factory()->started($start))
             ->has(Suspension::factory()->started($end))
             ->afterCreating(function (Manager $manager) {
@@ -99,7 +99,7 @@ class ManagerFactory extends Factory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::injured()])
+        return $this->state(fn (array $attributes) => ['status' => ManagerStatus::INJURED])
             ->has(Employment::factory()->started($start))
             ->has(Injury::factory()->started($now))
             ->afterCreating(function (Manager $manager) {

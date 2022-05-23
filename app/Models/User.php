@@ -54,7 +54,7 @@ class User extends Authenticatable
      */
     public function isAdministrator()
     {
-        return $this->role->equals(Role::administrator());
+        return $this->role === ROLE::ADMINISTRATOR;
     }
 
     /**

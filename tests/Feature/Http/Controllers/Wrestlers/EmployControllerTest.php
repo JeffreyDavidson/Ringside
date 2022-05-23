@@ -28,16 +28,16 @@ class EmployControllerTest extends TestCase
         $wrestler = Wrestler::factory()->unemployed()->create();
 
         $this->assertCount(0, $wrestler->employments);
-        $this->assertEquals(WrestlerStatus::unemployed(), $wrestler->status);
+        $this->assertEquals(WrestlerStatus::UNEMPLOYED, $wrestler->status);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([EmployController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
     }
 
@@ -50,16 +50,16 @@ class EmployControllerTest extends TestCase
         $startedAt = $wrestler->employments->last()->started_at;
 
         $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(WrestlerStatus::future_employment(), $wrestler->status);
+        $this->assertEquals(WrestlerStatus::FUTURE_EMPLOYMENT, $wrestler->status);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([EmployController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) use ($startedAt) {
             $this->assertTrue($wrestler->currentEmployment->started_at->lt($startedAt));
-            $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
     }
 
@@ -70,16 +70,16 @@ class EmployControllerTest extends TestCase
     {
         $wrestler = Wrestler::factory()->released()->create();
 
-        $this->assertEquals(WrestlerStatus::released(), $wrestler->status);
+        $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([EmployController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertCount(2, $wrestler->employments);
-            $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
     }
 
@@ -91,7 +91,7 @@ class EmployControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([EmployController::class], $wrestler))
             ->assertForbidden();
     }
@@ -120,7 +120,7 @@ class EmployControllerTest extends TestCase
 
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([EmployController::class], $wrestler));
     }
 

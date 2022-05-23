@@ -25,13 +25,13 @@ class DeactivateControllerTest extends TestCase
         $title = Title::factory()->active()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([DeactivateController::class], $title))
             ->assertRedirect(route('titles.index'));
 
         tap($title->fresh(), function ($title) {
             $this->assertNotNull($title->activations->last()->ended_at);
-            $this->assertEquals(TitleStatus::inactive(), $title->status);
+            $this->assertEquals(TitleStatus::INACTIVE, $title->status);
         });
     }
 
@@ -43,7 +43,7 @@ class DeactivateControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([DeactivateController::class], $title))
             ->assertForbidden();
     }
@@ -73,7 +73,7 @@ class DeactivateControllerTest extends TestCase
         $title = Title::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([DeactivateController::class], $title));
     }
 

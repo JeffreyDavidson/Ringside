@@ -27,7 +27,7 @@ class TagTeamControllerUpdateMethodTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([TagTeamsController::class, 'edit'], $tagTeam))
             ->assertViewIs('tagteams.edit')
             ->assertViewHas('tagTeam', $tagTeam);
@@ -41,7 +41,7 @@ class TagTeamControllerUpdateMethodTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([TagTeamsController::class, 'edit'], $tagTeam))
             ->assertForbidden();
     }
@@ -69,7 +69,7 @@ class TagTeamControllerUpdateMethodTest extends TestCase
             ->create(['name' => 'Old Tag Team Name']);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TagTeamsController::class, 'edit'], $tagTeam))
             ->put(
                 action([TagTeamsController::class, 'update'], $tagTeam),
@@ -94,7 +94,7 @@ class TagTeamControllerUpdateMethodTest extends TestCase
         $newTagTeamPartners = Wrestler::factory()->count(2)->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TagTeamsController::class, 'edit'], $tagTeam))
             ->put(
                 action([TagTeamsController::class, 'update'], $tagTeam),
@@ -121,7 +121,7 @@ class TagTeamControllerUpdateMethodTest extends TestCase
         $tagTeam = TagTeam::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([TagTeamsController::class, 'edit'], $tagTeam))
             ->put(action([TagTeamsController::class, 'update'], $tagTeam), TagTeamRequestDataFactory::new()->create())
             ->assertForbidden();

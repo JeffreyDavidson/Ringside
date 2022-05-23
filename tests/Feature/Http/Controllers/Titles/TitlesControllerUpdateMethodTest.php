@@ -24,7 +24,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([TitlesController::class, 'edit'], $title))
             ->assertViewIs('titles.edit')
             ->assertViewHas('title', $title);
@@ -37,7 +37,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
     {
         $title = Title::factory()->create();
 
-        $this->actAs(Role::basic())
+        $this->actAs(ROLE::BASIC)
             ->get(action([TitlesController::class, 'edit'], $title))
             ->assertForbidden();
     }
@@ -62,7 +62,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $title = Title::factory()->create(['name' => 'Old Name Title']);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),
@@ -85,7 +85,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $title = Title::factory()->unactivated()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),
@@ -107,7 +107,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $title = Title::factory()->withFutureActivation()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),
@@ -131,7 +131,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $title = Title::factory()->inactive()->create();
         $startDate = $title->activations->last()->started_at->toDateTimeString();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),
@@ -153,7 +153,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $startDate = $title->activations->last()->started_at->toDateTimeString();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),
@@ -177,7 +177,7 @@ class TitlesControllerUpdateMethodTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([TitlesController::class, 'edit'], $title))
             ->put(
                 action([TitlesController::class, 'update'], $title),

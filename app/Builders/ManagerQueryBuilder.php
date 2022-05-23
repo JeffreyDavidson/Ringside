@@ -15,6 +15,6 @@ class ManagerQueryBuilder extends SingleRosterMemberQueryBuilder
      */
     public function available()
     {
-        return $this->where('status', ManagerStatus::available());
+        return $this->where('status', ManagerStatus::AVAILABLE);
     }
 }

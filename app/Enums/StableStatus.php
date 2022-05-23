@@ -4,33 +4,33 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-/**
- * These are the statuses a stable can have at any given time.
- *
- * @method static self active()
- * @method static self future_activation()
- * @method static self inactive()
- * @method static self retired()
- * @method static self unactivated()
- */
-class StableStatus extends BaseEnum
+enum StableStatus: string
 {
-    public $colors = [
-        'active' => 'success',
-        'future-activation' => 'warning',
-        'inactive' => 'dark',
-        'retired' => 'secondary',
-        'unactivated' => 'info',
-    ];
+    case ACTIVE = 'active';
+    case FUTURE_ACTIVATION = 'future_activation';
+    case INACTIVE = 'inactive';
+    case RETIRED = 'retired';
+    case UNACTIVATED = 'unactivated';
 
-    protected static function labels(): array
+    public function color(): string
     {
-        return [
-            'active' => 'Active',
-            'future_activation' => 'Awaiting Employment',
-            'inactive' => 'Inactive',
-            'retired' => 'Retired',
-            'unactivated' => 'Unactivated',
-        ];
+        return match ($this) {
+            self::ACTIVE => 'success',
+            self::FUTURE_ACTIVATION => 'warning',
+            self::INACTIVE => 'dark',
+            self::RETIRED => 'secondary',
+            self::UNACTIVATED => 'info',
+        };
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::ACTIVE => 'Active',
+            self::FUTURE_ACTIVATION => 'Awaiting Activation',
+            self::INACTIVE => 'Inactive',
+            self::RETIRED => 'Retired',
+            self::UNACTIVATED => 'Unactivated',
+        };
     }
 }

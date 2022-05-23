@@ -24,7 +24,7 @@ class VenuesControllerUpdateMethodTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([VenuesController::class, 'edit'], $venue))
             ->assertViewIs('venues.edit')
             ->assertViewHas('venue', $venue);
@@ -38,7 +38,7 @@ class VenuesControllerUpdateMethodTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([VenuesController::class, 'edit'], $venue))
             ->assertForbidden();
     }
@@ -70,7 +70,7 @@ class VenuesControllerUpdateMethodTest extends TestCase
         ]);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([VenuesController::class, 'edit'], $venue))
             ->put(action([VenuesController::class, 'update'], $venue), VenueRequestDataFactory::new()->create([
                 'name' => 'New Venue Name',
@@ -100,7 +100,7 @@ class VenuesControllerUpdateMethodTest extends TestCase
         $venue = Venue::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([VenuesController::class, 'edit'], $venue))
             ->put(action([VenuesController::class, 'update'], $venue), VenueRequestDataFactory::new()->create())
             ->assertForbidden();

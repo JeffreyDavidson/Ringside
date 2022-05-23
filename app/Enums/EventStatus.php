@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-/**
- * These are the statuses an event can have at any given time.
- *
- * @method static self past()
- * @method static self scheduled()
- * @method static self unscheduled()
- */
-class EventStatus extends BaseEnum
+enum EventStatus: string
 {
-    public $colors = [
-        'past' => 'dark',
-        'scheduled' => 'success',
-        'unscheduled' => 'danger',
-    ];
+    case PAST = 'past';
+    case SCHEDULED = 'scheduled';
+    case UNSCHEDULED = 'unscheduled';
 
-    protected static function labels(): array
+    public function color(): string
     {
-        return [
-            'past' => 'Past',
-            'scheduled' => 'Scheduled',
-            'unscheduled' => 'Unscheduled',
-        ];
+        return match ($this) {
+            self::PAST => 'dark',
+            self::SCHEDULED => 'success',
+            self::UNSCHEDULED => 'danger',
+        };
+    }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PAST => 'Past',
+            self::SCHEDULED => 'Scheduled',
+            self::UNSCHEDULED => 'Unscheduled',
+        };
     }
 }

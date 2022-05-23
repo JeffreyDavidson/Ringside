@@ -30,13 +30,13 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertCount(1, $wrestler->suspensions);
-            $this->assertEquals(WrestlerStatus::suspended(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::SUSPENDED, $wrestler->status);
         });
     }
 
@@ -48,13 +48,13 @@ class SuspendControllerTest extends TestCase
         $tagTeam = TagTeam::factory()->bookable()->create();
         $wrestler = $tagTeam->currentWrestlers()->first();
 
-        $this->assertEquals(TagTeamStatus::bookable(), $tagTeam->status);
+        $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $wrestler));
 
-        $this->assertEquals(TagTeamStatus::unbookable(), $tagTeam->fresh()->status);
+        $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->fresh()->status);
     }
 
     /**
@@ -65,7 +65,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([SuspendController::class], $wrestler))
             ->assertForbidden();
     }
@@ -95,7 +95,7 @@ class SuspendControllerTest extends TestCase
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([SuspendController::class], $wrestler));
     }
 

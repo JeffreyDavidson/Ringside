@@ -23,9 +23,9 @@ class RefereeControllerTest extends TestCase
     public function index_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([RefereesController::class, 'index']))
-            ->assertOk(Role::administrator())
+            ->assertOk(ROLE::ADMINISTRATOR)
             ->assertViewIs('referees.index')
             ->assertSeeLivewire('referees.referees-list');
     }
@@ -36,7 +36,7 @@ class RefereeControllerTest extends TestCase
     public function a_basic_user_cannot_view_referees_index_page()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([RefereesController::class, 'index']))
             ->assertForbidden();
     }
@@ -59,7 +59,7 @@ class RefereeControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([RefereesController::class, 'show'], $referee))
             ->assertViewIs('referees.show')
             ->assertViewHas('referee', $referee);
@@ -73,7 +73,7 @@ class RefereeControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([RefereesController::class, 'show'], $referee))
             ->assertForbidden();
     }
@@ -98,7 +98,7 @@ class RefereeControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->delete(action([RefereesController::class, 'destroy'], $referee))
             ->assertRedirect(action([RefereesController::class, 'index']));
 
@@ -113,7 +113,7 @@ class RefereeControllerTest extends TestCase
         $referee = Referee::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->delete(action([RefereesController::class, 'destroy'], $referee))
             ->assertForbidden();
     }

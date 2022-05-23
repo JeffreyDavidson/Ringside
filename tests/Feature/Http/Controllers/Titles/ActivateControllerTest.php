@@ -25,16 +25,16 @@ class ActivateControllerTest extends TestCase
     {
         $title = Title::factory()->unactivated()->create();
 
-        $this->assertEquals(TitleStatus::unactivated(), $title->status);
+        $this->assertEquals(TitleStatus::UNACTIVATED, $title->status);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ActivateController::class], $title))
             ->assertRedirect(action([TitlesController::class, 'index']));
 
         tap($title->fresh(), function ($title) {
             $this->assertCount(1, $title->activations);
-            $this->assertEquals(TitleStatus::active(), $title->status);
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
     }
 
@@ -47,13 +47,13 @@ class ActivateControllerTest extends TestCase
         $startedAt = $title->activations->last()->started_at;
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ActivateController::class], $title))
             ->assertRedirect(action([TitlesController::class, 'index']));
 
         tap($title->fresh(), function ($title) use ($startedAt) {
             $this->assertTrue($title->currentActivation->started_at->lt($startedAt));
-            $this->assertEquals(TitleStatus::active(), $title->status);
+            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
         });
     }
 
@@ -65,7 +65,7 @@ class ActivateControllerTest extends TestCase
         $title = Title::factory()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([ActivateController::class], $title))
             ->assertForbidden();
     }
@@ -95,7 +95,7 @@ class ActivateControllerTest extends TestCase
         $title = Title::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ActivateController::class], $title));
     }
 

@@ -24,7 +24,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
     public function create_returns_a_view()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->get(action([WrestlersController::class, 'create']))
             ->assertViewIs('wrestlers.create')
             ->assertViewHas('wrestler', new Wrestler);
@@ -36,7 +36,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_view_the_form_for_creating_a_wrestler()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->get(action([WrestlersController::class, 'create']))
             ->assertForbidden();
     }
@@ -58,7 +58,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
     {
         $this->withoutExceptionHandling();
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'create']))
             ->post(action([WrestlersController::class, 'store']), WrestlerRequestDataFactory::new()->create([
                 'name' => 'Example Wrestler Name',
@@ -84,7 +84,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
     public function signature_move_for_a_wrestler_if_signature_move_is_filled_in_request()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'create']))
             ->post(
                 action([WrestlersController::class, 'index']),
@@ -102,7 +102,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
     public function an_employment_is_not_created_for_the_wrestler_if_started_at_is_filled_in_request()
     {
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'create']))
             ->post(
                 action([WrestlersController::class, 'store']),
@@ -122,7 +122,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
         $startedAt = now()->toDateTimeString();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->from(action([WrestlersController::class, 'create']))
             ->post(
                 action([WrestlersController::class, 'store']),
@@ -141,7 +141,7 @@ class WrestlerControllerStoreMethodTest extends TestCase
     public function a_basic_user_cannot_create_a_wrestler()
     {
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->from(action([WrestlersController::class, 'create']))
             ->post(action([WrestlersController::class, 'store']), WrestlerRequestDataFactory::new()->create())
             ->assertForbidden();

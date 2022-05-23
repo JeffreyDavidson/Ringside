@@ -31,13 +31,13 @@ class ClearInjuryControllerTest extends TestCase
         $this->assertNull($wrestler->injuries->last()->ended_at);
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $wrestler))
             ->assertRedirect(action([WrestlersController::class, 'index']));
 
         tap($wrestler->fresh(), function ($wrestler) {
             $this->assertNotNull($wrestler->injuries->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::bookable(), $wrestler->status);
+            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
         });
     }
 
@@ -53,7 +53,7 @@ class ClearInjuryControllerTest extends TestCase
             ->bookable()
             ->create();
 
-        $this->actAs(Role::administrator())
+        $this->actAs(ROLE::ADMINISTRATOR)
             ->patch(route('wrestlers.clear-from-injury', $injuredWrestler));
 
         tap($injuredWrestler->fresh(), function ($wrestler) {
@@ -73,7 +73,7 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler = Wrestler::factory()->injured()->create();
 
         $this
-            ->actAs(Role::basic())
+            ->actAs(ROLE::BASIC)
             ->patch(action([ClearInjuryController::class], $wrestler))
             ->assertForbidden();
     }
@@ -103,7 +103,7 @@ class ClearInjuryControllerTest extends TestCase
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         $this
-            ->actAs(Role::administrator())
+            ->actAs(ROLE::ADMINISTRATOR)
             ->patch(action([ClearInjuryController::class], $wrestler));
     }
 
