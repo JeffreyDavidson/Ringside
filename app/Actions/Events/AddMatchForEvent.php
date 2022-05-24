@@ -6,11 +6,13 @@ namespace App\Actions\Events;
 
 use App\Data\EventMatchData;
 use App\Models\Event;
+use App\Models\EventMatch;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 use App\Repositories\EventMatchRepository;
+use Illuminate\Support\Collection;
 
 class AddMatchForEvent
 {
@@ -77,42 +79,45 @@ class AddMatchForEvent
      * @param \Illuminate\Database\Eloquent\Collection<Referee> $referees
      * @return void
      */
-    private function addRefereesToMatch($eventMatch, $referees)
+    private function addRefereesToMatch($eventMatch, $referees): void
     {
         $referees->map(
             fn (Referee $referee) => $this->eventMatchRepository->addRefereeToMatch($eventMatch, $referee)
         );
     }
 
-    /**
-     * Add competitors to an event match.
-     *
-     * @param \App\Models\EventMatch $eventMatch
-     * @param \Illuminate\Database\Eloquent\Collection $competitors
-     * @return void
-     */
-    private function addCompetitorsToMatch($eventMatch, $competitors)
+    private function addCompetitorsToMatch(EventMatch $eventMatch, Collection $competitors): void
     {
         $competitors->each(function ($sideCompetitors, $sideNumber) use ($eventMatch) {
             if ($sideCompetitors->has('wrestlers')) {
-                $sideCompetitors->get('wrestlers')->each(
-                    fn (Wrestler $wrestler) => $this->eventMatchRepository->addWrestlerToMatch(
-                        $eventMatch,
-                        $wrestler,
-                        $sideNumber
-                    )
-                );
+                $this->addWrestlersToMatch($eventMatch, $sideCompetitors->get('wrestlers'), $sideNumber);
             }
 
             if ($sideCompetitors->has('tag_teams')) {
-                $sideCompetitors->get('tag_teams')->each(
-                    fn (TagTeam $tagTeam) => $this->eventMatchRepository->addTagTeamToMatch(
-                        $eventMatch,
-                        $tagTeam,
-                        $sideNumber
-                    )
-                );
+                $this->addTagTeamsToMatch($eventMatch, $sideCompetitors->get('tag_teams'), $sideNumber);
             }
         });
+    }
+
+    private function addWrestlersToMatch(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
+    {
+        $wrestlers->each(
+            fn (Wrestler $wrestler) => $this->eventMatchRepository->addWrestlerToMatch(
+                $eventMatch,
+                $wrestler,
+                $sideNumber
+            )
+        );
+    }
+
+    private function addTagTeamsToMatch($eventMatch, $tagTeams, $sideNumber): void
+    {
+        $tagTeams->each(
+            fn (TagTeam $tagTeam) => $this->eventMatchRepository->addTagTeamToMatch(
+                $eventMatch,
+                $tagTeam,
+                $sideNumber
+            )
+        );
     }
 }
