@@ -10,8 +10,8 @@ use App\Models\Injury;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 class WrestlerFactory extends Factory
 {

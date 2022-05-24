@@ -7,8 +7,8 @@ namespace Database\Factories;
 use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\Venue;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Event>
