@@ -34,7 +34,7 @@ class RetireControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->retirements);
-            $this->assertEquals(RefereeStatus::retired(), $referee->status);
+            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
         });
     }
 
@@ -52,7 +52,7 @@ class RetireControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->retirements);
-            $this->assertEquals(RefereeStatus::retired(), $referee->status);
+            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
         });
     }
 
@@ -70,7 +70,7 @@ class RetireControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->retirements);
-            $this->assertEquals(RefereeStatus::retired(), $referee->status);
+            $this->assertEquals(RefereeStatus::RETIRED, $referee->status);
         });
     }
 

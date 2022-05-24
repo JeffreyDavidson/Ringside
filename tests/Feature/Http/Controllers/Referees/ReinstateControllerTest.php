@@ -36,7 +36,7 @@ class ReinstateControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->suspensions->last()->ended_at);
-            $this->assertEquals(RefereeStatus::bookable(), $referee->status);
+            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
     }
 

@@ -34,7 +34,7 @@ class ReleaseControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->employments->last()->ended_at);
-            $this->assertEquals(RefereeStatus::released(), $referee->status);
+            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
         });
     }
 
@@ -53,7 +53,7 @@ class ReleaseControllerTest extends TestCase
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->injuries->last()->ended_at);
             $this->assertNotNull($referee->employments->last()->ended_at);
-            $this->assertEquals(RefereeStatus::released(), $referee->status);
+            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
         });
     }
 
@@ -72,7 +72,7 @@ class ReleaseControllerTest extends TestCase
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->suspensions->last()->ended_at);
             $this->assertNotNull($referee->employments->last()->ended_at);
-            $this->assertEquals(RefereeStatus::released(), $referee->status);
+            $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
         });
     }
 
