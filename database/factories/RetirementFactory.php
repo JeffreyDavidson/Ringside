@@ -10,8 +10,8 @@ use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 class RetirementFactory extends Factory
 {

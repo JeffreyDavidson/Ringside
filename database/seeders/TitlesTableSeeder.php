@@ -7,8 +7,8 @@ namespace Database\Seeders;
 use App\Models\Activation;
 use App\Models\Retirement;
 use App\Models\Title;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class TitlesTableSeeder extends Seeder
 {

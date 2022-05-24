@@ -6,8 +6,8 @@ namespace Database\Factories;
 
 use App\Models\Stable;
 use App\Models\Title;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 class ActivationFactory extends Factory
 {

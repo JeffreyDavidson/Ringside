@@ -8,8 +8,8 @@ use App\Models\Manager;
 use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 class EmploymentFactory extends Factory
 {

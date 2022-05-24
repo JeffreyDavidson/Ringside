@@ -7,8 +7,8 @@ namespace Database\Seeders;
 use App\Models\Employment;
 use App\Models\Retirement;
 use App\Models\TagTeam;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class TagTeamsTableSeeder extends Seeder
 {

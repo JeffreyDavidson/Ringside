@@ -7,8 +7,8 @@ namespace Database\Seeders;
 use App\Models\Employment;
 use App\Models\Referee;
 use App\Models\Retirement;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class RefereesTableSeeder extends Seeder
 {
