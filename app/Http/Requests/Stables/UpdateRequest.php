@@ -7,6 +7,8 @@ namespace App\Http\Requests\Stables;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use App\Rules\TagTeamCanJoinStable;
+use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -35,10 +37,23 @@ class UpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('stables')->ignore($stable->id)],
             'started_at' => ['nullable', Rule::requiredIf(fn () => ! $stable->isUnactivated()), 'string', 'date'],
+            'members_count' => ['nullable', 'integer', 'min:3'],
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
-            'wrestlers.*' => ['bail', 'integer', 'distinct', Rule::exists('wrestlers', 'id')],
-            'tag_teams.*' => ['bail', 'integer', 'distinct', Rule::exists('tag_teams', 'id')],
+            'wrestlers.*' => [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('wrestlers', 'id'),
+                new WrestlerCanJoinStable($this->input('tag_teams')),
+            ],
+            'tag_teams.*' => [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('tag_teams', 'id'),
+                new TagTeamCanJoinStable(),
+            ],
         ];
     }
 
@@ -156,5 +171,17 @@ class UpdateRequest extends FormRequest
                 }
             }
         });
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'members_count' => (count($this->input('tag_teams')) * 2) + count($this->input('wrestlers')),
+        ]);
     }
 }

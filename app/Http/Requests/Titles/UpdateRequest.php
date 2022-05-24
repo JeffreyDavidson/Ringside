@@ -31,7 +31,13 @@ class UpdateRequest extends FormRequest
         $title = $this->route()->parameter('title');
 
         return [
-            'name' => ['required', 'string', 'min:3', 'ends_with:Title,Titles', Rule::unique('titles')->ignore($title->id)],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'ends_with:Title,Titles',
+                Rule::unique('titles')->ignore($title->id),
+            ],
             'activated_at' => ['nullable', 'string', 'date'],
         ];
     }

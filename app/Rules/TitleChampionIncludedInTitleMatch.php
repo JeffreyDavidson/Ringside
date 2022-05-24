@@ -35,6 +35,10 @@ class TitleChampionIncludedInTitleMatch implements Rule
      */
     public function passes($attribute, $value)
     {
+        if (count($this->itleIds) === 0) {
+            return true;
+        }
+
         $titles = Title::with('currentChampionship.champion')
             ->findMany($this->titleIds)
             ->filter(fn ($title) => ! $title->isVacant());
