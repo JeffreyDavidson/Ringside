@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Referees;
 
 use App\Models\Referee;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class UpdateRequest extends FormRequest
 {
@@ -27,50 +27,13 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        $referee = $this->route()->parameter('referee');
+
         return [
             'first_name' => ['required', 'string', 'min:3'],
             'last_name' => ['required', 'string', 'min:3'],
-            'started_at' => ['nullable', 'string', 'date'],
+            'started_at' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($referee)],
         ];
-    }
-
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator) {
-            if ($validator->errors()->isEmpty()) {
-                $referee = $this->route()->parameter('referee');
-
-                if ($referee->isCurrentlyEmployed()) {
-                    $validator->errors()->add(
-                        'started_at',
-                        "{$referee->full_name} is currently employed and cannot have their original start date changed."
-                    );
-                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
-                }
-
-                if ($referee->isReleased()) {
-                    $validator->errors()->add(
-                        'started_at',
-                        "{$referee->full_name} has been released and cannot have their original start date changed."
-                    );
-                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
-                }
-
-                if ($referee->isRetired()) {
-                    $validator->errors()->add(
-                        'started_at',
-                        "{$referee->full_name} is currently retired and cannot have their original start date changed."
-                    );
-                    $validator->addFailure('started_at', 'employment_date_cannot_be_changed');
-                }
-            }
-        });
     }
 
     /**
