@@ -34,7 +34,7 @@ class InjureControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->injuries);
-            $this->assertEquals(RefereeStatus::injured(), $referee->status);
+            $this->assertEquals(RefereeStatus::INJURED, $referee->status);
         });
     }
 

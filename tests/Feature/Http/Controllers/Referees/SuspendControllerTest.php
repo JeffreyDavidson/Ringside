@@ -34,7 +34,7 @@ class SuspendControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertCount(1, $referee->suspensions);
-            $this->assertEquals(RefereeStatus::suspended(), $referee->status);
+            $this->assertEquals(RefereeStatus::SUSPENDED, $referee->status);
         });
     }
 

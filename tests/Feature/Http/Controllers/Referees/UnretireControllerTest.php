@@ -34,7 +34,7 @@ class UnretireControllerTest extends TestCase
 
         tap($referee->fresh(), function ($referee) {
             $this->assertNotNull($referee->retirements->last()->ended_at);
-            $this->assertEquals(RefereeStatus::bookable(), $referee->status);
+            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
         });
     }
 
