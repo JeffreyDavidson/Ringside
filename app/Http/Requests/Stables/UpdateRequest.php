@@ -12,9 +12,15 @@ use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Tests\RequestFactories\StableRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = StableRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *

@@ -7,9 +7,15 @@ namespace App\Http\Requests\Referees;
 use App\Models\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
+use Tests\RequestFactories\RefereeRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = RefereeRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *

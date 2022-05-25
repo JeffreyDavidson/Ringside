@@ -7,9 +7,15 @@ namespace App\Http\Requests\Events;
 use App\Rules\EventDateCanBeChanged;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Tests\RequestFactories\EventRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = EventRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *

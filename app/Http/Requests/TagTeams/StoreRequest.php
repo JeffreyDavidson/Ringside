@@ -8,9 +8,15 @@ use App\Models\TagTeam;
 use App\Rules\WrestlerCanJoinTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Tests\RequestFactories\TagTeamRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = TagTeamRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *

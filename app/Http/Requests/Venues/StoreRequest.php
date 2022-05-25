@@ -6,9 +6,15 @@ namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
 use Illuminate\Foundation\Http\FormRequest;
+use Tests\RequestFactories\VenueRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = VenueRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *
