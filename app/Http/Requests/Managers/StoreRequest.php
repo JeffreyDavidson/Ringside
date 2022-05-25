@@ -6,9 +6,15 @@ namespace App\Http\Requests\Managers;
 
 use App\Models\Manager;
 use Illuminate\Foundation\Http\FormRequest;
+use Tests\RequestFactories\ManagerRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = ManagerRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *

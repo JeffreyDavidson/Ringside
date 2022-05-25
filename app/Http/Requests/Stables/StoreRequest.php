@@ -9,9 +9,15 @@ use App\Rules\TagTeamCanJoinStable;
 use App\Rules\WrestlerCanJoinStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Tests\RequestFactories\StableRequestFactory;
+use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
+    use HasFactory;
+
+    public static $factory = StableRequestFactory::class;
+
     /**
      * Determine if the user is authorized to make this request.
      *
