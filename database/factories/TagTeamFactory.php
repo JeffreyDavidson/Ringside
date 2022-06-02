@@ -41,6 +41,7 @@ class TagTeamFactory extends Factory
                 $wrestlers = Wrestler::factory()->count(2)->create();
                 foreach ($wrestlers as $wrestler) {
                     $tagTeam->wrestlers()->attach($wrestler->id, ['joined_at' => now()->toDateTimeString()]);
+                    $wrestler->update(['current_tag_team_id' => $tagTeam->id]);
                 }
             }
         });
