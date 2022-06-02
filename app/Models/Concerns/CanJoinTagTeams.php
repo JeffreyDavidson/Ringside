@@ -26,9 +26,7 @@ trait CanJoinTagTeams
      */
     public function currentTagTeam()
     {
-        return $this->tagTeams()
-            ->wherePivotNull('left_at')
-            ->first();
+        return $this->belongsTo(TagTeam::class);
     }
 
     /**
