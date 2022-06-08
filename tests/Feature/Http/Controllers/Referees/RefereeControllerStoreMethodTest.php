@@ -1,137 +1,76 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Referees;
-
-use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
+use App\Http\Requests\Referees\StoreRequest;
 use App\Models\Referee;
-use Tests\Factories\RefereeRequestDataFactory;
-use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
-/**
- * @group referees
- * @group feature-referees
- * @group roster
- * @group feature-roster
- */
-class RefereeControllerStoreMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function create_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([RefereesController::class, 'create']))
-            ->assertViewIs('referees.create')
-            ->assertViewHas('referee', new Referee);
-    }
+test('create returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([RefereesController::class, 'create']))
+        ->assertStatus(200)
+        ->assertViewIs('referees.create')
+        ->assertViewHas('referee', new Referee);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_creating_a_referee()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([RefereesController::class, 'create']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view the form for creating a referee', function () {
+    $this->actingAs(basicUser())
+        ->get(action([RefereesController::class, 'create']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_creating_a_referee()
-    {
-        $this
-            ->get(action([RefereesController::class, 'create']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view the form for creating a referee', function () {
+    $this->get(action([RefereesController::class, 'create']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function store_creates_a_referee_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'create']))
-            ->post(action([RefereesController::class, 'store'], RefereeRequestDataFactory::new()->create([
-                'first_name' => 'James',
-                'last_name' => 'Williams',
-                'started_at' => null,
-            ])))
-            ->assertRedirect(action([RefereesController::class, 'index']));
+test('store creates a referee and redirects', function () {
+    $data = StoreRequest::factory()->create([
+        'first_name' => 'Taylor',
+        'last_name' => 'Otwell',
+        'started_at' => null,
+    ]);
 
-        tap(Referee::first(), function ($referee) {
-            $this->assertEquals('James', $referee->first_name);
-            $this->assertEquals('Williams', $referee->last_name);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([RefereesController::class, 'create']))
+        ->post(action([RefereesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function an_employment_is_not_created_for_the_referee_if_started_at_is_filled_in_request()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'create']))
-            ->post(
-                action([RefereesController::class, 'index']),
-                RefereeRequestDataFactory::new()->create(['started_at' => null])
-            );
+    expect(Referee::latest()->first())
+        ->first_name->toBe('Taylor')
+        ->last_name->toBe('Otwell')
+        ->employments->toBeEmpty();
+});
 
-        tap(Referee::first(), function ($referee) {
-            $this->assertCount(0, $referee->employments);
-        });
-    }
+test('an employment is created for the referee if started at is filled in request', function () {
+    $dateTime = Carbon::now()->toDateTimeString();
+    $data = StoreRequest::factory()->create([
+        'started_at' => $dateTime,
+    ]);
 
-    /**
-     * @test
-     */
-    public function an_employment_is_created_for_the_referee_if_started_at_is_filled_in_request()
-    {
-        $this->withoutExceptionHandling();
-        $startedAt = now()->toDateTimeString();
+    $this->actingAs(administrator())
+        ->from(action([RefereesController::class, 'create']))
+        ->post(action([RefereesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'create']))
-            ->post(
-                action([RefereesController::class, 'store']),
-                RefereeRequestDataFactory::new()->create(['started_at' => $startedAt])
-            );
+    expect(Referee::latest()->first())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+});
 
-        tap(Referee::first(), function ($referee) use ($startedAt) {
-            $this->assertCount(1, $referee->employments);
-            $this->assertEquals($startedAt, $referee->employments->first()->started_at->toDateTimeString());
-        });
-    }
+test('a basic user cannot create a referee', function () {
+    $data = StoreRequest::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_create_a_referee()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([RefereesController::class, 'create']))
-            ->post(action([RefereesController::class, 'store']), RefereeRequestDataFactory::new()->create())
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->post(action([RefereesController::class, 'store']), $data)
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_create_a_referee()
-    {
-        $this
-            ->from(action([RefereesController::class, 'create']))
-            ->post(action([RefereesController::class, 'store']), RefereeRequestDataFactory::new()->create())
-            ->assertRedirect(route('login'));
-    }
-}
+test('a guest cannot create a referee', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->post(action([RefereesController::class, 'store']), $data)
+        ->assertRedirect(route('login'));
+});

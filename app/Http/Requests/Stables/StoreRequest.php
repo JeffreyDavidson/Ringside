@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Stables;
 
 use App\Models\Stable;
-use App\Rules\TagTeamCanJoinStable;
-use App\Rules\WrestlerCanJoinStable;
+use App\Rules\TagTeamCanJoinNewStable;
+use App\Rules\WrestlerCanJoinNewStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\StableRequestFactory;
@@ -38,7 +38,7 @@ class StoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('stables', 'name')],
             'started_at' => ['nullable', 'string', 'date'],
-            'members_count' => ['nullable', 'integer', 'min:3'],
+            'members_count' => ['nullable', 'integer', Rule::when($this->input('started_at'), 'min:3')],
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
             'wrestlers.*' => [
@@ -46,14 +46,14 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinStable($this->input('tag_teams')),
+                new WrestlerCanJoinNewStable($this->input('tag_teams')),
             ],
             'tag_teams.*' => [
                 'bail',
                 'integer',
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
-                new TagTeamCanJoinStable(),
+                new TagTeamCanJoinNewStable(),
             ],
         ];
     }
@@ -66,7 +66,7 @@ class StoreRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'members_count' => (count($this->input('tag_teams')) * 2) + count($this->input('wrestlers')),
+            'members_count' => (count($this->input('tag_teams', [])) * 2) + count($this->input('wrestlers', [])),
         ]);
     }
 

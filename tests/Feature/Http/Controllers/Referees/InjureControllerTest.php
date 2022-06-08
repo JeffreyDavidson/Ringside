@@ -1,167 +1,48 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Referees;
-
 use App\Enums\RefereeStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Referees\InjureController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
-use Tests\TestCase;
 
-/**
- * @group referees
- * @group feature-referees
- * @group roster
- * @group feature-roster
- */
-class InjureControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_injures_a_bookable_referee_and_redirects()
-    {
-        $referee = Referee::factory()->bookable()->create();
+beforeEach(function () {
+    $this->referee = Referee::factory()->bookable()->create();
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee))
-            ->assertRedirect(action([RefereesController::class, 'index']));
+test('invoke injures a bookable referee and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([InjureController::class], $this->referee))
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertCount(1, $referee->injuries);
-            $this->assertEquals(RefereeStatus::INJURED, $referee->status);
-        });
-    }
+    expect($this->referee->fresh())
+        ->injuries->toHaveCount(1)
+        ->status->toBe(RefereeStatus::INJURED);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_injure_a_referee()
-    {
-        $referee = Referee::factory()->withFutureEmployment()->create();
+test('a basic user cannot injure a bookable referee', function () {
+    $this->actingAs(basicUser())
+        ->patch(action([InjureController::class], $this->referee))
+        ->assertForbidden();
+});
 
-        $this->actAs(ROLE::BASIC)
-            ->patch(action([InjureController::class], $referee))
-            ->assertForbidden();
-    }
+test('a guest user cannot injure a bookable referee', function () {
+    $this->patch(action([InjureController::class], $this->referee))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_injure_a_referee()
-    {
-        $referee = Referee::factory()->create();
+test('invoke throws exception for injuring a non injurable referee', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $this->patch(action([InjureController::class], $referee))
-            ->assertRedirect(route('login'));
-    }
+    $referee = Referee::factory()->{$factoryState}()->create();
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_an_unemployed_referee()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->unemployed()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_suspended_referee()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->suspended()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_released_referee()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->released()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_future_employed_referee()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->withFutureEmployment()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_injuring_a_retired_referee()
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->retired()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider noninjurableRefereeTypes
-     */
-    public function invoke_throws_exception_for_injuring_a_non_injurable_referee($factoryState)
-    {
-        $this->expectException(CannotBeInjuredException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([InjureController::class], $referee));
-    }
-
-    public function noninjurableRefereeTypes()
-    {
-        return [
-            'unemployed referee' => ['unemployed'],
-            'suspended referee' => ['suspended'],
-            'released referee' => ['released'],
-            'with future employed referee' => ['withFutureEmployment'],
-            'retired referee' => ['retired'],
-            'injured referee' => ['injured'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([InjureController::class], $referee));
+})->throws(CannotBeInjuredException::class)->with([
+    'unemployed',
+    'suspended',
+    'released',
+    'withFutureEmployment',
+    'retired',
+    'injured',
+]);

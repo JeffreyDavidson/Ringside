@@ -37,6 +37,6 @@ class RetireAction extends BaseManagerAction
             ->whenNotEmpty(fn () => $this->managerRepository->removeFromCurrentTagTeams($manager));
 
         $manager->currentWrestlers
-            ->whenNotEmpty(fn () => $this->managerRepository->removeFromCurrentTagTeams($manager));
+            ->whenNotEmpty(fn () => $this->managerRepository->removeFromCurrentWrestlers($manager));
     }
 }

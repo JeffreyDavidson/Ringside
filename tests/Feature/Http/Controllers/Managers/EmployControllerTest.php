@@ -1,137 +1,73 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
 use App\Enums\ManagerStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Managers\EmployController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class EmployControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_employs_an_unemployed_manager_and_redirects()
-    {
-        $manager = Manager::factory()->unemployed()->create();
+test('invoke employs an unemployed manager and redirects', function () {
+    $manager = Manager::factory()->unemployed()->create();
 
-        $this->assertCount(0, $manager->employments);
-        $this->assertEquals(ManagerStatus::UNEMPLOYED, $manager->status);
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    expect($manager->fresh())
+        ->employments->toHaveCount(1)
+        ->status->toBe(ManagerStatus::AVAILABLE);
+});
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertCount(1, $manager->employments);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-        });
-    }
+test('invoke employs a future employed manager and redirects', function () {
+    $manager = Manager::factory()->withFutureEmployment()->create();
+    $startedAt = $manager->employments->first()->started_at;
 
-    /**
-     * @test
-     */
-    public function invoke_employs_a_future_employed_manager_and_redirects()
-    {
-        $manager = Manager::factory()->withFutureEmployment()->create();
-        $startedAt = $manager->employments->last()->started_at;
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(ManagerStatus::FUTURE_EMPLOYMENT, $manager->status);
+    expect($manager->fresh())
+        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->status->toBe(ManagerStatus::AVAILABLE);
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+test('invoke employs a released manager and redirects', function () {
+    $manager = Manager::factory()->released()->create();
 
-        tap($manager->fresh(), function ($manager) use ($startedAt) {
-            $this->assertTrue($manager->currentEmployment->started_at->lt($startedAt));
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-        });
-    }
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function invoke_employs_a_released_manager_and_redirects()
-    {
-        $manager = Manager::factory()->released()->create();
+    expect($manager->fresh())
+        ->employments->toHaveCount(2)
+        ->status->toBe(ManagerStatus::AVAILABLE);
+});
 
-        $this->assertEquals(ManagerStatus::RELEASED, $manager->status);
+test('a basic user cannot employ a manager', function () {
+    $manager = Manager::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->actingAs(basicUser())
+        ->patch(action([EmployController::class], $manager))
+        ->assertForbidden();
+});
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertCount(2, $manager->employments);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-        });
-    }
+test('a guest user cannot injure a manager', function () {
+    $manager = Manager::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_employ_a_manager()
-    {
-        $manager = Manager::factory()->withFutureEmployment()->create();
+    $this->patch(action([EmployController::class], $manager))
+        ->assertRedirect(route('login'));
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([EmployController::class], $manager))
-            ->assertForbidden();
-    }
+test('invoke throws exception for injuring a non injurable manager', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_employ_a_manager()
-    {
-        $manager = Manager::factory()->withFutureEmployment()->create();
+    $manager = Manager::factory()->{$factoryState}()->create();
 
-        $this
-            ->patch(action([EmployController::class], $manager))
-            ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider nonemployableManagerTypes
-     */
-    public function invoke_throws_exception_for_employing_a_non_employable_manager($factoryState)
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $manager));
-    }
-
-    public function nonemployableManagerTypes()
-    {
-        return [
-            'suspended manager' => ['suspended'],
-            'injured manager' => ['injured'],
-            'available manager' => ['available'],
-            'retired manager' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $manager));
+})->throws(CannotBeEmployedException::class)->with([
+    'suspended',
+    'injured',
+    'available',
+    'retired',
+]);

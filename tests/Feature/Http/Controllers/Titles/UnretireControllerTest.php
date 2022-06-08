@@ -1,89 +1,46 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Titles;
-
-use App\Enums\Role;
 use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Titles\UnretireController;
 use App\Models\Title;
-use Tests\TestCase;
 
-/**
- * @group titles
- * @group feature-titles
- */
-class UnretireControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_unretires_a_retired_title_and_redirects()
-    {
-        $title = Title::factory()->retired()->create();
+beforeEach(function () {
+    $this->title = Title::factory()->retired()->create();
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $title))
-            ->assertRedirect(action([TitlesController::class, 'index']));
+test('invoke unretires a retired title and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([UnretireController::class], $this->title))
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) {
-            $this->assertNotNull($title->retirements->last()->ended_at);
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-        });
-    }
+    expect($this->title->fresh())
+        ->retirements->last()->ended_at->not->toBeNull()
+        ->status->toBe(TitleStatus::ACTIVE);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_unretire_a_title()
-    {
-        $title = Title::factory()->create();
+test('a basic user cannot unretire a title', function () {
+    $this->actingAs(basicUser())
+        ->patch(action([UnretireController::class], $this->title))
+        ->assertForbidden();
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([UnretireController::class], $title))
-            ->assertForbidden();
-    }
+test('a guest cannot unretire a title', function () {
+    $this->patch(action([UnretireController::class], $this->title))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_unretire_a_title()
-    {
-        $title = Title::factory()->create();
+test('invoke throws exception for unretiring a non unretirable title', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $this
-            ->patch(action([UnretireController::class], $title))
-            ->assertRedirect(route('login'));
-    }
+    $title = Title::factory()->{$factoryState}()->create();
 
-    /**
-     * @test
-     *
-     * @dataProvider nonunretirableTitleTypes
-     */
-    public function invoke_throws_exception_for_unretiring_a_non_unretirable_title($factoryState)
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $title = Title::factory()->{$factoryState}()->create();
-
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $title));
-    }
-
-    public function nonunretirableTitleTypes()
-    {
-        return [
-            'active title' => ['active'],
-            'inactive title' => ['inactive'],
-            'with future activation title' => ['withFutureActivation'],
-            'unactivated title' => ['unactivated'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([UnretireController::class], $title));
+})->throws(CannotBeUnretiredException::class)->with([
+    'active',
+    'inactive',
+    'withFutureActivation',
+    'unactivated',
+]);

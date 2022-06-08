@@ -1,94 +1,50 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
 use App\Enums\ManagerStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\SuspendController;
 use App\Models\Manager;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class SuspendControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_suspends_an_available_manager_and_redirects()
-    {
-        $manager = Manager::factory()->available()->create();
+test('invoke suspends an available manager and redirects', function () {
+    $manager = Manager::factory()->available()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([SuspendController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertCount(1, $manager->suspensions);
-            $this->assertEquals(ManagerStatus::SUSPENDED, $manager->status);
-        });
-    }
+    expect($manager->fresh())
+        ->suspensions->toHaveCount(1)
+        ->status->toBe(ManagerStatus::SUSPENDED);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_suspend_a_manager()
-    {
-        $manager = Manager::factory()->create();
+test('a basic user cannot suspend an available manager', function () {
+    $manager = Manager::factory()->available()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([SuspendController::class], $manager))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([SuspendController::class], $manager))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_suspend_a_manager()
-    {
-        $manager = Manager::factory()->create();
+test('a guest cannot suspend an available manager', function () {
+    $manager = Manager::factory()->available()->create();
 
-        $this
-            ->patch(action([SuspendController::class], $manager))
-            ->assertRedirect(route('login'));
-    }
+    $this->patch(action([SuspendController::class], $manager))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     *
-     * @dataProvider nonsuspendableManagerTypes
-     */
-    public function invoke_throws_exception_for_suspending_a_non_suspendable_manager($factoryState)
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
+test('invoke throws exception for suspending a non suspendable manager', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->{$factoryState}()->create();
+    $manager = Manager::factory()->{$factoryState}()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $manager));
-    }
-
-    public function nonsuspendableManagerTypes()
-    {
-        return [
-            'unemployed manager' => ['unemployed'],
-            'with future employed manager' => ['withFutureEmployment'],
-            'injured manager' => ['injured'],
-            'released manager' => ['released'],
-            'retired manager' => ['retired'],
-            'suspended manager' => ['suspended'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([SuspendController::class], $manager));
+})->throws(CannotBeSuspendedException::class)->with([
+    'unemployed',
+    'withFutureEmployment',
+    'injured',
+    'released',
+    'retired',
+    'suspended',
+]);

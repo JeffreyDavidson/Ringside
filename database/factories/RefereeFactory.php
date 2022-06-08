@@ -108,12 +108,4 @@ class RefereeFactory extends Factory
                 $referee->save();
             });
     }
-
-    public function softDeleted()
-    {
-        return $this->state(fn (array $attributes) => ['deleted_at' => now()])
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
-    }
 }

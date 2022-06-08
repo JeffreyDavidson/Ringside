@@ -7,7 +7,7 @@ namespace App\Http\Requests\Wrestlers;
 use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Tests\Factories\Wrestlers\WrestlerRequestFactory;
+use Tests\RequestFactories\WrestlerRequestFactory;
 use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest

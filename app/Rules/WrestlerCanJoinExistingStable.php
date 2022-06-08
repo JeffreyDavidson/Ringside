@@ -2,9 +2,10 @@
 
 namespace App\Rules;
 
+use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
 
-class WrestlerCanJoinStable implements Rule
+class WrestlerCanJoinExistingStable implements Rule
 {
     /**
      * @var array

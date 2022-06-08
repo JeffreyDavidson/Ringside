@@ -1,204 +1,116 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Titles;
-
-use App\Enums\Role;
 use App\Http\Controllers\Titles\TitlesController;
+use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
-use Tests\Factories\TitleRequestDataFactory;
-use Tests\TestCase;
 
-/**
- * @group titles
- * @group feature-titles
- */
-class TitlesControllerUpdateMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function edit_returns_a_view()
-    {
-        $title = Title::factory()->create();
+test('edit returns a view', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([TitlesController::class, 'edit'], $title))
-            ->assertViewIs('titles.edit')
-            ->assertViewHas('title', $title);
-    }
+    $this->actingAs(administrator())
+        ->get(action([TitlesController::class, 'edit'], $title))
+        ->assertStatus(200)
+        ->assertViewIs('titles.edit')
+        ->assertViewHas('title', $title);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_editing_a_title()
-    {
-        $title = Title::factory()->create();
+test('a basic user cannot view the form for editing a title', function () {
+    $title = Title::factory()->create();
 
-        $this->actAs(ROLE::BASIC)
-            ->get(action([TitlesController::class, 'edit'], $title))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([TitlesController::class, 'edit'], $title))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_editing_a_title()
-    {
-        $title = Title::factory()->create();
+test('a guest cannot view the form for editing a title', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->get(action([TitlesController::class, 'edit'], $title))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([TitlesController::class, 'edit'], $title))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function update_a_title()
-    {
-        $title = Title::factory()->create(['name' => 'Old Name Title']);
+test('updates a title and redirects', function () {
+    $title = Title::factory()->create([
+        'name' => 'Old Example Title',
+    ]);
+    $data = UpdateRequest::factory()->create([
+        'name' => 'New Example Title',
+        'started_at' => null,
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create([
-                    'name' => 'New Name Title',
-                ])
-            )
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->from(action([TitlesController::class, 'edit'], $title))
+        ->patch(action([TitlesController::class, 'update'], $title), $data)
+        ->assertValid()
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) {
-            $this->assertEquals('New Name Title', $title->name);
-        });
-    }
+    expect($title->fresh())
+        ->name->toBe('New Example Title')
+        ->activations->toBeEmpty();
+});
 
-    /**
-     * @test
-     */
-    public function update_can_activate_an_unactivated_title_when_activated_at_is_filled()
-    {
-        $title = Title::factory()->unactivated()->create();
+test('update can activate an unactivated title when activated at is filled', function () {
+    $title = Title::factory()->unactivated()->create();
+    $activatedAt = now()->toDateTimeString();
+    $data = UpdateRequest::factory()->create([
+        'activated_at' => $activatedAt,
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create(['activated_at' => now()->toDateTimeString()])
-            )
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->from(action([TitlesController::class, 'edit'], $title))
+        ->patch(action([TitlesController::class, 'update'], $title), $data)
+        ->assertValid()
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) {
-            $this->assertCount(1, $title->activations);
-        });
-    }
+    expect($title->fresh())
+        ->activations->toHaveCount(1)
+        ->activations->first()->started_at->toDateTimeString()->toBe($activatedAt);
+});
 
-    /**
-     * @test
-     */
-    public function update_can_activate_a_future_activated_title_when_activated_at_is_filled()
-    {
-        $now = now();
-        $title = Title::factory()->withFutureActivation()->create();
+test('update can activate an inactive title', function () {
+    $title = Title::factory()->inactive()->create();
+    $activatedAt = now()->toDateTimeString();
+    $data = UpdateRequest::factory()->create([
+        'activated_at' => $activatedAt,
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create([
-                    'activated_at' => $now->toDateTimeString(),
-                ])
-            )
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->from(action([TitlesController::class, 'edit'], $title))
+        ->patch(action([TitlesController::class, 'update'], $title), $data)
+        ->assertValid()
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) use ($now) {
-            $this->assertCount(1, $title->activations);
-            $this->assertEquals($now, $title->activations()->first()->started_at->toDateTimeString());
-        });
-    }
+    expect(Title::latest()->first())
+        ->activations->toHaveCount(2)
+        ->activations->last()->started_at->toDateTimeString()->toBe($activatedAt);
+});
 
-    /**
-     * @test
-     */
-    public function update_can_activate_an_inactive_title()
-    {
-        $title = Title::factory()->inactive()->create();
-        $startDate = $title->activations->last()->started_at->toDateTimeString();
+test('update cannot activate an active title', function () {
+    $title = Title::factory()->active()->create();
+    $activatedAt = now()->toDateTimeString();
+    $data = UpdateRequest::factory()->create([
+        'activated_at' => $activatedAt,
+    ]);
 
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create()
-            )
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->from(action([TitlesController::class, 'edit'], $title))
+        ->patch(action([TitlesController::class, 'update'], $title), $data)
+        ->assertInvalid();
+});
 
-        tap($title->fresh(), function ($title) use ($startDate) {
-            $this->assertCount(2, $title->activations);
-        });
-    }
+test('a basic user cannot update a title', function () {
+    $title = Title::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-    /**
-     * @test
-     */
-    public function update_cannot_activate_an_active_title()
-    {
-        $title = Title::factory()->active()->create();
-        $startDate = $title->activations->last()->started_at->toDateTimeString();
+    $this->actingAs(basicUser())
+        ->patch(action([TitlesController::class, 'update'], $title), $data)
+        ->assertForbidden();
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create([
-                    'activated_at' => now()->toDateTimeString(),
-                ])
-            )
-            ->assertSessionHasErrors(['activated_at']);
+test('a guest cannot update a title', function () {
+    $title = Title::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-        tap($title->fresh(), function ($title) use ($startDate) {
-            $this->assertCount(1, $title->activations);
-            $this->assertSame($startDate, $title->activations->last()->started_at->toDateTimeString());
-        });
-    }
-
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_update_a_title()
-    {
-        $title = Title::factory()->create();
-
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create()
-            )
-            ->assertForbidden();
-    }
-
-    /**
-     * @test
-     */
-    public function a_guest_cannot_update_a_title()
-    {
-        $title = Title::factory()->create();
-
-        $this
-            ->from(action([TitlesController::class, 'edit'], $title))
-            ->put(
-                action([TitlesController::class, 'update'], $title),
-                TitleRequestDataFactory::new()->withTitle($title)->create()
-            )
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->patch(action([TitlesController::class, 'update'], $title), $data)
+        ->assertRedirect(route('login'));
+});

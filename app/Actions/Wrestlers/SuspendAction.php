@@ -24,8 +24,8 @@ class SuspendAction extends BaseWrestlerAction
         $this->wrestlerRepository->suspend($wrestler, $suspensionDate);
         $wrestler->save();
 
-        if ($wrestler->currentTagTeam() !== null && $wrestler->currentTagTeam()->exists()) {
-            $wrestler->currentTagTeam()->touch();
+        if ($wrestler->isAMemberOfCurrentTagTeam()) {
+            $wrestler->currentTagTeam->save();
         }
     }
 }

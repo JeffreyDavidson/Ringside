@@ -81,13 +81,6 @@ class TitleFactory extends Factory
         });
     }
 
-    public function softDeleted($delete = true)
-    {
-        return $this->state(fn (array $attributes) => ['deleted_at' => now()])->afterCreating(function (Title $title) {
-            $title->save();
-        });
-    }
-
     public function withChampion($champion)
     {
         return $this->has(

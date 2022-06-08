@@ -6,7 +6,7 @@ namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use App\Rules\WrestlerCanJoinTagTeam;
+use App\Rules\WrestlerCanJoinExistingTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\TagTeamRequestFactory;
@@ -47,7 +47,7 @@ class UpdateRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinTagTeam(),
+                new WrestlerCanJoinExistingTagTeam($tagTeam),
             ],
         ];
     }

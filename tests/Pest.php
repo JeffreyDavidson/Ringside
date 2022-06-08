@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -42,4 +45,24 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+uses()->group('wrestlers', 'feature-wrestlers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Wrestlers');
+uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Managers');
+uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Referees');
+uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
+uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
+uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
+uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
+uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
+uses()->group('event-matches', 'feature-event-matches')->in('Feature/Http/Controllers/EventMatches');
+
+function administrator()
+{
+    return User::factory()->administrator()->create();
+}
+
+function basicUser()
+{
+    return User::factory()->basicUser()->create();
 }

@@ -1,187 +1,75 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Events;
-
-use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
+use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
-use App\Models\Venue;
-use Illuminate\Support\Carbon;
-use Tests\Factories\EventRequestDataFactory;
-use Tests\TestCase;
 
-/**
- * @group events
- * @group feature-events
- */
-class EventControllerUpdateMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function edit_displays_correct_view_with_data()
-    {
-        $event = Event::factory()->scheduled()->create();
+test('edit returns a view', function () {
+    $event = Event::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'edit'], $event))
-            ->assertViewIs('events.edit')
-            ->assertViewHas('event', $event);
-    }
+    $this->actingAs(administrator())
+        ->get(action([EventsController::class, 'edit'], $event))
+        ->assertStatus(200)
+        ->assertViewIs('events.edit')
+        ->assertViewHas('event', $event);
+});
 
-    /**
-     * @test
-     */
-    public function an_administrator_can_view_the_form_for_editing_a_scheduled_event()
-    {
-        $event = Event::factory()->scheduled()->create();
+test('a basic user cannot view the form for editing a event', function () {
+    $event = Event::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'edit'], $event))
-            ->assertSuccessful();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([EventsController::class, 'edit'], $event))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function an_administrator_can_view_the_form_for_editing_an_unscheduled_event()
-    {
-        $event = Event::factory()->unscheduled()->create();
+test('a guest cannot view the form for editing a event', function () {
+    $event = Event::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'edit'], $event))
-            ->assertSuccessful();
-    }
+    $this->get(action([EventsController::class, 'edit'], $event))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_editing_an_event()
-    {
-        $event = Event::factory()->create();
+test('updates a event and redirects', function () {
+    $event = Event::factory()->create([
+        'name' => 'Old Event Name',
+        'date' => null,
+        'venue_id' => null,
+        'preview' => null,
+    ]);
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([EventsController::class, 'edit'], $event))
-            ->assertForbidden();
-    }
+    $data = UpdateRequest::factory()->create([
+        'name' => 'New Event Name',
+        'date' => null,
+        'venue_id' => null,
+        'preview' => null,
+    ]);
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_editing_an_event()
-    {
-        $event = Event::factory()->unscheduled()->create();
+    $this->actingAs(administrator())
+        ->from(action([EventsController::class, 'edit'], $event))
+        ->patch(action([EventsController::class, 'update'], $event), $data)
+        ->assertValid()
+        ->assertRedirect(action([EventsController::class, 'index']));
 
-        $this
-            ->get(action([EventsController::class, 'edit'], $event))
-            ->assertRedirect(route('login'));
-    }
+    expect($event->fresh())
+        ->name->toBe('New Event Name')
+        ->date->toBeNull()
+        ->venue_id->toBeNull()
+        ->preview->toBeNull();
+});
 
-    /**
-     * @test
-     */
-    public function a_past_event_cannot_be_edited()
-    {
-        $event = Event::factory()->past()->create();
+test('a basic user cannot update a event', function () {
+    $event = Event::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'edit'], $event))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([EventsController::class, 'update'], $event), $data)
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function an_administrator_can_update_a_scheduled_event()
-    {
-        $venue = Venue::factory()->create();
-        $newVenue = Venue::factory()->create();
-        $oldDate = Carbon::parse('+2 weeks');
-        $newDate = Carbon::parse('+1 weeks');
+test('a guest cannot update a event', function () {
+    $event = Event::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-        $event = Event::factory()
-            ->for($venue)
-            ->scheduledOn($oldDate->toDateTimeString())
-            ->withName('Old Name')
-            ->withPreview('This old preview')
-            ->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([EventsController::class, 'edit'], $event))
-            ->put(
-                action([EventsController::class, 'update'], $event),
-                EventRequestDataFactory::new()->withEvent($event)->create([
-                    'name' => 'Example Event Name',
-                    'date' => $newDate->toDateTimeString(),
-                    'venue_id' => $newVenue->id,
-                    'preview' => 'This is an new event preview.',
-                ])
-            )
-            ->assertRedirect(action([EventsController::class, 'index']));
-
-        tap($event->fresh(), function ($event) use ($newVenue, $newDate) {
-            $this->assertEquals('Example Event Name', $event->name);
-            $this->assertEquals($newDate->toDateTimeString(), $event->date->toDateTimeString());
-            $this->assertTrue($event->venue->is($newVenue));
-            $this->assertEquals('This is an new event preview.', $event->preview);
-        });
-    }
-
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_update_an_event()
-    {
-        $event = Event::factory()->create();
-
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([EventsController::class, 'edit'], $event))
-            ->put(
-                action([EventsController::class, 'update'], $event),
-                EventRequestDataFactory::new()->withEvent($event)->create()
-            )
-            ->assertForbidden();
-    }
-
-    /**
-     * @test
-     */
-    public function a_guest_cannot_update_an_event()
-    {
-        $event = Event::factory()->create();
-
-        $this
-            ->from(action([EventsController::class, 'edit'], $event))
-            ->put(
-                action([EventsController::class, 'update'], $event),
-                EventRequestDataFactory::new()->withEvent($event)->create()
-            )
-            ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     */
-    public function an_administrator_cannot_update_a_past_event()
-    {
-        $event = Event::factory()->past()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([EventsController::class, 'edit'], $event))
-            ->put(
-                action([EventsController::class, 'update'], $event),
-                EventRequestDataFactory::new()->withEvent($event)->create()
-            )
-            ->assertForbidden();
-    }
-}
+    $this->patch(action([EventsController::class, 'update'], $event), $data)
+        ->assertRedirect(route('login'));
+});

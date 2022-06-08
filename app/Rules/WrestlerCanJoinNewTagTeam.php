@@ -2,9 +2,10 @@
 
 namespace App\Rules;
 
+use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
 
-class WrestlerCanJoinTagTeam implements Rule
+class WrestlerCanJoinNewTagTeam implements Rule
 {
     /**
      * Determine if the validation rule passes.
@@ -21,14 +22,7 @@ class WrestlerCanJoinTagTeam implements Rule
             return false;
         }
 
-        if (($wrestler->currentTagTeam() !== null && $wrestler->currentTagTeam()->exists())
-            || (! is_null($this->tagTeam))) {
-            return false;
-        }
-
-        if ($wrestler->currentTagTeam() !== null
-            && ! $wrestler->currentTagTeam()->isNot($this->route()->parameter('tag_team'))
-        ) {
+        if (($wrestler->currentTagTeam !== null && $wrestler->currentTagTeam->exists())) {
             return false;
         }
 

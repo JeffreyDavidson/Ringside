@@ -1,115 +1,66 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Wrestlers;
-
-use App\Enums\Role;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Wrestlers\ReinstateController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
-/**
- * @group wrestlers
- * @group feature-wrestlers
- * @group roster
- * @group feature-roster
- */
-class ReinstateControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_reinstates_a_suspended_wrestler_and_redirects()
-    {
-        $wrestler = Wrestler::factory()->suspended()->create();
+beforeEach(function () {
+    $this->wrestler = Wrestler::factory()->suspended()->create();
+});
 
-        $this->assertNull($wrestler->currentSuspension->ended_at);
+test('invoke reinstates a suspended wrestler and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([ReinstateController::class], $this->wrestler))
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler))
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    expect($this->wrestler->fresh())
+        ->suspensions->last()->ended_at->not->toBeNull()
+        ->status->toBe(WrestlerStatus::BOOKABLE);
+});
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertNotNull($wrestler->suspensions->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-        });
-    }
+test('reinstating a suspended wrestler on an unbookable tag team makes tag team bookable', function () {
+    $tagTeam = TagTeam::factory()
+        ->hasAttached($suspendedWrestler = Wrestler::factory()->suspended()->create())
+        ->hasAttached(Wrestler::factory()->bookable())
+        ->has(Employment::factory()->started(Carbon::yesterday()))
+        ->create();
 
-    /**
-     * @test
-     */
-    public function reinstating_a_suspended_wrestler_on_an_unbookable_tag_team_makes_tag_team_bookable()
-    {
-        $tagTeam = TagTeam::factory()->withSuspendedWrestler()->create();
-        $wrestler = $tagTeam->currentWrestlers()->suspended()->first();
+    $this->actingAs(administrator())
+        ->patch(action([ReinstateController::class], $suspendedWrestler));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
+    expect($tagTeam->fresh())
+        ->status->toBe(TagTeamStatus::BOOKABLE);
+});
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-        });
-    }
+test('a basic user cannot reinstate a suspended wrestler', function () {
+    $this->actingAs(basicUser())
+        ->patch(action([ReinstateController::class], $this->wrestler))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_reinstate_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
+test('a guest cannot reinstate a suspended wrestler', function () {
+    $this->patch(action([ReinstateController::class], $this->wrestler))
+        ->assertRedirect(route('login'));
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([ReinstateController::class], $wrestler))
-            ->assertForbidden();
-    }
+test('invoke throws exception for reinstating a non reinstatable wrestler', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_reinstate_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
+    $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        $this
-            ->patch(action([ReinstateController::class], $wrestler))
-            ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider nonreinstatableWrestlerTypes
-     */
-    public function invoke_throws_exception_for_reinstating_a_non_reinstatable_wrestler($factoryState)
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
-
-        $wrestler = Wrestler::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $wrestler));
-    }
-
-    public function nonreinstatableWrestlerTypes()
-    {
-        return [
-            'bookable wrestler' => ['bookable'],
-            'unemployed wrestler' => ['unemployed'],
-            'injured wrestler' => ['injured'],
-            'released wrestler' => ['released'],
-            'with future employed wrestler' => ['withFutureEmployment'],
-            'retired wrestler' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([ReinstateController::class], $wrestler));
+})->throws(CannotBeReinstatedException::class)->with([
+    'bookable',
+    'unemployed',
+    'injured',
+    'released',
+    'withFutureEmployment',
+    'retired',
+]);

@@ -1,147 +1,81 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Stables;
-
-use App\Enums\Role;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
 use App\Models\User;
-use Tests\TestCase;
 
-/**
- * @group stables
- * @group feature-stables
- * @group roster
- * @group feature-roster
- */
-class StableControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function index_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([StablesController::class, 'index']))
-            ->assertOk()
-            ->assertViewIs('stables.index')
-            ->assertSeeLivewire('stables.stables-list');
-    }
+test('index returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([StablesController::class, 'index']))
+        ->assertOk()
+        ->assertViewIs('stables.index')
+        ->assertSeeLivewire('stables.stables-list');
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_stables_index_page()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([StablesController::class, 'index']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view tag teams index page', function () {
+    $this->actingAs(basicUser())
+        ->get(action([StablesController::class, 'index']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_stables_index_page()
-    {
-        $this
-            ->get(action([StablesController::class, 'index']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view tag teams index page', function () {
+    $this->get(action([StablesController::class, 'index']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function show_returns_a_view()
-    {
-        $stable = Stable::factory()->create();
+test('show returns a view', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([StablesController::class, 'show'], $stable))
-            ->assertViewIs('stables.show')
-            ->assertViewHas('stable', $stable);
-    }
+    $this->actingAs(administrator())
+        ->get(action([StablesController::class, 'show'], $stable))
+        ->assertViewIs('stables.show')
+        ->assertViewHas('stable', $stable);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_can_view_their_stable_profile()
-    {
-        $this->actAs(ROLE::BASIC);
-        $stable = Stable::factory()->create(['user_id' => auth()->user()]);
+test('a basic user can view their tag team profile', function () {
+    $stable = Stable::factory()->for($user = basicUser())->create();
 
-        $this
-            ->get(action([StablesController::class, 'show'], $stable))
-            ->assertOk();
-    }
+    $this->actingAs($user)
+        ->get(action([StablesController::class, 'show'], $stable))
+        ->assertOk();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_another_users_stable_profile()
-    {
-        $otherUser = User::factory()->create();
-        $stable = Stable::factory()->create(['user_id' => $otherUser->id]);
+test('a basic user cannot view another users tag team profile', function () {
+    $stable = Stable::factory()->for(User::factory())->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([StablesController::class, 'show'], $stable))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([StablesController::class, 'show'], $stable))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_a_stable_profile()
-    {
-        $stable = Stable::factory()->create();
+test('a guest cannot view a stable profile', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->get(action([StablesController::class, 'show'], $stable))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([StablesController::class, 'show'], $stable))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function deletes_a_stable_and_redirects()
-    {
-        $stable = Stable::factory()->create();
+test('deletes a stable and redirects', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->delete(action([StablesController::class, 'destroy'], $stable))
-            ->assertRedirect(action([StablesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->delete(action([StablesController::class, 'destroy'], $stable))
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        $this->assertSoftDeleted($stable);
-    }
+    $this->assertSoftDeleted($stable);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_delete_a_stable()
-    {
-        $stable = Stable::factory()->create();
+test('a basic user cannot delete a stable', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->delete(action([StablesController::class, 'destroy'], $stable))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->delete(action([StablesController::class, 'destroy'], $stable))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_delete_a_stable()
-    {
-        $stable = Stable::factory()->create();
+test('a guest cannot delete a stable', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->delete(action([StablesController::class, 'destroy'], $stable))
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->delete(action([StablesController::class, 'destroy'], $stable))
+        ->assertRedirect(route('login'));
+});

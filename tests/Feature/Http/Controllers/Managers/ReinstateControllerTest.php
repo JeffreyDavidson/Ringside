@@ -1,96 +1,50 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
 use App\Enums\ManagerStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\ReinstateController;
 use App\Models\Manager;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class ReinstateControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_reinstates_a_suspended_manager_and_redirects()
-    {
-        $manager = Manager::factory()->suspended()->create();
+test('invoke reinstates a suspended manager and redirects', function () {
+    $manager = Manager::factory()->suspended()->create();
 
-        $this->assertNull($manager->currentSuspension->ended_at);
+    $this->actingAs(administrator())
+        ->patch(action([ReinstateController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    expect($manager->fresH())
+        ->suspensions->last()->ended_at->not->toBeNull()
+        ->status->toBe(ManagerStatus::AVAILABLE);
+});
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertNotNull($manager->suspensions->last()->ended_at);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-        });
-    }
+test('a basic user cannot reinstate a suspended manager', function () {
+    $manager = Manager::factory()->suspended()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_reinstate_a_manager()
-    {
-        $manager = Manager::factory()->create();
+    $this->actingAs(basicUser())
+        ->patch(action([ReinstateController::class], $manager))
+        ->assertForbidden();
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([ReinstateController::class], $manager))
-            ->assertForbidden();
-    }
+test('a guest cannot reinstate a suspended manager', function () {
+    $manager = Manager::factory()->suspended()->create();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_reinstate_a_manager()
-    {
-        $manager = Manager::factory()->create();
+    $this->patch(action([ReinstateController::class], $manager))
+        ->assertRedirect(route('login'));
+});
 
-        $this
-            ->patch(action([ReinstateController::class], $manager))
-            ->assertRedirect(route('login'));
-    }
+test('invoke throws exception for reinstating a non reinstatable manager', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     *
-     * @dataProvider nonreinstatableManagerTypes
-     */
-    public function invoke_throws_exception_for_reinstating_a_non_reinstatable_manager($factoryState)
-    {
-        $this->expectException(CannotBeReinstatedException::class);
-        $this->withoutExceptionHandling();
+    $manager = Manager::factory()->{$factoryState}()->create();
 
-        $manager = Manager::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ReinstateController::class], $manager));
-    }
-
-    public function nonreinstatableManagerTypes()
-    {
-        return [
-            'available manager' => ['available'],
-            'unemployed manager' => ['unemployed'],
-            'injured manager' => ['injured'],
-            'released manager' => ['released'],
-            'with future employed manager' => ['withFutureEmployment'],
-            'retired manager' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([ReinstateController::class], $manager));
+})->throws(CannotBeReinstatedException::class)->with([
+    'available',
+    'unemployed',
+    'injured',
+    'released',
+    'withFutureEmployment',
+    'retired',
+]);

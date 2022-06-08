@@ -1,160 +1,98 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Wrestlers;
-
-use App\Enums\Role;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Models\Wrestler;
-use Tests\Factories\WrestlerRequestDataFactory;
-use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
-/**
- * @group wrestlers
- * @group feature-wrestlers
- * @group roster
- * @group feature-roster
- */
-class WrestlerControllerStoreMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function create_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([WrestlersController::class, 'create']))
-            ->assertViewIs('wrestlers.create')
-            ->assertViewHas('wrestler', new Wrestler);
-    }
+test('create returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([WrestlersController::class, 'create']))
+        ->assertStatus(200)
+        ->assertViewIs('wrestlers.create')
+        ->assertViewHas('wrestler', new Wrestler);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_creating_a_wrestler()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([WrestlersController::class, 'create']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view the form for creating a wrestler', function () {
+    $this->actingAs(basicUser())
+        ->get(action([WrestlersController::class, 'create']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_creating_a_wrestler()
-    {
-        $this
-            ->get(action([WrestlersController::class, 'create']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view the form for creating a wrestler', function () {
+    $this->get(action([WrestlersController::class, 'create']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function store_creates_a_wrestler_and_redirects()
-    {
-        $this->withoutExceptionHandling();
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'create']))
-            ->post(action([WrestlersController::class, 'store']), WrestlerRequestDataFactory::new()->create([
-                'name' => 'Example Wrestler Name',
-                'feet' => 6,
-                'inches' => 4,
-                'hometown' => 'Laraville, FL',
-                'signature_move' => null,
-            ]))
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+test('store creates a wrestler and redirects', function () {
+    $data = StoreRequest::factory()->create([
+        'name' => 'Example Wrestler Name',
+        'feet' => 6,
+        'inches' => 10,
+        'weight' => 300,
+        'hometown' => 'Laraville, New York',
+        'signature_move' => null,
+        'started_at' => null,
+    ]);
 
-        tap(Wrestler::first(), function ($wrestler) {
-            $this->assertEquals('Example Wrestler Name', $wrestler->name);
-            $this->assertEquals(76, $wrestler->height);
-            $this->assertEquals(240, $wrestler->weight);
-            $this->assertEquals('Laraville, FL', $wrestler->hometown);
-            $this->assertNull($wrestler->signature_move);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([WrestlersController::class, 'create']))
+        ->post(action([WrestlersController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function signature_move_for_a_wrestler_if_signature_move_is_filled_in_request()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'create']))
-            ->post(
-                action([WrestlersController::class, 'index']),
-                WrestlerRequestDataFactory::new()->create(['signature_move' => 'The Signature Move'])
-            );
+    expect(Wrestler::latest()->first())
+        ->name->toBe('Example Wrestler Name')
+        ->height->toBe(82)
+        ->weight->toBe(300)
+        ->hometown->toBe('Laraville, New York')
+        ->signature_move->toBeNull()
+        ->employments->toBeEmpty();
+});
 
-        tap(Wrestler::first(), function ($wrestler) {
-            $this->assertEquals('The Signature Move', $wrestler->signature_move);
-        });
-    }
+test('store creates a wrestler with a signature move and redirects', function () {
+    $data = StoreRequest::factory()->create([
+        'signature_move' => 'Example Finishing Move',
+    ]);
 
-    /**
-     * @test
-     */
-    public function an_employment_is_not_created_for_the_wrestler_if_started_at_is_filled_in_request()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'create']))
-            ->post(
-                action([WrestlersController::class, 'store']),
-                WrestlerRequestDataFactory::new()->create(['started_at' => null])
-            );
+    $this->actingAs(administrator())
+        ->from(action([WrestlersController::class, 'create']))
+        ->post(action([WrestlersController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        tap(Wrestler::first(), function ($wrestler) {
-            $this->assertCount(0, $wrestler->employments);
-        });
-    }
+    expect(Wrestler::latest()->first())
+        ->signature_move->toBe('Example Finishing Move');
+});
 
-    /**
-     * @test
-     */
-    public function an_employment_is_created_for_the_wrestler_if_started_at_is_filled_in_request()
-    {
-        $startedAt = now()->toDateTimeString();
+test('an employment is created for the wrestler if started at is filled in request', function () {
+    $dateTime = Carbon::now()->toDateTimeString();
+    $data = StoreRequest::factory()->create([
+        'started_at' => $dateTime,
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'create']))
-            ->post(
-                action([WrestlersController::class, 'store']),
-                WrestlerRequestDataFactory::new()->create(['started_at' => $startedAt])
-            );
+    $this->actingAs(administrator())
+        ->from(action([WrestlersController::class, 'create']))
+        ->post(action([WrestlersController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        tap(Wrestler::all()->last(), function ($wrestler) use ($startedAt) {
-            $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals($startedAt, $wrestler->employments->first()->started_at->toDateTimeString());
-        });
-    }
+    expect(Wrestler::latest()->first())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_create_a_wrestler()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([WrestlersController::class, 'create']))
-            ->post(action([WrestlersController::class, 'store']), WrestlerRequestDataFactory::new()->create())
-            ->assertForbidden();
-    }
+test('a basic user cannot create a wrestler', function () {
+    $data = StoreRequest::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_create_a_wrestler()
-    {
-        $this
-            ->from(action([WrestlersController::class, 'create']))
-            ->post(action([WrestlersController::class, 'store']), WrestlerRequestDataFactory::new()->create())
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->actingAs(basicUser())
+        ->post(action([WrestlersController::class, 'store']), $data)
+        ->assertForbidden();
+});
+
+test('a guest cannot create a wrestler', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->post(action([WrestlersController::class, 'store']), $data)
+        ->assertRedirect(route('login'));
+});

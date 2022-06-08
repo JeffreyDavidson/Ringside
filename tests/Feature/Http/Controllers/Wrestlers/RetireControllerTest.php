@@ -1,10 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Wrestlers;
-
-use App\Enums\Role;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeRetiredException;
@@ -12,136 +7,80 @@ use App\Http\Controllers\Wrestlers\RetireController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Tests\TestCase;
 
-/**
- * @group wrestlers
- * @group feature-wrestlers
- * @group roster
- * @group feature-roster
- */
-class RetireControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_retires_a_bookable_wrestler_and_redirects()
-    {
-        $wrestler = Wrestler::factory()->bookable()->create();
+test('invoke retires a bookable wrestler and redirects', function () {
+    $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler))
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([RetireController::class], $wrestler))
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertCount(1, $wrestler->retirements);
-            $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
-        });
-    }
+    expect($wrestler->fresh())
+        ->retirements->toHaveCount(1)
+        ->status->toBe(WrestlerStatus::RETIRED);
+});
 
-    /**
-     * @test
-     */
-    public function invoke_retires_an_injured_wrestler_and_redirects()
-    {
-        $wrestler = Wrestler::factory()->injured()->create();
+test('invoke retires an injured wrestler and redirects', function () {
+    $wrestler = Wrestler::factory()->injured()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler))
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([RetireController::class], $wrestler))
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertCount(1, $wrestler->retirements);
-            $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
-        });
-    }
+    expect($wrestler->fresh())
+        ->retirements->toHaveCount(1)
+        ->status->toBe(WrestlerStatus::RETIRED);
+});
 
-    /**
-     * @test
-     */
-    public function invoke_retires_a_suspended_wrestler_and_redirects()
-    {
-        $wrestler = Wrestler::factory()->suspended()->create();
+test('invoke retires a suspended wrestler and redirects', function () {
+    $wrestler = Wrestler::factory()->suspended()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler))
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([RetireController::class], $wrestler))
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertCount(1, $wrestler->retirements);
-            $this->assertEquals(WrestlerStatus::RETIRED, $wrestler->status);
-        });
-    }
+    expect($wrestler->fresh())
+        ->retirements->toHaveCount(1)
+        ->status->toBe(WrestlerStatus::RETIRED);
+});
 
-    /**
-     * @test
-     */
-    public function retiring_a_bookable_wrestler_on_a_bookable_tag_team_makes_tag_team_unbookable()
-    {
-        $tagTeam = TagTeam::factory()->bookable()->create();
-        $wrestler = $tagTeam->wrestlers()->first();
+test('retiring a bookable wrestler on a bookable tag team makes tag team unbookable', function () {
+    $tagTeam = TagTeam::factory()->bookable()->create();
+    $wrestler = $tagTeam->wrestlers()->first();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler));
+    $this->actingAs(administrator())
+        ->patch(action([RetireController::class], $wrestler))
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertEquals(TagTeamStatus::UNBOOKABLE, $tagTeam->status);
-        });
-    }
+    expect($tagTeam->fresh())
+        ->status->toBe(TagTeamStatus::UNBOOKABLE);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_retire_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
+test('a basic user cannot retire a bookable wrestler', function () {
+    $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(route('wrestlers.retire', $wrestler))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([RetireController::class], $wrestler))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_retire_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
+test('a guest cannot suspend a bookable wrestler', function () {
+    $wrestler = Wrestler::factory()->bookable()->create();
 
-        $this
-            ->patch(action([RetireController::class], $wrestler))
-            ->assertRedirect(route('login'));
-    }
+    $this->patch(action([RetireController::class], $wrestler))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     *
-     * @dataProvider nonretirableWrestlerTypes
-     */
-    public function invoke_throws_an_exception_for_retiring_a_non_retirable_wrestler($factoryState)
-    {
-        $this->expectException(CannotBeRetiredException::class);
-        $this->withoutExceptionHandling();
+test('invoke throws exception for retiring a non retirable wrestler', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $wrestler = Wrestler::factory()->{$factoryState}()->create();
+    $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RetireController::class], $wrestler));
-    }
-
-    public function nonretirableWrestlerTypes()
-    {
-        return [
-            'retired wrestler' => ['retired'],
-            'with future employed wrestler' => ['withFutureEmployment'],
-            'released wrestler' => ['released'],
-            'unemployed wrestler' => ['unemployed'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([RetireController::class], $wrestler));
+})->throws(CannotBeRetiredException::class)->with([
+    'retired',
+    'withFutureEmployment',
+    'released',
+    'unemployed',
+]);

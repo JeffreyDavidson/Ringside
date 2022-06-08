@@ -1,147 +1,81 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
-use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
 use App\Models\User;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class ManagerControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function index_returns_a_views()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([ManagersController::class, 'index']))
-            ->assertOk()
-            ->assertViewIs('managers.index')
-            ->assertSeeLivewire('managers.managers-list');
-    }
+test('index returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([ManagersController::class, 'index']))
+        ->assertOk()
+        ->assertViewIs('managers.index')
+        ->assertSeeLivewire('managers.managers-list');
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_managers_index_page()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([ManagersController::class, 'index']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view managers index page', function () {
+    $this->actingAs(basicUser())
+        ->get(action([ManagersController::class, 'index']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_managers_index_page()
-    {
-        $this
-            ->get(action([ManagersController::class, 'index']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view managers index page', function () {
+    $this->get(action([ManagersController::class, 'index']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function show_can_view_a_manager_profile()
-    {
-        $manager = Manager::factory()->create();
+test('show returns a view', function () {
+    $manager = Manager::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([ManagersController::class, 'show'], $manager))
-            ->assertViewIs('managers.show')
-            ->assertViewHas('manager', $manager);
-    }
+    $this->actingAs(administrator())
+        ->get(action([ManagersController::class, 'show'], $manager))
+        ->assertViewIs('managers.show')
+        ->assertViewHas('manager', $manager);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_can_view_their_manager_profile()
-    {
-        $this->actAs(ROLE::BASIC);
-        $manager = Manager::factory()->create(['user_id' => auth()->user()]);
+test('a basic user can view their manager profile', function () {
+    $manager = Manager::factory()->for($user = basicUser())->create();
 
-        $this
-            ->get(action([ManagersController::class, 'show'], $manager))
-            ->assertOk();
-    }
+    $this->actingAs($user)
+        ->get(action([ManagersController::class, 'show'], $manager))
+        ->assertOk();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_another_users_manager_profile()
-    {
-        $otherUser = User::factory()->create();
-        $manager = Manager::factory()->create(['user_id' => $otherUser->id]);
+test('a basic user cannot view another users manager profile', function () {
+    $manager = Manager::factory()->for(User::factory())->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([ManagersController::class, 'show'], $manager))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([ManagersController::class, 'show'], $manager))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_a_manager_profile()
-    {
-        $manager = Manager::factory()->create();
+test('a guest cannot view a manager profile', function () {
+    $manager = Manager::factory()->create();
 
-        $this
-            ->get(action([ManagersController::class, 'show'], $manager))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([ManagersController::class, 'show'], $manager))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function delete_a_manager_and_redirects()
-    {
-        $manager = Manager::factory()->create();
+test('deletes a manager and redirects', function () {
+    $manager = Manager::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->delete(action([ManagersController::class, 'destroy'], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->actingAs(administrator())
+        ->delete(action([ManagersController::class, 'destroy'], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this->assertSoftDeleted($manager);
-    }
+    $this->assertSoftDeleted($manager);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_delete_a_manager()
-    {
-        $manager = Manager::factory()->create();
+test('a basic user cannot delete a manager', function () {
+    $manager = Manager::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->delete(route('managers.destroy', $manager))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->delete(action([ManagersController::class, 'destroy'], $manager))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_delete_a_manager()
-    {
-        $manager = Manager::factory()->create();
+test('a guest cannot delete a manager', function () {
+    $manager = Manager::factory()->create();
 
-        $this
-            ->delete(action([ManagersController::class, 'destroy'], $manager))
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->delete(action([ManagersController::class, 'destroy'], $manager))
+        ->assertRedirect(route('login'));
+});

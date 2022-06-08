@@ -1,160 +1,50 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
 use App\Enums\ManagerStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\UnretireController;
 use App\Models\Manager;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class UnretireControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_unretires_a_retired_manager_and_redirects()
-    {
-        $manager = Manager::factory()->retired()->create();
+test('invoke unretires a retired manager and redirects', function () {
+    $manager = Manager::factory()->retired()->create();
 
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([UnretireController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertNotNull($manager->retirements->last()->ended_at);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-        });
-    }
+    expect($manager->fresh())
+        ->retirements->last()->ended_at->not->toBeNull()
+        ->status->toBe(ManagerStatus::AVAILABLE);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_unretire_a_manager()
-    {
-        $manager = Manager::factory()->create();
+test('a basic user cannot unretire a manager', function () {
+    $manager = Manager::factory()->retired()->create();
 
-        $this->actAs(ROLE::BASIC)
-            ->patch(action([UnretireController::class], $manager))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([UnretireController::class], $manager))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_unretire_a_manager()
-    {
-        $manager = Manager::factory()->create();
+test('a guest cannot unretire a manager', function () {
+    $manager = Manager::factory()->retired()->create();
 
-        $this->patch(action([UnretireController::class], $manager))
-            ->assertRedirect(route('login'));
-    }
+    $this->patch(action([UnretireController::class], $manager))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_an_available_manager()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
+test('invoke throws exception for unretiring a non unretirable manager', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $manager = Manager::factory()->available()->create();
+    $manager = Manager::factory()->{$factoryState}()->create();
 
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_future_employed_manager()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->withFutureEmployment()->create();
-
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_an_injured_manager()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->injured()->create();
-
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_released_manager()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->released()->create();
-
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager));
-    }
-
-    /**
-     * @test
-     */
-    public function invoke_throws_exception_for_unretiring_a_suspended_manager()
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->suspended()->create();
-
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider nonunretirableManagerTypes
-     */
-    public function invoke_throws_exception_for_unretiring_a_non_unretirable_manager($factoryState)
-    {
-        $this->expectException(CannotBeUnretiredException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->{$factoryState}()->create();
-
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([UnretireController::class], $manager));
-    }
-
-    public function nonunretirableManagerTypes()
-    {
-        return [
-            'available manager' => ['available'],
-            'with future employed manager' => ['withFutureEmployment'],
-            'injured manager' => ['injured'],
-            'released manager' => ['released'],
-            'suspended manager' => ['suspended'],
-            'unemployed manager' => ['unemployed'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([UnretireController::class], $manager));
+})->throws(CannotBeUnretiredException::class)->with([
+    'available',
+    'withFutureEmployment',
+    'injured',
+    'released',
+    'suspended',
+    'unemployed',
+]);

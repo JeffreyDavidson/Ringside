@@ -1,144 +1,72 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Events;
-
-use App\Enums\Role;
 use App\Http\Controllers\Events\EventsController;
 use App\Models\Event;
-use App\Models\Venue;
-use Tests\TestCase;
 
-/**
- * @group events
- * @group feature-events
- */
-class EventControllerTest extends TestCase
-{
-    private Event $event;
+test('index returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([EventsController::class, 'index']))
+        ->assertOk()
+        ->assertViewIs('events.index')
+        ->assertSeeLivewire('events.events-list');
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('a basic user cannot view events index page', function () {
+    $this->actingAs(basicUser())
+        ->get(action([EventsController::class, 'index']))
+        ->assertForbidden();
+});
 
-        $this->event = Event::factory()->create();
-    }
+test('a guest cannot view events index page', function () {
+    $this->get(action([EventsController::class, 'index']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function index_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'index']))
-            ->assertOk()
-            ->assertViewIs('events.index')
-            ->assertSeeLivewire('events.events-list');
-    }
+test('show returns a view', function () {
+    $event = Event::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_events_index_page()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([EventsController::class, 'index']))
-            ->assertForbidden();
-    }
+    $this->actingAs(administrator())
+        ->get(action([EventsController::class, 'show'], $event))
+        ->assertViewIs('events.show')
+        ->assertViewHas('event', $event);
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_events_index_page()
-    {
-        $this
-            ->get(action([EventsController::class, 'index']))
-            ->assertRedirect(route('login'));
-    }
+test('a basic user can view event show page', function () {
+    $event = Event::factory()->create();
 
-    /**
-     * @test
-     */
-    public function show_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'show'], $this->event))
-            ->assertViewIs('events.show')
-            ->assertViewHas('event', $this->event)
-            ->assertViewMissing('event.venue');
-    }
+    $this->actingAs(basicUser())
+        ->get(action([EventsController::class, 'show'], $event))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function show_returns_a_view_with_an_event_venue()
-    {
-        $venue = Venue::factory()->create();
-        $event = Event::factory()->create(['venue_id' => $venue->id]);
+test('a guest cannot view a event profile', function () {
+    $event = Event::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([EventsController::class, 'show'], $event))
-            ->assertViewIs('events.show')
-            ->assertViewHas('event', $event)
-            ->assertViewHas('event.venue');
-    }
+    $this->get(action([EventsController::class, 'show'], $event))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_an_event_page()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([EventsController::class, 'show'], $this->event))
-            ->assertForbidden();
-    }
+test('deletes a event and redirects', function () {
+    $event = Event::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_an_event_page()
-    {
-        $this
-            ->get(action([EventsController::class, 'show'], $this->event))
-            ->assertRedirect(route('login'));
-    }
+    $this->actingAs(administrator())
+        ->delete(action([EventsController::class, 'destroy'], $event))
+        ->assertRedirect(action([EventsController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function deletes_an_event_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->delete(action([EventsController::class, 'destroy'], $this->event));
+    $this->assertSoftDeleted($event);
+});
 
-        $this->assertSoftDeleted($this->event);
-    }
+test('a basic user cannot delete a event', function () {
+    $event = Event::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_delete_an_event()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->delete(action([EventsController::class, 'destroy'], $this->event))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->delete(action([EventsController::class, 'destroy'], $event))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_delete_an_event()
-    {
-        $this
-            ->delete(action([EventsController::class, 'destroy'], $this->event))
-            ->assertRedirect(route('login'));
-    }
-}
+test('a guest cannot delete a event', function () {
+    $event = Event::factory()->create();
+
+    $this->delete(action([EventsController::class, 'destroy'], $event))
+        ->assertRedirect(route('login'));
+});

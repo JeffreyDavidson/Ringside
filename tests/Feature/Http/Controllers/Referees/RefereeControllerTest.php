@@ -1,132 +1,72 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Referees;
-
-use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
-use Tests\TestCase;
 
-/**
- * @group referees
- * @group feature-referees
- * @group roster
- * @group feature-roster
- */
-class RefereeControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function index_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([RefereesController::class, 'index']))
-            ->assertOk(ROLE::ADMINISTRATOR)
-            ->assertViewIs('referees.index')
-            ->assertSeeLivewire('referees.referees-list');
-    }
+test('index returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([RefereesController::class, 'index']))
+        ->assertOk()
+        ->assertViewIs('referees.index')
+        ->assertSeeLivewire('referees.referees-list');
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_referees_index_page()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([RefereesController::class, 'index']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view referees index page', function () {
+    $this->actingAs(basicUser())
+        ->get(action([RefereesController::class, 'index']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_referees_index_page()
-    {
-        $this
-            ->get(action([RefereesController::class, 'index']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view referees index page', function () {
+    $this->get(action([RefereesController::class, 'index']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function show_returns_a_view()
-    {
-        $referee = Referee::factory()->create();
+test('show returns a view', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([RefereesController::class, 'show'], $referee))
-            ->assertViewIs('referees.show')
-            ->assertViewHas('referee', $referee);
-    }
+    $this->actingAs(administrator())
+        ->get(action([RefereesController::class, 'show'], $referee))
+        ->assertViewIs('referees.show')
+        ->assertViewHas('referee', $referee);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_a_referee_profile()
-    {
-        $referee = Referee::factory()->create();
+test('a basic user cannot view a referee profile', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([RefereesController::class, 'show'], $referee))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([RefereesController::class, 'show'], $referee))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_a_referee_profile()
-    {
-        $referee = Referee::factory()->create();
+test('a guest cannot view a referee profile', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->get(action([RefereesController::class, 'show'], $referee))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([RefereesController::class, 'show'], $referee))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function an_administrator_can_delete_a_referee()
-    {
-        $referee = Referee::factory()->create();
+test('deletes a referee and redirects', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->delete(action([RefereesController::class, 'destroy'], $referee))
-            ->assertRedirect(action([RefereesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->delete(action([RefereesController::class, 'destroy'], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-        $this->assertSoftDeleted($referee);
-    }
+    $this->assertSoftDeleted($referee);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_delete_a_referee()
-    {
-        $referee = Referee::factory()->create();
+test('a basic user cannot delete a referee', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->delete(action([RefereesController::class, 'destroy'], $referee))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->delete(action([RefereesController::class, 'destroy'], $referee))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_delete_a_referee()
-    {
-        $referee = Referee::factory()->create();
+test('a guest cannot delete a referee', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->delete(action([RefereesController::class, 'destroy'], $referee))
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->delete(action([RefereesController::class, 'destroy'], $referee))
+        ->assertRedirect(route('login'));
+});
