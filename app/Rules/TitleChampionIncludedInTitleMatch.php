@@ -35,7 +35,7 @@ class TitleChampionIncludedInTitleMatch implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (count($this->itleIds) === 0) {
+        if (count($this->titleIds) === 0) {
             return true;
         }
 

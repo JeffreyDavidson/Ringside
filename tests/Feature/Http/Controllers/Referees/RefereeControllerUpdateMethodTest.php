@@ -1,216 +1,103 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Referees;
-
-use App\Enums\Role;
 use App\Http\Controllers\Referees\RefereesController;
+use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
-use Tests\Factories\RefereeRequestDataFactory;
-use Tests\TestCase;
 
-/**
- * @group referees
- * @group feature-referees
- * @group roster
- * @group feature-roster
- */
-class RefereeControllerUpdateMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function edit_returns_a_view()
-    {
-        $referee = Referee::factory()->create();
+test('edit returns a view', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([RefereesController::class, 'edit'], $referee))
-            ->assertViewIs('referees.edit')
-            ->assertViewHas('referee', $referee);
-    }
+    $this->actingAs(administrator())
+        ->get(action([RefereesController::class, 'edit'], $referee))
+        ->assertStatus(200)
+        ->assertViewIs('referees.edit')
+        ->assertViewHas('referee', $referee);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_editing_a_referee()
-    {
-        $referee = Referee::factory()->create();
+test('a basic user cannot view the form for editing a referee', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([RefereesController::class, 'edit'], $referee))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([RefereesController::class, 'edit'], $referee))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_editing_a_referee()
-    {
-        $referee = Referee::factory()->create();
+test('a guest cannot view the form for editing a referee', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->get(action([RefereesController::class, 'edit'], $referee))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([RefereesController::class, 'edit'], $referee))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function update_a_referee()
-    {
-        $referee = Referee::factory()->create(['first_name' => 'John', 'last_name' => 'Smith']);
+test('updates a referee and redirects', function () {
+    $referee = Referee::factory()->create([
+        'first_name' => 'Dries',
+        'last_name' => 'Vints',
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()->withReferee($referee)->create([
-                    'first_name' => 'James',
-                    'last_name' => 'Williams',
-                ])
-            )
-            ->assertRedirect(action([RefereesController::class, 'index']));
+    $data = UpdateRequest::factory()->create([
+        'first_name' => 'Taylor',
+        'last_name' => 'Otwell',
+        'started_at' => null,
+    ]);
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertEquals('James', $referee->first_name);
-            $this->assertEquals('Williams', $referee->last_name);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([RefereesController::class, 'edit'], $referee))
+        ->patch(action([RefereesController::class, 'update'], $referee), $data)
+        ->assertValid()
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function update_can_employ_an_unemployed_referee_when_started_at_is_filled()
-    {
-        $now = now()->toDateTimeString();
-        $referee = Referee::factory()->unemployed()->create();
+    expect(Referee::latest()->first())
+        ->first_name->toBe('Taylor')
+        ->last_name->toBe('Otwell')
+        ->employments->toBeEmpty();
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()->withReferee($referee)->create(['started_at' => $now])
-            )
-            ->assertRedirect(action([RefereesController::class, 'index']));
+test('update can employ an unemployed referee when started at is filled', function () {
+    $now = now();
+    $referee = Referee::factory()->unemployed()->create();
+    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
 
-        tap($referee->fresh(), function ($referee) use ($now) {
-            $this->assertCount(1, $referee->employments);
-            $this->assertEquals($now, $referee->employments->first()->started_at->toDateTimeString());
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([RefereesController::class, 'edit'], $referee))
+        ->patch(action([RefereesController::class, 'update'], $referee), $data)
+        ->assertValid()
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function update_can_employ_a_future_employed_referee_when_started_at_is_filled()
-    {
-        $now = now()->toDateTimeString();
-        $referee = Referee::factory()->withFutureEmployment()->create();
+    expect($referee->fresh())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()->withReferee($referee)->create(['started_at' => $now])
-            )
-            ->assertRedirect(action([RefereesController::class, 'index']));
+test('update can employ a future employed referee when started at is filled', function () {
+    $now = now();
+    $referee = Referee::factory()->withFutureEmployment()->create();
+    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
 
-        tap($referee->fresh(), function ($referee) use ($now) {
-            $this->assertCount(1, $referee->employments);
-            $this->assertEquals($now, $referee->employments()->first()->started_at->toDateTimeString());
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([RefereesController::class, 'edit'], $referee))
+        ->patch(action([RefereesController::class, 'update'], $referee), $data)
+        ->assertValid()
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function update_cannot_reemploy_a_released_referee()
-    {
-        $referee = Referee::factory()->released()->create();
-        $startDate = $referee->startedAt->toDateTimeString();
+    expect($referee->fresh())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
+});
 
-        $this->assertCount(1, $referee->employments);
+test('a basic user cannot update a referee', function () {
+    $referee = Referee::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()
-                    ->withReferee($referee)
-                    ->create([
-                        'started_at' => now()->toDateTimeString(),
-                    ])
-            )
-            ->assertSessionHasErrors(['started_at']);
+    $this->actingAs(basicUser())
+        ->patch(action([RefereesController::class, 'update'], $referee), $data)
+        ->assertForbidden();
+});
 
-        tap($referee->fresh(), function ($referee) use ($startDate) {
-            $this->assertSame($startDate, $referee->employments->last()->started_at->toDateTimeString());
-        });
-    }
+test('a guest cannot update a referee', function () {
+    $referee = Referee::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-    /**
-     * @test
-     */
-    public function updating_cannot_employ_a_bookable_referee_when_started_at_is_filled()
-    {
-        $referee = Referee::factory()->bookable()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()
-                    ->withReferee($referee)
-                    ->create([
-                        'started_at' => now()->toDateTImeString(),
-                    ])
-            )
-            ->assertSessionHasErrors(['started_at']);
-
-        tap($referee->fresh(), function ($referee) {
-            $this->assertCount(1, $referee->employments);
-        });
-    }
-
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_update_a_referee()
-    {
-        $referee = Referee::factory()->create();
-
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()->create()
-            )
-            ->assertForbidden();
-    }
-
-    /**
-     * @test
-     */
-    public function a_guest_cannot_update_a_referee()
-    {
-        $referee = Referee::factory()->create();
-
-        $this
-            ->from(action([RefereesController::class, 'edit'], $referee))
-            ->put(
-                action([RefereesController::class, 'update'], $referee),
-                RefereeRequestDataFactory::new()->withReferee($referee)->create()
-            )
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->patch(action([RefereesController::class, 'update'], $referee), $data)
+        ->assertRedirect(route('login'));
+});

@@ -50,13 +50,13 @@ class EventMatchData
     {
         return $competitors->transform(function ($sideCompetitors) {
             return collect($sideCompetitors)->transform(function ($competitor) {
-                $competitor['type'] = $competitor['competitor_type'] === 'wrestler'
+                $competitor['competitor'] = $competitor['competitor_type'] === 'wrestler'
                     ? Wrestler::find($competitor['competitor_id'])
                     : TagTeam::find($competitor['competitor_id']);
 
                 return $competitor;
             })->mapToGroups(function ($item) {
-                return [str($item['competitor_type'])->plural() => $item['type']];
+                return [str($item['competitor_type'])->plural()->value() => $item['competitor']];
             });
         });
     }

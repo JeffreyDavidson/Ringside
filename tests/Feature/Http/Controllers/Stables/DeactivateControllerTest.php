@@ -1,10 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Stables;
-
-use App\Enums\Role;
 use App\Enums\StableStatus;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
@@ -12,91 +7,46 @@ use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Stables\DeactivateController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
-use Tests\TestCase;
 
-/**
- * @group stables
- * @group feature-stables
- * @group roster
- * @group feature-roster
- */
-class DeactivateControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_deactivates_an_active_stable_and_its_members_and_redirects()
-    {
-        $stable = Stable::factory()->active()->create();
+test('invoke deactivates an active stable and its members and redirects', function () {
+    $stable = Stable::factory()->active()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $stable))
-            ->assertRedirect(action([StablesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([DeactivateController::class], $stable))
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        tap($stable->fresh(), function ($stable) {
-            $this->assertNotNull($stable->activations->last()->ended_at);
-            $this->assertEquals(StableStatus::INACTIVE, $stable->status);
+    expect($stable->fresh())
+        ->activations->last()->ended_at->not->toBeNull()
+        ->status->toBe(StableStatus::INACTIVE)
+        ->currentWrestlers->each(fn ($wrestler) => $wrestler->status->toBe(WrestlerStatus::RELEASED))
+        ->currentTagTeams->each(fn ($tagTeam) => $tagTeam->status->toBe(TagTeamStatus::RELEASED));
+});
 
-            foreach ($stable->currentWrestlers as $wrestler) {
-                $this->assertEquals(WrestlerStatus::RELEASED, $wrestler->status);
-            }
+test('a basic user cannot deactivate a stable', function () {
+    $stable = Stable::factory()->active()->create();
 
-            foreach ($stable->currentTagTeams as $tagTeam) {
-                $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
-            }
-        });
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([DeactivateController::class], $stable))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_deactivates_a_stable()
-    {
-        $stable = Stable::factory()->create();
+test('a guest cannot activate a stable', function () {
+    $stable = Stable::factory()->active()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([DeactivateController::class], $stable))
-            ->assertForbidden();
-    }
+    $this->patch(action([DeactivateController::class], $stable))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_deactivates_a_stable()
-    {
-        $stable = Stable::factory()->create();
+test('invoke throws exception for deactivating a non deactivatable stable', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $this
-            ->patch(action([DeactivateController::class], $stable))
-            ->assertRedirect(route('login'));
-    }
+    $stable = Stable::factory()->{$factoryState}()->create();
 
-    /**
-     * @test
-     *
-     * @dataProvider nondeactivatableStableTypes
-     */
-    public function invoke_throws_exception_for_deactivating_a_non_deactivatable_stable($factoryState)
-    {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
-
-        $stable = Stable::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $stable));
-    }
-
-    public function nondeactivatableStableTypes()
-    {
-        return [
-            'inactive stable' => ['inactive'],
-            'retired stable' => ['retired'],
-            'unactivated stable' => ['unactivated'],
-            'with future activated stable' => ['withFutureActivation'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([DeactivateController::class], $stable));
+})->throws(CannotBeDeactivatedException::class)->with([
+    'inactive',
+    'retired',
+    'unactivated',
+    'withFutureActivation',
+]);

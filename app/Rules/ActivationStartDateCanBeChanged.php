@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Models\Title;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Carbon;
 

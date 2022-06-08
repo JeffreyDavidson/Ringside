@@ -2,9 +2,10 @@
 
 namespace App\Rules;
 
+use App\Models\TagTeam;
 use Illuminate\Contracts\Validation\Rule;
 
-class TagTeamCanJoinStable implements Rule
+class TagTeamCanJoinNewStable implements Rule
 {
     /**
      * Determine if the validation rule passes.
@@ -20,6 +21,8 @@ class TagTeamCanJoinStable implements Rule
         if ($tagTeam->currentStable !== null) {
             return false;
         }
+
+        return true;
     }
 
     /**

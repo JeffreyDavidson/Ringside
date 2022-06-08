@@ -1,150 +1,111 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\TagTeams;
-
-use App\Enums\Role;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\TagTeams\EmployController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
-use Tests\TestCase;
+use App\Models\Wrestler;
 
-/**
- * @group tagteams
- * @group feature-tagteams
- * @group roster
- * @group feature-roster
- */
-class EmployControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_employs_an_unemployed_tag_team_and_their_tag_team_partners_and_redirects()
-    {
-        $tagTeam = TagTeam::factory()->unemployed()->create();
+test('invoke employs an unemployed tag team and their unemployed wrestlers and redirects', function () {
+    [$wrestlerA, $wrestlerB] = Wrestler::factory()->unemployed()->count(2)->create();
+    $tagTeam = TagTeam::factory()
+        ->hasAttached($wrestlerA, ['joined_at' => now()->toDateTimeString()])
+        ->hasAttached($wrestlerB, ['joined_at' => now()->toDateTimeString()])
+        ->unemployed()
+        ->create();
 
-        $this->assertCount(0, $tagTeam->employments);
-        $this->assertEquals(TagTeamStatus::UNEMPLOYED, $tagTeam->status);
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $tagTeam))
+        ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $tagTeam))
-            ->assertRedirect(action([TagTeamsController::class, 'index']));
-
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertCount(1, $tagTeam->employments);
-            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-
-            foreach ($tagTeam->currentWrestlers as $wrestler) {
-                $this->assertCount(1, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            }
+    expect($tagTeam->fresh())
+        ->employments->toHaveCount(1)
+        ->status->toMatchObject(TagTeamStatus::BOOKABLE)
+        ->currentWrestlers->each(function ($wrestler) {
+            $wrestler->employments->toHaveCount(1);
+            $wrestler->status->toBe(WrestlerStatus::BOOKABLE);
         });
-    }
+});
 
-    /**
-     * @test
-     */
-    public function invoke_employs_a_future_employed_tag_team_and_their_tag_team_partners_and_redirects()
-    {
-        $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-        $startedAt = $tagTeam->employments->last()->started_at;
+test('invoke employs an unemployed tag team with bookable wrestlers and redirects', function () {
+    [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
+    $tagTeam = TagTeam::factory()
+        ->hasAttached($wrestlerA, ['joined_at' => now()->toDateTimeString()])
+        ->hasAttached($wrestlerB, ['joined_at' => now()->toDateTimeString()])
+        ->unemployed()
+        ->create();
 
-        $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(TagTeamStatus::FUTURE_EMPLOYMENT, $tagTeam->status);
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $tagTeam))
+        ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $tagTeam))
-            ->assertRedirect(action([TagTeamsController::class, 'index']));
-
-        tap($tagTeam->fresh(), function ($tagTeam) use ($startedAt) {
-            $this->assertTrue($tagTeam->currentEmployment->started_at->lt($startedAt));
-            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-
-            foreach ($tagTeam->currentWrestlers as $wrestler) {
-                $this->assertTrue($wrestler->currentEmployment->started_at->lt($startedAt));
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            }
+    expect($tagTeam->fresh())
+        ->employments->toHaveCount(1)
+        ->status->toMatchObject(TagTeamStatus::BOOKABLE)
+        ->currentWrestlers->each(function ($wrestler) {
+            $wrestler->employments->toHaveCount(1);
+            $wrestler->status->toBe(WrestlerStatus::BOOKABLE);
         });
-    }
+});
 
-    /**
-     * @test
-     */
-    public function invoke_employs_a_released_tag_team_and_their_tag_team_partners_redirects()
-    {
-        $tagTeam = TagTeam::factory()->released()->create();
+test('invoke employs a future employed tag team and their tag team partners and redirects', function () {
+    $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+    $startedAt = $tagTeam->employments->last()->started_at;
 
-        $this->assertEquals(TagTeamStatus::RELEASED, $tagTeam->status);
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $tagTeam))
+        ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $tagTeam))
-            ->assertRedirect(action([TagTeamsController::class, 'index']));
-
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertCount(2, $tagTeam->employments);
-            $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-
-            foreach ($tagTeam->currentWrestlers as $wrestler) {
-                $this->assertCount(2, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            }
+    expect($tagTeam->fresh())
+        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->status->toBe(TagTeamStatus::BOOKABLE)
+        ->currentWrestlers->each(function ($wrestler) use ($startedAt) {
+            $wrestler->currentEmployment->started_at->toBeLessThan($startedAt);
+            $wrestler->status->toBe(WrestlerStatus::BOOKABLE);
         });
-    }
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_employ_a_tag_team()
-    {
-        $tagTeam = TagTeam::factory()->create();
+test('invoke employs a released tag team and their tag team partners redirects', function () {
+    $tagTeam = TagTeam::factory()->released()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([EmployController::class], $tagTeam))
-            ->assertForbidden();
-    }
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $tagTeam))
+        ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_employ_a_tag_team()
-    {
-        $tagTeam = TagTeam::factory()->create();
+    expect($tagTeam->fresh())
+        ->employments->toHaveCount(2)
+        ->status->toBe(TagTeamStatus::BOOKABLE)
+        ->currentWrestlers->each(function ($wrestler) {
+            $wrestler->employments->toHaveCount(2);
+            $wrestler->status->toBe(WrestlerStatus::BOOKABLE);
+        });
+});
 
-        $this->patch(action([EmployController::class], $tagTeam))
-            ->assertRedirect(route('login'));
-    }
+test('a basic user cannot employ a tag team', function () {
+    $tagTeam = TagTeam::factory()->create();
 
-    /**
-     * @test
-     *
-     * @dataProvider nonemployableTagTeamTypes
-     */
-    public function invoke_throws_exception_for_employing_a_non_employable_tag_team($factoryState)
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
+    $this->actingAs(basicUser())
+        ->patch(action([EmployController::class], $tagTeam))
+        ->assertForbidden();
+});
 
-        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
+test('a guest cannot employ a tag team', function () {
+    $tagTeam = TagTeam::factory()->create();
 
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $tagTeam));
-    }
+    $this->patch(action([EmployController::class], $tagTeam))
+        ->assertRedirect(route('login'));
+});
 
-    public function nonemployableTagTeamTypes()
-    {
-        return [
-            'bookable tag team' => ['bookable'],
-            'retired tag team' => ['retired'],
-            'suspended tag team' => ['suspended'],
-        ];
-    }
-}
+test('invoke throws exception for employing a non employable tag team', function ($factoryState) {
+    $this->withoutExceptionHandling();
+
+    $wrestler = TagTeam::factory()->{$factoryState}()->create();
+
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $wrestler));
+})->throws(CannotBeEmployedException::class)->with([
+    'bookable',
+    'retired',
+]);

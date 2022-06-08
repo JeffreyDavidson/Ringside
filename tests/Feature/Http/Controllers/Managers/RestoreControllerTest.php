@@ -1,63 +1,32 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Tests\Feature\Http\Controllers\Managers;
 
-use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\RestoreController;
 use App\Models\Manager;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class RestoreControllerTest extends TestCase
-{
-    public Manager $manager;
+test('invoke restores a deleted manager and redirects', function () {
+    $manager = Manager::factory()->trashed()->create();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $this->actingAs(administrator())
+        ->patch(action([RestoreController::class], $manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this->manager = Manager::factory()->softDeleted()->create();
-    }
+    $this->assertNull($manager->fresh()->deleted_at);
+});
 
-    /**
-     * @test
-     */
-    public function invoke_restores_a_soft_deleted_manager_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RestoreController::class], $this->manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+test('a basic user cannot restore a deleted manager', function () {
+    $manager = Manager::factory()->trashed()->create();
 
-        $this->assertNull($this->manager->fresh()->deleted_at);
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([RestoreController::class], $manager))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_restore_a_manager()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([RestoreController::class], $this->manager))
-            ->assertForbidden();
-    }
+test('a guest cannot restore a deleted manager', function () {
+    $manager = Manager::factory()->trashed()->create();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_restore_a_manager()
-    {
-        $this
-            ->patch(action([RestoreController::class], $this->manager))
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->patch(action([RestoreController::class], $manager))
+        ->assertRedirect(route('login'));
+});

@@ -1,95 +1,48 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
 use App\Enums\ManagerStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Managers\ClearInjuryController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
-use Tests\TestCase;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class ClearInjuryControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_marks_an_injured_manager_as_being_cleared_and_redirects()
-    {
-        $manager = Manager::factory()->injured()->create();
+beforeEach(function () {
+    $this->manager = Manager::factory()->injured()->create();
+});
 
-        $this->assertNull($manager->injuries->last()->ended_at);
-        $this->assertEquals(ManagerStatus::INJURED, $manager->status);
+test('invoke marks an injured manager as being cleared from injury and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([ClearInjuryController::class], $this->manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+    expect($this->manager->fresh())
+        ->injuries->last()->ended_at->not->toBeNull()
+        ->status->toBe(ManagerStatus::AVAILABLE);
+});
 
-        tap($manager->fresh(), function ($manager) {
-            $this->assertNotNull($manager->injuries->last()->ended_at);
-            $this->assertEquals(ManagerStatus::AVAILABLE, $manager->status);
-        });
-    }
+test('a basic user cannot mark an injured manager as cleared', function () {
+    $this->actingAs(basicUser())
+        ->patch(action([ClearInjuryController::class], $this->manager))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_mark_an_injured_manager_as_cleared()
-    {
-        $manager = Manager::factory()->injured()->create();
+test('a guest cannot mark an injured manager as cleared', function () {
+    $this->patch(action([ClearInjuryController::class], $this->manager))
+        ->assertRedirect(route('login'));
+});
 
-        $this->actAs(ROLE::BASIC)
-            ->patch(action([ClearInjuryController::class], $manager))
-            ->assertForbidden();
-    }
+test('invoke throws exception for injuring a non injurable manager', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_mark_an_injured_manager_as_cleared()
-    {
-        $manager = Manager::factory()->injured()->create();
+    $manager = Manager::factory()->{$factoryState}()->create();
 
-        $this->patch(action([ClearInjuryController::class], $manager))
-            ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider nonclearableManagerTypes
-     */
-    public function invoke_throws_exception_for_clearing_an_injury_from_a_non_clearable_manager($factoryState)
-    {
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-        $this->withoutExceptionHandling();
-
-        $manager = Manager::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $manager));
-    }
-
-    public function nonclearableManagerTypes()
-    {
-        return [
-            'unemployed manager' => ['unemployed'],
-            'available manager' => ['available'],
-            'with future employed manager' => ['withFutureEmployment'],
-            'suspended manager' => ['suspended'],
-            'retired manager' => ['retired'],
-            'released manager' => ['released'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([ClearInjuryController::class], $manager));
+})->throws(CannotBeClearedFromInjuryException::class)->with([
+    'unemployed',
+    'available',
+    'withFutureEmployment',
+    'suspended',
+    'retired',
+    'released',
+]);

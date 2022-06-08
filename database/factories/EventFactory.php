@@ -34,8 +34,14 @@ class EventFactory extends Factory
      */
     public function definition(): array
     {
+        // dd($this->faker->locale());
+        // $faker = \Faker\Factory::create('en_US');
+        // dd($faker);
+        // dd($faker->words(2, true));
+        // dd(\Faker\Factory::create()->words());
+
         return [
-            'name' => $this->faker->words(2, true),
+            'name' => str($this->faker->words(2, true))->title(),
             'date' => null,
             'status' => EventStatus::UNSCHEDULED,
             'venue_id' => null,
@@ -128,15 +134,5 @@ class EventFactory extends Factory
     public function withPreview(string $preview)
     {
         return $this->state(['preview' => $preview]);
-    }
-
-    /**
-     * Define the event's soft deleted state.
-     *
-     * @return static
-     */
-    public function softDeleted()
-    {
-        return $this->state(['deleted_at' => now()]);
     }
 }

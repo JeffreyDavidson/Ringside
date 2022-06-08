@@ -111,14 +111,6 @@ class StableFactory extends Factory
             });
     }
 
-    public function softDeleted()
-    {
-        return $this->state(fn (array $attributes) => ['deleted_at' => now()])
-            ->afterCreating(function (Stable $stable) {
-                $stable->save();
-            });
-    }
-
     public function withNoMembers()
     {
         return $this->afterCreating(function (Stable $stable) {

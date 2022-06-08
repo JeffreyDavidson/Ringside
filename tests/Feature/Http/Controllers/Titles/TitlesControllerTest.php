@@ -1,134 +1,74 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Titles;
-
-use App\Enums\Role;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
-use App\Models\TitleChampionship;
-use App\Models\Wrestler;
-use Tests\TestCase;
 
-/**
- * @group titles
- * @group feature-titles
- */
-class TitlesControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function index_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([TitlesController::class, 'index']))
-            ->assertOk()
-            ->assertViewIs('titles.index')
-            ->assertSeeLivewire('titles.titles-list');
-    }
+test('index returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([TitlesController::class, 'index']))
+        ->assertOk()
+        ->assertViewIs('titles.index')
+        ->assertSeeLivewire('titles.titles-list');
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_titles_index_page()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([TitlesController::class, 'index']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view titles index page', function () {
+    $this->actingAs(basicUser())
+        ->get(action([TitlesController::class, 'index']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_titles_index_page()
-    {
-        $this
-            ->get(action([TitlesController::class, 'index']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view titles index page', function () {
+    $this->get(action([TitlesController::class, 'index']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function a_title_can_be_viewed()
-    {
-        $this->withoutExceptionHandling();
-        $title = Title::factory()->create();
+test('show returns a view', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([TitlesController::class, 'show'], $title))
-            ->assertViewIs('titles.show')
-            ->assertViewHas('title', $title)
-            ->assertSeeLivewire('titles.title-championships-list');
-    }
+    $this->actingAs(administrator())
+        ->get(action([TitlesController::class, 'show'], $title))
+        ->assertOk()
+        ->assertViewIs('titles.show')
+        ->assertViewHas('title', $title)
+        ->assertSeeLivewire('titles.title-championships-list');
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_can_view_a_title()
-    {
-        $title = Title::factory()->create();
+test('a basic user cannot view a title', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([TitlesController::class, 'show'], $title))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([TitlesController::class, 'show'], $title))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_a_title()
-    {
-        $title = Title::factory()->create();
+test('a guest cannot view a title', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->get(action([TitlesController::class, 'show'], $title))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([TitlesController::class, 'show'], $title))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function delete_a_title()
-    {
-        $title = Title::factory()->create();
+test('deletes a title and redirects', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->delete(action([TitlesController::class, 'destroy'], $title))
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->actingAs(administrator())
+        ->delete(action([TitlesController::class, 'destroy'], $title))
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        $this->assertSoftDeleted($title);
-    }
+    $this->assertSoftDeleted($title);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_delete_a_title()
-    {
-        $title = Title::factory()->create();
+test('a basic user cannot delete a title', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->delete(action([TitlesController::class, 'destroy'], $title))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->delete(action([TitlesController::class, 'destroy'], $title))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_delete_a_title()
-    {
-        $title = Title::factory()->create();
+test('a guest cannot delete a title', function () {
+    $title = Title::factory()->create();
 
-        $this
-            ->delete(action([TitlesController::class, 'destroy'], $title))
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->delete(action([TitlesController::class, 'destroy'], $title))
+        ->assertRedirect(route('login'));
+});

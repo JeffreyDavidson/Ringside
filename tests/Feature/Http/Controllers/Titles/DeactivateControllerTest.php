@@ -1,89 +1,48 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Titles;
-
-use App\Enums\Role;
 use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Titles\DeactivateController;
+use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
-use Tests\TestCase;
 
-/**
- * @group titles
- * @group feature-titles
- */
-class DeactivateControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_deactivates_an_active_title_and_redirects()
-    {
-        $title = Title::factory()->active()->create();
+test('invoke deactivates an active title and redirects', function () {
+    $title = Title::factory()->active()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $title))
-            ->assertRedirect(route('titles.index'));
+    $this->actingAs(administrator())
+        ->patch(action([DeactivateController::class], $title))
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        tap($title->fresh(), function ($title) {
-            $this->assertNotNull($title->activations->last()->ended_at);
-            $this->assertEquals(TitleStatus::INACTIVE, $title->status);
-        });
-    }
+    expect($title->fresh())
+        ->activations->last()->ended_at->not->toBeNull()
+        ->status->toBe(TitleStatus::INACTIVE);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_deactivates_a_title()
-    {
-        $title = Title::factory()->create();
+test('a basic user cannot deactivate an active title', function () {
+    $title = Title::factory()->active()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([DeactivateController::class], $title))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([DeactivateController::class], $title))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_deactivates_a_title()
-    {
-        $title = Title::factory()->create();
+test('a guest cannot deactivates a titles', function () {
+    $title = Title::factory()->active()->create();
 
-        $this
-            ->patch(action([DeactivateController::class], $title))
-            ->assertRedirect(route('login'));
-    }
+    $this->patch(action([DeactivateController::class], $title))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     *
-     * @dataProvider nondeactivatableTitleTypes
-     */
-    public function invoke_throws_exception_for_deactivating_a_non_deactivatable_title($factoryState)
-    {
-        $this->expectException(CannotBeDeactivatedException::class);
-        $this->withoutExceptionHandling();
+test('invoke throws exception for deactivating a non deactivatable title', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $title = Title::factory()->{$factoryState}()->create();
+    $title = Title::factory()->{$factoryState}()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([DeactivateController::class], $title));
-    }
-
-    public function nondeactivatableTitleTypes()
-    {
-        return [
-            'unactivated title' => ['unactivated'],
-            'with future activation title' => ['withFutureActivation'],
-            'inactive title' => ['inactive'],
-            'retired title' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([DeactivateController::class], $title));
+})->throws(CannotBeDeactivatedException::class)->with([
+    'unactivated',
+    'withFutureActivation',
+    'inactive',
+    'retired',
+]);

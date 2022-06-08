@@ -31,14 +31,14 @@ class UserFactory extends Factory
     public function administrator(): self
     {
         return $this->state([
-            'role' => ROLE::ADMINISTRATOR,
+            'role' => Role::ADMINISTRATOR,
         ]);
     }
 
     public function basicUser(): self
     {
         return $this->state([
-            'role' => ROLE::BASIC,
+            'role' => Role::BASIC,
         ]);
     }
 

@@ -1,215 +1,111 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Wrestlers;
-
-use App\Enums\Role;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
-use Tests\Factories\WrestlerRequestDataFactory;
-use Tests\TestCase;
 
-/**
- * @group wrestlers
- * @group feature-wrestlers
- * @group roster
- * @group feature-roster
- */
-class WrestlerControllerUpdateMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function edit_returns_a_view()
-    {
-        $wrestler = Wrestler::factory()->create();
+test('edit returns a view', function () {
+    $wrestler = Wrestler::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([WrestlersController::class, 'edit'], $wrestler))
-            ->assertViewIs('wrestlers.edit')
-            ->assertViewHas('wrestler', $wrestler);
-    }
+    $this->actingAs(administrator())
+        ->get(action([WrestlersController::class, 'edit'], $wrestler))
+        ->assertStatus(200)
+        ->assertViewIs('wrestlers.edit')
+        ->assertViewHas('wrestler', $wrestler);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_editing_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
+test('a basic user cannot view the form for editing a wrestler', function () {
+    $wrestler = Wrestler::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(route('wrestlers.edit', $wrestler))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->get(action([WrestlersController::class, 'edit'], $wrestler))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_editing_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
+test('a guest cannot view the form for editing a wrestler', function () {
+    $wrestler = Wrestler::factory()->create();
 
-        $this
-            ->get(route('wrestlers.edit', $wrestler))
-            ->assertRedirect(route('login'));
-    }
+    $this->get(action([WrestlersController::class, 'edit'], $wrestler))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function updates_a_wrestler_and_redirects()
-    {
-        $wrestler = Wrestler::factory()->create([
-            'name' => 'Old Wrestler Name',
-            'height' => 81,
-            'weight' => 300,
-            'hometown' => 'Old Location',
-            'signature_move' => 'Old Signature Move',
-        ]);
+test('updates a wrestler and redirects', function () {
+    $wrestler = Wrestler::factory()->create([
+        'name' => 'Old Wrestler Name',
+        'height' => 81,
+        'weight' => 300,
+        'hometown' => 'Old Location',
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create([
-                    'name' => 'New Wrestler Name',
-                    'feet' => 6,
-                    'inches' => 2,
-                    'weight' => 240,
-                    'hometown' => 'Laraville, FL',
-                    'signature_move' => 'New Signature Move',
-                ])
-            )
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    $data = UpdateRequest::factory()->create([
+        'name' => 'Example Wrestler Name',
+        'feet' => 6,
+        'inches' => 10,
+        'weight' => 300,
+        'hometown' => 'Laraville, New York',
+        'signature_move' => null,
+        'started_at' => null,
+    ]);
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertEquals('New Wrestler Name', $wrestler->name);
-            $this->assertEquals(74, $wrestler->height);
-            $this->assertEquals(240, $wrestler->weight);
-            $this->assertEquals('Laraville, FL', $wrestler->hometown);
-            $this->assertEquals('New Signature Move', $wrestler->signature_move);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([WrestlersController::class, 'edit'], $wrestler))
+        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
+        ->assertValid()
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function update_can_employ_an_unemployed_wrestler_when_started_at_is_filled()
-    {
-        $now = now();
+    expect($wrestler->fresh())
+        ->name->toBe('Example Wrestler Name')
+        ->height->toBe(82)
+        ->weight->toBe(300)
+        ->hometown->toBe('Laraville, New York')
+        ->employments->toBeEmpty();
+});
 
-        $wrestler = Wrestler::factory()->unemployed()->create();
+test('update can employ an unemployed wrestler when started at is filled', function () {
+    $now = now();
+    $wrestler = Wrestler::factory()->unemployed()->create();
+    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
 
-        $this->assertCount(0, $wrestler->employments);
+    $this->actingAs(administrator())
+        ->from(action([WrestlersController::class, 'edit'], $wrestler))
+        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
+        ->assertValid()
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()
-                    ->withWrestler($wrestler)
-                    ->create([
-                        'started_at' => $now->toDateTimeString(),
-                    ])
-            )
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    expect($wrestler->fresh())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
+});
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals(
-                $now->toDateTimeString('minute'),
-                $wrestler->employments->first()->started_at->toDateTimeString('minute')
-            );
-        });
-    }
+test('update can employ a future employed wrestler when started at is filled', function () {
+    $now = now();
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
 
-    /**
-     * @test
-     */
-    public function update_can_employ_a_future_employed_wrestler_when_started_at_is_filled()
-    {
-        $now = now();
-        $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+    $this->actingAs(administrator())
+        ->from(action([WrestlersController::class, 'edit'], $wrestler))
+        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
+        ->assertValid()
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create([
-                    'started_at' => $now->toDateTimeString(),
-                ])
-            )
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    expect($wrestler->fresh())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
+});
 
-        tap($wrestler->fresh(), function ($wrestler) use ($now) {
-            $this->assertCount(1, $wrestler->employments);
-            $this->assertEquals(
-                $now->toDateTimeString(),
-                $wrestler->employments()->first()->started_at->toDateTimeString()
-            );
-        });
-    }
+test('a basic user cannot update a wrestler', function () {
+    $wrestler = Wrestler::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-    /**
-     * @test
-     */
-    public function updating_cannot_employ_a_bookable_wrestler_when_started_at_is_filled()
-    {
-        $wrestler = Wrestler::factory()->bookable()->create();
+    $this->actingAs(basicUser())
+        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
+        ->assertForbidden();
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()
-                    ->withWrestler($wrestler)
-                    ->create([
-                        'started_at' => now()->toDateTimeString(),
-                    ])
-            )
-            ->assertSessionHasErrors(['started_at']);
+test('a guest cannot update a wrestler', function () {
+    $wrestler = Wrestler::factory()->create();
+    $data = UpdateRequest::factory()->create();
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertCount(1, $wrestler->employments);
-        });
-    }
-
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_update_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
-
-        $this->actAs(ROLE::BASIC)
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create()
-            )
-            ->assertForbidden();
-    }
-
-    /**
-     * @test
-     */
-    public function a_guest_cannot_update_a_wrestler()
-    {
-        $wrestler = Wrestler::factory()->create();
-
-        $this
-            ->from(action([WrestlersController::class, 'edit'], $wrestler))
-            ->patch(
-                action([WrestlersController::class, 'update'], $wrestler),
-                WrestlerRequestDataFactory::new()->withWrestler($wrestler)->create()
-            )
-            ->assertRedirect(route('login'));
-    }
-}
+    $this->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
+        ->assertRedirect(route('login'));
+});

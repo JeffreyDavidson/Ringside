@@ -14,12 +14,18 @@ class EventMatchRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'match_type_id' => MatchType::factory(),
-            'referees'      => Referee::factory(),
+            'match_type_id' => MatchType::first()->id,
+            'referees'      => [Referee::factory()->create()->id],
             'titles'        => null,
             'competitors'   => [
-                'competitor_type' => 'wrestler',
-                'competitor_id'   => Wrestler::factory(),
+                [
+                    'competitor_type' => 'wrestler',
+                    'competitor_id'   => Wrestler::factory()->create()->id,
+                ],
+                [
+                    'competitor_type' => 'wrestler',
+                    'competitor_id'   => Wrestler::factory()->create()->id,
+                ],
             ],
             'preview'       => null,
         ];

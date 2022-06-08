@@ -1,10 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Stables;
-
-use App\Enums\Role;
 use App\Enums\StableStatus;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
@@ -12,128 +7,71 @@ use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Stables\ActivateController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
-use Tests\TestCase;
 
-/**
- * @group stables
- * @group feature-stables
- * @group roster
- * @group feature-roster
- */
-class ActivateControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_activates_an_unactivated_stable_and_employs_its_unemployed_members_and_redirects()
-    {
-        $stable = Stable::factory()->unactivated()->withUnemployedDefaultMembers()->create();
+test('invoke activates an unactivated stable and employs its unemployed members and redirects', function () {
+    $stable = Stable::factory()->unactivated()->withUnemployedDefaultMembers()->create();
 
-        $this->assertEquals(StableStatus::UNACTIVATED, $stable->status);
+    $this->actingAs(administrator())
+        ->patch(action([ActivateController::class], $stable))
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $stable))
-            ->assertRedirect(action([StablesController::class, 'index']));
-
-        tap($stable->fresh(), function ($stable) {
-            $this->assertCount(1, $stable->activations);
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
-
-            $stable->currentWrestlers->each(function (Wrestler $wrestler) {
-                $this->assertCount(1, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            });
-
-            $stable->currentTagTeams->each(function (TagTeam $tagTeam) {
-                $this->assertCount(1, $tagTeam->employments);
-                $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-            });
+    expect($stable->fresh())
+        ->activations->toHaveCount(1)
+        ->status->toBe(StableStatus::ACTIVE)
+        ->currentWrestlers->each(function ($wrestler) {
+            $wrestler->employments->toHaveCount(1)
+                ->status->toBe(WrestlerStatus::BOOKABLE);
+        })
+        ->currentTagTeams->each(function ($tagTeam) {
+            $tagTeam->employments->toHaveCount(1)
+                ->status->toBe(TagTeamStatus::BOOKABLE);
         });
-    }
+});
 
-    /**
-     * @test
-     */
-    public function invoke_activates_a_future_activated_stable_with_members_and_redirects()
-    {
-        $this->withoutExceptionHandling();
-        $stable = Stable::factory()->withFutureActivation()->create();
-        $startedAt = $stable->activations->last()->started_at;
+test('invoke activates a future activated stable with members and redirects', function () {
+    $stable = Stable::factory()->withFutureActivation()->create();
+    $startedAt = $stable->activations->last()->started_at;
 
-        $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(StableStatus::FUTURE_ACTIVATION, $stable->status);
+    $this->actingAs(administrator())
+        ->patch(action([ActivateController::class], $stable))
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $stable))
-            ->assertRedirect(action([StablesController::class, 'index']));
-
-        tap($stable->fresh(), function ($stable) use ($startedAt) {
-            $this->assertTrue($stable->currentActivation->started_at->lt($startedAt));
-            $this->assertEquals(StableStatus::ACTIVE, $stable->status);
-
-            foreach ($stable->currentWrestlers as $wrestler) {
-                $this->assertCount(1, $wrestler->employments);
-                $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-            }
-
-            foreach ($stable->currentTagTeams as $tagTeam) {
-                $this->assertCount(1, $tagTeam->employments);
-                $this->assertEquals(TagTeamStatus::BOOKABLE, $tagTeam->status);
-            }
+    expect($stable->fresh())
+        ->currentActivation->started_at->toBeLessThan($startedAt)
+        ->status->toBe(StableStatus::ACTIVE)
+        ->currentWrestlers->each(function ($wrestler) {
+            $wrestler->employments->toHaveCount(1)
+                ->status->toHaveCount(WrestlerStatus::BOOKABLE);
+        })
+        ->currentTagTeams->each(function ($tagTeam) {
+            $tagTeam->employments->toHaveCount(1)
+                ->status->toBe(TagTeamStatus::BOOKABLE);
         });
-    }
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_activate_a_stable()
-    {
-        $stable = Stable::factory()->create();
+test('a basic user cannot activate a stable', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([ActivateController::class], $stable))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([ActivateController::class], $stable))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_activate_a_stable()
-    {
-        $stable = Stable::factory()->create();
+test('a guest cannot activate a stable', function () {
+    $stable = Stable::factory()->create();
 
-        $this
-            ->patch(action([ActivateController::class], $stable))
-            ->assertRedirect(route('login'));
-    }
+    $this->patch(action([ActivateController::class], $stable))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     *
-     * @dataProvider nonactivatableStableTypes
-     */
-    public function invoke_throws_exception_for_activating_a_non_activatable_stable($factoryState)
-    {
-        $this->expectException(CannotBeActivatedException::class);
-        $this->withoutExceptionHandling();
+test('invoke throws exception for activating a non activatable stable', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $stable = Stable::factory()->{$factoryState}()->create();
+    $stable = Stable::factory()->{$factoryState}()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $stable));
-    }
-
-    public function nonactivatableStableTypes()
-    {
-        return [
-            'retired stable' => ['retired'],
-            'active stable' => ['active'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([ActivateController::class], $stable));
+})->throws(CannotBeActivatedException::class)->with([
+    'active',
+    'retired',
+]);

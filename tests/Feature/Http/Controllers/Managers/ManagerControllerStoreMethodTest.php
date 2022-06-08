@@ -1,136 +1,76 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Managers;
-
-use App\Enums\Role;
 use App\Http\Controllers\Managers\ManagersController;
+use App\Http\Requests\Managers\StoreRequest;
 use App\Models\Manager;
-use Tests\Factories\ManagerRequestDataFactory;
-use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
-/**
- * @group managers
- * @group feature-managers
- * @group roster
- * @group feature-roster
- */
-class ManagerControllerStoreMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function create_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([ManagersController::class, 'create']))
-            ->assertViewIs('managers.create')
-            ->assertViewHas('manager', new Manager);
-    }
+test('create returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([ManagersController::class, 'create']))
+        ->assertStatus(200)
+        ->assertViewIs('managers.create')
+        ->assertViewHas('manager', new Manager);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_creating_a_manager()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([ManagersController::class, 'create']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view the form for creating a manager', function () {
+    $this->actingAs(basicUser())
+        ->get(action([ManagersController::class, 'create']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_creating_a_manager()
-    {
-        $this
-            ->get(action([ManagersController::class, 'create']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view the form for creating a manager', function () {
+    $this->get(action([ManagersController::class, 'create']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function store_creates_a_manager_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([ManagersController::class, 'create']))
-            ->post(action([ManagersController::class, 'store'], ManagerRequestDataFactory::new()->create([
-                'first_name' => 'John',
-                'last_name' => 'Smith',
-                'started_at' => null,
-            ])))
-            ->assertRedirect(action([ManagersController::class, 'index']));
+test('store creates a manager and redirects', function () {
+    $data = StoreRequest::factory()->create([
+        'first_name' => 'Taylor',
+        'last_name' => 'Otwell',
+        'started_at' => null,
+    ]);
 
-        tap(Manager::first(), function ($manager) {
-            $this->assertEquals('John', $manager->first_name);
-            $this->assertEquals('Smith', $manager->last_name);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([ManagersController::class, 'create']))
+        ->post(action([ManagersController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function an_employment_is_not_created_for_the_manager_if_started_at_is_filled_in_request()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([ManagersController::class, 'create']))
-            ->post(
-                action([ManagersController::class, 'store']),
-                ManagerRequestDataFactory::new()->create(['started_at' => null])
-            );
+    expect(Manager::latest()->first())
+        ->first_name->toBe('Taylor')
+        ->last_name->toBe('Otwell')
+        ->employments->toBeEmpty();
+});
 
-        tap(Manager::first(), function ($manager) {
-            $this->assertCount(0, $manager->employments);
-        });
-    }
+test('an employment is created for the manager if started at is filled in request', function () {
+    $dateTime = Carbon::now()->toDateTimeString();
+    $data = StoreRequest::factory()->create([
+        'started_at' => $dateTime,
+    ]);
 
-    /**
-     * @test
-     */
-    public function an_employment_is_created_for_the_manager_if_started_at_is_filled_in_request()
-    {
-        $startedAt = now()->toDateTimeString();
+    $this->actingAs(administrator())
+        ->from(action([ManagersController::class, 'create']))
+        ->post(action([ManagersController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([ManagersController::class, 'create']))
-            ->post(
-                action([ManagersController::class, 'store']),
-                ManagerRequestDataFactory::new()->create(['started_at' => $startedAt])
-            );
+    expect(Manager::latest()->first())
+        ->employments->toHaveCount(1)
+        ->employments->first()->started_at->toEqual($dateTime);
+});
 
-        tap(Manager::first(), function ($manager) use ($startedAt) {
-            $this->assertCount(1, $manager->employments);
-            $this->assertEquals($startedAt, $manager->employments->first()->started_at->toDateTimeString());
-        });
-    }
+test('a basic user cannot create a manager', function () {
+    $data = StoreRequest::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_create_a_manager()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([ManagersController::class, 'create']))
-            ->post(action([ManagersController::class, 'store'], ManagerRequestDataFactory::new()->create()))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->post(action([ManagersController::class, 'store']), $data)
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_create_a_manager()
-    {
-        $this
-            ->from(action([ManagersController::class, 'create']))
-            ->post(action([ManagersController::class, 'store'], ManagerRequestDataFactory::new()->create()))
-            ->assertRedirect(route('login'));
-    }
-}
+test('a guest cannot create a manager', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->post(action([ManagersController::class, 'store']), $data)
+        ->assertRedirect(route('login'));
+});

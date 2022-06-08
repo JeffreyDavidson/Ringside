@@ -1,93 +1,58 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\TagTeams;
-
-use App\Enums\Role;
 use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\TagTeams\SuspendController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
-use Tests\TestCase;
+use App\Models\Wrestler;
 
-/**
- * @group tagteams
- * @group feature-tagteams
- * @group roster
- * @group feature-rosters
- */
-class SuspendControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_suspends_a_tag_team_and_their_tag_team_partners_and_redirects()
-    {
-        $tagTeam = TagTeam::factory()->bookable()->create();
+test('invoke suspends a tag team and their tag team partners and redirects', function () {
+    [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
+    $tagTeam = TagTeam::factory()
+        ->hasAttached($wrestlerA, ['joined_at' => now()->toDateTimeString()])
+        ->hasAttached($wrestlerB, ['joined_at' => now()->toDateTimeString()])
+        ->bookable()
+        ->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $tagTeam))
-            ->assertRedirect(action([TagTeamsController::class, 'index']));
+    $this->actingAs(administrator())
+        ->patch(action([SuspendController::class], $tagTeam))
+        ->assertRedirect(action([TagTeamsController::class, 'index']));
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertCount(1, $tagTeam->suspensions);
-            $this->assertEquals(TagTeamStatus::SUSPENDED, $tagTeam->status);
+    expect($tagTeam->fresh())
+        ->suspensions->toHaveCount(1)
+        ->status->toMatchObject(TagTeamStatus::SUSPENDED)
+        ->currentWrestlers->each(function ($wrestler) {
+            $wrestler->status->toMatchObject(WrestlerStatus::SUSPENDED);
         });
-    }
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_suspend_a_tag_team()
-    {
-        $tagTeam = TagTeam::factory()->create();
+test('a basic user cannot retire a bookable tag team', function () {
+    $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([SuspendController::class], $tagTeam))
-            ->assertForbidden();
-    }
+    $this->actingAs(basicUser())
+        ->patch(action([SuspendController::class], $tagTeam))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_suspend_a_tag_team()
-    {
-        $tagTeam = TagTeam::factory()->create();
+test('a guest cannot suspend a bookable tag team', function () {
+    $tagTeam = TagTeam::factory()->bookable()->create();
 
-        $this
-            ->patch(action([SuspendController::class], $tagTeam))
-            ->assertRedirect(route('login'));
-    }
+    $this->patch(action([SuspendController::class], $tagTeam))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     *
-     * @dataProvider nonsuspendableTagTeamTypes
-     */
-    public function invoke_throws_exception_for_suspending_a_non_suspendable_tag_team($factoryState)
-    {
-        $this->expectException(CannotBeSuspendedException::class);
-        $this->withoutExceptionHandling();
+test('invoke throws exception for retiring a non retirable tag team', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-        $tagTeam = TagTeam::factory()->{$factoryState}()->create();
+    $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([SuspendController::class], $tagTeam));
-    }
-
-    public function nonsuspendableTagTeamTypes()
-    {
-        return [
-            'suspended tag team' => ['suspended'],
-            'unemployed tag team' => ['unemployed'],
-            'released tag team' => ['released'],
-            'with future employed tag team' => ['withFutureEmployment'],
-            'retired tag team' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([SuspendController::class], $tagTeam));
+})->throws(CannotBeSuspendedException::class)->with([
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+    'retired',
+]);

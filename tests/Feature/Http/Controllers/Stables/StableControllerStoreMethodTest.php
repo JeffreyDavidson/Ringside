@@ -1,225 +1,162 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Stables;
-
-use App\Enums\Role;
 use App\Http\Controllers\Stables\StablesController;
+use App\Http\Requests\Stables\StoreRequest;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
-use Tests\Factories\StableRequestDataFactory;
-use Tests\TestCase;
 
-/**
- * @group stables
- * @group feature-stables
- * @group roster
- * @group feature-roster
- */
-class StableControllerStoreMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function create_returns_a_view()
-    {
-        $this->withoutExceptionHandling();
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([StablesController::class, 'create']))
-            ->assertViewIs('stables.create')
-            ->assertViewHas('stable', new Stable);
-    }
+test('create returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([StablesController::class, 'create']))
+        ->assertStatus(200)
+        ->assertViewIs('stables.create')
+        ->assertViewHas('stable', new Stable);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_creating_a_stable()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([StablesController::class, 'create']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view the form for creating a stable', function () {
+    $this->actingAs(basicUser())
+        ->get(action([StablesController::class, 'create']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_creating_a_stable()
-    {
-        $this
-            ->get(action([StablesController::class, 'create']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view the form for creating a stable', function () {
+    $this->get(action([StablesController::class, 'create']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function store_creates_a_stable_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([StablesController::class, 'create']))
-            ->post(
-                action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()->create([
-                    'name' => 'Example Stable Name',
-                ])
-            )
-            ->assertRedirect(action([StablesController::class, 'index']));
+test('store creates a stable and redirects', function () {
+    $data = StoreRequest::factory()->create([
+        'name' => 'Example Stable Name',
+        'started_at' => null,
+        'wrestlers' => [],
+        'tag_teams' => [],
+    ]);
 
-        tap(Stable::first(), function ($stable) {
-            $this->assertEquals('Example Stable Name', $stable->name);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([StablesController::class, 'create']))
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function an_activation_is_created_for_the_stable_if_started_at_is_filled_in_request()
-    {
-        $now = now();
-        $wrestlers = Wrestler::factory()->count(3)->create();
+    expect(Stable::latest()->first())
+        ->name->toBe('Example Stable Name')
+        ->activations->toBeEmpty()
+        ->wrestlers->toBeEmpty()
+        ->tagteams->toBeEmpty();
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([StablesController::class, 'create']))
-            ->post(
-                action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()
-                    ->withWrestlers($wrestlers->modelKeys())
-                    ->create(['started_at' => $now->toDateTimeString()])
-            );
+test('an activation is created for the stable if started at is filled in request', function () {
+    $dateTime = now()->toDateTimeString();
+    $wrestlers = Wrestler::factory()->count(3)->create();
 
-        tap(Stable::first(), function ($stable) use ($now) {
-            $this->assertCount(1, $stable->activations);
-            $this->assertEquals($now, $stable->activatedAt->toDateTimeString());
-        });
-    }
+    $data = StoreRequest::factory()->create([
+        'started_at' => $dateTime,
+        'wrestlers' => $wrestlers->modelKeys(),
+    ]);
 
-    /**
-     * @test
-     */
-    public function wrestlers_are_added_to_stable_if_present()
-    {
-        $createdWrestlers = Wrestler::factory()->count(3)->create()->pluck('id')->toArray();
+    $this->actingAs(administrator())
+        ->from(action([StablesController::class, 'create']))
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([StablesController::class, 'create']))
-            ->post(
-                action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()->withWrestlers($createdWrestlers)->create()
-            );
+    expect(Stable::latest()->first())
+        ->activations->toHaveCount(1)
+        ->activations->last()->started_at->toDateTimeString()->toBe($dateTime);
+});
 
-        tap(Stable::first()->currentWrestlers, function ($wrestlers) use ($createdWrestlers) {
-            $this->assertCount(3, $wrestlers);
-            $this->assertEquals($wrestlers->modelKeys(), $createdWrestlers);
-        });
-    }
+test('wrestlers are added to stable if present', function () {
+    $wrestlers = Wrestler::factory()->count(3)->create();
 
-    /**
-     * @test
-     */
-    public function tag_teams_are_added_to_stable_if_present()
-    {
-        $createdTagTeams = TagTeam::factory()->count(2)->create()->pluck('id')->toArray();
+    $data = StoreRequest::factory()->create([
+        'wrestlers' => $wrestlers->modelKeys(),
+    ]);
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([StablesController::class, 'create']))
-            ->post(
-                action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()->withTagTeams($createdTagTeams)->create()
-            );
+    $this->actingAs(administrator())
+        ->from(action([StablesController::class, 'create']))
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        tap(Stable::first()->currentTagTeams, function ($tagTeams) use ($createdTagTeams) {
-            $this->assertCount(2, $tagTeams);
-            $this->assertEquals($tagTeams->modelKeys(), $createdTagTeams);
-        });
-    }
+    expect(Stable::latest()->first())
+        ->currentWrestlers->toHaveCount(3)
+        ->currentWrestlers->modelKeys()->toEqual($wrestlers->modelKeys());
+});
 
-    /**
-     * @test
-     */
-    public function a_stables_members_join_when_stable_is_started_if_filled()
-    {
-        $createdWrestlers = Wrestler::factory()->count(3)->create();
+test('tag teams are added to stable if present', function () {
+    $tagTeams = TagTeam::factory()->count(2)->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([StablesController::class, 'create']))
-            ->post(
-                action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()
-                    ->withStartDate(Carbon::now())
-                    ->withWrestlers($createdWrestlers->modelKeys())
-                    ->create()
-            );
+    $data = StoreRequest::factory()->create([
+        'tag_teams' => $tagTeams->modelKeys(),
+    ]);
 
-        tap(Stable::first(), function ($stable) {
-            $wrestlers = $stable->currentWrestlers;
-            foreach ($wrestlers as $wrestler) {
-                $this->assertNotNull($wrestler->pivot->joined_at);
-            }
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([StablesController::class, 'create']))
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function a_stables_members_join_at_the_current_time_when_stable_is_created_if_started_at_is_not_filled()
-    {
-        $wrestler = Wrestler::factory()->create()->getKey();
-        $tagTeam = TagTeam::factory()->create()->getKey();
-        $now = now()->toDateTimeString();
-        Carbon::setTestNow($now);
+    expect(Stable::latest()->first())
+        ->currentTagTeams->toHaveCount(2)
+        ->currentTagTeams->modelKeys()->toEqual($tagTeams->modelKeys());
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([StablesController::class, 'create']))
-            ->post(
-                action([StablesController::class, 'store']),
-                StableRequestDataFactory::new()->withWrestlers([$wrestler])->withTagTeams([$tagTeam])->create([
-                    'started_at' => '',
-                ])
-            );
+test('a stables members join when stable is started if filled', function () {
+    $dateTime = now()->toDateTimeString();
+    $wrestlers = Wrestler::factory()->count(1)->create();
+    $tagTeam = TagTeam::factory()->count(1)->create();
 
-        tap(Stable::first(), function ($stable) use ($wrestler, $tagTeam, $now) {
-            $wrestlers = $stable->currentWrestlers;
-            $tagTeams = $stable->currentTagTeams;
+    $data = StoreRequest::factory()->create([
+        'started_at' => $dateTime,
+        'wrestlers' => $wrestlers->modelKeys(),
+        'tag_teams' => $tagTeam->modelKeys(),
+    ]);
 
-            $this->assertCollectionHas($wrestlers, $wrestler);
-            $this->assertCollectionHas($tagTeams, $tagTeam);
+    $this->actingAs(administrator())
+        ->from(action([StablesController::class, 'create']))
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-            $this->assertEquals($now, $wrestlers->first()->pivot->joined_at->toDateTimeString());
-            $this->assertEquals($now, $tagTeams->first()->pivot->joined_at->toDateTimeString());
-        });
-    }
+    expect(Stable::latest()->first())
+        ->currentWrestlers->each(fn ($wrestler) => $wrestler->pivot->joined_at->toDateTimeString()->toBe($dateTime))
+        ->currentTagTeams->each(fn ($tagTeam) => $tagTeam->pivot->joined_at->toDateTimeString()->toBe($dateTime));
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_create_a_stable()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([StablesController::class, 'create']))
-            ->post(action([StablesController::class, 'store']), StableRequestDataFactory::new()->create())
-            ->assertForbidden();
-    }
+test('a stables members join at the current time when stable is created if started at is not filled', function () {
+    $dateTime = now()->toDateTimeString();
+    $wrestlers = Wrestler::factory()->count(1)->create();
+    $tagTeam = TagTeam::factory()->count(1)->create();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_create_a_stable()
-    {
-        $this
-            ->from(action([StablesController::class, 'create']))
-            ->post(action([StablesController::class, 'store']), StableRequestDataFactory::new()->create())
-            ->assertRedirect(route('login'));
-    }
-}
+    $data = StoreRequest::factory()->create([
+        'started_at' => null,
+        'wrestlers' => $wrestlers->modelKeys(),
+        'tag_teams' => $tagTeam->modelKeys(),
+    ]);
+
+    $this->actingAs(administrator())
+        ->from(action([StablesController::class, 'create']))
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([StablesController::class, 'index']));
+
+    expect(Stable::latest()->first())
+        ->currentWrestlers->each(fn ($wrestler) => $wrestler->pivot->joined_at->toDateTimeString()->toBe($dateTime))
+        ->currentTagTeams->each(fn ($tagTeam) => $tagTeam->pivot->joined_at->toDateTimeString()->toBe($dateTime));
+});
+
+test('a basic user cannot create a stable', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->actingAs(basicUser())
+        ->post(action([StablesController::class, 'store']), $data)
+        ->assertForbidden();
+});
+
+test('a guest cannot create a stable', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->post(action([StablesController::class, 'store']), $data)
+        ->assertRedirect(route('login'));
+});

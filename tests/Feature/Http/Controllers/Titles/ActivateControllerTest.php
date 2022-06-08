@@ -1,109 +1,58 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Titles;
-
-use App\Enums\Role;
 use App\Enums\TitleStatus;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
-use Tests\TestCase;
 
-/**
- * @group titles
- * @group feature-titles
- */
-class ActivateControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_activates_an_unactivated_title_and_redirects()
-    {
-        $title = Title::factory()->unactivated()->create();
+test('invoke activates an unactivated title and redirects', function () {
+    $title = Title::factory()->unactivated()->create();
 
-        $this->assertEquals(TitleStatus::UNACTIVATED, $title->status);
+    $this->actingAs(administrator())
+        ->patch(action([ActivateController::class], $title))
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $title))
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    expect($title->fresh())
+        ->activations->toHaveCount(1)
+        ->status->toBe(TitleStatus::ACTIVE);
+});
 
-        tap($title->fresh(), function ($title) {
-            $this->assertCount(1, $title->activations);
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-        });
-    }
+test('invoke activates a future activated title and redirects', function () {
+    $title = Title::factory()->withFutureActivation()->create();
 
-    /**
-     * @test
-     */
-    public function invoke_activates_a_future_activated_title_and_redirects()
-    {
-        $title = Title::factory()->withFutureActivation()->create();
-        $startedAt = $title->activations->last()->started_at;
+    $this->actingAs(administrator())
+        ->patch(action([ActivateController::class], $title))
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $title))
-            ->assertRedirect(action([TitlesController::class, 'index']));
+    expect($title->fresh())
+        ->activations->toHaveCount(1)
+        ->status->toBe(TitleStatus::ACTIVE);
+});
 
-        tap($title->fresh(), function ($title) use ($startedAt) {
-            $this->assertTrue($title->currentActivation->started_at->lt($startedAt));
-            $this->assertEquals(TitleStatus::ACTIVE, $title->status);
-        });
-    }
+test('a basic user cannot activate an unactivated title', function () {
+    $title = Title::factory()->unactivated()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_activate_a_title()
-    {
-        $title = Title::factory()->create();
+    $this->actingAs(basicUser())
+        ->patch(action([ActivateController::class], $title))
+        ->assertForbidden();
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([ActivateController::class], $title))
-            ->assertForbidden();
-    }
+test('a guest cannot activate an unactivated title', function () {
+    $title = Title::factory()->unactivated()->create();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_activate_a_title()
-    {
-        $title = Title::factory()->create();
+    $this->patch(action([ActivateController::class], $title))
+        ->assertRedirect(route('login'));
+});
 
-        $this
-            ->patch(action([ActivateController::class], $title))
-            ->assertRedirect(route('login'));
-    }
+test('invoke throws exception for unretiring a non unretirable title', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     *
-     * @dataProvider nonactivatableTitleTypes
-     */
-    public function invoke_throws_exception_for_activating_a_non_activatable_title($factoryState)
-    {
-        $this->expectException(CannotBeActivatedException::class);
-        $this->withoutExceptionHandling();
+    $title = Title::factory()->{$factoryState}()->create();
 
-        $title = Title::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ActivateController::class], $title));
-    }
-
-    public function nonactivatableTitleTypes()
-    {
-        return [
-            'active title' => ['active'],
-            'retired title' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([ActivateController::class], $title));
+})->throws(CannotBeActivatedException::class)->with([
+    'active',
+    'retired',
+]);

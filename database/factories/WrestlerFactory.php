@@ -30,7 +30,6 @@ class WrestlerFactory extends Factory
             'hometown' => $this->faker->city().', '.$this->faker->state(),
             'signature_move' => null,
             'status' => WrestlerStatus::UNEMPLOYED,
-            'current_tag_team_id' => null,
         ];
     }
 
@@ -120,14 +119,6 @@ class WrestlerFactory extends Factory
                 $wrestler->save();
                 $wrestler->load('employments');
                 $wrestler->load('injuries');
-            });
-    }
-
-    public function softDeleted()
-    {
-        return $this->state(fn (array $attributes) => ['deleted_at' => now()])
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
             });
     }
 }

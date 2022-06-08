@@ -24,7 +24,6 @@ return new class extends Migration {
             $table->string('hometown');
             $table->string('signature_move')->nullable();
             $table->string('status');
-            $table->foreignIdFor(TagTeam::class, 'current_tag_team_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

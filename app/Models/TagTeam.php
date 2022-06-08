@@ -166,6 +166,10 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
             return false;
         }
 
+        if (! $this->currentWrestlers->every->isBookable()) {
+            return false;
+        }
+
         return true;
     }
 

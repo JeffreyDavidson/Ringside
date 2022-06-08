@@ -1,102 +1,63 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Venues;
-
-use App\Enums\Role;
 use App\Http\Controllers\Venues\VenuesController;
+use App\Http\Requests\Venues\StoreRequest;
 use App\Models\Venue;
-use Tests\Factories\VenueRequestDataFactory;
-use Tests\TestCase;
 
-/**
- * @group venues
- * @group feature-venues
- */
-class VenuesControllerStoreMethodTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function create_returns_a_view()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->get(action([VenuesController::class, 'create']))
-            ->assertViewIs('venues.create')
-            ->assertViewHas('venue', new Venue);
-    }
+test('create returns a view', function () {
+    $this->actingAs(administrator())
+        ->get(action([VenuesController::class, 'create']))
+        ->assertViewIs('venues.create')
+        ->assertViewHas('venue', new Venue);
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_view_the_form_for_creating_a_venue()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->get(action([VenuesController::class, 'create']))
-            ->assertForbidden();
-    }
+test('a basic user cannot view the form for creating a venue', function () {
+    $this->actingAs(basicUser())
+        ->get(action([VenuesController::class, 'create']))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_the_form_for_creating_a_venue()
-    {
-        $this
-            ->get(action([VenuesController::class, 'create']))
-            ->assertRedirect(route('login'));
-    }
+test('a guest cannot view the form for creating a venue', function () {
+    $this->get(action([VenuesController::class, 'create']))
+        ->assertRedirect(route('login'));
+});
 
-    /**
-     * @test
-     */
-    public function store_creates_a_venue_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->from(action([VenuesController::class, 'create']))
-            ->post(action([VenuesController::class, 'store']), VenueRequestDataFactory::new()->create([
-                'name' => 'Example Venue',
-                'address1' => '123 Main Street',
-                'address2' => 'Suite 100',
-                'city' => 'Laraville',
-                'state' => 'New York',
-                'zip' => '12345',
-            ]))
-            ->assertRedirect(action([VenuesController::class, 'index']));
+test('store creates a venue and redirects', function () {
+    $data = StoreRequest::factory()->create([
+        'name' => 'Example Venue',
+        'address1' => '123 Main Street',
+        'address2' => 'Suite 100',
+        'city' => 'Laraville',
+        'state' => 'New York',
+        'zip' => '12345',
+    ]);
 
-        tap(Venue::first(), function ($venue) {
-            $this->assertEquals('Example Venue', $venue->name);
-            $this->assertEquals('123 Main Street', $venue->address1);
-            $this->assertEquals('Suite 100', $venue->address2);
-            $this->assertEquals('Laraville', $venue->city);
-            $this->assertEquals('New York', $venue->state);
-            $this->assertEquals(12345, $venue->zip);
-        });
-    }
+    $this->actingAs(administrator())
+        ->from(action([VenuesController::class, 'create']))
+        ->post(action([VenuesController::class, 'store']), $data)
+        ->assertValid()
+        ->assertRedirect(action([VenuesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_create_a_venue()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->from(action([VenuesController::class, 'create']))
-            ->post(action([VenuesController::class, 'store']), VenueRequestDataFactory::new()->create())
-            ->assertForbidden();
-    }
+    expect(Venue::latest()->first())
+        ->name->toBe('Example Venue')
+        ->address1->toBe('123 Main Street')
+        ->address2->toBe('Suite 100')
+        ->city->toBe('Laraville')
+        ->state->toBe('New York')
+        ->zip->toBe('12345');
+});
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_create_a_venue()
-    {
-        $this
-            ->from(action([VenuesController::class, 'create']))
-            ->post(action([VenuesController::class, 'store']), VenueRequestDataFactory::new()->create())
-            ->assertRedirect(route('login'));
-    }
-}
+test('a basic user cannot create a venue', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->actingAs(basicUser())
+        ->post(action([VenuesController::class, 'store']), $data)
+        ->assertForbidden();
+});
+
+test('a guest cannot create a venue', function () {
+    $data = StoreRequest::factory()->create();
+
+    $this->post(action([VenuesController::class, 'store']), $data)
+        ->assertRedirect(route('login'));
+});

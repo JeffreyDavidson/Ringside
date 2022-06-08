@@ -36,7 +36,10 @@ class EventMatchFactory extends Factory
     {
         return [
             'event_id' => Event::factory(),
-            'match_type_id' => MatchType::factory(),
+            'match_type_id' => MatchType::first()->id,
+            'referees' => Referee::factory(),
+            'titles' => [],
+            'competitors' => '',
             'preview' => null,
         ];
     }

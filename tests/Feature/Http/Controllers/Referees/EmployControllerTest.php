@@ -1,137 +1,73 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Referees;
-
 use App\Enums\RefereeStatus;
-use App\Enums\Role;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Referees\EmployController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
-use Tests\TestCase;
 
-/**
- * @group referees
- * @group feature-referees
- * @group roster
- * @group feature-roster
- */
-class EmployControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_employs_an_unemployed_referee_and_redirects()
-    {
-        $referee = Referee::factory()->unemployed()->create();
+test('invoke employs an unemployed referee and redirects', function () {
+    $referee = Referee::factory()->unemployed()->create();
 
-        $this->assertCount(0, $referee->employments);
-        $this->assertEquals(RefereeStatus::UNEMPLOYED, $referee->status);
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $referee))
-            ->assertRedirect(action([RefereesController::class, 'index']));
+    expect($referee->fresh())
+        ->employments->toHaveCount(1)
+        ->status->toBe(RefereeStatus::BOOKABLE);
+});
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertCount(1, $referee->employments);
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
-        });
-    }
+test('invoke employs a future employed referee and redirects', function () {
+    $referee = Referee::factory()->withFutureEmployment()->create();
+    $startedAt = $referee->employments->last()->started_at;
 
-    /**
-     * @test
-     */
-    public function invoke_employs_a_future_employed_referee_and_redirects()
-    {
-        $referee = Referee::factory()->withFutureEmployment()->create();
-        $startedAt = $referee->employments->last()->started_at;
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-        $this->assertTrue(now()->lt($startedAt));
-        $this->assertEquals(RefereeStatus::FUTURE_EMPLOYMENT, $referee->status);
+    expect($referee->fresh())
+        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->status->toBe(RefereeStatus::BOOKABLE);
+});
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $referee))
-            ->assertRedirect(action([RefereesController::class, 'index']));
+test('invoke employs a released referee and redirects', function () {
+    $referee = Referee::factory()->released()->create();
 
-        tap($referee->fresh(), function ($referee) use ($startedAt) {
-            $this->assertTrue($referee->currentEmployment->started_at->lt($startedAt));
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
-        });
-    }
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']));
 
-    /**
-     * @test
-     */
-    public function invoke_employs_a_released_referee_and_redirects()
-    {
-        $referee = Referee::factory()->released()->create();
+    expect($referee->fresh())
+        ->employments->toHaveCount(2)
+        ->status->toBe(RefereeStatus::BOOKABLE);
+});
 
-        $this->assertEquals(RefereeStatus::RELEASED, $referee->status);
+test('a basic user cannot employ a referee', function () {
+    $referee = Referee::factory()->create();
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $referee))
-            ->assertRedirect(action([RefereesController::class, 'index']));
+    $this->actingAs(basicUser())
+        ->patch(action([EmployController::class], $referee))
+        ->assertForbidden();
+});
 
-        tap($referee->fresh(), function ($referee) {
-            $this->assertCount(2, $referee->employments);
-            $this->assertEquals(RefereeStatus::BOOKABLE, $referee->status);
-        });
-    }
+test('a guest user cannot injure a referee', function () {
+    $referee = Referee::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_employ_a_referee()
-    {
-        $referee = Referee::factory()->create();
+    $this->patch(action([EmployController::class], $referee))
+        ->assertRedirect(route('login'));
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([EmployController::class], $referee))
-            ->assertForbidden();
-    }
+test('invoke throws exception for injuring a non injurable referee', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_employ_a_referee()
-    {
-        $referee = Referee::factory()->create();
+    $referee = Referee::factory()->{$factoryState}()->create();
 
-        $this
-            ->patch(action([EmployController::class], $referee))
-            ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider nonemployableRefereeTypes
-     */
-    public function invoke_throws_exception_for_employing_a_non_employable_referee($factoryState)
-    {
-        $this->expectException(CannotBeEmployedException::class);
-        $this->withoutExceptionHandling();
-
-        $referee = Referee::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([EmployController::class], $referee));
-    }
-
-    public function nonemployableRefereeTypes()
-    {
-        return [
-            'suspended referee' => ['suspended'],
-            'injured referee' => ['injured'],
-            'bookable referee' => ['bookable'],
-            'retired referee' => ['retired'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([EmployController::class], $referee));
+})->throws(CannotBeEmployedException::class)->with([
+    'suspended',
+    'injured',
+    'bookable',
+    'retired',
+]);

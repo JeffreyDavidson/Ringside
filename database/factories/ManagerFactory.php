@@ -106,12 +106,4 @@ class ManagerFactory extends Factory
                 $manager->save();
             });
     }
-
-    public function softDeleted()
-    {
-        return $this->state(fn (array $attributes) => ['deleted_at' => now()])
-            ->afterCreating(function (Manager $manager) {
-                $manager->save();
-            });
-    }
 }

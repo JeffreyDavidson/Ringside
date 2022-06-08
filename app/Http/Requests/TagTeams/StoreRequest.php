@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
-use App\Rules\WrestlerCanJoinTagTeam;
+use App\Rules\WrestlerCanJoinNewTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\TagTeamRequestFactory;
@@ -45,7 +45,7 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinTagTeam(),
+                new WrestlerCanJoinNewTagTeam(),
             ],
         ];
     }

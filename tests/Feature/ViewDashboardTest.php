@@ -1,40 +1,18 @@
 <?php
 
-declare(strict_types=1);
+test('administrators can view the dashboard', function () {
+    $this->actingAs(administrator())
+        ->get(route('dashboard'))
+        ->assertViewIs('dashboard');
+});
 
-namespace Tests\Feature;
+test('basic users can view the dashboard', function () {
+    $this->actingAs(basicUser())
+        ->get(route('dashboard'))
+        ->assertViewIs('dashboard');
+});
 
-use App\Enums\Role;
-use Tests\TestCase;
-
-class ViewDashboardTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function administrators_can_view_the_dashboard()
-    {
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->get(route('dashboard'))
-            ->assertViewIs('dashboard');
-    }
-
-    /**
-     * @test
-     */
-    public function basic_users_can_view_the_dashboard()
-    {
-        $this->actAs(ROLE::BASIC)
-            ->get(route('dashboard'))
-            ->assertViewIs('dashboard');
-    }
-
-    /**
-     * @test
-     */
-    public function a_guest_cannot_view_dashboard_page()
-    {
-        $this->get(route('dashboard'))
-            ->assertRedirect(route('login'));
-    }
-}
+test('a guest cannot view the dashboard', function () {
+    $this->get(route('dashboard'))
+        ->assertRedirect(route('login'));
+});

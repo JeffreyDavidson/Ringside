@@ -1,62 +1,28 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Stables;
-
-use App\Enums\Role;
 use App\Http\Controllers\Stables\RestoreController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
-use Tests\TestCase;
 
-/**
- * @group stables
- * @group feature-stables
- * @group roster
- * @group feature-roster
- */
-class RestoreControllerTest extends TestCase
-{
-    public Stable $stable;
+beforeEach(function () {
+    $this->stable = Stable::factory()->trashed()->create();
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('invoke restores a deleted stable and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([RestoreController::class], $this->stable))
+        ->assertRedirect(action([StablesController::class, 'index']));
 
-        $this->stable = Stable::factory()->softDeleted()->create();
-    }
+    $this->assertNull($this->stable->fresh()->deleted_at);
+});
 
-    /**
-     * @test
-     */
-    public function invoke_restores_a_stable_and_redirects()
-    {
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([RestoreController::class], $this->stable))
-            ->assertRedirect(action([StablesController::class, 'index']));
+test('a basic user cannot restore a deleted stable', function () {
+    $this->actingAs(basicUser())
+        ->patch(action([RestoreController::class], $this->stable))
+        ->assertForbidden();
+});
 
-        $this->assertNull($this->stable->fresh()->deleted_at);
-    }
-
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_restore_a_stable()
-    {
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([RestoreController::class], $this->stable))
-            ->assertForbidden();
-    }
-
-    /**
-     * @test
-     */
-    public function a_guest_cannot_restore_a_stable()
-    {
-        $this->patch(action([RestoreController::class], $this->stable))
-            ->assertRedirect(route('login'));
-    }
-}
+test('a guest cannot restore a deleted stable', function () {
+    $this->patch(action([RestoreController::class], $this->stable))
+        ->assertRedirect(route('login'));
+});

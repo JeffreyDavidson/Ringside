@@ -1,121 +1,70 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Wrestlers;
-
-use App\Enums\Role;
+use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
-/**
- * @group wrestlers
- * @group feature-wrestlers
- * @group roster
- * @group feature-roster
- */
-class ClearInjuryControllerTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function invoke_marks_an_injured_wrestler_as_being_cleared_from_injury_and_redirects()
-    {
-        $wrestler = Wrestler::factory()->injured()->create();
+beforeEach(function () {
+    $this->wrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
+});
 
-        $this->assertNull($wrestler->injuries->last()->ended_at);
+test('invoke marks an injured wrestler as being cleared from injury and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([ClearInjuryController::class], $this->wrestler))
+        ->assertRedirect(action([WrestlersController::class, 'index']));
 
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $wrestler))
-            ->assertRedirect(action([WrestlersController::class, 'index']));
+    expect($this->wrestler->fresh())
+        ->injuries->last()->ended_at->not->toBeNull()
+        ->status->toBe(WrestlerStatus::BOOKABLE);
+});
 
-        tap($wrestler->fresh(), function ($wrestler) {
-            $this->assertNotNull($wrestler->injuries->last()->ended_at);
-            $this->assertEquals(WrestlerStatus::BOOKABLE, $wrestler->status);
-        });
-    }
+test('clearing an injured wrestler on an unbookable tag team makes tag team bookable', function () {
+    $bookableWrestler = Wrestler::factory()->bookable()->create();
+    $tagTeam = TagTeam::factory()
+        ->hasAttached($this->wrestler, ['joined_at' => Carbon::yesterday()->toDateTimeString()])
+        ->hasAttached($bookableWrestler, ['joined_at' => Carbon::yesterday()->toDateTimeString()])
+        ->has(Employment::factory()->started(Carbon::yesterday()))
+        ->create();
 
-    /**
-     * @test
-     */
-    public function clearing_an_injured_wrestler_on_an_unbookable_tag_team_makes_tag_team_bookable()
-    {
-        $injuredWrestler = Wrestler::factory()->injured()->create();
-        $tagTeam = TagTeam::factory()
-            ->hasAttached($injuredWrestler, ['joined_at' => now()->toDateTimeString()])
-            ->hasAttached(Wrestler::factory()->bookable(), ['joined_at' => now()->toDateTimeString()])
-            ->bookable()
-            ->create();
+    $this->actingAs(administrator())
+        ->patch(action([ClearInjuryController::class], $this->wrestler));
 
-        $this->actAs(ROLE::ADMINISTRATOR)
-            ->patch(route('wrestlers.clear-from-injury', $injuredWrestler));
+    expect($this->wrestler->fresh())
+        ->status->toMatchObject(WrestlerStatus::BOOKABLE);
 
-        tap($injuredWrestler->fresh(), function ($wrestler) {
-            $this->assertTrue($wrestler->isBookable());
-        });
+    expect($tagTeam->fresh())
+        ->status->toMatchObject(TagTeamStatus::BOOKABLE);
+});
 
-        tap($tagTeam->fresh(), function ($tagTeam) {
-            $this->assertTrue($tagTeam->isBookable());
-        });
-    }
+test('a basic user cannot mark an injured wrestler as cleared', function () {
+    $this->actingAs(basicUser())
+        ->patch(action([ClearInjuryController::class], $this->wrestler))
+        ->assertForbidden();
+});
 
-    /**
-     * @test
-     */
-    public function a_basic_user_cannot_mark_an_injured_wrestler_as_cleared()
-    {
-        $wrestler = Wrestler::factory()->injured()->create();
+test('a guest cannot mark an injured wrestler as cleared', function () {
+    $this->patch(action([ClearInjuryController::class], $this->wrestler))
+        ->assertRedirect(route('login'));
+});
 
-        $this
-            ->actAs(ROLE::BASIC)
-            ->patch(action([ClearInjuryController::class], $wrestler))
-            ->assertForbidden();
-    }
+test('invoke throws exception for injuring a non injurable wrestler', function ($factoryState) {
+    $this->withoutExceptionHandling();
 
-    /**
-     * @test
-     */
-    public function a_guest_cannot_mark_an_injured_wrestler_as_cleared()
-    {
-        $wrestler = Wrestler::factory()->injured()->create();
+    $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        $this
-            ->patch(action([ClearInjuryController::class], $wrestler))
-            ->assertRedirect(route('login'));
-    }
-
-    /**
-     * @test
-     *
-     * @dataProvider nonclearableWrestlerTypes
-     */
-    public function invoke_throws_an_exception_for_clearing_an_injury_from_a_non_clearable_wrestler($factoryState)
-    {
-        $this->withoutExceptionHandling();
-        $this->expectException(CannotBeClearedFromInjuryException::class);
-
-        $wrestler = Wrestler::factory()->{$factoryState}()->create();
-
-        $this
-            ->actAs(ROLE::ADMINISTRATOR)
-            ->patch(action([ClearInjuryController::class], $wrestler));
-    }
-
-    public function nonclearableWrestlerTypes()
-    {
-        return [
-            'unemployed wrestler' => ['unemployed'],
-            'released wrestler' => ['released'],
-            'with future employed wrestler' => ['withFutureEmployment'],
-            'bookable wrestler' => ['bookable'],
-            'retired wrestler' => ['retired'],
-            'suspended wrestler' => ['suspended'],
-        ];
-    }
-}
+    $this->actingAs(administrator())
+        ->patch(action([ClearInjuryController::class], $wrestler));
+})->throws(CannotBeClearedFromInjuryException::class)->with([
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+    'bookable',
+    'retired',
+    'suspended',
+]);
