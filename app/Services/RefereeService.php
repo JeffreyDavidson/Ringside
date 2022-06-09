@@ -21,7 +21,7 @@ class RefereeService
     /**
      * Create a new referee service instance.
      *
-     * @param \App\Repositories\RefereeRepository $refereeRepository
+     * @param  \App\Repositories\RefereeRepository  $refereeRepository
      */
     public function __construct(RefereeRepository $refereeRepository)
     {
@@ -31,7 +31,7 @@ class RefereeService
     /**
      * Create a referee with given data.
      *
-     * @param  \App\Data\RefereeData $refereeData
+     * @param  \App\Data\RefereeData  $refereeData
      * @return \App\Models\Referee
      */
     public function create(RefereeData $refereeData)
@@ -49,8 +49,8 @@ class RefereeService
     /**
      * Update a given referee with given data.
      *
-     * @param  \App\Models\Referee $referee
-     * @param  \App\Data\RefereeData $refereeData
+     * @param  \App\Models\Referee  $referee
+     * @param  \App\Data\RefereeData  $refereeData
      * @return \App\Models\Referee
      */
     public function update(Referee $referee, RefereeData $refereeData)
@@ -71,7 +71,7 @@ class RefereeService
     /**
      * Delete a given referee.
      *
-     * @param  \App\Models\Referee $referee
+     * @param  \App\Models\Referee  $referee
      * @return void
      */
     public function delete(Referee $referee)
@@ -82,7 +82,7 @@ class RefereeService
     /**
      * Restore a given referee.
      *
-     * @param  \App\Models\Referee $referee
+     * @param  \App\Models\Referee  $referee
      * @return void
      */
     public function restore(Referee $referee)

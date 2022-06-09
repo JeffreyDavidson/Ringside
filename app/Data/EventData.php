@@ -21,7 +21,7 @@ class EventData
     /**
      * Retrieve data from the store request.
      *
-     * @param  \App\Http\Requests\Events\StoreRequest $request
+     * @param  \App\Http\Requests\Events\StoreRequest  $request
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
@@ -37,7 +37,7 @@ class EventData
     /**
      * Retrieve data from the update request.
      *
-     * @param  \App\Http\Requests\Events\UpdateRequest $request
+     * @param  \App\Http\Requests\Events\UpdateRequest  $request
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self

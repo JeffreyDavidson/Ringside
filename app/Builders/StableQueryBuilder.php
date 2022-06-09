@@ -39,7 +39,7 @@ class StableQueryBuilder extends Builder
     /**
      * Scope a query to order by the model's current retirement date.
      *
-     * @param  string $direction
+     * @param  string  $direction
      * @return \App\Builders\StableQueryBuilder
      */
     public function orderByCurrentRetiredAtDate($direction = 'asc')
@@ -77,7 +77,7 @@ class StableQueryBuilder extends Builder
     /**
      * Scope a query to order by the models current deactivation date.
      *
-     * @param  string $direction
+     * @param  string  $direction
      * @return \App\Builders\StableQueryBuilder
      */
     public function orderByLastDeactivationDate(string $direction = 'asc')
@@ -147,7 +147,7 @@ class StableQueryBuilder extends Builder
     /**
      * Scope a query to order by the models first activation date.
      *
-     * @param  string $direction
+     * @param  string  $direction
      * @return \App\Builders\StableQueryBuilder
      */
     public function orderByFirstActivatedAtDate(string $direction = 'asc')

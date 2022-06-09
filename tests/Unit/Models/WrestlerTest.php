@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Models;
 
 use App\Enums\WrestlerStatus;
-use App\Height;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\SingleRosterMember;
@@ -50,7 +49,7 @@ class WrestlerTest extends TestCase
      */
     public function a_wrestler_uses_can_join_stables_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\CanJoinStables', Wrestler::class);
+        $this->assertUsesTrait(\App\Models\Concerns\CanJoinStables::class, Wrestler::class);
     }
 
     /**

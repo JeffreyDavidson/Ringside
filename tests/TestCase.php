@@ -41,8 +41,7 @@ abstract class TestCase extends BaseTestCase
      * Assert that the given class uses the provided trait name.
      *
      * @param  string  $trait
-     * @param  mixed   $class
-     *
+     * @param  mixed  $class
      * @return void
      */
     public function assertUsesTrait($trait, $class)

@@ -28,7 +28,7 @@ class ActivationFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $activationDate
+     * @param  string|Carbon  $activationDate
      */
     public function started($activationDate = 'now')
     {
@@ -38,7 +38,7 @@ class ActivationFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $deactivationDate
+     * @param  string|Carbon  $deactivationDate
      */
     public function ended($deactivationDate = 'now')
     {

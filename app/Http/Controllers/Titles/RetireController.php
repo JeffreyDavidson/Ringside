@@ -14,7 +14,7 @@ class RetireController extends Controller
     /**
      * Retires a title.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Title  $title
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(Title $title)

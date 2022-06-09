@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class EventMatchFactory extends Factory
 {
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return static
      */

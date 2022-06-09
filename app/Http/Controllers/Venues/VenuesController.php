@@ -18,7 +18,7 @@ class VenuesController extends Controller
     /**
      * Create a new venues controller instance.
      *
-     * @param  \App\Services\VenueService $venueService
+     * @param  \App\Services\VenueService  $venueService
      */
     public function __construct(VenueService $venueService)
     {
@@ -40,7 +40,7 @@ class VenuesController extends Controller
     /**
      * Show the form for creating a venue.
      *
-     * @param Venue $venue
+     * @param  Venue  $venue
      * @return \Illuminate\View\View
      */
     public function create(Venue $venue)

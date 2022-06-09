@@ -20,7 +20,7 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param  \Illuminate\Support\Carbon $stableStartDate
+     * @param  \Illuminate\Support\Carbon  $stableStartDate
      * @return void
      */
     public function __construct(Carbon $stableStartDate)

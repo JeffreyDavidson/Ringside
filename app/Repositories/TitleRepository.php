@@ -13,7 +13,7 @@ class TitleRepository
     /**
      * Create a new title with the given data.
      *
-     * @param  \App\Data\TitleData $titleData
+     * @param  \App\Data\TitleData  $titleData
      * @return \App\Models\Title
      */
     public function create(TitleData $titleData)
@@ -26,8 +26,8 @@ class TitleRepository
     /**
      * Update the given title with the given data.
      *
-     * @param  \App\Models\Title $title
-     * @param  \App\Data\TitleData $titleData
+     * @param  \App\Models\Title  $title
+     * @param  \App\Data\TitleData  $titleData
      * @return \App\Models\Title
      */
     public function update(Title $title, TitleData $titleData)
@@ -42,7 +42,7 @@ class TitleRepository
     /**
      * Delete a given title.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Title  $title
      * @return void
      */
     public function delete(Title $title)
@@ -53,7 +53,7 @@ class TitleRepository
     /**
      * Restore a given title.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Title  $title
      * @return void
      */
     public function restore(Title $title)
@@ -64,8 +64,8 @@ class TitleRepository
     /**
      * Activate a given title on a given date.
      *
-     * @param  \App\Models\Title $title
-     * @param  \Illuminate\Support\Carbon $activationDate
+     * @param  \App\Models\Title  $title
+     * @param  \Illuminate\Support\Carbon  $activationDate
      * @return \App\Models\Title
      */
     public function activate(Title $title, Carbon $activationDate)
@@ -81,8 +81,8 @@ class TitleRepository
     /**
      * Deactivate a given title on a given date.
      *
-     * @param  \App\Models\Title $title
-     * @param  \Illuminate\Support\Carbon $deactivationDate
+     * @param  \App\Models\Title  $title
+     * @param  \Illuminate\Support\Carbon  $deactivationDate
      * @return \App\Models\Title
      */
     public function deactivate(Title $title, Carbon $deactivationDate)
@@ -95,8 +95,8 @@ class TitleRepository
     /**
      * Retire a given title on a given date.
      *
-     * @param  \App\Models\Title $title
-     * @param  \Illuminate\Support\Carbon $retirementDate
+     * @param  \App\Models\Title  $title
+     * @param  \Illuminate\Support\Carbon  $retirementDate
      * @return \App\Models\Title
      */
     public function retire(Title $title, Carbon $retirementDate)
@@ -109,8 +109,8 @@ class TitleRepository
     /**
      * Unretire a given title on a given date.
      *
-     * @param  \App\Models\Title $title
-     * @param  \Illuminate\Support\Carbon $unretireDate
+     * @param  \App\Models\Title  $title
+     * @param  \Illuminate\Support\Carbon  $unretireDate
      * @return \App\Models\Title
      */
     public function unretire(Title $title, Carbon $unretireDate)

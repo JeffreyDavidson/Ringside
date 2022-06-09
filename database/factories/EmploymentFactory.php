@@ -31,7 +31,7 @@ class EmploymentFactory extends Factory
     }
 
     /**
-     * @param \Illuminate\Support\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      */
     public function started(Carbon $employmentDate)
     {
@@ -41,7 +41,7 @@ class EmploymentFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $releaseDate
+     * @param  string|Carbon  $releaseDate
      */
     public function ended($releaseDate = 'now')
     {

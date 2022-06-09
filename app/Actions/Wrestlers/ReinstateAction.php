@@ -16,7 +16,7 @@ class ReinstateAction extends BaseWrestlerAction
      * Reinstate a wrestler.
      *
      * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Illuminate\Support\Carbon|null $reinstatementDate
+     * @param  \Illuminate\Support\Carbon|null  $reinstatementDate
      * @return void
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void

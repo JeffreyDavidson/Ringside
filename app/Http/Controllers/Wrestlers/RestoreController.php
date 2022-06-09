@@ -14,7 +14,7 @@ class RestoreController extends Controller
      * Restore a deleted wrestler.
      *
      * @param  int  $wrestlerId
-     * @param  \App\Services\WrestlerService $wrestlerService
+     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(int $wrestlerId, WrestlerService $wrestlerService)

@@ -12,7 +12,7 @@ class VenueRepository
     /**
      * Create a new venue with the given data.
      *
-     * @param  \App\Data\VenueData $venueData
+     * @param  \App\Data\VenueData  $venueData
      * @return \App\Models\Venue
      */
     public function create(VenueData $venueData)
@@ -30,8 +30,8 @@ class VenueRepository
     /**
      * Update the given venue with the given data.
      *
-     * @param  \App\Models\Venue $venue
-     * @param  \App\Data\VenueData $venueData
+     * @param  \App\Models\Venue  $venue
+     * @param  \App\Data\VenueData  $venueData
      * @return \App\Models\Venue $venue
      */
     public function update(Venue $venue, VenueData $venueData)
@@ -51,7 +51,7 @@ class VenueRepository
     /**
      * Delete a given venue.
      *
-     * @param  \App\Models\Venue $venue
+     * @param  \App\Models\Venue  $venue
      * @return void
      */
     public function delete(Venue $venue)
@@ -62,7 +62,7 @@ class VenueRepository
     /**
      * Restore a given venue.
      *
-     * @param  \App\Models\Venue $venue
+     * @param  \App\Models\Venue  $venue
      * @return void
      */
     public function restore(Venue $venue)

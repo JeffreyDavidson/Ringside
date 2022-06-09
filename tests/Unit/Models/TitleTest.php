@@ -37,7 +37,7 @@ class TitleTest extends TestCase
      */
     public function a_title_uses_activations_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\Activations', Title::class);
+        $this->assertUsesTrait(\App\Models\Concerns\Activations::class, Title::class);
     }
 
     /**
@@ -45,7 +45,7 @@ class TitleTest extends TestCase
      */
     public function a_title_uses_can_be_competable_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\Competable', Title::class);
+        $this->assertUsesTrait(\App\Models\Concerns\Competable::class, Title::class);
     }
 
     /**
@@ -53,6 +53,6 @@ class TitleTest extends TestCase
      */
     public function a_title_uses_retirements_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\HasRetirements', Title::class);
+        $this->assertUsesTrait(\App\Models\Concerns\HasRetirements::class, Title::class);
     }
 }

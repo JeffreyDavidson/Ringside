@@ -12,8 +12,7 @@ class EventObserver
     /**
      * Handle the Event "saved" event.
      *
-     * @param  \App\Models\Event $event
-     *
+     * @param  \App\Models\Event  $event
      * @return void
      */
     public function saving(Event $event)

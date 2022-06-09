@@ -174,7 +174,7 @@ class RosterMemberQueryBuilder extends Builder
     /**
      * Scope a query to order by the model's first employment date.
      *
-     * @param  string $direction
+     * @param  string  $direction
      * @return \App\Builders\RosterMemberQueryBuilder
      */
     public function orderByFirstEmployedAtDate(string $direction = 'asc')

@@ -20,7 +20,7 @@ class VenueService
     /**
      * Create a new venue service instance.
      *
-     * @param \App\Repositories\VenueRepository $venueRepository
+     * @param  \App\Repositories\VenueRepository  $venueRepository
      */
     public function __construct(VenueRepository $venueRepository)
     {
@@ -30,7 +30,7 @@ class VenueService
     /**
      * Create a new venue with given data.
      *
-     * @param  \App\Data\VenueData $venueData
+     * @param  \App\Data\VenueData  $venueData
      * @return \App\Models\Venue
      */
     public function create(VenueData $venueData)
@@ -41,8 +41,8 @@ class VenueService
     /**
      * Update a given venue with given data.
      *
-     * @param  \App\Models\Venue $venue
-     * @param  \App\Data\VenueData $venueData
+     * @param  \App\Models\Venue  $venue
+     * @param  \App\Data\VenueData  $venueData
      * @return \App\Models\Venue
      */
     public function update(Venue $venue, VenueData $venueData)
@@ -53,7 +53,7 @@ class VenueService
     /**
      * Delete a given venue.
      *
-     * @param  \App\Models\Venue $venue
+     * @param  \App\Models\Venue  $venue
      * @return void
      */
     public function delete(Venue $venue)
@@ -64,7 +64,7 @@ class VenueService
     /**
      * Restore a given venue.
      *
-     * @param  \App\Models\Venue $venue
+     * @param  \App\Models\Venue  $venue
      * @return void
      */
     public function restore(Venue $venue)

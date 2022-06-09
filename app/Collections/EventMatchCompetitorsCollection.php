@@ -20,7 +20,7 @@ class EventMatchCompetitorsCollection extends Collection
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return \Illuminate\Support\Collection
      */
@@ -28,8 +28,8 @@ class EventMatchCompetitorsCollection extends Collection
     {
         return $this->groupBy(function ($group) {
             return match ($group->competitor_type) {
-                'App\Models\Wrestler' => 'wrestlers',
-                'App\Models\TagTeam' => 'tag_teams'
+                \App\Models\Wrestler::class => 'wrestlers',
+                \App\Models\TagTeam::class => 'tag_teams'
             };
         });
     }

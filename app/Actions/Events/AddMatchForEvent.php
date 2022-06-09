@@ -26,7 +26,7 @@ class AddMatchForEvent
     /**
      * Create a new add match for event instance.
      *
-     * @param \App\Repositories\EventMatchRepository $eventMatchRepository
+     * @param  \App\Repositories\EventMatchRepository  $eventMatchRepository
      */
     public function __construct(EventMatchRepository $eventMatchRepository)
     {
@@ -36,8 +36,8 @@ class AddMatchForEvent
     /**
      * Undocumented function.
      *
-     * @param  \App\Models\Event $event
-     * @param  \App\Data\EventMatchData $eventMatchData
+     * @param  \App\Models\Event  $event
+     * @param  \App\Data\EventMatchData  $eventMatchData
      * @return \App\Models\EventMatch $cratedMatch
      */
     public function __invoke(Event $event, EventMatchData $eventMatchData)
@@ -61,8 +61,8 @@ class AddMatchForEvent
     /**
      * Add titles to an event match.
      *
-     * @param \App\Models\EventMatch $eventMatch
-     * @param \Illuminate\Database\Eloquent\Collection<Title> $titles
+     * @param  \App\Models\EventMatch  $eventMatch
+     * @param  \Illuminate\Database\Eloquent\Collection<Title>  $titles
      * @return void
      */
     private function addTitlesToMatch($eventMatch, $titles)
@@ -75,8 +75,8 @@ class AddMatchForEvent
     /**
      * Add referees to an event match.
      *
-     * @param \App\Models\EventMatch $eventMatch
-     * @param \Illuminate\Database\Eloquent\Collection<Referee> $referees
+     * @param  \App\Models\EventMatch  $eventMatch
+     * @param  \Illuminate\Database\Eloquent\Collection<Referee>  $referees
      * @return void
      */
     private function addRefereesToMatch($eventMatch, $referees): void

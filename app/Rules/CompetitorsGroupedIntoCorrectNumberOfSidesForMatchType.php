@@ -19,7 +19,7 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param int $matchTypeId
+     * @param  int  $matchTypeId
      */
     public function __construct(int $matchTypeId)
     {

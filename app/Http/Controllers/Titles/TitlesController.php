@@ -18,7 +18,7 @@ class TitlesController extends Controller
     /**
      * Create a new titles controller instance.
      *
-     * @param  \App\Services\TitleService $titleService
+     * @param  \App\Services\TitleService  $titleService
      */
     public function __construct(TitleService $titleService)
     {
@@ -40,7 +40,7 @@ class TitlesController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @param Title $title
+     * @param  Title  $title
      * @return \Illuminate\View\View
      */
     public function create(Title $title)
@@ -56,7 +56,7 @@ class TitlesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\Titles\StoreRequest  $request
-     * @param  \App\Data\TitleData $titleData
+     * @param  \App\Data\TitleData  $titleData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
@@ -69,7 +69,7 @@ class TitlesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param Title $title
+     * @param  Title  $title
      * @return \Illuminate\View\View
      */
     public function show(Title $title)

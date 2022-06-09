@@ -18,7 +18,7 @@ class RefereesController extends Controller
     /**
      * Create a new referees controller instance.
      *
-     * @param \App\Services\RefereeService $refereeService
+     * @param  \App\Services\RefereeService  $refereeService
      */
     public function __construct(RefereeService $refereeService)
     {
@@ -40,7 +40,7 @@ class RefereesController extends Controller
     /**
      * Show the form for creating a new referee.
      *
-     * @param  \App\Models\Referee $referee
+     * @param  \App\Models\Referee  $referee
      * @return \Illuminate\View\View
      */
     public function create(Referee $referee)

@@ -10,31 +10,32 @@
     "require": {
         "php": "^8.1",
         "fidum/laravel-eloquent-morph-to-one": "^2.1",
-        "fruitcake/laravel-cors": "^2.0.5",
-        "laravel/framework": "^9.0",
-        "laravel/tinker": "^2.0",
+        "laravel/framework": "^9.17",
+        "laravel/tinker": "^2.7",
         "livewire/livewire": "^2.10",
-        "lorisleiva/laravel-actions": "^2.3",
-        "staudenmeir/laravel-merged-relations": "^1.5"
+        "lorisleiva/laravel-actions": "^2.4",
+        "staudenmeir/laravel-merged-relations": "^1.5",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "guzzlehttp/guzzle": "^7.2"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.2",
+        "barryvdh/laravel-debugbar": "^3.6",
         "barryvdh/laravel-ide-helper": "^2.12",
-        "doctrine/dbal": "^2.9",
+        "doctrine/dbal": "^3.3",
         "fakerphp/faker": "^1.19",
-        "filp/whoops": "^2.0",
-        "friendsofphp/php-cs-fixer": "^3.6",
-        "laravel/breeze": "^1.7",
-        "laravel/sail": "^1.10",
-        "mockery/mockery": "^1.0",
+        "filp/whoops": "^2.14",
+        "friendsofphp/php-cs-fixer": "^3.8",
+        "laravel/breeze": "^1.9",
+        "laravel/sail": "^1.14",
+        "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
-        "nunomaduro/larastan": "^2.0",
-        "nunomaduro/phpinsights": "^2.1",
+        "nunomaduro/larastan": "^2.1",
+        "nunomaduro/phpinsights": "^2.4",
         "pestphp/pest": "^1.21",
         "pestphp/pest-plugin-faker": "^1.0",
         "pestphp/pest-plugin-laravel": "^1.2",
-        "phpunit/phpunit": "^9",
-        "spatie/laravel-ignition": "^1.0",
+        "phpunit/phpunit": "^9.5.10",
+        "spatie/laravel-ignition": "^1.2",
         "worksome/request-factories": "^1.1"
     },
     "config": {
@@ -75,6 +76,9 @@
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
         ],
-        "php-cs-fixer": "php-cs-fixer --config=./.php-cs-fixer.php fix"
+        "php-cs-fixer": "php-cs-fixer --config=./.php-cs-fixer.php fix",
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ]
     }
 }

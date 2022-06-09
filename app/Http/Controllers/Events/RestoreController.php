@@ -14,7 +14,7 @@ class RestoreController extends Controller
      * Restore a deleted scheduled event.
      *
      * @param  int  $eventId
-     * @param  \App\Services\EventService $eventService
+     * @param  \App\Services\EventService  $eventService
      * @return \Illuminate\Http\RedirectResponse
      */
     public function __invoke(int $eventId, EventService $eventService)

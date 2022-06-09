@@ -47,6 +47,6 @@ class RefereeTest extends TestCase
      */
     public function a_referee_uses_has_a_full_name_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\HasFullName', Referee::class);
+        $this->assertUsesTrait(\App\Models\Concerns\HasFullName::class, Referee::class);
     }
 }
