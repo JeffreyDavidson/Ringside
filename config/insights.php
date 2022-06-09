@@ -9,6 +9,7 @@ use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenPrivateMethods;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenTraits;
 use NunoMaduro\PhpInsights\Domain\Metrics\Architecture\Classes;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
+use PHP_CodeSniffer\Standards\PSR1\Sniffs\Files\SideEffectsSniff;
 use PHP_CodeSniffer\Standards\PSR12\Sniffs\Classes\ClassInstantiationSniff;
 use PhpCsFixer\Fixer\Operator\NewWithBracesFixer;
 use SlevomatCodingStandard\Sniffs\Classes\ForbiddenPublicPropertySniff;
@@ -120,6 +121,11 @@ return [
         ],
         DocCommentSpacingSniff::class => [
             'linesCountBetweenDifferentAnnotationsTypes' => 0,
+        ],
+        SideEffectsSniff::class => [
+            'exclude' => [
+                'app/Enums/',
+            ],
         ],
     ],
 

@@ -28,8 +28,6 @@ class VenuesList extends BaseComponent
         $this->selectedRowsQuery->delete();
 
         $this->showDeleteModal = false;
-
-        $this->notify('You\'ve deleted '.$deleteCount.' venues');
     }
 
     public function getRowsQueryProperty()
