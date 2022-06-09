@@ -30,7 +30,7 @@ class SuspensionFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $suspensionDate
+     * @param  string|Carbon  $suspensionDate
      */
     public function started($suspensionDate = 'now'): self
     {
@@ -40,7 +40,7 @@ class SuspensionFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $reinstateDate
+     * @param  string|Carbon  $reinstateDate
      */
     public function ended($reinstateDate = 'now'): self
     {

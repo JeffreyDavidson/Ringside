@@ -16,7 +16,7 @@ class StableRepository
     /**
      * Create a new stable with the given data.
      *
-     * @param  \App\Data\StableData $stableData
+     * @param  \App\Data\StableData  $stableData
      * @return \App\Models\Stable
      */
     public function create(StableData $stableData)
@@ -29,8 +29,8 @@ class StableRepository
     /**
      * Update the given stable with the given data.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \App\Data\StableData $stableData
+     * @param  \App\Models\Stable  $stable
+     * @param  \App\Data\StableData  $stableData
      * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)
@@ -45,7 +45,7 @@ class StableRepository
     /**
      * Delete a given stable.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Stable  $stable
      * @return void
      */
     public function delete(Stable $stable)
@@ -56,7 +56,7 @@ class StableRepository
     /**
      * Restore a given stable.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Stable  $stable
      * @return void
      */
     public function restore(Stable $stable)
@@ -67,8 +67,8 @@ class StableRepository
     /**
      * Activate a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Support\Carbon $activationDate
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Support\Carbon  $activationDate
      * @return \App\Models\Stable
      */
     public function activate(Stable $stable, Carbon $activationDate)
@@ -84,8 +84,8 @@ class StableRepository
     /**
      * Deactivate a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Support\Carbon $deactivationDate
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Support\Carbon  $deactivationDate
      * @return \App\Models\Stable
      */
     public function deactivate(Stable $stable, Carbon $deactivationDate)
@@ -98,8 +98,8 @@ class StableRepository
     /**
      * Retire a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Support\Carbon $retirementDate
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Support\Carbon  $retirementDate
      * @return \App\Models\Stable
      */
     public function retire(Stable $stable, Carbon $retirementDate)
@@ -112,8 +112,8 @@ class StableRepository
     /**
      * Unretire a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Support\Carbon $unretireDate
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Support\Carbon  $unretireDate
      * @return \App\Models\Stable
      */
     public function unretire(Stable $stable, Carbon $unretireDate)
@@ -126,8 +126,8 @@ class StableRepository
     /**
      * Unretire a given stable on a given date.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Support\Carbon $disassembleDate
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Support\Carbon  $disassembleDate
      * @return \App\Models\Stable
      */
     public function disassemble(Stable $stable, Carbon $disassembleDate)
@@ -183,8 +183,8 @@ class StableRepository
      * Undocumented function.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Collection $currentWrestlers
-     * @param  \Illuminate\Support\Carbon $removalDate
+     * @param  \Illuminate\Support\Collection  $currentWrestlers
+     * @param  \Illuminate\Support\Carbon  $removalDate
      * @return void
      */
     public function removeWrestlers(Stable $stable, Collection $currentWrestlers, Carbon $removalDate)
@@ -201,8 +201,8 @@ class StableRepository
      * Undocumented function.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Collection $currentTagTeams
-     * @param  \Illuminate\Support\Carbon $removalDate
+     * @param  \Illuminate\Support\Collection  $currentTagTeams
+     * @param  \Illuminate\Support\Carbon  $removalDate
      * @return void
      */
     public function removeTagTeams(Stable $stable, Collection $currentTagTeams, Carbon $removalDate)

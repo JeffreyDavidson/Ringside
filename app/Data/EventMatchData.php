@@ -26,7 +26,7 @@ class EventMatchData
     /**
      * Retrieve data from the store request.
      *
-     * @param  \App\Http\Requests\EventMatches\StoreRequest $request
+     * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
@@ -43,7 +43,7 @@ class EventMatchData
     /**
      * Undocumented function.
      *
-     * @param  \Illuminate\Support\Collection $competitors
+     * @param  \Illuminate\Support\Collection  $competitors
      * @return \Illuminate\Support\Collection
      */
     public static function getCompetitors(Collection $competitors)

@@ -12,8 +12,7 @@ class WrestlerObserver
     /**
      * Handle the Wrestler "saved" event.
      *
-     * @param  \App\Models\Wrestler $wrestler
-     *
+     * @param  \App\Models\Wrestler  $wrestler
      * @return void
      */
     public function saving(Wrestler $wrestler)

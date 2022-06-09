@@ -16,7 +16,7 @@ class ReinstateAction extends BaseManagerAction
      * Reinstate a manager.
      *
      * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null $reinstatementDate
+     * @param  \Illuminate\Support\Carbon|null  $reinstatementDate
      * @return void
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void

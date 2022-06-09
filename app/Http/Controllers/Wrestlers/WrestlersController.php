@@ -18,7 +18,7 @@ class WrestlersController extends Controller
     /**
      * Create a new wrestlers controller instance.
      *
-     * @param  \App\Services\WrestlerService $wrestlerService
+     * @param  \App\Services\WrestlerService  $wrestlerService
      */
     public function __construct(WrestlerService $wrestlerService)
     {
@@ -40,7 +40,7 @@ class WrestlersController extends Controller
     /**
      * Show the form for creating a new wrestler.
      *
-     * @param Wrestler $wrestler
+     * @param  Wrestler  $wrestler
      * @return \Illuminate\View\View
      */
     public function create(Wrestler $wrestler)

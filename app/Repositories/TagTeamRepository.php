@@ -15,7 +15,7 @@ class TagTeamRepository
     /**
      * Create a new tag team with the given data.
      *
-     * @param  \App\Data\TagTeamData $tagTeamData
+     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -29,8 +29,8 @@ class TagTeamRepository
     /**
      * Update a given tag team with the given data.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \App\Data\TagTeamData $tagTeamData
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
@@ -46,7 +46,7 @@ class TagTeamRepository
     /**
      * Delete a given tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return void
      */
     public function delete(TagTeam $tagTeam)
@@ -57,7 +57,7 @@ class TagTeamRepository
     /**
      * Restore a given tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return void
      */
     public function restore(TagTeam $tagTeam)
@@ -68,8 +68,8 @@ class TagTeamRepository
     /**
      * Employ a given tag team on a given date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return \App\Models\TagTeam
      */
     public function employ(TagTeam $tagTeam, Carbon $employmentDate)
@@ -85,8 +85,8 @@ class TagTeamRepository
     /**
      * Release a given tag team on a given date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $releaseDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $releaseDate
      * @return \App\Models\TagTeam
      */
     public function release(TagTeam $tagTeam, Carbon $releaseDate)
@@ -99,8 +99,8 @@ class TagTeamRepository
     /**
      * Retire a given tag team on a given date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $retirementDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $retirementDate
      * @return \App\Models\TagTeam
      */
     public function retire(TagTeam $tagTeam, Carbon $retirementDate)
@@ -113,8 +113,8 @@ class TagTeamRepository
     /**
      * Unretire a given tag team on a given date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $unretireDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $unretireDate
      * @return \App\Models\TagTeam
      */
     public function unretire(TagTeam $tagTeam, Carbon $unretireDate)
@@ -127,8 +127,8 @@ class TagTeamRepository
     /**
      * Suspend a given tag team on a given date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $suspensionDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $suspensionDate
      * @return \App\Models\TagTeam
      */
     public function suspend(TagTeam $tagTeam, Carbon $suspensionDate)
@@ -141,8 +141,8 @@ class TagTeamRepository
     /**
      * Reinstate a given tag team on a given date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $reinstateDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $reinstateDate
      * @return \App\Models\TagTeam
      */
     public function reinstate(TagTeam $tagTeam, Carbon $reinstateDate)
@@ -155,8 +155,8 @@ class TagTeamRepository
     /**
      * Get the model's first employment date.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return \App\Models\TagTeam
      */
     public function updateEmployment(TagTeam $tagTeam, Carbon $employmentDate)
@@ -169,9 +169,9 @@ class TagTeamRepository
     /**
      * Add wrestlers to a tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
-     * @param  \Illuminate\Support\Carbon|null $joinDate
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
+     * @param  \Illuminate\Support\Carbon|null  $joinDate
      * @return \App\Models\TagTeam
      */
     public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null)
@@ -188,10 +188,10 @@ class TagTeamRepository
     /**
      * Add wrestlers to a tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \Illuminate\Database\Eloquent\Collection $formerTagTeamPartners
-     * @param  \Illuminate\Database\Eloquent\Collection $newTagTeamPartners
-     * @param  \Illuminate\Support\Carbon|null $date
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Database\Eloquent\Collection  $formerTagTeamPartners
+     * @param  \Illuminate\Database\Eloquent\Collection  $newTagTeamPartners
+     * @param  \Illuminate\Support\Carbon|null  $date
      * @return \App\Models\TagTeam
      */
     public function syncTagTeamPartners(
@@ -224,9 +224,9 @@ class TagTeamRepository
     /**
      * Remove wrestler from a tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  int $tagTeamPartnerId
-     * @param  \Illuminate\Support\Carbon $date
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  int  $tagTeamPartnerId
+     * @param  \Illuminate\Support\Carbon  $date
      * @return void
      */
     public function removeTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)
@@ -240,9 +240,9 @@ class TagTeamRepository
     /**
      * Add wrestler to a tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  int $tagTeamPartnerId
-     * @param  \Illuminate\Support\Carbon $date
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  int  $tagTeamPartnerId
+     * @param  \Illuminate\Support\Carbon  $date
      * @return void
      */
     public function addTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)

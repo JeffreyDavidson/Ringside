@@ -18,7 +18,7 @@ class StablesController extends Controller
     /**
      * Create a new stables controller instance.
      *
-     * @param  \App\Services\StableService $stableService
+     * @param  \App\Services\StableService  $stableService
      */
     public function __construct(StableService $stableService)
     {
@@ -40,7 +40,7 @@ class StablesController extends Controller
     /**
      * Show the form for creating a stable.
      *
-     * @param Stable $stable
+     * @param  Stable  $stable
      * @return \Illuminate\View\View
      */
     public function create(Stable $stable)
@@ -100,7 +100,7 @@ class StablesController extends Controller
      *
      * @param  \App\Http\Requests\Stables\UpdateRequest  $request
      * @param  \App\Models\Stable  $stable
-     * @param  \App\Data\StableData $stableData
+     * @param  \App\Data\StableData  $stableData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Stable $stable)

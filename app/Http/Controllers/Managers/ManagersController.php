@@ -18,7 +18,7 @@ class ManagersController extends Controller
     /**
      * Create a new managers controller instance.
      *
-     * @param \App\Services\ManagerService $managerService
+     * @param  \App\Services\ManagerService  $managerService
      */
     public function __construct(ManagerService $managerService)
     {
@@ -40,7 +40,7 @@ class ManagersController extends Controller
     /**
      * Show the form for creating a manager.
      *
-     * @param  \App\Models\Manager $manager
+     * @param  \App\Models\Manager  $manager
      * @return \Illuminate\View\View
      */
     public function create(Manager $manager)

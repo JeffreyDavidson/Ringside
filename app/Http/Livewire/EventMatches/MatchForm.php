@@ -34,7 +34,7 @@ class MatchForm extends BaseComponent
     /**
      * Apply the EventMatch to the Match form instance.
      *
-     * @param  \App\Models\EventMatch $match
+     * @param  \App\Models\EventMatch  $match
      * @return void
      */
     public function mount(EventMatch $match)

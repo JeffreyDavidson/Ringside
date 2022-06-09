@@ -31,11 +31,11 @@ class UpdateMembersAction extends BaseStableAction
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Database\Eloquent\Collection $wrestlers
-     * @param  \Illuminate\Support\Carbon $now
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
+     * @param  \Illuminate\Support\Carbon  $now
      * @return void
      */
     protected function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now)
@@ -53,11 +53,11 @@ class UpdateMembersAction extends BaseStableAction
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \Illuminate\Database\Eloquent\Collection $tagTeams
-     * @param  \Illuminate\Support\Carbon $now
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Database\Eloquent\Collection  $tagTeams
+     * @param  \Illuminate\Support\Carbon  $now
      * @return void
      */
     protected function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now)

@@ -91,8 +91,7 @@ class EventFactory extends Factory
     /**
      * Define the venue the event takes place at.
      *
-     * @param  \App\Models\Venue $venue
-     *
+     * @param  \App\Models\Venue  $venue
      * @return static
      */
     public function atVenue(Venue $venue)
@@ -103,8 +102,7 @@ class EventFactory extends Factory
     /**
      * Define the event's date.
      *
-     * @param  string $date
-     *
+     * @param  string  $date
      * @return static
      */
     public function scheduledOn(string $date)
@@ -115,8 +113,7 @@ class EventFactory extends Factory
     /**
      * Define the event's name.
      *
-     * @param  string $name
-     *
+     * @param  string  $name
      * @return static
      */
     public function withName(string $name)
@@ -127,8 +124,7 @@ class EventFactory extends Factory
     /**
      * Define the event's preview.
      *
-     * @param  string $preview
-     *
+     * @param  string  $preview
      * @return static
      */
     public function withPreview(string $preview)

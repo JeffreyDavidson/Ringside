@@ -20,7 +20,7 @@ class EventDateCanBeChanged implements Rule
     /**
      * Create a new event date can be changed rule instance.
      *
-     * @param \App\Models\Event $event
+     * @param  \App\Models\Event  $event
      */
     public function __construct(Event $event)
     {

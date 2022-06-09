@@ -19,7 +19,7 @@ class TitleData
     /**
      * Create a DTO from the store request.
      *
-     * @param  \App\Http\Requests\Titles\StoreRequest $request
+     * @param  \App\Http\Requests\Titles\StoreRequest  $request
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
@@ -33,7 +33,7 @@ class TitleData
     /**
      * Create a DTO from the update request.
      *
-     * @param  \App\Http\Requests\Titles\UpdateRequest $request
+     * @param  \App\Http\Requests\Titles\UpdateRequest  $request
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self

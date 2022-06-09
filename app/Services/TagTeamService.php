@@ -31,8 +31,8 @@ class TagTeamService
     /**
      * Create a new tag team service instance.
      *
-     * @param \App\Repositories\TagTeamRepository $tagTeamRepository
-     * @param \App\Repositories\WrestlerRepository $wrestlerRepository
+     * @param  \App\Repositories\TagTeamRepository  $tagTeamRepository
+     * @param  \App\Repositories\WrestlerRepository  $wrestlerRepository
      */
     public function __construct(TagTeamRepository $tagTeamRepository, WrestlerRepository $wrestlerRepository)
     {
@@ -43,7 +43,7 @@ class TagTeamService
     /**
      * Create a tag team with given data.
      *
-     * @param  \App\Data\TagTeamData $tagTeamData
+     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function create(TagTeamData $tagTeamData)
@@ -65,8 +65,8 @@ class TagTeamService
     /**
      * Update a given tag team with given data.
      *
-     * @param  \App\Models\TagTeam $tagTeam
-     * @param  \App\Data\TagTeamData $tagTeamData
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \App\Data\TagTeamData  $tagTeamData
      * @return \App\Models\TagTeam
      */
     public function update(TagTeam $tagTeam, TagTeamData $tagTeamData)
@@ -91,7 +91,7 @@ class TagTeamService
     /**
      * Delete a given tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return void
      */
     public function delete(TagTeam $tagTeam)
@@ -102,7 +102,7 @@ class TagTeamService
     /**
      * Restore a given tag team.
      *
-     * @param  \App\Models\TagTeam $tagTeam
+     * @param  \App\Models\TagTeam  $tagTeam
      * @return void
      */
     public function restore(TagTeam $tagTeam)

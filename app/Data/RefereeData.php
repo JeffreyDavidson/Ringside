@@ -20,7 +20,7 @@ class RefereeData
     /**
      * Create a DTO from the store request.
      *
-     * @param  \App\Http\Requests\Referees\StoreRequest $request
+     * @param  \App\Http\Requests\Referees\StoreRequest  $request
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
@@ -35,7 +35,7 @@ class RefereeData
     /**
      * Create a DTO from the update request.
      *
-     * @param  \App\Http\Requests\Referees\UpdateRequest $request
+     * @param  \App\Http\Requests\Referees\UpdateRequest  $request
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self

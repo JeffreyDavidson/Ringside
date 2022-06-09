@@ -21,7 +21,7 @@ class TitleService
     /**
      * Create a new title service instance.
      *
-     * @param \App\Repositories\TitleRepository $titleRepository
+     * @param  \App\Repositories\TitleRepository  $titleRepository
      */
     public function __construct(TitleRepository $titleRepository)
     {
@@ -31,7 +31,7 @@ class TitleService
     /**
      * Create a title with given data.
      *
-     * @param  \App\Data\TitleData $titleData
+     * @param  \App\Data\TitleData  $titleData
      * @return \App\Models\Title
      */
     public function create(TitleData $titleData)
@@ -49,8 +49,8 @@ class TitleService
     /**
      * Update a given title with given data.
      *
-     * @param  \App\Models\Title $title
-     * @param  \App\Data\TitleData $titleData
+     * @param  \App\Models\Title  $title
+     * @param  \App\Data\TitleData  $titleData
      * @return \App\Models\Title
      */
     public function update(Title $title, TitleData $titleData)
@@ -69,7 +69,7 @@ class TitleService
     /**
      * Delete a given title.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Title  $title
      * @return void
      */
     public function delete(Title $title)
@@ -80,7 +80,7 @@ class TitleService
     /**
      * Restore a given title.
      *
-     * @param  \App\Models\Title $title
+     * @param  \App\Models\Title  $title
      * @return void
      */
     public function restore(Title $title)

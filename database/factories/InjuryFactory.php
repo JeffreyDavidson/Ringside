@@ -29,7 +29,7 @@ class InjuryFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $injureDate
+     * @param  string|Carbon  $injureDate
      */
     public function started($injureDate = 'now')
     {
@@ -39,7 +39,7 @@ class InjuryFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $recoveryDate
+     * @param  string|Carbon  $recoveryDate
      */
     public function ended($recoveryDate = 'now'): self
     {

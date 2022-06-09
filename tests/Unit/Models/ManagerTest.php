@@ -47,6 +47,6 @@ class ManagerTest extends TestCase
      */
     public function a_manager_uses_has_a_full_name_trait()
     {
-        $this->assertUsesTrait('App\Models\Concerns\HasFullName', Manager::class);
+        $this->assertUsesTrait(\App\Models\Concerns\HasFullName::class, Manager::class);
     }
 }

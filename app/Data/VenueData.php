@@ -22,7 +22,7 @@ class VenueData
     /**
      * Create a DTO from the store request.
      *
-     * @param  \App\Http\Requests\Venues\StoreRequest $request
+     * @param  \App\Http\Requests\Venues\StoreRequest  $request
      * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
@@ -40,7 +40,7 @@ class VenueData
     /**
      * Create a DTO from the update request.
      *
-     * @param  \App\Http\Requests\Venues\UpdateRequest $request
+     * @param  \App\Http\Requests\Venues\UpdateRequest  $request
      * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self

@@ -32,7 +32,7 @@ class RetirementFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $retirementDate
+     * @param  string|Carbon  $retirementDate
      */
     public function started($retirementDate = 'now')
     {
@@ -42,7 +42,7 @@ class RetirementFactory extends Factory
     }
 
     /**
-     * @param string|Carbon $unretireDate
+     * @param  string|Carbon  $unretireDate
      */
     public function ended($unretireDate = 'now')
     {

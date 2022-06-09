@@ -19,7 +19,7 @@ class TagTeamsController extends Controller
     /**
      * Create a new tag teams controller instance.
      *
-     * @param  \App\Services\TagTeamService $tagTeamService
+     * @param  \App\Services\TagTeamService  $tagTeamService
      */
     public function __construct(TagTeamService $tagTeamService)
     {
@@ -41,7 +41,7 @@ class TagTeamsController extends Controller
     /**
      * Show the form for creating a new tag team.
      *
-     * @param TagTeam $tagTeam
+     * @param  TagTeam  $tagTeam
      * @return \Illuminate\View\View
      */
     public function create(TagTeam $tagTeam)

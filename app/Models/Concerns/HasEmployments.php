@@ -94,7 +94,7 @@ trait HasEmployments
     /**
      * Check to see if the model is employed.
      *
-     * @param  \Illuminate\Support\Carbon $startDate
+     * @param  \Illuminate\Support\Carbon  $startDate
      * @return bool
      */
     public function startDateWas(Carbon $startDate)
@@ -184,7 +184,7 @@ trait HasEmployments
     /**
      * Determine if the roster member was employed on a given date.
      *
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
     public function employedOn(Carbon $employmentDate)
@@ -195,7 +195,7 @@ trait HasEmployments
     /**
      * Determine if the roster member is to be employed on a given date.
      *
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
     public function scheduledToBeEmployedOn(Carbon $employmentDate)
@@ -206,7 +206,7 @@ trait HasEmployments
     /**
      * Determine if the roster member is to be employed on a given date.
      *
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
     public function employedBefore(Carbon $employmentDate)
@@ -217,7 +217,7 @@ trait HasEmployments
     /**
      * Determine if the roster member is employed after a given date.
      *
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
     public function employedAfter(Carbon $employmentDate)
@@ -228,7 +228,7 @@ trait HasEmployments
     /**
      * Determine if the roster member future start date is before the given date.
      *
-     * @param  \Illuminate\Support\Carbon $date
+     * @param  \Illuminate\Support\Carbon  $date
      * @return bool
      */
     public function futureEmploymentIsBefore(Carbon $date)
@@ -239,7 +239,7 @@ trait HasEmployments
     /**
      * Check to see if employable can have their start date changed.
      *
-     * @param  \Illuminate\Support\Carbon $employmentDate
+     * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
     public function canHaveEmploymentStartDateChanged(Carbon $employmentDate)

@@ -21,7 +21,7 @@ class ManagerService
     /**
      * Create a new manager service instance.
      *
-     * @param \App\Repositories\ManagerRepository $managerRepository
+     * @param  \App\Repositories\ManagerRepository  $managerRepository
      */
     public function __construct(ManagerRepository $managerRepository)
     {
@@ -31,7 +31,7 @@ class ManagerService
     /**
      * Create a manager with given data.
      *
-     * @param  \App\Data\ManagerData $managerData
+     * @param  \App\Data\ManagerData  $managerData
      * @return \App\Models\Manager
      */
     public function create(ManagerData $managerData)
@@ -49,8 +49,8 @@ class ManagerService
     /**
      * Update a given manager with given data.
      *
-     * @param  \App\Models\Manager $manager
-     * @param  \App\Data\ManagerData $managerData
+     * @param  \App\Models\Manager  $manager
+     * @param  \App\Data\ManagerData  $managerData
      * @return \App\Models\Manager
      */
     public function update(Manager $manager, ManagerData $managerData)
@@ -71,7 +71,7 @@ class ManagerService
     /**
      * Delete a given manager.
      *
-     * @param  \App\Models\Manager $manager
+     * @param  \App\Models\Manager  $manager
      * @return void
      */
     public function delete(Manager $manager)
@@ -82,7 +82,7 @@ class ManagerService
     /**
      * Restore a given manager.
      *
-     * @param  \App\Models\Manager $manager
+     * @param  \App\Models\Manager  $manager
      * @return void
      */
     public function restore(Manager $manager)

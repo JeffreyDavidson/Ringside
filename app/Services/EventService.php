@@ -20,7 +20,7 @@ class EventService
     /**
      * Create a new event service instance.
      *
-     * @param \App\Repositories\EventRepository $eventRepository
+     * @param  \App\Repositories\EventRepository  $eventRepository
      */
     public function __construct(EventRepository $eventRepository)
     {
@@ -30,7 +30,7 @@ class EventService
     /**
      * Create an event with given data.
      *
-     * @param  \App\Data\EventData $eventData
+     * @param  \App\Data\EventData  $eventData
      * @return \App\Models\Event
      */
     public function create(EventData $eventData)
@@ -41,8 +41,8 @@ class EventService
     /**
      * Update a given event.
      *
-     * @param  \App\Models\Event $event
-     * @param  \App\Data\EventData $eventData
+     * @param  \App\Models\Event  $event
+     * @param  \App\Data\EventData  $eventData
      * @return \App\Models\Event
      */
     public function update(Event $event, EventData $eventData)
@@ -53,7 +53,7 @@ class EventService
     /**
      * Delete an event.
      *
-     * @param  \App\Models\Event $event
+     * @param  \App\Models\Event  $event
      * @return void
      */
     public function delete($event)
@@ -64,7 +64,7 @@ class EventService
     /**
      * Restore an event.
      *
-     * @param  \App\Models\Event $event
+     * @param  \App\Models\Event  $event
      * @return void
      */
     public function restore(Event $event)

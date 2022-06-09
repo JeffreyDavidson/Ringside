@@ -165,7 +165,7 @@ trait Activations
     /**
      * Get the model's first activation date.
      *
-     * @param  \Illuminate\Support\Carbon $activationDate
+     * @param  \Illuminate\Support\Carbon  $activationDate
      * @return bool|null
      */
     public function activatedOn(Carbon $activationDate)
@@ -176,7 +176,7 @@ trait Activations
     /**
      * Check to see if activatable can have their start date changed.
      *
-     * @param  \Illuminate\Support\Carbon $activationDate
+     * @param  \Illuminate\Support\Carbon  $activationDate
      * @return bool
      */
     public function canHaveActivationStartDateChanged(Carbon $activationDate)

@@ -47,9 +47,9 @@ trait CanJoinStables
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Stable  $stable
      * @return bool
      */
     public function isNotCurrentlyInStable(Stable $stable)

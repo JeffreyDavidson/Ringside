@@ -23,7 +23,7 @@ class StableService
     /**
      * Create a new stable service instance.
      *
-     * @param \App\Repositories\StableRepository $stableRepository
+     * @param  \App\Repositories\StableRepository  $stableRepository
      */
     public function __construct(StableRepository $stableRepository)
     {
@@ -33,7 +33,7 @@ class StableService
     /**
      * Create a stable with given data.
      *
-     * @param  \App\Data\StableData $stableData
+     * @param  \App\Data\StableData  $stableData
      * @return \App\Models\Stable
      */
     public function create(StableData $stableData)
@@ -53,8 +53,8 @@ class StableService
     /**
      * Update a given stable with given data.
      *
-     * @param  \App\Models\Stable $stable
-     * @param  \App\Data\StableData $stableData
+     * @param  \App\Models\Stable  $stable
+     * @param  \App\Data\StableData  $stableData
      * @return \App\Models\Stable
      */
     public function update(Stable $stable, StableData $stableData)
@@ -75,7 +75,7 @@ class StableService
     /**
      * Delete a given stable.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Stable  $stable
      * @return void
      */
     public function delete(Stable $stable)
@@ -86,7 +86,7 @@ class StableService
     /**
      * Restore a given stable.
      *
-     * @param  \App\Models\Stable $stable
+     * @param  \App\Models\Stable  $stable
      * @return void
      */
     public function restore(Stable $stable)

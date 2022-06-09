@@ -18,7 +18,7 @@ class EventsController extends Controller
     /**
      * Create a new events controller instance.
      *
-     * @param \App\Services\EventService $eventService
+     * @param  \App\Services\EventService  $eventService
      */
     public function __construct(EventService $eventService)
     {
@@ -40,7 +40,7 @@ class EventsController extends Controller
     /**
      * Show the form for creating a new event.
      *
-     * @param  \App\Models\Event $event
+     * @param  \App\Models\Event  $event
      * @return \Illuminate\View\View
      */
     public function create(Event $event)
@@ -83,7 +83,7 @@ class EventsController extends Controller
     /**
      * Show the form for editing a given event.
      *
-     * @param  \App\Models\Event $event
+     * @param  \App\Models\Event  $event
      * @return \Illuminate\View\View
      */
     public function edit(Event $event)
