@@ -78,6 +78,7 @@ class ManagerRepository
             ['ended_at' => null],
             ['started_at' => $employmentDate->toDateTimeString()]
         );
+        $manager->save();
 
         return $manager;
     }
@@ -92,6 +93,7 @@ class ManagerRepository
     public function release(Manager $manager, Carbon $releaseDate)
     {
         $manager->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }
@@ -106,6 +108,7 @@ class ManagerRepository
     public function injure(Manager $manager, Carbon $injureDate)
     {
         $manager->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }
@@ -120,6 +123,7 @@ class ManagerRepository
     public function clearInjury(Manager $manager, Carbon $recoveryDate)
     {
         $manager->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }
@@ -134,6 +138,7 @@ class ManagerRepository
     public function retire(Manager $manager, Carbon $retirementDate)
     {
         $manager->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }
@@ -148,6 +153,7 @@ class ManagerRepository
     public function unretire(Manager $manager, Carbon $unretireDate)
     {
         $manager->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }
@@ -162,6 +168,7 @@ class ManagerRepository
     public function suspend(Manager $manager, Carbon $suspensionDate)
     {
         $manager->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }
@@ -176,6 +183,7 @@ class ManagerRepository
     public function reinstate(Manager $manager, Carbon $reinstateDate)
     {
         $manager->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
+        $manager->save();
 
         return $manager;
     }

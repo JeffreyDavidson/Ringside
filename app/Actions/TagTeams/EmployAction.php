@@ -24,11 +24,8 @@ class EmployAction extends BaseTagTeamAction
     {
         $startDate ??= now();
 
-        $tagTeam->currentWrestlers->each(function ($wrestler) use ($startDate) {
-            WrestlersEmployAction::run($wrestler, $startDate);
-        });
+        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersEmployAction::run($wrestler, $startDate));
 
         $this->tagTeamRepository->employ($tagTeam, $startDate);
-        $tagTeam->save();
     }
 }

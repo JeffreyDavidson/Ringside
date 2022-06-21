@@ -16,21 +16,19 @@ class ReleaseAction extends BaseTagTeamAction
      * Release a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
+     * @param  \Illuminate\Support\Carbon|null  $releaseDate
      * @return void
      */
-    public function handle(TagTeam $tagTeam): void
+    public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = now();
+        $releaseDate ??= now();
 
         if ($tagTeam->isSuspended()) {
             ReinstateAction::run($tagTeam, $releaseDate);
         }
 
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
-        $tagTeam->save();
 
-        $tagTeam->currentWrestlers->each(function ($wrestler) use ($releaseDate) {
-            WrestlersReleaseAction::run($wrestler, $releaseDate);
-        });
+        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersReleaseAction::run($wrestler, $releaseDate));
     }
 }

@@ -22,6 +22,18 @@ class TagTeamCanJoinExistingStable implements Rule
             return false;
         }
 
+        if ($tagTeam->isSuspended()) {
+            $this->messages = "{$tagTeam->name} is supsended and cannot join the stable.";
+
+            return false;
+        }
+
+        if ($tagTeam->isCurrentlyEmployed() && ! $tagTeam->employedBefore($this->date('started_at'))) {
+            $this->messages = "{$tagTeam->name} cannot have an employment start date after stable's start date.";
+
+            return false;
+        }
+
         return true;
     }
 
@@ -32,6 +44,6 @@ class TagTeamCanJoinExistingStable implements Rule
      */
     public function message()
     {
-        return 'This tag team is already a member of a stable.';
+        return $this->messages;
     }
 }

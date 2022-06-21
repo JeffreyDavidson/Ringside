@@ -28,12 +28,9 @@ class RetireAction extends BaseTagTeamAction
             ReinstateAction::run($tagTeam, $retirementDate);
         }
 
-        $tagTeam->currentWrestlers->each(function ($wrestler) use ($retirementDate) {
-            WrestlersRetireAction::run($wrestler, $retirementDate);
-        });
+        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
 
         $this->tagTeamRepository->release($tagTeam, $retirementDate);
         $this->tagTeamRepository->retire($tagTeam, $retirementDate);
-        $tagTeam->save();
     }
 }

@@ -24,6 +24,5 @@ class ClearInjuryAction extends BaseManagerAction
         $recoveryDate ??= now();
 
         $this->managerRepository->clearInjury($manager, $recoveryDate);
-        $manager->save();
     }
 }

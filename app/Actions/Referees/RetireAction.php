@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Models\Referee;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction extends BaseRefereeAction
@@ -15,11 +16,12 @@ class RetireAction extends BaseRefereeAction
      * Retire a referee.
      *
      * @param  \App\Models\Referee  $referee
+     * @param  \Illuminate\Support\Carbon|null  $retirementDate
      * @return void
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        $retirementDate = now();
+        $retirementDate ??= now();
 
         if ($referee->isSuspended()) {
             $this->refereeRepository->reinstate($referee, $retirementDate);
@@ -31,6 +33,5 @@ class RetireAction extends BaseRefereeAction
 
         $this->refereeRepository->release($referee, $retirementDate);
         $this->refereeRepository->retire($referee, $retirementDate);
-        $referee->save();
     }
 }

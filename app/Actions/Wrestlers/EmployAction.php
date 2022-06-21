@@ -24,6 +24,5 @@ class EmployAction extends BaseWrestlerAction
         $startDate ??= now();
 
         $this->wrestlerRepository->employ($wrestler, $startDate);
-        $wrestler->save();
     }
 }

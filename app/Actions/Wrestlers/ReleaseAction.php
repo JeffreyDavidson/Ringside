@@ -32,7 +32,6 @@ class ReleaseAction extends BaseWrestlerAction
         }
 
         $this->wrestlerRepository->release($wrestler, $releaseDate);
-        $wrestler->save();
 
         if ($wrestler->isAMemberOfCurrentTagTeam()) {
             $wrestler->currentTagTeam->save();

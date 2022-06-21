@@ -11,7 +11,7 @@ trait HasFullName
     protected function fullName(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => "{$this->first_name} {$this->last_name}",
+            get: fn () => "{$this->first_name} {$this->last_name}",
         );
     }
 }

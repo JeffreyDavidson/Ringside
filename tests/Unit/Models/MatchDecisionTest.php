@@ -1,98 +1,15 @@
 <?php
 
-declare(strict_types=1);
+use App\Models\MatchDecision;
 
-namespace Tests\Unit\Models;
+test('a match decision has a name', function () {
+    $matchDecision = MatchDecision::factory()->create(['name' => 'Example Match Decision Name']);
 
-use Illuminate\Support\Facades\Artisan;
-use Tests\TestCase;
+    expect($matchDecision)->name->toBe('Example Match Decision Name');
+});
 
-class MatchDecisionTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('a match decision has a slug', function () {
+    $matchDecision = MatchDecision::factory()->create(['slug' => 'example-slug']);
 
-        Artisan::call('db:seed', ['--class' => 'MatchDecisionsTableSeeder']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_pinfall_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Pinfall', 'slug' => 'pinfall']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_submission_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Submission', 'slug' => 'submission']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_disqualification_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Disqualification', 'slug' => 'dq']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_countout_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Countout', 'slug' => 'countout']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_knockout_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Knockout', 'slug' => 'knockout']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_stipulation_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Stipulation', 'slug' => 'stipulation']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_forfeit_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Forfeit', 'slug' => 'forfeit']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_time_limit_draw_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Time Limit Draw', 'slug' => 'draw']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_no_decision_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'No Decision', 'slug' => 'nodecision']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_reverse_decision_match_decision_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_decisions', ['name' => 'Reverse Decision', 'slug' => 'revdecision']);
-    }
-}
+    expect($matchDecision)->slug->toBe('example-slug');
+});

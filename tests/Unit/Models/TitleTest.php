@@ -1,58 +1,85 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Unit\Models;
-
 use App\Enums\TitleStatus;
+use App\Models\Concerns\HasRetirements;
 use App\Models\Title;
-use Tests\TestCase;
 
-/**
- * @group titles
- * @group models
- */
-class TitleTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function a_title_status_gets_cast_as_a_title_status_enum()
-    {
-        $title = Title::factory()->make();
+test('a title has a name', function () {
+    $title = Title::factory()->create(['name' => 'Example Name Title']);
 
-        $this->assertInstanceOf(TitleStatus::class, $title->status);
-    }
+    expect($title)->name->toBe('Example Name Title');
+});
 
-    /**
-     * @test
-     */
-    public function a_title_uses_soft_deleted_trait()
-    {
-        $this->assertUsesTrait('Illuminate\Database\Eloquent\SoftDeletes', Title::class);
-    }
+test('a title has a status', function () {
+    $title = Title::factory()->create();
 
-    /**
-     * @test
-     */
-    public function a_title_uses_activations_trait()
-    {
-        $this->assertUsesTrait(\App\Models\Concerns\Activations::class, Title::class);
-    }
+    expect($title)->status->toBeInstanceOf(TitleStatus::class);
+});
 
-    /**
-     * @test
-     */
-    public function a_title_uses_can_be_competable_trait()
-    {
-        $this->assertUsesTrait(\App\Models\Concerns\Competable::class, Title::class);
-    }
+test('a title uses soft deleted trait', function () {
+    expect(Title::class)->assertUsesTrait(SoftDeletes::class);
+});
 
-    /**
-     * @test
-     */
-    public function a_title_uses_retirements_trait()
-    {
-        $this->assertUsesTrait(\App\Models\Concerns\HasRetirements::class, Title::class);
-    }
-}
+test('a title uses activation trait', function () {
+    expect(Title::class)->assertUsesTrait(Activations::class);
+});
+
+test('a title uses competable trait', function () {
+    expect(Title::class)->assertUsesTrait(Competable::class);
+});
+
+test('a title uses retirements trait', function () {
+    expect(Title::class)->assertUsesTrait(HasRetirements::class);
+});
+
+test('active titles can be retrieved', function () {
+    $activeTitle = Title::factory()->active()->create();
+    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
+    $inactiveTitle = Title::factory()->inactive()->create();
+    $retiredTitle = Title::factory()->retired()->create();
+
+    $activeTitles = Title::active()->get();
+
+    expect($activeTitles)
+        ->toHaveCount(1)
+        ->assertCollectionHas($activeTitle);
+});
+
+test('future activated titles can be retrieved', function () {
+    $activeTitle = Title::factory()->active()->create();
+    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
+    $inactiveTitle = Title::factory()->inactive()->create();
+    $retiredTitle = Title::factory()->retired()->create();
+
+    $futureActivatedTitles = Title::withFutureActivation()->get();
+
+    expect($futureActivatedTitles)
+        ->toHaveCount(1)
+        ->assertCollectionHas($futureActivatedTitle);
+});
+
+test('inactive titles can be retrieved', function () {
+    $activeTitle = Title::factory()->active()->create();
+    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
+    $inactiveTitle = Title::factory()->inactive()->create();
+    $retiredTitle = Title::factory()->retired()->create();
+
+    $inactiveTitles = Title::inactive()->get();
+
+    expect($inactiveTitles)
+        ->toHaveCount(1)
+        ->assertCollectionHas($inactiveTitle);
+});
+
+test('retired titles can be retrieved', function () {
+    $activeTitle = Title::factory()->active()->create();
+    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
+    $inactiveTitle = Title::factory()->inactive()->create();
+    $retiredTitle = Title::factory()->retired()->create();
+
+    $retiredTitles = Title::retired()->get();
+
+    expect($retiredTitles)
+        ->toHaveCount(1)
+        ->assertCollectionHas($retiredTitle);
+});

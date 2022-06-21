@@ -1,53 +1,33 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Feature\Http\Controllers\Auth;
-
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
-use Tests\TestCase;
+use function Pest\Laravel\assertAuthenticated;
+use function Pest\Laravel\assertGuest;
 
-class AuthenticationTest extends TestCase
-{
-    /**
-     * @test
-     */
-    public function login_screen_can_be_rendered()
-    {
-        $response = $this->get('/login');
+test('login screen can be rendered', function () {
+    $this->get('/login')
+        ->assertStatus(200);
+});
 
-        $response->assertStatus(200);
-    }
+test('users can authenticate using the login screen', function () {
+    $user = User::factory()->create();
 
-    /**
-     * @test
-     */
-    public function users_can_authenticate_using_the_login_screen()
-    {
-        $user = User::factory()->create();
+    $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'secret',
+    ])->assertRedirect(RouteServiceProvider::HOME);
 
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'secret',
-        ]);
+    assertAuthenticated();
+});
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
-    }
+test('users can not authenticate with invalid password', function () {
+    $user = User::factory()->create();
 
-    /**
-     * @test
-     */
-    public function users_can_not_authenticate_with_invalid_password()
-    {
-        $user = User::factory()->create();
+    $this->post('/login', [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
 
-        $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
-        $this->assertGuest();
-    }
-}
+    assertGuest();
+});

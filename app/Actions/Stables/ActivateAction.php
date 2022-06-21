@@ -40,6 +40,5 @@ class ActivateAction extends BaseStableAction
         }
 
         $this->stableRepository->activate($stable, $activationDate);
-        $stable->save();
     }
 }

@@ -1,6 +1,12 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase;
+use function PHPUnit\Framework\assertContains;
+use function PHPUnit\Framework\assertNotContains;
+use Tests\CreatesApplication;
+use Tests\ValidatesRequests;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,7 +19,23 @@ use App\Models\User;
 |
 */
 
-uses(Tests\TestCase::class)->in('Feature');
+uses(TestCase::class, CreatesApplication::class, LazilyRefreshDatabase::class)->in('Feature', 'Unit');
+uses(ValidatesRequests::class)->in('Integration/Http/Requests');
+
+uses()->group('wrestlers', 'feature-wrestlers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Wrestlers');
+uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Managers');
+uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Referees');
+uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
+uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
+uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
+uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
+uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
+uses()->group('event-matches', 'feature-event-matches')->in('Feature/Http/Controllers/EventMatches');
+
+beforeEach(function () {
+    TestResponse::macro('data', fn ($key) => $this->original->getData()[$key]);
+    $dropViews = true;
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +52,40 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
+expect()->extend('collectionHas', function ($collection, $entity) {
+    if (is_array($entity) || $entity instanceof Collection) {
+        foreach ($entity as $test) {
+            $this->assertContains($collection, $test);
+        }
+
+        return $this;
+    }
+
+    expect($collection->contains($entity))->toBeTrue();
+
+    return $this;
+});
+
+expect()->extend('collectionDoesntHave', function ($collection, $entity) {
+    if (is_array($entity) || $entity instanceof Collection) {
+        foreach ($entity as $test) {
+            $this->assertNotContains($collection, $test);
+        }
+
+        return $this;
+    }
+
+    expect($collection->contains($entity))->toBeFalse();
+
+    return $this;
+});
+
+expect()->extend('assertUsesTrait', function ($trait) {
+    dd($this);
+
+    return $this->assertContains($trait, class_uses($this->value));
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -40,21 +96,6 @@ expect()->extend('toBeOne', function () {
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-
-function something()
-{
-    // ..
-}
-
-uses()->group('wrestlers', 'feature-wrestlers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Wrestlers');
-uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Managers');
-uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Referees');
-uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
-uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
-uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
-uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
-uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
-uses()->group('event-matches', 'feature-event-matches')->in('Feature/Http/Controllers/EventMatches');
 
 function administrator()
 {
