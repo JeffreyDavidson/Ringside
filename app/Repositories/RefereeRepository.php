@@ -76,6 +76,7 @@ class RefereeRepository
             ['ended_at' => null],
             ['started_at' => $employmentDate->toDateTimeString()]
         );
+        $referee->save();
 
         return $referee;
     }
@@ -90,6 +91,7 @@ class RefereeRepository
     public function release(Referee $referee, Carbon $releaseDate)
     {
         $referee->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }
@@ -104,6 +106,7 @@ class RefereeRepository
     public function injure(Referee $referee, Carbon $injureDate)
     {
         $referee->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }
@@ -118,6 +121,7 @@ class RefereeRepository
     public function clearInjury(Referee $referee, Carbon $recoveryDate)
     {
         $referee->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }
@@ -132,6 +136,7 @@ class RefereeRepository
     public function retire(Referee $referee, Carbon $retirementDate)
     {
         $referee->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }
@@ -146,6 +151,7 @@ class RefereeRepository
     public function unretire(Referee $referee, Carbon $unretireDate)
     {
         $referee->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }
@@ -160,6 +166,7 @@ class RefereeRepository
     public function suspend(Referee $referee, Carbon $suspensionDate)
     {
         $referee->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }
@@ -174,6 +181,7 @@ class RefereeRepository
     public function reinstate(Referee $referee, Carbon $reinstateDate)
     {
         $referee->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
+        $referee->save();
 
         return $referee;
     }

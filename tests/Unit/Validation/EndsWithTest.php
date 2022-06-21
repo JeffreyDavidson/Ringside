@@ -1,39 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Tests\Unit\Validation;
-
 use Illuminate\Support\Facades\Validator;
-use Tests\TestCase;
 
-/**
- * @group validation
- */
-class EndsWithTest extends TestCase
-{
-    /**
-     * @test
-     *
-     * @dataProvider endsWithMessages
-     */
-    public function it_formats_ends_with_message_correctly($arguments, $message): void
-    {
-        $arguments = implode(',', $arguments);
+test('it formats ends with message correctly', function ($arguments, $message) {
+    $arguments = implode(',', $arguments);
 
-        $validator = Validator::make(['name' => 'Hello world'], [
-            'name' => "ends_with:{$arguments}",
-        ]);
+    $validator = Validator::make(['name' => 'Hello world'], [
+        'name' => "ends_with:{$arguments}",
+    ]);
 
-        $this->assertEquals($message, $validator->errors()->first('name'));
-    }
-
-    public function endsWithMessages(): array
-    {
-        return [
-            'one argument' => [['foo'], 'The name must end with foo.'],
-            'two arguments' => [['foo', 'bar'], 'The name must end with foo or bar.'],
-            'more than 2 arguments' => [['foo', 'bar', 'baz'], 'The name must end with foo, bar or baz.'],
-        ];
-    }
-}
+    expect($validator->errors()->first('name'))->toEqual($message);
+})->with([
+    'one argument' => [['foo'], 'The name must end with one of the following: foo.'],
+    'two arguments' => [['foo', 'bar'], 'The name must end with one of the following: foo or bar.'],
+    'more than 2 arguments' => [['foo', 'bar', 'baz'], 'The name must end with one of the following: foo, bar or baz.'],
+]);

@@ -1,130 +1,21 @@
 <?php
 
-declare(strict_types=1);
+use App\Models\MatchType;
 
-namespace Tests\Unit\Models;
+test('a match type has a name', function () {
+    $matchType = MatchType::factory()->create(['name' => 'Example Match Type Name']);
 
-use MatchTypesTableSeeder;
-use Tests\TestCase;
+    expect($matchType)->name->toBe('Example Match Type Name');
+});
 
-class MatchTypeTest extends TestCase
-{
-    protected function setUp(): void
-    {
-        parent::setUp();
+test('a match type has a slug', function () {
+    $matchType = MatchType::factory()->create(['slug' => 'example-slug']);
 
-        $this->seed(MatchTypesTableSeeder::class);
-    }
+    expect($matchType)->slug->toBe('example-slug');
+});
 
-    /**
-     * @test
-     */
-    public function a_singles_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Singles', 'slug' => 'singles']);
-    }
+test('a match type has a defined number of sides to the match', function () {
+    $matchType = MatchType::factory()->create(['number_of_sides' => 2]);
 
-    /**
-     * @test
-     */
-    public function a_tag_team_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Tag Team', 'slug' => 'tagteam']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_triangle_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Triangle', 'slug' => 'triangle']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_triple_threat_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Triple Threat', 'slug' => 'triple']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_fatal_four_way_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Fatal 4 Way', 'slug' => 'fatal4way']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_six_man_tag_team_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => '6 Man Tag Team', 'slug' => '6man']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_eight_man_tag_team_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => '8 Man Tag Team', 'slug' => '8man']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_ten_man_tag_team_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => '10 Man Tag Team', 'slug' => '10man']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_two_on_one_handicap_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Two On One Handicap', 'slug' => '21handicap']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_three_on_two_handicap_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Three On Two Handicap', 'slug' => '32handicap']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_battle_royal_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Battle Royal', 'slug' => 'battleroyal']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_royal_rumble_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Royal Rumble', 'slug' => 'royalrumble']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_tornado_tag_team_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Tornado Tag Team', 'slug' => 'tornadotag']);
-    }
-
-    /**
-     * @test
-     */
-    public function a_gauntlet_match_type_is_saved_in_database()
-    {
-        $this->assertDatabaseHas('match_types', ['name' => 'Gauntlet', 'slug' => 'gauntlet']);
-    }
-}
+    expect($matchType)->number_of_sides->toBe(2);
+});

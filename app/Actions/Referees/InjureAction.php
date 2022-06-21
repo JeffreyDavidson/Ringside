@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Models\Referee;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class InjureAction extends BaseRefereeAction
@@ -15,11 +16,13 @@ class InjureAction extends BaseRefereeAction
      * Injure a referee.
      *
      * @param  \App\Models\Referee  $referee
+     * @param  \Illuminate\Support\Carbon|null  $startDate
      * @return void
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $injureDate = null): void
     {
-        $this->refereeRepository->injure($referee, now());
-        $referee->save();
+        $injureDate ??= now();
+
+        $this->refereeRepository->injure($referee, $injureDate);
     }
 }

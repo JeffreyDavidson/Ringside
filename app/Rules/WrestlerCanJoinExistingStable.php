@@ -33,6 +33,24 @@ class WrestlerCanJoinExistingStable implements Rule
     {
         $wrestler = Wrestler::with(['currentStable', 'currentTagTeam'])->whereKey($value)->sole();
 
+        if ($wrestler->isSuspended()) {
+            $this->messages = "{$wrestler->name} is suspended and cannot join stable.";
+
+            return false;
+        }
+
+        if ($wrestler->isInjured()) {
+            $this->messages = "{$wrestler->name} is injured and cannot join stable.";
+
+            return false;
+        }
+
+        if ($wrestler->isCurrentlyEmployed() && ! $wrestler->employedBefore($this->date('started_at'))) {
+            $this->messages = "{$wrestler->name} cannot have an employment start date after stable's start date.";
+
+            return false;
+        }
+
         if ($this->tagTeamIds !== 0) {
             collect($this->tagTeamIds)->map(function ($id) use ($wrestler) {
                 if ($id === $wrestler->currentTagTeam->id) {
@@ -53,6 +71,6 @@ class WrestlerCanJoinExistingStable implements Rule
      */
     public function message()
     {
-        return 'This wrestler is already a member of a stable.';
+        return $this->messages;
     }
 }

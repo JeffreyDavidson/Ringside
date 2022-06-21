@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Models\Referee;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction extends BaseRefereeAction
@@ -15,11 +16,13 @@ class ReinstateAction extends BaseRefereeAction
      * Reinstate a referee.
      *
      * @param  \App\Models\Referee  $referee
+     * @param  \Illuminate\Support\Carbon|null  $reinstatementDate
      * @return void
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
-        $this->refereeRepository->reinstate($referee, now());
-        $referee->save();
+        $reinstatementDate ??= now();
+
+        $this->refereeRepository->reinstate($referee, $reinstatementDate);
     }
 }

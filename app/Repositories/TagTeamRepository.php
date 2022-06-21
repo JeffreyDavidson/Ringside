@@ -78,6 +78,7 @@ class TagTeamRepository
             ['ended_at' => null],
             ['started_at' => $employmentDate->toDateTimeString()]
         );
+        $tagTeam->save();
 
         return $tagTeam;
     }
@@ -92,6 +93,7 @@ class TagTeamRepository
     public function release(TagTeam $tagTeam, Carbon $releaseDate)
     {
         $tagTeam->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
+        $tagTeam->save();
 
         return $tagTeam;
     }
@@ -106,6 +108,7 @@ class TagTeamRepository
     public function retire(TagTeam $tagTeam, Carbon $retirementDate)
     {
         $tagTeam->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+        $tagTeam->save();
 
         return $tagTeam;
     }
@@ -134,6 +137,7 @@ class TagTeamRepository
     public function suspend(TagTeam $tagTeam, Carbon $suspensionDate)
     {
         $tagTeam->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
+        $tagTeam->save();
 
         return $tagTeam;
     }
@@ -148,6 +152,7 @@ class TagTeamRepository
     public function reinstate(TagTeam $tagTeam, Carbon $reinstateDate)
     {
         $tagTeam->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
+        $tagTeam->save();
 
         return $tagTeam;
     }

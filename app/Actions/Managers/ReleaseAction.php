@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Models\Manager;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction extends BaseManagerAction
@@ -15,11 +16,12 @@ class ReleaseAction extends BaseManagerAction
      * Release a manager.
      *
      * @param  \App\Models\Manager  $manager
+     * @param  \Illuminate\Support\Carbon|null  $releaseDate
      * @return void
      */
-    public function handle(Manager $manager): void
+    public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = now();
+        $releaseDate ??= now();
 
         if ($manager->isSuspended()) {
             ReinstateAction::run($manager, $releaseDate);
@@ -30,7 +32,6 @@ class ReleaseAction extends BaseManagerAction
         }
 
         $this->managerRepository->release($manager, $releaseDate);
-        $manager->save();
 
         if ($manager->currentTagTeams->isNotEmpty()) {
             $this->managerRepository->removeFromCurrentTagTeams($manager);

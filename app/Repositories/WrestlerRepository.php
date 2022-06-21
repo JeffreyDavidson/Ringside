@@ -82,6 +82,7 @@ class WrestlerRepository
             ['ended_at' => null],
             ['started_at' => $employmentDate->toDateTimeString()]
         );
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -96,6 +97,7 @@ class WrestlerRepository
     public function release(Wrestler $wrestler, Carbon $releaseDate)
     {
         $wrestler->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -110,6 +112,7 @@ class WrestlerRepository
     public function injure(Wrestler $wrestler, Carbon $injureDate)
     {
         $wrestler->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -124,6 +127,7 @@ class WrestlerRepository
     public function clearInjury(Wrestler $wrestler, Carbon $recoveryDate)
     {
         $wrestler->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -138,6 +142,7 @@ class WrestlerRepository
     public function retire(Wrestler $wrestler, Carbon $retirementDate)
     {
         $wrestler->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -152,6 +157,7 @@ class WrestlerRepository
     public function unretire(Wrestler $wrestler, Carbon $unretireDate)
     {
         $wrestler->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -166,6 +172,7 @@ class WrestlerRepository
     public function suspend(Wrestler $wrestler, Carbon $suspensionDate)
     {
         $wrestler->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }
@@ -180,6 +187,7 @@ class WrestlerRepository
     public function reinstate(Wrestler $wrestler, Carbon $reinstateDate)
     {
         $wrestler->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
+        $wrestler->save();
 
         return $wrestler;
     }

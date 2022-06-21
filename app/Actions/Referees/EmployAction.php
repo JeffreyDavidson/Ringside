@@ -24,6 +24,5 @@ class EmployAction extends BaseRefereeAction
         $startDate ??= now();
 
         $this->refereeRepository->employ($referee, $startDate);
-        $referee->save();
     }
 }

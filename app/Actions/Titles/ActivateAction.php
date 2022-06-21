@@ -24,6 +24,5 @@ class ActivateAction extends BaseTitleAction
         $activationDate ??= now();
 
         $this->titleRepository->activate($title, $activationDate);
-        $title->save();
     }
 }

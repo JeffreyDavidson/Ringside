@@ -26,7 +26,6 @@ class UpdateMembersAction extends BaseStableAction
         $now = now();
 
         $this->updateWrestlers($stable, $wrestlers, $now);
-
         $this->updateTagTeams($stable, $tagTeams, $now);
     }
 

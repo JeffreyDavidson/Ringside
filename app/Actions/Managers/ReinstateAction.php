@@ -24,6 +24,5 @@ class ReinstateAction extends BaseManagerAction
         $reinstatementDate ??= now();
 
         $this->managerRepository->reinstate($manager, $reinstatementDate);
-        $manager->save();
     }
 }

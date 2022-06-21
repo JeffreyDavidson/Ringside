@@ -24,6 +24,5 @@ class EmployAction extends BaseManagerAction
         $startDate ??= now();
 
         $this->managerRepository->employ($manager, $startDate);
-        $manager->save();
     }
 }

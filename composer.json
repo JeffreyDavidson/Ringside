@@ -1,10 +1,10 @@
 {
-    "name": "laravel/laravel",
+    "name": "jeffreydavidson/ringside",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "A project to help wrestling promoters run their companies.",
     "keywords": [
-        "framework",
-        "laravel"
+        "laravel",
+        "wrestling"
     ],
     "license": "MIT",
     "require": {

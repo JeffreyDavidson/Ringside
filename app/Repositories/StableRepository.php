@@ -77,6 +77,7 @@ class StableRepository
             ['ended_at' => null],
             ['started_at' => $activationDate->toDateTimeString()]
         );
+        $stable->save();
 
         return $stable;
     }
@@ -91,6 +92,7 @@ class StableRepository
     public function deactivate(Stable $stable, Carbon $deactivationDate)
     {
         $stable->currentActivation()->update(['ended_at' => $deactivationDate->toDateTimeString()]);
+        $stable->save();
 
         return $stable;
     }
@@ -105,6 +107,7 @@ class StableRepository
     public function retire(Stable $stable, Carbon $retirementDate)
     {
         $stable->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
+        $stable->save();
 
         return $stable;
     }
@@ -145,6 +148,7 @@ class StableRepository
                 ['left_at' => $disassembleDate->toDateTimeString()]
             )
         );
+        $stable->save();
 
         return $stable;
     }

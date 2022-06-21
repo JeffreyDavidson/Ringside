@@ -24,11 +24,9 @@ class ReinstateAction extends BaseTagTeamAction
     {
         $reinstatementDate ??= now();
 
-        $tagTeam->currentWrestlers->each(function ($wrestler) use ($reinstatementDate) {
-            WrestlersReinstateAction::run($wrestler, $reinstatementDate);
-        });
+        $tagTeam->currentWrestlers
+            ->each(fn ($wrestler) => WrestlersReinstateAction::run($wrestler, $reinstatementDate));
 
         $this->tagTeamRepository->reinstate($tagTeam, $reinstatementDate);
-        $tagTeam->save();
     }
 }

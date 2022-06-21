@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Wrestlers\ClearInjuryAction;
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\CannotBeClearedFromInjuryException;
@@ -19,9 +20,7 @@ test('invoke marks an injured wrestler as being cleared from injury and redirect
         ->patch(action([ClearInjuryController::class], $this->wrestler))
         ->assertRedirect(action([WrestlersController::class, 'index']));
 
-    expect($this->wrestler->fresh())
-        ->injuries->last()->ended_at->not->toBeNull()
-        ->status->toBe(WrestlerStatus::BOOKABLE);
+    ClearInjuryAction::allowToRun()->with($this->wrestler)->andReturn();
 });
 
 test('clearing an injured wrestler on an unbookable tag team makes tag team bookable', function () {

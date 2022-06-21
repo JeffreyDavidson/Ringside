@@ -15,11 +15,12 @@ class ReleaseAction extends BaseRefereeAction
      * Release a referee.
      *
      * @param  \App\Models\Referee  $referee
+     * @param  \Illuminate\Support\Carbon|null  $releaseDate
      * @return void
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = now();
+        $releaseDate ??= now();
 
         if ($referee->isSuspended()) {
             $this->refereeRepository->reinstate($referee, $releaseDate);
@@ -30,6 +31,5 @@ class ReleaseAction extends BaseRefereeAction
         }
 
         $this->refereeRepository->release($referee, $releaseDate);
-        $referee->save();
     }
 }

@@ -16,7 +16,7 @@ class EventQueryBuilder extends Builder
      */
     public function scheduled()
     {
-        return $this->where('status', EventStatus::scheduled())->whereNotNull('date');
+        return $this->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
     }
 
     /**
@@ -26,7 +26,7 @@ class EventQueryBuilder extends Builder
      */
     public function unscheduled()
     {
-        return $this->where('status', EventStatus::unscheduled())->whereNull('date');
+        return $this->where('status', EventStatus::UNSCHEDULED)->whereNull('date');
     }
 
     /**
@@ -36,6 +36,6 @@ class EventQueryBuilder extends Builder
      */
     public function past()
     {
-        return $this->where('status', EventStatus::past())->where('date', '<', now()->toDateString());
+        return $this->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
     }
 }

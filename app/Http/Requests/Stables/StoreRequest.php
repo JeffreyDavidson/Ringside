@@ -42,14 +42,12 @@ class StoreRequest extends FormRequest
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
             'wrestlers.*' => [
-                'bail',
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
                 new WrestlerCanJoinNewStable($this->input('tag_teams')),
             ],
             'tag_teams.*' => [
-                'bail',
                 'integer',
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
@@ -68,10 +66,5 @@ class StoreRequest extends FormRequest
         $this->merge([
             'members_count' => (count($this->input('tag_teams', [])) * 2) + count($this->input('wrestlers', [])),
         ]);
-    }
-
-    protected function requestHasMembers()
-    {
-        return $this->collect('tag_teams')->isNotEmpty() || $this->collect('wrestlers')->isNotEmpty();
     }
 }
