@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Title extends Model implements Activatable, Deactivatable, Retirable
 {
-    use Activations,
-        Competable,
-        Deactivations,
-        HasFactory,
-        HasRetirements,
-        SoftDeletes;
+    use Activations;
+    use Competable;
+    use Deactivations;
+    use HasFactory;
+    use HasRetirements;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class RosterMember extends Model implements Employable
 {
-    use HasEmployments, HasRetirements, HasSuspensions;
+    use HasEmployments;
+    use HasRetirements;
+    use HasSuspensions;
 
     /**
      * Create a new Eloquent query builder for the model.

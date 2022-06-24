@@ -11,7 +11,8 @@ use App\Models\Venue;
 
 class VenuesList extends BaseComponent
 {
-    use WithBulkActions, WithSorting;
+    use WithBulkActions;
+    use WithSorting;
 
     public $showDeleteModal = false;
 

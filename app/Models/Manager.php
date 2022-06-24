@@ -16,12 +16,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Manager extends SingleRosterMember implements CanBeAStableMember
 {
-    use CanJoinStables,
-        HasFactory,
-        HasFullName,
-        Manageables,
-        OwnedByUser,
-        SoftDeletes;
+    use CanJoinStables;
+    use HasFactory;
+    use HasFullName;
+    use Manageables;
+    use OwnedByUser;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

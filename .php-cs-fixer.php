@@ -15,7 +15,9 @@ $rules = [
     'blank_line_before_statement' => [
         'statements' => ['return'],
     ],
-    'braces' => true,
+    'braces' => [
+        'position_after_functions_and_oop_constructs' => 'next'
+    ],
     'cast_spaces' => true,
     'class_attributes_separation' => [
         'elements' => [
