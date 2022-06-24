@@ -8,6 +8,7 @@ use App\Models\EventMatch;
 use App\Rules\CompetitorsAreValid;
 use App\Rules\CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType;
 use App\Rules\TitleChampionIncludedInTitleMatch;
+use App\Rules\TitleMustBeActive;
 use App\Rules\TitlesMustBeActive;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -41,9 +42,10 @@ class StoreRequest extends FormRequest
             'match_type_id' => ['required', 'integer', Rule::exists('match_types', 'id')],
             'referees' => ['required', 'array'],
             'referees.*' => ['integer', 'distinct', Rule::exists('referees', 'id')],
-            'titles' => ['nullable', 'array', new TitlesMustBeActive()],
-            'titles.*' => ['integer', 'distinct', Rule::exists('titles', 'id')],
+            'titles' => ['array'],
+            'titles.*' => ['bail', 'integer', 'distinct', Rule::exists('titles', 'id'), new TitleMustBeActive()],
             'competitors' => [
+                'bail',
                 'required',
                 'array',
                 'min:2',
@@ -52,8 +54,8 @@ class StoreRequest extends FormRequest
                 new TitleChampionIncludedInTitleMatch($this->input('titles')),
             ],
             'competitors.*' => ['required', 'array', 'min:1'],
-            'competitors.*.*.competitor_id' => ['required', 'integer'],
-            'competitors.*.*.competitor_type' => ['required', Rule::in(['wrestler', 'tag_team'])],
+            'competitors.*.wrestlers' => ['array'],
+            'competitors.*.tagteams' => ['array'],
             'preview' => ['nullable', 'string'],
         ];
     }

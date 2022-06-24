@@ -7,6 +7,7 @@ namespace App\Rules;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Arr;
 
 class CompetitorsAreValid implements Rule
 {
@@ -27,24 +28,14 @@ class CompetitorsAreValid implements Rule
     public function passes($attribute, $value)
     {
         foreach ($value as $sideCompetitors) {
-            $wrestlers = array_filter(
-                $sideCompetitors,
-                static fn ($contestant) => $contestant['competitor_type'] === 'wrestler'
-            );
+            $wrestlers = Arr::get($sideCompetitors, 'wrestlers', []);
+            $tagTeams = Arr::get($sideCompetitors, 'tag_teams', []);
 
-            $tagTeams = array_filter(
-                $sideCompetitors,
-                static fn ($contestant) => $contestant['competitor_type'] === 'tag_team'
-            );
+            $existing_wrestler_ids = Wrestler::whereIn('id', $wrestlers)->pluck('id')->toArray();
+            $existing_tag_team_ids = TagTeam::whereIn('id', $tagTeams)->pluck('id')->toArray();
 
-            $wrestler_ids = array_column($wrestlers, 'competitor_id');
-            $tag_team_ids = array_column($tagTeams, 'competitor_id');
-
-            $existing_wrestler_ids = Wrestler::whereIn('id', $wrestler_ids)->pluck('id')->toArray();
-            $existing_tag_team_ids = TagTeam::whereIn('id', $tag_team_ids)->pluck('id')->toArray();
-
-            $diffWrestlers = array_diff($wrestler_ids, $existing_wrestler_ids);
-            $diffTagTeams = array_diff($tag_team_ids, $existing_tag_team_ids);
+            $diffWrestlers = array_diff($wrestlers, $existing_wrestler_ids);
+            $diffTagTeams = array_diff($tagTeams, $existing_tag_team_ids);
         }
 
         if (count($diffWrestlers) > 0) {

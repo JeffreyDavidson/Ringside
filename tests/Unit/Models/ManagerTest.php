@@ -29,11 +29,11 @@ test('a manager is a single roster member', function () {
 });
 
 test('a manager uses soft deleted trait', function () {
-    expect(Manager::class)->assertUsesTrait(SoftDeletes::class);
+    expect(Manager::class)->usesTrait(SoftDeletes::class);
 });
 
 test('a manager uses has full name trait', function () {
-    expect(Manager::class)->assertUsesTrait(HasFullName::class);
+    expect(Manager::class)->usesTrait(HasFullName::class);
 });
 
 test('available managers can be retrieved', function () {

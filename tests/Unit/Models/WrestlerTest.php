@@ -49,11 +49,11 @@ test('a wrestler is a single roster member', function () {
 });
 
 test('a wrestler uses soft deleted trait', function () {
-    expect(Wrestler::class)->assertUsesTrait(SoftDeletes::class);
+    expect(Wrestler::class)->usesTrait(SoftDeletes::class);
 });
 
 test('a wrestler uses can join stables trait', function () {
-    expect(Wrestler::class)->assertUsesTrait(CanJoinStables::class);
+    expect(Wrestler::class)->usesTrait(CanJoinStables::class);
 });
 
 test('a wrestler implements bookable interface', function () {
