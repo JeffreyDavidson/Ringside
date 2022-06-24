@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMember, Manageable, TagTeamMember
 {
-    use CanJoinStables,
-        CanJoinTagTeams,
-        HasFactory,
-        HasManagers,
-        OwnedByUser,
-        SoftDeletes;
+    use CanJoinStables;
+    use CanJoinTagTeams;
+    use HasFactory;
+    use HasManagers;
+    use OwnedByUser;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

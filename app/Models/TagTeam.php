@@ -20,12 +20,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Competitor, Manageable
 {
-    use CanJoinStables,
-        HasFactory,
-        HasManagers,
-        HasMorphToOne,
-        OwnedByUser,
-        SoftDeletes;
+    use CanJoinStables;
+    use HasFactory;
+    use HasManagers;
+    use HasMorphToOne;
+    use OwnedByUser;
+    use SoftDeletes;
 
     /**
      * The number of the wrestlers allowed on a tag team.

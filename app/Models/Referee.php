@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends SingleRosterMember implements Bookable
 {
-    use HasFactory,
-        HasFullName,
-        SoftDeletes;
+    use HasFactory;
+    use HasFullName;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

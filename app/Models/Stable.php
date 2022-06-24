@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stable extends Model implements Activatable, Deactivatable, Retirable
 {
-    use Activations,
-        Deactivations,
-        HasFactory,
-        HasMembers,
-        OwnedByUser,
-        SoftDeletes;
+    use Activations;
+    use Deactivations;
+    use HasFactory;
+    use HasMembers;
+    use OwnedByUser;
+    use SoftDeletes;
 
     /**
      * The minium number of members allowed on a tag team.

@@ -11,7 +11,8 @@ use App\Models\Referee;
 
 class RefereesList extends BaseComponent
 {
-    use WithBulkActions, WithSorting;
+    use WithBulkActions;
+    use WithSorting;
 
     public $showFilters = false;
 

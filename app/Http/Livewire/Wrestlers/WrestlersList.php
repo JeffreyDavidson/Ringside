@@ -11,7 +11,8 @@ use App\Models\Wrestler;
 
 class WrestlersList extends BaseComponent
 {
-    use WithBulkActions, WithSorting;
+    use WithBulkActions;
+    use WithSorting;
 
     public $showFilters = false;
 

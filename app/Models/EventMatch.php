@@ -10,8 +10,8 @@ use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
 class EventMatch extends Model
 {
-    use HasFactory,
-        HasMergedRelationships;
+    use HasFactory;
+    use HasMergedRelationships;
 
     /**
      * The attributes that are mass assignable.
