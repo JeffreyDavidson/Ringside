@@ -2,10 +2,27 @@
 
 namespace App\Rules\Stables;
 
+use App\Models\Stable;
 use Illuminate\Contracts\Validation\Rule;
 
 class HasMinimumAmountOfMembers implements Rule
 {
+    protected $stable;
+
+    protected $startedAt;
+
+    protected $wrestlers;
+
+    protected $tagTeams;
+
+    public function __construct(Stable $stable, $startedAt, $wrestlers, $tagTeams)
+    {
+        $this->stable = $stable;
+        $this->startedAt = $startedAt;
+        $this->wrestlers = $wrestlers;
+        $this->tagTeams = $tagTeams;
+    }
+
     /**
      * Determine if the validation rule passes.
      *
@@ -15,19 +32,14 @@ class HasMinimumAmountOfMembers implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($stable->isCurrentlyActivated() || $this->date('activated_at')) {
-            $tagTeamsCountFromRequest = $this->collect('tag_teams')->count();
-            $wrestlersCountFromRequest = $this->collect('wrestlers')->count();
+        if ($this->stable->isCurrentlyActivated() || Carbon::parse('started_at')) {
+            $tagTeamsCountFromRequest = $this->tag_teams->count();
+            $wrestlersCountFromRequest = $this->wrestlers->count();
 
             $tagTeamMembersCount = $tagTeamsCountFromRequest * 2;
 
             if ($tagTeamMembersCount + $wrestlersCountFromRequest < 3) {
-                $validator->errors()->add(
-                    '*',
-                    "{$stable->name} does not contain at least 3 members."
-                );
-
-                $validator->addFailure('*', 'not_enough_members');
+                return false;
             }
         }
 

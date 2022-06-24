@@ -47,7 +47,7 @@ test('wrestler name must be unique', function () {
         ->validate(WrestlerRequestFactory::new()->create([
             'name' => 'Example Wrestler Name',
         ]))
-        ->assertFailsValidation(['name' => 'unique:wrestlers,name,NULL,id']);
+        ->assertFailsValidation(['name' => 'unique:wrestlers,NULL,NULL,id']);
 });
 
 test('wrestler height in feet is required', function () {

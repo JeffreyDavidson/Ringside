@@ -4,6 +4,7 @@ namespace App\Rules;
 
 use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Carbon;
 
 class WrestlerCanJoinExistingStable implements Rule
 {
@@ -13,13 +14,21 @@ class WrestlerCanJoinExistingStable implements Rule
     protected $tagTeamIds;
 
     /**
+     * @var array
+     */
+    protected $date;
+
+    protected $messages;
+
+    /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct(array $tagTeamIds)
+    public function __construct($tagTeamIds, $date)
     {
         $this->tagTeamIds = $tagTeamIds;
+        $this->date = $date;
     }
 
     /**
@@ -31,7 +40,12 @@ class WrestlerCanJoinExistingStable implements Rule
      */
     public function passes($attribute, $value)
     {
-        $wrestler = Wrestler::with(['currentStable', 'currentTagTeam'])->whereKey($value)->sole();
+        if (! is_array($this->tagTeamIds)) {
+            return false;
+        }
+
+        $wrestler = Wrestler::with('currentStable')->whereKey($value)->first();
+        // dd($wrestler);
 
         if ($wrestler->isSuspended()) {
             $this->messages = "{$wrestler->name} is suspended and cannot join stable.";
@@ -45,7 +59,7 @@ class WrestlerCanJoinExistingStable implements Rule
             return false;
         }
 
-        if ($wrestler->isCurrentlyEmployed() && ! $wrestler->employedBefore($this->date('started_at'))) {
+        if ($wrestler->isCurrentlyEmployed() && ! $wrestler->employedBefore(Carbon::parse($this->date))) {
             $this->messages = "{$wrestler->name} cannot have an employment start date after stable's start date.";
 
             return false;
@@ -53,7 +67,7 @@ class WrestlerCanJoinExistingStable implements Rule
 
         if ($this->tagTeamIds !== 0) {
             collect($this->tagTeamIds)->map(function ($id) use ($wrestler) {
-                if ($id === $wrestler->currentTagTeam->id) {
+                if ($id === $wrestler->currentTagTeam?->id) {
                     return false;
                 }
             });

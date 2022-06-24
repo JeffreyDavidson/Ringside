@@ -56,7 +56,7 @@ test('tag team name must be unique', function () {
     TagTeam::factory()->create(['name' => 'Example Tag Team Name B']);
 
     $this->createRequest(UpdateRequest::class)
-        ->withParam('tag_team', $tagTeam)
+        ->withParam('tag_team', $tagTeamA)
         ->validate(TagTeamRequestFactory::new()->create([
             'name' => 'Example Tag Team Name B',
         ]))
@@ -127,7 +127,7 @@ test('tag team started at cannot be changed if employment start date has past', 
         ->validate(TagTeamRequestFactory::new()->create([
             'started_at' => Carbon::now()->toDateTImeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'employment_date_cannot_be_changed']);
+        ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
 });
 
 test('tag_team_started_at_can_be_changed_if_employment_start_date_is_in_the_future', function () {

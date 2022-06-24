@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\RefereeStatus;
+use App\Models\Concerns\HasFullName;
 use App\Models\Referee;
 use App\Models\SingleRosterMember;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a referee has a first name', function () {
-    $referee = Referee::factory()->create(['first_name' => 'Johnn']);
+    $referee = Referee::factory()->create(['first_name' => 'John']);
 
     expect($referee)->first_name->toBe('John');
 });
@@ -23,7 +25,7 @@ test('a referee has a status', function () {
 });
 
 test('a referee is a single roster member', function () {
-    expect(get_parent_class(Referee::class))->toBeInstanceOf(SingleRosterMember::class);
+    expect(get_parent_class(Referee::class))->toBe(SingleRosterMember::class);
 });
 
 test('a referee uses soft deleted trait', function () {
@@ -47,7 +49,7 @@ test('bookable referees can be retrieved', function () {
 
     expect($bookableReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($bookableReferee);
+        ->collectionHas($bookableReferee);
 });
 
 test('future employed referees can be retrieved', function () {
@@ -59,11 +61,11 @@ test('future employed referees can be retrieved', function () {
     $unemployedReferee = Referee::factory()->unemployed()->create();
     $injuredReferee = Referee::factory()->injured()->create();
 
-    $futureEmployedReferees = Referee::withFutureEmployment()->get();
+    $futureEmployedReferees = Referee::futureEmployed()->get();
 
     expect($futureEmployedReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($futureEmployedReferee);
+        ->collectionHas($futureEmployedReferee);
 });
 
 test('suspended referees can be retrieved', function () {
@@ -79,7 +81,7 @@ test('suspended referees can be retrieved', function () {
 
     expect($suspendedReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($suspendedReferee);
+        ->collectionHas($suspendedReferee);
 });
 
 test('released referees can be retrieved', function () {
@@ -91,11 +93,11 @@ test('released referees can be retrieved', function () {
     $unemployedReferee = Referee::factory()->unemployed()->create();
     $injuredReferee = Referee::factory()->injured()->create();
 
-    $releasedReferees = Referee::suspended()->get();
+    $releasedReferees = Referee::released()->get();
 
     expect($releasedReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($releasedReferee);
+        ->collectionHas($releasedReferee);
 });
 
 test('retired referees can be retrieved', function () {
@@ -107,11 +109,11 @@ test('retired referees can be retrieved', function () {
     $unemployedReferee = Referee::factory()->unemployed()->create();
     $injuredReferee = Referee::factory()->injured()->create();
 
-    $retiredReferees = Referee::suspended()->get();
+    $retiredReferees = Referee::retired()->get();
 
     expect($retiredReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($retiredReferee);
+        ->collectionHas($retiredReferee);
 });
 
 test('unemployed referees can be retrieved', function () {
@@ -127,7 +129,7 @@ test('unemployed referees can be retrieved', function () {
 
     expect($unemployedReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($unemployedReferee);
+        ->collectionHas($unemployedReferee);
 });
 
 test('injured referees can be retrieved', function () {
@@ -139,9 +141,9 @@ test('injured referees can be retrieved', function () {
     $unemployedReferee = Referee::factory()->unemployed()->create();
     $injuredReferee = Referee::factory()->injured()->create();
 
-    $injuredReferees = Referee::unemployed()->get();
+    $injuredReferees = Referee::injured()->get();
 
     expect($injuredReferees)
         ->toHaveCount(1)
-        ->assertCollectionHas($injuredReferee);
+        ->collectionHas($injuredReferee);
 });

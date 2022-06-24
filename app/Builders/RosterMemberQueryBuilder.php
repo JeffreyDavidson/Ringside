@@ -151,8 +151,7 @@ class RosterMemberQueryBuilder extends Builder
      */
     public function unemployed()
     {
-        return $this->whereDoesntHave('currentEmployment')
-            ->orWhereDoesntHave('previousEmployments');
+        return $this->whereDoesntHave('employments');
     }
 
     /**

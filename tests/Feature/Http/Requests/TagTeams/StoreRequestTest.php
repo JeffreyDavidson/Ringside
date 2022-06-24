@@ -148,7 +148,7 @@ test('each tag team wrestler cannot be suspended to join a tag team', function (
         ->validate(TagTeamRequestFactory::new()->create([
             'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'cannot_be_suspended_to_join_tag_team']);
+        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewtagteam']);
 });
 
 test('each tag team wrestler cannot be injured to join a tag team', function () {
@@ -159,7 +159,7 @@ test('each tag team wrestler cannot be injured to join a tag team', function () 
         ->validate(TagTeamRequestFactory::new()->create([
             'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'cannot_be_injured_to_join_tag_team']);
+        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewtagteam']);
 });
 
 test('each tag team wrestler cannot join multiple bookable tag team', function () {
@@ -177,5 +177,5 @@ test('each tag team wrestler cannot join multiple bookable tag team', function (
         ->validate(TagTeamRequestFactory::new()->create([
             'wrestlers' => [$tagTeam->currentWrestlers->first()->getKey(), $wrestlerB->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'cannot_belong_to_multiple_employed_tag_teams']);
+        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewtagteam']);
 });

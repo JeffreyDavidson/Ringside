@@ -28,7 +28,7 @@ test('referee first name must be a string', function () {
         ->validate(RefereeRequestFactory::new()->create([
             'first_name' => 123,
         ]))
-        ->assertFailsValidation(['first_name' => 'required']);
+        ->assertFailsValidation(['first_name' => 'string']);
 });
 
 test('referee first name must be at least 3 characters', function () {
@@ -52,7 +52,7 @@ test('referee last name must be a string', function () {
         ->validate(RefereeRequestFactory::new()->create([
             'last_name' => 123,
         ]))
-        ->assertFailsValidation(['last_name' => 'required']);
+        ->assertFailsValidation(['last_name' => 'string']);
 });
 
 test('referee last name must be at least 3 characters', function () {

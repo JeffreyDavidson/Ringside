@@ -97,7 +97,7 @@ test('stable started must be a string if provided', function () {
         ->assertFailsValidation(['started_at' => 'string']);
 });
 
-test('stable_started_at_must_be_in_the_correct_date_format', function () {
+test('stable started at must be in the correct date format', function () {
     $stable = Stable::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
@@ -116,7 +116,7 @@ test('stable started at cannot be changed if stable date has past', function () 
         ->validate(StableRequestFactory::new()->create([
             'started_at' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['activated_at' => 'activation_date_cannot_be_changed']);
+        ->assertFailsValidation(['started_at' => 'app\rules\stables\activationstartdatecanbechanged']);
 });
 
 test('stable started at can be changed if activation start date is in the future', function () {
@@ -195,10 +195,9 @@ test('a suspended wrestler cannot join the stable', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'wrestlers' => [$stable->currentWrestlers->first()->getKey(), $wrestlerNotInStable->getKey()],
-            'tag_teams' => $stable->currentTagTeams->modelKeys(),
+            'wrestlers' => [$wrestlerNotInStable->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers.1' => 'cannot_join_stable']);
+        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinexistingstable']);
 });
 
 test('an injured wrestler cannot join the stable', function () {
@@ -208,10 +207,9 @@ test('an injured wrestler cannot join the stable', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'wrestlers' => [$stable->currentWrestlers->first()->getKey(), $wrestlerNotInStable->getKey()],
-            'tag_teams' => $stable->currentTagTeams->modelKeys(),
+            'wrestlers' => [$wrestlerNotInStable->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers.1' => 'cannot_join_stable']);
+        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinexistingstable']);
 });
 
 test('each tag team in a stable must be an integer', function () {
@@ -225,7 +223,7 @@ test('each tag team in a stable must be an integer', function () {
         ->assertFailsValidation(['tag_teams.0' => 'integer']);
 });
 
-test('each tag_team in a stable must be distinct', function () {
+test('each tag team in a stable must be distinct', function () {
     $stable = Stable::factory()
         ->hasAttached(TagTeam::factory()->count(2), ['joined_at' => now()->toDateTimeString()])
         ->create();
@@ -239,7 +237,7 @@ test('each tag_team in a stable must be distinct', function () {
         ->assertFailsValidation(['tag_teams.0' => 'distinct']);
 });
 
-test('each tag_team in a stable must exist', function () {
+test('each tag team in a stable must exist', function () {
     $stable = Stable::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
@@ -250,7 +248,7 @@ test('each tag_team in a stable must exist', function () {
         ->assertFailsValidation(['tag_teams.0' => 'exists']);
 });
 
-test('suspended_tag_teams_cannot_join_a_stable', function () {
+test('suspended tag teams cannot join a stable', function () {
     $stable = Stable::factory()
         ->hasAttached(TagTeam::factory(), ['joined_at' => now()->toDateTimeString()])
         ->create();
@@ -262,20 +260,21 @@ test('suspended_tag_teams_cannot_join_a_stable', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'tag_teams' => [$tagTeamToJoinStable->getKey(), $tagTeamNotInStable->getKey()],
+            'tag_teams' => [$tagTeamNotInStable->getKey()],
         ]))
-        ->assertFailsValidation(['tag_teams.1' => 'cannot_join_stable']);
+        ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinexistingstable']);
 });
 
 test('stable must have a minimum number of members', function () {
-    $stable = Stable::factory()->active()->withEmployedDefaultMembers()->create();
+    $stable = Stable::factory()->withEmployedDefaultMembers()->create();
     $wrestlersToJoinStable = Wrestler::factory()->bookable()->count(2)->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
+            'started_at' => now()->toDateTimeString(),
             'wrestlers' => $wrestlersToJoinStable->modelKeys(),
             'tag_teams' => [],
         ]))
-        ->assertFailsValidation(['*' => 'not_enough_members']);
+        ->assertFailsValidation(['members_count' => 'app\models\hasminimumamountofmembers']);
 });

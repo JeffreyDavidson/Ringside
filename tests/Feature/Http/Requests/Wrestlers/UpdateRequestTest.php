@@ -46,7 +46,7 @@ test('wrestler name must be at least 3 characters', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
-            'name' => 'abc',
+            'name' => 'ab',
         ]))
         ->assertFailsValidation(['name' => 'min:3']);
 });
@@ -93,7 +93,7 @@ test('wrestler height in inches is required', function () {
         ->validate(WrestlerRequestFactory::new()->create([
             'inches' => null,
         ]))
-        ->assertFailsValidation(['feet' => 'required']);
+        ->assertFailsValidation(['inches' => 'required']);
 });
 
 test('wrestler height in inches must be an integer', function () {
@@ -104,7 +104,7 @@ test('wrestler height in inches must be an integer', function () {
         ->validate(WrestlerRequestFactory::new()->create([
             'inches' => 'not-an-integer',
         ]))
-        ->assertFailsValidation(['feet' => 'integer']);
+        ->assertFailsValidation(['inches' => 'integer']);
 });
 
 test('wrestler height in inches has a max of 11', function () {
@@ -115,7 +115,7 @@ test('wrestler height in inches has a max of 11', function () {
         ->validate(WrestlerRequestFactory::new()->create([
             'inches' => 12,
         ]))
-        ->assertFailsValidation(['feet' => 'max:11']);
+        ->assertFailsValidation(['inches' => 'max:11']);
 });
 
 test('wrestler weight is required', function () {
@@ -225,7 +225,7 @@ test('wrestler started at cannot be changed if employment start date has past', 
         ->validate(WrestlerRequestFactory::new()->create([
             'started_at' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'employment_date_cannot_be_changed']);
+        ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
 });
 
 test('wrestler started at can be changed if employment start date is in the future', function () {

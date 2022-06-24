@@ -7,6 +7,8 @@ use Illuminate\Contracts\Validation\Rule;
 
 class TagTeamCanJoinExistingStable implements Rule
 {
+    protected $messages;
+
     /**
      * Determine if the validation rule passes.
      *

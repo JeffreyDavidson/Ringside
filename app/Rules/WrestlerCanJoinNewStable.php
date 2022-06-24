@@ -17,7 +17,7 @@ class WrestlerCanJoinNewStable implements Rule
      *
      * @return void
      */
-    public function __construct(array $tagTeamIds)
+    public function __construct($tagTeamIds)
     {
         $this->tagTeamIds = $tagTeamIds;
     }
@@ -31,6 +31,10 @@ class WrestlerCanJoinNewStable implements Rule
      */
     public function passes($attribute, $value)
     {
+        if (! is_array($this->tagTeamIds)) {
+            return false;
+        }
+
         $wrestler = Wrestler::with(['currentStable'])->whereKey($value)->sole();
 
         if (count($this->tagTeamIds) === 0 || is_null($wrestler->currentTagTeam)) {

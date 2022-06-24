@@ -20,7 +20,7 @@ use Tests\ValidatesRequests;
 */
 
 uses(TestCase::class, CreatesApplication::class, LazilyRefreshDatabase::class)->in('Feature', 'Unit');
-uses(ValidatesRequests::class)->in('Integration/Http/Requests');
+uses(ValidatesRequests::class)->in('Feature/Http/Requests');
 
 uses()->group('wrestlers', 'feature-wrestlers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Wrestlers');
 uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Managers');
@@ -52,30 +52,30 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
-expect()->extend('collectionHas', function ($collection, $entity) {
+expect()->extend('collectionHas', function ($entity) {
     if (is_array($entity) || $entity instanceof Collection) {
         foreach ($entity as $test) {
-            $this->assertContains($collection, $test);
+            $this->value->assertContains($this, $test);
         }
 
         return $this;
     }
 
-    expect($collection->contains($entity))->toBeTrue();
+    expect($this->value)->contains($entity)->toBeTrue();
 
     return $this;
 });
 
-expect()->extend('collectionDoesntHave', function ($collection, $entity) {
+expect()->extend('collectionDoesntHave', function ($entity) {
     if (is_array($entity) || $entity instanceof Collection) {
         foreach ($entity as $test) {
-            $this->assertNotContains($collection, $test);
+            $this->value->assertNotContains($this, $test);
         }
 
         return $this;
     }
 
-    expect($collection->contains($entity))->toBeFalse();
+    expect($this->value)->contains($entity)->toBeFalse();
 
     return $this;
 });

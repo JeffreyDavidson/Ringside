@@ -1,8 +1,11 @@
 <?php
 
 use App\Enums\TitleStatus;
+use App\Models\Concerns\Activations;
+use App\Models\Concerns\Competable;
 use App\Models\Concerns\HasRetirements;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a title has a name', function () {
     $title = Title::factory()->create(['name' => 'Example Name Title']);
@@ -42,7 +45,7 @@ test('active titles can be retrieved', function () {
 
     expect($activeTitles)
         ->toHaveCount(1)
-        ->assertCollectionHas($activeTitle);
+        ->collectionHas($activeTitle);
 });
 
 test('future activated titles can be retrieved', function () {
@@ -55,7 +58,7 @@ test('future activated titles can be retrieved', function () {
 
     expect($futureActivatedTitles)
         ->toHaveCount(1)
-        ->assertCollectionHas($futureActivatedTitle);
+        ->collectionHas($futureActivatedTitle);
 });
 
 test('inactive titles can be retrieved', function () {
@@ -68,7 +71,7 @@ test('inactive titles can be retrieved', function () {
 
     expect($inactiveTitles)
         ->toHaveCount(1)
-        ->assertCollectionHas($inactiveTitle);
+        ->collectionHas($inactiveTitle);
 });
 
 test('retired titles can be retrieved', function () {
@@ -81,5 +84,5 @@ test('retired titles can be retrieved', function () {
 
     expect($retiredTitles)
         ->toHaveCount(1)
-        ->assertCollectionHas($retiredTitle);
+        ->collectionHas($retiredTitle);
 });

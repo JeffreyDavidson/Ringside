@@ -5,7 +5,7 @@ use Livewire\Livewire;
 
 test('it should return correct view', function () {
     Livewire::test(ManagersList::class)
-        ->assertViewIs('livewire.managers.events-list');
+        ->assertViewIs('livewire.managers.managers-list');
 });
 
 test('it should pass correct data', function () {

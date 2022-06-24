@@ -74,6 +74,7 @@ class TagTeamFactory extends Factory
 
         return $this->state(fn () => ['status' => TagTeamStatus::UNBOOKABLE])
             ->has(Employment::factory()->started($employmentStartDate))
+            ->has(Wrestler::factory()->injured()->count(2))
             ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });

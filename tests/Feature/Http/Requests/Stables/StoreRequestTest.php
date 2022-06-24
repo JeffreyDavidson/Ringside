@@ -179,7 +179,7 @@ test('each tag team must not already be in stable to join stable', function () {
                 $tagTeamNotInStableC->getKey(),
             ],
         ]))
-        ->assertFailsValidation(['tag_teams.0' => 'tag_team_already_in_different_stable']);
+        ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinnewstable']);
 });
 
 test('stable must have a minimum number of 3 members', function () {

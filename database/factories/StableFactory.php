@@ -24,7 +24,7 @@ class StableFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str($this->faker->words(2, true))->title(),
+            'name' => str($this->faker->words(2, true))->title()->value,
             'status' => StableStatus::UNACTIVATED,
         ];
     }
