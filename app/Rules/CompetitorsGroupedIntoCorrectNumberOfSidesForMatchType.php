@@ -21,7 +21,7 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
      *
      * @param  int  $matchTypeId
      */
-    public function __construct(int $matchTypeId)
+    public function __construct($matchTypeId)
     {
         $this->matchTypeId = $matchTypeId;
     }
@@ -35,6 +35,10 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
      */
     public function passes($attribute, $value)
     {
+        if (is_null($this->matchTypeId)) {
+            return false;
+        }
+
         return MatchType::find($this->matchTypeId)?->number_of_sides === count($value);
     }
 

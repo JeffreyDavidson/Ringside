@@ -10,6 +10,7 @@ use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class EventMatchData
@@ -48,16 +49,12 @@ class EventMatchData
      */
     public static function getCompetitors(Collection $competitors)
     {
-        return $competitors->transform(function ($sideCompetitors) {
-            return collect($sideCompetitors)->transform(function ($competitor) {
-                $competitor['competitor'] = $competitor['competitor_type'] === 'wrestler'
-                    ? Wrestler::find($competitor['competitor_id'])
-                    : TagTeam::find($competitor['competitor_id']);
-
-                return $competitor;
-            })->mapToGroups(function ($item) {
-                return [str($item['competitor_type'])->plural()->value() => $item['competitor']];
-            });
+        return $competitors->transform(function ($sideCompetitors, $sideNumber) {
+            if (Arr::exists($sideCompetitors, 'wrestlers')) {
+                return data_set($sideCompetitors, 'wrestlers', Wrestler::findMany(Arr::get($sideCompetitors, 'wrestlers')));
+            } elseif (Arr::exists($sideCompetitors, 'tag_teams')) {
+                return data_set($sideCompetitors, 'tag_teams', TagTeam::findMany(Arr::get($sideCompetitors, 'tag_teams')));
+            }
         });
     }
 }

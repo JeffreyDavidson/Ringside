@@ -23,19 +23,19 @@ test('a stable has a status', function () {
 });
 
 test('a stable uses soft deleted trait', function () {
-    expect(Stable::class)->assertUsesTrait(SoftDeletes::class);
+    expect(Stable::class)->usesTrait(SoftDeletes::class);
 });
 
 test('a stable uses activations trait', function () {
-    expect(Stable::class)->assertUsesTrait(Activations::class);
+    expect(Stable::class)->usesTrait(Activations::class);
 });
 
 test('a stable uses deactivations trait', function () {
-    expect(Stable::class)->assertUsesTrait(Deactivations::class);
+    expect(Stable::class)->usesTrait(Deactivations::class);
 });
 
 test('a stable uses owned by user trait', function () {
-    expect(Stable::class)->assertUsesTrait(OwnedByUser::class);
+    expect(Stable::class)->usesTrait(OwnedByUser::class);
 });
 
 test('a stable implements activatable interface', function () {

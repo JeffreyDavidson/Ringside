@@ -29,21 +29,21 @@ test('competitors can be separated into wrestlers and tag teams', function () {
 
     $this->assertArrayHasKey('wrestlers', $retreivedCompetitors[0]);
     $this->assertCount(2, $retreivedCompetitors[0]['wrestlers']);
-    $this->assertCollectionHas($retreivedCompetitors[0]['wrestlers']->pluck('id'), $wrestlerA->id);
-    $this->assertCollectionHas($retreivedCompetitors[0]['wrestlers']->pluck('id'), $wrestlerB->id);
+    $this->collectionHas($retreivedCompetitors[0]['wrestlers']->pluck('id'), $wrestlerA->id);
+    $this->collectionHas($retreivedCompetitors[0]['wrestlers']->pluck('id'), $wrestlerB->id);
 
     $this->assertArrayHasKey('tag_teams', $retreivedCompetitors[0]);
     $this->assertCount(2, $retreivedCompetitors[0]['tag_teams']);
-    $this->assertCollectionHas($retreivedCompetitors[0]['tag_teams']->pluck('id'), $tagTeamA->id);
-    $this->assertCollectionHas($retreivedCompetitors[0]['tag_teams']->pluck('id'), $tagTeamB->id);
+    $this->collectionHas($retreivedCompetitors[0]['tag_teams']->pluck('id'), $tagTeamA->id);
+    $this->collectionHas($retreivedCompetitors[0]['tag_teams']->pluck('id'), $tagTeamB->id);
 
     $this->assertArrayHasKey('wrestlers', $retreivedCompetitors[1]);
     $this->assertCount(2, $retreivedCompetitors[1]['wrestlers']);
-    $this->assertCollectionHas($retreivedCompetitors[1]['wrestlers']->pluck('id'), $wrestlerC->id);
-    $this->assertCollectionHas($retreivedCompetitors[1]['wrestlers']->pluck('id'), $wrestlerD->id);
+    $this->collectionHas($retreivedCompetitors[1]['wrestlers']->pluck('id'), $wrestlerC->id);
+    $this->collectionHas($retreivedCompetitors[1]['wrestlers']->pluck('id'), $wrestlerD->id);
 
     $this->assertArrayHasKey('tag_teams', $retreivedCompetitors[1]);
     $this->assertCount(2, $retreivedCompetitors[1]['tag_teams']);
-    $this->assertCollectionHas($retreivedCompetitors[1]['tag_teams']->pluck('id'), $tagTeamC->id);
-    $this->assertCollectionHas($retreivedCompetitors[1]['tag_teams']->pluck('id'), $tagTeamD->id);
+    $this->collectionHas($retreivedCompetitors[1]['tag_teams']->pluck('id'), $tagTeamC->id);
+    $this->collectionHas($retreivedCompetitors[1]['tag_teams']->pluck('id'), $tagTeamD->id);
 });

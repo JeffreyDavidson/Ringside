@@ -29,11 +29,11 @@ test('a referee is a single roster member', function () {
 });
 
 test('a referee uses soft deleted trait', function () {
-    expect(Referee::class)->assertUsesTrait(SoftDeletes::class);
+    expect(Referee::class)->usesTrait(SoftDeletes::class);
 });
 
 test('a referee uses has full name trait', function () {
-    expect(Referee::class)->assertUsesTrait(HasFullName::class);
+    expect(Referee::class)->usesTrait(HasFullName::class);
 });
 
 test('bookable referees can be retrieved', function () {

@@ -28,7 +28,9 @@ uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Fea
 uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
 uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
 uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
-uses()->group('event-matches', 'feature-event-matches')->in('Feature/Http/Controllers/EventMatches');
+uses()->group('event-matches', 'feature-event-matches')
+    ->in('Feature/Http/Controllers/EventMatches', 'Feature/Actions/EventMatches', 'Feature/Http/Requests/EventMatches');
+uses()->group('actions')->in('Feature/Actions');
 
 beforeEach(function () {
     TestResponse::macro('data', fn ($key) => $this->original->getData()[$key]);
@@ -78,10 +80,10 @@ expect()->extend('collectionDoesntHave', function ($entity) {
     return $this;
 });
 
-expect()->extend('assertUsesTrait', function ($trait) {
-    dd($this);
+expect()->extend('usesTrait', function ($trait) {
+    expect(class_uses($this->value))->toContain($trait);
 
-    return $this->assertContains($trait, class_uses($this->value));
+    return $this;
 });
 
 /*

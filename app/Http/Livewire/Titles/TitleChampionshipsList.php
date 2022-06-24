@@ -38,8 +38,6 @@ class TitleChampionshipsList extends BaseComponent
      */
     public function render()
     {
-        // dd($this->rows);
-
         return view('livewire.titles.title-championships-list', [
             'titleChampionships' => $this->rows,
         ]);

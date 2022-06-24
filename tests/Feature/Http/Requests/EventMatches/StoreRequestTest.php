@@ -132,7 +132,7 @@ test('each event match titles must be active', function () {
         ->validate(EventMatchRequestFactory::new()->create([
             'titles' => [$title->id],
         ]))
-        ->assertFailsValidation(['titles.0' => 'app\rules\titlesmustbeactive']);
+        ->assertFailsValidation(['titles.0' => 'app\rules\titlemustbeactive']);
 });
 
 test('each event match competitors is required', function () {

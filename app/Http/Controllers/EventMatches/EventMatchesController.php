@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\EventMatches;
 
-use App\Actions\Events\AddMatchForEvent;
+use App\Actions\EventMatches\AddMatchForEventAction;
 use App\Data\EventMatchData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EventMatches\StoreRequest;
@@ -34,12 +34,11 @@ class EventMatchesController extends Controller
      *
      * @param  \App\Models\Event  $event
      * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
-     * @param  \App\Actions\Events\AddMatchForEvent  $addMatchForEvent
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Event $event, StoreRequest $request, AddMatchForEvent $addMatchForEvent)
+    public function store(Event $event, StoreRequest $request)
     {
-        $addMatchForEvent($event, EventMatchData::fromStoreRequest($request));
+        AddMatchForEventAction::run($event, EventMatchData::fromStoreRequest($request));
 
         return to_route('events.matches.index', $event);
     }

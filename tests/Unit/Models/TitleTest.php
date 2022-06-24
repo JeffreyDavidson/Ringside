@@ -20,19 +20,19 @@ test('a title has a status', function () {
 });
 
 test('a title uses soft deleted trait', function () {
-    expect(Title::class)->assertUsesTrait(SoftDeletes::class);
+    expect(Title::class)->usesTrait(SoftDeletes::class);
 });
 
 test('a title uses activation trait', function () {
-    expect(Title::class)->assertUsesTrait(Activations::class);
+    expect(Title::class)->usesTrait(Activations::class);
 });
 
 test('a title uses competable trait', function () {
-    expect(Title::class)->assertUsesTrait(Competable::class);
+    expect(Title::class)->usesTrait(Competable::class);
 });
 
 test('a title uses retirements trait', function () {
-    expect(Title::class)->assertUsesTrait(HasRetirements::class);
+    expect(Title::class)->usesTrait(HasRetirements::class);
 });
 
 test('active titles can be retrieved', function () {

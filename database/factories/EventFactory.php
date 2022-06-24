@@ -34,14 +34,8 @@ class EventFactory extends Factory
      */
     public function definition(): array
     {
-        // dd($this->faker->locale());
-        // $faker = \Faker\Factory::create('en_US');
-        // dd($faker);
-        // dd($faker->words(2, true));
-        // dd(\Faker\Factory::create()->words());
-
         return [
-            'name' => str($this->faker->words(2, true))->title(),
+            'name' => str($this->faker->words(2, true))->title()->value(),
             'date' => null,
             'status' => EventStatus::UNSCHEDULED,
             'venue_id' => null,
