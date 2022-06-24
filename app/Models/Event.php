@@ -91,7 +91,7 @@ class Event extends Model
      */
     public function isPast()
     {
-        return $this->date?->isPast() ?? false;
+        return $this->date?->isPast();
     }
 
     /**

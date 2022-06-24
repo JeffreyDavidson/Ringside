@@ -10,7 +10,7 @@ test('a tag team has a name', function () {
 });
 
 test('a tag team can have a signature move', function () {
-    $tagTeam = Wrestler::factory()->create(['signature_move' => 'Example Signature Move']);
+    $tagTeam = TagTeam::factory()->create(['signature_move' => 'Example Signature Move']);
 
     expect($tagTeam)->signature_move->toBe('Example Signature Move');
 });
@@ -30,11 +30,11 @@ test('bookable tag teams can be retrieved', function () {
     $unemployedTagTeam = TagTeam::factory()->unemployed()->create();
     $unbookableTagTeam = TagTeam::factory()->unbookable()->create();
 
-    $bookableTagTeams = TagTeam::scheduled()->get();
+    $bookableTagTeams = TagTeam::bookable()->get();
 
     expect($bookableTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($bookableTagTeam);
+        ->collectionHas($bookableTagTeam);
 });
 
 test('future employed tag teams can be retrieved', function () {
@@ -46,11 +46,11 @@ test('future employed tag teams can be retrieved', function () {
     $unemployedTagTeam = TagTeam::factory()->unemployed()->create();
     $unbookableTagTeam = TagTeam::factory()->unbookable()->create();
 
-    $futureEmployedTagTeams = TagTeam::withFutureEmployment()->get();
+    $futureEmployedTagTeams = TagTeam::futureEmployed()->get();
 
     expect($futureEmployedTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($futureEmployedTagTeam);
+        ->collectionHas($futureEmployedTagTeam);
 });
 
 test('unbookable tag teams can be retrieved', function () {
@@ -66,7 +66,7 @@ test('unbookable tag teams can be retrieved', function () {
 
     expect($unbookableTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($unbookableTagTeams);
+        ->collectionHas($unbookableTagTeams);
 });
 
 test('released tag teams can be retrieved', function () {
@@ -82,7 +82,7 @@ test('released tag teams can be retrieved', function () {
 
     expect($releasedTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($releasedTagTeam);
+        ->collectionHas($releasedTagTeam);
 });
 
 test('suspended tag teams can be retrieved', function () {
@@ -98,7 +98,7 @@ test('suspended tag teams can be retrieved', function () {
 
     expect($suspendedTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($suspendedTagTeam);
+        ->collectionHas($suspendedTagTeam);
 });
 
 test('retired tag teams can be retrieved', function () {
@@ -114,7 +114,7 @@ test('retired tag teams can be retrieved', function () {
 
     expect($retiredTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($retiredTagTeam);
+        ->collectionHas($retiredTagTeam);
 });
 
 test('unemployed tag teams can be retrieved', function () {
@@ -130,5 +130,5 @@ test('unemployed tag teams can be retrieved', function () {
 
     expect($unemployedTagTeams)
         ->toHaveCount(1)
-        ->assertCollectionHas($unemployedTagTeam);
+        ->collectionHas($unemployedTagTeam);
 });

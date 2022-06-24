@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Wrestlers\WrestlerSuspendAction;
+use App\Actions\Wrestlers\SuspendAction as WrestlerSuspendAction;
 use App\Models\TagTeam;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;

@@ -2,6 +2,7 @@
 
 use App\Models\Event;
 use App\Models\Venue;
+use Illuminate\Support\Carbon;
 
 test('an event has a name', function () {
     $event = Event::factory()->create(['name' => 'Example Event Name']);
@@ -12,7 +13,7 @@ test('an event has a name', function () {
 test('an event has a date', function () {
     $event = Event::factory()->create(['date' => '2022-10-11 07:00:00']);
 
-    expect($event)->date->toBe('2022-10-11 07:00:00');
+    expect($event)->date->toDateTimeString()->toBe('2022-10-11 07:00:00');
 });
 
 test('an event date can be formatted', function () {
@@ -22,9 +23,10 @@ test('an event date can be formatted', function () {
 });
 
 test('an event takes place at a venue', function () {
-    $event = Event::factory()->create(['venue_id' => $venue = Venue::factory()->create()->id]);
+    $venue = Venue::factory()->create();
+    $event = Event::factory()->create(['venue_id' => $venue->id]);
 
-    expect($event)->venue_id->toBe($venue->id);
+    expect($event)->venue_id->toEqual($venue->id);
 });
 
 test('an event with a date in the future is scheduled', function () {
@@ -54,7 +56,7 @@ test('scheduled events can be retrieved', function () {
 
     expect($scheduledEvents)
         ->toHaveCount(1)
-        ->assertCollectionHas($scheduledEvent);
+        ->collectionHas($scheduledEvent);
 });
 
 test('unscheduled events can be retrieved', function () {
@@ -66,7 +68,7 @@ test('unscheduled events can be retrieved', function () {
 
     expect($unscheduledEvents)
         ->toHaveCount(1)
-        ->assertCollectionHas($unscheduledEvent);
+        ->collectionHas($unscheduledEvent);
 });
 
 test('past events can be retrieved', function () {
@@ -78,5 +80,5 @@ test('past events can be retrieved', function () {
 
     expect($pastEvents)
         ->toHaveCount(1)
-        ->assertCollectionHas($pastEvent);
+        ->collectionHas($pastEvent);
 });

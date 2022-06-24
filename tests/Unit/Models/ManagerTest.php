@@ -1,8 +1,10 @@
 <?php
 
 use App\Enums\ManagerStatus;
+use App\Models\Concerns\HasFullName;
 use App\Models\Manager;
 use App\Models\SingleRosterMember;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a manager has a first name', function () {
     $manager = Manager::factory()->create(['first_name' => 'John']);
@@ -23,7 +25,7 @@ test('a manager has a status', function () {
 });
 
 test('a manager is a single roster member', function () {
-    expect(get_parent_class(Manager::class))->toBeInstanceOf(SingleRosterMember::class);
+    expect(get_parent_class(Manager::class))->toBe(SingleRosterMember::class);
 });
 
 test('a manager uses soft deleted trait', function () {
@@ -47,7 +49,7 @@ test('available managers can be retrieved', function () {
 
     expect($availableManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($availableManager);
+        ->collectionHas($availableManager);
 });
 
 test('future employed managers can be retrieved', function () {
@@ -59,11 +61,11 @@ test('future employed managers can be retrieved', function () {
     $unemployedManager = Manager::factory()->unemployed()->create();
     $injuredManager = Manager::factory()->injured()->create();
 
-    $futureEmployedManagers = Manager::withFutureEmployment()->get();
+    $futureEmployedManagers = Manager::futureEmployed()->get();
 
     expect($futureEmployedManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($futureEmployedManager);
+        ->collectionHas($futureEmployedManager);
 });
 
 test('suspended managers can be retrieved', function () {
@@ -79,7 +81,7 @@ test('suspended managers can be retrieved', function () {
 
     expect($suspendedManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($suspendedManager);
+        ->collectionHas($suspendedManager);
 });
 
 test('released managers can be retrieved', function () {
@@ -91,11 +93,11 @@ test('released managers can be retrieved', function () {
     $unemployedManager = Manager::factory()->unemployed()->create();
     $injuredManager = Manager::factory()->injured()->create();
 
-    $releasedManagers = Manager::suspended()->get();
+    $releasedManagers = Manager::released()->get();
 
     expect($releasedManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($releasedManager);
+        ->collectionHas($releasedManager);
 });
 
 test('retired managers can be retrieved', function () {
@@ -107,11 +109,11 @@ test('retired managers can be retrieved', function () {
     $unemployedManager = Manager::factory()->unemployed()->create();
     $injuredManager = Manager::factory()->injured()->create();
 
-    $retiredManagers = Manager::suspended()->get();
+    $retiredManagers = Manager::retired()->get();
 
     expect($retiredManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($retiredManager);
+        ->collectionHas($retiredManager);
 });
 
 test('unemployed managers can be retrieved', function () {
@@ -127,7 +129,7 @@ test('unemployed managers can be retrieved', function () {
 
     expect($unemployedManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($unemployedManager);
+        ->collectionHas($unemployedManager);
 });
 
 test('injured managers can be retrieved', function () {
@@ -139,9 +141,9 @@ test('injured managers can be retrieved', function () {
     $unemployedManager = Manager::factory()->unemployed()->create();
     $injuredManager = Manager::factory()->injured()->create();
 
-    $injuredManagers = Manager::unemployed()->get();
+    $injuredManagers = Manager::injured()->get();
 
     expect($injuredManagers)
         ->toHaveCount(1)
-        ->assertCollectionHas($injuredManager);
+        ->collectionHas($injuredManager);
 });

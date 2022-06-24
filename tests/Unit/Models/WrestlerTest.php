@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\WrestlerStatus;
+use App\Models\Concerns\CanJoinStables;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\SingleRosterMember;
@@ -44,7 +45,7 @@ test('a wrestler has a status', function () {
 });
 
 test('a wrestler is a single roster member', function () {
-    expect(get_parent_class(Wrestler::class))->toBeInstanceOf(SingleRosterMember::class);
+    expect(get_parent_class(Wrestler::class))->toBe(SingleRosterMember::class);
 });
 
 test('a wrestler uses soft deleted trait', function () {
@@ -56,11 +57,11 @@ test('a wrestler uses can join stables trait', function () {
 });
 
 test('a wrestler implements bookable interface', function () {
-    expect(class_implements(Wrestler::class))->assertContains(Bookable::class);
+    expect(class_implements(Wrestler::class))->toContain(Bookable::class);
 });
 
 test('a wrestler implements can be a stable member interface', function () {
-    expect(class_implements(Wrestler::class))->assertContains(CanBeAStableMember::class);
+    expect(class_implements(Wrestler::class))->toContain(CanBeAStableMember::class);
 });
 
 test('bookable wrestlers can be retrieved', function () {
@@ -76,7 +77,7 @@ test('bookable wrestlers can be retrieved', function () {
 
     expect($bookableWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($bookableWrestler);
+        ->collectionHas($bookableWrestler);
 });
 
 test('future employed wrestlers can be retrieved', function () {
@@ -88,11 +89,11 @@ test('future employed wrestlers can be retrieved', function () {
     $unemployedWrestler = Wrestler::factory()->unemployed()->create();
     $injuredWrestler = Wrestler::factory()->injured()->create();
 
-    $futureEmployedWrestlers = Wrestler::withFutureEmployment()->get();
+    $futureEmployedWrestlers = Wrestler::futureEmployed()->get();
 
     expect($futureEmployedWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($futureEmployedWrestler);
+        ->collectionHas($futureEmployedWrestler);
 });
 
 test('suspended wrestlers can be retrieved', function () {
@@ -108,7 +109,7 @@ test('suspended wrestlers can be retrieved', function () {
 
     expect($suspendedWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($suspendedWrestler);
+        ->collectionHas($suspendedWrestler);
 });
 
 test('released wrestlers can be retrieved', function () {
@@ -120,11 +121,11 @@ test('released wrestlers can be retrieved', function () {
     $unemployedWrestler = Wrestler::factory()->unemployed()->create();
     $injuredWrestler = Wrestler::factory()->injured()->create();
 
-    $releasedWrestlers = Wrestler::suspended()->get();
+    $releasedWrestlers = Wrestler::released()->get();
 
     expect($releasedWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($releasedWrestler);
+        ->collectionHas($releasedWrestler);
 });
 
 test('retired wrestlers can be retrieved', function () {
@@ -136,11 +137,11 @@ test('retired wrestlers can be retrieved', function () {
     $unemployedWrestler = Wrestler::factory()->unemployed()->create();
     $injuredWrestler = Wrestler::factory()->injured()->create();
 
-    $retiredWrestlers = Wrestler::suspended()->get();
+    $retiredWrestlers = Wrestler::retired()->get();
 
     expect($retiredWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($retiredWrestler);
+        ->collectionHas($retiredWrestler);
 });
 
 test('unemployed wrestlers can be retrieved', function () {
@@ -156,7 +157,7 @@ test('unemployed wrestlers can be retrieved', function () {
 
     expect($unemployedWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($unemployedWrestler);
+        ->collectionHas($unemployedWrestler);
 });
 
 test('injured wrestlers can be retrieved', function () {
@@ -168,9 +169,9 @@ test('injured wrestlers can be retrieved', function () {
     $unemployedWrestler = Wrestler::factory()->unemployed()->create();
     $injuredWrestler = Wrestler::factory()->injured()->create();
 
-    $injuredWrestlers = Wrestler::unemployed()->get();
+    $injuredWrestlers = Wrestler::injured()->get();
 
     expect($injuredWrestlers)
         ->toHaveCount(1)
-        ->assertCollectionHas($injuredWrestler);
+        ->collectionHas($injuredWrestler);
 });

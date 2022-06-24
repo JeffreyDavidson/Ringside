@@ -6,13 +6,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\EventRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $event = Event::factory()->scheduled()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('event', $event)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $event = Event::factory()->scheduled()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('event', $event)
         ->by(basicUser())
         ->assertNotAuthorized();
 });

@@ -1,8 +1,14 @@
 <?php
 
 use App\Enums\StableStatus;
+use App\Models\Concerns\Activations;
+use App\Models\Concerns\Deactivations;
+use App\Models\Concerns\OwnedByUser;
+use App\Models\Contracts\Activatable;
+use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
 use App\Models\Stable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a stable has a name', function () {
     $stable = Stable::factory()->create(['name' => 'Example Stable Name']);
@@ -33,15 +39,15 @@ test('a stable uses owned by user trait', function () {
 });
 
 test('a stable implements activatable interface', function () {
-    expect(class_implements(Stable::class))->assertContains(Activatable::class);
+    expect(class_implements(Stable::class))->toContain(Activatable::class);
 });
 
 test('a stable implements deactivatable interface', function () {
-    expect(class_implements(Stable::class))->assertContains(Deactivatable::class);
+    expect(class_implements(Stable::class))->toContain(Deactivatable::class);
 });
 
 test('a stable implements retirable interface', function () {
-    expect(class_implements(Stable::class))->assertContains(Retirable::class);
+    expect(class_implements(Stable::class))->toContain(Retirable::class);
 });
 
 test('active stables can be retrieved', function () {
@@ -55,7 +61,7 @@ test('active stables can be retrieved', function () {
 
     expect($activeStables)
         ->toHaveCount(1)
-        ->assertCollectionHas($activeStable);
+        ->collectionHas($activeStable);
 });
 
 test('future activated stables can be retrieved', function () {
@@ -69,7 +75,7 @@ test('future activated stables can be retrieved', function () {
 
     expect($futureActivatedStables)
         ->toHaveCount(1)
-        ->assertCollectionHas($futureActivatedStable);
+        ->collectionHas($futureActivatedStable);
 });
 
 test('inactive stables can be retrieved', function () {
@@ -83,7 +89,7 @@ test('inactive stables can be retrieved', function () {
 
     expect($inactiveStables)
         ->toHaveCount(1)
-        ->assertCollectionHas($inactiveStable);
+        ->collectionHas($inactiveStable);
 });
 
 test('retired stables can be retrieved', function () {
@@ -97,7 +103,7 @@ test('retired stables can be retrieved', function () {
 
     expect($retiredStables)
         ->toHaveCount(1)
-        ->assertCollectionHas($retiredStable);
+        ->collectionHas($retiredStable);
 });
 
 test('unactivated stables can be retrieved', function () {
@@ -111,5 +117,5 @@ test('unactivated stables can be retrieved', function () {
 
     expect($unactivatedStables)
         ->toHaveCount(1)
-        ->assertCollectionHas($unactivatedStable);
+        ->collectionHas($unactivatedStable);
 });

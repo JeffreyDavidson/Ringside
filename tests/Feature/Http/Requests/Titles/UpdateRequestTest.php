@@ -4,7 +4,7 @@ use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Activation;
 use App\Models\Title;
 use Illuminate\Support\Carbon;
-use Tests\Factories\TitleRequestFactory;
+use Tests\RequestFactories\TitleRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
     $this->createRequest(UpdateRequest::class)
@@ -115,7 +115,7 @@ test('title activated at cannot be changed if activation start date has past', f
         ->validate(TitleRequestFactory::new()->create([
             'activated_at' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['activated_at' => 'activation_date_cannot_be_changed']);
+        ->assertFailsValidation(['activated_at' => 'app\rules\activationstartdatecanbechanged']);
 });
 
 test('title activated at can be changed if activation start date is in the future', function () {
