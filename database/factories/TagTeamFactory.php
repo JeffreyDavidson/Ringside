@@ -74,7 +74,8 @@ class TagTeamFactory extends Factory
 
         return $this->state(fn () => ['status' => TagTeamStatus::UNBOOKABLE])
             ->has(Employment::factory()->started($employmentStartDate))
-            ->has(Wrestler::factory()->injured()->count(2))
+            ->hasAttached(Wrestler::factory()->injured(), ['joined_at' => $employmentStartDate])
+            ->hasAttached(Wrestler::factory()->bookable()->count(1), ['joined_at' => $employmentStartDate])
             ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });
@@ -127,20 +128,18 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $retirementStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(Employment::factory()->started($employmentStartDate))
+            ->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate))
             ->has(Retirement::factory()->started($retirementStartDate))
             ->create();
+
+
 
         return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::RETIRED])
             ->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate))
             ->has(Retirement::factory()->started($retirementStartDate))
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
-            ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
+            ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
-
-                foreach ($wrestlers as $wrestler) {
-                    $wrestler->update(['current_tag_team_id' => $tagTeam->id]);
-                }
             });
     }
 

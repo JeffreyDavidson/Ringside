@@ -272,9 +272,10 @@ test('stable must have a minimum number of members', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => 2,
             'started_at' => now()->toDateTimeString(),
             'wrestlers' => $wrestlersToJoinStable->modelKeys(),
             'tag_teams' => [],
         ]))
-        ->assertFailsValidation(['members_count' => 'app\models\hasminimumamountofmembers']);
+        ->assertFailsValidation(['members_count' => 'app\rules\stables\hasminimumamountofmembers']);
 });

@@ -180,7 +180,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
      */
     public function isUnbookable()
     {
-        return ! $this->partnersAreBookable();
+        return ! $this->currentWrestlers->every->isBookable();
     }
 
     /**
@@ -218,7 +218,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
      */
     public function canBeRetired()
     {
-        return $this->isBookable();
+        return $this->isBookable() || $this->isUnbookable();
     }
 
     /**

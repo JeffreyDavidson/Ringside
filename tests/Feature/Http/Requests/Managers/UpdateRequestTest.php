@@ -34,7 +34,7 @@ test('manager first name must be a string', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('manager', $manager)
         ->validate(ManagerRequestFactory::new()->create([
-            'first_name' => null,
+            'first_name' => 12345,
         ]))
         ->assertFailsValidation(['first_name' => 'string']);
 });
