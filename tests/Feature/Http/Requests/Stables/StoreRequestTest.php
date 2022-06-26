@@ -4,6 +4,7 @@ use App\Http\Requests\Stables\StoreRequest;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Support\Carbon;
 use Tests\RequestFactories\StableRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
@@ -111,7 +112,7 @@ test('each wrestler in a stable must be distinct', function () {
 test('each wrestler in a stable must exist', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
-            'wrestlers' => [1, 1],
+            'wrestlers' => [1, 2],
         ]))
         ->assertFailsValidation(['wrestlers.0' => 'exists']);
 });
@@ -119,8 +120,7 @@ test('each wrestler in a stable must exist', function () {
 test('each wrestler must not already be in stable to join stable', function () {
     $wrestlerAlreadyInDifferentStable = Wrestler::factory()->bookable()->create();
     $stable = Stable::factory()
-        ->hasAttached($wrestlerAlreadyInDifferentStable, ['joined_at' => now()->toDateTimeString()])
-        ->create();
+        ->hasAttached($wrestlerAlreadyInDifferentStable, ['joined_at' => now()->toDateTimeString()]);
     $wrestlerNotInStableA = Wrestler::factory()->bookable()->create();
     $wrestlerNotInStableB = Wrestler::factory()->bookable()->create();
     $wrestlerNotInStableC = Wrestler::factory()->bookable()->create();
@@ -134,7 +134,7 @@ test('each wrestler must not already be in stable to join stable', function () {
                 $wrestlerNotInStableC->getKey(),
             ],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'wrestler_already_in_different_stable']);
+        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewstable']);
 });
 
 test('each tag team in a stable must be an integer', function () {
@@ -148,15 +148,15 @@ test('each tag team in a stable must be an integer', function () {
 test('each tag team in a stable must be distinct', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
-            'tagTeams' => [1, 1],
+            'tag_teams' => [1, 1],
         ]))
-        ->assertFailsValidation(['tagTeams.0' => 'distinct']);
+        ->assertFailsValidation(['tag_teams.0' => 'distinct']);
 });
 
 test('each tag team in a stable must exist', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
-            'tag_teams' => [1, 1],
+            'tag_teams' => [1],
         ]))
         ->assertFailsValidation(['tag_teams.0' => 'exists']);
 });
@@ -182,15 +182,17 @@ test('each tag team must not already be in stable to join stable', function () {
         ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinnewstable']);
 });
 
-test('stable must have a minimum number of 3 members', function () {
+test('stable must have a minimum number of 3 members when started at is set', function () {
     $wrestlers = Wrestler::factory()->count(2)->create();
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => $wrestlers->count(),
+            'started_at' => Carbon::now()->toDateTimeString(),
             'wrestlers' => $wrestlers->modelKeys(),
             'tag_teams' => [],
         ]))
-        ->assertFailsValidation(['*' => 'not_enough_members']);
+        ->assertFailsValidation(['members_count' => 'min:3']);
 });
 
 test('stable can have one wrestler and one tag team', function () {
@@ -199,6 +201,8 @@ test('stable can have one wrestler and one tag team', function () {
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => 3,
+            'started_at' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [$wrestler->id],
             'tag_teams' => [$tagTeam->id],
         ]))
@@ -210,10 +214,12 @@ test('a stable cannot be formed with only one tag team and no wrestlers', functi
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => 2,
+            'started_at' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [],
             'tag_teams' => [$tagTeam->id],
         ]))
-        ->assertFailsValidation(['*' => 'not_enough_members']);
+        ->assertFailsValidation(['members_count' => 'min:3']);
 });
 
 test('a stable can contain at least two tag teams with no wrestlers', function () {
@@ -222,6 +228,8 @@ test('a stable can contain at least two tag teams with no wrestlers', function (
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => 4,
+            'started_at' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [],
             'tag_teams' => [$tagTeamA->id, $tagTeamB->id],
         ]))
@@ -235,6 +243,8 @@ test('a stable can contain at least three wrestlers with no tag teams', function
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => 3,
+            'started_at' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [$wrestlerA->id, $wrestlerB->id, $wrestlerC->id],
             'tag_teams' => [],
         ]))
@@ -247,6 +257,8 @@ test('a stable cannot contain a wrestler that is added in a tag team', function 
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
+            'members_count' => 5,
+            'started_at' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [
                 $wrestlerA->getKey(),
                 $wrestlerB->getKey(),
@@ -254,5 +266,5 @@ test('a stable cannot contain a wrestler that is added in a tag team', function 
             ],
             'tag_teams' => [$tagTeam->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers' => 'wrestlers_added_that_are_inside_tag_teams']);
+        ->assertFailsValidation(['wrestlers.2' => 'app\rules\wrestlercanjoinnewstable']);
 });

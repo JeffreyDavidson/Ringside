@@ -4,6 +4,7 @@ namespace App\Rules\Stables;
 
 use App\Models\Stable;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Carbon;
 
 class HasMinimumAmountOfMembers implements Rule
 {
@@ -32,8 +33,8 @@ class HasMinimumAmountOfMembers implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->stable->isCurrentlyActivated() || Carbon::parse('started_at')) {
-            $tagTeamsCountFromRequest = $this->tag_teams->count();
+        if ($this->stable->isCurrentlyActivated() || Carbon::parse($this->startedAt)) {
+            $tagTeamsCountFromRequest = $this->tagTeams->count();
             $wrestlersCountFromRequest = $this->wrestlers->count();
 
             $tagTeamMembersCount = $tagTeamsCountFromRequest * 2;

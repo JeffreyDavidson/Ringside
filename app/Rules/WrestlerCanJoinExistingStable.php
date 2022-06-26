@@ -45,7 +45,6 @@ class WrestlerCanJoinExistingStable implements Rule
         }
 
         $wrestler = Wrestler::with('currentStable')->whereKey($value)->first();
-        // dd($wrestler);
 
         if ($wrestler->isSuspended()) {
             $this->messages = "{$wrestler->name} is suspended and cannot join stable.";

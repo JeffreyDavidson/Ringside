@@ -66,7 +66,7 @@ test('unbookable tag teams can be retrieved', function () {
 
     expect($unbookableTagTeams)
         ->toHaveCount(1)
-        ->collectionHas($unbookableTagTeams);
+        ->collectionHas($unbookableTagTeam);
 });
 
 test('released tag teams can be retrieved', function () {

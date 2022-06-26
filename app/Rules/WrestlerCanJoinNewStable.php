@@ -35,17 +35,17 @@ class WrestlerCanJoinNewStable implements Rule
             return false;
         }
 
-        $wrestler = Wrestler::with(['currentStable'])->whereKey($value)->sole();
+        $wrestler = Wrestler::with(['currentStable'])->find($value);
+
+        if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
+            return false;
+        }
 
         if (count($this->tagTeamIds) === 0 || is_null($wrestler->currentTagTeam)) {
             return true;
         }
 
-        if (collect($this->tagTeamIds)->doesntContain($wrestler->currentTagTeam->id)) {
-            return true;
-        }
-
-        if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
+        if (collect($this->tagTeamIds)->contains($wrestler->currentTagTeam->id)) {
             return false;
         }
 
