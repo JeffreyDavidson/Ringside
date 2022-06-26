@@ -132,8 +132,6 @@ class TagTeamFactory extends Factory
             ->has(Retirement::factory()->started($retirementStartDate))
             ->create();
 
-
-
         return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::RETIRED])
             ->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate))
             ->has(Retirement::factory()->started($retirementStartDate))
