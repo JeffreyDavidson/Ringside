@@ -18,18 +18,18 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         $userData = [];
-        collect(Role::toArray())->each(function ($value, $key) use (&$userData): void {
+        collect(Role::cases())->each(function ($role, $key) use (&$userData): void {
             for ($i = 0; $i <= 1; $i++) {
                 $user = new User;
-                $user->first_name = ($i ? 'Second ' : '').ucwords($value);
+                $user->first_name = ($i ? 'Second ' : '').ucwords($role->value);
                 $user->last_name = 'User';
-                $user->email = $value.($i ? '2' : '').'@example.com';
+                $user->email = $role->value.($i ? '2' : '').'@example.com';
                 $user->password = 'password';
-                $user->role = new Role($value);
+                $user->role = $role->value;
                 $user->save();
                 $user->refresh();
                 $userData[] = [
-                    'role'     => $value,
+                    'role'     => $role->value,
                     'name'     => $user->first_name.' '.$user->last_name,
                     'email'    => $user->email,
                     'password' => 'password',
