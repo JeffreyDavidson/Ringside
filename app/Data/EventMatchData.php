@@ -47,7 +47,7 @@ class EventMatchData
      * @param  \Illuminate\Support\Collection  $competitors
      * @return \Illuminate\Support\Collection
      */
-    public static function getCompetitors(Collection $competitors)
+    private static function getCompetitors(Collection $competitors)
     {
         return $competitors->transform(function ($sideCompetitors, $sideNumber) {
             if (Arr::exists($sideCompetitors, 'wrestlers')) {
