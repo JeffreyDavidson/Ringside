@@ -31,22 +31,18 @@ class WrestlerCanJoinNewStable implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (! is_array($this->tagTeamIds)) {
-            return false;
-        }
-
         $wrestler = Wrestler::with(['currentStable'])->find($value);
 
-        if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
+        if (! is_null($wrestler->currentStable) && $wrestler->currentStable()->exists()) {
             return false;
         }
 
-        if (count($this->tagTeamIds) === 0 || is_null($wrestler->currentTagTeam)) {
-            return true;
-        }
-
-        if (collect($this->tagTeamIds)->contains($wrestler->currentTagTeam->id)) {
-            return false;
+        if (is_array($this->tagTeamIds) && count($this->tagTeamIds) > 0) {
+            if (! is_null($wrestler->currentTagTeam)
+                && collect($this->tagTeamIds)->contains($wrestler->currentTagTeam->id)
+            ) {
+                return false;
+            }
         }
 
         return true;
