@@ -119,8 +119,9 @@ test('each wrestler in a stable must exist', function () {
 
 test('each wrestler must not already be in stable to join stable', function () {
     $wrestlerAlreadyInDifferentStable = Wrestler::factory()->bookable()->create();
-    $stable = Stable::factory()
-        ->hasAttached($wrestlerAlreadyInDifferentStable, ['joined_at' => now()->toDateTimeString()]);
+    Stable::factory()
+        ->hasAttached($wrestlerAlreadyInDifferentStable, ['joined_at' => now()->toDateTimeString()])
+        ->create();
     $wrestlerNotInStableA = Wrestler::factory()->bookable()->create();
     $wrestlerNotInStableB = Wrestler::factory()->bookable()->create();
     $wrestlerNotInStableC = Wrestler::factory()->bookable()->create();
