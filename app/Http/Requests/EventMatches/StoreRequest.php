@@ -9,7 +9,6 @@ use App\Rules\CompetitorsAreValid;
 use App\Rules\CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType;
 use App\Rules\TitleChampionIncludedInTitleMatch;
 use App\Rules\TitleMustBeActive;
-use App\Rules\TitlesMustBeActive;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\EventMatchRequestFactory;

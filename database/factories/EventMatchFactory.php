@@ -6,8 +6,6 @@ namespace Database\Factories;
 
 use App\Models\Event;
 use App\Models\MatchType;
-use App\Models\Referee;
-use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
