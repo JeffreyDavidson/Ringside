@@ -33,32 +33,33 @@ class WrestlerFactory extends Factory
         ];
     }
 
+    /**
+     * Configure the model factory.
+     *
+     * @return $this
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (Wrestler $wrestler) {
+            $wrestler->save();
+        });
+    }
+
     public function bookable()
     {
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::BOOKABLE])
-            ->has(Employment::factory()->started(Carbon::yesterday()))
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-                $wrestler->load('employments');
-            });
+            ->has(Employment::factory()->started(Carbon::yesterday()));
     }
 
     public function withFutureEmployment()
     {
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::FUTURE_EMPLOYMENT])
-            ->has(Employment::factory()->started(Carbon::tomorrow()))
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-                $wrestler->load('employments');
-            });
+            ->has(Employment::factory()->started(Carbon::tomorrow()));
     }
 
     public function unemployed()
     {
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::UNEMPLOYED])
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-            });
+        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::UNEMPLOYED]);
     }
 
     public function retired()
@@ -69,12 +70,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::RETIRED])
             ->has(Employment::factory()->started($start)->ended($end))
-            ->has(Retirement::factory()->started($end))
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-                $wrestler->load('employments');
-                $wrestler->load('retirements');
-            });
+            ->has(Retirement::factory()->started($end));
     }
 
     public function released()
@@ -84,11 +80,7 @@ class WrestlerFactory extends Factory
         $end = $now->copy()->subDays(1);
 
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::RELEASED])
-            ->has(Employment::factory()->started($start)->ended($end))
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-                $wrestler->load('employments');
-            });
+            ->has(Employment::factory()->started($start)->ended($end));
     }
 
     public function suspended()
@@ -99,12 +91,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::SUSPENDED])
             ->has(Employment::factory()->started($start))
-            ->has(Suspension::factory()->started($end))
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-                $wrestler->load('employments');
-                $wrestler->load('suspensions');
-            });
+            ->has(Suspension::factory()->started($end));
     }
 
     public function injured()
@@ -114,11 +101,6 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::INJURED])
             ->has(Employment::factory()->started($start))
-            ->has(Injury::factory()->started($now))
-            ->afterCreating(function (Wrestler $wrestler) {
-                $wrestler->save();
-                $wrestler->load('employments');
-                $wrestler->load('injuries');
-            });
+            ->has(Injury::factory()->started($now));
     }
 }
