@@ -26,7 +26,7 @@ class UnretireAction extends BaseTagTeamAction
 
         $this->tagTeamRepository->unretire($tagTeam, $unretiredDate);
 
-        $tagTeam->currentWrestlers->each(fn ($wrestler) =>  WrestlersUnretireAction::run($wrestler, $unretiredDate));
+        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersUnretireAction::run($wrestler, $unretiredDate));
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
     }

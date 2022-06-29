@@ -24,7 +24,7 @@ class SuspendAction extends BaseTagTeamAction
     {
         $suspensionDate ??= now();
 
-        $tagTeam->currentWrestlers->each(fn ($wrestler) =>  WrestlerSuspendAction::run($wrestler, $suspensionDate));
+        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlerSuspendAction::run($wrestler, $suspensionDate));
 
         $this->tagTeamRepository->suspend($tagTeam, $suspensionDate);
     }
