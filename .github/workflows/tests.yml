@@ -23,8 +23,8 @@ jobs:
         run: |
           composer install
       - name: Execute lint with Laravel preset
-        run: ./pint
+        run: ./vendor/bin/pint
       - name: Execute lint with PSR 12 preset
-        run: ./pint --preset=psr12
+        run: ./vendor/bin/pint --preset=psr12
       - name: Execute unit/feature tests
         run: vendor/bin/pest
