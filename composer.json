@@ -24,7 +24,6 @@
         "doctrine/dbal": "^3.3",
         "fakerphp/faker": "^1.19",
         "filp/whoops": "^2.14",
-        "friendsofphp/php-cs-fixer": "^3.8",
         "laravel/breeze": "^1.9",
         "laravel/pint": "^1.0.0",
         "laravel/sail": "^1.14",
