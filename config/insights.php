@@ -8,16 +8,7 @@ use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenNormalClasses;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenPrivateMethods;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenTraits;
 use NunoMaduro\PhpInsights\Domain\Metrics\Architecture\Classes;
-use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
-use PHP_CodeSniffer\Standards\PSR1\Sniffs\Files\SideEffectsSniff;
-use PHP_CodeSniffer\Standards\PSR12\Sniffs\Classes\ClassInstantiationSniff;
-use SlevomatCodingStandard\Sniffs\Classes\ForbiddenPublicPropertySniff;
-use SlevomatCodingStandard\Sniffs\Classes\SuperfluousExceptionNamingSniff;
-use SlevomatCodingStandard\Sniffs\Commenting\DocCommentSpacingSniff;
-use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\UselessFunctionDocCommentSniff;
-use SlevomatCodingStandard\Sniffs\ControlStructures\DisallowShortTernaryOperatorSniff;
-use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\AlphabeticallySortedUsesSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\DeclareStrictTypesSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff;
@@ -60,7 +51,7 @@ return [
     |
     */
 
-    'ide' => 'vscode',
+    'ide' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -85,7 +76,6 @@ return [
 
     'remove' => [
         AlphabeticallySortedUsesSniff::class,
-        ClassInstantiationSniff::class,
         DeclareStrictTypesSniff::class,
         DisallowMixedTypeHintSniff::class,
         ForbiddenDefineFunctions::class,
@@ -95,36 +85,11 @@ return [
         PropertyTypeHintSniff::class,
         ReturnTypeHintSniff::class,
         UselessFunctionDocCommentSniff::class,
-        DisallowShortTernaryOperatorSniff::class,
-        ForbiddenPublicPropertySniff::class,
-        SuperfluousExceptionNamingSniff::class,
     ],
 
     'config' => [
         ForbiddenPrivateMethods::class => [
             'title' => 'The usage of private methods is not idiomatic in Laravel.',
-        ],
-        LineLengthSniff::class => [
-            'lineLimit' => 120,
-            'absoluteLineLimit' => 120,
-        ],
-        UnusedParameterSniff::class => [
-            'exclude' => [
-                'app/Console/Kernel.php',
-                'app/Exceptions/Handler.php',
-                'app/Rules/',
-            ],
-        ],
-        InlineDocCommentDeclarationSniff::class => [
-
-        ],
-        DocCommentSpacingSniff::class => [
-            'linesCountBetweenDifferentAnnotationsTypes' => 0,
-        ],
-        SideEffectsSniff::class => [
-            'exclude' => [
-                'app/Enums/',
-            ],
         ],
     ],
 
@@ -140,11 +105,11 @@ return [
     */
 
     'requirements' => [
-        //        'min-quality' => 0,
-        //        'min-complexity' => 0,
-        //        'min-architecture' => 0,
-        //        'min-style' => 0,
-        //        'disable-security-check' => false,
+//        'min-quality' => 0,
+//        'min-complexity' => 0,
+//        'min-architecture' => 0,
+//        'min-style' => 0,
+//        'disable-security-check' => false,
     ],
 
     /*
@@ -158,6 +123,6 @@ return [
     |
     */
 
-    'threads' => 10,
+    'threads' => null,
 
 ];
