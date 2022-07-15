@@ -17,7 +17,7 @@ class EventMatchCompetitorFactory extends Factory
     public function definition()
     {
         return [
-            'event_match_id'  => EventMatch::factory(),
+            'event_match_id' => EventMatch::factory(),
             'competitor_type' => 'wrestler',
             'competitor_id' => Wrestler::factory(),
             'side_number' => $this->faker->randomDigitNotZero(),

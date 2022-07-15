@@ -29,9 +29,9 @@ class UsersTableSeeder extends Seeder
                 $user->save();
                 $user->refresh();
                 $userData[] = [
-                    'role'     => $role->value,
-                    'name'     => $user->first_name.' '.$user->last_name,
-                    'email'    => $user->email,
+                    'role' => $role->value,
+                    'name' => $user->first_name.' '.$user->last_name,
+                    'email' => $user->email,
                     'password' => 'password',
                 ];
             }
