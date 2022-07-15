@@ -15,8 +15,8 @@ class AddTitlesToMatchAction extends BaseEventMatchAction
     /**
      * Add titles to an event match.
      *
-     * @param \App\Models\EventMatch $eventMatch
-     * @param \Illuminate\Database\Eloquent\Collection<Title> $titles
+     * @param  \App\Models\EventMatch  $eventMatch
+     * @param  \Illuminate\Database\Eloquent\Collection<Title>  $titles
      * @return void
      */
     public function handle(EventMatch $eventMatch, $titles): void

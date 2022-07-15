@@ -18,7 +18,7 @@ abstract class BaseEventMatchAction
     /**
      * Create a new add match for event instance.
      *
-     * @param \App\Repositories\EventMatchRepository $eventMatchRepository
+     * @param  \App\Repositories\EventMatchRepository  $eventMatchRepository
      */
     public function __construct(EventMatchRepository $eventMatchRepository)
     {
