@@ -8,11 +8,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: ['8.0']
+        php: ['8.0', '8.1']
     name: PHP ${{ matrix.php }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@2
+        uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
