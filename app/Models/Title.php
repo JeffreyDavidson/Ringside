@@ -66,7 +66,7 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     /**
      * Undocumented function.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphedByMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function championships()
     {
@@ -83,6 +83,11 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
         return $this->hasOne(TitleChampionship::class)->whereNull('lost_at')->latestOfMany();
     }
 
+    /**
+     * Determines if title has champion.
+     *
+     * @return bool
+     */
     public function isVacant()
     {
         return $this->currentChampionship?->champion === null;
