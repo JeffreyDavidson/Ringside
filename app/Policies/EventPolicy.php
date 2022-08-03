@@ -82,7 +82,7 @@ class EventPolicy
     /**
      * Determine whether the user can add matches to an event.
      *
-     * @param  \App\Models\Event  $event
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function addMatches(User $user)

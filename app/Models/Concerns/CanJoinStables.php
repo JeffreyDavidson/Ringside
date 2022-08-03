@@ -25,7 +25,7 @@ trait CanJoinStables
     /**
      * Get the current stable the member belongs to.
      *
-     * @return \App\Models\Stable|null
+     * @return \Fidum\EloquentMorphToOne\MorphToOne
      */
     public function currentStable()
     {
