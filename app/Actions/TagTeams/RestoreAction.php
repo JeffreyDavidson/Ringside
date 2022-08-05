@@ -7,7 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Models\TagTeam;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseTagTeamAction
+class RestoreAction extends BaseTagTeamAction
 {
     use AsAction;
 

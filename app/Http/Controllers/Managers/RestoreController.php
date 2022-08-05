@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
-use App\Services\ManagerService;
 
 class RestoreController extends Controller
 {
@@ -14,16 +14,15 @@ class RestoreController extends Controller
      * Restore a manager.
      *
      * @param  int  $managerId
-     * @param  \App\Services\ManagerService  $managerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(int $managerId, ManagerService $managerService)
+    public function __invoke(int $managerId)
     {
         $manager = Manager::onlyTrashed()->findOrFail($managerId);
 
         $this->authorize('restore', $manager);
 
-        $managerService->restore($manager);
+        RestoreAction::run($manager);
 
         return to_route('managers.index');
     }

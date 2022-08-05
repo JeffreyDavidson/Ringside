@@ -4,28 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TagTeams;
 
+use App\Actions\TagTeams\CreateAction;
+use App\Actions\TagTeams\DeleteAction;
+use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeamData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use App\Services\TagTeamService;
 
 class TagTeamsController extends Controller
 {
-    private TagTeamService $tagTeamService;
-
-    /**
-     * Create a new tag teams controller instance.
-     *
-     * @param  \App\Services\TagTeamService  $tagTeamService
-     */
-    public function __construct(TagTeamService $tagTeamService)
-    {
-        $this->tagTeamService = $tagTeamService;
-    }
-
     /**
      * View a list of tag teams.
      *
@@ -64,7 +54,7 @@ class TagTeamsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->tagTeamService->create(TagTeamData::fromStoreRequest($request));
+        CreateAction::run(TagTeamData::fromStoreRequest($request));
 
         return to_route('tag-teams.index');
     }
@@ -111,7 +101,7 @@ class TagTeamsController extends Controller
      */
     public function update(UpdateRequest $request, TagTeam $tagTeam)
     {
-        $this->tagTeamService->update($tagTeam, TagTeamData::fromUpdateRequest($request));
+        UpdateAction::run($tagTeam, TagTeamData::fromUpdateRequest($request));
 
         return to_route('tag-teams.index');
     }
@@ -126,7 +116,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('delete', $tagTeam);
 
-        $this->tagTeamService->delete($tagTeam);
+        DeleteAction::run($tagTeam);
 
         return to_route('tag-teams.index');
     }

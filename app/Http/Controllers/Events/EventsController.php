@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Events;
 
+use App\Actions\Events\CreateAction;
+use App\Actions\Events\DeleteAction;
+use App\Actions\Events\UpdateAction;
 use App\Data\EventData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
-use App\Services\EventService;
 
 class EventsController extends Controller
 {
-    private EventService $eventService;
-
-    /**
-     * Create a new events controller instance.
-     *
-     * @param  \App\Services\EventService  $eventService
-     */
-    public function __construct(EventService $eventService)
-    {
-        $this->eventService = $eventService;
-    }
-
     /**
      * View a list of events.
      *
@@ -60,7 +50,7 @@ class EventsController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->eventService->create(EventData::fromStoreRequest($request));
+        CreateAction::run(EventData::fromStoreRequest($request));
 
         return to_route('events.index');
     }
@@ -104,7 +94,7 @@ class EventsController extends Controller
      */
     public function update(UpdateRequest $request, Event $event)
     {
-        $this->eventService->update($event, EventData::fromUpdateRequest($request));
+        UpdateAction::run($event, EventData::fromUpdateRequest($request));
 
         return to_route('events.index');
     }
@@ -119,7 +109,7 @@ class EventsController extends Controller
     {
         $this->authorize('delete', $event);
 
-        $this->eventService->delete($event);
+        DeleteAction::run($event);
 
         return to_route('events.index');
     }

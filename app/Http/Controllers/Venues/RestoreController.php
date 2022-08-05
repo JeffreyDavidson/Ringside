@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Venues;
 
+use App\Actions\Venues\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
-use App\Services\VenueService;
 
 class RestoreController extends Controller
 {
@@ -17,13 +17,13 @@ class RestoreController extends Controller
      * @param  \App\Services\VenueService  $venueService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($venueId, VenueService $venueService)
+    public function __invoke($venueId)
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 
         $this->authorize('restore', $venue);
 
-        $venueService->restore($venue);
+        RestoreAction::run($venue);
 
         return to_route('venues.index');
     }

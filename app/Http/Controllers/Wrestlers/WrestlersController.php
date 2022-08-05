@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Wrestlers;
 
+use App\Actions\Wrestlers\CreateAction;
+use App\Actions\Wrestlers\DeleteAction;
+use App\Actions\Wrestlers\UpdateAction;
 use App\Data\WrestlerData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
-use App\Services\WrestlerService;
 
 class WrestlersController extends Controller
 {
-    private WrestlerService $wrestlerService;
-
-    /**
-     * Create a new wrestlers controller instance.
-     *
-     * @param  \App\Services\WrestlerService  $wrestlerService
-     */
-    public function __construct(WrestlerService $wrestlerService)
-    {
-        $this->wrestlerService = $wrestlerService;
-    }
-
     /**
      * View a list of employed wrestlers.
      *
@@ -60,7 +50,7 @@ class WrestlersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->wrestlerService->create(WrestlerData::fromStoreRequest($request));
+        CreateAction::run(WrestlerData::fromStoreRequest($request));
 
         return to_route('wrestlers.index');
     }
@@ -104,7 +94,7 @@ class WrestlersController extends Controller
      */
     public function update(UpdateRequest $request, Wrestler $wrestler)
     {
-        $this->wrestlerService->update($wrestler, WrestlerData::fromUpdateRequest($request));
+        UpdateAction::run($wrestler, WrestlerData::fromUpdateRequest($request));
 
         return to_route('wrestlers.index');
     }
@@ -119,7 +109,7 @@ class WrestlersController extends Controller
     {
         $this->authorize('delete', $wrestler);
 
-        $this->wrestlerService->delete($wrestler);
+        DeleteAction::run($wrestler);
 
         return to_route('wrestlers.index');
     }

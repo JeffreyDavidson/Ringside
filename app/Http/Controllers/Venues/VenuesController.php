@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Venues;
 
+use App\Actions\Venues\CreateAction;
+use App\Actions\Venues\DeleteAction;
+use App\Actions\Venues\UpdateAction;
 use App\Data\VenueData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
-use App\Services\VenueService;
 
 class VenuesController extends Controller
 {
-    private VenueService $venueService;
-
-    /**
-     * Create a new venues controller instance.
-     *
-     * @param  \App\Services\VenueService  $venueService
-     */
-    public function __construct(VenueService $venueService)
-    {
-        $this->venueService = $venueService;
-    }
-
     /**
      * View a list of venues.
      *
@@ -40,7 +30,7 @@ class VenuesController extends Controller
     /**
      * Show the form for creating a venue.
      *
-     * @param  Venue  $venue
+     * @param  \App\Models\Venue  $venue
      * @return \Illuminate\View\View
      */
     public function create(Venue $venue)
@@ -60,7 +50,7 @@ class VenuesController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->venueService->create(VenueData::fromStoreRequest($request));
+        CreateAction::run(VenueData::fromStoreRequest($request));
 
         return to_route('venues.index');
     }
@@ -104,7 +94,7 @@ class VenuesController extends Controller
      */
     public function update(UpdateRequest $request, Venue $venue)
     {
-        $this->venueService->update($venue, VenueData::fromUpdateRequest($request));
+        UpdateAction::run($venue, VenueData::fromUpdateRequest($request));
 
         return to_route('venues.index');
     }
@@ -119,7 +109,7 @@ class VenuesController extends Controller
     {
         $this->authorize('delete', $venue);
 
-        $this->venueService->delete($venue);
+        DeleteAction::run($venue);
 
         return to_route('venues.index');
     }

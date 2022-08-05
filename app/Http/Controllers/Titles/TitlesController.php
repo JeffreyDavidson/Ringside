@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Titles;
 
+use App\Actions\Titles\CreateAction;
+use App\Actions\Titles\DeleteAction;
+use App\Actions\Titles\UpdateAction;
 use App\Data\TitleData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
-use App\Services\TitleService;
 
 class TitlesController extends Controller
 {
-    private TitleService $titleService;
-
-    /**
-     * Create a new titles controller instance.
-     *
-     * @param  \App\Services\TitleService  $titleService
-     */
-    public function __construct(TitleService $titleService)
-    {
-        $this->titleService = $titleService;
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -56,12 +46,11 @@ class TitlesController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\Titles\StoreRequest  $request
-     * @param  \App\Data\TitleData  $titleData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(StoreRequest $request)
     {
-        $this->titleService->create(TitleData::fromStoreRequest($request));
+        CreateAction::run(TitleData::fromStoreRequest($request));
 
         return to_route('titles.index');
     }
@@ -69,7 +58,7 @@ class TitlesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Title  $title
+     * @param  \App\Models\Title  $title
      * @return \Illuminate\View\View
      */
     public function show(Title $title)
@@ -105,7 +94,7 @@ class TitlesController extends Controller
      */
     public function update(UpdateRequest $request, Title $title)
     {
-        $this->titleService->update($title, TitleData::fromUpdateRequest($request));
+        UpdateAction::run($title, TitleData::fromUpdateRequest($request));
 
         return to_route('titles.index');
     }
@@ -120,7 +109,7 @@ class TitlesController extends Controller
     {
         $this->authorize('delete', $title);
 
-        $this->titleService->delete($title);
+        DeleteAction::run($title);
 
         return to_route('titles.index');
     }

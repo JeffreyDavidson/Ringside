@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Events;
 
+use App\Actions\Events\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Services\EventService;
 
 class RestoreController extends Controller
 {
@@ -14,16 +14,15 @@ class RestoreController extends Controller
      * Restore a deleted scheduled event.
      *
      * @param  int  $eventId
-     * @param  \App\Services\EventService  $eventService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(int $eventId, EventService $eventService)
+    public function __invoke(int $eventId)
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 
         $this->authorize('restore', $event);
 
-        $eventService->restore($event);
+        RestoreAction::run($event);
 
         return to_route('events.index');
     }
