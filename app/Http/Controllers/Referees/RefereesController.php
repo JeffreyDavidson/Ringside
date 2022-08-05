@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Referees;
 
+use App\Actions\Referees\CreateAction;
+use App\Actions\Referees\DeleteAction;
+use App\Actions\Referees\UpdateAction;
 use App\Data\RefereeData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
-use App\Services\RefereeService;
 
 class RefereesController extends Controller
 {
-    private RefereeService $refereeService;
-
-    /**
-     * Create a new referees controller instance.
-     *
-     * @param  \App\Services\RefereeService  $refereeService
-     */
-    public function __construct(RefereeService $refereeService)
-    {
-        $this->refereeService = $refereeService;
-    }
-
     /**
      * View a list of referees.
      *
@@ -60,7 +50,7 @@ class RefereesController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->refereeService->create(RefereeData::fromStoreRequest($request));
+        CreateAction::run(RefereeData::fromStoreRequest($request));
 
         return to_route('referees.index');
     }
@@ -104,7 +94,7 @@ class RefereesController extends Controller
      */
     public function update(UpdateRequest $request, Referee $referee)
     {
-        $this->refereeService->update($referee, RefereeData::fromUpdateRequest($request));
+        UpdateAction::run($referee, RefereeData::fromUpdateRequest($request));
 
         return to_route('referees.index');
     }
@@ -119,7 +109,7 @@ class RefereesController extends Controller
     {
         $this->authorize('delete', $referee);
 
-        $this->refereeService->delete($referee);
+        DeleteAction::run($referee);
 
         return to_route('referees.index');
     }

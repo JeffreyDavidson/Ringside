@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Managers;
 
+use App\Actions\Managers\CreateAction;
+use App\Actions\Managers\DeleteAction;
+use App\Actions\Managers\UpdateAction;
 use App\Data\ManagerData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
-use App\Services\ManagerService;
 
 class ManagersController extends Controller
 {
-    private ManagerService $managerService;
-
-    /**
-     * Create a new managers controller instance.
-     *
-     * @param  \App\Services\ManagerService  $managerService
-     */
-    public function __construct(ManagerService $managerService)
-    {
-        $this->managerService = $managerService;
-    }
-
     /**
      * View a list of managers.
      *
@@ -60,7 +50,7 @@ class ManagersController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->managerService->create(ManagerData::fromStoreRequest($request));
+        CreateAction::run(ManagerData::fromStoreRequest($request));
 
         return to_route('managers.index');
     }
@@ -104,7 +94,7 @@ class ManagersController extends Controller
      */
     public function update(UpdateRequest $request, Manager $manager)
     {
-        $this->managerService->update($manager, ManagerData::fromUpdateRequest($request));
+        UpdateAction::run($manager, ManagerData::fromUpdateRequest($request));
 
         return to_route('managers.index');
     }
@@ -119,7 +109,7 @@ class ManagersController extends Controller
     {
         $this->authorize('delete', $manager);
 
-        $this->managerService->delete($manager);
+        DeleteAction::run($manager);
 
         return to_route('managers.index');
     }

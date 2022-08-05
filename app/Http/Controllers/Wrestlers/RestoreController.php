@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Wrestlers;
 
+use App\Actions\Wrestlers\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
-use App\Services\WrestlerService;
 
 class RestoreController extends Controller
 {
@@ -14,16 +14,15 @@ class RestoreController extends Controller
      * Restore a deleted wrestler.
      *
      * @param  int  $wrestlerId
-     * @param  \App\Services\WrestlerService  $wrestlerService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(int $wrestlerId, WrestlerService $wrestlerService)
+    public function __invoke(int $wrestlerId)
     {
         $wrestler = Wrestler::onlyTrashed()->findOrFail($wrestlerId);
 
         $this->authorize('restore', $wrestler);
 
-        $wrestlerService->restore($wrestler);
+        RestoreAction::run($wrestler);
 
         return to_route('wrestlers.index');
     }

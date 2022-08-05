@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Stables;
 
+use App\Actions\Stables\CreateAction;
+use App\Actions\Stables\DeleteAction;
+use App\Actions\Stables\UpdateAction;
 use App\Data\StableData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
 use App\Models\Stable;
-use App\Services\StableService;
 
 class StablesController extends Controller
 {
-    private StableService $stableService;
-
-    /**
-     * Create a new stables controller instance.
-     *
-     * @param  \App\Services\StableService  $stableService
-     */
-    public function __construct(StableService $stableService)
-    {
-        $this->stableService = $stableService;
-    }
-
     /**
      * View a list of stables.
      *
@@ -60,7 +50,7 @@ class StablesController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        $this->stableService->create(StableData::fromStoreRequest($request));
+        CreateAction::run(StableData::fromStoreRequest($request));
 
         return to_route('stables.index');
     }
@@ -100,12 +90,11 @@ class StablesController extends Controller
      *
      * @param  \App\Http\Requests\Stables\UpdateRequest  $request
      * @param  \App\Models\Stable  $stable
-     * @param  \App\Data\StableData  $stableData
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateRequest $request, Stable $stable)
     {
-        $this->stableService->update($stable, StableData::fromUpdateRequest($request));
+        UpdateAction::run($stable, StableData::fromUpdateRequest($request));
 
         return to_route('stables.index');
     }
@@ -120,7 +109,7 @@ class StablesController extends Controller
     {
         $this->authorize('delete', Stable::class);
 
-        $this->stableService->delete($stable);
+        DeleteAction::run($stable);
 
         return to_route('stables.index');
     }

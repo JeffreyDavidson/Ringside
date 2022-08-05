@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Titles;
 
+use App\Actions\Titles\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Title;
-use App\Services\TitleService;
 
 class RestoreController extends Controller
 {
@@ -14,16 +14,15 @@ class RestoreController extends Controller
      * Restores a title.
      *
      * @param  int  $titleId
-     * @param  TitleService  $titleService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($titleId, TitleService $titleService)
+    public function __invoke($titleId)
     {
         $title = Title::onlyTrashed()->findOrFail($titleId);
 
         $this->authorize('restore', $title);
 
-        $titleService->restore($title);
+        RestoreAction::run($title);
 
         return to_route('titles.index');
     }
