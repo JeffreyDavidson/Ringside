@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules;
 
 use App\Models\MatchType;
+use Countable;
 use Illuminate\Contracts\Validation\Rule;
 
 class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
@@ -30,15 +31,11 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
-     * @param  mixed  $value
+     * @param  array|Countable  $value
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        if (is_null($this->matchTypeId)) {
-            return false;
-        }
-
         return MatchType::find($this->matchTypeId)?->number_of_sides === count($value);
     }
 

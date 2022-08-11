@@ -16,7 +16,7 @@ class InjureAction extends BaseRefereeAction
      * Injure a referee.
      *
      * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $startDate
+     * @param  \Illuminate\Support\Carbon|null  $injureDate
      * @return void
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void

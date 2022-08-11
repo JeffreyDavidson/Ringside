@@ -16,7 +16,7 @@ class AddRefereesToMatchAction extends BaseEventMatchAction
      * Add referees to an event match.
      *
      * @param  \App\Models\EventMatch  $eventMatch
-     * @param  \Illuminate\Database\Eloquent\Collection<Referee>  $referees
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee>  $referees
      * @return void
      */
     public function handle(EventMatch $eventMatch, $referees): void

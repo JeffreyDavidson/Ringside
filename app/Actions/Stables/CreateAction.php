@@ -17,7 +17,6 @@ class CreateAction extends BaseStableAction
      *
      * @param  \App\Data\StableData  $stableData
      * @return \App\Models\Stable
-     * @return void
      */
     public function handle(StableData $stableData): Stable
     {

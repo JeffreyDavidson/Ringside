@@ -9,6 +9,7 @@ use Illuminate\Contracts\Validation\Rule;
 
 class TitleMustBeActive implements Rule
 {
+    /** @var string */
     protected $messages;
 
     /**
@@ -20,7 +21,7 @@ class TitleMustBeActive implements Rule
      */
     public function passes($attribute, $value)
     {
-        $title = Title::query()->find($value);
+        $title = Title::query()->whereKey($value)->sole();
 
         if (! $title->isCurrentlyActivated()) {
             return false;
@@ -32,7 +33,7 @@ class TitleMustBeActive implements Rule
     /**
      * Get the validation error message.
      *
-     * @return array
+     * @return string
      */
     public function message()
     {

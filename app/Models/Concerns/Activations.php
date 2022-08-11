@@ -117,7 +117,7 @@ trait Activations
      */
     public function isInactive()
     {
-        return $this->current()->count() === 0;
+        return $this->currentActivation()->count() === 0;
     }
 
     /**

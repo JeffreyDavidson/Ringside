@@ -16,7 +16,7 @@ class ManagerRepository
      * Create a new manager with the given data.
      *
      * @param  \App\Data\ManagerData  $managerData
-     * @return \App\Models\Manager
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(ManagerData $managerData)
     {

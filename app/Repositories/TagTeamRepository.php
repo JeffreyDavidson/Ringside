@@ -16,7 +16,7 @@ class TagTeamRepository
      * Create a new tag team with the given data.
      *
      * @param  \App\Data\TagTeamData  $tagTeamData
-     * @return \App\Models\TagTeam
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(TagTeamData $tagTeamData)
     {
@@ -175,7 +175,7 @@ class TagTeamRepository
      * Add wrestlers to a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
      * @param  \Illuminate\Support\Carbon|null  $joinDate
      * @return \App\Models\TagTeam
      */
@@ -194,8 +194,8 @@ class TagTeamRepository
      * Add wrestlers to a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Database\Eloquent\Collection  $formerTagTeamPartners
-     * @param  \Illuminate\Database\Eloquent\Collection  $newTagTeamPartners
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $formerTagTeamPartners
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $newTagTeamPartners
      * @param  \Illuminate\Support\Carbon|null  $date
      * @return \App\Models\TagTeam
      */

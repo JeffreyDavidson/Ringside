@@ -10,6 +10,13 @@ use Illuminate\Support\Carbon;
 
 class ManagerData
 {
+    /**
+     * Create a new manager data instance.
+     *
+     * @param  string  $first_name
+     * @param  string  $last_name
+     * @param  \Illuminate\Support\Carbon|null  $start_date
+     */
     public function __construct(
         public string $first_name,
         public string $last_name,
@@ -26,8 +33,8 @@ class ManagerData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            $request->input('first_name'),
-            $request->input('last_name'),
+            (string) $request->input('first_name'),
+            (string) $request->input('last_name'),
             $request->date('started_at')
         );
     }
@@ -41,8 +48,8 @@ class ManagerData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            $request->input('first_name'),
-            $request->input('last_name'),
+            (string) $request->input('first_name'),
+            (string) $request->input('last_name'),
             $request->date('started_at')
         );
     }

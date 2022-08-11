@@ -644,7 +644,6 @@ namespace App\Models{
      * @property-read \App\Models\Retirement|null $currentRetirement
      * @property-read \App\Models\Stable|null $currentStable
      * @property-read \App\Models\Suspension|null $currentSuspension
-     * @property-read \App\Models\TagTeam|null $currentTagTeam
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employment[] $employments
      * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\EventMatch[] $eventMatches
      * @property-read \App\Models\Employment|null $firstEmployment

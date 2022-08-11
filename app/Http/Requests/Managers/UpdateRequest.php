@@ -14,6 +14,7 @@ class UpdateRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = ManagerRequestFactory::class;
 
     /**
@@ -23,6 +24,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('update', Manager::class);
     }
 
@@ -33,6 +38,7 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        /** @var \App\Models\Manager */
         $manager = $this->route()->parameter('manager');
 
         return [

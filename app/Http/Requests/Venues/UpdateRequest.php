@@ -13,6 +13,7 @@ class UpdateRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = VenueRequestFactory::class;
 
     /**
@@ -22,6 +23,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('update', Venue::class);
     }
 

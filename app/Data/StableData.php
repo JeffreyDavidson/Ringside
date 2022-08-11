@@ -13,11 +13,19 @@ use Illuminate\Support\Collection;
 
 class StableData
 {
+    /**
+     * Create a new stable data instance.
+     *
+     * @param  string  $name
+     * @param  \Illuminate\Support\Carbon|null  $start_date
+     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     */
     public function __construct(
         public string $name,
         public ?Carbon $start_date,
-        public ?Collection $tagTeams,
-        public ?Collection $wrestlers
+        public Collection $tagTeams,
+        public Collection $wrestlers
     ) {
     }
 

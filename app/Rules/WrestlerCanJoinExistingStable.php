@@ -14,15 +14,22 @@ class WrestlerCanJoinExistingStable implements Rule
     protected $tagTeamIds;
 
     /**
-     * @var array
+     * @var string
      */
     protected $date;
 
-    protected $messages;
+    /**
+     * Undocumented variable
+     *
+     * @var string
+     */
+    protected string $messages;
 
     /**
      * Create a new rule instance.
      *
+     * @param  array  $tagTeamIds
+     * @param  string  $date
      * @return void
      */
     public function __construct($tagTeamIds, $date)
@@ -44,6 +51,7 @@ class WrestlerCanJoinExistingStable implements Rule
             return false;
         }
 
+        /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::with('currentStable')->whereKey($value)->first();
 
         if ($wrestler->isSuspended()) {
@@ -75,6 +83,8 @@ class WrestlerCanJoinExistingStable implements Rule
         if ($wrestler->currentStable !== null && $wrestler->currentStable->exists()) {
             return false;
         }
+
+        return true;
     }
 
     /**

@@ -16,6 +16,7 @@ class StoreRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = StableRequestFactory::class;
 
     /**
@@ -25,6 +26,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('create', Stable::class);
     }
 

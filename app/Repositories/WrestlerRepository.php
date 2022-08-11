@@ -14,7 +14,7 @@ class WrestlerRepository
      * Create a new wrestler with the given data.
      *
      * @param  \App\Data\WrestlerData  $wrestlerData
-     * @return \App\Models\Wrestler
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(WrestlerData $wrestlerData)
     {

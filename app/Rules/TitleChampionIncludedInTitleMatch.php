@@ -8,20 +8,22 @@ use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Collection;
 
 class TitleChampionIncludedInTitleMatch implements Rule
 {
     /**
-     * @var array
+     * @var \Illuminate\Support\Collection
      */
-    protected $titleIds = [];
+    protected $titleIds;
 
     /**
      * Create a new rule instance.
      *
+     * @param  \Illuminate\Support\Collection  $titleIds
      * @return void
      */
-    public function __construct($titleIds = [])
+    public function __construct(Collection $titleIds)
     {
         $this->titleIds = $titleIds;
     }
@@ -35,11 +37,7 @@ class TitleChampionIncludedInTitleMatch implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (! is_array($this->titleIds)) {
-            return false;
-        }
-
-        if (count($this->titleIds) === 0) {
+        if ($this->titleIds->isEmpty()) {
             return true;
         }
 

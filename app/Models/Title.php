@@ -46,7 +46,7 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \App\Builders\TitleQueryBuilder<\App\Models\Title>
+     * @return \App\Builders\TitleQueryBuilder<Title>
      */
     public function newEloquentBuilder($query): TitleQueryBuilder
     {
@@ -64,7 +64,7 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     }
 
     /**
-     * Undocumented function.
+     * Retrieve the championships of the title.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -74,7 +74,7 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     }
 
     /**
-     * Undocumented function.
+     * Retrieve the current championship reign being held.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
@@ -84,7 +84,7 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     }
 
     /**
-     * Determines if title has champion.
+     * Determines if a title has a current champion.
      *
      * @return bool
      */
@@ -94,7 +94,7 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     }
 
     /**
-     * Determine if the model can be unretired.
+     * Determine if the title can be unretired.
      *
      * @return bool
      */

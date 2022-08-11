@@ -17,7 +17,7 @@ class AddTagTeamsToMatchAction extends BaseEventMatchAction
      * Add titles to an event match.
      *
      * @param  \App\Models\EventMatch  $eventMatch
-     * @param  \Illuminate\Support\Collection<TagTeam>  $tagTeams
+     * @param  \Illuminate\Support\Collection<int, \App\Models\TagTeam>  $tagTeams
      * @param  int  $sideNumber
      * @return void
      */

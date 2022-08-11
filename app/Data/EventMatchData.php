@@ -15,10 +15,19 @@ use Illuminate\Support\Collection;
 
 class EventMatchData
 {
+    /**
+     * Create a new event match data instance.
+     *
+     * @param  \App\Models\MatchType  $matchType
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee>  $referees
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title>  $titles
+     * @param  \Illuminate\Support\Collection<int, mixed>  $competitors
+     * @param  string|null  $preview
+     */
     public function __construct(
         public MatchType $matchType,
         public Collection $referees,
-        public ?Collection $titles,
+        public Collection $titles,
         public Collection $competitors,
         public ?string $preview
     ) {

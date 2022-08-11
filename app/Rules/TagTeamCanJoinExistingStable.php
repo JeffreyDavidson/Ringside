@@ -4,10 +4,31 @@ namespace App\Rules;
 
 use App\Models\TagTeam;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Carbon;
 
 class TagTeamCanJoinExistingStable implements Rule
 {
+    /**
+     * @var string
+     */
     protected $messages;
+
+    /**
+     * Undocumented variable
+     *
+     * @var \Illuminate\Support\Carbon|null
+     */
+    protected $startedAt;
+
+    /**
+     * Undocumented function
+     *
+     * @param  \Illuminate\Support\Carbon|null  $startedAt
+     */
+    public function __construct(?Carbon $startedAt)
+    {
+        $this->startedAt = $startedAt;
+    }
 
     /**
      * Determine if the validation rule passes.
@@ -18,6 +39,7 @@ class TagTeamCanJoinExistingStable implements Rule
      */
     public function passes($attribute, $value)
     {
+        /** @var \App\Models\TagTeam $tagTeam */
         $tagTeam = TagTeam::with(['currentWrestlers', 'currentStable'])->whereKey($value)->sole();
 
         if ($tagTeam->currentStable !== null) {
@@ -30,7 +52,7 @@ class TagTeamCanJoinExistingStable implements Rule
             return false;
         }
 
-        if ($tagTeam->isCurrentlyEmployed() && ! $tagTeam->employedBefore($this->date('started_at'))) {
+        if ($tagTeam->isCurrentlyEmployed() && isset($this->startedAt) && ! $tagTeam->employedBefore($this->startedAt)) {
             $this->messages = "{$tagTeam->name} cannot have an employment start date after stable's start date.";
 
             return false;

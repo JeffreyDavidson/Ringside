@@ -37,9 +37,9 @@ class Event extends Model
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \App\Builders\EventQueryBuilder
+     * @return \App\Builders\EventQueryBuilder<Event>
      */
-    public function newEloquentBuilder($query)
+    public function newEloquentBuilder($query): EventQueryBuilder
     {
         return new EventQueryBuilder($query);
     }
@@ -81,7 +81,11 @@ class Event extends Model
      */
     public function isScheduled()
     {
-        return $this->date?->isFuture() ?? false;
+        if (is_null($this->date)) {
+            return false;
+        }
+
+        return $this->date->isFuture();
     }
 
     /**
@@ -91,7 +95,11 @@ class Event extends Model
      */
     public function isPast()
     {
-        return $this->date?->isPast();
+        if (is_null($this->date)) {
+            return false;
+        }
+
+        return $this->date->isPast();
     }
 
     /**

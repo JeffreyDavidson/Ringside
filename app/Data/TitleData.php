@@ -10,6 +10,12 @@ use Illuminate\Support\Carbon;
 
 class TitleData
 {
+    /**
+     * Create a new title data instance.
+     *
+     * @param  string  $name
+     * @param  \Illuminate\Support\Carbon|null  $activation_date
+     */
     public function __construct(
         public string $name,
         public ?Carbon $activation_date

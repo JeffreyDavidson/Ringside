@@ -18,7 +18,7 @@ class NotEnoughMembersException extends Exception
     {
         return new self(sprintf(
             'A tag team must contain %u wrestlers to be on a tag team.',
-            [TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM]
+            TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM
         ));
     }
 

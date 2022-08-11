@@ -75,10 +75,15 @@ trait HasRetirements
         return $this->retirements()->count() > 0;
     }
 
+    /**
+     * Retrieve the retirement start date.
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
     public function retiredAt(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->currentRetirement->started_at
+            get: fn () => $this->currentRetirement?->started_at
         );
     }
 }

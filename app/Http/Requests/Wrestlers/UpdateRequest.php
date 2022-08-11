@@ -15,6 +15,7 @@ class UpdateRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = WrestlerRequestFactory::class;
 
     /**
@@ -24,6 +25,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('update', Wrestler::class);
     }
 
@@ -34,6 +39,7 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        /** @var \App\Models\Wrestler */
         $wrestler = $this->route()->parameter('wrestler');
 
         return [
