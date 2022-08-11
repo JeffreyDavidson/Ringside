@@ -9,6 +9,16 @@ use App\Http\Requests\Venues\UpdateRequest;
 
 class VenueData
 {
+    /**
+     * Create a new venue data instance.
+     *
+     * @param  string  $name
+     * @param  string  $address1
+     * @param  string|null  $address2
+     * @param  string  $city
+     * @param  string  $state
+     * @param  string  $zip
+     */
     public function __construct(
         public string $name,
         public string $address1,

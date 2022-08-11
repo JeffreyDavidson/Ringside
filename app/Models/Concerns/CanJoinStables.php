@@ -7,6 +7,9 @@ namespace App\Models\Concerns;
 use App\Models\Stable;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 
+/**
+ * @property ?Stable $currentStable
+ */
 trait CanJoinStables
 {
     use HasMorphToOne;

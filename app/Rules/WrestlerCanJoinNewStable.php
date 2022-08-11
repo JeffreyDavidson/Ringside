@@ -15,6 +15,7 @@ class WrestlerCanJoinNewStable implements Rule
     /**
      * Create a new rule instance.
      *
+     * @param  array $tagTeamIds
      * @return void
      */
     public function __construct($tagTeamIds)
@@ -31,9 +32,10 @@ class WrestlerCanJoinNewStable implements Rule
      */
     public function passes($attribute, $value)
     {
+        /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::with(['currentStable'])->find($value);
 
-        if (! is_null($wrestler->currentStable) && $wrestler->currentStable()->exists()) {
+        if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
             return false;
         }
 

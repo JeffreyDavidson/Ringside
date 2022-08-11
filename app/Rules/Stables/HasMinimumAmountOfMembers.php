@@ -5,18 +5,47 @@ namespace App\Rules\Stables;
 use App\Models\Stable;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class HasMinimumAmountOfMembers implements Rule
 {
+    /**
+     * Undocumented variable
+     *
+     * @var \App\Models\Stable
+     */
     protected $stable;
 
+    /**
+     * Undocumented variable
+     *
+     * @var \Illuminate\Support\Carbon
+     */
     protected $startedAt;
 
+    /**
+     * Undocumented variable
+     *
+     * @var \Illuminate\Support\Collection
+     */
     protected $wrestlers;
 
+    /**
+     * Undocumented variable
+     *
+     * @var \Illuminate\Support\Collection
+     */
     protected $tagTeams;
 
-    public function __construct(Stable $stable, $startedAt, $wrestlers, $tagTeams)
+    /**
+     * Undocumented function
+     *
+     * @param  \App\Models\Stable  $stable
+     * @param  \Illuminate\Support\Carbon  $startedAt
+     * @param  \Illuminate\Support\Collection  $wrestlers
+     * @param  \Illuminate\Support\Collection  $tagTeams
+     */
+    public function __construct(Stable $stable, Carbon $startedAt, Collection $wrestlers, Collection $tagTeams)
     {
         $this->stable = $stable;
         $this->startedAt = $startedAt;
@@ -33,7 +62,7 @@ class HasMinimumAmountOfMembers implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->stable->isCurrentlyActivated() || Carbon::parse($this->startedAt)) {
+        if ($this->stable->isCurrentlyActivated()) {
             $tagTeamsCountFromRequest = $this->tagTeams->count();
             $wrestlersCountFromRequest = $this->wrestlers->count();
 

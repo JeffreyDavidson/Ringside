@@ -16,6 +16,7 @@ class WrestlerCanJoinNewTagTeam implements Rule
      */
     public function passes($attribute, $value)
     {
+        /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 
         if ($wrestler->isSuspended() || $wrestler->isInjured()) {

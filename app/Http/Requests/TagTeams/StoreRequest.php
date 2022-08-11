@@ -15,6 +15,7 @@ class StoreRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = TagTeamRequestFactory::class;
 
     /**
@@ -24,6 +25,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('create', TagTeam::class);
     }
 
@@ -38,9 +43,8 @@ class StoreRequest extends FormRequest
             'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams', 'name')],
             'signature_move' => ['nullable', 'string'],
             'started_at' => ['nullable', 'string', 'date'],
-            'wrestlers' => ['nullable', 'array', 'required_with:signature_move'],
+            'wrestlers' => ['array', 'required_with:signature_move'],
             'wrestlers.*' => [
-                'nullable',
                 'bail',
                 'integer',
                 'distinct',

@@ -14,6 +14,7 @@ class StoreRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = EventRequestFactory::class;
 
     /**
@@ -23,6 +24,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('create', Event::class);
     }
 

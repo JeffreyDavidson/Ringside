@@ -16,6 +16,7 @@ class UpdateRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = TagTeamRequestFactory::class;
 
     /**
@@ -25,6 +26,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('update', TagTeam::class);
     }
 
@@ -35,13 +40,14 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        /** @var \App\Models\TagTeam */
         $tagTeam = $this->route()->parameter('tag_team');
 
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
             'signature_move' => ['nullable', 'string'],
             'started_at' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($tagTeam)],
-            'wrestlers' => ['nullable', 'array'],
+            'wrestlers' => ['array'],
             'wrestlers.*', [
                 'bail',
                 'integer',

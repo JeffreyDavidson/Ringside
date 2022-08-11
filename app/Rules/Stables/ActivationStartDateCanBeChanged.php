@@ -8,11 +8,17 @@ use Illuminate\Support\Carbon;
 
 class ActivationStartDateCanBeChanged implements Rule
 {
+    /**
+     * Undocumented variable
+     *
+     * @var \App\Models\Stable
+     */
     private $stable;
 
     /**
      * Create a new rule instance.
      *
+     * @param  \App\Models\Stable  $stable
      * @return void
      */
     public function __construct(Stable $stable)
@@ -24,7 +30,7 @@ class ActivationStartDateCanBeChanged implements Rule
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
-     * @param  mixed  $value
+     * @param  \Illuminate\Support\Carbon  $value
      * @return bool
      */
     public function passes($attribute, $value)

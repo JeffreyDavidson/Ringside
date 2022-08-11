@@ -17,7 +17,7 @@ class StableRepository
      * Create a new stable with the given data.
      *
      * @param  \App\Data\StableData  $stableData
-     * @return \App\Models\Stable
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(StableData $stableData)
     {
@@ -157,7 +157,7 @@ class StableRepository
      * Add wrestlers to a given stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Collection  $wrestlers
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Wrestler>  $wrestlers
      * @param  \Illuminate\Support\Carbon  $joinDate
      * @return void
      */
@@ -172,7 +172,7 @@ class StableRepository
      * Add tag teams to a given stable at a given date.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Collection  $tagTeams
+     * @param  \Illuminate\Support\Collection<int, \App\Models\TagTeam>  $tagTeams
      * @param  \Illuminate\Support\Carbon  $joinDate
      * @return void
      */
@@ -187,7 +187,7 @@ class StableRepository
      * Undocumented function.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Collection  $currentWrestlers
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Wrestler>  $currentWrestlers
      * @param  \Illuminate\Support\Carbon  $removalDate
      * @return void
      */
@@ -205,7 +205,7 @@ class StableRepository
      * Undocumented function.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Collection  $currentTagTeams
+     * @param  \Illuminate\Support\Collection<int, \App\Models\TagTeam>  $currentTagTeams
      * @param  \Illuminate\Support\Carbon  $removalDate
      * @return void
      */

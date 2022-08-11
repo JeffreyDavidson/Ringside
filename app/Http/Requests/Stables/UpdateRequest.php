@@ -18,6 +18,7 @@ class UpdateRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = StableRequestFactory::class;
 
     /**
@@ -27,6 +28,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('update', Stable::class);
     }
 
@@ -37,6 +42,7 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        /** @var \App\Models\Stable */
         $stable = $this->route()->parameter('stable');
 
         return [
@@ -51,12 +57,16 @@ class UpdateRequest extends FormRequest
             'members_count' => [
                 'bail',
                 'integer',
-                Rule::when($this->input('started_at'),
-                new HasMinimumAmountOfMembers(
-                    $stable,
+                Rule::when(
                     $this->input('started_at'),
-                    $this->collect('wrestlers'),
-                    $this->collect('tag_teams'))
+                    function () use ($stable) {
+                        new HasMinimumAmountOfMembers(
+                            $stable,
+                            $this->input('started_at'),
+                            $this->collect('wrestlers'),
+                            $this->collect('tag_teams')
+                        );
+                    }
                 ),
             ],
             'wrestlers' => ['array'],
@@ -73,7 +83,7 @@ class UpdateRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
-                new TagTeamCanJoinExistingStable(),
+                new TagTeamCanJoinExistingStable($this->date('started_at')),
             ],
         ];
     }

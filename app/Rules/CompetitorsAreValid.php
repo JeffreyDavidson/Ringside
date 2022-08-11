@@ -27,6 +27,9 @@ class CompetitorsAreValid implements Rule
      */
     public function passes($attribute, $value)
     {
+        $diffWrestlers = [];
+        $diffTagTeams = [];
+
         foreach ($value as $sideCompetitors) {
             $wrestlers = Arr::get($sideCompetitors, 'wrestlers', []);
             $tagTeams = Arr::get($sideCompetitors, 'tag_teams', []);

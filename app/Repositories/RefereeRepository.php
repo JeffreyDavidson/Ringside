@@ -14,7 +14,7 @@ class RefereeRepository
      * Create a new referee with the given data.
      *
      * @param  \App\Data\RefereeData  $refereeData
-     * @return \App\Models\Referee
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(RefereeData $refereeData)
     {

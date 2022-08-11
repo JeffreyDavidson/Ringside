@@ -6,10 +6,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
 class TitleChampionship extends Model
 {
     use HasFactory;
+    use HasMergedRelationships;
 
     /**
      * The attributes that are mass assignable.
@@ -28,7 +30,7 @@ class TitleChampionship extends Model
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'won_at' => 'datetime',
@@ -46,17 +48,17 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Undocumented function.
+     * Retrieve all title champions for championships.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation
      */
     public function allTitleChampions()
     {
-        return $this->mergedRelationWithModel('all_title_champions');
+        return $this->mergedRelation('all_title_champions');
     }
 
     /**
-     * Undocumented function.
+     * Retrieve the champion of title championship.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */

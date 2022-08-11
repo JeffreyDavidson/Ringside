@@ -51,7 +51,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \App\Builders\StableQueryBuilder
+     * @return \App\Builders\StableQueryBuilder<Stable>
      */
     public function newEloquentBuilder($query)
     {

@@ -9,28 +9,36 @@ use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Venue;
 
+/**
+ * @property \Illuminate\Database\Eloquent\Collection $rows
+ * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
+ */
 class VenuesList extends BaseComponent
 {
     use WithBulkActions;
     use WithSorting;
 
-    public $showDeleteModal = false;
-
+    /**
+     * Determines if the filters should be shown.
+     *
+     * @var bool
+     */
     public $showFilters = false;
 
+    /**
+     * Shows list of accepted filters and direction to be displayed.
+     *
+     * @var array<string, string>
+     */
     public $filters = [
         'search' => '',
     ];
 
-    public function deleteSelected()
-    {
-        $deleteCount = $this->selectedRowsQuery->count();
-
-        $this->selectedRowsQuery->delete();
-
-        $this->showDeleteModal = false;
-    }
-
+    /**
+     * Undocumented function.
+     *
+     * @return \Illuminate\Database\Query\Builder
+     */
     public function getRowsQueryProperty()
     {
         $query = Venue::query()
@@ -40,6 +48,11 @@ class VenuesList extends BaseComponent
         return $this->applySorting($query);
     }
 
+    /**
+     * Undocumented function.
+     *
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
     public function getRowsProperty()
     {
         return $this->applyPagination($this->rowsQuery);

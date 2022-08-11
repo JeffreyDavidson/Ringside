@@ -6,6 +6,8 @@ namespace App\Models\Concerns;
 
 use App\Models\Employment;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
 trait HasEmployments
@@ -15,7 +17,7 @@ trait HasEmployments
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function employments()
+    public function employments(): MorphMany
     {
         return $this->morphMany(Employment::class, 'employable');
     }
@@ -25,7 +27,7 @@ trait HasEmployments
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function firstEmployment()
+    public function firstEmployment(): MorphOne
     {
         return $this->morphOne(Employment::class, 'employable')
             ->oldestOfMany('started_at');
@@ -36,7 +38,7 @@ trait HasEmployments
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentEmployment()
+    public function currentEmployment(): MorphOne
     {
         return $this->morphOne(Employment::class, 'employable')
             ->where('started_at', '<=', now())
@@ -49,7 +51,7 @@ trait HasEmployments
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function futureEmployment()
+    public function futureEmployment(): MorphOne
     {
         return $this->morphOne(Employment::class, 'employable')
             ->where('started_at', '>', now())
@@ -62,7 +64,7 @@ trait HasEmployments
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousEmployments()
+    public function previousEmployments(): MorphMany
     {
         return $this->employments()
             ->whereNotNull('ended_at');
@@ -73,7 +75,7 @@ trait HasEmployments
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousEmployment()
+    public function previousEmployment(): MorphOne
     {
         return $this->morphOne(Employment::class, 'employable')
             ->whereNotNull('ended_at')
@@ -86,7 +88,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function isCurrentlyEmployed()
+    public function isCurrentlyEmployed(): bool
     {
         return $this->currentEmployment()->exists();
     }
@@ -97,8 +99,12 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $startDate
      * @return bool
      */
-    public function startDateWas(Carbon $startDate)
+    public function startDateWas(Carbon $startDate): bool
     {
+        if (is_null($this->firstEmployment)) {
+            return false;
+        }
+
         return $this->firstEmployment->started_at->ne($startDate);
     }
 
@@ -107,7 +113,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function hasEmployments()
+    public function hasEmployments(): bool
     {
         return $this->employments()->count() > 0;
     }
@@ -117,7 +123,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function isNotInEmployment()
+    public function isNotInEmployment(): bool
     {
         return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
     }
@@ -127,7 +133,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function isUnemployed()
+    public function isUnemployed(): bool
     {
         return $this->employments()->count() === 0;
     }
@@ -137,7 +143,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function hasFutureEmployment()
+    public function hasFutureEmployment(): bool
     {
         return $this->futureEmployment()->exists();
     }
@@ -147,7 +153,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function isReleased()
+    public function isReleased(): bool
     {
         return $this->previousEmployment()->exists()
                 && $this->futureEmployment()->doesntExist()
@@ -160,7 +166,7 @@ trait HasEmployments
      *
      * @return bool
      */
-    public function canBeReleased()
+    public function canBeReleased(): bool
     {
         if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
@@ -187,8 +193,12 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
-    public function employedOn(Carbon $employmentDate)
+    public function employedOn(Carbon $employmentDate): bool
     {
+        if (is_null($this->currentEmployment)) {
+            return false;
+        }
+
         return $this->currentEmployment->started_at->eq($employmentDate);
     }
 
@@ -198,8 +208,12 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
-    public function scheduledToBeEmployedOn(Carbon $employmentDate)
+    public function scheduledToBeEmployedOn(Carbon $employmentDate): bool
     {
+        if (is_null($this->futureEmployment)) {
+            return false;
+        }
+
         return $this->futureEmployment->started_at->eq($employmentDate);
     }
 
@@ -209,8 +223,12 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
-    public function employedBefore(Carbon $employmentDate)
+    public function employedBefore(Carbon $employmentDate): bool
     {
+        if (is_null($this->currentEmployment)) {
+            return false;
+        }
+
         return $this->currentEmployment->started_at->lte($employmentDate);
     }
 
@@ -220,8 +238,12 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
-    public function employedAfter(Carbon $employmentDate)
+    public function employedAfter(Carbon $employmentDate): bool
     {
+        if (is_null($this->currentEmployment)) {
+            return false;
+        }
+
         return $this->currentEmployment->started_at->gt($employmentDate);
     }
 
@@ -231,8 +253,12 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $date
      * @return bool
      */
-    public function futureEmploymentIsBefore(Carbon $date)
+    public function futureEmploymentIsBefore(Carbon $date): bool
     {
+        if (is_null($this->futureEmployment)) {
+            return false;
+        }
+
         return $this->futureEmployment->started_at->lt($date);
     }
 
@@ -242,7 +268,7 @@ trait HasEmployments
      * @param  \Illuminate\Support\Carbon  $employmentDate
      * @return bool
      */
-    public function canHaveEmploymentStartDateChanged(Carbon $employmentDate)
+    public function canHaveEmploymentStartDateChanged(Carbon $employmentDate): bool
     {
         return $this->hasFutureEmployment() && ! $this->scheduledToBeEmployedOn($employmentDate);
     }

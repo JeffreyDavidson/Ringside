@@ -18,6 +18,7 @@ class StoreRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = EventMatchRequestFactory::class;
 
     /**
@@ -27,6 +28,10 @@ class StoreRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         return $this->user()->can('create', EventMatch::class);
     }
 
@@ -50,7 +55,7 @@ class StoreRequest extends FormRequest
                 'min:2',
                 new CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType($this->input('match_type_id')),
                 new CompetitorsAreValid(),
-                new TitleChampionIncludedInTitleMatch($this->input('titles')),
+                new TitleChampionIncludedInTitleMatch($this->collect('titles')),
             ],
             'competitors.*' => ['required', 'array', 'min:1'],
             'competitors.*.wrestlers' => ['array'],

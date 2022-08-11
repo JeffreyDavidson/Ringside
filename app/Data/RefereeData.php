@@ -10,6 +10,13 @@ use Illuminate\Support\Carbon;
 
 class RefereeData
 {
+    /**
+     * Create a new referee data instance.
+     *
+     * @param  string  $first_name
+     * @param  string  $last_name
+     * @param  \Illuminate\Support\Carbon|null  $start_date
+     */
     public function __construct(
         public string $first_name,
         public string $last_name,

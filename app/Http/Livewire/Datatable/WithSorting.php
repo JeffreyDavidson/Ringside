@@ -6,8 +6,19 @@ namespace App\Http\Livewire\Datatable;
 
 trait WithSorting
 {
+    /**
+     * The list of fields and direction to be sorted.
+     *
+     * @var array<string, string>
+     */
     private $sorts = [];
 
+    /**
+     * Sorts a field by a given key.
+     *
+     * @param  string  $field
+     * @return string|null
+     */
     public function sortBy($field)
     {
         if (! isset($this->sorts[$field])) {
@@ -21,6 +32,12 @@ trait WithSorting
         unset($this->sorts[$field]);
     }
 
+    /**
+     * Undocumented function.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return  \Illuminate\Database\Query\Builder
+     */
     public function applySorting($query)
     {
         foreach ($this->sorts as $field => $direction) {

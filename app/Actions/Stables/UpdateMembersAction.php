@@ -17,8 +17,8 @@ class UpdateMembersAction extends BaseStableAction
      * Retire a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
-     * @param  \Illuminate\Database\Eloquent\Collection  $tagTeams
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
      * @return void
      */
     public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams): void
@@ -30,10 +30,10 @@ class UpdateMembersAction extends BaseStableAction
     }
 
     /**
-     * Undocumented function.
+     * Update wrestlers attached to a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Database\Eloquent\Collection  $wrestlers
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
      * @param  \Illuminate\Support\Carbon  $now
      * @return void
      */
@@ -52,10 +52,10 @@ class UpdateMembersAction extends BaseStableAction
     }
 
     /**
-     * Undocumented function.
+     * Update tag teams attached to a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Database\Eloquent\Collection  $tagTeams
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
      * @param  \Illuminate\Support\Carbon  $now
      * @return void
      */

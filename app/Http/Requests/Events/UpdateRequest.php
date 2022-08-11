@@ -14,6 +14,7 @@ class UpdateRequest extends FormRequest
 {
     use HasFactory;
 
+    /** @var class-string */
     public static $factory = EventRequestFactory::class;
 
     /**
@@ -23,6 +24,10 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
+        if (is_null($this->user())) {
+            return false;
+        }
+
         $event = $this->route()->parameter('event');
 
         return $this->user()->can('update', $event);
@@ -35,9 +40,12 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
+        /** @var \App\Models\Event */
+        $event = $this->route()->parameter('event');
+
         return [
-            'name' => ['required', 'string', 'min:3', Rule::unique('events')->ignore($this->route('event'))],
-            'date' => ['nullable', 'string', 'date', new EventDateCanBeChanged($this->route('event'))],
+            'name' => ['required', 'string', 'min:3', Rule::unique('events')->ignore($event)],
+            'date' => ['nullable', 'string', 'date', new EventDateCanBeChanged($event)],
             'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];

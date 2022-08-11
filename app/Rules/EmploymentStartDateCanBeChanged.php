@@ -8,11 +8,24 @@ use Illuminate\Support\Carbon;
 
 class EmploymentStartDateCanBeChanged implements Rule
 {
-    private $rosterMember;
+    /**
+     * Undocumented variable
+     *
+     * @var \App\Models\Contracts\Employable
+     */
+    private Employable $rosterMember;
+
+    /**
+     * Undocumented variable
+     *
+     * @var string
+     */
+    private $message;
 
     /**
      * Create a new rule instance.
      *
+     * @param  \App\Models\Contracts\Employable  $rosterMember
      * @return void
      */
     public function __construct(Employable $rosterMember)
@@ -24,7 +37,7 @@ class EmploymentStartDateCanBeChanged implements Rule
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
-     * @param  mixed  $value
+     * @param  string  $value
      * @return bool
      */
     public function passes($attribute, $value)

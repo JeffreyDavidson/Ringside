@@ -52,9 +52,9 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \App\Builders\TagTeamQueryBuilder
+     * @return \App\Builders\TagTeamQueryBuilder<TagTeam>
      */
-    public function newEloquentBuilder($query)
+    public function newEloquentBuilder($query): TagTeamQueryBuilder
     {
         return new TagTeamQueryBuilder($query);
     }
@@ -132,7 +132,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
      *
      * @return bool
      */
-    public function canBeReleased()
+    public function canBeReleased(): bool
     {
         if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
@@ -152,7 +152,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
             return false;
         }
 
-        return $this->currentWrestlers->every->canBeReinstated();
+        return true;
     }
 
     /**
@@ -166,10 +166,6 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
             return false;
         }
 
-        if (! $this->currentWrestlers->every->isBookable()) {
-            return false;
-        }
-
         return true;
     }
 
@@ -180,17 +176,7 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
      */
     public function isUnbookable()
     {
-        return ! $this->currentWrestlers->every->isBookable();
-    }
-
-    /**
-     * Find out if both tag team partners are bookable.
-     *
-     * @return bool
-     */
-    public function partnersAreBookable()
-    {
-        return $this->currentWrestlers->every->isBookable();
+        return ! $this->isBookable();
     }
 
     /**

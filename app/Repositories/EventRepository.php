@@ -13,7 +13,7 @@ class EventRepository
      * Create a new event with the given data.
      *
      * @param  \App\Data\EventData  $eventData
-     * @return \App\Models\Event
+     * @return \Illuminate\Database\Eloquent\Model
      */
     public function create(EventData $eventData)
     {
