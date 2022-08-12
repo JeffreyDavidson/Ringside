@@ -12,29 +12,41 @@
 		<link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
         @livewireStyles
     </head>
-    <body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px">
-		<div class="d-flex flex-column flex-root">
-			<div class="flex-row page d-flex flex-column-fluid">
-                @include('partials.aside')
+    <body id="kt_app_body" class="app-default" data-kt-app-layout="dark-sidebar" data-kt-app-header-fixed="true" data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true" data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true" data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true">
+        <div id="kt_app_root" class="d-flex flex-column flex-root app-root">
+            <div id="kt_app_page" class="app-page flex-column flex-column-fluid">
+                @include('partials.header')
 
-				<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
-                    @include('partials.header')
+                <div id="kt_app_wrapper" class="app-wrapper flex-column flex-row-fluid">
+                    @include('partials.aside')
+                    <div id="kt_app_main" class="app-main flex-column flex-row-fluid">
+                        <div class="d-flex flex-column flex-column-fluid">
+                            {{ $toolbar }}
 
-                    <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
-                        @include('partials.toolbar')
-
-                        <div class="post d-flex flex-column-fluid" id="kt_post">
-                            <div id="kt_content_container" class="container-xxl">
-                                {{ $slot }}
+                            <div id="kt_app_content" class="app-content flex-column-fluid">
+                                <div id="kt_app_content_container" class="app-container container-fluid">
+                                    {{ $slot }}
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <x-notification />
 
-                    @include('partials.footer')
+                        </div>
+                        <div id="kt_app_footer" class="app-footer">
+							<!--begin::Footer container-->
+							<div class="py-3 app-container container-fluid d-flex flex-column flex-md-row flex-center flex-md-stack">
+								<!--begin::Copyright-->
+								<div class="order-2 text-dark order-md-1">
+									<span class="text-muted fw-semibold me-1">2022©</span>
+									<span class="text-gray-800">Jeffrey Davidson</span>
+								</div>
+								<!--end::Copyright-->
+							</div>
+							<!--end::Footer container-->
+						</div>
+                    </div>
                 </div>
             </div>
         </div>
+
 		<script>var hostUrl = "assets/";</script>
 		<script src="{{ asset('assets/js/app.js') }}"></script>
 		<script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
