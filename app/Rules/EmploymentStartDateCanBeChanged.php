@@ -45,13 +45,13 @@ class EmploymentStartDateCanBeChanged implements Rule
         $name = $this->rosterMember->name;
 
         if ($this->rosterMember->isReleased() && ! $this->rosterMember->employedOn(Carbon::parse($value))) {
-            $this->message = "{$name} was released and the employment date cannot be changed.";
+            $this->message = "{$name} was released and the start date cannot be changed.";
 
             return false;
         }
 
         if ($this->rosterMember->isCurrentlyEmployed() && ! $this->rosterMember->employedOn(Carbon::parse($value))) {
-            $this->message = "{$name} is currently employed and the employment date cannot be changed.";
+            $this->message = "{$name} is currently employed and the start date cannot be changed.";
 
             return false;
         }
