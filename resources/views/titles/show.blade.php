@@ -1,45 +1,62 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ $title->name }} Page
-        </h2>
+        <x-toolbar title="{{ $title->name }}">
+            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('titles.index')" label="Titles" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :label="$title->name" />
+        </x-toolbar>
     </x-slot>
 
-    <x-content>
-        @empty($title->activated_at)
-            <div class="alert alert-warning" role="alert">
-                <strong>Warning!</strong>&nbsp;This title is not activated!
+    <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
+        <!--begin::Card header-->
+        <div class="card-header">
+            <!--begin::Card title-->
+            <div class="m-0 card-title">
+                <h3 class="m-0 fw-bold">Title Details</h3>
             </div>
-        @endempty
-
-        <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
-            <div class="card-header">
-                <div class="m-0 card-title">
-                    <h3 class="m-0 fw-bolder">{{ $title->name }} Details</h3>
-                </div>
-                <a href="{{ route('titles.edit', $title) }}" class="btn btn-primary align-self-center">Edit Details</a>
-            </div>
-
-            <div class="card-body p-9">
-                <div class="row mb-7">
-                    <label class="col-lg-4 fw-bold text-muted">Name</label>
-
-                    <div class="col-lg-8">
-                        <span class="text-gray-800 fw-bolder fs-6">{{ $title->name }}</span>
-                    </div>
-                </div>
-
-                @isset($title->activatedAt)
-                    <div class="row mb-7">
-                        <label class="col-lg-4 fw-bold text-muted">Date Introduced</label>
-
-                        <div class="col-lg-8">
-                            <span class="text-gray-800 fw-bolder fs-6">{{ $title->activatedAt->toDateString() }}</span>
-                        </div>
-                    </div>
-                @endisset
-            </div>
+            <!--end::Card title-->
+            <!--begin::Action-->
+            <a href="{{ route('titles.edit', $title) }}" class="btn btn-primary align-self-center">Edit Title</a>
+            <!--end::Action-->
         </div>
-        <livewire:titles.title-championships-list :title="$title" />
-    </x-content>
+        <!--begin::Card header-->
+        <!--begin::Card body-->
+        <div class="card-body p-9">
+            <!--begin::Row-->
+            <div class="row mb-7">
+                <!--begin::Label-->
+                <label class="col-lg-4 fw-semibold text-muted">Title Name</label>
+                <!--end::Label-->
+                <!--begin::Col-->
+                <div class="col-lg-8">
+                    <span class="text-gray-800 fs-6">{{ $title->name }}</span>
+                </div>
+                <!--end::Col-->
+            </div>
+            <!--end::Row-->
+            <!--begin::Input group-->
+            <div class="row mb-7">
+                <!--begin::Label-->
+                <label class="col-lg-4 fw-semibold text-muted">Activation Date</label>
+                <!--end::Label-->
+                <!--begin::Col-->
+                <div class="col-lg-8 fv-row">
+                    <span class="text-gray-800 fw-semibold fs-6">{{ $title->activatedAt->toDateString() ?? 'Unscheduled' }}</span>
+                </div>
+                <!--end::Col-->
+            </div>
+            <!--end::Input group-->
+            @if ($title->isUnactivated())
+                <x-notice
+                    title="This title needs your attention!"
+                    description="This title does not have an activation date and needs to be activated."
+                />
+            @endif
+        </div>
+        <!--end::Card body-->
+    </div>
+
+    <livewire:titles.title-championships-list :title="$title" />
 </x-layouts.app>

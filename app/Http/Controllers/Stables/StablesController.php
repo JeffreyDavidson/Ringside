@@ -11,7 +11,10 @@ use App\Data\StableData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
+use App\Models\Manager;
 use App\Models\Stable;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 
 class StablesController extends Controller
 {
@@ -39,6 +42,12 @@ class StablesController extends Controller
 
         return view('stables.create', [
             'stable' => $stable,
+            'wrestlers' => Wrestler::query()->pluck('name', 'id'),
+            'tagTeams' => TagTeam::query()->pluck('name', 'id'),
+            'managers' => Manager::query()
+                ->get()
+                ->map(fn ($manager) => ['id' => $manager->id, 'full_name' => $manager->first_name.' '.$manager->last_name])
+                ->pluck('full_name', 'id'),
         ]);
     }
 
@@ -82,6 +91,12 @@ class StablesController extends Controller
 
         return view('stables.edit', [
             'stable' => $stable,
+            'wrestlers' => Wrestler::query()->pluck('name', 'id'),
+            'tagTeams' => TagTeam::query()->pluck('name', 'id'),
+            'managers' => Manager::query()
+                ->get()
+                ->map(fn ($manager) => ['id' => $manager->id, 'full_name' => $manager->first_name.' '.$manager->last_name])
+                ->pluck('full_name', 'id'),
         ]);
     }
 

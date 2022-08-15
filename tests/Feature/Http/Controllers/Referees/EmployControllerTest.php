@@ -20,14 +20,14 @@ test('invoke employs an unemployed referee and redirects', function () {
 
 test('invoke employs a future employed referee and redirects', function () {
     $referee = Referee::factory()->withFutureEmployment()->create();
-    $startedAt = $referee->employments->last()->started_at;
+    $startDate = $referee->employments->last()->started_at;
 
     $this->actingAs(administrator())
         ->patch(action([EmployController::class], $referee))
         ->assertRedirect(action([RefereesController::class, 'index']));
 
     expect($referee->fresh())
-        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->currentEmployment->started_at->toBeLessThan($startDate)
         ->status->toBe(RefereeStatus::BOOKABLE);
 });
 

@@ -5,7 +5,7 @@
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
                     <x-table.heading class="w-10px pe-2 sorting_disabled">
-                        <x-input.checkbox wire:model="selectPage" />
+                        <x-form.inputs.checkbox wire:model="selectPage" />
                     </x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Stable Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
@@ -16,7 +16,7 @@
                     @forelse ($stables as $stable)
                         <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:loading.class.delay="opacity-50" wire:key="row-{{ $stable->id }}">
                             <x-table.cell>
-                                <x-input.checkbox wire:model="selected" value="{{ $stable->id }}" />
+                                <x-form.inputs.checkbox wire:model="selected" value="{{ $stable->id }}" />
                             </x-table.cell>
 
                             <x-table.cell>
@@ -24,8 +24,8 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                <div class="badge badge-{{ $stable->status->getBadgeColor() }}">
-                                    {{ $stable->status->label }}
+                                <div class="badge badge-{{ $stable->status->color() }}">
+                                    {{ $stable->status->label() }}
                                 </div>
                             </x-table.cell>
 

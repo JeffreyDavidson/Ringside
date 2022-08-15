@@ -40,7 +40,7 @@ class StoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'min:3', 'ends_with:Title,Titles', Rule::unique('titles', 'name')],
-            'activated_at' => ['nullable', 'string', 'date'],
+            'activation_date' => ['nullable', 'string', 'date'],
         ];
     }
 }

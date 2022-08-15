@@ -28,7 +28,7 @@ test('store creates a referee and redirects', function () {
     $data = StoreRequest::factory()->create([
         'first_name' => 'Taylor',
         'last_name' => 'Otwell',
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -43,10 +43,10 @@ test('store creates a referee and redirects', function () {
         ->employments->toBeEmpty();
 });
 
-test('an employment is created for the referee if started at is filled in request', function () {
+test('an employment is created for the referee if start date is filled in request', function () {
     $dateTime = Carbon::now()->toDateTimeString();
     $data = StoreRequest::factory()->create([
-        'started_at' => $dateTime,
+        'start_date' => $dateTime,
     ]);
 
     $this->actingAs(administrator())

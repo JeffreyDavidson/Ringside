@@ -32,6 +32,7 @@ class TestFormRequest
         $validator = Closure::fromCallable(fn () => $this->getValidatorInstance())->call($this->request);
 
         try {
+            // dd($validator);
             $validator->validate();
         } catch (ValidationException $e) {
             return new TestValidationResult($validator, $e);

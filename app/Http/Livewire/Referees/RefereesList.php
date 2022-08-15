@@ -47,8 +47,6 @@ class RefereesList extends BaseComponent
             })
             ->oldest('last_name');
 
-        // dd($query);
-
         return $this->applySorting($query);
     }
 

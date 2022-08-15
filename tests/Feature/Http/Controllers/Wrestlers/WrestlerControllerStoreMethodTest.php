@@ -32,7 +32,7 @@ test('store creates a wrestler and redirects', function () {
         'weight' => 300,
         'hometown' => 'Laraville, New York',
         'signature_move' => null,
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -65,10 +65,10 @@ test('store creates a wrestler with a signature move and redirects', function ()
         ->signature_move->toBe('Example Finishing Move');
 });
 
-test('an employment is created for the wrestler if started at is filled in request', function () {
+test('an employment is created for the wrestler if start date is filled in request', function () {
     $dateTime = Carbon::now()->toDateTimeString();
     $data = StoreRequest::factory()->create([
-        'started_at' => $dateTime,
+        'start_date' => $dateTime,
     ]);
 
     $this->actingAs(administrator())

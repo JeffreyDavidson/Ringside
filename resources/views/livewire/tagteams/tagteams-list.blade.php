@@ -5,10 +5,10 @@
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
                     <x-table.heading class="w-10px pe-2 sorting_disabled">
-                        <x-input.checkbox wire:model="selectPage" />
+                        <x-form.inputs.checkbox wire:model="selectPage" />
                     </x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null"
-                        class="min-w-125px sorting">TagTeam Name</x-table.heading>
+                        class="min-w-125px sorting">Tag Team Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null"
                         class="min-w-125px sorting">Status</x-table.heading>
                     <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
@@ -19,7 +19,7 @@
                         <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:loading.class.delay="opacity-50"
                             wire:key="row-{{ $tagTeam->id }}">
                             <x-table.cell>
-                                <x-input.checkbox wire:model="selected" value="{{ $tagTeam->id }}" />
+                                <x-form.inputs.checkbox wire:model="selected" value="{{ $tagTeam->id }}" />
                             </x-table.cell>
 
                             <x-table.cell>
@@ -28,8 +28,8 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                <div class="badge badge-{{ $tagTeam->status->getBadgeColor() }}">
-                                    {{ $tagTeam->status->label }}
+                                <div class="badge badge-{{ $tagTeam->status->color() }}">
+                                    {{ $tagTeam->status->label() }}
                                 </div>
                             </x-table.cell>
 

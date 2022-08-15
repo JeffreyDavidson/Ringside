@@ -63,26 +63,26 @@ test('manager last name must be at least 3 characters', function () {
         ->assertFailsValidation(['last_name' => 'min:3']);
 });
 
-test('manager started at is optional', function () {
+test('manager start date is optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('manager started at must be a string if provided', function () {
+test('manager start date must be a string if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('manager started at must be in the correct date format', function () {
+test('manager start date must be in the correct date format', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => 'not-a-date',
+            'start_date' => 'not-a-date',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });

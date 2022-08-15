@@ -13,7 +13,7 @@ class EmploymentStartDateCanBeChanged implements Rule
      *
      * @var \App\Models\Contracts\Employable
      */
-    private Employable $rosterMember;
+    protected Employable $rosterMember;
 
     /**
      * Undocumented variable

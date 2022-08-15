@@ -13,7 +13,7 @@ class TagTeamRequestFactory extends RequestFactory
         return [
             'name' => $this->faker->name(),
             'signature_move' => null,
-            'started_at' => null,
+            'start_date' => null,
             'wrestlers' => null,
         ];
     }

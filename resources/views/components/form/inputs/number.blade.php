@@ -1,13 +1,13 @@
-<label for="{{ $name }}">{{ $label }}:</label>
+<label for="{{ $name }}">{{ $label }}</label>
 
 <input
     type="number"
-    class="form-control @error($name) is-invalid @enderror"
-    min="{{ $min ?? '' }}"
+    class="form-control"
+    min="{{ $min ?? 0 }}"
     max="{{ $max ?? '' }}"
     name="{{ $name }}"
-    placeholder="Enter {{ $label }}"
-    value="{{ $value }}"
+    placeholder="{{ $placeholder }}"
+    value="{{ $value ?? null }}"
 >
 
 @error($name)

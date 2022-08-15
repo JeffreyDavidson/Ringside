@@ -37,7 +37,7 @@ test('updates a tag team and redirects', function () {
 
     $data = UpdateRequest::factory()->create([
         'name' => 'New Tag Team Name',
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())

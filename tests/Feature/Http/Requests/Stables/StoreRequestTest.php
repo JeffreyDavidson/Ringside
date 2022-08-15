@@ -53,28 +53,28 @@ test('stable name must be unique', function () {
         ->assertFailsValidation(['name' => 'unique:stables,name,NULL,id']);
 });
 
-test('stable started at is optional', function () {
+test('stable start date is optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('stable started at must be a string if provided', function () {
+test('stable start date must be a string if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('stable started at must be in the correct date format', function () {
+test('stable start date must be in the correct date format', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => 'not-a-date',
+            'start_date' => 'not-a-date',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
 test('stable wreslters must be an array', function () {
@@ -183,13 +183,13 @@ test('each tag team must not already be in stable to join stable', function () {
         ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinnewstable']);
 });
 
-test('stable must have a minimum number of 3 members when started at is set', function () {
+test('stable must have a minimum number of 3 members when start date is set', function () {
     $wrestlers = Wrestler::factory()->count(2)->create();
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'members_count' => $wrestlers->count(),
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
             'wrestlers' => $wrestlers->modelKeys(),
             'tag_teams' => [],
         ]))
@@ -203,7 +203,7 @@ test('stable can have one wrestler and one tag team', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'members_count' => 3,
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [$wrestler->id],
             'tag_teams' => [$tagTeam->id],
         ]))
@@ -216,7 +216,7 @@ test('a stable cannot be formed with only one tag team and no wrestlers', functi
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'members_count' => 2,
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [],
             'tag_teams' => [$tagTeam->id],
         ]))
@@ -230,7 +230,7 @@ test('a stable can contain at least two tag teams with no wrestlers', function (
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'members_count' => 4,
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [],
             'tag_teams' => [$tagTeamA->id, $tagTeamB->id],
         ]))
@@ -245,7 +245,7 @@ test('a stable can contain at least three wrestlers with no tag teams', function
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'members_count' => 3,
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [$wrestlerA->id, $wrestlerB->id, $wrestlerC->id],
             'tag_teams' => [],
         ]))
@@ -259,7 +259,7 @@ test('a stable cannot contain a wrestler that is added in a tag team', function 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'members_count' => 5,
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
             'wrestlers' => [
                 $wrestlerA->getKey(),
                 $wrestlerB->getKey(),

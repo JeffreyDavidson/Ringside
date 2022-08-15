@@ -42,15 +42,9 @@ class StoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams', 'name')],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date'],
-            'wrestlers' => ['array', 'required_with:signature_move'],
-            'wrestlers.*' => [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinNewTagTeam(),
-            ],
+            'start_date' => ['nullable', 'string', 'date'],
+            'wrestlerA' => ['integer', 'different:wrestlerB', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinNewTagTeam()],
+            'wrestlerB' => ['integer', 'different:wrestlerA', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinNewTagTeam()],
         ];
     }
 }

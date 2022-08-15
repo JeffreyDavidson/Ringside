@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
+use App\Models\Venue;
 
 class EventsController extends Controller
 {
@@ -39,6 +40,7 @@ class EventsController extends Controller
 
         return view('events.create', [
             'event' => $event,
+            'venues' => Venue::pluck('name', 'id'),
         ]);
     }
 
@@ -82,6 +84,7 @@ class EventsController extends Controller
 
         return view('events.edit', [
             'event' => $event,
+            'venues' => Venue::withTrashed()->pluck('name', 'id'),
         ]);
     }
 

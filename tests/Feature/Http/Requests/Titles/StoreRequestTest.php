@@ -58,26 +58,26 @@ test('title name must end with title or titles', function () {
         ->assertFailsValidation(['name' => 'endswith:Title,Titles']);
 });
 
-test('title activated at is optional', function () {
+test('title activation date is optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => null,
+            'activation_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('title activated at must be a string if provided', function () {
+test('title activation date must be a string if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => 12345,
+            'activation_date' => 12345,
         ]))
-        ->assertFailsValidation(['activated_at' => 'string']);
+        ->assertFailsValidation(['activation_date' => 'string']);
 });
 
-test('title activated at must be a in the correct date format', function () {
+test('title activation date must be a in the correct date format', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => 'not-a-date',
+            'activation_date' => 'not-a-date',
         ]))
-        ->assertFailsValidation(['activated_at' => 'date']);
+        ->assertFailsValidation(['activation_date' => 'date']);
 });

@@ -8,8 +8,8 @@
     @endcan
 
     @can('addMatches', $event)
-        <x-menu-link>
+        <x-menu.menu-link>
             <a href="{{ route('events.matches.create', $event) }}" class="px-3 menu-link">Add Match</a>
-        </x-menu-link>
+        </x-menu.menu-link>
     @endcan
 </x-actions-dropdown>

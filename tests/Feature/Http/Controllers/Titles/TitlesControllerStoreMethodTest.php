@@ -25,7 +25,7 @@ test('a guest cannot view the form for creating a title', function () {
 test('store creates a title and redirects', function () {
     $data = StoreRequest::factory()->create([
         'name' => 'Example Title',
-        'activated_at' => null,
+        'activation_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -39,10 +39,10 @@ test('store creates a title and redirects', function () {
         ->activations->toBeEmpty();
 });
 
-test('an activation is created for the title if activated at is filled in request', function () {
-    $activatedAt = now()->toDateTimeString();
+test('an activation is created for the title if activation date is filled in request', function () {
+    $activationDate = now()->toDateTimeString();
     $data = StoreRequest::factory()->create([
-        'activated_at' => $activatedAt,
+        'activation_date' => $activationDate,
     ]);
 
     $this->actingAs(administrator())
@@ -53,7 +53,7 @@ test('an activation is created for the title if activated at is filled in reques
 
     expect(Title::latest()->first())
         ->activations->toHaveCount(1)
-        ->activations->first()->started_at->toDateTimeString()->toBe($activatedAt);
+        ->activations->first()->started_at->toDateTimeString()->toBe($activationDate);
 });
 
 test('a basic user cannot create a title', function () {

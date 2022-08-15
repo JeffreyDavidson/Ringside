@@ -35,7 +35,7 @@ class ManagerData
         return new self(
             (string) $request->input('first_name'),
             (string) $request->input('last_name'),
-            $request->date('started_at')
+            $request->date('start_date')
         );
     }
 
@@ -50,7 +50,7 @@ class ManagerData
         return new self(
             (string) $request->input('first_name'),
             (string) $request->input('last_name'),
-            $request->date('started_at')
+            $request->date('start_date')
         );
     }
 }

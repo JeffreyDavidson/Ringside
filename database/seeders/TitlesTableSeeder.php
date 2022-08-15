@@ -47,7 +47,7 @@ class TitlesTableSeeder extends Seeder
 
             Title::factory()
                 ->active($activation)
-                ->create(['name' => 'Title '.$eNum]);
+                ->create(['name' => 'Title '.$eNum.' Title']);
 
             $eNum++;
         }
@@ -69,7 +69,7 @@ class TitlesTableSeeder extends Seeder
 
         Title::factory()
             ->active($activation)
-            ->create(['name' => 'Title '.$eNum]);
+            ->create(['name' => 'Title '.$eNum.' Title']);
 
         $eNum++;
 
@@ -86,7 +86,7 @@ class TitlesTableSeeder extends Seeder
             $retirement = Retirement::factory()->started($end);
             Title::factory()
                 ->retired($activation, $retirement)
-                ->create(['name' => 'Title '.$eNum]);
+                ->create(['name' => 'Title '.$eNum.' Title']);
 
             $eNum++;
         }
@@ -96,7 +96,7 @@ class TitlesTableSeeder extends Seeder
          */
         Title::factory()
             ->withFutureActivation()
-            ->create(['name' => 'Title '.$eNum]);
+            ->create(['name' => 'Title '.$eNum.' Title']);
 
         $eNum++;
 
@@ -106,6 +106,6 @@ class TitlesTableSeeder extends Seeder
          */
         Title::factory()
             ->unactivated()
-            ->create(['name' => 'Title '.$eNum]);
+            ->create(['name' => 'Title '.$eNum.' Title']);
     }
 }

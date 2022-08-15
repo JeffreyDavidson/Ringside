@@ -35,7 +35,7 @@ test('updates a title and redirects', function () {
     ]);
     $data = UpdateRequest::factory()->create([
         'name' => 'New Example Title',
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -49,11 +49,11 @@ test('updates a title and redirects', function () {
         ->activations->toBeEmpty();
 });
 
-test('update can activate an unactivated title when activated at is filled', function () {
+test('update can activate an unactivated title when activation date is filled', function () {
     $title = Title::factory()->unactivated()->create();
-    $activatedAt = now()->toDateTimeString();
+    $activationDate = now()->toDateTimeString();
     $data = UpdateRequest::factory()->create([
-        'activated_at' => $activatedAt,
+        'activation_date' => $activationDate,
     ]);
 
     $this->actingAs(administrator())
@@ -64,14 +64,14 @@ test('update can activate an unactivated title when activated at is filled', fun
 
     expect($title->fresh())
         ->activations->toHaveCount(1)
-        ->activations->first()->started_at->toDateTimeString()->toBe($activatedAt);
+        ->activations->first()->started_at->toDateTimeString()->toBe($activationDate);
 });
 
 test('update can activate an inactive title', function () {
     $title = Title::factory()->inactive()->create();
-    $activatedAt = now()->toDateTimeString();
+    $activationDate = now()->toDateTimeString();
     $data = UpdateRequest::factory()->create([
-        'activated_at' => $activatedAt,
+        'activation_date' => $activationDate,
     ]);
 
     $this->actingAs(administrator())
@@ -82,14 +82,14 @@ test('update can activate an inactive title', function () {
 
     expect(Title::latest()->first())
         ->activations->toHaveCount(2)
-        ->activations->last()->started_at->toDateTimeString()->toBe($activatedAt);
+        ->activations->last()->started_at->toDateTimeString()->toBe($activationDate);
 });
 
 test('update cannot activate an active title', function () {
     $title = Title::factory()->active()->create();
-    $activatedAt = now()->toDateTimeString();
+    $activationDate = now()->toDateTimeString();
     $data = UpdateRequest::factory()->create([
-        'activated_at' => $activatedAt,
+        'activation_date' => $activationDate,
     ]);
 
     $this->actingAs(administrator())

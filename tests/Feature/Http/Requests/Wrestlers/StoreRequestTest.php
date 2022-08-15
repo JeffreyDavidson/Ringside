@@ -138,26 +138,26 @@ test('wrestler signature move must be a string if provided', function () {
         ->assertFailsValidation(['signature_move' => 'string']);
 });
 
-test('wrestler started at is optional', function () {
+test('wrestler start date is optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('wrestler started at must be a string if provided', function () {
+test('wrestler start date must be a string if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('wrestler started at must be in the correct date format', function () {
+test('wrestler start date must be in the correct date format', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => 'not-a-date',
+            'start_date' => 'not-a-date',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });

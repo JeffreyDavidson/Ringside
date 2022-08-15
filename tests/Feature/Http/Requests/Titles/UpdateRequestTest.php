@@ -7,13 +7,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TitleRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $title = Title::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('title', $title)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $title = Title::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('title', $title)
         ->by(basicUser())
         ->assertNotAuthorized();
 });
@@ -74,57 +80,57 @@ test('title name must be unique', function () {
         ->assertFailsValidation(['name' => 'unique:titles,NULL,1,id']);
 });
 
-test('title activated at is optional', function () {
+test('title activation date is optional', function () {
     $title = Title::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => null,
+            'activation_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('title activated at must be a string if provided', function () {
+test('title activation date must be a string if provided', function () {
     $title = Title::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => 12345,
+            'activation_date' => 12345,
         ]))
-        ->assertFailsValidation(['activated_at' => 'string']);
+        ->assertFailsValidation(['activation_date' => 'string']);
 });
 
-test('title activated at must be in the correct date format if provided', function () {
+test('title activation date must be in the correct date format if provided', function () {
     $title = Title::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => 'not-a-date-format',
+            'activation_date' => 'not-a-date-format',
         ]))
-        ->assertFailsValidation(['activated_at' => 'date']);
+        ->assertFailsValidation(['activation_date' => 'date']);
 });
 
-test('title activated at cannot be changed if activation start date has past', function () {
+test('title activation date cannot be changed if activation start date has past', function () {
     $title = Title::factory()->active()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => Carbon::now()->toDateTimeString(),
+            'activation_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['activated_at' => 'app\rules\activationstartdatecanbechanged']);
+        ->assertFailsValidation(['activation_date' => 'app\rules\activationstartdatecanbechanged']);
 });
 
-test('title activated at can be changed if activation start date is in the future', function () {
+test('title activation date can be changed if activation start date is in the future', function () {
     $title = Title::factory()->has(Activation::factory()->started(Carbon::parse('+2 weeks')))->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
-            'activated_at' => Carbon::tomorrow()->toDateString(),
+            'activation_date' => Carbon::tomorrow()->toDateString(),
         ]))
         ->assertPassesValidation();
 });

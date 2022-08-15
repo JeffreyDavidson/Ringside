@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Http\Requests\Stables\StoreRequest;
 use App\Http\Requests\Stables\UpdateRequest;
+use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
@@ -20,12 +21,14 @@ class StableData
      * @param  \Illuminate\Support\Carbon|null  $start_date
      * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
      * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, \App\Models\Manager>  $managers
      */
     public function __construct(
         public string $name,
         public ?Carbon $start_date,
         public Collection $tagTeams,
-        public Collection $wrestlers
+        public Collection $wrestlers,
+        public Collection $managers,
     ) {
     }
 
@@ -39,9 +42,10 @@ class StableData
     {
         return new self(
             $request->input('name'),
-            $request->date('started_at'),
+            $request->date('start_date'),
             TagTeam::query()->findMany($request->collect('tag_teams')),
-            Wrestler::query()->findMany($request->collect('wrestlers'))
+            Wrestler::query()->findMany($request->collect('wrestlers')),
+            Manager::query()->findMany($request->collect('managers')),
         );
     }
 
@@ -55,9 +59,10 @@ class StableData
     {
         return new self(
             $request->input('name'),
-            $request->date('started_at'),
+            $request->date('start_date'),
             TagTeam::query()->findMany($request->collect('tag_teams')),
-            Wrestler::query()->findMany($request->collect('wrestlers'))
+            Wrestler::query()->findMany($request->collect('wrestlers')),
+            Manager::query()->findMany($request->collect('managers')),
         );
     }
 }

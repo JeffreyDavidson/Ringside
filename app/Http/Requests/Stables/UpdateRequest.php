@@ -28,7 +28,11 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (is_null($this->user())) {
+        if (is_null($this->user()) || is_null($this->route())) {
+            return false;
+        }
+
+        if (! $this->route()->hasParameter('stable') || is_null($this->route()->parameter('stable'))) {
             return false;
         }
 
@@ -47,7 +51,7 @@ class UpdateRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('stables')->ignore($stable->id)],
-            'started_at' => [
+            'start_date' => [
                 'nullable',
                 Rule::requiredIf($stable->isCurrentlyActivated()),
                 'string',
@@ -58,11 +62,11 @@ class UpdateRequest extends FormRequest
                 'bail',
                 'integer',
                 Rule::when(
-                    $this->input('started_at'),
+                    $this->input('start_date'),
                     function () use ($stable) {
                         new HasMinimumAmountOfMembers(
                             $stable,
-                            $this->input('started_at'),
+                            $this->date('start_date'),
                             $this->collect('wrestlers'),
                             $this->collect('tag_teams')
                         );
@@ -71,19 +75,26 @@ class UpdateRequest extends FormRequest
             ],
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
+            'managers' => ['array'],
             'wrestlers.*' => [
                 'bail',
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinExistingStable($this->input('tag_teams'), $this->input('started_at')),
+                new WrestlerCanJoinExistingStable($this->input('tag_teams'), $this->input('start_date')),
             ],
             'tag_teams.*' => [
                 'bail',
                 'integer',
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
-                new TagTeamCanJoinExistingStable($this->date('started_at')),
+                new TagTeamCanJoinExistingStable($this->date('start_date')),
+            ],
+            'managers' => [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('managers', 'id'),
             ],
         ];
     }
@@ -96,7 +107,9 @@ class UpdateRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'members_count' => (count($this->input('tag_teams', [])) * 2) + count($this->input('wrestlers', [])),
+            'members_count' => ($this->collect('tag_teams')->count() * 2) + $this->collect('wrestlers')->count(),
         ]);
+
+        // dd($this->all());
     }
 }

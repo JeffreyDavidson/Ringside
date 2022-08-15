@@ -26,7 +26,11 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (is_null($this->user())) {
+        if (is_null($this->user()) || is_null($this->route())) {
+            return false;
+        }
+
+        if (! $this->route()->hasParameter('tag_team') || is_null($this->route()->parameter('tag_team'))) {
             return false;
         }
 
@@ -46,15 +50,9 @@ class UpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($tagTeam)],
-            'wrestlers' => ['array'],
-            'wrestlers.*', [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinExistingTagTeam($tagTeam),
-            ],
+            'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($tagTeam)],
+            'wrestlerA' => ['integer', 'different:wrestlerB', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinExistingTagTeam($tagTeam)],
+            'wrestlerB' => ['integer', 'different:wrestlerA', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinExistingTagTeam($tagTeam)],
         ];
     }
 }

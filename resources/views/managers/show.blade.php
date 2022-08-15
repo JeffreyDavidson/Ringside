@@ -1,43 +1,61 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <a href="{{ route('managers.index') }}" class="btn btn-label-brand btn-bold">
-            Back To Managers
-        </a>
+        <x-toolbar title="{{ $manager->full_name }}">
+            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('managers.index')" label="Managers" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :label="$manager->full_name" />
+        </x-toolbar>
     </x-slot>
-    <x-content>
-        @if ($manager->isUnemployed())
-            <div class="alert alert-warning" role="alert">
-                <strong>Warning!</strong>&nbsp;This manager is not employed!
+
+    <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
+        <!--begin::Card header-->
+        <div class="card-header">
+            <!--begin::Card title-->
+            <div class="m-0 card-title">
+                <h3 class="m-0 fw-bold">Manager Details</h3>
             </div>
-        @endif
-        <div class="kt-grid kt-grid--desktop kt-grid--ver kt-grid--ver-desktop kt-app">
-            <div id="kt_profile_aside" class="kt-grid__item kt-app__toggle kt-app__aside">
-                <x-portlet title="Biography" headBorder="false">
-                    <div class="kt-portlet__head kt-portlet__head--noborder">
-                        <div class="kt-portlet__head-label">
-                            <h3 class="kt-portlet__head-title"></h3>
-                            <div class="kt-portlet__head-toolbar"></div>
-                        </div>
-                    </div>
-                    <div class="kt-portlet__body kt-portlet__body--fit-y">
-                        <div class="kt-widget kt-widget--user-profile-1">
-                            <div class="kt-widget__head">
-                                <div class="kt-widget__media">
-                                    <img src="https://via.placeholder.com/100" alt="image">
-                                </div>
-                                <div class="kt-widget__content">
-                                    <div class="kt-widget__section">
-                                        <span class="kt-widget__username">{{ $manager->full_name }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="kt-widget__body">
-                                <div class="kt-widget__content"></div>
-                            </div>
-                        </div>
-                    </div>
-                </x-portlet>
-            </div>
+            <!--end::Card title-->
+            <!--begin::Action-->
+            <a href="{{ route('managers.edit', $manager) }}" class="btn btn-primary align-self-center">Edit Manager</a>
+            <!--end::Action-->
         </div>
-    </x-content>
+        <!--begin::Card header-->
+        <!--begin::Card body-->
+        <div class="card-body p-9">
+            <!--begin::Row-->
+            <div class="row mb-7">
+                <!--begin::Label-->
+                <label class="col-lg-4 fw-semibold text-muted">Manager Name</label>
+                <!--end::Label-->
+                <!--begin::Col-->
+                <div class="col-lg-8">
+                    <span class="text-gray-800 fs-6">{{ $manager->full_name }}</span>
+                </div>
+                <!--end::Col-->
+            </div>
+            <!--end::Row-->
+            <!--begin::Input group-->
+            <div class="row mb-7">
+                <!--begin::Label-->
+                <label class="col-lg-4 fw-semibold text-muted">Start Date</label>
+                <!--end::Label-->
+                <!--begin::Col-->
+                <div class="col-lg-8 fv-row">
+                    <span class="text-gray-800 fw-semibold fs-6">{{ $manager->employedAt?->toDateString() ?? 'No Start Date Set' }}</span>
+                </div>
+                <!--end::Col-->
+            </div>
+            <!--end::Input group-->
+            @if ($manager->isUnemployed())
+                <x-notice
+                    title="This manager needs your attention!"
+                    description="This manager does not have a start date and needs to be employed."
+                />
+            @endif
+        </div>
+        <!--end::Card body-->
+    </div>
+
 </x-layouts.app>

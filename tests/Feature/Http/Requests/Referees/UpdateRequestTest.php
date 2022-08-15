@@ -6,13 +6,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\RefereeRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $referee = Referee::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('referee', $referee)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $referee = Referee::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('referee', $referee)
         ->by(basicUser())
         ->assertNotAuthorized();
 });
@@ -83,57 +89,57 @@ test('referee last name must be at least 3 characters', function () {
         ->assertFailsValidation(['last_name' => 'min:3']);
 });
 
-test('referee started at is optional', function () {
+test('referee start date is optional', function () {
     $referee = Referee::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('referee', $referee)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('referee started at must be a string if provided', function () {
+test('referee start date must be a string if provided', function () {
     $referee = Referee::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('referee', $referee)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('referee started at must be in the correct date format', function () {
+test('referee start date must be in the correct date format', function () {
     $referee = Referee::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('referee', $referee)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => 'not-a-date-format',
+            'start_date' => 'not-a-date-format',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
-test('referee started at cannot be changed if employment start date has past', function () {
+test('referee start date cannot be changed if employment start date has past', function () {
     $referee = Referee::factory()->bookable()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('referee', $referee)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
 });
 
-test('referee started at can be changed if employment start date is in the future', function () {
+test('referee start date can be changed if employment start date is in the future', function () {
     $referee = Referee::factory()->withFutureEmployment()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('referee', $referee)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => Carbon::tomorrow()->toDateString(),
+            'start_date' => Carbon::tomorrow()->toDateString(),
         ]))
         ->assertPassesValidation();
 });

@@ -63,26 +63,26 @@ test('referee last name must be at least 3 characters', function () {
         ->assertFailsValidation(['last_name' => 'min:3']);
 });
 
-test('referee started at is optional', function () {
+test('referee start date is optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('referee started at must be a string if provided', function () {
+test('referee start date must be a string if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('referee started at must be in the correct date format', function () {
+test('referee start date must be in the correct date format', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(RefereeRequestFactory::new()->create([
-            'started_at' => 'not-a-date',
+            'start_date' => 'not-a-date',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });

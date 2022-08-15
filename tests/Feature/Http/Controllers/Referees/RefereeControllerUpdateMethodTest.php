@@ -38,7 +38,7 @@ test('updates a referee and redirects', function () {
     $data = UpdateRequest::factory()->create([
         'first_name' => 'Taylor',
         'last_name' => 'Otwell',
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -53,10 +53,10 @@ test('updates a referee and redirects', function () {
         ->employments->toBeEmpty();
 });
 
-test('update can employ an unemployed referee when started at is filled', function () {
+test('update can employ an unemployed referee when start date is filled', function () {
     $now = now();
     $referee = Referee::factory()->unemployed()->create();
-    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
+    $data = UpdateRequest::factory()->create(['start_date' => $now->toDateTimeString()]);
 
     $this->actingAs(administrator())
         ->from(action([RefereesController::class, 'edit'], $referee))
@@ -69,10 +69,10 @@ test('update can employ an unemployed referee when started at is filled', functi
         ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
 });
 
-test('update can employ a future employed referee when started at is filled', function () {
+test('update can employ a future employed referee when start date is filled', function () {
     $now = now();
     $referee = Referee::factory()->withFutureEmployment()->create();
-    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
+    $data = UpdateRequest::factory()->create(['start_date' => $now->toDateTimeString()]);
 
     $this->actingAs(administrator())
         ->from(action([RefereesController::class, 'edit'], $referee))

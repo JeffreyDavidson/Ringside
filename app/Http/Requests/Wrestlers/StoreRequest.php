@@ -45,7 +45,7 @@ class StoreRequest extends FormRequest
             'weight' => ['required', 'integer'],
             'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date'],
+            'start_date' => ['nullable', 'string', 'date'],
         ];
     }
 
@@ -57,7 +57,7 @@ class StoreRequest extends FormRequest
     public function attributes()
     {
         return [
-            'started_at' => 'date started',
+            'start_date' => 'start date',
             'signature_move' => 'signature move',
         ];
     }

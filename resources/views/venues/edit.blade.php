@@ -1,34 +1,56 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Edit Venue
-        </h2>
+        <x-toolbar title="Venues">
+            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('venues.index')" label="Venues" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('venues.show', $venue)" :label="$venue->name" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item label="Edit" />
+            <!--end::Item-->
+        </x-toolbar>
     </x-slot>
-    <x-content>
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Venue Form</h3>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('venues.update', $venue) }}" method="post">
-                    @method('PATCH')
-                    @csrf
-                    @include('venues.partials.form')
-                    <div class="row">
-                        <div class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start">
-                            <button type="submit" class="me-2 btn btn-primary">Submit</button>
-                            <button type="reset" class="btn btn-secondary">Cancel</button>
-                        </div>
 
-                        <div class="col-sm-12 col-md-7 d-flex align-items-center justify-content-center justify-content-md-end">
-                            <a href="{{ route('venues.index') }}" class="btn btn-md btn-secondary">
-                                <x-icons.arrow />
-                                Back to Venues
-                            </a>
+    <div class="shadow-sm card">
+        <div class="card-header">
+            <h3 class="card-title">Edit Venue Form</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ route('venues.update', $venue) }}">
+                @method('patch')
+                @csrf
+                <div class="mb-10">
+                    <x-form.inputs.text label="Name:" name="name" placeholder="Venue Name Here" value="{{ $venue->name }}" />
+                </div>
+                <div class="mb-10">
+                    <div class="mb-5 row gx-10">
+                        <div class="col-lg-8">
+                            <x-form.inputs.text label="Street Address:" name="address1" placeholder="Street Address Here" value="{{ $venue->address1 }}" />
+                        </div>
+                        <div class="col-lg-4">
+                            <x-form.inputs.text label="Suite Number:" name="address2" placeholder="Suite Number Here" value="{{ $venue->address2 }}" />
                         </div>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="mb-10">
+                    <div class="mb-5 row gx-10">
+                        <div class="col-lg-4">
+                            <x-form.inputs.text label="City:" name="city" placeholder="Orlando" value="{{ $venue->city }}" />
+                        </div>
+                        <div class="col-lg-4">
+                            <x-form.inputs.text label="State:" name="state" placeholder="Florida" value="{{ $venue->state }}" />
+                        </div>
+                        <div class="col-lg-4">
+                            <x-form.inputs.text label="Zip:" name="zip" placeholder="12345" value="{{ $venue->zip }}" />
+                        </div>
+                    </div>
+                </div>
         </div>
-    </x-content>
+        <div class="card-footer">
+            <x-form.buttons.submit />
+            <x-form.buttons.reset />
+        </div>
+        </form>
+    </div>
 </x-layouts.app>

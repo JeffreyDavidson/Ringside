@@ -35,7 +35,7 @@ class RefereeData
         return new self(
             $request->input('first_name'),
             $request->input('last_name'),
-            $request->date('started_at')
+            $request->date('start_date')
         );
     }
 
@@ -50,7 +50,7 @@ class RefereeData
         return new self(
             $request->input('first_name'),
             $request->input('last_name'),
-            $request->date('started_at')
+            $request->date('start_date')
         );
     }
 }

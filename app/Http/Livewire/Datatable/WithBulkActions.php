@@ -28,6 +28,16 @@ trait WithBulkActions
     public $selected;
 
     /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function bootWithSorting()
+    {
+        $this->selected = collect();
+    }
+
+    /**
      * Undocumented function.
      *
      * @return void

@@ -1,24 +1,32 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Create Title
-        </h2>
+        <x-toolbar title="Titles">
+            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('titles.index')" label="Titles" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item label="Create" />
+        </x-toolbar>
     </x-slot>
 
-    <x-content>
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Title Form</h3>
-            </div>
-            <div class="card-body">
-                <x-form.form
-                    action="{{ route('titles.store') }}"
-                    backTo="{{ route('titles.index') }}"
-                    resource="Titles"
-                >
-                    @include('titles.partials.form')
-                </x-form.form>
-            </div>
+    <div class="shadow-sm card">
+        <div class="card-header">
+            <h3 class="card-title">Create A New Title Form</h3>
         </div>
-    </x-content>
+        <div class="card-body">
+            <form method="post" action="{{ route('titles.store') }}">
+                @csrf
+                <div class="mb-10">
+                    <x-form.inputs.text label="Name:" name="name" placeholder="Title Name Here" />
+                </div>
+                <div class="mb-10">
+                    <x-form.inputs.date label="Activation Date:" name="activation_date" />
+                </div>
+        </div>
+        <div class="card-footer">
+            <x-form.buttons.submit />
+            <x-form.buttons.reset />
+        </div>
+        </form>
+    </div>
 </x-layouts.app>

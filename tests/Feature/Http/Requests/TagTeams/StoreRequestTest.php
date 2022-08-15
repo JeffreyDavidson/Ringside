@@ -67,28 +67,28 @@ test('tag team signature move must be a string if provided', function () {
         ->assertFailsValidation(['signature_move' => 'string']);
 });
 
-test('tag team started at is optional', function () {
+test('tag team start date is optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('tag team started at must be a string if provided', function () {
+test('tag team start date must be a string if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('tag team started at must be in the correct date format', function () {
+test('tag team start date must be in the correct date format', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => 'not-a-date',
+            'start_date' => 'not-a-date',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
 test('tag team wrestlers are optional', function () {

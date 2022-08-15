@@ -28,7 +28,7 @@ test('a guest cannot view the form for creating a stable', function () {
 test('store creates a stable and redirects', function () {
     $data = StoreRequest::factory()->create([
         'name' => 'Example Stable Name',
-        'started_at' => null,
+        'start_date' => null,
         'wrestlers' => [],
         'tag_teams' => [],
     ]);
@@ -46,12 +46,12 @@ test('store creates a stable and redirects', function () {
         ->tagteams->toBeEmpty();
 });
 
-test('an activation is created for the stable if started at is filled in request', function () {
+test('an activation is created for the stable if start date is filled in request', function () {
     $dateTime = now()->toDateTimeString();
     $wrestlers = Wrestler::factory()->count(3)->create();
 
     $data = StoreRequest::factory()->create([
-        'started_at' => $dateTime,
+        'start_date' => $dateTime,
         'wrestlers' => $wrestlers->modelKeys(),
     ]);
 
@@ -102,13 +102,13 @@ test('tag teams are added to stable if present', function () {
         ->currentTagTeams->modelKeys()->toEqual($tagTeams->modelKeys());
 });
 
-test('a stables members join when stable is started if filled', function () {
+test('a stables members join when start date is filled', function () {
     $dateTime = now()->toDateTimeString();
     $wrestlers = Wrestler::factory()->count(1)->create();
     $tagTeam = TagTeam::factory()->count(1)->create();
 
     $data = StoreRequest::factory()->create([
-        'started_at' => $dateTime,
+        'start_date' => $dateTime,
         'wrestlers' => $wrestlers->modelKeys(),
         'tag_teams' => $tagTeam->modelKeys(),
     ]);
@@ -124,13 +124,13 @@ test('a stables members join when stable is started if filled', function () {
         ->currentTagTeams->each(fn ($tagTeam) => $tagTeam->pivot->joined_at->toDateTimeString()->toBe($dateTime));
 });
 
-test('a stables members join at the current time when stable is created if started at is not filled', function () {
+test('a stables members join at the current time when stable is created if start date is not filled', function () {
     $dateTime = now()->toDateTimeString();
     $wrestlers = Wrestler::factory()->count(1)->create();
     $tagTeam = TagTeam::factory()->count(1)->create();
 
     $data = StoreRequest::factory()->create([
-        'started_at' => null,
+        'start_date' => null,
         'wrestlers' => $wrestlers->modelKeys(),
         'tag_teams' => $tagTeam->modelKeys(),
     ]);

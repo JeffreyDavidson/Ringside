@@ -1,1 +1,3 @@
-<div id="{{ $name }}-error" class="error invalid-feedback">{{ $message }}</div>
+<div class="fv-plugins-message-container invalid-feedback">
+    <div data-field="name" data-validator="notEmpty">{{ $message }}</div>
+</div>

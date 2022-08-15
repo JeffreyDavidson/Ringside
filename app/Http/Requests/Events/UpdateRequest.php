@@ -24,13 +24,15 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (is_null($this->user())) {
+        if (is_null($this->user()) || is_null($this->route())) {
             return false;
         }
 
-        $event = $this->route()->parameter('event');
+        if (! $this->route()->hasParameter('event') || is_null($this->route()->parameter('event'))) {
+            return false;
+        }
 
-        return $this->user()->can('update', $event);
+        return $this->user()->can('update', $this->route()->parameter('event'));
     }
 
     /**

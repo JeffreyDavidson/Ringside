@@ -6,13 +6,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\ManagerRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $manager = Manager::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('manager', $manager)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $manager = Manager::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('manager', $manager)
         ->by(basicUser())
         ->assertNotAuthorized();
 });
@@ -83,57 +89,57 @@ test('manager last name must be at least 3 characters', function () {
         ->assertFailsValidation(['last_name' => 'min:3']);
 });
 
-test('manager started at is optional', function () {
+test('manager start date is optional', function () {
     $manager = Manager::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('manager', $manager)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('manager started at must be a string if provided', function () {
+test('manager start date must be a string if provided', function () {
     $manager = Manager::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('manager', $manager)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('manager started at must be in the correct date format', function () {
+test('manager start date must be in the correct date format', function () {
     $manager = Manager::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('manager', $manager)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => 'not-a-date-format',
+            'start_date' => 'not-a-date-format',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
-test('manager started at cannot be changed if employment start date has past', function () {
+test('manager start date cannot be changed if employment start date has past', function () {
     $manager = Manager::factory()->available()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('manager', $manager)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
 });
 
-test('manager started at can be changed if employment start date is in the future', function () {
+test('manager start date can be changed if employment start date is in the future', function () {
     $manager = Manager::factory()->withFutureEmployment()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('manager', $manager)
         ->validate(ManagerRequestFactory::new()->create([
-            'started_at' => Carbon::tomorrow()->toDateString(),
+            'start_date' => Carbon::tomorrow()->toDateString(),
         ]))
         ->assertPassesValidation();
 });

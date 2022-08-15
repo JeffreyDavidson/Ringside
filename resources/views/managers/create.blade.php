@@ -1,22 +1,39 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <a href="{{ route('managers.index') }}" class="btn btn-label-brand btn-bold">
-            Back To Managers
-        </a>
+        <x-toolbar title="Managers">
+            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('managers.index')" label="Managers" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item label="Create" />
+        </x-toolbar>
     </x-slot>
-    <x-content>
-        <x-portlet title="Create Manager Form">
-            <x-form.form
-                class="kt-form"
-                method="post"
-                :action="route('managers.store')"
-                resource="Managers"
-                :backTo="route('managers.index')"
-            >
-                <div class="kt-portlet__body">
-                    @include('managers.partials.form')
+
+    <div class="shadow-sm card">
+        <div class="card-header">
+            <h3 class="card-title">Create A New Manager Form</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ route('managers.store') }}">
+                @csrf
+                <div class="mb-10">
+                    <div class="mb-5 row gx-10">
+                        <div class="col-lg-6">
+                            <x-form.inputs.text label="First Name:" name="first_name" placeholder="First Name Here" />
+                        </div>
+                        <div class="col-lg-6">
+                            <x-form.inputs.text label="Last Name:" name="last_name" placeholder="Last Name Here" />
+                        </div>
+                    </div>
                 </div>
-            </x-form>
-        </x-portlet>
-    </x-content>
+                <div class="mb-10">
+                    <x-form.inputs.date label="Start Date:" name="start_date" />
+                </div>
+        </div>
+        <div class="card-footer">
+            <x-form.buttons.submit />
+            <x-form.buttons.reset />
+        </div>
+        </form>
+    </div>
 </x-layouts.app>

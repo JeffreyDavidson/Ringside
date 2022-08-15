@@ -25,7 +25,11 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (is_null($this->user())) {
+        if (is_null($this->user()) || is_null($this->route())) {
+            return false;
+        }
+
+        if (! $this->route()->hasParameter('title') || is_null($this->route()->parameter('title'))) {
             return false;
         }
 
@@ -50,7 +54,7 @@ class UpdateRequest extends FormRequest
                 'ends_with:Title,Titles',
                 Rule::unique('titles')->ignore($title->id),
             ],
-            'activated_at' => ['nullable', 'string', 'date', new ActivationStartDateCanBeChanged($title)],
+            'activation_date' => ['nullable', 'string', 'date', new ActivationStartDateCanBeChanged($title)],
         ];
     }
 }

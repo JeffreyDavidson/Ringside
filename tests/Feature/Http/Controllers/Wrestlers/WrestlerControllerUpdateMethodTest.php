@@ -44,7 +44,7 @@ test('updates a wrestler and redirects', function () {
         'weight' => 300,
         'hometown' => 'Laraville, New York',
         'signature_move' => null,
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -61,10 +61,10 @@ test('updates a wrestler and redirects', function () {
         ->employments->toBeEmpty();
 });
 
-test('update can employ an unemployed wrestler when started at is filled', function () {
+test('update can employ an unemployed wrestler when start date is filled', function () {
     $now = now();
     $wrestler = Wrestler::factory()->unemployed()->create();
-    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
+    $data = UpdateRequest::factory()->create(['start_date' => $now->toDateTimeString()]);
 
     $this->actingAs(administrator())
         ->from(action([WrestlersController::class, 'edit'], $wrestler))
@@ -77,10 +77,10 @@ test('update can employ an unemployed wrestler when started at is filled', funct
         ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
 });
 
-test('update can employ a future employed wrestler when started at is filled', function () {
+test('update can employ a future employed wrestler when start date is filled', function () {
     $now = now();
     $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $data = UpdateRequest::factory()->create(['started_at' => $now->toDateTimeString()]);
+    $data = UpdateRequest::factory()->create(['start_date' => $now->toDateTimeString()]);
 
     $this->actingAs(administrator())
         ->from(action([WrestlersController::class, 'edit'], $wrestler))

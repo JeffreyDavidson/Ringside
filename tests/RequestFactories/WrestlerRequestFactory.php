@@ -17,7 +17,7 @@ class WrestlerRequestFactory extends RequestFactory
             'weight' => $this->faker->numberBetween(200, 400),
             'hometown' => $this->faker->city().', '.$this->faker->state(),
             'signature_move' => null,
-            'started_at' => null,
+            'start_date' => null,
         ];
     }
 }

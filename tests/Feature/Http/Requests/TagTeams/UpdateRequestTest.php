@@ -7,13 +7,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TagTeamRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $tagTeam = TagTeam::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('tag_team', $tagTeam)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $tagTeam = TagTeam::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('tag_team', $tagTeam)
         ->by(basicUser())
         ->assertNotAuthorized();
 });
@@ -86,57 +92,57 @@ test('tag team signature move must be a string if provided', function () {
         ->assertFailsValidation(['signature_move' => 'string']);
 });
 
-test('tag team started at is optional', function () {
+test('tag team start date is optional', function () {
     $tagTeam = TagTeam::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('tag_team', $tagTeam)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('tag team started at must be a string if provided', function () {
+test('tag team start date must be a string if provided', function () {
     $tagTeam = TagTeam::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('tag_team', $tagTeam)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('tag team started at must be in the correct date format', function () {
+test('tag team start date must be in the correct date format', function () {
     $tagTeam = TagTeam::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('tag_team', $tagTeam)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => 'not-a-date-format',
+            'start_date' => 'not-a-date-format',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
-test('tag team started at cannot be changed if employment start date has past', function () {
+test('tag team start date cannot be changed if employment start date has past', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('tag_team', $tagTeam)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => Carbon::now()->toDateTImeString(),
+            'start_date' => Carbon::now()->toDateTImeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
 });
 
-test('tag_team_started_at_can_be_changed_if_employment_start_date_is_in_the_future', function () {
+test('tag_team_start_date_can_be_changed_if_employment_start_date_is_in_the_future', function () {
     $tagTeam = TagTeam::factory()->has(Employment::factory()->started(Carbon::parse('+2 weeks')))->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('tag_team', $tagTeam)
         ->validate(TagTeamRequestFactory::new()->create([
-            'started_at' => Carbon::tomorrow()->toDateString(),
+            'start_date' => Carbon::tomorrow()->toDateString(),
         ]))
         ->assertPassesValidation();
 });

@@ -37,7 +37,7 @@ test('updates a stable and redirects', function () {
 
     $data = UpdateRequest::factory()->create([
         'name' => 'New Stable Name',
-        'started_at' => null,
+        'start_date' => null,
         'wrestlers' => [],
         'tag_teams' => [],
     ]);
