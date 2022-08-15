@@ -43,7 +43,7 @@
                 <!--end::Label-->
                 <!--begin::Col-->
                 <div class="col-lg-8 fv-row">
-                    <span class="text-gray-800 fw-semibold fs-6">{{ $title->activatedAt->toDateString() ?? 'Unscheduled' }}</span>
+                    <span class="text-gray-800 fw-semibold fs-6">{{ $title->activatedAt?->toDateString() ?? 'Unscheduled' }}</span>
                 </div>
                 <!--end::Col-->
             </div>
