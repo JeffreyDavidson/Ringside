@@ -13,7 +13,7 @@ class ManagerRequestFactory extends RequestFactory
         return [
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
-            'started_at' => null,
+            'start_date' => null,
         ];
     }
 }

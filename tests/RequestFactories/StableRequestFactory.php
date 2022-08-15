@@ -12,7 +12,7 @@ class StableRequestFactory extends RequestFactory
     {
         return [
             'name' => $this->faker->name(),
-            'started_at' => null,
+            'start_date' => null,
             'wrestlers' => [],
             'tag_teams' => [],
         ];

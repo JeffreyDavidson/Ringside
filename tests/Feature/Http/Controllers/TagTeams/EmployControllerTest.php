@@ -52,17 +52,17 @@ test('invoke employs an unemployed tag team with bookable wrestlers and redirect
 
 test('invoke employs a future employed tag team and their tag team partners and redirects', function () {
     $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
-    $startedAt = $tagTeam->employments->last()->started_at;
+    $startDate = $tagTeam->employments->last()->started_at;
 
     $this->actingAs(administrator())
         ->patch(action([EmployController::class], $tagTeam))
         ->assertRedirect(action([TagTeamsController::class, 'index']));
 
     expect($tagTeam->fresh())
-        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->currentEmployment->started_at->toBeLessThan($startDate)
         ->status->toBe(TagTeamStatus::BOOKABLE)
-        ->currentWrestlers->each(function ($wrestler) use ($startedAt) {
-            $wrestler->currentEmployment->started_at->toBeLessThan($startedAt);
+        ->currentWrestlers->each(function ($wrestler) use ($startDate) {
+            $wrestler->currentEmployment->started_at->toBeLessThan($startDate);
             $wrestler->status->toBe(WrestlerStatus::BOOKABLE);
         });
 });

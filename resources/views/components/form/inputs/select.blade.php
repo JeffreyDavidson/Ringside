@@ -1,9 +1,15 @@
-<label for="{{ $name }}">{{ $label }}:</label>
+@props([
+    'name',
+    'label',
+    'options',
+    'selected' => '',
+])
+
+<label for="{{ $name }}">{{ $label }}</label>
 
 <select
-    class="form-control form-select @error($name) is-invalid @enderror"
+    class="form-select
     name="{{ $name }}"
-    id="{{ $name }}-dropdown"
     {{ $attributes->whereStartsWith('wire:click') }}
     {{ $attributes->whereStartsWith('wire:model') }}
 >
@@ -11,7 +17,7 @@
     @foreach ($options as $key => $value)
         <option
             value="{{ $key }}"
-            @if ($selected === $key) selected @endif
+            @selected($selected == $key)
         >{{ $value }}</option>
     @endforeach
 </select>

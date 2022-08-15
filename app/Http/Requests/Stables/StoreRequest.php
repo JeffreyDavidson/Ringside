@@ -42,10 +42,11 @@ class StoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('stables', 'name')],
-            'started_at' => ['nullable', 'string', 'date'],
-            'members_count' => ['nullable', 'integer', Rule::when($this->input('started_at'), 'min:3')],
+            'start_date' => ['nullable', 'string', 'date'],
+            'members_count' => ['nullable', 'integer', Rule::when($this->input('start_date'), 'min:3')],
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
+            'managers' => ['array'],
             'wrestlers.*' => [
                 'bail',
                 'integer',
@@ -59,6 +60,12 @@ class StoreRequest extends FormRequest
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
                 new TagTeamCanJoinNewStable(),
+            ],
+            'managers' => [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('managers', 'id'),
             ],
         ];
     }

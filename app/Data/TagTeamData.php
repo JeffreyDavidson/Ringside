@@ -39,7 +39,7 @@ class TagTeamData
         return new self(
             $request->input('name'),
             $request->input('signature_move'),
-            $request->date('started_at'),
+            $request->date('start_date'),
             Wrestler::query()->findMany($request->collect('wrestlers'))
         );
     }
@@ -55,7 +55,7 @@ class TagTeamData
         return new self(
             $request->input('name'),
             $request->input('signature_move'),
-            $request->date('started_at'),
+            $request->date('start_date'),
             Wrestler::query()->findMany($request->collect('wrestlers'))
         );
     }

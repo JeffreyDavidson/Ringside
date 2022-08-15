@@ -38,7 +38,7 @@ test('updates a manager and redirects', function () {
     $data = UpdateRequest::factory()->create([
         'first_name' => 'Taylor',
         'last_name' => 'Otwell',
-        'started_at' => null,
+        'start_date' => null,
     ]);
 
     $this->actingAs(administrator())
@@ -53,10 +53,10 @@ test('updates a manager and redirects', function () {
         ->employments->toBeEmpty();
 });
 
-test('update can employ an unemployed manager when started at is filled', function () {
+test('update can employ an unemployed manager when start date is filled', function () {
     $dateTime = now()->toDateTimeString();
     $manager = Manager::factory()->unemployed()->create();
-    $data = UpdateRequest::factory()->create(['started_at' => $dateTime]);
+    $data = UpdateRequest::factory()->create(['start_date' => $dateTime]);
 
     $this->actingAs(administrator())
         ->from(action([ManagersController::class, 'edit'], $manager))
@@ -69,10 +69,10 @@ test('update can employ an unemployed manager when started at is filled', functi
         ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
 });
 
-test('update can employ a future employed manager when started at is filled', function () {
+test('update can employ a future employed manager when start date is filled', function () {
     $dateTime = now()->toDateTimeString();
     $manager = Manager::factory()->withFutureEmployment()->create();
-    $data = UpdateRequest::factory()->create(['started_at' => $dateTime]);
+    $data = UpdateRequest::factory()->create(['start_date' => $dateTime]);
 
     $this->actingAs(administrator())
         ->from(action([ManagersController::class, 'edit'], $manager))

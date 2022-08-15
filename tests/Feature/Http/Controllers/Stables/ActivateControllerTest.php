@@ -30,14 +30,14 @@ test('invoke activates an unactivated stable and employs its unemployed members 
 
 test('invoke activates a future activated stable with members and redirects', function () {
     $stable = Stable::factory()->withFutureActivation()->create();
-    $startedAt = $stable->activations->last()->started_at;
+    $activationDate = $stable->activations->last()->started_at;
 
     $this->actingAs(administrator())
         ->patch(action([ActivateController::class], $stable))
         ->assertRedirect(action([StablesController::class, 'index']));
 
     expect($stable->fresh())
-        ->currentActivation->started_at->toBeLessThan($startedAt)
+        ->currentActivation->started_at->toBeLessThan($activationDate)
         ->status->toBe(StableStatus::ACTIVE)
         ->currentWrestlers->each(function ($wrestler) {
             $wrestler->employments->toHaveCount(1)

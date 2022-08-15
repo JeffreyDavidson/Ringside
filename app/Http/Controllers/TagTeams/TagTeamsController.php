@@ -38,7 +38,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('create', TagTeam::class);
 
-        $wrestlers = Wrestler::select('name', 'id')->get();
+        $wrestlers = Wrestler::bookable()->pluck('name', 'id');
 
         return view('tagteams.create', [
             'tagTeam' => $tagTeam,
@@ -84,7 +84,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('update', $tagTeam);
 
-        $wrestlers = Wrestler::all();
+        $wrestlers = Wrestler::withTrashed()->bookable()->pluck('name', 'id');
 
         return view('tagteams.edit', [
             'tagTeam' => $tagTeam,

@@ -52,7 +52,7 @@ class UpdateRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'min:3'],
             'last_name' => ['required', 'string', 'min:3'],
-            'started_at' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($referee)],
+            'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($referee)],
         ];
     }
 
@@ -66,7 +66,7 @@ class UpdateRequest extends FormRequest
         return [
             'first_name' => 'first name',
             'last_name' => 'last name',
-            'started_at' => 'started at',
+            'start_date' => 'start date',
         ];
     }
 }

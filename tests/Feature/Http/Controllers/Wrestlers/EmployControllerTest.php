@@ -20,14 +20,14 @@ test('invoke employs an unemployed wrestler and redirects', function () {
 
 test('invoke employs a future employed wrestler and redirects', function () {
     $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $startedAt = $wrestler->employments->last()->started_at;
+    $startDate = $wrestler->employments->last()->started_at;
 
     $this->actingAs(administrator())
         ->patch(action([EmployController::class], $wrestler))
         ->assertRedirect(action([WrestlersController::class, 'index']));
 
     expect($wrestler->fresh())
-        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->currentEmployment->started_at->toBeLessThan($startDate)
         ->status->toBe(WrestlerStatus::BOOKABLE);
 });
 

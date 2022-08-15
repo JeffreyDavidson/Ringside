@@ -1,34 +1,39 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Create Match
-        </h2>
+        <x-toolbar title="Event Matches">
+            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('events.index')" label="Events" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('events.show', $event)" :label="$event->name" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item :url="route('events.matches.index', $event)" label="Matches" />
+            <x-breadcrumbs.separator />
+            <x-breadcrumbs.item label="Create" />
+        </x-toolbar>
     </x-slot>
 
-    <x-content>
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Create Match for {{ $event->name }}</h3>
-            </div>
-            <div class="card-body">
-                <form action="{{ route('events.matches.store', $event) }}" method="post">
-                    @csrf
-                    @include('matches.partials.form')
-                    <div class="row">
-                        <div class="col-sm-12 col-md-7 d-flex align-items-center justify-content-center justify-content-md-start">
-                            <a href="{{ route('events.matches.index', $event) }}" class="btn btn-md btn-secondary">
-                                <x-icons.arrow />
-                                Back to Matches
-                            </a>
-                        </div>
-
-                        <div class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-end">
-                            <button type="reset" class="me-2 btn btn-secondary">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+    <div class="shadow-sm card">
+        <div class="card-header">
+            <h3 class="card-title">Create A New Match Form</h3>
         </div>
-    </x-content>
+        <div class="card-body">
+            <form method="post" action="{{ route('events.matches.store', $event) }}">
+                @csrf
+                <div class="mb-10">
+                    <x-form.inputs.text label="Name:" name="name" placeholder="Event Name Here" />
+                </div>
+                <div class="mb-10">
+                    <x-form.inputs.date label="Date:" name="date" />
+                </div>
+                <div class="mb-10">
+                    <x-form.inputs.textarea label="Preview:" name="preview" placeholder="Enter a preview description of the event." />
+                </div>
+        </div>
+        <div class="card-footer">
+            <x-form.buttons.submit />
+            <x-form.buttons.reset />
+        </div>
+        </form>
+    </div>
 </x-layouts.app>

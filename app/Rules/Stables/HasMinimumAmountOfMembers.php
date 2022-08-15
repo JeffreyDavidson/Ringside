@@ -21,7 +21,7 @@ class HasMinimumAmountOfMembers implements Rule
      *
      * @var \Illuminate\Support\Carbon
      */
-    protected $startedAt;
+    protected $startDate;
 
     /**
      * Undocumented variable
@@ -41,14 +41,14 @@ class HasMinimumAmountOfMembers implements Rule
      * Undocumented function
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon  $startedAt
+     * @param  \Illuminate\Support\Carbon  $startDate
      * @param  \Illuminate\Support\Collection  $wrestlers
      * @param  \Illuminate\Support\Collection  $tagTeams
      */
-    public function __construct(Stable $stable, Carbon $startedAt, Collection $wrestlers, Collection $tagTeams)
+    public function __construct(Stable $stable, Carbon $startDate, Collection $wrestlers, Collection $tagTeams)
     {
         $this->stable = $stable;
-        $this->startedAt = $startedAt;
+        $this->startDate = $startDate;
         $this->wrestlers = $wrestlers;
         $this->tagTeams = $tagTeams;
     }

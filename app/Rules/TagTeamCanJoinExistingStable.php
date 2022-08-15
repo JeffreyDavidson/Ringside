@@ -18,16 +18,16 @@ class TagTeamCanJoinExistingStable implements Rule
      *
      * @var \Illuminate\Support\Carbon|null
      */
-    protected $startedAt;
+    protected $startDate;
 
     /**
      * Undocumented function
      *
-     * @param  \Illuminate\Support\Carbon|null  $startedAt
+     * @param  \Illuminate\Support\Carbon|null  $startDate
      */
-    public function __construct(?Carbon $startedAt)
+    public function __construct(?Carbon $startDate)
     {
-        $this->startedAt = $startedAt;
+        $this->startDate = $startDate;
     }
 
     /**
@@ -52,7 +52,7 @@ class TagTeamCanJoinExistingStable implements Rule
             return false;
         }
 
-        if ($tagTeam->isCurrentlyEmployed() && isset($this->startedAt) && ! $tagTeam->employedBefore($this->startedAt)) {
+        if ($tagTeam->isCurrentlyEmployed() && isset($this->startDate) && ! $tagTeam->employedBefore($this->startDate)) {
             $this->messages = "{$tagTeam->name} cannot have an employment start date after stable's start date.";
 
             return false;

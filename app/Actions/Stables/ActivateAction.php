@@ -20,25 +20,25 @@ class ActivateAction extends BaseStableAction
      * Activate a stable.
      *
      * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon|null  $activationDate
+     * @param  \Illuminate\Support\Carbon|null  $startDate
      * @return void
      */
-    public function handle(Stable $stable, ?Carbon $activationDate = null): void
+    public function handle(Stable $stable, ?Carbon $startDate = null): void
     {
-        $activationDate ??= now();
+        $startDate ??= now();
 
         if ($stable->currentWrestlers->isNotEmpty()) {
             $stable->currentWrestlers->each(
-                fn (Wrestler $wrestler) => WrestlerEmployAction::run($wrestler, $activationDate)
+                fn (Wrestler $wrestler) => WrestlerEmployAction::run($wrestler, $startDate)
             );
         }
 
         if ($stable->currentTagTeams->isNotEmpty()) {
             $stable->currentTagTeams->each(
-                fn (TagTeam $tagTeam) => TagTeamEmployAction::run($tagTeam, $activationDate)
+                fn (TagTeam $tagTeam) => TagTeamEmployAction::run($tagTeam, $startDate)
             );
         }
 
-        $this->stableRepository->activate($stable, $activationDate);
+        $this->stableRepository->activate($stable, $startDate);
     }
 }

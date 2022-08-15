@@ -1,4 +1,11 @@
 <div class="card">
+    <div class="card-header">
+        <!--begin::Card title-->
+        <div class="m-0 card-title">
+            <h3 class="m-0 fw-bold">Title Champions</h3>
+        </div>
+        <!--end::Card title-->
+    </div>
     <div class="py-4 card-body">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">

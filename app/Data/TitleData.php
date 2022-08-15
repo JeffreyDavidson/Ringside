@@ -32,7 +32,7 @@ class TitleData
     {
         return new self(
             $request->input('name'),
-            $request->date('activated_at'),
+            $request->date('activation_date'),
         );
     }
 
@@ -46,7 +46,7 @@ class TitleData
     {
         return new self(
             $request->input('name'),
-            $request->date('activated_at'),
+            $request->date('activation_date'),
         );
     }
 }

@@ -5,7 +5,7 @@
         </tr>
     </thead>
 
-    <tbody class="text-gray-600 fw-bold">
+    <tbody class="text-gray-600 fw-semibold">
         {{ $body }}
     </tbody>
 </table>

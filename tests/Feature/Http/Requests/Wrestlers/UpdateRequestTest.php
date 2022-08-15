@@ -7,13 +7,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\WrestlerRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $wrestler = Wrestler::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $wrestler = Wrestler::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
         ->by(basicUser())
         ->assertNotAuthorized();
 });
@@ -184,57 +190,57 @@ test('wrestler signature move must be a string if provided', function () {
         ->assertFailsValidation(['signature_move' => 'string']);
 });
 
-test('wrestler started at is optional', function () {
+test('wrestler start date is optional', function () {
     $wrestler = Wrestler::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('wrestler started at must be a string if provided', function () {
+test('wrestler start date must be a string if provided', function () {
     $wrestler = Wrestler::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('wrestler started at must be in the correct date format if provided', function () {
+test('wrestler start date must be in the correct date format if provided', function () {
     $wrestler = Wrestler::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => 'not-a-date-format',
+            'start_date' => 'not-a-date-format',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
-test('wrestler started at cannot be changed if employment start date has past', function () {
+test('wrestler start date cannot be changed if employment start date has past', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
 });
 
-test('wrestler started at can be changed if employment start date is in the future', function () {
+test('wrestler start date can be changed if employment start date is in the future', function () {
     $wrestler = Wrestler::factory()->has(Employment::factory()->started(Carbon::parse('+2 weeks')))->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
-            'started_at' => Carbon::tomorrow()->toDateString(),
+            'start_date' => Carbon::tomorrow()->toDateString(),
         ]))
         ->assertPassesValidation();
 });

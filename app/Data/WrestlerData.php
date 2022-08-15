@@ -41,10 +41,10 @@ class WrestlerData
         return new self(
             $request->input('name'),
             ($request->input('feet') * 12) + $request->input('inches'),
-            $request->input('weight'),
+            (int) $request->input('weight'),
             $request->input('hometown'),
             $request->input('signature_move'),
-            $request->date('started_at')
+            $request->date('start_date')
         );
     }
 
@@ -59,10 +59,10 @@ class WrestlerData
         return new self(
             $request->input('name'),
             ($request->input('feet') * 12) + $request->input('inches'),
-            $request->input('weight'),
+            (int) $request->input('weight'),
             $request->input('hometown'),
             $request->input('signature_move'),
-            $request->date('started_at')
+            $request->date('start_date')
         );
     }
 }

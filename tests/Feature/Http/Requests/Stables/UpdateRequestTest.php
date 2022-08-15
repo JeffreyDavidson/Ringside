@@ -8,13 +8,19 @@ use Illuminate\Support\Carbon;
 use Tests\RequestFactories\StableRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
+    $stable = Stable::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('stable', $stable)
         ->by(administrator())
         ->assertAuthorized();
 });
 
 test('a non administrator is not authorized to make this request', function () {
+    $stable = Stable::factory()->create();
+
     $this->createRequest(UpdateRequest::class)
+        ->withParam('stable', $stable)
         ->by(basicUser())
         ->assertNotAuthorized();
 });
@@ -64,26 +70,26 @@ test('stable name must be unique', function () {
         ->assertFailsValidation(['name' => 'unique:stables,NULL,1,id']);
 });
 
-test('stable started at is optional if not activated', function () {
+test('stable start date is optional if not started', function () {
     $stable = Stable::factory()->unactivated()->withNoMembers()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
         ->assertPassesValidation();
 });
 
-test('stable started at is required if active', function () {
+test('stable start date is required if active', function () {
     $stable = Stable::factory()->active()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => null,
+            'start_date' => null,
         ]))
-        ->assertFailsValidation(['started_at' => 'required']);
+        ->assertFailsValidation(['start_date' => 'required']);
 });
 
 test('stable started must be a string if provided', function () {
@@ -92,40 +98,40 @@ test('stable started must be a string if provided', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => 12345,
+            'start_date' => 12345,
         ]))
-        ->assertFailsValidation(['started_at' => 'string']);
+        ->assertFailsValidation(['start_date' => 'string']);
 });
 
-test('stable started at must be in the correct date format', function () {
+test('stable start date must be in the correct date format', function () {
     $stable = Stable::factory()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => 'not-a-date-format',
+            'start_date' => 'not-a-date-format',
         ]))
-        ->assertFailsValidation(['started_at' => 'date']);
+        ->assertFailsValidation(['start_date' => 'date']);
 });
 
-test('stable started at cannot be changed if stable date has past', function () {
+test('stable start date cannot be changed if stable date has past', function () {
     $stable = Stable::factory()->active()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => Carbon::now()->toDateTimeString(),
+            'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['started_at' => 'app\rules\stables\activationstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => 'app\rules\stables\activationstartdatecanbechanged']);
 });
 
-test('stable started at can be changed if activation start date is in the future', function () {
+test('stable start date can be changed if activation start date is in the future', function () {
     $stable = Stable::factory()->withFutureActivation()->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'started_at' => Carbon::tomorrow()->toDateString(),
+            'start_date' => Carbon::tomorrow()->toDateString(),
         ]))
         ->assertPassesValidation();
 });
@@ -265,15 +271,14 @@ test('suspended tag teams cannot join a stable', function () {
         ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinexistingstable']);
 });
 
-test('stable must have a minimum number of members', function () {
-    $stable = Stable::factory()->withEmployedDefaultMembers()->create();
+test('stable must have a minimum number of members if start date is filled', function () {
+    $stable = Stable::factory()->create();
     $wrestlersToJoinStable = Wrestler::factory()->bookable()->count(2)->create();
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'members_count' => 2,
-            'started_at' => now()->toDateTimeString(),
+            'start_date' => now()->toDateTimeString(),
             'wrestlers' => $wrestlersToJoinStable->modelKeys(),
             'tag_teams' => [],
         ]))

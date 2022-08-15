@@ -25,7 +25,11 @@ class UpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        if (is_null($this->user())) {
+        if (is_null($this->user()) || is_null($this->route())) {
+            return false;
+        }
+
+        if (! $this->route()->hasParameter('wrestler') || is_null($this->route()->parameter('wrestler'))) {
             return false;
         }
 
@@ -49,7 +53,7 @@ class UpdateRequest extends FormRequest
             'weight' => ['required', 'integer'],
             'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string'],
-            'started_at' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($wrestler)],
+            'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($wrestler)],
         ];
     }
 
@@ -61,7 +65,7 @@ class UpdateRequest extends FormRequest
     public function attributes()
     {
         return [
-            'started_at' => 'date started',
+            'start_date' => 'start date',
             'signature_move' => 'signature move',
         ];
     }

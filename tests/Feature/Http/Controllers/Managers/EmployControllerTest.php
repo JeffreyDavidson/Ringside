@@ -20,14 +20,14 @@ test('invoke employs an unemployed manager and redirects', function () {
 
 test('invoke employs a future employed manager and redirects', function () {
     $manager = Manager::factory()->withFutureEmployment()->create();
-    $startedAt = $manager->employments->first()->started_at;
+    $startDate = $manager->employments->first()->started_at;
 
     $this->actingAs(administrator())
         ->patch(action([EmployController::class], $manager))
         ->assertRedirect(action([ManagersController::class, 'index']));
 
     expect($manager->fresh())
-        ->currentEmployment->started_at->toBeLessThan($startedAt)
+        ->currentEmployment->started_at->toBeLessThan($startDate)
         ->status->toBe(ManagerStatus::AVAILABLE);
 });
 

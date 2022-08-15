@@ -30,7 +30,7 @@ test('store creates a tag team and redirects', function () {
     $data = StoreRequest::factory()->create([
         'name' => 'Example Tag Team Name',
         'signature_move' => null,
-        'started_at' => null,
+        'start_date' => null,
         'wrestlers' => null,
     ]);
 
@@ -47,7 +47,7 @@ test('store creates a tag team and redirects', function () {
         ->wrestlers->toBeEmpty();
 });
 
-test('an employment is created only for the tag team if started at is filled in request', function () {
+test('an employment is created only for the tag team if start date is filled in request', function () {
     $startDate = now();
     $wrestlers = Wrestler::factory()
         ->has(Employment::factory()->started($startDate->copy()->subWeek()))
@@ -55,7 +55,7 @@ test('an employment is created only for the tag team if started at is filled in 
         ->create();
 
     $data = StoreRequest::factory()->create([
-        'started_at' => $startDate->toDateTimeString(),
+        'start_date' => $startDate->toDateTimeString(),
         'wrestlers' => $wrestlers->modelKeys(),
     ]);
 
@@ -71,7 +71,7 @@ test('an employment is created only for the tag team if started at is filled in 
         });
 });
 
-test('unemployed wrestlers are employed on the same date if started at is filled in request', function () {
+test('unemployed wrestlers are employed on the same date if start date is filled in request', function () {
     $startDate = now();
     Carbon::setTestNow($startDate);
     $wrestlers = Wrestler::factory()
@@ -80,7 +80,7 @@ test('unemployed wrestlers are employed on the same date if started at is filled
         ->create();
 
     $data = StoreRequest::factory()->create([
-        'started_at' => $startDate->toDateTimeString(),
+        'start_date' => $startDate->toDateTimeString(),
         'wrestlers' => $wrestlers->pluck('id')->toArray(),
     ]);
 
@@ -96,7 +96,7 @@ test('unemployed wrestlers are employed on the same date if started at is filled
         });
 });
 
-test('unemployed wrestlers are joined at the current date if started at is not filled in request', function () {
+test('unemployed wrestlers are joined at the current date if start date is not filled in request', function () {
     $startDate = now();
     Carbon::setTestNow($startDate);
     $wrestlers = Wrestler::factory()
