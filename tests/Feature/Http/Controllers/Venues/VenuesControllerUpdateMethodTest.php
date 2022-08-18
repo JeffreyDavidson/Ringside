@@ -39,7 +39,6 @@ test('updates a venue and redirects', function () {
     $data = UpdateRequest::factory()->create([
         'name' => 'New Venue Name',
         'address1' => '456 1st Avenue',
-        'address2' => null,
         'city' => 'Laraville',
         'state' => 'California',
         'zip' => '67890',
@@ -54,7 +53,6 @@ test('updates a venue and redirects', function () {
     expect($venue->fresh())
         ->name->toBe('New Venue Name')
         ->address1->toBe('456 1st Avenue')
-        ->address2->toBeNull()
         ->city->toBe('Laraville')
         ->state->toBe('California')
         ->zip->toBe('67890');

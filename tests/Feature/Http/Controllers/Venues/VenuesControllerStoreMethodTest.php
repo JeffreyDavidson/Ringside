@@ -26,7 +26,6 @@ test('store creates a venue and redirects', function () {
     $data = StoreRequest::factory()->create([
         'name' => 'Example Venue',
         'address1' => '123 Main Street',
-        'address2' => 'Suite 100',
         'city' => 'Laraville',
         'state' => 'New York',
         'zip' => '12345',
@@ -41,7 +40,6 @@ test('store creates a venue and redirects', function () {
     expect(Venue::latest()->first())
         ->name->toBe('Example Venue')
         ->address1->toBe('123 Main Street')
-        ->address2->toBe('Suite 100')
         ->city->toBe('Laraville')
         ->state->toBe('New York')
         ->zip->toBe('12345');
