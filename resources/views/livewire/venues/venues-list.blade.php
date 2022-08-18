@@ -27,7 +27,7 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                {{ $venue->address1 }} {{ $venue->address2 }}
+                                {{ $venue->address1 }}
                             </x-table.cell>
 
                             <x-table.cell>

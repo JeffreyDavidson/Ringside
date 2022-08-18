@@ -24,9 +24,6 @@
                         <div class="col-lg-8">
                             <x-form.inputs.text label="Street Address:" name="address1" placeholder="Street Address Here" />
                         </div>
-                        <div class="col-lg-4">
-                            <x-form.inputs.text label="Suite Number:" name="address2" placeholder="Suite Number Here" />
-                        </div>
                     </div>
                 </div>
                 <div class="mb-10">

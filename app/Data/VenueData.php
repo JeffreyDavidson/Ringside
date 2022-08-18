@@ -14,7 +14,6 @@ class VenueData
      *
      * @param  string  $name
      * @param  string  $address1
-     * @param  string|null  $address2
      * @param  string  $city
      * @param  string  $state
      * @param  string  $zip
@@ -22,7 +21,6 @@ class VenueData
     public function __construct(
         public string $name,
         public string $address1,
-        public ?string $address2,
         public string $city,
         public string $state,
         public string $zip,
@@ -40,7 +38,6 @@ class VenueData
         return new self(
             $request->input('name'),
             $request->input('address1'),
-            $request->input('address2'),
             $request->input('city'),
             $request->input('state'),
             $request->input('zip')
@@ -58,7 +55,6 @@ class VenueData
         return new self(
             $request->input('name'),
             $request->input('address1'),
-            $request->input('address2'),
             $request->input('city'),
             $request->input('state'),
             $request->input('zip')

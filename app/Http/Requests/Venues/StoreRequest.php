@@ -40,7 +40,6 @@ class StoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:3'],
             'address1' => ['required', 'string'],
-            'address2' => ['nullable', 'string'],
             'city' => ['required', 'string'],
             'state' => ['required', 'string'],
             'zip' => ['required', 'integer', 'digits:5'],
@@ -57,7 +56,6 @@ class StoreRequest extends FormRequest
         return [
             'name' => 'venue name',
             'address1' => 'street address',
-            'address2' => 'suite number',
             'zip' => 'zip code',
         ];
     }
