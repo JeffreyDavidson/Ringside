@@ -601,7 +601,7 @@ namespace App\Models{
      *
      * @property int $id
      * @property string $name
-     * @property string $address1
+     * @property string $street_address
      * @property string $city
      * @property string $state
      * @property string $zip

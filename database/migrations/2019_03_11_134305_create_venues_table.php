@@ -18,7 +18,7 @@ return new class extends Migration
         Schema::create('venues', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('address1');
+            $table->string('street_address');
             $table->string('city');
             $table->string('state');
             $table->string('zip');

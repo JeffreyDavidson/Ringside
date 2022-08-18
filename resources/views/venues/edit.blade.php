@@ -26,7 +26,7 @@
                 <div class="mb-10">
                     <div class="mb-5 row gx-10">
                         <div class="col-lg-8">
-                            <x-form.inputs.text label="Street Address:" name="address1" placeholder="Street Address Here" value="{{ $venue->address1 }}" />
+                            <x-form.inputs.text label="Street Address:" name="street_address" placeholder="Street Address Here" value="{{ $venue->street_address }}" />
                         </div>
                     </div>
                 </div>

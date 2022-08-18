@@ -31,14 +31,14 @@ test('a guest cannot view the form for creating a venue', function () {
 test('updates a venue and redirects', function () {
     $venue = Venue::factory()->create([
         'name' => 'Old Venue Name',
-        'address1' => '123 Main Street',
+        'street_address' => '123 Main Street',
         'city' => 'New York City',
         'state' => 'New York',
         'zip' => '12345',
     ]);
     $data = UpdateRequest::factory()->create([
         'name' => 'New Venue Name',
-        'address1' => '456 1st Avenue',
+        'street_address' => '456 1st Avenue',
         'city' => 'Laraville',
         'state' => 'California',
         'zip' => '67890',
@@ -52,7 +52,7 @@ test('updates a venue and redirects', function () {
 
     expect($venue->fresh())
         ->name->toBe('New Venue Name')
-        ->address1->toBe('456 1st Avenue')
+        ->street_address->toBe('456 1st Avenue')
         ->city->toBe('Laraville')
         ->state->toBe('California')
         ->zip->toBe('67890');
