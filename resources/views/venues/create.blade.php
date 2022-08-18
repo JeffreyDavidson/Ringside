@@ -22,7 +22,7 @@
                 <div class="mb-10">
                     <div class="mb-5 row gx-10">
                         <div class="col-lg-8">
-                            <x-form.inputs.text label="Street Address:" name="address1" placeholder="Street Address Here" />
+                            <x-form.inputs.text label="Street Address:" name="street_address" placeholder="Street Address Here" />
                         </div>
                     </div>
                 </div>

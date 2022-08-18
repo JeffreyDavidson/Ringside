@@ -12,7 +12,7 @@ class VenueRequestFactory extends RequestFactory
     {
         return [
             'name' => $this->faker->name(),
-            'address1' => $this->faker->buildingNumber(),
+            'street_address' => $this->faker->buildingNumber().' '.$this->faker->streetName(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),
             'zip' => $this->faker->postcode(),

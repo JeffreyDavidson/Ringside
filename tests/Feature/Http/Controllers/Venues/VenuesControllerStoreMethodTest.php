@@ -25,7 +25,7 @@ test('a guest cannot view the form for creating a venue', function () {
 test('store creates a venue and redirects', function () {
     $data = StoreRequest::factory()->create([
         'name' => 'Example Venue',
-        'address1' => '123 Main Street',
+        'street_address' => '123 Main Street',
         'city' => 'Laraville',
         'state' => 'New York',
         'zip' => '12345',
@@ -39,7 +39,7 @@ test('store creates a venue and redirects', function () {
 
     expect(Venue::latest()->first())
         ->name->toBe('Example Venue')
-        ->address1->toBe('123 Main Street')
+        ->street_address->toBe('123 Main Street')
         ->city->toBe('Laraville')
         ->state->toBe('New York')
         ->zip->toBe('12345');

@@ -19,7 +19,7 @@ class VenueRepository
     {
         return Venue::create([
             'name' => $venueData->name,
-            'address1' => $venueData->address1,
+            'street_address' => $venueData->street_address,
             'city' => $venueData->city,
             'state' => $venueData->state,
             'zip' => $venueData->zip,
@@ -37,7 +37,7 @@ class VenueRepository
     {
         $venue->update([
             'name' => $venueData->name,
-            'address1' => $venueData->address1,
+            'street_address' => $venueData->street_address,
             'city' => $venueData->city,
             'state' => $venueData->state,
             'zip' => $venueData->zip,

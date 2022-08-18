@@ -43,7 +43,7 @@
                 <!--end::Label-->
                 <!--begin::Col-->
                 <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $venue->address1 }}</span>
+                    <span class="text-gray-800 fs-6">{{ $venue->street_address }}</span>
                     <span class="text-gray-800 fs-6">{{ $venue->city }}, {{ $venue->state }} {{ $venue->zip }}</span>
                 </div>
                 <!--end::Col-->
