@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Data\WrestlerData;
+use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 
@@ -215,8 +217,34 @@ class WrestlerRepository
      */
     public function removeFromCurrentTagTeam(Wrestler $wrestler, Carbon $removalDate)
     {
-        $wrestler->tagTeams()->updateExistingPivot($wrestler->currentTagTeam->id, [
+        $wrestler->update(['current_tag_team_id' => null]);
+
+        $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot($wrestler->currentTagTeam->id, [
             'left_at' => $removalDate->toDateTimeString(),
         ]);
+    }
+
+    public static function getAvailableWrestlersForNewTagTeam()
+    {
+        // Each wrestler must be either:
+        // have a currentEmployment (scope called employed) AND have a status of bookable and not belong to another employed tag team where the tag team is bookable OR the tag team has a future employment
+        // or have a future employment (scope called futureEmployment)
+        // or has not been employed (scope called unemployed)
+
+        return Wrestler::query()
+            ->where(function ($query) {
+                $query->unemployed();
+            })
+            ->orWhere(function ($query) {
+                $query->futureEmployed();
+            })
+            ->orWhere(function ($query) {
+                $query->employed()
+                    ->where('status', WrestlerStatus::BOOKABLE)
+                    ->whereDoesntHave('currentTagTeam', function ($query) {
+                        // $query->whereNotIn('status', [TagTeamStatus::BOOKABLE, TagTeamStatus::FUTURE_EMPLOYMENT]);
+                        $query->where('status', '!=', TagTeamStatus::BOOKABLE)->orWhere('status', '!=', TagTeamStatus::FUTURE_EMPLOYMENT);
+                    });
+            });
     }
 }

@@ -73,13 +73,11 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     /**
      * Get current wrestlers of the tag team.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function currentWrestlers()
     {
-        return $this->wrestlers()
-            ->wherePivot('joined_at', '<=', now())
-            ->wherePivotNull('left_at');
+        return $this->hasMany(Wrestler::class, 'current_tag_team_id');
     }
 
     /**
