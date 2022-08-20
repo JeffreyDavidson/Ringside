@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\TagTeam;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -39,13 +39,11 @@ trait CanJoinTagTeams
     /**
      * Get the model's current tag team.
      *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function currentTagTeam(): Attribute
+    public function currentTagTeam(): BelongsTo
     {
-        return Attribute::make(
-            get: fn () => $this->tagTeams()->wherePivotNull('left_at')->first(),
-        );
+        return $this->belongsTo(TagTeam::class, 'current_tag_team_id');
     }
 
     /**

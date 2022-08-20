@@ -16,7 +16,7 @@ interface TagTeamMember
     /**
      * Get the current tag team the member belongs to.
      *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function currentTagTeam();
 
