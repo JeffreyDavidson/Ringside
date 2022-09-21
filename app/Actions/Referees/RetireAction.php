@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Exceptions\CannotBeRetiredException;
 use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -18,20 +19,25 @@ class RetireAction extends BaseRefereeAction
      * @param  \App\Models\Referee  $referee
      * @param  \Illuminate\Support\Carbon|null  $retirementDate
      * @return void
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
+        throw_if($referee->canBeRetired(), CannotBeRetiredException::class);
+
         $retirementDate ??= now();
 
         if ($referee->isSuspended()) {
-            $this->refereeRepository->reinstate($referee, $retirementDate);
+            ReinstateAction::run($referee, $retirementDate);
         }
 
         if ($referee->isInjured()) {
-            $this->refereeRepository->clearInjury($referee, $retirementDate);
+            ClearInjuryAction::run($referee, $retirementDate);
         }
 
-        $this->refereeRepository->release($referee, $retirementDate);
+        ReleaseAction::run($referee, $retirementDate);
+
         $this->refereeRepository->retire($referee, $retirementDate);
     }
 }

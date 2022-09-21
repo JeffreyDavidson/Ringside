@@ -15,7 +15,7 @@ class WrestlerCanJoinNewStable implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param  array $tagTeamIds
+     * @param  array  $tagTeamIds
      * @return void
      */
     public function __construct($tagTeamIds)
@@ -29,6 +29,8 @@ class WrestlerCanJoinNewStable implements Rule
      * @param  string  $attribute
      * @param  mixed  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

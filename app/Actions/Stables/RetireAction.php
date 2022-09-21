@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Exceptions\CannotBeRetiredException;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -22,9 +23,13 @@ class RetireAction extends BaseStableAction
      * @param  \App\Models\Stable  $stable
      * @param  \Illuminate\Support\Carbon|null  $retirementDate
      * @return void
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {
+        throw_if($stable->canBeRetired(), CannotBeRetiredException::class);
+
         $retirementDate ??= now();
 
         if ($stable->currentTagTeams->isNotEmpty()) {

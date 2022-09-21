@@ -37,7 +37,7 @@ class StablesList extends BaseComponent
     /**
      * Undocumented function.
      *
-     * @return  \Illuminate\Database\Query\Builder
+     * @return \Illuminate\Database\Query\Builder
      */
     public function getRowsQueryProperty()
     {

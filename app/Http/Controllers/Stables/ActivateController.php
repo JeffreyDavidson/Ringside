@@ -21,9 +21,11 @@ class ActivateController extends Controller
     {
         $this->authorize('activate', $stable);
 
-        throw_unless($stable->canBeActivated(), CannotBeActivatedException::class);
-
-        ActivateAction::run($stable);
+        try {
+            ActivateAction::run($stable);
+        } catch (CannotBeActivatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('stables.index');
     }

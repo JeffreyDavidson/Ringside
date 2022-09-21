@@ -21,9 +21,11 @@ class ReleaseController extends Controller
     {
         $this->authorize('release', $tagTeam);
 
-        throw_unless($tagTeam->canBeReleased(), CannotBeReleasedException::class);
-
-        ReleaseAction::run($tagTeam);
+        try {
+            ReleaseAction::run($tagTeam);
+        } catch (CannotBeReleasedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('tag-teams.index');
     }

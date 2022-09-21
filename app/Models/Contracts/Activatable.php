@@ -79,13 +79,6 @@ interface Activatable
     public function hasFutureActivation();
 
     /**
-     * Determine if the model can be activated.
-     *
-     * @return bool
-     */
-    public function canBeActivated();
-
-    /**
      * Retrieve the model's first activation date.
      *
      * @return \Illuminate\Database\Eloquent\Casts\Attribute

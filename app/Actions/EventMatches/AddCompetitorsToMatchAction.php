@@ -22,7 +22,7 @@ class AddCompetitorsToMatchAction extends BaseEventMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
-        $competitors->each(function ($sideCompetitors, $sideNumber) use ($eventMatch) {
+        $competitors->each(function (array $sideCompetitors, int $sideNumber) use ($eventMatch) {
             if (Arr::exists($sideCompetitors, 'wrestlers')) {
                 AddWrestlersToMatchAction::run($eventMatch, Arr::get($sideCompetitors, 'wrestlers'), $sideNumber);
             }

@@ -65,7 +65,7 @@ class EventFactory extends Factory
     {
         return $this->state([
             'status' => EventStatus::SCHEDULED,
-            'date' => Carbon::tomorrow(),
+            'date' => Carbon::tomorrow()->hour(19),
         ]);
     }
 
@@ -105,14 +105,14 @@ class EventFactory extends Factory
     }
 
     /**
-     * Define the event's name.
+     * Define the event's preview.
      *
-     * @param  string  $name
+     * @param  string  $preview
      * @return static
      */
-    public function withName(string $name)
+    public function withPreview()
     {
-        return $this->state(['name' => $name]);
+        return $this->state(['preview' => $this->faker->paragraphs(3, true)]);
     }
 
     /**
@@ -121,8 +121,8 @@ class EventFactory extends Factory
      * @param  string  $preview
      * @return static
      */
-    public function withPreview(string $preview)
+    public function withVenue()
     {
-        return $this->state(['preview' => $preview]);
+        return $this->state(['venue_id' => Venue::inRandomOrder()->first()]);
     }
 }

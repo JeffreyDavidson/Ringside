@@ -9,14 +9,14 @@ use Illuminate\Support\Carbon;
 class EmploymentStartDateCanBeChanged implements Rule
 {
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var \App\Models\Contracts\Employable
      */
     protected Employable $rosterMember;
 
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var string
      */
@@ -39,6 +39,8 @@ class EmploymentStartDateCanBeChanged implements Rule
      * @param  string  $attribute
      * @param  string  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

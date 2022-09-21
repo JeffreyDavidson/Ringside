@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class VenueFactory extends Factory
 {
@@ -16,7 +17,7 @@ class VenueFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->sentence(),
+            'name' => Str::of(Str::title($this->faker->words(2, true)))->append(' Arena')->value,
             'street_address' => $this->faker->buildingNumber().' '.$this->faker->streetName(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),

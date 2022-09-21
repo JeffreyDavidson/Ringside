@@ -33,6 +33,8 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
      * @param  string  $attribute
      * @param  array|Countable  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

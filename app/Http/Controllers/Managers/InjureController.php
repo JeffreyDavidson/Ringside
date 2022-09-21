@@ -21,9 +21,11 @@ class InjureController extends Controller
     {
         $this->authorize('injure', $manager);
 
-        throw_unless($manager->canBeInjured(), CannotBeInjuredException::class);
-
-        InjureAction::run($manager);
+        try {
+            InjureAction::run($manager);
+        } catch (CannotBeInjuredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('managers.index');
     }

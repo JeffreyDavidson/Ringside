@@ -22,7 +22,11 @@ class RestoreController extends Controller
 
         $this->authorize('restore', $tagTeam);
 
-        RestoreAction::run($tagTeam);
+        try {
+            RestoreAction::run($tagTeam);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('tag-teams.index');
     }

@@ -21,9 +21,11 @@ class ReinstateController extends Controller
     {
         $this->authorize('reinstate', $referee);
 
-        throw_unless($referee->canBeReinstated(), CannotBeReinstatedException::class);
-
-        ReinstateAction::run($referee);
+        try {
+            ReinstateAction::run($referee);
+        } catch (CannotBeReinstatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('referees.index');
     }

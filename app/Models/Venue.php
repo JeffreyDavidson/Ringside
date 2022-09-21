@@ -18,5 +18,11 @@ class Venue extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'street_address', 'city', 'state', 'zip'];
+    protected $fillable = [
+        'name',
+        'street_address',
+        'city',
+        'state',
+        'zip',
+    ];
 }

@@ -46,7 +46,7 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
-        /** @var \App\Models\Stable */
+        /** @var \App\Models\Stable $stable */
         $stable = $this->route()->parameter('stable');
 
         return [
@@ -90,12 +90,7 @@ class UpdateRequest extends FormRequest
                 Rule::exists('tag_teams', 'id'),
                 new TagTeamCanJoinExistingStable($this->date('start_date')),
             ],
-            'managers' => [
-                'bail',
-                'integer',
-                'distinct',
-                Rule::exists('managers', 'id'),
-            ],
+            'managers' => ['bail', 'integer', 'distinct', Rule::exists('managers', 'id')],
         ];
     }
 
@@ -109,7 +104,5 @@ class UpdateRequest extends FormRequest
         $this->merge([
             'members_count' => ($this->collect('tag_teams')->count() * 2) + $this->collect('wrestlers')->count(),
         ]);
-
-        // dd($this->all());
     }
 }

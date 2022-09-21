@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\RequestFactories;
 
+use Illuminate\Support\Str;
 use Worksome\RequestFactories\RequestFactory;
 
 class WrestlerRequestFactory extends RequestFactory
@@ -11,7 +12,7 @@ class WrestlerRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => Str::title($this->faker->words(3, true)),
             'feet' => $this->faker->numberBetween(5, 8),
             'inches' => $this->faker->numberBetween(0, 11),
             'weight' => $this->faker->numberBetween(200, 400),

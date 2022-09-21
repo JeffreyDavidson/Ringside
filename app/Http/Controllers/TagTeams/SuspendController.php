@@ -21,9 +21,11 @@ class SuspendController extends Controller
     {
         $this->authorize('suspend', $tagTeam);
 
-        throw_unless($tagTeam->canBeSuspended(), CannotBeSuspendedException::class);
-
-        SuspendAction::run($tagTeam);
+        try {
+            SuspendAction::run($tagTeam);
+        } catch (CannotBeSuspendedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('tag-teams.index');
     }

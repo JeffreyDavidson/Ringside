@@ -23,8 +23,12 @@ class CreateAction extends BaseTagTeamAction
         /** @var \App\Models\TagTeam $tagTeam */
         $tagTeam = $this->tagTeamRepository->create($tagTeamData);
 
-        if ($tagTeamData->wrestlers->isNotEmpty()) {
-            AddTagTeamPartnersAction::run($tagTeam, $tagTeamData->wrestlers, now());
+        if ($tagTeamData->wrestlerA) {
+            AddTagTeamPartnerAction::run($tagTeam, $tagTeamData->wrestlerA, now());
+        }
+
+        if ($tagTeamData->wrestlerB) {
+            AddTagTeamPartnerAction::run($tagTeam, $tagTeamData->wrestlerB, now());
         }
 
         if (isset($tagTeamData->start_date)) {

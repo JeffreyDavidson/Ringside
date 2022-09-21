@@ -13,7 +13,13 @@ class StableMember extends MorphPivot
      *
      * @var array<int, string>
      */
-    protected $fillable = ['stable_id', 'member_id', 'member_type', 'joined_at', 'left_at'];
+    protected $fillable = [
+        'stable_id',
+        'member_id',
+        'member_type',
+        'joined_at',
+        'left_at',
+    ];
 
     /**
      * The attributes that should be cast to native types.

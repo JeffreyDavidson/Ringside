@@ -8,7 +8,7 @@
 <label for="{{ $name }}">{{ $label }}</label>
 
 <select
-    class="form-select
+    class="form-select"
     name="{{ $name }}"
     {{ $attributes->whereStartsWith('wire:click') }}
     {{ $attributes->whereStartsWith('wire:model') }}

@@ -47,18 +47,4 @@ interface Retirable
      * @return bool
      */
     public function hasRetirements();
-
-    /**
-     * Determine if a model can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired();
-
-    /**
-     * Determine if a model can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired();
 }

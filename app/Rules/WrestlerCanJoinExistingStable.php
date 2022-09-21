@@ -19,7 +19,7 @@ class WrestlerCanJoinExistingStable implements Rule
     protected $date;
 
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var string
      */
@@ -44,6 +44,8 @@ class WrestlerCanJoinExistingStable implements Rule
      * @param  string  $attribute
      * @param  mixed  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

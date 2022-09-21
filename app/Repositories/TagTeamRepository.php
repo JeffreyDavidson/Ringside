@@ -231,14 +231,18 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  int  $tagTeamPartnerId
-     * @param  \Illuminate\Support\Carbon  $date
+     * @param  \Illuminate\Support\Carbon|null  $removalDate
      * @return void
      */
-    public function removeTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)
+    public function removeTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, ?Carbon $removalDate = null)
     {
-        $tagTeam->currentWrestlers()->updateExistingPivot(
+        $removalDate ??= now();
+
+        $tagTeam->currentWrestlers()->find($tagTeamPartnerId)->update(['current_tag_team_id' => null]);
+
+        $tagTeam->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
             $tagTeamPartnerId,
-            ['left_at' => $date->toDateTimeString()]
+            ['left_at' => $removalDate->toDateTimeString()]
         );
     }
 
@@ -247,14 +251,18 @@ class TagTeamRepository
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  int  $tagTeamPartnerId
-     * @param  \Illuminate\Support\Carbon  $date
+     * @param  \Illuminate\Support\Carbon|null  $joinDate
      * @return void
      */
-    public function addTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, Carbon $date)
+    public function addTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, ?Carbon $joinDate = null)
     {
-        $tagTeam->currentWrestlers()->attach(
+        $joinDate ??= now();
+
+        Wrestler::find($tagTeamPartnerId)->update(['current_tag_team_id' => $tagTeam->id]);
+
+        $tagTeam->wrestlers()->attach(
             $tagTeamPartnerId,
-            ['joined_at' => $date->toDateTimeString()]
+            ['joined_at' => $joinDate->toDateTimeString()]
         );
     }
 }

@@ -35,7 +35,7 @@ class TagTeamsList extends BaseComponent
     ];
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return \Illuminate\Database\Query\Builder
      */
@@ -49,7 +49,7 @@ class TagTeamsList extends BaseComponent
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */

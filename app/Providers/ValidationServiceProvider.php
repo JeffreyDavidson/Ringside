@@ -25,6 +25,7 @@ class ValidationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        /** @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter */
         Validator::replacer('ends_with', function ($message, $attribute, $rule, $parameters) {
             $values = array_pop($parameters);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
+use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\VenueRequestFactory;
 use Worksome\RequestFactories\Concerns\HasFactory;
@@ -38,7 +39,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3'],
+            'name' => ['required', 'string', new LetterSpace, 'min:3'],
             'street_address' => ['required', 'string'],
             'city' => ['required', 'string'],
             'state' => ['required', 'string'],

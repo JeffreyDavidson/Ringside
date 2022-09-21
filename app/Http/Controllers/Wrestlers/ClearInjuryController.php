@@ -21,9 +21,11 @@ class ClearInjuryController extends Controller
     {
         $this->authorize('clearFromInjury', $wrestler);
 
-        throw_unless($wrestler->canBeClearedFromInjury(), CannotBeClearedFromInjuryException::class);
-
-        ClearInjuryAction::run($wrestler);
+        try {
+            ClearInjuryAction::run($wrestler);
+        } catch (CannotBeClearedFromInjuryException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('wrestlers.index');
     }

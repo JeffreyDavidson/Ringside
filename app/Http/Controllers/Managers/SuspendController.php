@@ -21,9 +21,11 @@ class SuspendController extends Controller
     {
         $this->authorize('suspend', $manager);
 
-        throw_unless($manager->canBeSuspended(), CannotBeSuspendedException::class);
-
-        SuspendAction::run($manager);
+        try {
+            SuspendAction::run($manager);
+        } catch (CannotBeSuspendedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('managers.index');
     }

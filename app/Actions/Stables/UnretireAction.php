@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Stable;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -18,9 +19,13 @@ class UnretireAction extends BaseStableAction
      * @param  \App\Models\Stable  $stable
      * @param  \Illuminate\Support\Carbon|null  $unretiredDate
      * @return void
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Stable $stable, ?Carbon $unretiredDate = null): void
     {
+        throw_if($stable->canBeUnretired(), CannotBeUnretiredException::class);
+
         $unretiredDate ??= now();
 
         $this->stableRepository->unretire($stable, $unretiredDate);

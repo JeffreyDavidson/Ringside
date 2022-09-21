@@ -34,8 +34,6 @@ interface Employable
 
     public function isReleased(): bool;
 
-    public function canBeReleased(): bool;
-
     public function startedAt(): \Illuminate\Database\Eloquent\Casts\Attribute;
 
     public function employedOn(Carbon $employmentDate): bool;

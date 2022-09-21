@@ -10,35 +10,35 @@ use Illuminate\Support\Collection;
 class HasMinimumAmountOfMembers implements Rule
 {
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var \App\Models\Stable
      */
     protected $stable;
 
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var \Illuminate\Support\Carbon
      */
     protected $startDate;
 
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var \Illuminate\Support\Collection
      */
     protected $wrestlers;
 
     /**
-     * Undocumented variable
+     * Undocumented variable.
      *
      * @var \Illuminate\Support\Collection
      */
     protected $tagTeams;
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @param  \App\Models\Stable  $stable
      * @param  \Illuminate\Support\Carbon  $startDate
@@ -59,6 +59,8 @@ class HasMinimumAmountOfMembers implements Rule
      * @param  string  $attribute
      * @param  mixed  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

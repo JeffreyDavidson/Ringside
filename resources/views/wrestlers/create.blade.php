@@ -17,29 +17,62 @@
             <form method="post" action="{{ route('wrestlers.store') }}">
                 @csrf
                 <div class="mb-10">
-                    <x-form.inputs.text label="Name:" name="name" placeholder="Wrestler Name Here" />
+                    <x-form.inputs.text
+                        label="Name:"
+                        name="name"
+                        placeholder="Wrestler Name Here"
+                        :value="old('name')"
+                    />
                 </div>
                 <div class="mb-10">
                     <div class="mb-5 row gx-10">
                         <div class="col-lg-3">
-                            <x-form.inputs.number label="Height (Feet):" name="feet" placeholder="6" />
+                            <x-form.inputs.number
+                                label="Height (Feet):"
+                                name="feet"
+                                max="8"
+                                :value="old('feet')"
+                            />
                         </div>
                         <div class="col-lg-3">
-                            <x-form.inputs.number label="Height (Inches):" name="inches" placeholder="2" max="11" />
+                            <x-form.inputs.number
+                                label="Height (Inches):"
+                                name="inches"
+                                max="11"
+                                :value="old('inches')"
+                            />
                         </div>
                         <div class="col-lg-6">
-                            <x-form.inputs.number label="Weight:" name="weight" placeholder="220" />
+                            <x-form.inputs.number
+                                label="Weight:"
+                                name="weight"
+                                :value="old('weight')"
+                            />
                         </div>
                     </div>
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.text label="Hometown:" name="hometown" placeholder="Orlando, FL" />
+                    <x-form.inputs.text
+                        label="Hometown:"
+                        name="hometown"
+                        placeholder="Orlando, FL"
+                        :value="old('hometown')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.text label="Signature Move:" name="signature_move" placeholder="This Amazing Finisher" />
+                    <x-form.inputs.text
+                        label="Signature Move:"
+                        name="signature_move"
+                        placeholder="This Amazing Finisher"
+                        :value="old('signature_move')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.date label="Start Date:" name="start_date" />
+                    <x-form.inputs.date
+                        label="Start Date:"
+                        name="start_date"
+                        :value="old('start_date')"
+                    />
                 </div>
         </div>
         <div class="card-footer">

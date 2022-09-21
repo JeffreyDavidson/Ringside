@@ -1,58 +1,29 @@
 <?php
 
-use App\Enums\TitleStatus;
-use App\Exceptions\CannotBeActivatedException;
+use App\Actions\Titles\ActivateAction;
 use App\Http\Controllers\Titles\ActivateController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
 
-test('invoke activates an unactivated title and redirects', function () {
-    $title = Title::factory()->unactivated()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $title))
-        ->assertRedirect(action([TitlesController::class, 'index']));
-
-    expect($title->fresh())
-        ->activations->toHaveCount(1)
-        ->status->toBe(TitleStatus::ACTIVE);
+beforeEach(function () {
+    $this->title = Title::factory()->unactivated()->create();
 });
 
-test('invoke activates a future activated title and redirects', function () {
-    $title = Title::factory()->withFutureActivation()->create();
-
+test('invoke calls activate action and redirects', function () {
     $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $title))
+        ->patch(action([ActivateController::class], $this->title))
         ->assertRedirect(action([TitlesController::class, 'index']));
 
-    expect($title->fresh())
-        ->activations->toHaveCount(1)
-        ->status->toBe(TitleStatus::ACTIVE);
+    ActivateAction::shouldRun()->with($this->title);
 });
 
-test('a basic user cannot activate an unactivated title', function () {
-    $title = Title::factory()->unactivated()->create();
-
+test('a basic user cannot activate a title', function () {
     $this->actingAs(basicUser())
-        ->patch(action([ActivateController::class], $title))
+        ->patch(action([ActivateController::class], $this->title))
         ->assertForbidden();
 });
 
-test('a guest cannot activate an unactivated title', function () {
-    $title = Title::factory()->unactivated()->create();
-
-    $this->patch(action([ActivateController::class], $title))
+test('a guest cannot activate a title', function () {
+    $this->patch(action([ActivateController::class], $this->title))
         ->assertRedirect(route('login'));
 });
-
-test('invoke throws exception for unretiring a non unretirable title', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $title = Title::factory()->{$factoryState}()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $title));
-})->throws(CannotBeActivatedException::class)->with([
-    'active',
-    'retired',
-]);

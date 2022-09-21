@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
+use App\Exceptions\CannotBeEmployedException;
 use App\Models\TagTeam;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -14,14 +15,18 @@ class EmployAction extends BaseTagTeamAction
     use AsAction;
 
     /**
-     * Employ a tagTeam.
+     * Employ a tag team.
      *
      * @param  \App\Models\TagTeam  $tagTeam
      * @param  \Illuminate\Support\Carbon|null  $startDate
      * @return void
+     *
+     * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void
     {
+        throw_if($tagTeam->canBeEmployed(), CannotBeEmployedException::class);
+
         $startDate ??= now();
 
         $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersEmployAction::run($wrestler, $startDate));

@@ -13,27 +13,6 @@
         </x-toolbar>
     </x-slot>
 
-    <div class="shadow-sm card">
-        <div class="card-header">
-            <h3 class="card-title">Create A New Match Form</h3>
-        </div>
-        <div class="card-body">
-            <form method="post" action="{{ route('events.matches.store', $event) }}">
-                @csrf
-                <div class="mb-10">
-                    <x-form.inputs.text label="Name:" name="name" placeholder="Event Name Here" />
-                </div>
-                <div class="mb-10">
-                    <x-form.inputs.date label="Date:" name="date" />
-                </div>
-                <div class="mb-10">
-                    <x-form.inputs.textarea label="Preview:" name="preview" placeholder="Enter a preview description of the event." />
-                </div>
-        </div>
-        <div class="card-footer">
-            <x-form.buttons.submit />
-            <x-form.buttons.reset />
-        </div>
-        </form>
-    </div>
+    <livewire:event-matches.match-create-form>
+
 </x-layouts.app>

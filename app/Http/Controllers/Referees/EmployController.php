@@ -21,9 +21,11 @@ class EmployController extends Controller
     {
         $this->authorize('employ', $referee);
 
-        throw_unless($referee->canBeEmployed(), CannotBeEmployedException::class);
-
-        EmployAction::run($referee);
+        try {
+            EmployAction::run($referee);
+        } catch (CannotBeEmployedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('referees.index');
     }

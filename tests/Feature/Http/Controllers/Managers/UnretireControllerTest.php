@@ -1,50 +1,29 @@
 <?php
 
-use App\Enums\ManagerStatus;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Actions\Managers\UnretireAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\UnretireController;
 use App\Models\Manager;
 
-test('invoke unretires a retired manager and redirects', function () {
-    $manager = Manager::factory()->retired()->create();
+beforeEach(function () {
+    $this->manager = Manager::factory()->retired()->create();
+});
 
+test('invoke calls unretire action and redirects', function () {
     $this->actingAs(administrator())
-        ->patch(action([UnretireController::class], $manager))
+        ->patch(action([UnretireController::class], $this->manager))
         ->assertRedirect(action([ManagersController::class, 'index']));
 
-    expect($manager->fresh())
-        ->retirements->last()->ended_at->not->toBeNull()
-        ->status->toBe(ManagerStatus::AVAILABLE);
+    UnretireAction::shouldRun()->with($this->manager);
 });
 
 test('a basic user cannot unretire a manager', function () {
-    $manager = Manager::factory()->retired()->create();
-
     $this->actingAs(basicUser())
-        ->patch(action([UnretireController::class], $manager))
+        ->patch(action([UnretireController::class], $this->manager))
         ->assertForbidden();
 });
 
 test('a guest cannot unretire a manager', function () {
-    $manager = Manager::factory()->retired()->create();
-
-    $this->patch(action([UnretireController::class], $manager))
+    $this->patch(action([UnretireController::class], $this->manager))
         ->assertRedirect(route('login'));
 });
-
-test('invoke throws exception for unretiring a non unretirable manager', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $manager = Manager::factory()->{$factoryState}()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([UnretireController::class], $manager));
-})->throws(CannotBeUnretiredException::class)->with([
-    'available',
-    'withFutureEmployment',
-    'injured',
-    'released',
-    'suspended',
-    'unemployed',
-]);

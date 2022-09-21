@@ -16,7 +16,12 @@ class Injury extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['injurable_id', 'injurable_type', 'started_at', 'ended_at'];
+    protected $fillable = [
+        'injurable_id',
+        'injurable_type',
+        'started_at',
+        'ended_at',
+    ];
 
     /**
      * The attributes that should be cast to native types.

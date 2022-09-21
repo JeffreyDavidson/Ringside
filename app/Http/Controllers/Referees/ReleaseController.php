@@ -21,9 +21,11 @@ class ReleaseController extends Controller
     {
         $this->authorize('release', $referee);
 
-        throw_unless($referee->canBeReleased(), CannotBeReleasedException::class);
-
-        ReleaseAction::run($referee);
+        try {
+            ReleaseAction::run($referee);
+        } catch (CannotBeReleasedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('referees.index');
     }

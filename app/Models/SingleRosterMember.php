@@ -20,70 +20,6 @@ abstract class SingleRosterMember extends RosterMember
     }
 
     /**
-     * Determine if the model can be employed.
-     *
-     * @return bool
-     */
-    public function canBeEmployed()
-    {
-        if ($this->isCurrentlyEmployed()) {
-            return false;
-        }
-
-        if ($this->isRetired()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Determine if the model can be suspended.
-     *
-     * @return bool
-     */
-    public function canBeSuspended()
-    {
-        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        if ($this->isSuspended()) {
-            return false;
-        }
-
-        if ($this->isInjured()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Determine if the tag team can be reinstated.
-     *
-     * @return bool
-     */
-    public function canBeReinstated()
-    {
-        return $this->isSuspended();
-    }
-
-    /**
-     * Determine if the model can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired()
-    {
-        if (! $this->isRetired()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Get the injuries of the model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -146,42 +82,6 @@ abstract class SingleRosterMember extends RosterMember
     public function hasInjuries()
     {
         return $this->injuries()->count() > 0;
-    }
-
-    /**
-     * Determine if the model can be injured.
-     *
-     * @return bool
-     */
-    public function canBeInjured()
-    {
-        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        if ($this->isInjured()) {
-            return false;
-        }
-
-        if ($this->isSuspended()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Determine if the model can be cleared from an injury.
-     *
-     * @return bool
-     */
-    public function canBeClearedFromInjury()
-    {
-        if (! $this->isInjured()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**

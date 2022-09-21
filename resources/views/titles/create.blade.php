@@ -17,10 +17,19 @@
             <form method="post" action="{{ route('titles.store') }}">
                 @csrf
                 <div class="mb-10">
-                    <x-form.inputs.text label="Name:" name="name" placeholder="Title Name Here" />
+                    <x-form.inputs.text
+                        label="Name:"
+                        name="name"
+                        placeholder="Title Name Here"
+                        :value="old('name')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.date label="Activation Date:" name="activation_date" />
+                    <x-form.inputs.date
+                        label="Activation Date:"
+                        name="activation_date"
+                        :value="old('activation_date')"
+                    />
                 </div>
         </div>
         <div class="card-footer">

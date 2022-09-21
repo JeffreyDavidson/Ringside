@@ -33,6 +33,8 @@ class EventDateCanBeChanged implements Rule
      * @param  string  $attribute
      * @param  \Illuminate\Support\Carbon  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

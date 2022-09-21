@@ -9,10 +9,6 @@ use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Wrestler;
 
-/**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
- */
 class WrestlersList extends BaseComponent
 {
     use WithBulkActions;
@@ -35,15 +31,15 @@ class WrestlersList extends BaseComponent
     ];
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
-     * @return  \Illuminate\Database\Query\Builder
+     * @return void
      */
     public function getRowsQueryProperty()
     {
         $query = Wrestler::query()
             ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
-            ->oldest('name');
+            ->orderBy('name');
 
         return $this->applySorting($query);
     }
@@ -51,7 +47,7 @@ class WrestlersList extends BaseComponent
     /**
      * Undocumented function.
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return void
      */
     public function getRowsProperty()
     {

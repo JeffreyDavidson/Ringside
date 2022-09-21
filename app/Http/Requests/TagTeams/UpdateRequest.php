@@ -6,6 +6,7 @@ namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
 use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Rules\LetterSpace;
 use App\Rules\WrestlerCanJoinExistingTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -44,15 +45,56 @@ class UpdateRequest extends FormRequest
      */
     public function rules()
     {
-        /** @var \App\Models\TagTeam */
+        /** @var \App\Models\TagTeam $tagTeam */
         $tagTeam = $this->route()->parameter('tag_team');
 
         return [
-            'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
-            'signature_move' => ['nullable', 'string'],
+            'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
+            'signature_move' => ['nullable', 'string', 'regex:/^[a-zA-Z\s\']+$/'],
             'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($tagTeam)],
-            'wrestlerA' => ['integer', 'different:wrestlerB', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinExistingTagTeam($tagTeam)],
-            'wrestlerB' => ['integer', 'different:wrestlerA', Rule::exists('wrestlers', 'id'), new WrestlerCanJoinExistingTagTeam($tagTeam)],
+            'wrestlerA' => [
+                'nullable',
+                'integer',
+                'different:wrestlerB',
+                'required_with:wrestlerB',
+                Rule::exists('wrestlers', 'id'),
+                new WrestlerCanJoinExistingTagTeam($tagTeam),
+            ],
+            'wrestlerB' => [
+                'nullable',
+                'integer',
+                'different:wrestlerA',
+                'required_with:wrestlerB',
+                Rule::exists('wrestlers', 'id'),
+                new WrestlerCanJoinExistingTagTeam($tagTeam),
+            ],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'signature_move.regex' => 'The signature move only allows for letters, spaces, and apostrophes',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'signature_move' => 'signature move',
+            'start_date' => 'start date',
+            'wrestlerA' => 'tag team partner 1',
+            'wrestlerB' => 'tag team partner 2',
         ];
     }
 }

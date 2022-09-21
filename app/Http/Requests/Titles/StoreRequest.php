@@ -39,8 +39,39 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'ends_with:Title,Titles', Rule::unique('titles', 'name')],
+            'name' => [
+                'required',
+                'string',
+                'regex:/^[a-zA-Z\s\']+$/',
+                'min:3',
+                'ends_with:Title,Titles',
+                Rule::unique('titles', 'name'),
+            ],
             'activation_date' => ['nullable', 'string', 'date'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'name.regex' => 'The name only allows for letters, spaces, and apostrophes',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'activation_date' => 'activation date',
         ];
     }
 }

@@ -6,6 +6,7 @@ namespace App\Http\Requests\Referees;
 
 use App\Models\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\RefereeRequestFactory;
 use Worksome\RequestFactories\Concerns\HasFactory;
@@ -46,12 +47,12 @@ class UpdateRequest extends FormRequest
             return [];
         }
 
-        /** @var \App\Models\Referee */
+        /** @var \App\Models\Referee $referee */
         $referee = $this->route()->parameter('referee');
 
         return [
-            'first_name' => ['required', 'string', 'min:3'],
-            'last_name' => ['required', 'string', 'min:3'],
+            'first_name' => ['required', 'string', new LetterSpace, 'min:3'],
+            'last_name' => ['required', 'string', new LetterSpace, 'min:3'],
             'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($referee)],
         ];
     }

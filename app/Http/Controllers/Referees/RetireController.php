@@ -21,9 +21,11 @@ class RetireController extends Controller
     {
         $this->authorize('retire', $referee);
 
-        throw_unless($referee->canBeRetired(), CannotBeRetiredException::class);
-
-        RetireAction::run($referee);
+        try {
+            RetireAction::run($referee);
+        } catch (CannotBeRetiredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('referees.index');
     }

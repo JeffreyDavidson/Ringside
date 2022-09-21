@@ -7,7 +7,6 @@ namespace App\Data;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\Wrestler;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 class TagTeamData
@@ -18,13 +17,15 @@ class TagTeamData
      * @param  string  $name
      * @param  string|null  $signature_move
      * @param  \Illuminate\Support\Carbon|null  $start_date
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  \App\Models\Wrestler|null  $wrestlerA
+     * @param  \App\Models\Wrestler|null  $wrestlerB
      */
     public function __construct(
         public string $name,
         public ?string $signature_move,
         public ?Carbon $start_date,
-        public Collection $wrestlers
+        public ?Wrestler $wrestlerA,
+        public ?Wrestler $wrestlerB,
     ) {
     }
 
@@ -40,7 +41,8 @@ class TagTeamData
             $request->input('name'),
             $request->input('signature_move'),
             $request->date('start_date'),
-            Wrestler::query()->findMany($request->collect('wrestlers'))
+            Wrestler::query()->find($request->input('wrestlerA')),
+            Wrestler::query()->find($request->input('wrestlerB')),
         );
     }
 
@@ -56,7 +58,8 @@ class TagTeamData
             $request->input('name'),
             $request->input('signature_move'),
             $request->date('start_date'),
-            Wrestler::query()->findMany($request->collect('wrestlers'))
+            Wrestler::query()->find($request->input('wrestlerA')),
+            Wrestler::query()->find($request->input('wrestlerB')),
         );
     }
 }

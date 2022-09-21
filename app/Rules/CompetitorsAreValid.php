@@ -24,6 +24,8 @@ class CompetitorsAreValid implements Rule
      * @param  string  $attribute
      * @param  array  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {

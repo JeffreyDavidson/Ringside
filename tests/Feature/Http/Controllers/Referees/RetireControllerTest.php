@@ -1,52 +1,29 @@
 <?php
 
-use App\Enums\RefereeStatus;
-use App\Exceptions\CannotBeRetiredException;
+use App\Actions\Referees\RetireAction;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\RetireController;
 use App\Models\Referee;
 
-test('invoke retires a retirable referee and redirects', function ($factoryState) {
-    $referee = Referee::factory()->$factoryState()->create();
+beforeEach(function () {
+    $this->referee = Referee::factory()->bookable()->create();
+});
 
+test('invoke calls retire action and redirects', function () {
     $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $referee))
+        ->patch(action([RetireController::class], $this->referee))
         ->assertRedirect(action([RefereesController::class, 'index']));
 
-    expect($referee->fresh())
-        ->retirements->toHaveCount(1)
-        ->status->toBe(RefereeStatus::RETIRED);
-})->with([
-    'bookable',
-    'injured',
-    'suspended',
-]);
+    RetireAction::shouldRun()->with($this->referee);
+});
 
-test('a basic user cannot retire a bookable referee', function () {
-    $referee = Referee::factory()->bookable()->create();
-
+test('a basic user cannot retire a referee', function () {
     $this->actingAs(basicUser())
-        ->patch(action([RetireController::class], $referee))
+        ->patch(action([RetireController::class], $this->referee))
         ->assertForbidden();
 });
 
-test('a guest cannot suspend a bookable referee', function () {
-    $referee = Referee::factory()->bookable()->create();
-
-    $this->patch(action([RetireController::class], $referee))
+test('a guest cannot retire a referee', function () {
+    $this->patch(action([RetireController::class], $this->referee))
         ->assertRedirect(route('login'));
 });
-
-test('invoke throws exception for retiring a non retirable referee', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $referee = Referee::factory()->{$factoryState}()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $referee));
-})->throws(CannotBeRetiredException::class)->with([
-    'retired',
-    'withFutureEmployment',
-    'released',
-    'unemployed',
-]);

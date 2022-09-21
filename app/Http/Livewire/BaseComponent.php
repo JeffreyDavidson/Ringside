@@ -25,6 +25,6 @@ class BaseComponent extends Component
      */
     public function paginationView()
     {
-        return 'pagination.datatables';
+        return 'pagination.base';
     }
 }

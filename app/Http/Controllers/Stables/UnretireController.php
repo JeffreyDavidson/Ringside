@@ -21,9 +21,11 @@ class UnretireController extends Controller
     {
         $this->authorize('unretire', $stable);
 
-        throw_unless($stable->canBeUnretired(), CannotBeUnretiredException::class);
-
-        UnretireAction::run($stable);
+        try {
+            UnretireAction::run($stable);
+        } catch (CannotBeUnretiredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('stables.index');
     }

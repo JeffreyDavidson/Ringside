@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Data\WrestlerData;
-use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
@@ -224,10 +223,17 @@ class WrestlerRepository
         ]);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return \App\Builders\WrestlerQueryBuilder
+     */
     public static function getAvailableWrestlersForNewTagTeam()
     {
         // Each wrestler must be either:
-        // have a currentEmployment (scope called employed) AND have a status of bookable and not belong to another employed tag team where the tag team is bookable OR the tag team has a future employment
+        // have a currentEmployment (scope called employed)
+        // AND have a status of bookable and not belong to another employed tag team where the tag team is bookable
+        // OR the tag team has a future employment
         // or have a future employment (scope called futureEmployment)
         // or has not been employed (scope called unemployed)
 
@@ -241,10 +247,40 @@ class WrestlerRepository
             ->orWhere(function ($query) {
                 $query->employed()
                     ->where('status', WrestlerStatus::BOOKABLE)
-                    ->whereDoesntHave('currentTagTeam', function ($query) {
-                        // $query->whereNotIn('status', [TagTeamStatus::BOOKABLE, TagTeamStatus::FUTURE_EMPLOYMENT]);
-                        $query->where('status', '!=', TagTeamStatus::BOOKABLE)->orWhere('status', '!=', TagTeamStatus::FUTURE_EMPLOYMENT);
-                    });
+                    ->whereDoesntHave('currentTagTeam');
+            });
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param  \App\Models\TagTeam  $tagTeam
+     * @return \App\Builders\WrestlerQueryBuilder
+     */
+    public static function getAvailableWrestlersForExistingTagTeam($tagTeam)
+    {
+        // Each wrestler must be either:
+        // have a currentEmployment (scope called employed)
+        // AND have a status of bookable and not belong to another employed tag team where the tag team is bookable
+        // OR the tag team has a future employment
+        // or have a future employment (scope called futureEmployment)
+        // or has not been employed (scope called unemployed)
+        // or is currently on the tag team
+
+        return Wrestler::query()
+            ->where(function ($query) {
+                $query->unemployed();
+            })
+            ->orWhere(function ($query) {
+                $query->futureEmployed();
+            })
+            ->orWhere(function ($query) {
+                $query->employed()
+                    ->where('status', WrestlerStatus::BOOKABLE)
+                    ->whereDoesntHave('currentTagTeam');
+            })
+            ->orWhere(function ($query) use ($tagTeam) {
+                $query->where('current_tag_team_id', $tagTeam->id);
             });
     }
 }

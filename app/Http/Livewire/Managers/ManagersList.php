@@ -35,7 +35,7 @@ class ManagersList extends BaseComponent
     ];
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return \Illuminate\Database\Query\Builder
      */
@@ -51,7 +51,7 @@ class ManagersList extends BaseComponent
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
