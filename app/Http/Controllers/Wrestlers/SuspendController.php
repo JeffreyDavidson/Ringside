@@ -21,9 +21,11 @@ class SuspendController extends Controller
     {
         $this->authorize('suspend', $wrestler);
 
-        throw_unless($wrestler->canBeSuspended(), CannotBeSuspendedException::class);
-
-        SuspendAction::run($wrestler);
+        try {
+            SuspendAction::run($wrestler);
+        } catch (CannotBeSuspendedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('wrestlers.index');
     }

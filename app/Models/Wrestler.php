@@ -6,10 +6,6 @@ namespace App\Models;
 
 use App\Builders\WrestlerQueryBuilder;
 use App\Enums\WrestlerStatus;
-use App\Models\Concerns\CanJoinStables;
-use App\Models\Concerns\CanJoinTagTeams;
-use App\Models\Concerns\HasManagers;
-use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Manageable;
@@ -19,11 +15,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMember, Manageable, TagTeamMember
 {
-    use CanJoinStables;
-    use CanJoinTagTeams;
+    use Concerns\CanJoinStables;
+    use Concerns\CanJoinTagTeams;
+    use Concerns\HasManagers;
+    use Concerns\OwnedByUser;
     use HasFactory;
-    use HasManagers;
-    use OwnedByUser;
     use SoftDeletes;
 
     /**
@@ -31,7 +27,16 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
      *
      * @var array<int, string>
      */
-    protected $fillable = ['user_id', 'name', 'height', 'weight', 'hometown', 'signature_move', 'status', 'current_tag_team_id'];
+    protected $fillable = [
+        'user_id',
+        'name',
+        'height',
+        'weight',
+        'hometown',
+        'signature_move',
+        'status',
+        'current_tag_team_id',
+    ];
 
     /**
      * The attributes that should be cast to native types.
@@ -61,25 +66,5 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
     public function eventMatches()
     {
         return $this->morphToMany(EventMatch::class, 'event_match_competitor');
-    }
-
-    /**
-     * Determine if the model can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired()
-    {
-        return $this->isBookable() || $this->isInjured() || $this->isSuspended();
-    }
-
-    /**
-     * Determine if the model can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired()
-    {
-        return $this->isRetired();
     }
 }

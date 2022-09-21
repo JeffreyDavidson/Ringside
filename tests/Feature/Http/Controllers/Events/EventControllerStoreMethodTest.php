@@ -1,60 +1,33 @@
 <?php
 
+use App\Actions\Events\CreateAction;
+use App\Data\EventData;
 use App\Http\Controllers\Events\EventsController;
+use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Events\StoreRequest;
-use App\Models\Event;
 
-test('create returns a view', function () {
-    $this->actingAs(administrator())
-        ->get(action([EventsController::class, 'create']))
-        ->assertStatus(200)
-        ->assertViewIs('events.create')
-        ->assertViewHas('event', new Event);
+beforeEach(function () {
+    $this->data = StoreRequest::factory()->create();
+    $this->request = StoreRequest::create(action([ManagersController::class, 'store']), 'POST', $this->data);
 });
 
-test('a basic user cannot view the form for creating a event', function () {
-    $this->actingAs(basicUser())
-        ->get(action([EventsController::class, 'create']))
-        ->assertForbidden();
-});
-
-test('a guest cannot view the form for creating a event', function () {
-    $this->get(action([EventsController::class, 'create']))
-        ->assertRedirect(route('login'));
-});
-
-test('store creates a event and redirects', function () {
-    $data = StoreRequest::factory()->create([
-        'name' => 'Example Event Name',
-        'date' => null,
-        'venue_id' => null,
-        'preview' => null,
-    ]);
-
+test('store calls create action and redirects', function () {
     $this->actingAs(administrator())
         ->from(action([EventsController::class, 'create']))
-        ->post(action([EventsController::class, 'store']), $data)
+        ->post(action([EventsController::class, 'store']), $this->data)
         ->assertValid()
         ->assertRedirect(action([EventsController::class, 'index']));
 
-    expect(Event::latest()->first())
-        ->name->toBe('Example Event Name')
-        ->date->toBeNull()
-        ->venue_id->toBeNull()
-        ->preview->toBeNull();
+    CreateAction::shouldRun()->with(EventData::fromStoreRequest($this->request));
 });
 
-test('a basic user cannot create a event', function () {
-    $data = StoreRequest::factory()->create();
-
+test('a basic user cannot create an event', function () {
     $this->actingAs(basicUser())
-        ->post(action([EventsController::class, 'store']), $data)
+        ->post(action([EventsController::class, 'store']), $this->data)
         ->assertForbidden();
 });
 
-test('a guest cannot create a event', function () {
-    $data = StoreRequest::factory()->create();
-
-    $this->post(action([EventsController::class, 'store']), $data)
+test('a guest cannot create an event', function () {
+    $this->post(action([EventsController::class, 'store']), $this->data)
         ->assertRedirect(route('login'));
 });

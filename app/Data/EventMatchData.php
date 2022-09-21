@@ -10,6 +10,7 @@ use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -58,12 +59,25 @@ class EventMatchData
      */
     private static function getCompetitors(Collection $competitors)
     {
+        /** @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter */
         return $competitors->transform(function ($sideCompetitors, $sideNumber) {
             if (Arr::exists($sideCompetitors, 'wrestlers')) {
-                return data_set($sideCompetitors, 'wrestlers', Wrestler::findMany(Arr::get($sideCompetitors, 'wrestlers')));
-            } elseif (Arr::exists($sideCompetitors, 'tag_teams')) {
-                return data_set($sideCompetitors, 'tag_teams', TagTeam::findMany(Arr::get($sideCompetitors, 'tag_teams')));
+                return data_set(
+                    $sideCompetitors,
+                    'wrestlers',
+                    Wrestler::findMany(Arr::get($sideCompetitors, 'wrestlers'))
+                );
             }
+
+            if (Arr::exists($sideCompetitors, 'tag_teams')) {
+                return data_set(
+                    $sideCompetitors,
+                    'tag_teams',
+                    TagTeam::findMany(Arr::get($sideCompetitors, 'tag_teams'))
+                );
+            }
+
+            throw new Exception('Roster member type not found');
         });
     }
 }

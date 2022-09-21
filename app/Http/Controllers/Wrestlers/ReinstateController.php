@@ -21,9 +21,11 @@ class ReinstateController extends Controller
     {
         $this->authorize('reinstate', $wrestler);
 
-        throw_unless($wrestler->canBeReinstated(), CannotBeReinstatedException::class);
-
-        ReinstateAction::run($wrestler);
+        try {
+            ReinstateAction::run($wrestler);
+        } catch (CannotBeReinstatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('wrestlers.index');
     }

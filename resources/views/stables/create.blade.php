@@ -17,19 +17,43 @@
             <form method="post" action="{{ route('stables.store') }}">
                 @csrf
                 <div class="mb-10">
-                    <x-form.inputs.text label="Name:" name="name" placeholder="Stable Name Here" />
+                    <x-form.inputs.text
+                        label="Name:"
+                        name="name"
+                        placeholder="Stable Name Here"
+                        :value="old('name')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.date label="Start Date:" name="start_date" />
+                    <x-form.inputs.date
+                        label="Start Date:"
+                        name="start_date"
+                        :value="old('start_date')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.select label="Wrestlers:" name="wrestlers" :options="$wrestlers" />
+                    <x-form.inputs.select
+                        label="Wrestlers:"
+                        name="wrestlers"
+                        :options="$wrestlers"
+                        :selected="old('wrestlers')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.select label="Tag Teams:" name="tag_teams" :options="$tagTeams" />
+                    <x-form.inputs.select
+                        label="Tag Teams:"
+                        name="tag_teams"
+                        :options="$tagTeams"
+                        :selected="old('tag_teams')"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.select label="Managers:" name="managers" :options="$managers" />
+                    <x-form.inputs.select
+                        label="Managers:"
+                        name="managers"
+                        :options="$managers"
+                        :selected="old('managers')"
+                    />
                 </div>
         </div>
         <div class="card-footer">

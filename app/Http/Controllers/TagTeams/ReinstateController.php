@@ -21,9 +21,11 @@ class ReinstateController extends Controller
     {
         $this->authorize('reinstate', $tagTeam);
 
-        throw_unless($tagTeam->canBeReinstated(), CannotBeReinstatedException::class);
-
-        ReinstateAction::run($tagTeam);
+        try {
+            ReinstateAction::run($tagTeam);
+        } catch (CannotBeReinstatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('tag-teams.index');
     }

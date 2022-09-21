@@ -20,19 +20,43 @@
                 @method('patch')
                 @csrf
                 <div class="mb-10">
-                    <x-form.inputs.text label="Name:" name="name" placeholder="Tag Team Name Here" value="{{ $tagTeam->name }}" />
+                    <x-form.inputs.text
+                        label="Name:"
+                        name="name"
+                        placeholder="Tag Team Name Here"
+                        :value="old('name', $tagTeam->name)"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.text label="Signature Move:" name="signature_move" placeholder="This Amazing Finisher" value="{{ $tagTeam->signature_move }}" />
+                    <x-form.inputs.text
+                        label="Signature Move:"
+                        name="signature_move"
+                        placeholder="This Amazing Finisher"
+                        :value="old('signature_move', $tagTeam->signature_move)"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.date label="Start Date:" name="start_date" value="{{ $tagTeam->started_at?->format('Y-m-d') }}" />
+                    <x-form.inputs.date
+                        label="Start Date:"
+                        name="start_date"
+                        :value="old('start_date', $tagTeam->started_at?->format('Y-m-d'))"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.select label="Tag Team Partner 1:" name="wrestlerA" :options="$wrestlers" :selected="old('wrestlerA', $tagTeam->currentWrestlers?->first()?->id)" />
+                    <x-form.inputs.select
+                        label="Tag Team Partner 1:"
+                        name="wrestlerA"
+                        :options="$wrestlers"
+                        :selected="old('wrestlerA', $tagTeam->currentWrestlers?->first()?->id)"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.select label="Tag Team Partner 2:" name="wrestlerB" :options="$wrestlers" :selected="old('wrestlerB', $tagTeam->currentWrestlers?->last()?->id)" />
+                    <x-form.inputs.select
+                        label="Tag Team Partner 2:"
+                        name="wrestlerB"
+                        :options="$wrestlers"
+                        :selected="old('wrestlerB', $tagTeam->currentWrestlers?->last()?->id)"
+                    />
                 </div>
         </div>
         <div class="card-footer">

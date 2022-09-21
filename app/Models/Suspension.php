@@ -16,7 +16,12 @@ class Suspension extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['suspendable_id', 'suspendable_type', 'started_at', 'ended_at'];
+    protected $fillable = [
+        'suspendable_id',
+        'suspendable_type',
+        'started_at',
+        'ended_at',
+    ];
 
     /**
      * The attributes that should be cast to native types.

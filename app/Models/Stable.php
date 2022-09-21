@@ -6,10 +6,6 @@ namespace App\Models;
 
 use App\Builders\StableQueryBuilder;
 use App\Enums\StableStatus;
-use App\Models\Concerns\Activations;
-use App\Models\Concerns\Deactivations;
-use App\Models\Concerns\HasMembers;
-use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
@@ -19,11 +15,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stable extends Model implements Activatable, Deactivatable, Retirable
 {
-    use Activations;
-    use Deactivations;
+    use Concerns\Activations;
+    use Concerns\Deactivations;
+    use Concerns\HasMembers;
+    use Concerns\OwnedByUser;
     use HasFactory;
-    use HasMembers;
-    use OwnedByUser;
     use SoftDeletes;
 
     /**
@@ -122,25 +118,5 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
     public function hasRetirements()
     {
         return $this->retirements()->count() > 0;
-    }
-
-    /**
-     * Determine if the model can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired()
-    {
-        return $this->isCurrentlyActivated() || $this->isDeactivated();
-    }
-
-    /**
-     * Determine if the model can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired()
-    {
-        return $this->isRetired();
     }
 }

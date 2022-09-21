@@ -131,16 +131,6 @@ trait Activations
     }
 
     /**
-     * Determine if the model can be activated.
-     *
-     * @return bool
-     */
-    public function canBeActivated()
-    {
-        return $this->isUnactivated() || $this->hasFutureActivation() || $this->isDeactivated();
-    }
-
-    /**
      * Retrieve the model's first activation date.
      *
      * @return \Illuminate\Database\Eloquent\Casts\Attribute

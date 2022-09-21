@@ -13,9 +13,15 @@ class WrestlerCanJoinNewTagTeam implements Rule
      * @param  string  $attribute
      * @param  mixed  $value
      * @return bool
+     *
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function passes($attribute, $value)
     {
+        if (is_null($value)) {
+            return false;
+        }
+
         /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 

@@ -16,7 +16,11 @@ class MatchType extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'slug', 'number_of_sides'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'number_of_sides',
+    ];
 
     /**
      * The attributes that should be cast to native types.

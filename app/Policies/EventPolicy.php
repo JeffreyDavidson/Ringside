@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Event;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -27,10 +26,9 @@ class EventPolicy
      * Determine whether the user can update an event.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Event  $event
      * @return bool
      */
-    public function update(User $user, Event $event)
+    public function update(User $user)
     {
         return $user->isAdministrator();
     }

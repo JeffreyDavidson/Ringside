@@ -9,6 +9,7 @@ use App\Models\Employment;
 use App\Models\Injury;
 use App\Models\Retirement;
 use App\Models\Suspension;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -103,5 +104,19 @@ class WrestlerFactory extends Factory
         return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::INJURED])
             ->has(Employment::factory()->started($start))
             ->has(Injury::factory()->started($now));
+    }
+
+    /**
+     * Undocumented function.
+     *
+     * @param  [type] $tagTeam
+     * @return void
+     */
+    public function onCurrentTagTeam($tagTeam = null)
+    {
+        $tagTeam ??= TagTeam::factory()->create();
+
+        return $this->state(fn () => ['current_tag_team_id' => $tagTeam->id])
+            ->hasAttached($tagTeam, ['joined_at' => now()->toDateTimeString()]);
     }
 }

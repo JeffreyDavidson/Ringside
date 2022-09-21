@@ -12,7 +12,7 @@ class TitleRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => Str::of($this->faker->name())->append(' Title')->value,
+            'name' => Str::of(Str::title($this->faker->words(2, true)))->append(' Title')->value,
             'activated_at' => null,
         ];
     }

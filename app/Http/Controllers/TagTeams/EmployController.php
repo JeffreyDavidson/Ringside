@@ -21,9 +21,11 @@ class EmployController extends Controller
     {
         $this->authorize('employ', $tagTeam);
 
-        throw_unless($tagTeam->canBeEmployed(), CannotBeEmployedException::class);
-
-        EmployAction::run($tagTeam);
+        try {
+            EmployAction::run($tagTeam);
+        } catch (CannotBeEmployedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('tag-teams.index');
     }

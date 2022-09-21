@@ -1,3 +1,4 @@
+@dd('testing new')
 @if ($paginator->hasPages())
     <ul class="pagination">
 

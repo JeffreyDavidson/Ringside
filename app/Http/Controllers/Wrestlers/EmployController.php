@@ -21,9 +21,11 @@ class EmployController extends Controller
     {
         $this->authorize('employ', $wrestler);
 
-        throw_unless($wrestler->canBeEmployed(), CannotBeEmployedException::class);
-
-        EmployAction::run($wrestler);
+        try {
+            EmployAction::run($wrestler);
+        } catch (CannotBeEmployedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('wrestlers.index');
     }

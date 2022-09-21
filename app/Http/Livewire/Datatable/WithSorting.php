@@ -36,7 +36,7 @@ trait WithSorting
      * Undocumented function.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     * @return  \Illuminate\Database\Query\Builder
+     * @return \Illuminate\Database\Query\Builder
      */
     public function applySorting($query)
     {

@@ -22,7 +22,11 @@ class RestoreController extends Controller
 
         $this->authorize('restore', $event);
 
-        RestoreAction::run($event);
+        try {
+            RestoreAction::run($event);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('events.index');
     }

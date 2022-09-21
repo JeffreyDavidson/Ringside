@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Exceptions\CannotBeReleasedException;
 use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -18,9 +19,13 @@ class ReleaseAction extends BaseManagerAction
      * @param  \App\Models\Manager  $manager
      * @param  \Illuminate\Support\Carbon|null  $releaseDate
      * @return void
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
+        throw_if($manager->canBeReleased(), CannotBeReleasedException::class);
+
         $releaseDate ??= now();
 
         if ($manager->isSuspended()) {
@@ -33,12 +38,10 @@ class ReleaseAction extends BaseManagerAction
 
         $this->managerRepository->release($manager, $releaseDate);
 
-        if ($manager->currentTagTeams->isNotEmpty()) {
-            $this->managerRepository->removeFromCurrentTagTeams($manager);
-        }
+        $manager->currentTagTeams
+            ->whenNotEmpty(fn () => RemoveFromCurrentTagTeamsAction::run($manager));
 
-        if ($manager->currentWrestlers->isNotEmpty()) {
-            $this->managerRepository->removeFromCurrentWrestlers($manager);
-        }
+        $manager->currentWrestlers
+            ->whenNotEmpty(fn () => RemoveFromCurrentWrestlersAction::run($manager));
     }
 }

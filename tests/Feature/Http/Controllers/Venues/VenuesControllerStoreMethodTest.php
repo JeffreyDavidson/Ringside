@@ -1,61 +1,32 @@
 <?php
 
+use App\Actions\Venues\CreateAction;
+use App\Data\VenueData;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Requests\Venues\StoreRequest;
-use App\Models\Venue;
 
-test('create returns a view', function () {
-    $this->actingAs(administrator())
-        ->get(action([VenuesController::class, 'create']))
-        ->assertViewIs('venues.create')
-        ->assertViewHas('venue', new Venue);
+beforeEach(function () {
+    $this->data = StoreRequest::factory()->create();
+    $this->request = StoreRequest::create(action([VenuesController::class, 'store']), 'POST', $this->data);
 });
 
-test('a basic user cannot view the form for creating a venue', function () {
-    $this->actingAs(basicUser())
-        ->get(action([VenuesController::class, 'create']))
-        ->assertForbidden();
-});
-
-test('a guest cannot view the form for creating a venue', function () {
-    $this->get(action([VenuesController::class, 'create']))
-        ->assertRedirect(route('login'));
-});
-
-test('store creates a venue and redirects', function () {
-    $data = StoreRequest::factory()->create([
-        'name' => 'Example Venue',
-        'street_address' => '123 Main Street',
-        'city' => 'Laraville',
-        'state' => 'New York',
-        'zip' => '12345',
-    ]);
-
+test('store calls create action and redirects', function () {
     $this->actingAs(administrator())
         ->from(action([VenuesController::class, 'create']))
-        ->post(action([VenuesController::class, 'store']), $data)
+        ->post(action([VenuesController::class, 'store']), $this->data)
         ->assertValid()
         ->assertRedirect(action([VenuesController::class, 'index']));
 
-    expect(Venue::latest()->first())
-        ->name->toBe('Example Venue')
-        ->street_address->toBe('123 Main Street')
-        ->city->toBe('Laraville')
-        ->state->toBe('New York')
-        ->zip->toBe('12345');
+    CreateAction::shouldRun()->with(VenueData::fromStoreRequest($this->request));
 });
 
 test('a basic user cannot create a venue', function () {
-    $data = StoreRequest::factory()->create();
-
     $this->actingAs(basicUser())
-        ->post(action([VenuesController::class, 'store']), $data)
+        ->post(action([VenuesController::class, 'store']), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot create a venue', function () {
-    $data = StoreRequest::factory()->create();
-
-    $this->post(action([VenuesController::class, 'store']), $data)
+    $this->post(action([VenuesController::class, 'store']), $this->data)
         ->assertRedirect(route('login'));
 });

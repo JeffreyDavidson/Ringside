@@ -162,20 +162,6 @@ trait HasEmployments
     }
 
     /**
-     * Determine if the model can be released.
-     *
-     * @return bool
-     */
-    public function canBeReleased(): bool
-    {
-        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Get the model's first employment date.
      *
      * @return \Illuminate\Database\Eloquent\Casts\Attribute

@@ -6,7 +6,7 @@
     min="{{ $min ?? 0 }}"
     max="{{ $max ?? '' }}"
     name="{{ $name }}"
-    placeholder="{{ $placeholder }}"
+    placeholder="{{ $placeholder ?? '' }}"
     value="{{ $value ?? null }}"
 >
 

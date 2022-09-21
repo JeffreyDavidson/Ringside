@@ -21,9 +21,11 @@ class ActivateController extends Controller
     {
         $this->authorize('activate', $title);
 
-        throw_unless($title->canBeActivated(), CannotBeActivatedException::class);
-
-        ActivateAction::run($title);
+        try {
+            ActivateAction::run($title);
+        } catch (CannotBeActivatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('titles.index');
     }

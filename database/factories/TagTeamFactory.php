@@ -16,10 +16,6 @@ use Illuminate\Support\Str;
 
 class TagTeamFactory extends Factory
 {
-    private $wrestlerA;
-
-    private $wrestlerB;
-
     /**
      * Define the model's default state.
      *
@@ -170,8 +166,10 @@ class TagTeamFactory extends Factory
             });
     }
 
-    public function withWrestler($wrestler, $joinDate = null)
+    public function withCurrentWrestler($wrestler, $joinDate = null)
     {
-        return $this->hasAttached($wrestler, ['joined_at' => $joinDate ?? now()]);
+        $this->hasAttached($wrestler, ['joined_at' => $joinDate ?? now()]);
+
+        return $this;
     }
 }

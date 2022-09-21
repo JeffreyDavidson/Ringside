@@ -17,7 +17,12 @@ class Employment extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['employable_id', 'employable_type', 'started_at', 'ended_at'];
+    protected $fillable = [
+        'employable_id',
+        'employable_type',
+        'started_at',
+        'ended_at',
+    ];
 
     /**
      * The attributes that should be cast to native types.

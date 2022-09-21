@@ -22,7 +22,7 @@ class CreateAction extends BaseManagerAction
     {
         /** @var \App\Models\Manager $manager */
         $manager = $this->managerRepository->create($managerData);
-;
+
         if (isset($managerData->start_date)) {
             EmployAction::run($manager, $managerData->start_date);
         }

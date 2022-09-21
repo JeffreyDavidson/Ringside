@@ -6,15 +6,14 @@ namespace App\Models;
 
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
-use App\Models\Concerns\HasFullName;
 use App\Models\Contracts\Bookable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends SingleRosterMember implements Bookable
 {
+    use Concerns\HasFullName;
     use HasFactory;
-    use HasFullName;
     use SoftDeletes;
 
     /**
@@ -22,7 +21,11 @@ class Referee extends SingleRosterMember implements Bookable
      *
      * @var array<int, string>
      */
-    protected $fillable = ['first_name', 'last_name', 'status'];
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'status',
+    ];
 
     /**
      * The attributes that should be cast to native types.
@@ -42,25 +45,5 @@ class Referee extends SingleRosterMember implements Bookable
     public function newEloquentBuilder($query): RefereeQueryBuilder
     {
         return new RefereeQueryBuilder($query);
-    }
-
-    /**
-     * Determine if the model can be retired.
-     *
-     * @return bool
-     */
-    public function canBeRetired()
-    {
-        return $this->isBookable() || $this->isInjured() || $this->isSuspended();
-    }
-
-    /**
-     * Determine if the model can be unretired.
-     *
-     * @return bool
-     */
-    public function canBeUnretired()
-    {
-        return $this->isRetired();
     }
 }

@@ -1,32 +1,29 @@
 <?php
 
-namespace Tests\Feature\Http\Controllers\Managers;
-
+use App\Actions\Managers\RestoreAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\RestoreController;
 use App\Models\Manager;
 
-test('invoke restores a deleted manager and redirects', function () {
-    $manager = Manager::factory()->trashed()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([RestoreController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
-
-    $this->assertNull($manager->fresh()->deleted_at);
+beforeEach(function () {
+    $this->manager = Manager::factory()->trashed()->create();
 });
 
-test('a basic user cannot restore a deleted manager', function () {
-    $manager = Manager::factory()->trashed()->create();
+test('invoke calls restore action and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([RestoreController::class], $this->manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
+    RestoreAction::shouldRun()->with($this->manager);
+});
+
+test('a basic user cannot restore a manager', function () {
     $this->actingAs(basicUser())
-        ->patch(action([RestoreController::class], $manager))
+        ->patch(action([RestoreController::class], $this->manager))
         ->assertForbidden();
 });
 
-test('a guest cannot restore a deleted manager', function () {
-    $manager = Manager::factory()->trashed()->create();
-
-    $this->patch(action([RestoreController::class], $manager))
+test('a guest cannot restore a manager', function () {
+    $this->patch(action([RestoreController::class], $this->manager))
         ->assertRedirect(route('login'));
 });

@@ -1,48 +1,29 @@
 <?php
 
-use App\Enums\TitleStatus;
-use App\Exceptions\CannotBeDeactivatedException;
+use App\Actions\Titles\DeactivateAction;
 use App\Http\Controllers\Titles\DeactivateController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
 
-test('invoke deactivates an active title and redirects', function () {
-    $title = Title::factory()->active()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([DeactivateController::class], $title))
-        ->assertRedirect(action([TitlesController::class, 'index']));
-
-    expect($title->fresh())
-        ->activations->last()->ended_at->not->toBeNull()
-        ->status->toBe(TitleStatus::INACTIVE);
+beforeEach(function () {
+    $this->title = Title::factory()->active()->create();
 });
 
-test('a basic user cannot deactivate an active title', function () {
-    $title = Title::factory()->active()->create();
+test('invoke calls deactivate action and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([DeactivateController::class], $this->title))
+        ->assertRedirect(action([TitlesController::class, 'index']));
 
+    DeactivateAction::shouldRun()->with($this->title);
+});
+
+test('a basic user cannot deactivate a title', function () {
     $this->actingAs(basicUser())
-        ->patch(action([DeactivateController::class], $title))
+        ->patch(action([DeactivateController::class], $this->title))
         ->assertForbidden();
 });
 
-test('a guest cannot deactivates a titles', function () {
-    $title = Title::factory()->active()->create();
-
-    $this->patch(action([DeactivateController::class], $title))
+test('a guest cannot deactivate a title', function () {
+    $this->patch(action([DeactivateController::class], $this->title))
         ->assertRedirect(route('login'));
 });
-
-test('invoke throws exception for deactivating a non deactivatable title', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $title = Title::factory()->{$factoryState}()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([DeactivateController::class], $title));
-})->throws(CannotBeDeactivatedException::class)->with([
-    'unactivated',
-    'withFutureActivation',
-    'inactive',
-    'retired',
-]);

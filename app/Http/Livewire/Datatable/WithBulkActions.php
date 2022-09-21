@@ -28,7 +28,7 @@ trait WithBulkActions
     public $selected;
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return void
      */
@@ -79,7 +79,7 @@ trait WithBulkActions
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      *
      * @return void
      */

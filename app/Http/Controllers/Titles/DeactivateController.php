@@ -21,9 +21,11 @@ class DeactivateController extends Controller
     {
         $this->authorize('deactivate', $title);
 
-        throw_unless($title->canBeDeactivated(), CannotBeDeactivatedException::class);
-
-        DeactivateAction::run($title);
+        try {
+            DeactivateAction::run($title);
+        } catch (CannotBeDeactivatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('titles.index');
     }

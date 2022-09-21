@@ -21,7 +21,12 @@ class EventMatchCompetitor extends MorphPivot
      *
      * @var array<int, string>
      */
-    protected $fillable = ['event_match_id', 'competitor_id', 'competitor_type', 'side_number'];
+    protected $fillable = [
+        'event_match_id',
+        'competitor_id',
+        'competitor_type',
+        'side_number',
+    ];
 
     /**
      * Retreive the model as the competitor.

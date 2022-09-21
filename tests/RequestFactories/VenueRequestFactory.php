@@ -15,7 +15,7 @@ class VenueRequestFactory extends RequestFactory
             'street_address' => $this->faker->buildingNumber().' '.$this->faker->streetName(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),
-            'zip' => $this->faker->postcode(),
+            'zip' => (string) mt_rand(11111, 99999),
         ];
     }
 }

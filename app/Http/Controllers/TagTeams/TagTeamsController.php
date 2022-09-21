@@ -12,7 +12,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\TagTeam;
-use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
 
 class TagTeamsController extends Controller
@@ -32,15 +31,13 @@ class TagTeamsController extends Controller
     /**
      * Show the form for creating a new tag team.
      *
-     * @param  TagTeam  $tagTeam
      * @return \Illuminate\View\View
      */
-    public function create(TagTeam $tagTeam)
+    public function create()
     {
         $this->authorize('create', TagTeam::class);
 
         return view('tagteams.create', [
-            'tagTeam' => $tagTeam,
             'wrestlers' => WrestlerRepository::getAvailableWrestlersForNewTagTeam()->pluck('name', 'id'),
         ]);
     }
@@ -83,11 +80,9 @@ class TagTeamsController extends Controller
     {
         $this->authorize('update', $tagTeam);
 
-        $wrestlers = Wrestler::withTrashed()->bookable()->pluck('name', 'id');
-
         return view('tagteams.edit', [
             'tagTeam' => $tagTeam,
-            'wrestlers' => $wrestlers,
+            'wrestlers' => WrestlerRepository::getAvailableWrestlersForExistingTagTeam($tagTeam)->pluck('name', 'id'),
         ]);
     }
 

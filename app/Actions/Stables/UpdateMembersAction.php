@@ -14,7 +14,7 @@ class UpdateMembersAction extends BaseStableAction
     use AsAction;
 
     /**
-     * Retire a stable.
+     * Update a stables members.
      *
      * @param  \App\Models\Stable  $stable
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers

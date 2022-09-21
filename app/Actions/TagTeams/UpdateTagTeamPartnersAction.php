@@ -26,7 +26,7 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
                 $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlers);
             }
         } else {
-            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Wrestler> */
+            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Wrestler> $formerTagTeamPartners */
             $formerTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotNotIn(
                 'wrestler_id',
                 $wrestlers->modelKeys()

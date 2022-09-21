@@ -18,7 +18,11 @@ class EventMatch extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['event_id', 'match_type_id', 'preview'];
+    protected $fillable = [
+        'event_id',
+        'match_type_id',
+        'preview',
+    ];
 
     /**
      * Get the match type of the match.

@@ -21,9 +21,11 @@ class RetireController extends Controller
     {
         $this->authorize('retire', $tagTeam);
 
-        throw_unless($tagTeam->canBeRetired(), CannotBeRetiredException::class);
-
-        RetireAction::run($tagTeam);
+        try {
+            RetireAction::run($tagTeam);
+        } catch (CannotBeRetiredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
 
         return to_route('tag-teams.index');
     }

@@ -41,8 +41,20 @@ class StoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('events', 'name')],
             'date' => ['nullable', 'string', 'date'],
-            'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
+            'venue_id' => ['nullable', 'required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string', 'min:3'],
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes()
+    {
+        return [
+            'venue_id' => 'venue',
         ];
     }
 }

@@ -35,6 +35,7 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        /** @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter */
         $this->reportable(function (Throwable $e) {
         });
     }

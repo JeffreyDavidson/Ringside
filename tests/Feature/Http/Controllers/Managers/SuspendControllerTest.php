@@ -1,50 +1,29 @@
 <?php
 
-use App\Enums\ManagerStatus;
-use App\Exceptions\CannotBeSuspendedException;
+use App\Actions\Managers\SuspendAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\SuspendController;
 use App\Models\Manager;
 
-test('invoke suspends an available manager and redirects', function () {
-    $manager = Manager::factory()->available()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([SuspendController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
-
-    expect($manager->fresh())
-        ->suspensions->toHaveCount(1)
-        ->status->toBe(ManagerStatus::SUSPENDED);
+beforeEach(function () {
+    $this->manager = Manager::factory()->available()->create();
 });
 
-test('a basic user cannot suspend an available manager', function () {
-    $manager = Manager::factory()->available()->create();
+test('invoke calls suspend action and redirects', function () {
+    $this->actingAs(administrator())
+        ->patch(action([SuspendController::class], $this->manager))
+        ->assertRedirect(action([ManagersController::class, 'index']));
 
+    SuspendAction::shouldRun()->with($this->manager);
+});
+
+test('a basic user cannot suspend a manager', function () {
     $this->actingAs(basicUser())
-        ->patch(action([SuspendController::class], $manager))
+        ->patch(action([SuspendController::class], $this->manager))
         ->assertForbidden();
 });
 
-test('a guest cannot suspend an available manager', function () {
-    $manager = Manager::factory()->available()->create();
-
-    $this->patch(action([SuspendController::class], $manager))
+test('a guest cannot suspend a manager', function () {
+    $this->patch(action([SuspendController::class], $this->manager))
         ->assertRedirect(route('login'));
 });
-
-test('invoke throws exception for suspending a non suspendable manager', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $manager = Manager::factory()->{$factoryState}()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([SuspendController::class], $manager));
-})->throws(CannotBeSuspendedException::class)->with([
-    'unemployed',
-    'withFutureEmployment',
-    'injured',
-    'released',
-    'retired',
-    'suspended',
-]);

@@ -1,103 +1,34 @@
 <?php
 
+use App\Actions\Managers\UpdateAction;
+use App\Data\ManagerData;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
 
-test('edit returns a view', function () {
-    $manager = Manager::factory()->create();
+beforeEach(function () {
+    $this->manager = Manager::factory()->create();
+    $this->data = UpdateRequest::factory()->create();
+    $this->request = UpdateRequest::create(action([ManagersController::class, 'update'], $this->manager), 'PATCH', $this->data);
+});
 
+test('update calls update action and redirects', function () {
     $this->actingAs(administrator())
-        ->get(action([ManagersController::class, 'edit'], $manager))
-        ->assertStatus(200)
-        ->assertViewIs('managers.edit')
-        ->assertViewHas('manager', $manager);
-});
-
-test('a basic user cannot view the form for editing a manager', function () {
-    $manager = Manager::factory()->create();
-
-    $this->actingAs(basicUser())
-        ->get(action([ManagersController::class, 'edit'], $manager))
-        ->assertForbidden();
-});
-
-test('a guest cannot view the form for editing a manager', function () {
-    $manager = Manager::factory()->create();
-
-    $this->get(action([ManagersController::class, 'edit'], $manager))
-        ->assertRedirect(route('login'));
-});
-
-test('updates a manager and redirects', function () {
-    $manager = Manager::factory()->create([
-        'first_name' => 'Dries',
-        'last_name' => 'Vints',
-    ]);
-
-    $data = UpdateRequest::factory()->create([
-        'first_name' => 'Taylor',
-        'last_name' => 'Otwell',
-        'start_date' => null,
-    ]);
-
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'edit'], $manager))
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
+        ->from(action([ManagersController::class, 'edit'], $this->manager))
+        ->patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
         ->assertValid()
         ->assertRedirect(action([ManagersController::class, 'index']));
 
-    expect($manager->fresh())
-        ->first_name->toBe('Taylor')
-        ->last_name->toBe('Otwell')
-        ->employments->toBeEmpty();
-});
-
-test('update can employ an unemployed manager when start date is filled', function () {
-    $dateTime = now()->toDateTimeString();
-    $manager = Manager::factory()->unemployed()->create();
-    $data = UpdateRequest::factory()->create(['start_date' => $dateTime]);
-
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'edit'], $manager))
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
-
-    expect($manager->fresh())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
-});
-
-test('update can employ a future employed manager when start date is filled', function () {
-    $dateTime = now()->toDateTimeString();
-    $manager = Manager::factory()->withFutureEmployment()->create();
-    $data = UpdateRequest::factory()->create(['start_date' => $dateTime]);
-
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'edit'], $manager))
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
-
-    expect($manager->fresh())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+    UpdateAction::shouldRun()->with($this->manager, ManagerData::fromUpdateRequest($this->request));
 });
 
 test('a basic user cannot update a manager', function () {
-    $manager = Manager::factory()->create();
-    $data = UpdateRequest::factory()->create();
-
     $this->actingAs(basicUser())
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
+        ->patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot update a manager', function () {
-    $manager = Manager::factory()->create();
-    $data = UpdateRequest::factory()->create();
-
-    $this->patch(action([ManagersController::class, 'update'], $manager), $data)
+    $this->patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
         ->assertRedirect(route('login'));
 });

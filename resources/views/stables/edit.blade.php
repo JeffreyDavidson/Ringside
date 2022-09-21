@@ -20,10 +20,19 @@
                 @method('patch')
                 @csrf
                 <div class="mb-10">
-                    <x-form.inputs.text label="Name:" name="name" placeholder="Stable Name Here" value="{{ $stable->name }}" />
+                    <x-form.inputs.text
+                        label="Name:"
+                        name="name"
+                        placeholder="Stable Name Here"
+                        :value="old('name', $stable->name)"
+                    />
                 </div>
                 <div class="mb-10">
-                    <x-form.inputs.date label="Start Date:" name="start_date" value="{{ $stable->started_at?->format('Y-m-d') }}" />
+                    <x-form.inputs.date
+                        label="Start Date:"
+                        name="start_date"
+                        :value="old('start_date', $stable->started_at?->format('Y-m-d'))"
+                    />
                 </div>
         </div>
         <div class="card-footer">
