@@ -81,4 +81,14 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
     {
         return $this->currentChampionship?->champion === null;
     }
+
+    public function canBeRetired()
+    {
+        return $this->isCurrentlyActivated() || $this->isDeactivated();
+    }
+
+    public function canBeUnretired()
+    {
+        return $this->isRetired();
+    }
 }

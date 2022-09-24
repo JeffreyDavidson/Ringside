@@ -130,6 +130,11 @@ trait Activations
         return $this->futureActivation()->exists();
     }
 
+    public function canBeActivated()
+    {
+        return $this->isUnactivated() || $this->hasFutureActivation() || $this->isDeactivated();
+    }
+
     /**
      * Retrieve the model's first activation date.
      *

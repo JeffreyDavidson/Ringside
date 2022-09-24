@@ -19,6 +19,15 @@ trait Deactivations
                 && $this->currentRetirement()->doesntExist();
     }
 
+    public function canBeDeactivated()
+    {
+        if ($this->isCurrentlyActivated()) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Check to see if the model is not in activation.
      *
