@@ -75,6 +75,15 @@ trait HasRetirements
         return $this->retirements()->count() > 0;
     }
 
+    public function canBeRetired()
+    {
+        if ($this->isNotInEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Retrieve the retirement start date.
      *

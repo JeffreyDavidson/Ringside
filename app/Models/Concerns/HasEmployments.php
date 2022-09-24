@@ -161,6 +161,15 @@ trait HasEmployments
                 && $this->currentRetirement()->doesntExist();
     }
 
+    public function canBeReleased()
+    {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Get the model's first employment date.
      *

@@ -133,4 +133,70 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     {
         return $this->morphToMany(EventMatch::class, 'event_match_competitor');
     }
+
+    public function canBeEmployed()
+    {
+        if ($this->isCurrentlyEmployed()) {
+            return false;
+        }
+
+        if ($this->isRetired()) {
+            return false;
+        }
+
+        if ($this->currentWrestlers->count() !== self::NUMBER_OF_WRESTLERS_ON_TEAM) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canBeReleased()
+    {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canBeReinstated()
+    {
+        if (! $this->isSuspended()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canBeSuspended()
+    {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        if ($this->isSuspended()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canBeRetired()
+    {
+        if ($this->isNotInEmployment()) {
+            return false;
+        }
+
+        return $this->isBookable() || $this->isUnbookable();
+    }
+
+    public function canBeUnretired()
+    {
+        if (! $this->isRetired()) {
+            return false;
+        }
+
+        return ! $this->currentWrestlers->every->isBookable();
+    }
 }

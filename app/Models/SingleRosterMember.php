@@ -19,6 +19,50 @@ abstract class SingleRosterMember extends RosterMember
         return new SingleRosterMemberQueryBuilder($query);
     }
 
+    public function canBeEmployed()
+    {
+        if ($this->isCurrentlyEmployed()) {
+            return false;
+        }
+
+        if ($this->isRetired()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canBeSuspended()
+    {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        if ($this->isSuspended()) {
+            return false;
+        }
+
+        if ($this->isInjured()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function canBeReinstated()
+    {
+        return $this->isSuspended();
+    }
+
+    public function canBeUnretired()
+    {
+        if (! $this->isRetired()) {
+            return false;
+        }
+
+        return false;
+    }
+
     /**
      * Get the injuries of the model.
      *
@@ -82,6 +126,42 @@ abstract class SingleRosterMember extends RosterMember
     public function hasInjuries()
     {
         return $this->injuries()->count() > 0;
+    }
+
+    /**
+     * Determine if the model can be injured.
+     *
+     * @return bool
+     */
+    public function canBeInjured()
+    {
+        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        if ($this->isInjured()) {
+            return false;
+        }
+
+        if ($this->isSuspended()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if the model can be cleared from an injury.
+     *
+     * @return bool
+     */
+    public function canBeClearedFromInjury()
+    {
+        if (! $this->isInjured()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
