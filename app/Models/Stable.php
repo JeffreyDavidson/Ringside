@@ -32,7 +32,11 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @var array<int, string>
      */
-    protected $fillable = ['user_id', 'name', 'status'];
+    protected $fillable = [
+        'user_id',
+        'name',
+        'status',
+    ];
 
     /**
      * The attributes that should be cast to native types.
