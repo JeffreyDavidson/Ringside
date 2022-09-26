@@ -24,7 +24,7 @@ class UnretireAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
     {
-        throw_unless($manager->canBeUnretired(), CannotBeUnretiredException::class);
+        throw_if(! $manager->isRetired(), CannotBeUnretiredException::class, $manager.' is not retired so cannot be unretired.');
 
         $unretiredDate ??= now();
 

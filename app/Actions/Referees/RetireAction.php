@@ -24,7 +24,10 @@ class RetireAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        throw_if($referee->canBeRetired(), CannotBeRetiredException::class);
+        throw_if($referee->isUnemployed(), CannotBeRetiredException::class, $referee.' is unemployed and cannot be retired.');
+        throw_if($referee->hasFutureEmployment(), CannotBeRetiredException::class, $referee.' has not been officially employed and cannot be retired');
+        throw_if($referee->isRetired(), CannotBeRetiredException::class, $referee.' is already retired.');
+        throw_if($referee->isReleased(), CannotBeRetiredException::class, $referee.' was released and cannot be retired. Re-employ this referee to retire them.');
 
         $retirementDate ??= now();
 

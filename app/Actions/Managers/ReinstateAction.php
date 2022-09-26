@@ -24,7 +24,7 @@ class ReinstateAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
-        throw_if($manager->canBeReinstated(), CannotBeReinstatedException::class);
+        throw_if(! $manager->isSuspended(), CannotBeReinstatedException::class, $manager.' is not suspended and cannot be reinstated.');
 
         $reinstatementDate ??= now();
 

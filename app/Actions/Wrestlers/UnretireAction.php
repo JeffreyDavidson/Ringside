@@ -24,7 +24,7 @@ class UnretireAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretiredDate = null): void
     {
-        throw_if(! $wrestler->isSuspended(), CannotBeUnretiredException::class, $wrestler.' is not suspended so cannot be reinstated.');
+        throw_if(! $wrestler->isRetired(), CannotBeUnretiredException::class, $wrestler.' is not retired so cannot be unretired.');
 
         $unretiredDate ??= now();
 

@@ -24,7 +24,10 @@ class ReleaseAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
-        throw_if($referee->canBeReleased(), CannotBeReleasedException::class);
+        throw_if($referee->isUnemployed(), CannotBeReleasedException::class, $referee.' is unemployed and cannot be released.');
+        throw_if($referee->isReleased(), CannotBeReleasedException::class, $referee.' is already released.');
+        throw_if($referee->hasFutureEmployment(), CannotBeReleasedException::class, $referee.' has not been officially employed and cannot be released.');
+        throw_if($referee->isRetired(), CannotBeReleasedException::class, $referee.' has is retired and cannot be released.');
 
         $releaseDate ??= now();
 
