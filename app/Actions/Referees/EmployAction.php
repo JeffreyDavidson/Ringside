@@ -24,7 +24,7 @@ class EmployAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $startDate = null): void
     {
-        throw_if($referee->canBeEmployed(), CannotBeEmployedException::class);
+        throw_if($referee->isCurrentlyEmployed(), CannotBeEmployedException::class, $referee.' is currently employed and cannot be employed further.');
 
         $startDate ??= now();
 

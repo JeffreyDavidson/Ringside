@@ -24,7 +24,7 @@ class EmployAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
-        throw_if($manager->canBeEmployed(), CannotBeEmployedException::class);
+        throw_if($manager->isCurrentlyEmployed(), CannotBeEmployedException::class, $manager.' is currently employed and cannot be employed again.');
 
         $startDate ??= now();
 

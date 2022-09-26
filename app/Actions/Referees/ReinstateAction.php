@@ -24,7 +24,7 @@ class ReinstateAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
-        throw_if($referee->canBeReinstated(), CannotBeReinstatedException::class);
+        throw_if(! $referee->isSuspended(), CannotBeReinstatedException::class, $referee.' is not suspended and cannot be reinstated.');
 
         $reinstatementDate ??= now();
 

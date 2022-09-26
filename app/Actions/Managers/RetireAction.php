@@ -24,7 +24,10 @@ class RetireAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {
-        throw_if($manager->canBeRetired(), CannotBeRetiredException::class);
+        throw_if($manager->isUnemployed(), CannotBeRetiredException::class, $manager.' is unemployed and cannot be retired.');
+        throw_if($manager->hasFutureEmployment(), CannotBeRetiredException::class, $manager.' has not been officially employed and cannot be retired');
+        throw_if($manager->isRetired(), CannotBeRetiredException::class, $manager.' is already retired.');
+        throw_if($manager->isReleased(), CannotBeRetiredException::class, $manager.' was released and cannot be retired. Re-employ this manager to retire them.');
 
         $retirementDate ??= now();
 

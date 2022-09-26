@@ -24,7 +24,7 @@ class InjureAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void
     {
-        throw_if($referee->canBeInjured(), CannotBeInjuredException::class);
+        throw_if($referee->isInjured(), CannotBeInjuredException::class, $referee.' is currently injured and cannot be injured further.');
 
         $injureDate ??= now();
 

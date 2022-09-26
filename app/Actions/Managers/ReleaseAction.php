@@ -24,7 +24,10 @@ class ReleaseAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
-        throw_if($manager->canBeReleased(), CannotBeReleasedException::class);
+        throw_if($manager->isUnemployed(), CannotBeReleasedException::class, $manager.' is unemployed and cannot be released.');
+        throw_if($manager->isReleased(), CannotBeReleasedException::class, $manager.' is already released.');
+        throw_if($manager->hasFutureEmployment(), CannotBeReleasedException::class, $manager.' has not been officially employed and cannot be released.');
+        throw_if($manager->isRetired(), CannotBeReleasedException::class, $manager.' has is retired and cannot be released.');
 
         $releaseDate ??= now();
 

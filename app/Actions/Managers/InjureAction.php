@@ -24,7 +24,7 @@ class InjureAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void
     {
-        throw_if($manager->canBeInjured(), CannotBeInjuredException::class);
+        throw_if($manager->isInjured(), CannotBeInjuredException::class, $manager.' is currently injured and cannot be injured further.');
 
         $injureDate ??= now();
 
