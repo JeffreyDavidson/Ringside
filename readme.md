@@ -2,13 +2,15 @@
 
 Ringside is created and maintained by Jeffrey Davidson and it is a Content Management System (CMS) for wrestling promoters to easily keep their roster updated as well as schedule new events.
 
+[![Laravel Forge Site Deployment Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fforge.laravel.com%2Fsite-badges%2Fc403536a-0e14-491a-ae2a-c6c3b529ed19&style=flat)](https://forge.laravel.com)
+
 ## Prerequisites
 
 Lando - https://github.com/lando/lando/releases
 
 
 ## Installation
-For installing this application locally, clone this repository to your default project directory. After doing so, using any terminal application of your choice, change directories into the repository project.  
+For installing this application locally, clone this repository to your default project directory. After doing so, using any terminal application of your choice, change directories into the repository project.
 
 1. Run `composer install` to install all of the PHP packages needed for this application.
 2. To start the application you will need to run the command `lando start`. This will start up your docker container and spit up the application and database containers for your application based on the lando.yaml file located in the root directory of the application.
