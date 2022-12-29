@@ -1,9 +1,17 @@
 <?php
 
-test('deletes a event and redirects', function () {
-    $this->actingAs(administrator())
-        ->delete(action([EventsController::class, 'destroy'], $event))
-        ->assertRedirect(action([EventsController::class, 'index']));
+use App\Actions\Events\DeleteAction;
+use App\Models\Event;
+use App\Repositories\EventRepository;
 
-    $this->assertSoftDeleted($event);
+test('deletes a event and redirects', function () {
+    $event = Event::factory()->create();
+
+    $this->mock(EventRepository::class)
+        ->shouldReceive('delete')
+        ->once()
+        ->with($event)
+        ->andReturns();
+
+    DeleteAction::run($event);
 });

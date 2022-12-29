@@ -57,3 +57,12 @@ test('it creates an event with with a date and venue and preview', function () {
         ->venue_id->toBe($venue->id)
         ->preview->toEqual($preview);
 });
+
+test('it can delete an event', function () {
+    $event = Event::factory()->create();
+
+    (new EventRepository())->delete($event);
+
+    expect($event->fresh())
+        ->deleted_at->not->toBeNull();
+});
