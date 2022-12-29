@@ -66,3 +66,12 @@ test('it can delete an event', function () {
     expect($event->fresh())
         ->deleted_at->not->toBeNull();
 });
+
+test('it can restore a trashed event', function () {
+    $event = Event::factory()->trashed()->create();
+
+    (new EventRepository())->restore($event);
+
+    expect($event->fresh())
+        ->deleted_at->toBeNull();
+});

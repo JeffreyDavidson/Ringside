@@ -1,9 +1,17 @@
 <?php
 
-test('invoke restores a deleted event and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([RestoreController::class], $this->event))
-        ->assertRedirect(action([EventsController::class, 'index']));
+use App\Actions\Events\RestoreAction;
+use App\Models\Event;
+use App\Repositories\EventRepository;
 
-    $this->assertNull($this->event->fresh()->deleted_at);
+test('invoke restores a trashed event', function () {
+    $event = Event::factory()->trashed()->create();
+
+    $this->mock(EventRepository::class)
+        ->shouldReceive('restore')
+        ->once()
+        ->with($event)
+        ->andReturns();
+
+    RestoreAction::run($event);
 });

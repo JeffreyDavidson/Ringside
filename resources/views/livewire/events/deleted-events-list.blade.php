@@ -34,7 +34,11 @@
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
-                                @include('livewire.events.partials.action-cell')
+                                <x-actions-dropdown>
+                                    @can('restore', $event)
+                                        <x-buttons.restore :route="route('events.restore', $event)" />
+                                    @endcan
+                                </x-actions-dropdown>
                             </x-table.cell>
 
                         </x-table.row>
@@ -42,7 +46,7 @@
                         <x-table.row>
                             <x-table.cell colspan="6">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <span class="py-8 text-xl font-medium text-cool-gray-400">No events found...</span>
+                                    <span class="py-8 text-xl font-medium text-cool-gray-400">No deleted events found...</span>
                                 </div>
                             </x-table.cell>
                         </x-table.row>

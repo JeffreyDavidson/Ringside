@@ -28,6 +28,6 @@ class RestoreController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
 
-        return to_route('events.index');
+        return to_route('events.show', $event);
     }
 }
