@@ -90,7 +90,7 @@ class TestValidationResult
 
         $failedRules = collect($this->validator->failed())
             ->map(fn ($details) => collect($details)->reduce(function ($aggregateRule, $constraints, $ruleName) {
-                $failedRule = str($ruleName)->lower();
+                $failedRule = str($ruleName)->snake()->lower();
 
                 if (count($constraints)) {
                     $failedRule .= ':'.implode(',', $constraints);

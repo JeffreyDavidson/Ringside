@@ -2,10 +2,7 @@
 
 use App\Http\Requests\Events\StoreRequest;
 use App\Models\Event;
-use Database\Seeders\MatchTypesTableSeeder;
 use Tests\RequestFactories\EventRequestFactory;
-
-beforeEach(fn () => $this->seed(MatchTypesTableSeeder::class));
 
 test('an administrator is authorized to make this request', function () {
     $this->createRequest(StoreRequest::class)
@@ -85,6 +82,15 @@ test('event venue id is optional', function () {
         ->assertPassesValidation();
 });
 
+test('event venue id is required with a date', function () {
+    $this->createRequest(StoreRequest::class)
+        ->validate(EventRequestFactory::new()->create([
+            'date' => now()->toDateTimeString(),
+            'venue_id' => null,
+        ]))
+        ->assertFailsValidation(['venue_id' => 'required_with:date']);
+});
+
 test('event venue id must be an integer if provided', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(EventRequestFactory::new()->create([
@@ -107,4 +113,20 @@ test('event preview is optional', function () {
             'preview' => null,
         ]))
         ->assertPassesValidation();
+});
+
+test('event preview must be a string if provided', function () {
+    $this->createRequest(StoreRequest::class)
+        ->validate(EventRequestFactory::new()->create([
+            'preview' => 123,
+        ]))
+        ->assertFailsValidation(['preview' => 'string']);
+});
+
+test('event preview must be be at least three lettes long if provided', function () {
+    $this->createRequest(StoreRequest::class)
+        ->validate(EventRequestFactory::new()->create([
+            'preview' => 'ab',
+        ]))
+        ->assertFailsValidation(['preview' => 'min:3']);
 });

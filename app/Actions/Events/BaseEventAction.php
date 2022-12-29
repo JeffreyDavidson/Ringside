@@ -8,15 +8,7 @@ use App\Repositories\EventRepository;
 
 abstract class BaseEventAction
 {
-    protected EventRepository $eventRepository;
-
-    /**
-     * Create a new base event action instance.
-     *
-     * @param  \App\Repositories\EventRepository  $eventRepository
-     */
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(protected EventRepository $eventRepository)
     {
-        $this->eventRepository = $eventRepository;
     }
 }
