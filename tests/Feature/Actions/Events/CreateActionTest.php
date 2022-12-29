@@ -1,22 +1,17 @@
 <?php
 
-test('store creates a event and redirects', function () {
-    $data = StoreRequest::factory()->create([
-        'name' => 'Example Event Name',
-        'date' => null,
-        'venue_id' => null,
-        'preview' => null,
-    ]);
+use App\Actions\Events\CreateAction;
+use App\Data\EventData;
+use App\Repositories\EventRepository;
 
-    $this->actingAs(administrator())
-        ->from(action([EventsController::class, 'create']))
-        ->post(action([EventsController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([EventsController::class, 'index']));
+test('it creates an event', function () {
+    $data = new EventData('Example Event Name', null, null, null);
 
-    expect(Event::latest()->first())
-        ->name->toBe('Example Event Name')
-        ->date->toBeNull()
-        ->venue_id->toBeNull()
-        ->preview->toBeNull();
+    $this->mock(EventRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturns(new App\Models\Event());
+
+    CreateAction::run($data);
 });
