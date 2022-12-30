@@ -28,10 +28,19 @@ uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('F
 uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
 uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
 uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
-uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
+// uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
 uses()->group('event-matches', 'feature-event-matches')
     ->in('Feature/Http/Controllers/EventMatches', 'Feature/Actions/EventMatches', 'Feature/Http/Requests/EventMatches');
 uses()->group('actions')->in('Feature/Actions');
+uses()
+    ->group('events')
+    ->in(
+        'Feature/Actions/Events',
+        'Feature/Http/Controllers/Events',
+        'Feature/Http/Livewire/Events',
+        'Feature/Http/Requests/Events',
+        'Feature/Http/Repositories/EventRepositoryTest.php'
+    );
 
 beforeEach(function () {
     TestResponse::macro('data', fn ($key) => $this->original->getData()[$key]);

@@ -58,6 +58,7 @@ class TestValidationResult
                     assertArrayHasKey($constraints, $failedRules->all());
                 }
             }
+
             assertArrayHasKey($expectedFailedRule, $failedRules);
             assertStringContainsString($constraints, $failedRules[$expectedFailedRule]);
         }
@@ -90,7 +91,13 @@ class TestValidationResult
 
         $failedRules = collect($this->validator->failed())
             ->map(fn ($details) => collect($details)->reduce(function ($aggregateRule, $constraints, $ruleName) {
-                $failedRule = str($ruleName)->snake()->lower();
+                $failedRule = str($ruleName);
+
+                if ($failedRule->contains('App\Rules')) {
+                    // Nothing here.
+                } else {
+                    $failedRule = $failedRule->snake()->lower();
+                }
 
                 if (count($constraints)) {
                     $failedRule .= ':'.implode(',', $constraints);
