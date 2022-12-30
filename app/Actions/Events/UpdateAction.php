@@ -12,13 +12,6 @@ class UpdateAction extends BaseEventAction
 {
     use AsAction;
 
-    /**
-     * Update an event.
-     *
-     * @param  \App\Models\Event  $event
-     * @param  \App\Data\EventData  $eventData
-     * @return \App\Models\Event
-     */
     public function handle(Event $event, EventData $eventData): Event
     {
         return $this->eventRepository->update($event, $eventData);

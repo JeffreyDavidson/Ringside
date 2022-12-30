@@ -25,14 +25,7 @@ class EventRepository
         ]);
     }
 
-    /**
-     * Update a given event with given data.
-     *
-     * @param  \App\Models\Event  $event
-     * @param  \App\Data\EventData  $eventData
-     * @return \App\Models\Event
-     */
-    public function update(Event $event, EventData $eventData)
+    public function update(Event $event, EventData $eventData): Event
     {
         $event->update([
             'name' => $eventData->name,

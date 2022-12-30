@@ -1,15 +1,19 @@
 <?php
 
-test('updates a event and redirects', function () {
-    $this->actingAs(administrator())
-        ->from(action([EventsController::class, 'edit'], $this->event))
-        ->patch(action([EventsController::class, 'update'], $this->event), $this->data)
-        ->assertValid()
-        ->assertRedirect(action([EventsController::class, 'index']));
+use App\Actions\Events\UpdateAction;
+use App\Data\EventData;
+use App\Models\Event;
+use App\Repositories\EventRepository;
 
-    expect($event->fresh())
-        ->name->toBe('New Event Name')
-        ->date->toBeNull()
-        ->venue_id->toBeNull()
-        ->preview->toBeNull();
+test('it updates a event', function () {
+    $data = new EventData('Example Event Name', null, null, null);
+    $event = Event::factory()->create();
+
+    $this->mock(EventRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($event, $data)
+        ->andReturns($event);
+
+    UpdateAction::run($event, $data);
 });

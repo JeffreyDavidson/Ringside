@@ -2,6 +2,9 @@
 
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
+use App\Models\Venue;
+use App\Rules\EventDateCanBeChanged;
+use App\Rules\LetterSpace;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\EventRequestFactory;
 
@@ -43,6 +46,17 @@ test('event name must be a string', function () {
             'name' => 123,
         ]))
         ->assertFailsValidation(['name' => 'string']);
+});
+
+test('event name can only be letters and spaces', function () {
+    $event = Event::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('event', $event)
+        ->validate(EventRequestFactory::new()->create([
+            'name' => 'Invalid!%%# Event Name',
+        ]))
+        ->assertFailsValidation(['name' => LetterSpace::class]);
 });
 
 test('event name must be a at least characters', function () {
@@ -109,7 +123,7 @@ test('event date cannot be changed if event date has past', function () {
         ->validate(EventRequestFactory::new()->create([
             'date' => '2021-02-01',
         ]))
-        ->assertFailsValidation(['date' => 'app\rules\eventdatecanbechanged']);
+        ->assertFailsValidation(['date' => EventDateCanBeChanged::class]);
 });
 
 test('event date can be changed if activation start date is in the future', function () {
@@ -119,6 +133,7 @@ test('event date can be changed if activation start date is in the future', func
         ->withParam('event', $event)
         ->validate(EventRequestFactory::new()->create([
             'date' => Carbon::tomorrow()->toDateString(),
+            'venue_id' => Venue::factory()->create()->id
         ]))
         ->assertPassesValidation();
 });
@@ -132,6 +147,18 @@ test('event venue id is optional', function () {
             'venue_id' => null,
         ]))
         ->assertPassesValidation();
+});
+
+test('event venue id required when date is provided', function () {
+    $event = Event::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('event', $event)
+        ->validate(EventRequestFactory::new()->create([
+            'date' => Carbon::tomorrow()->toDateTimeString(),
+            'venue_id' => null,
+        ]))
+        ->assertFailsValidation(['venue_id' => 'required_with:date']);
 });
 
 test('event venue id must be an integer if provided', function () {
@@ -176,4 +203,15 @@ test('event preview must be a string if provided', function () {
             'preview' => 1234,
         ]))
         ->assertFailsValidation(['preview' => 'string']);
+});
+
+test('event preview must be be at least three lettes long if provided', function () {
+    $event = Event::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('event', $event)
+        ->validate(EventRequestFactory::new()->create([
+            'preview' => 'ab',
+        ]))
+        ->assertFailsValidation(['preview' => 'min:3']);
 });
