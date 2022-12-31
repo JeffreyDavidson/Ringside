@@ -41,6 +41,15 @@ uses()
         'Feature/Http/Requests/Events',
         'Feature/Http/Repositories/EventRepositoryTest.php'
     );
+uses()
+    ->group('titles')
+    ->in(
+        'Feature/Actions/Titles',
+        'Feature/Http/Controllers/Titles',
+        'Feature/Http/Livewire/Titles',
+        'Feature/Http/Requests/Titles',
+        'Feature/Http/Repositories/TitleRepositoryTest.php'
+    );
 
 beforeEach(function () {
     TestResponse::macro('data', fn ($key) => $this->original->getData()[$key]);
