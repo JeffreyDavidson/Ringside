@@ -19,7 +19,7 @@ class LetterSpace implements InvokableRule
     public function __invoke($attribute, $value, $fail)
     {
         if (! preg_match('/^[a-zA-Z\s,]+$/', $value)) {
-            $fail('The :attribute only allows for letters and commas.');
+            $fail('The :attribute only allows for letters and spaces.');
         }
     }
 }
