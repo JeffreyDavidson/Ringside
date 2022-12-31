@@ -1,70 +1,35 @@
 <?php
 
-test('updates a title and redirects', function () {
-    $title = Title::factory()->create([
-        'name' => 'Old Example Title',
-    ]);
-    $data = UpdateRequest::factory()->create([
-        'name' => 'New Example Title',
-        'start_date' => null,
-    ]);
+use App\Actions\Titles\ActivateAction;
+use App\Actions\Titles\UpdateAction;
+use App\Data\TitleData;
+use App\Models\Title;
+use App\Repositories\TitleRepository;
 
-    $this->actingAs(administrator())
-        ->from(action([TitlesController::class, 'edit'], $title))
-        ->patch(action([TitlesController::class, 'update'], $title), $data)
-        ->assertValid()
-        ->assertRedirect(action([TitlesController::class, 'index']));
+test('it updates a title', function () {
+    $data = new TitleData('New Example Title', null);
+    $title = Title::factory()->create();
 
-    expect($title->fresh())
-        ->name->toBe('New Example Title')
-        ->activations->toBeEmpty();
+    $this->mock(TitleRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($title, $data)
+        ->andReturns($title);
+
+    UpdateAction::run($title, $data);
 });
 
-test('update can activate an unactivated title when activation date is filled', function () {
+test('it activates an unactivated title when activation date is filled', function () {
+    $data = new TitleData('Example Name Title', now());
     $title = Title::factory()->unactivated()->create();
-    $activationDate = now()->toDateTimeString();
-    $data = UpdateRequest::factory()->create([
-        'activation_date' => $activationDate,
-    ]);
 
-    $this->actingAs(administrator())
-        ->from(action([TitlesController::class, 'edit'], $title))
-        ->patch(action([TitlesController::class, 'update'], $title), $data)
-        ->assertValid()
-        ->assertRedirect(action([TitlesController::class, 'index']));
+    ActivateAction::shouldRun()->with($title, $data->activation_date)->once();
 
-    expect($title->fresh())
-        ->activations->toHaveCount(1)
-        ->activations->first()->started_at->toDateTimeString()->toBe($activationDate);
-});
+    $this->mock(TitleRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($title, $data)
+        ->andReturns($title);
 
-test('update can activate an inactive title', function () {
-    $title = Title::factory()->inactive()->create();
-    $activationDate = now()->toDateTimeString();
-    $data = UpdateRequest::factory()->create([
-        'activation_date' => $activationDate,
-    ]);
-
-    $this->actingAs(administrator())
-        ->from(action([TitlesController::class, 'edit'], $title))
-        ->patch(action([TitlesController::class, 'update'], $title), $data)
-        ->assertValid()
-        ->assertRedirect(action([TitlesController::class, 'index']));
-
-    expect(Title::latest()->first())
-        ->activations->toHaveCount(2)
-        ->activations->last()->started_at->toDateTimeString()->toBe($activationDate);
-});
-
-test('update cannot activate an active title', function () {
-    $title = Title::factory()->active()->create();
-    $activationDate = now()->toDateTimeString();
-    $data = UpdateRequest::factory()->create([
-        'activation_date' => $activationDate,
-    ]);
-
-    $this->actingAs(administrator())
-        ->from(action([TitlesController::class, 'edit'], $title))
-        ->patch(action([TitlesController::class, 'update'], $title), $data)
-        ->assertInvalid();
+    UpdateAction::run($title, $data);
 });
