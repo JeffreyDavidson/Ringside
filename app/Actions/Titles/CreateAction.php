@@ -12,12 +12,6 @@ class CreateAction extends BaseTitleAction
 {
     use AsAction;
 
-    /**
-     * Create a title.
-     *
-     * @param  \App\Data\TitleData  $titleData
-     * @return \App\Models\Title
-     */
     public function handle(TitleData $titleData): Title
     {
         /** @var \App\Models\Title $title */

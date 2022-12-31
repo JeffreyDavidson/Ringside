@@ -1,35 +1,35 @@
 <?php
 
-test('store calls create action and redirects', function () {
-    $data = StoreRequest::factory()->create([
-        'name' => 'Example Title',
-        'activation_date' => null,
-    ]);
+use App\Actions\Titles\ActivateAction;
+use App\Actions\Titles\CreateAction;
+use App\Data\TitleData;
+use App\Models\Title;
+use App\Repositories\TitleRepository;
+use Illuminate\Support\Carbon;
 
-    $this->actingAs(administrator())
-        ->from(action([TitlesController::class, 'create']))
-        ->post(action([TitlesController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([TitlesController::class, 'index']));
+test('it creates a title', function () {
+    $data = new TitleData('Example Title', null);
 
-    expect(Title::latest()->first())
-        ->name->toBe('Example Title')
-        ->activations->toBeEmpty();
+    $this->mock(TitleRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturns(new App\Models\Title());
+
+    CreateAction::run($data);
 });
 
-test('an activation is created for the title if activation date is filled in request', function () {
-    $activationDate = now()->toDateTimeString();
-    $data = StoreRequest::factory()->create([
-        'activation_date' => $activationDate,
-    ]);
+test('it creates a title and activates it if activation date is provided', function () {
+    $data = new TitleData('Example Title', Carbon::tomorrow());
+    $title = Title::factory()->create(['name' => $data->name]);
 
-    $this->actingAs(administrator())
-        ->from(action([TitlesController::class, 'create']))
-        ->post(action([TitlesController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([TitlesController::class, 'index']));
+    ActivateAction::shouldRun()->with($title, $data->activation_date)->once();
 
-    expect(Title::latest()->first())
-        ->activations->toHaveCount(1)
-        ->activations->first()->started_at->toDateTimeString()->toBe($activationDate);
+    $this->mock(TitleRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturns($title);
+
+    CreateAction::run($data);
 });

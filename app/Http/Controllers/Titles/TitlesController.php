@@ -23,13 +23,7 @@ class TitlesController extends Controller
         return view('titles.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @param  Title  $title
-     * @return \Illuminate\View\View
-     */
-    public function create(Title $title)
+    public function create(Title $title): View
     {
         $this->authorize('create', Title::class);
 
