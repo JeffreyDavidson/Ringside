@@ -12,15 +12,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
+use Illuminate\View\View;
 
 class TitlesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function index()
+    public function index(): View
     {
         $this->authorize('viewList', Title::class);
 
