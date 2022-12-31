@@ -3,6 +3,7 @@
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Activation;
 use App\Models\Title;
+use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TitleRequestFactory;
 
@@ -46,6 +47,17 @@ test('title name must be a string', function () {
         ->assertFailsValidation(['name' => 'string']);
 });
 
+test('title name can only be letters and spaces', function () {
+    $title = Title::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('title', $title)
+        ->validate(TitleRequestFactory::new()->create([
+            'name' => 'Invalid!%%# Name Title',
+        ]))
+        ->assertFailsValidation(['name' => LetterSpace::class]);
+});
+
 test('title name must be at least 3 characters', function () {
     $title = Title::factory()->create();
 
@@ -65,7 +77,7 @@ test('title name must end with title or titles', function () {
         ->validate(TitleRequestFactory::new()->create([
             'name' => 'Example Name',
         ]))
-        ->assertFailsValidation(['name' => 'endswith:Title,Titles']);
+        ->assertFailsValidation(['name' => 'ends_with:Title,Titles']);
 });
 
 test('title name must be unique', function () {
@@ -121,7 +133,7 @@ test('title activation date cannot be changed if activation start date has past'
         ->validate(TitleRequestFactory::new()->create([
             'activation_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['activation_date' => 'app\rules\activationstartdatecanbechanged']);
+        ->assertFailsValidation(['activation_date' => ActivationStartDateCanBeChanged::class]);
 });
 
 test('title activation date can be changed if activation start date is in the future', function () {

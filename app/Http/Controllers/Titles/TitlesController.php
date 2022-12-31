@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class TitlesController extends Controller
@@ -60,13 +61,7 @@ class TitlesController extends Controller
         return view('titles.show', compact('title'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Title  $title
-     * @return \Illuminate\View\View
-     */
-    public function edit(Title $title)
+    public function edit(Title $title): View
     {
         $this->authorize('update', Title::class);
 
@@ -75,14 +70,7 @@ class TitlesController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\Titles\UpdateRequest  $request
-     * @param  \App\Models\Title  $title
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(UpdateRequest $request, Title $title)
+    public function update(UpdateRequest $request, Title $title): RedirectResponse
     {
         UpdateAction::run($title, TitleData::fromUpdateRequest($request));
 
