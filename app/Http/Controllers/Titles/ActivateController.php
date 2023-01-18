@@ -8,16 +8,11 @@ use App\Actions\Titles\ActivateAction;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Title;
+use Illuminate\Http\RedirectResponse;
 
 class ActivateController extends Controller
 {
-    /**
-     * Activates a title.
-     *
-     * @param  \App\Models\Title  $title
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function __invoke(Title $title)
+    public function __invoke(Title $title): RedirectResponse
     {
         $this->authorize('activate', $title);
 

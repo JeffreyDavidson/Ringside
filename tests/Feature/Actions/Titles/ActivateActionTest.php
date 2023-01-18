@@ -1,36 +1,41 @@
 <?php
 
-test('invoke calls activate action and redirects', function () {
+use App\Actions\Titles\ActivateAction;
+use App\Data\TitleData;
+use App\Models\Title;
+use App\Repositories\TitleRepository;
+use Illuminate\Support\Carbon;
+
+test('invoke calls activate action', function () {
+    $data = new TitleData('Example Name Title', Carbon::tomorrow());
     $title = Title::factory()->unactivated()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $title))
-        ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->mock(TitleRepository::class)
+        ->shouldReceive('activate')
+        ->once()
+        ->with($title, $data->activation_date);
 
-    expect($title->fresh())
-        ->activations->toHaveCount(1)
-        ->status->toMatchObject(TitleStatus::ACTIVE);
+    ActivateAction::run($title, $data->activation_date);
 });
 
-test('invoke activates a future activated title and redirects', function () {
+test('invoke activates a future activated title', function () {
+    $data = new TitleData('Example Name Title', Carbon::tomorrow());
     $title = Title::factory()->withFutureActivation()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $title))
-        ->assertRedirect(action([TitlesController::class, 'index']));
+    $this->mock(TitleRepository::class)
+        ->shouldReceive('activate')
+        ->once()
+        ->with($title, $data->activation_date);
 
-    expect($title->fresh())
-        ->activations->toHaveCount(1)
-        ->status->toMatchObject(TitleStatus::ACTIVE);
+    ActivateAction::run($title, $data->activation_date);
 });
 
 test('invoke throws exception for unretiring a non unretirable title', function ($factoryState) {
     $this->withoutExceptionHandling();
-
+    $data = new TitleData('Example Name Title', Carbon::tomorrow());
     $title = Title::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $title));
+    ActivateAction::run($title, $data->activation_date);
 })->throws(CannotBeActivatedException::class)->with([
     'active',
     'retired',

@@ -14,12 +14,6 @@ class ActivateAction extends BaseTitleAction
     use AsAction;
 
     /**
-     * Activate a title.
-     *
-     * @param  \App\Models\Title  $title
-     * @param  \Illuminate\Support\Carbon|null  $activationDate
-     * @return void
-     *
      * @throws \App\Exceptions\CannotBeActivatedException
      */
     public function handle(Title $title, ?Carbon $activationDate = null): void

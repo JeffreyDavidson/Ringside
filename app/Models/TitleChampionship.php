@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
 class TitleChampionship extends Model
@@ -64,13 +66,15 @@ class TitleChampionship extends Model
         return $this->mergedRelation('all_title_champions');
     }
 
-    /**
-     * Retrieve the champion of title championship.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
-     */
-    public function champion()
+    public function champion(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function lengthInDays(): int
+    {
+        $datetime = $this->lost_at ?? now();
+
+        return $this->won_at->diffInDays($datetime);
     }
 }
