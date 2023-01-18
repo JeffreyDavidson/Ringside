@@ -6,6 +6,7 @@ namespace App\Builders;
 
 /**
  * @template TModelClass of \App\Models\Referee
+ *
  * @extends SingleRosterMemberQueryBuilder<\App\Models\Referee>
  */
 class RefereeQueryBuilder extends SingleRosterMemberQueryBuilder

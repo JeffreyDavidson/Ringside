@@ -32,7 +32,7 @@ test('it creates an event with with a date', function () {
 
 test('it creates an event with with a date and venue', function () {
     $venue = Venue::factory()->create();
-    $data  = new EventData('Example Event Name', $date = Carbon::tomorrow(), $venue, null);
+    $data = new EventData('Example Event Name', $date = Carbon::tomorrow(), $venue, null);
 
     (new EventRepository())->create($data);
 
@@ -44,10 +44,10 @@ test('it creates an event with with a date and venue', function () {
 });
 
 test('it creates an event with with a date and venue and preview', function () {
-    $date    = Carbon::tomorrow();
-    $venue   = Venue::factory()->create();
+    $date = Carbon::tomorrow();
+    $venue = Venue::factory()->create();
     $preview = fake()->paragraph();
-    $data    = new EventData('Example Event Name', $date, $venue, $preview);
+    $data = new EventData('Example Event Name', $date, $venue, $preview);
 
     (new EventRepository())->create($data);
 

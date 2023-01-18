@@ -133,7 +133,7 @@ test('event date can be changed if activation start date is in the future', func
         ->withParam('event', $event)
         ->validate(EventRequestFactory::new()->create([
             'date' => Carbon::tomorrow()->toDateString(),
-            'venue_id' => Venue::factory()->create()->id
+            'venue_id' => Venue::factory()->create()->id,
         ]))
         ->assertPassesValidation();
 });

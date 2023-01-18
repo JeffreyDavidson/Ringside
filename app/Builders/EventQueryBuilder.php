@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @template TModelClass of \App\Models\Event
+ *
  * @extends Builder<\App\Models\Event>
  */
 class EventQueryBuilder extends Builder

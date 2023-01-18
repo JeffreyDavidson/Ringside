@@ -8,6 +8,7 @@ use App\Enums\ManagerStatus;
 
 /**
  * @template TModelClass of \App\Models\Manager
+ *
  * @extends SingleRosterMemberQueryBuilder<\App\Models\Manager>
  */
 class ManagerQueryBuilder extends SingleRosterMemberQueryBuilder
