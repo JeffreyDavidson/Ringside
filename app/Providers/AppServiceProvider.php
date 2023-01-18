@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,5 +34,12 @@ class AppServiceProvider extends ServiceProvider
 
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
+
+        Relation::enforceMorphMap([
+            'wrestler' => 'App\Models\Wrestler',
+            'manager' => 'App\Models\Manager',
+            'title' => 'App\Models\Title',
+            'tagteam' => 'App\Models\TagTeam',
+        ]);
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\TagTeamMember;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -66,5 +67,12 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
     public function eventMatches()
     {
         return $this->morphToMany(EventMatch::class, 'event_match_competitor');
+    }
+
+    protected function displayName(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->name,
+        );
     }
 }

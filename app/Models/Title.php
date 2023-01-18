@@ -11,6 +11,8 @@ use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Title extends Model implements Activatable, Deactivatable, Retirable
@@ -52,42 +54,27 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
         return new TitleQueryBuilder($query);
     }
 
-    /**
-     * Retrieve the championships of the title.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function championships()
+    public function championships(): HasMany
     {
         return $this->hasMany(TitleChampionship::class)->oldest('won_at');
     }
 
-    /**
-     * Retrieve the current championship reign being held.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function currentChampionship()
+    public function currentChampionship(): HasOne
     {
         return $this->hasOne(TitleChampionship::class)->whereNull('lost_at')->latestOfMany();
     }
 
-    /**
-     * Determines if a title has a current champion.
-     *
-     * @return bool
-     */
-    public function isVacant()
+    public function isVacant(): bool
     {
         return $this->currentChampionship?->champion === null;
     }
 
-    public function canBeRetired()
+    public function canBeRetired(): bool
     {
         return $this->isCurrentlyActivated() || $this->isDeactivated();
     }
 
-    public function canBeUnretired()
+    public function canBeUnretired(): bool
     {
         return $this->isRetired();
     }
