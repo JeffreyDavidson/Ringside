@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @template TModelClass of \App\Models\Stable
+ *
  * @extends Builder<\App\Models\Stable>
  */
 class StableQueryBuilder extends Builder

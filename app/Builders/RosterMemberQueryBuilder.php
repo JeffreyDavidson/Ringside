@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @template TModelClass of \App\Models\RosterMember
+ *
  * @extends Builder<TModelClass>
  */
 class RosterMemberQueryBuilder extends Builder
