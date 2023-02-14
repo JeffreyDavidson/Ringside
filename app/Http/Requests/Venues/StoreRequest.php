@@ -8,12 +8,8 @@ use App\Models\Venue;
 use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\VenueRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
-
 class StoreRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = VenueRequestFactory::class;
 

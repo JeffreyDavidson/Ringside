@@ -9,12 +9,9 @@ use App\Rules\EmploymentStartDateCanBeChanged;
 use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\RefereeRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = RefereeRequestFactory::class;
 

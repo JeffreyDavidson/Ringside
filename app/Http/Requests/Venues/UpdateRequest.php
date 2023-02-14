@@ -7,12 +7,9 @@ namespace App\Http\Requests\Venues;
 use App\Models\Venue;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\VenueRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = VenueRequestFactory::class;
 

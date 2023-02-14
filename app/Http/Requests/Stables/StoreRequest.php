@@ -11,12 +11,9 @@ use App\Rules\WrestlerCanJoinNewStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\StableRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = StableRequestFactory::class;
 

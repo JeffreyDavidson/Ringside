@@ -8,12 +8,9 @@ use App\Models\Manager;
 use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\ManagerRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = ManagerRequestFactory::class;
 
