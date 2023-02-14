@@ -11,19 +11,15 @@ class ValidationServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         /** @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter */
         Validator::replacer('ends_with', function ($message, $attribute, $rule, $parameters) {

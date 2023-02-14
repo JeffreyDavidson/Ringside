@@ -6,8 +6,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
+use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
 
 class TitleChampionship extends Model
 {
@@ -47,20 +49,16 @@ class TitleChampionship extends Model
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function title()
+    public function title(): BelongsTo
     {
         return $this->belongsTo(Title::class);
     }
 
     /**
      * Retrieve all title champions for championships.
-     *
-     * @return \Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation
      */
-    public function allTitleChampions()
+    public function allTitleChampions(): MergedRelation
     {
         return $this->mergedRelation('all_title_champions');
     }

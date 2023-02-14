@@ -16,9 +16,6 @@ class DeactivateAction extends BaseTitleAction
     /**
      * Deactivate a title.
      *
-     * @param  \App\Models\Title  $title
-     * @param  \Illuminate\Support\Carbon|null  $deactivationDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeDeactivatedException
      */

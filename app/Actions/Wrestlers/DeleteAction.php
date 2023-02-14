@@ -13,9 +13,6 @@ class DeleteAction extends BaseWrestlerAction
 
     /**
      * Delete a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return void
      */
     public function handle(Wrestler $wrestler): void
     {

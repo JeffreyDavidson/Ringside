@@ -16,9 +16,6 @@ class SuspendAction extends BaseWrestlerAction
     /**
      * Suspend a wrestler.
      *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Illuminate\Support\Carbon|null  $suspensionDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */

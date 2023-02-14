@@ -16,9 +16,6 @@ class ReleaseAction extends BaseRefereeAction
     /**
      * Release a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $releaseDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeReleasedException
      */

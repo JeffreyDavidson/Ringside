@@ -13,20 +13,16 @@ class TagTeamQueryBuilder extends RosterMemberQueryBuilder
 {
     /**
      * Scope a query to only include bookable tag teams.
-     *
-     * @return \App\Builders\TagTeamQueryBuilder
      */
-    public function bookable()
+    public function bookable(): TagTeamQueryBuilder
     {
         return $this->where('status', 'bookable');
     }
 
     /**
      * Scope a query to only include bookable tag teams.
-     *
-     * @return \App\Builders\TagTeamQueryBuilder
      */
-    public function unbookable()
+    public function unbookable(): TagTeamQueryBuilder
     {
         return $this->where('status', 'unbookable');
     }

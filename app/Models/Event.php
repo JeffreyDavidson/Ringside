@@ -9,7 +9,10 @@ use App\Enums\EventStatus;
 use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 
 class Event extends Model
 {
@@ -42,7 +45,6 @@ class Event extends Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
      * @return \App\Builders\EventQueryBuilder<Event>
      */
     public function newEloquentBuilder($query): EventQueryBuilder
@@ -52,40 +54,32 @@ class Event extends Model
 
     /**
      * Present the event model.
-     *
-     * @return \App\Presenters\EventPresenter
      */
-    public function present()
+    public function present(): EventPresenter
     {
         return new EventPresenter($this);
     }
 
     /**
      * Retrieve the venue of the event.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function venue()
+    public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
     }
 
     /**
      * Retrieve the matches for the event.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function matches()
+    public function matches(): HasMany
     {
         return $this->hasMany(EventMatch::class);
     }
 
     /**
      * Checks to see if the event is scheduled for a future date.
-     *
-     * @return bool
      */
-    public function isScheduled()
+    public function isScheduled(): bool
     {
         if (is_null($this->date)) {
             return false;
@@ -96,10 +90,8 @@ class Event extends Model
 
     /**
      * Checks to see if the event has already taken place.
-     *
-     * @return bool
      */
-    public function isPast()
+    public function isPast(): bool
     {
         if (is_null($this->date)) {
             return false;
@@ -110,10 +102,8 @@ class Event extends Model
 
     /**
      * Checks to see if the event is unscheduled.
-     *
-     * @return bool
      */
-    public function isUnscheduled()
+    public function isUnscheduled(): bool
     {
         return $this->date === null;
     }

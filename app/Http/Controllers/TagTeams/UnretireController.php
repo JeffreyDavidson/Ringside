@@ -8,16 +8,14 @@ use App\Actions\TagTeams\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
+use Illuminate\Http\RedirectResponse;
 
 class UnretireController extends Controller
 {
     /**
      * Unretire a tag team.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(TagTeam $tagTeam)
+    public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
         $this->authorize('unretire', $tagTeam);
 

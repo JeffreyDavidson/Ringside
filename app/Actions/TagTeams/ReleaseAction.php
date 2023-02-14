@@ -17,9 +17,6 @@ class ReleaseAction extends BaseTagTeamAction
     /**
      * Release a tag team.
      *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Support\Carbon|null  $releaseDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeReleasedException
      */

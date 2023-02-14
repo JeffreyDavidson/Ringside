@@ -25,7 +25,6 @@ class EmploymentStartDateCanBeChanged implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param  \App\Models\Contracts\Employable  $rosterMember
      * @return void
      */
     public function __construct(Employable $rosterMember)
@@ -36,13 +35,10 @@ class EmploymentStartDateCanBeChanged implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  string  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, string $value): bool
     {
         $name = $this->rosterMember->name;
 
@@ -63,10 +59,8 @@ class EmploymentStartDateCanBeChanged implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return $this->message;
     }

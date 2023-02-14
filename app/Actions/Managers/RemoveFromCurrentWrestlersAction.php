@@ -13,9 +13,6 @@ class RemoveFromCurrentWrestlersAction extends BaseManagerAction
 
     /**
      * Remove manager from currently managed wrestlers.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return void
      */
     public function handle(Manager $manager): void
     {

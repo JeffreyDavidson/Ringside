@@ -14,9 +14,6 @@ class CreateAction extends BaseTagTeamAction
 
     /**
      * Create a tag team.
-     *
-     * @param  \App\Data\TagTeamData  $tagTeamData
-     * @return \App\Models\TagTeam
      */
     public function handle(TagTeamData $tagTeamData): TagTeam
     {

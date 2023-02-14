@@ -7,16 +7,14 @@ namespace App\Http\Controllers\Events;
 use App\Actions\Events\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use Illuminate\Http\RedirectResponse;
 
 class RestoreController extends Controller
 {
     /**
      * Restore a deleted scheduled event.
-     *
-     * @param  int  $eventId
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(int $eventId)
+    public function __invoke(int $eventId): RedirectResponse
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 

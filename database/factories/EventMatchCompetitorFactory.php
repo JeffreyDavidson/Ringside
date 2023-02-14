@@ -14,7 +14,7 @@ class EventMatchCompetitorFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'event_match_id' => EventMatch::factory(),

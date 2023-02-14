@@ -8,16 +8,14 @@ use App\Actions\Managers\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
+use Illuminate\Http\RedirectResponse;
 
 class SuspendController extends Controller
 {
     /**
      * Suspend a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager)
+    public function __invoke(Manager $manager): RedirectResponse
     {
         $this->authorize('suspend', $manager);
 

@@ -8,16 +8,14 @@ use App\Actions\Stables\ActivateAction;
 use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Stable;
+use Illuminate\Http\RedirectResponse;
 
 class ActivateController extends Controller
 {
     /**
      * Activate a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Stable $stable)
+    public function __invoke(Stable $stable): RedirectResponse
     {
         $this->authorize('activate', $stable);
 

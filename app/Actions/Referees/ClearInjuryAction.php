@@ -16,9 +16,6 @@ class ClearInjuryAction extends BaseRefereeAction
     /**
      * Clear an injury of a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $recoveryDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */

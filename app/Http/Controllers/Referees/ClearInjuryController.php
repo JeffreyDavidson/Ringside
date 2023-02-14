@@ -8,16 +8,14 @@ use App\Actions\Referees\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Controller;
 use App\Models\Referee;
+use Illuminate\Http\RedirectResponse;
 
 class ClearInjuryController extends Controller
 {
     /**
      * Clear a referee.
-     *
-     * @param  \App\Models\Referee  $referee
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee)
+    public function __invoke(Referee $referee): RedirectResponse
     {
         $this->authorize('clearFromInjury', $referee);
 

@@ -6,6 +6,7 @@ namespace App\Actions\EventMatches;
 
 use App\Models\EventMatch;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddTitlesToMatchAction extends BaseEventMatchAction
@@ -19,7 +20,7 @@ class AddTitlesToMatchAction extends BaseEventMatchAction
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title>  $titles
      * @return void
      */
-    public function handle(EventMatch $eventMatch, $titles): void
+    public function handle(EventMatch $eventMatch, Collection $titles): void
     {
         $titles->map(
             fn (Title $title) => $this->eventMatchRepository->addTitleToMatch($eventMatch, $title)

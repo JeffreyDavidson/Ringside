@@ -14,10 +14,6 @@ class UpdateAction extends BaseManagerAction
 
     /**
      * Update a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @param  \App\Data\ManagerData  $managerData
-     * @return \App\Models\Manager
      */
     public function handle(Manager $manager, ManagerData $managerData): Manager
     {

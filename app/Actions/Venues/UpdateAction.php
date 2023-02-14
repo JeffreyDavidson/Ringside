@@ -14,10 +14,6 @@ class UpdateAction extends BaseVenueAction
 
     /**
      * Update a venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @param  \App\Data\VenueData  $venueData
-     * @return \App\Models\Venue
      */
     public function handle(Venue $venue, VenueData $venueData): Venue
     {

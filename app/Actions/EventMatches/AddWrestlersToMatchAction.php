@@ -16,10 +16,7 @@ class AddWrestlersToMatchAction extends BaseEventMatchAction
     /**
      * Add titles to an event match.
      *
-     * @param  \App\Models\EventMatch  $eventMatch
      * @param  \Illuminate\Support\Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @param  int  $sideNumber
-     * @return void
      */
     public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
     {

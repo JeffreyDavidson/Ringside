@@ -15,10 +15,6 @@ class RemoveTagTeamPartnerAction extends BaseTagTeamAction
 
     /**
      * Update a given tag team with given wrestlers.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return void
      */
     public function handle(TagTeam $tagTeam, Wrestler $wrestler, ?Carbon $removalDate = null): void
     {

@@ -16,9 +16,6 @@ class UnretireAction extends BaseTitleAction
     /**
      * Unretire a title.
      *
-     * @param  \App\Models\Title  $title
-     * @param  \Illuminate\Support\Carbon|null  $unretiredDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */

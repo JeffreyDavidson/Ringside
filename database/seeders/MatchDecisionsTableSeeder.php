@@ -11,10 +11,8 @@ class MatchDecisionsTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         MatchDecision::create(['name' => 'Pinfall', 'slug' => 'pinfall']);
         MatchDecision::create(['name' => 'Submission', 'slug' => 'submission']);

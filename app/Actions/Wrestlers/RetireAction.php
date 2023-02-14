@@ -16,9 +16,6 @@ class RetireAction extends BaseWrestlerAction
     /**
      * Retire a wrestler.
      *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Illuminate\Support\Carbon|null  $retirementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */

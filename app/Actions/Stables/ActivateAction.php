@@ -20,9 +20,6 @@ class ActivateAction extends BaseStableAction
     /**
      * Activate a stable.
      *
-     * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon|null  $startDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeActivatedException
      */

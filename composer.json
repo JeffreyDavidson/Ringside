@@ -11,32 +11,32 @@
         "php": "^8.1",
         "fidum/laravel-eloquent-morph-to-one": "^2.1",
         "guzzlehttp/guzzle": "^7.2",
-        "laravel/framework": "^9.17",
-        "laravel/tinker": "^2.7",
+        "laravel/framework": "^10.0",
+        "laravel/tinker": "^2.8",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "livewire/livewire": "^2.10",
-        "lorisleiva/laravel-actions": "^2.4",
+        "livewire/livewire": "^2.11",
+        "lorisleiva/laravel-actions": "^2.5",
         "spatie/pest-plugin-test-time": "^1.1",
-        "staudenmeir/laravel-merged-relations": "^1.5"
+        "staudenmeir/laravel-merged-relations": "^1.6"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.6",
-        "doctrine/dbal": "^3.3",
+        "barryvdh/laravel-debugbar": "^3.8",
+        "doctrine/dbal": "^3.5",
         "fakerphp/faker": "^1.19",
         "filp/whoops": "^2.14",
-        "laravel/breeze": "^1.9",
+        "laravel/breeze": "^1.18",
         "laravel/pint": "^1.0.0",
-        "laravel/sail": "^1.14",
+        "laravel/sail": "^1.18",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
-        "nunomaduro/larastan": "^2.1",
+        "nunomaduro/larastan": "^2.4",
         "nunomaduro/phpinsights": "^2.4",
         "pestphp/pest": "^1.21",
         "pestphp/pest-plugin-faker": "^1.0",
-        "pestphp/pest-plugin-laravel": "^1.2",
+        "pestphp/pest-plugin-laravel": "^1.4",
         "phpunit/phpunit": "^9.5.10",
-        "spatie/laravel-ignition": "^1.2",
-        "worksome/request-factories": "^1.1"
+        "spatie/laravel-ignition": "^2.0",
+        "worksome/request-factories": "^3.1"
     },
     "config": {
         "optimize-autoloader": true,
@@ -63,7 +63,7 @@
             "Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
         "post-autoload-dump": [

@@ -8,6 +8,9 @@ use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Event;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\View\View;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows
@@ -36,10 +39,8 @@ class EventsList extends BaseComponent
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Database\Query\Builder
      */
-    public function getRowsQueryProperty()
+    public function getRowsQueryProperty(): Builder
     {
         $query = Event::query()
             ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
@@ -50,20 +51,16 @@ class EventsList extends BaseComponent
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getRowsProperty()
+    public function getRowsProperty(): LengthAwarePaginator
     {
         return $this->applyPagination($this->rowsQuery);
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\View\View
      */
-    public function render()
+    public function render(): View
     {
         return view('livewire.events.events-list', [
             'events' => $this->rows,

@@ -7,16 +7,14 @@ namespace App\Http\Controllers\TagTeams;
 use App\Actions\TagTeams\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
+use Illuminate\Http\RedirectResponse;
 
 class RestoreController extends Controller
 {
     /**
      * Restore a deleted tag team.
-     *
-     * @param  int  $tagTeamId
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($tagTeamId)
+    public function __invoke(int $tagTeamId): RedirectResponse
     {
         $tagTeam = TagTeam::onlyTrashed()->findOrFail($tagTeamId);
 

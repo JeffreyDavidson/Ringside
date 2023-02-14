@@ -7,6 +7,9 @@ namespace App\Http\Livewire\Titles;
 use App\Http\Livewire\BaseComponent;
 use App\Models\Title;
 use App\Models\TitleChampionship;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\View\View;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows
@@ -32,41 +35,32 @@ class TitleChampionshipsList extends BaseComponent
 
     /**
      * Undocumented function.
-     *
-     * @param  \App\Models\Title  $title
-     * @return void
      */
-    public function mount(Title $title)
+    public function mount(Title $title): void
     {
         $this->title = $title;
     }
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getRowsQueryProperty()
+    public function getRowsQueryProperty(): Builder
     {
         return TitleChampionship::where('title_id', $this->title->id)->latest('won_at');
     }
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getRowsProperty()
+    public function getRowsProperty(): LengthAwarePaginator
     {
         return $this->applyPagination($this->rowsQuery);
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\View\View
      */
-    public function render()
+    public function render(): View
     {
         return view('livewire.titles.title-championships-list', [
             'titleChampionships' => $this->rows,

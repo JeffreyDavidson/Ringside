@@ -11,6 +11,7 @@ use App\Models\Contracts\Employable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 
 class Manager extends SingleRosterMember implements CanBeAStableMember, Employable
 {
@@ -46,7 +47,6 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
      * @return \App\Builders\ManagerQueryBuilder<Manager>
      */
     public function newEloquentBuilder($query): ManagerQueryBuilder
@@ -56,10 +56,8 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
 
     /**
      * Determine if the manager is available.
-     *
-     * @return bool
      */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return $this->currentEmployment()->exists();
     }

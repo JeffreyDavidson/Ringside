@@ -14,9 +14,6 @@ class CreateAction extends BaseWrestlerAction
 
     /**
      * Create a wrestler.
-     *
-     * @param  \App\Data\WrestlerData  $wrestlerData
-     * @return \App\Models\Wrestler
      */
     public function handle(WrestlerData $wrestlerData): Wrestler
     {

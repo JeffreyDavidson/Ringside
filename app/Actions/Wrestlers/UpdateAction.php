@@ -14,10 +14,6 @@ class UpdateAction extends BaseWrestlerAction
 
     /**
      * Update a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @param  \App\Data\WrestlerData  $wrestlerData
-     * @return \App\Models\Wrestler
      */
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler
     {

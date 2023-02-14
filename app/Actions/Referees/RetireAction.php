@@ -16,9 +16,6 @@ class RetireAction extends BaseRefereeAction
     /**
      * Retire a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $retirementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */

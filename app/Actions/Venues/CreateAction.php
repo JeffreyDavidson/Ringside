@@ -14,9 +14,6 @@ class CreateAction extends BaseVenueAction
 
     /**
      * Create a venue.
-     *
-     * @param  \App\Data\VenueData  $venueData
-     * @return \App\Models\Venue
      */
     public function handle(VenueData $venueData): Venue
     {

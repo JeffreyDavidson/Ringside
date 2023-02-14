@@ -20,20 +20,16 @@ class TitleQueryBuilder extends Builder
 {
     /**
      * Scope a query to only include retired models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function retired()
+    public function retired(): TitleQueryBuilder
     {
         return $this->whereHas('currentRetirement');
     }
 
     /**
      * Scope a query to include current retirement date.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function withCurrentRetiredAtDate()
+    public function withCurrentRetiredAtDate(): TitleQueryBuilder
     {
         return $this->addSelect([
             'current_retired_at' => Retirement::select('started_at')
@@ -46,21 +42,16 @@ class TitleQueryBuilder extends Builder
 
     /**
      * Scope a query to order by the model's current retirement date.
-     *
-     * @param  string  $direction
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function orderByCurrentRetiredAtDate($direction = 'asc')
+    public function orderByCurrentRetiredAtDate(string $direction = 'asc'): TitleQueryBuilder
     {
         return $this->orderByRaw("DATE(current_retired_at) {$direction}");
     }
 
     /**
      * Scope a query to only include unactivated models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function deactivated()
+    public function deactivated(): TitleQueryBuilder
     {
         return $this->whereDoesntHave('currentActivation')
             ->orWhereDoesntHave('previousActivations');
@@ -68,10 +59,8 @@ class TitleQueryBuilder extends Builder
 
     /**
      * Scope a query to include current deactivation date.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function withLastDeactivationDate()
+    public function withLastDeactivationDate(): TitleQueryBuilder
     {
         return $this->addSelect([
             'last_deactivated_at' => Activation::select('ended_at')
@@ -84,41 +73,32 @@ class TitleQueryBuilder extends Builder
 
     /**
      * Scope a query to order by the models current deactivation date.
-     *
-     * @param  string  $direction
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function orderByLastDeactivationDate(string $direction = 'asc')
+    public function orderByLastDeactivationDate(string $direction = 'asc'): TitleQueryBuilder
     {
         return $this->orderByRaw("DATE(last_deactivated_at) {$direction}");
     }
 
     /**
      * Scope a query to only include active models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function active()
+    public function active(): TitleQueryBuilder
     {
         return $this->whereHas('currentActivation');
     }
 
     /**
      * Scope a query to only include future activated models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function withFutureActivation()
+    public function withFutureActivation(): TitleQueryBuilder
     {
         return $this->whereHas('futureActivation');
     }
 
     /**
      * Scope a query to only include inactive models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function inactive()
+    public function inactive(): TitleQueryBuilder
     {
         return $this->whereHas('previousActivation')
             ->whereDoesntHave('futureActivation')
@@ -128,20 +108,16 @@ class TitleQueryBuilder extends Builder
 
     /**
      * Scope a query to only include inactive models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function unactivated()
+    public function unactivated(): TitleQueryBuilder
     {
         return $this->whereDoesntHave('activations');
     }
 
     /**
      * Scope a query to include current activation date.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function withFirstActivatedAtDate()
+    public function withFirstActivatedAtDate(): TitleQueryBuilder
     {
         return $this->addSelect([
             'first_activated_at' => Activation::select('started_at')
@@ -154,21 +130,16 @@ class TitleQueryBuilder extends Builder
 
     /**
      * Scope a query to order by the models first activation date.
-     *
-     * @param  string  $direction
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function orderByFirstActivatedAtDate(string $direction = 'asc')
+    public function orderByFirstActivatedAtDate(string $direction = 'asc'): TitleQueryBuilder
     {
         return $this->orderByRaw("DATE(first_activated_at) {$direction}");
     }
 
     /**
      * Scope a query to only include competable models.
-     *
-     * @return \App\Builders\TitleQueryBuilder
      */
-    public function competable()
+    public function competable(): TitleQueryBuilder
     {
         return $this->where('status', TitleStatus::ACTIVE);
     }

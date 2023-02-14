@@ -11,11 +11,8 @@ class TitleObserver
 {
     /**
      * Handle the Title "saved" event.
-     *
-     * @param  \App\Models\Title  $title
-     * @return void
      */
-    public function saving(Title $title)
+    public function saving(Title $title): void
     {
         $title->status = match (true) {
             $title->isCurrentlyActivated() => TitleStatus::ACTIVE,

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Injury extends Model
 {
@@ -35,10 +36,8 @@ class Injury extends Model
 
     /**
      * Retrieve the injured model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
-    public function injurable()
+    public function injurable(): MorphTo
     {
         return $this->morphTo();
     }

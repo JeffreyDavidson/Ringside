@@ -13,9 +13,6 @@ class RestoreAction extends BaseEventAction
 
     /**
      * Restore an event.
-     *
-     * @param  \App\Models\Event  $event
-     * @return void
      */
     public function handle(Event $event): void
     {

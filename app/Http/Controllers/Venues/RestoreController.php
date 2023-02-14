@@ -7,16 +7,14 @@ namespace App\Http\Controllers\Venues;
 use App\Actions\Venues\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
+use Illuminate\Http\RedirectResponse;
 
 class RestoreController extends Controller
 {
     /**
      * Restore a deleted venue.
-     *
-     * @param  int  $venueId
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke($venueId)
+    public function __invoke(int $venueId): RedirectResponse
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 

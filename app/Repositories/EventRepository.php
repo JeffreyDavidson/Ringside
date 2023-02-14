@@ -6,16 +6,14 @@ namespace App\Repositories;
 
 use App\Data\EventData;
 use App\Models\Event;
+use Illuminate\Database\Eloquent\Model;
 
 class EventRepository
 {
     /**
      * Create a new event with the given data.
-     *
-     * @param  \App\Data\EventData  $eventData
-     * @return \Illuminate\Database\Eloquent\Model
      */
-    public function create(EventData $eventData)
+    public function create(EventData $eventData): Model
     {
         return Event::create([
             'name' => $eventData->name,
@@ -39,22 +37,16 @@ class EventRepository
 
     /**
      * Delete a given event.
-     *
-     * @param  \App\Models\Event  $event
-     * @return void
      */
-    public function delete(Event $event)
+    public function delete(Event $event): void
     {
         $event->delete();
     }
 
     /**
      * Restore a given event.
-     *
-     * @param  \App\Models\Event  $event
-     * @return void
      */
-    public function restore(Event $event)
+    public function restore(Event $event): void
     {
         $event->restore();
     }

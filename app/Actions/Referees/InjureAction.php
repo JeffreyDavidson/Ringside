@@ -16,9 +16,6 @@ class InjureAction extends BaseRefereeAction
     /**
      * Injure a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $injureDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeInjuredException
      */

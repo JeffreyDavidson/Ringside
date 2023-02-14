@@ -10,16 +10,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
 use App\Models\EventMatch;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class EventMatchesController extends Controller
 {
     /**
      * Show the form for creating a new match for a given event.
-     *
-     * @param  \App\Models\Event  $event
-     * @return \Illuminate\View\View
      */
-    public function create(Event $event, EventMatch $match)
+    public function create(Event $event, EventMatch $match): View
     {
         $this->authorize('create', EventMatch::class);
 
@@ -31,12 +30,8 @@ class EventMatchesController extends Controller
 
     /**
      * Create a new match for a given event.
-     *
-     * @param  \App\Models\Event  $event
-     * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Event $event, StoreRequest $request)
+    public function store(Event $event, StoreRequest $request): RedirectResponse
     {
         AddMatchForEventAction::run($event, EventMatchData::fromStoreRequest($request));
 

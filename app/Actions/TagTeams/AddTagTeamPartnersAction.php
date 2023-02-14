@@ -15,9 +15,7 @@ class AddTagTeamPartnersAction extends BaseTagTeamAction
     /**
      * Update a given tag team with given wrestlers.
      *
-     * @param  \App\Models\TagTeam  $tagTeam
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @return void
      */
     public function handle(TagTeam $tagTeam, Collection $wrestlers): void
     {

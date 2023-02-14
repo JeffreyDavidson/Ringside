@@ -8,16 +8,14 @@ use App\Actions\Stables\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Stable;
+use Illuminate\Http\RedirectResponse;
 
 class DeactivateController extends Controller
 {
     /**
      * Deactivate a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Stable $stable)
+    public function __invoke(Stable $stable): RedirectResponse
     {
         $this->authorize('deactivate', $stable);
 

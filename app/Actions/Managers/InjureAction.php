@@ -16,9 +16,6 @@ class InjureAction extends BaseManagerAction
     /**
      * Injure a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null  $injureDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeInjuredException
      */

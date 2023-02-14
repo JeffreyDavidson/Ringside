@@ -16,9 +16,6 @@ class RetireAction extends BaseManagerAction
     /**
      * Retire a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null  $retirementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */

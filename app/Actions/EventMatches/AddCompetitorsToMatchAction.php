@@ -15,10 +15,6 @@ class AddCompetitorsToMatchAction extends BaseEventMatchAction
 
     /**
      * Add competitors to an event match.
-     *
-     * @param  \App\Models\EventMatch  $eventMatch
-     * @param  \Illuminate\Support\Collection  $competitors
-     * @return void
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {

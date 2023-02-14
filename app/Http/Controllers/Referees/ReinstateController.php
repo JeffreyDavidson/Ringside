@@ -8,16 +8,14 @@ use App\Actions\Referees\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Referee;
+use Illuminate\Http\RedirectResponse;
 
 class ReinstateController extends Controller
 {
     /**
      * Reinstate a referee.
-     *
-     * @param  \App\Models\Referee  $referee
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee)
+    public function __invoke(Referee $referee): RedirectResponse
     {
         $this->authorize('reinstate', $referee);
 

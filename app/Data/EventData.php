@@ -13,11 +13,6 @@ class EventData
 {
     /**
      * Create a new event data instance.
-     *
-     * @param  string  $name
-     * @param  \Illuminate\Support\Carbon|null  $date
-     * @param  \App\Models\Venue|null  $venue
-     * @param  string|null  $preview
      */
     public function __construct(
         public string $name,
@@ -29,9 +24,6 @@ class EventData
 
     /**
      * Retrieve data from the store request.
-     *
-     * @param  \App\Http\Requests\Events\StoreRequest  $request
-     * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
@@ -45,9 +37,6 @@ class EventData
 
     /**
      * Retrieve data from the update request.
-     *
-     * @param  \App\Http\Requests\Events\UpdateRequest  $request
-     * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {

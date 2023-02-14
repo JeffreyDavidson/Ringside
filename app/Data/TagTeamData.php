@@ -13,12 +13,6 @@ class TagTeamData
 {
     /**
      * Create a new tag team data instance.
-     *
-     * @param  string  $name
-     * @param  string|null  $signature_move
-     * @param  \Illuminate\Support\Carbon|null  $start_date
-     * @param  \App\Models\Wrestler|null  $wrestlerA
-     * @param  \App\Models\Wrestler|null  $wrestlerB
      */
     public function __construct(
         public string $name,
@@ -31,9 +25,6 @@ class TagTeamData
 
     /**
      * Create a DTO from the store request.
-     *
-     * @param  \App\Http\Requests\TagTeams\StoreRequest  $request
-     * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
@@ -48,9 +39,6 @@ class TagTeamData
 
     /**
      * Create a DTO from the store request.
-     *
-     * @param  \App\Http\Requests\TagTeams\UpdateRequest  $request
-     * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {

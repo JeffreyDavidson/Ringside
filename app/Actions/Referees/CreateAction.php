@@ -14,9 +14,6 @@ class CreateAction extends BaseRefereeAction
 
     /**
      * Create a referee.
-     *
-     * @param  \App\Data\RefereeData  $refereeData
-     * @return \App\Models\Referee
      */
     public function handle(RefereeData $refereeData): Referee
     {

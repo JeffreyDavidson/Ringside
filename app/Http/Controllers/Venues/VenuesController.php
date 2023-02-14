@@ -12,15 +12,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class VenuesController extends Controller
 {
     /**
      * View a list of venues.
-     *
-     * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(): View
     {
         $this->authorize('viewList', Venue::class);
 
@@ -29,11 +29,8 @@ class VenuesController extends Controller
 
     /**
      * Show the form for creating a venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @return \Illuminate\View\View
      */
-    public function create(Venue $venue)
+    public function create(Venue $venue): View
     {
         $this->authorize('create', Venue::class);
 
@@ -44,11 +41,8 @@ class VenuesController extends Controller
 
     /**
      * Create a new venue.
-     *
-     * @param  \App\Http\Requests\Venues\StoreRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): RedirectResponse
     {
         CreateAction::run(VenueData::fromStoreRequest($request));
 
@@ -57,11 +51,8 @@ class VenuesController extends Controller
 
     /**
      * Show the venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @return \Illuminate\View\View
      */
-    public function show(Venue $venue)
+    public function show(Venue $venue): View
     {
         $this->authorize('view', $venue);
 
@@ -72,11 +63,8 @@ class VenuesController extends Controller
 
     /**
      * Show the form for editing a venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @return \Illuminate\View\View
      */
-    public function edit(Venue $venue)
+    public function edit(Venue $venue): View
     {
         $this->authorize('update', Venue::class);
 
@@ -87,12 +75,8 @@ class VenuesController extends Controller
 
     /**
      * Update a given venue.
-     *
-     * @param  \App\Http\Requests\Venues\UpdateRequest  $request
-     * @param  \App\Models\Venue  $venue
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Venue $venue)
+    public function update(UpdateRequest $request, Venue $venue): RedirectResponse
     {
         UpdateAction::run($venue, VenueData::fromUpdateRequest($request));
 
@@ -101,11 +85,8 @@ class VenuesController extends Controller
 
     /**
      * Delete a venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Venue $venue)
+    public function destroy(Venue $venue): RedirectResponse
     {
         $this->authorize('delete', $venue);
 

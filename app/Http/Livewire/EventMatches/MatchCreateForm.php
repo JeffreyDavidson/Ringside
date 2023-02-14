@@ -10,6 +10,7 @@ use App\Models\EventMatch;
 use App\Models\MatchType;
 use App\Models\Referee;
 use App\Models\Title;
+use Illuminate\View\View;
 
 class MatchCreateForm extends BaseComponent
 {
@@ -26,10 +27,7 @@ class MatchCreateForm extends BaseComponent
 
     public $subviewToUse;
 
-    /**
-     * @return void
-     */
-    public function mount(EventMatch $match)
+    public function mount(EventMatch $match): void
     {
         $this->event = request()->route()->parameter('event');
         $this->match = $match;
@@ -38,10 +36,8 @@ class MatchCreateForm extends BaseComponent
 
     /**
      * Run action hook when match type id is changed.
-     *
-     * @return string
      */
-    public function updatedMatchTypeId()
+    public function updatedMatchTypeId(): string
     {
         $matchTypeSlug = MatchType::findOrFail($this->matchTypeId)->slug;
 
@@ -50,10 +46,8 @@ class MatchCreateForm extends BaseComponent
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\View\View
      */
-    public function render()
+    public function render(): View
     {
         return view('livewire.matches.create', [
             'match' => $this->match,

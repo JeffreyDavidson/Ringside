@@ -12,13 +12,6 @@ class WrestlerData
 {
     /**
      * Create a new wrestler data instance.
-     *
-     * @param  string  $name
-     * @param  int|null  $height
-     * @param  int|null  $weight
-     * @param  string|null  $hometown
-     * @param  string|null  $signature_move
-     * @param  \Illuminate\Support\Carbon|null  $start_date
      */
     public function __construct(
         public string $name,
@@ -32,9 +25,6 @@ class WrestlerData
 
     /**
      * Create a DTO from the update request.
-     *
-     * @param  \App\Http\Requests\Wrestlers\StoreRequest  $request
-     * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
@@ -50,9 +40,6 @@ class WrestlerData
 
     /**
      * Create a DTO from the update request.
-     *
-     * @param  \App\Http\Requests\Wrestlers\UpdateRequest  $request
-     * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {

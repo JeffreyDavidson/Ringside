@@ -8,16 +8,14 @@ use App\Actions\TagTeams\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
+use Illuminate\Http\RedirectResponse;
 
 class ReinstateController extends Controller
 {
     /**
      * Reinstate a tag team.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(TagTeam $tagTeam)
+    public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
         $this->authorize('reinstate', $tagTeam);
 

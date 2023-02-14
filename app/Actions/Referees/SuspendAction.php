@@ -16,9 +16,6 @@ class SuspendAction extends BaseRefereeAction
     /**
      * Suspend a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $suspensionDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */

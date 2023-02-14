@@ -8,10 +8,8 @@ trait Competable
 {
     /**
      * Check to see if the model can be competed for.
-     *
-     * @return bool
      */
-    public function isCompetable()
+    public function isCompetable(): bool
     {
         if ($this->isNotActivation() || $this->isDeactivated() || $this->isRetired() || $this->hasFutureActivation()) {
             return false;

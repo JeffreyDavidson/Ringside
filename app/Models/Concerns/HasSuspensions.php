@@ -5,25 +5,23 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Suspension;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 trait HasSuspensions
 {
     /**
      * Get the suspensions of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function suspensions()
+    public function suspensions(): MorphMany
     {
         return $this->morphMany(Suspension::class, 'suspendable');
     }
 
     /**
      * Get the current suspension of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentSuspension()
+    public function currentSuspension(): MorphOne
     {
         return $this->morphOne(Suspension::class, 'suspendable')
             ->whereNull('ended_at')
@@ -32,10 +30,8 @@ trait HasSuspensions
 
     /**
      * Get the current suspension of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousSuspensions()
+    public function previousSuspensions(): MorphMany
     {
         return $this->suspensions()
             ->whereNotNull('ended_at');
@@ -43,10 +39,8 @@ trait HasSuspensions
 
     /**
      * Get the previous suspension of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousSuspension()
+    public function previousSuspension(): MorphOne
     {
         return $this->morphOne(Suspension::class, 'suspendable')
             ->latest('ended_at')
@@ -55,20 +49,16 @@ trait HasSuspensions
 
     /**
      * Check to see if the model has been suspended.
-     *
-     * @return bool
      */
-    public function isSuspended()
+    public function isSuspended(): bool
     {
         return $this->currentSuspension()->exists();
     }
 
     /**
      * Check to see if the model has been suspended.
-     *
-     * @return bool
      */
-    public function hasSuspensions()
+    public function hasSuspensions(): bool
     {
         return $this->suspensions()->count() > 0;
     }

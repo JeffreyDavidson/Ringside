@@ -14,9 +14,6 @@ class CreateAction extends BaseManagerAction
 
     /**
      * Create a manager.
-     *
-     * @param  \App\Data\ManagerData  $managerData
-     * @return \App\Models\Manager
      */
     public function handle(ManagerData $managerData): Manager
     {

@@ -6,25 +6,23 @@ namespace App\Models\Concerns;
 
 use App\Models\Retirement;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 trait HasRetirements
 {
     /**
      * Get the retirements of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function retirements()
+    public function retirements(): MorphMany
     {
         return $this->morphMany(Retirement::class, 'retiree');
     }
 
     /**
      * Get the current retirement of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentRetirement()
+    public function currentRetirement(): MorphOne
     {
         return $this->morphOne(Retirement::class, 'retiree')
             ->where('started_at', '<=', now())
@@ -34,10 +32,8 @@ trait HasRetirements
 
     /**
      * Get the previous retirements of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousRetirements()
+    public function previousRetirements(): MorphMany
     {
         return $this->retirements()
             ->whereNotNull('ended_at');
@@ -45,10 +41,8 @@ trait HasRetirements
 
     /**
      * Get the previous retirement of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousRetirement()
+    public function previousRetirement(): MorphOne
     {
         return $this->morphOne(Retirement::class, 'retiree')
             ->latest('ended_at')
@@ -57,20 +51,16 @@ trait HasRetirements
 
     /**
      * Check to see if the model is retired.
-     *
-     * @return bool
      */
-    public function isRetired()
+    public function isRetired(): bool
     {
         return $this->currentRetirement()->exists();
     }
 
     /**
      * Check to see if the model has been activated.
-     *
-     * @return bool
      */
-    public function hasRetirements()
+    public function hasRetirements(): bool
     {
         return $this->retirements()->count() > 0;
     }
@@ -86,8 +76,6 @@ trait HasRetirements
 
     /**
      * Retrieve the retirement start date.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     public function retiredAt(): Attribute
     {

@@ -14,10 +14,6 @@ class UpdateAction extends BaseRefereeAction
 
     /**
      * Create a referee.
-     *
-     * @param  \App\Models\Referee  $referee
-     * @param  \App\Data\RefereeData  $refereeData
-     * @return \App\Models\Referee
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {

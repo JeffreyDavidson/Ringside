@@ -8,16 +8,14 @@ use App\Actions\Wrestlers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
 
 class InjureController extends Controller
 {
     /**
      * Injure a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler)
+    public function __invoke(Wrestler $wrestler): RedirectResponse
     {
         $this->authorize('injure', $wrestler);
 

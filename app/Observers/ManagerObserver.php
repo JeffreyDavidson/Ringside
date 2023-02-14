@@ -11,11 +11,8 @@ class ManagerObserver
 {
     /**
      * Handle the Manager "saved" event.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return void
      */
-    public function saving(Manager $manager)
+    public function saving(Manager $manager): void
     {
         $manager->status = match (true) {
             $manager->isCurrentlyEmployed() => match (true) {

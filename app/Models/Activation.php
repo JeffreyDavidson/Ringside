@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 class Activation extends Model
@@ -36,21 +37,16 @@ class Activation extends Model
 
     /**
      * Get the activated model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
-    public function activatable()
+    public function activatable(): MorphTo
     {
         return $this->morphTo();
     }
 
     /**
      * Determine an activation started before a given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $date
-     * @return bool
      */
-    public function startedBefore(Carbon $date)
+    public function startedBefore(Carbon $date): bool
     {
         return $this->started_at->lt($date);
     }

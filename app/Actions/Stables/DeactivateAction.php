@@ -16,9 +16,6 @@ class DeactivateAction extends BaseStableAction
     /**
      * Deactivate a stable.
      *
-     * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon|null  $deactivationDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeDeactivatedException
      */

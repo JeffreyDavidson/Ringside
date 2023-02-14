@@ -8,16 +8,14 @@ use App\Actions\TagTeams\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
+use Illuminate\Http\RedirectResponse;
 
 class SuspendController extends Controller
 {
     /**
      * Suspend a tag team.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(TagTeam $tagTeam)
+    public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
         $this->authorize('suspend', $tagTeam);
 

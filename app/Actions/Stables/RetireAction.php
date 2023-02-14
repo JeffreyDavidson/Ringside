@@ -20,9 +20,6 @@ class RetireAction extends BaseStableAction
     /**
      * Retire a stable.
      *
-     * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon|null  $retirementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */

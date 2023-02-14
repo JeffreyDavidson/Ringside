@@ -16,9 +16,6 @@ class ReinstateAction extends BaseRefereeAction
     /**
      * Reinstate a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $reinstatementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeReinstatedException
      */

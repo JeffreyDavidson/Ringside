@@ -8,16 +8,14 @@ use App\Actions\Managers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
+use Illuminate\Http\RedirectResponse;
 
 class ClearInjuryController extends Controller
 {
     /**
      * Clear a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager)
+    public function __invoke(Manager $manager): RedirectResponse
     {
         $this->authorize('clearFromInjury', $manager);
 

@@ -39,11 +39,6 @@ class HasMinimumAmountOfMembers implements Rule
 
     /**
      * Undocumented function.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon  $startDate
-     * @param  \Illuminate\Support\Collection  $wrestlers
-     * @param  \Illuminate\Support\Collection  $tagTeams
      */
     public function __construct(Stable $stable, Carbon $startDate, Collection $wrestlers, Collection $tagTeams)
     {
@@ -56,13 +51,11 @@ class HasMinimumAmountOfMembers implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         if ($this->stable->isCurrentlyActivated()) {
             $tagTeamsCountFromRequest = $this->tagTeams->count();
@@ -80,10 +73,8 @@ class HasMinimumAmountOfMembers implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return "{$this->stable->name} is currently activated and the activation date cannot be changed.";
     }

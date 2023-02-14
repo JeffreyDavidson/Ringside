@@ -11,10 +11,8 @@ class MatchTypesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         MatchType::create(['name' => 'Singles', 'slug' => 'singles', 'number_of_sides' => 2]);
         MatchType::create(['name' => 'Tag Team', 'slug' => 'tagteam', 'number_of_sides' => 2]);

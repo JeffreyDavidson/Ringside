@@ -8,16 +8,14 @@ use App\Actions\Titles\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Models\Title;
+use Illuminate\Http\RedirectResponse;
 
 class UnretireController extends Controller
 {
     /**
      * Unretires a title.
-     *
-     * @param  \App\Models\Title  $title
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title)
+    public function __invoke(Title $title): RedirectResponse
     {
         $this->authorize('unretire', $title);
 

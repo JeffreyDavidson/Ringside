@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use App\Builders\StableQueryBuilder;
 use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
@@ -53,7 +55,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      * @param  \Illuminate\Database\Query\Builder  $query
      * @return \App\Builders\StableQueryBuilder<Stable>
      */
-    public function newEloquentBuilder($query)
+    public function newEloquentBuilder($query): StableQueryBuilder
     {
         return new StableQueryBuilder($query);
     }
@@ -63,7 +65,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function retirements()
+    public function retirements(): MorphMany
     {
         return $this->morphMany(Retirement::class, 'retiree');
     }
@@ -73,7 +75,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentRetirement()
+    public function currentRetirement(): MorphOne
     {
         return $this->morphOne(Retirement::class, 'retiree')
             ->where('started_at', '<=', now())
@@ -86,7 +88,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousRetirements()
+    public function previousRetirements(): MorphMany
     {
         return $this->morphMany(Retirement::class, 'retiree')
             ->whereNotNull('ended_at');
@@ -97,7 +99,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousRetirement()
+    public function previousRetirement(): MorphOne
     {
         return $this->morphOne(Retirement::class, 'retiree')
             ->latest('ended_at')
@@ -109,7 +111,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @return bool
      */
-    public function isRetired()
+    public function isRetired(): bool
     {
         return $this->currentRetirement()->exists();
     }
@@ -119,7 +121,7 @@ class Stable extends Model implements Activatable, Deactivatable, Retirable
      *
      * @return bool
      */
-    public function hasRetirements()
+    public function hasRetirements(): bool
     {
         return $this->retirements()->count() > 0;
     }

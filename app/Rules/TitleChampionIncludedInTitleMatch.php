@@ -20,7 +20,6 @@ class TitleChampionIncludedInTitleMatch implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param  \Illuminate\Support\Collection  $titleIds
      * @return void
      */
     public function __construct(Collection $titleIds)
@@ -31,13 +30,11 @@ class TitleChampionIncludedInTitleMatch implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         if ($this->titleIds->isEmpty()) {
             return true;
@@ -63,10 +60,8 @@ class TitleChampionIncludedInTitleMatch implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'This match requires the champion to be involved.';
     }
