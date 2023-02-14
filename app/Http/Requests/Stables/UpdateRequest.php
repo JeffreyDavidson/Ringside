@@ -12,12 +12,9 @@ use App\Rules\WrestlerCanJoinExistingStable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\StableRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = StableRequestFactory::class;
 

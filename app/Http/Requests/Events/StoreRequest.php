@@ -9,12 +9,9 @@ use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\EventRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = EventRequestFactory::class;
 

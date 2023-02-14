@@ -10,12 +10,9 @@ use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\WrestlerRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = WrestlerRequestFactory::class;
 

@@ -8,12 +8,9 @@ use App\Models\Referee;
 use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\RefereeRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class StoreRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = RefereeRequestFactory::class;
 

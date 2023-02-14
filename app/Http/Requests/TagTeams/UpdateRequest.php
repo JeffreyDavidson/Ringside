@@ -11,12 +11,9 @@ use App\Rules\WrestlerCanJoinExistingTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\TagTeamRequestFactory;
-use Worksome\RequestFactories\Concerns\HasFactory;
 
 class UpdateRequest extends FormRequest
 {
-    use HasFactory;
-
     /** @var class-string */
     public static $factory = TagTeamRequestFactory::class;
 
