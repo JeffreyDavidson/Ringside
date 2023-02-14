@@ -20,10 +20,8 @@ class BaseComponent extends Component
 
     /**
      * The view type to display for pagination.
-     *
-     * @return string
      */
-    public function paginationView()
+    public function paginationView(): string
     {
         return 'pagination.base';
     }

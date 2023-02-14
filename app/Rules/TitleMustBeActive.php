@@ -15,13 +15,11 @@ class TitleMustBeActive implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         $title = Title::query()->whereKey($value)->sole();
 
@@ -34,10 +32,8 @@ class TitleMustBeActive implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'This title is not active and cannot be added to the match.';
     }

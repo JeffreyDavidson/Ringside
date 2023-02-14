@@ -13,9 +13,6 @@ class DeleteAction extends BaseEventAction
 
     /**
      * Delete an event.
-     *
-     * @param  \App\Models\Event  $event
-     * @return void
      */
     public function handle(Event $event): void
     {

@@ -8,16 +8,14 @@ use App\Actions\Wrestlers\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
 
 class SuspendController extends Controller
 {
     /**
      * Suspend a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler)
+    public function __invoke(Wrestler $wrestler): RedirectResponse
     {
         $this->authorize('suspend', $wrestler);
 

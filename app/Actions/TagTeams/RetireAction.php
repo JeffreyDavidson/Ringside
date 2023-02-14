@@ -17,9 +17,6 @@ class RetireAction extends BaseTagTeamAction
     /**
      * Retire a tag team.
      *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Support\Carbon|null  $retirementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */

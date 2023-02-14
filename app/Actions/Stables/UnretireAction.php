@@ -16,9 +16,6 @@ class UnretireAction extends BaseStableAction
     /**
      * Unretire a stable.
      *
-     * @param  \App\Models\Stable  $stable
-     * @param  \Illuminate\Support\Carbon|null  $unretiredDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */

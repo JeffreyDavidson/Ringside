@@ -7,7 +7,9 @@ namespace App\Models\Concerns;
 use App\Models\StableMember;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
+use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
 
 trait HasMembers
 {
@@ -15,10 +17,8 @@ trait HasMembers
 
     /**
      * Get the wrestlers belonging to the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function wrestlers()
+    public function wrestlers(): MorphToMany
     {
         return $this->morphedByMany(Wrestler::class, 'member', 'stable_members')
             ->using(StableMember::class)
@@ -27,10 +27,8 @@ trait HasMembers
 
     /**
      * Get all current wrestlers that are members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function currentWrestlers()
+    public function currentWrestlers(): MorphToMany
     {
         return $this->wrestlers()
             ->wherePivotNull('left_at');
@@ -38,10 +36,8 @@ trait HasMembers
 
     /**
      * Get all previous wrestlers that were members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function previousWrestlers()
+    public function previousWrestlers(): MorphToMany
     {
         return $this->wrestlers()
             ->wherePivotNotNull('left_at');
@@ -49,10 +45,8 @@ trait HasMembers
 
     /**
      * Get the tag teams belonging to the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function tagTeams()
+    public function tagTeams(): MorphToMany
     {
         return $this->morphedByMany(TagTeam::class, 'member', 'stable_members')
             ->using(StableMember::class)
@@ -61,10 +55,8 @@ trait HasMembers
 
     /**
      * Get all current tag teams that are members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function currentTagTeams()
+    public function currentTagTeams(): MorphToMany
     {
         return $this->tagTeams()
             ->wherePivotNull('left_at');
@@ -72,10 +64,8 @@ trait HasMembers
 
     /**
      * Get all previous tag teams that were members of the stable.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function previousTagTeams()
+    public function previousTagTeams(): MorphToMany
     {
         return $this->tagTeams()
             ->wherePivotNotNull('left_at');
@@ -83,30 +73,24 @@ trait HasMembers
 
     /**
      * Get the members belonging to the stable.
-     *
-     * @return \Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation
      */
-    public function allMembers()
+    public function allMembers(): MergedRelation
     {
         return $this->mergedRelation('all_stable_members');
     }
 
     /**
      * Get all current members of the stable.
-     *
-     * @return \Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation
      */
-    public function currentMembers()
+    public function currentMembers(): MergedRelation
     {
         return $this->mergedRelation('current_stable_members');
     }
 
     /**
      * Get all previous members of the stable.
-     *
-     * @return \Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation
      */
-    public function previousMembers()
+    public function previousMembers(): MergedRelation
     {
         return $this->mergedRelation('previous_stable_members');
     }

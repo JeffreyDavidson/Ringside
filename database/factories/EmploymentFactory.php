@@ -15,8 +15,6 @@ class EmploymentFactory extends Factory
 {
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
     public function definition(): array
     {
@@ -30,9 +28,6 @@ class EmploymentFactory extends Factory
         ];
     }
 
-    /**
-     * @param  \Illuminate\Support\Carbon  $employmentDate
-     */
     public function started(Carbon $employmentDate)
     {
         return $this->state([

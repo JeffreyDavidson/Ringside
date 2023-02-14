@@ -20,7 +20,6 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param  \Illuminate\Support\Carbon  $stableStartDate
      * @return void
      */
     public function __construct(Carbon $stableStartDate)
@@ -31,13 +30,11 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         $tagTeam = TagTeam::with(['futureEmployment'])->whereKey($value)->sole();
 
@@ -58,10 +55,8 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'This tag team is not employed before the stable\'s activation date';
     }

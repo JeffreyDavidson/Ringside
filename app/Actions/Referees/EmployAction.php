@@ -16,9 +16,6 @@ class EmployAction extends BaseRefereeAction
     /**
      * Employ a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $startDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */

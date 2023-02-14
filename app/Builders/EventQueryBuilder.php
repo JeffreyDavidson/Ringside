@@ -16,30 +16,24 @@ class EventQueryBuilder extends Builder
 {
     /**
      * Scope a query to include scheduled events.
-     *
-     * @return \App\Builders\EventQueryBuilder
      */
-    public function scheduled()
+    public function scheduled(): EventQueryBuilder
     {
         return $this->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
     }
 
     /**
      * Scope a query to include unscheduled events.
-     *
-     * @return \App\Builders\EventQueryBuilder
      */
-    public function unscheduled()
+    public function unscheduled(): EventQueryBuilder
     {
         return $this->where('status', EventStatus::UNSCHEDULED)->whereNull('date');
     }
 
     /**
      * Scope a query to include past events.
-     *
-     * @return \App\Builders\EventQueryBuilder
      */
-    public function past()
+    public function past(): EventQueryBuilder
     {
         return $this->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
     }

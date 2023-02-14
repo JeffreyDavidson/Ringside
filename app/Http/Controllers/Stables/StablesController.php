@@ -15,15 +15,15 @@ use App\Models\Manager;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class StablesController extends Controller
 {
     /**
      * View a list of stables.
-     *
-     * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(): View
     {
         $this->authorize('viewList', Stable::class);
 
@@ -32,11 +32,8 @@ class StablesController extends Controller
 
     /**
      * Show the form for creating a stable.
-     *
-     * @param  Stable  $stable
-     * @return \Illuminate\View\View
      */
-    public function create(Stable $stable)
+    public function create(Stable $stable): View
     {
         $this->authorize('create', Stable::class);
 
@@ -50,11 +47,8 @@ class StablesController extends Controller
 
     /**
      * Create a new stable.
-     *
-     * @param  \App\Http\Requests\Stables\StoreRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): RedirectResponse
     {
         CreateAction::run(StableData::fromStoreRequest($request));
 
@@ -63,11 +57,8 @@ class StablesController extends Controller
 
     /**
      * Show the profile of a tag team.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\View\View
      */
-    public function show(Stable $stable)
+    public function show(Stable $stable): View
     {
         $this->authorize('view', $stable);
 
@@ -78,11 +69,8 @@ class StablesController extends Controller
 
     /**
      * Show the form for editing a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\View\View
      */
-    public function edit(Stable $stable)
+    public function edit(Stable $stable): View
     {
         $this->authorize('update', $stable);
 
@@ -96,12 +84,8 @@ class StablesController extends Controller
 
     /**
      * Update a given stable.
-     *
-     * @param  \App\Http\Requests\Stables\UpdateRequest  $request
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Stable $stable)
+    public function update(UpdateRequest $request, Stable $stable): RedirectResponse
     {
         UpdateAction::run($stable, StableData::fromUpdateRequest($request));
 
@@ -110,11 +94,8 @@ class StablesController extends Controller
 
     /**
      * Delete a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Stable $stable)
+    public function destroy(Stable $stable): RedirectResponse
     {
         $this->authorize('delete', Stable::class);
 

@@ -14,10 +14,6 @@ class UpdateAction extends BaseStableAction
 
     /**
      * Update a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @param  \App\Data\StableData  $stableData
-     * @return \App\Models\Stable
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {

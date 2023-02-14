@@ -16,9 +16,6 @@ class ReleaseAction extends BaseManagerAction
     /**
      * Release a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null  $releaseDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeReleasedException
      */

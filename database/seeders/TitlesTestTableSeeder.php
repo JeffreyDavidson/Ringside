@@ -11,10 +11,8 @@ class TitlesTestTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         Title::factory()->active()->times(3)->create();
         Title::factory()->withFutureActivation()->times(3)->create();

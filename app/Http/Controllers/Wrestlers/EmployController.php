@@ -8,16 +8,14 @@ use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
 
 class EmployController extends Controller
 {
     /**
      * Employ a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler)
+    public function __invoke(Wrestler $wrestler): RedirectResponse
     {
         $this->authorize('employ', $wrestler);
 

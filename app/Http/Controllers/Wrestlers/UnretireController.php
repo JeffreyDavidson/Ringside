@@ -8,16 +8,14 @@ use App\Actions\Wrestlers\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
 
 class UnretireController extends Controller
 {
     /**
      * Unretire a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler)
+    public function __invoke(Wrestler $wrestler): RedirectResponse
     {
         $this->authorize('unretire', $wrestler);
 

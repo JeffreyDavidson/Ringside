@@ -13,9 +13,6 @@ class RestoreAction extends BaseWrestlerAction
 
     /**
      * Restore a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return void
      */
     public function handle(Wrestler $wrestler): void
     {

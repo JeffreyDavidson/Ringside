@@ -11,11 +11,8 @@ class TagTeamObserver
 {
     /**
      * Handle the TagTeam "saved" event.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @return void
      */
-    public function saving(TagTeam $tagTeam)
+    public function saving(TagTeam $tagTeam): void
     {
         $tagTeam->status = match (true) {
             $tagTeam->isCurrentlyEmployed() => match (true) {

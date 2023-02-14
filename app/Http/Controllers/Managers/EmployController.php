@@ -8,16 +8,14 @@ use App\Actions\Managers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
+use Illuminate\Http\RedirectResponse;
 
 class EmployController extends Controller
 {
     /**
      * Employ a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager)
+    public function __invoke(Manager $manager): RedirectResponse
     {
         $this->authorize('employ', $manager);
 

@@ -8,16 +8,14 @@ use App\Actions\Wrestlers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
 
 class ReinstateController extends Controller
 {
     /**
      * Reinstate a wrestler.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler)
+    public function __invoke(Wrestler $wrestler): RedirectResponse
     {
         $this->authorize('reinstate', $wrestler);
 

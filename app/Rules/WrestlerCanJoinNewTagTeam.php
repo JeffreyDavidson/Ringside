@@ -10,13 +10,11 @@ class WrestlerCanJoinNewTagTeam implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         if (is_null($value)) {
             return false;
@@ -38,10 +36,8 @@ class WrestlerCanJoinNewTagTeam implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'This wrestler cannot join the tag team.';
     }

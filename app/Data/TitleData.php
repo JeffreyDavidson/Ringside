@@ -21,9 +21,6 @@ class TitleData
 
     /**
      * Create a DTO from the update request.
-     *
-     * @param  \App\Http\Requests\Titles\UpdateRequest  $request
-     * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {

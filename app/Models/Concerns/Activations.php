@@ -6,26 +6,24 @@ namespace App\Models\Concerns;
 
 use App\Models\Activation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
 trait Activations
 {
     /**
      * Get all of the activations of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function activations()
+    public function activations(): MorphMany
     {
         return $this->morphMany(Activation::class, 'activatable');
     }
 
     /**
      * Get the current activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentActivation()
+    public function currentActivation(): MorphOne
     {
         return $this->morphOne(Activation::class, 'activatable')
             ->where('started_at', '<=', now())
@@ -35,10 +33,8 @@ trait Activations
 
     /**
      * Get the first activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function firstActivation()
+    public function firstActivation(): MorphOne
     {
         return $this->morphOne(Activation::class, 'activatable')
             ->oldestOfMany('started_at');
@@ -46,10 +42,8 @@ trait Activations
 
     /**
      * Get the future activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function futureActivation()
+    public function futureActivation(): MorphOne
     {
         return $this->morphOne(Activation::class, 'activatable')
             ->where('started_at', '>', now())
@@ -59,10 +53,8 @@ trait Activations
 
     /**
      * Get the previous activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousActivation()
+    public function previousActivation(): MorphOne
     {
         return $this->morphOne(Activation::class, 'activatable')
             ->latest('ended_at')
@@ -71,10 +63,8 @@ trait Activations
 
     /**
      * Get the previous activations of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousActivations()
+    public function previousActivations(): MorphMany
     {
         return $this->activations()
             ->whereNotNull('ended_at');
@@ -82,50 +72,40 @@ trait Activations
 
     /**
      * Check to see if the model is currently active.
-     *
-     * @return bool
      */
-    public function isCurrentlyActivated()
+    public function isCurrentlyActivated(): bool
     {
         return $this->currentActivation()->exists();
     }
 
     /**
      * Check to see if the model has been activated.
-     *
-     * @return bool
      */
-    public function hasActivations()
+    public function hasActivations(): bool
     {
         return $this->activations()->count() > 0;
     }
 
     /**
      * Check to see if the model is unactivated.
-     *
-     * @return bool
      */
-    public function isUnactivated()
+    public function isUnactivated(): bool
     {
         return $this->activations()->count() === 0;
     }
 
     /**
      * Check to see if the model is unactivated.
-     *
-     * @return bool
      */
-    public function isInactive()
+    public function isInactive(): bool
     {
         return $this->currentActivation()->count() === 0;
     }
 
     /**
      * Check to see if the model has a future activation.
-     *
-     * @return bool
      */
-    public function hasFutureActivation()
+    public function hasFutureActivation(): bool
     {
         return $this->futureActivation()->exists();
     }
@@ -137,8 +117,6 @@ trait Activations
 
     /**
      * Retrieve the model's first activation date.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     public function activatedAt(): Attribute
     {
@@ -149,32 +127,24 @@ trait Activations
 
     /**
      * Check to see if the model is not in activation.
-     *
-     * @return bool
      */
-    public function isNotActivation()
+    public function isNotActivation(): bool
     {
         return $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 
     /**
      * Get the model's first activation date.
-     *
-     * @param  \Illuminate\Support\Carbon  $activationDate
-     * @return bool|null
      */
-    public function activatedOn(Carbon $activationDate)
+    public function activatedOn(Carbon $activationDate): ?bool
     {
         return $this->currentActivation?->started_at->eq($activationDate);
     }
 
     /**
      * Check to see if activatable can have their start date changed.
-     *
-     * @param  \Illuminate\Support\Carbon  $activationDate
-     * @return bool
      */
-    public function canHaveActivationStartDateChanged(Carbon $activationDate)
+    public function canHaveActivationStartDateChanged(Carbon $activationDate): bool
     {
         return $this->hasFutureActivation() && ! $this->activatedOn($activationDate);
     }

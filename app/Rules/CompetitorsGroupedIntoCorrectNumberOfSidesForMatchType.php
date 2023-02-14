@@ -19,10 +19,8 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
 
     /**
      * Create a new rule instance.
-     *
-     * @param  int  $matchTypeId
      */
-    public function __construct($matchTypeId)
+    public function __construct(int $matchTypeId)
     {
         $this->matchTypeId = $matchTypeId;
     }
@@ -30,23 +28,19 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  array|Countable  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         return MatchType::find($this->matchTypeId)?->number_of_sides === count($value);
     }
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'This match does not have the required amount of sides of competitors.';
     }

@@ -13,9 +13,6 @@ class RestoreAction extends BaseVenueAction
 
     /**
      * Restore a venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @return void
      */
     public function handle(Venue $venue): void
     {

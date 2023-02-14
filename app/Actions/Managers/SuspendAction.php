@@ -16,9 +16,6 @@ class SuspendAction extends BaseManagerAction
     /**
      * Suspend a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null  $suspensionDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */

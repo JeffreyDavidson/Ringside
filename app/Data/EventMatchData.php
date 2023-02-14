@@ -19,11 +19,9 @@ class EventMatchData
     /**
      * Create a new event match data instance.
      *
-     * @param  \App\Models\MatchType  $matchType
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee>  $referees
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title>  $titles
      * @param  \Illuminate\Support\Collection<int, mixed>  $competitors
-     * @param  string|null  $preview
      */
     public function __construct(
         public MatchType $matchType,
@@ -36,9 +34,6 @@ class EventMatchData
 
     /**
      * Retrieve data from the store request.
-     *
-     * @param  \App\Http\Requests\EventMatches\StoreRequest  $request
-     * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
@@ -53,11 +48,8 @@ class EventMatchData
 
     /**
      * Undocumented function.
-     *
-     * @param  \Illuminate\Support\Collection  $competitors
-     * @return \Illuminate\Support\Collection
      */
-    private static function getCompetitors(Collection $competitors)
+    private static function getCompetitors(Collection $competitors): Collection
     {
         /** @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter */
         return $competitors->transform(function ($sideCompetitors, $sideNumber) {

@@ -13,9 +13,6 @@ class DeleteAction extends BaseVenueAction
 
     /**
      * Delete a venue.
-     *
-     * @param  \App\Models\Venue  $venue
-     * @return void
      */
     public function handle(Venue $venue): void
     {

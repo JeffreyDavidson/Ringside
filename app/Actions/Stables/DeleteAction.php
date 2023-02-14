@@ -13,9 +13,6 @@ class DeleteAction extends BaseStableAction
 
     /**
      * Delete a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return void
      */
     public function handle(Stable $stable): void
     {

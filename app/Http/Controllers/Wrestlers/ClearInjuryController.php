@@ -8,16 +8,14 @@ use App\Actions\Wrestlers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
+use Illuminate\Http\RedirectResponse;
 
 class ClearInjuryController extends Controller
 {
     /**
      * Have a wrestler recover from an injury.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Wrestler $wrestler)
+    public function __invoke(Wrestler $wrestler): RedirectResponse
     {
         $this->authorize('clearFromInjury', $wrestler);
 

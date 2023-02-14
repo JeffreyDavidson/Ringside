@@ -12,15 +12,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ManagersController extends Controller
 {
     /**
      * View a list of managers.
-     *
-     * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(): View
     {
         $this->authorize('viewList', Manager::class);
 
@@ -29,11 +29,8 @@ class ManagersController extends Controller
 
     /**
      * Show the form for creating a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\View\View
      */
-    public function create(Manager $manager)
+    public function create(Manager $manager): View
     {
         $this->authorize('create', Manager::class);
 
@@ -44,11 +41,8 @@ class ManagersController extends Controller
 
     /**
      * Create a new manager.
-     *
-     * @param  \App\Http\Requests\Managers\StoreRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): RedirectResponse
     {
         CreateAction::run(ManagerData::fromStoreRequest($request));
 
@@ -57,11 +51,8 @@ class ManagersController extends Controller
 
     /**
      * Show the profile of a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\View\View
      */
-    public function show(Manager $manager)
+    public function show(Manager $manager): View
     {
         $this->authorize('view', $manager);
 
@@ -72,11 +63,8 @@ class ManagersController extends Controller
 
     /**
      * Show the form for editing a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\View\View
      */
-    public function edit(Manager $manager)
+    public function edit(Manager $manager): View
     {
         $this->authorize('update', $manager);
 
@@ -87,12 +75,8 @@ class ManagersController extends Controller
 
     /**
      * Update a given manager.
-     *
-     * @param  \App\Http\Requests\Managers\UpdateRequest  $request
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateRequest $request, Manager $manager)
+    public function update(UpdateRequest $request, Manager $manager): RedirectResponse
     {
         UpdateAction::run($manager, ManagerData::fromUpdateRequest($request));
 
@@ -101,11 +85,8 @@ class ManagersController extends Controller
 
     /**
      * Delete a manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Manager $manager)
+    public function destroy(Manager $manager): RedirectResponse
     {
         $this->authorize('delete', $manager);
 

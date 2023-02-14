@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Collections;
 
 use App\Models\EventMatchCompetitor;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class EventMatchCompetitorsCollection extends Collection
 {
@@ -14,7 +14,7 @@ class EventMatchCompetitorsCollection extends Collection
      *
      * @return \Illuminate\Support\Collection
      */
-    public function groupedBySide()
+    public function groupedBySide(): Collection
     {
         return EventMatchCompetitor::findMany($this->modelKeys())->groupBy('side_number');
     }
@@ -24,7 +24,7 @@ class EventMatchCompetitorsCollection extends Collection
      *
      * @return \Illuminate\Support\Collection
      */
-    public function groupedByCompetitorType()
+    public function groupedByCompetitorType(): Collection
     {
         return $this->groupBy(function ($group) {
             return match ($group->competitor_type) {

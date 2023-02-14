@@ -8,6 +8,9 @@ use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Referee;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\View\View;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows
@@ -36,10 +39,8 @@ class RefereesList extends BaseComponent
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Database\Query\Builder
      */
-    public function getRowsQueryProperty()
+    public function getRowsQueryProperty(): Builder
     {
         $query = Referee::query()
             ->when($this->filters['search'], function ($query, $search) {
@@ -52,20 +53,16 @@ class RefereesList extends BaseComponent
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getRowsProperty()
+    public function getRowsProperty(): LengthAwarePaginator
     {
         return $this->applyPagination($this->rowsQuery);
     }
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\View\View
      */
-    public function render()
+    public function render(): View
     {
         return view('livewire.referees.referees-list', [
             'referees' => $this->rows,

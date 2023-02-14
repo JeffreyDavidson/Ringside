@@ -16,9 +16,6 @@ class InjureAction extends BaseWrestlerAction
     /**
      * Injure a wrestler.
      *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Illuminate\Support\Carbon|null  $injureDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeInjuredException
      */

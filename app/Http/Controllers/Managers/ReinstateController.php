@@ -8,16 +8,14 @@ use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
+use Illuminate\Http\RedirectResponse;
 
 class ReinstateController extends Controller
 {
     /**
      * Reinstate a suspended manager.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Manager $manager)
+    public function __invoke(Manager $manager): RedirectResponse
     {
         $this->authorize('reinstate', $manager);
 

@@ -11,11 +11,8 @@ class WrestlerObserver
 {
     /**
      * Handle the Wrestler "saved" event.
-     *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @return void
      */
-    public function saving(Wrestler $wrestler)
+    public function saving(Wrestler $wrestler): void
     {
         $wrestler->status = match (true) {
             $wrestler->isCurrentlyEmployed() => match (true) {

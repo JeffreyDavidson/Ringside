@@ -16,9 +16,6 @@ class UnretireAction extends BaseWrestlerAction
     /**
      * Unretire a wrestler.
      *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Illuminate\Support\Carbon|null  $unretiredDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */

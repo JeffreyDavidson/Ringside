@@ -17,9 +17,6 @@ class SuspendAction extends BaseTagTeamAction
     /**
      * Suspend a tag team.
      *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Support\Carbon|null  $suspensionDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */

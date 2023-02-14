@@ -14,10 +14,6 @@ class UpdateAction extends BaseTagTeamAction
 
     /**
      * Update a tag team.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \App\Data\TagTeamData  $tagTeamData
-     * @return \App\Models\TagTeam
      */
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {

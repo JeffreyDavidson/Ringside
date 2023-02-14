@@ -8,16 +8,14 @@ use App\Actions\Stables\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Models\Stable;
+use Illuminate\Http\RedirectResponse;
 
 class UnretireController extends Controller
 {
     /**
      * Unretire a stable.
-     *
-     * @param  \App\Models\Stable  $stable
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Stable $stable)
+    public function __invoke(Stable $stable): RedirectResponse
     {
         $this->authorize('unretire', $stable);
 

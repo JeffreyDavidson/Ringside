@@ -18,7 +18,6 @@ class ActivationStartDateCanBeChanged implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param  \App\Models\Stable  $stable
      * @return void
      */
     public function __construct(Stable $stable)
@@ -29,13 +28,10 @@ class ActivationStartDateCanBeChanged implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  \Illuminate\Support\Carbon  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, Carbon $value): bool
     {
         if ($this->stable->isCurrentlyActivated() && ! $this->stable->activatedOn(Carbon::parse($value))) {
             return false;
@@ -46,10 +42,8 @@ class ActivationStartDateCanBeChanged implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return "{$this->stable->name} is currently activated and the activation date cannot be changed.";
     }

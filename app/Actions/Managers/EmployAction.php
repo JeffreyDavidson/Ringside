@@ -16,9 +16,6 @@ class EmployAction extends BaseManagerAction
     /**
      * Employ a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null  $startDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */

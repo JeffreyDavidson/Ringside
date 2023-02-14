@@ -16,9 +16,6 @@ class RetireAction extends BaseTitleAction
     /**
      * Retire a title.
      *
-     * @param  \App\Models\Title  $title
-     * @param  \Illuminate\Support\Carbon|null  $retirementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */

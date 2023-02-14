@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Datatable;
 
+use Illuminate\Database\Query\Builder;
+
 trait WithBulkActions
 {
     /**
@@ -29,20 +31,16 @@ trait WithBulkActions
 
     /**
      * Undocumented function.
-     *
-     * @return void
      */
-    public function bootWithSorting()
+    public function bootWithSorting(): void
     {
         $this->selected = collect();
     }
 
     /**
      * Undocumented function.
-     *
-     * @return void
      */
-    public function renderingWithBulkActions()
+    public function renderingWithBulkActions(): void
     {
         if ($this->selectAll) {
             $this->selectPageRows();
@@ -51,10 +49,8 @@ trait WithBulkActions
 
     /**
      * Undocumented function.
-     *
-     * @return void
      */
-    public function updatedSelected()
+    public function updatedSelected(): void
     {
         $this->selectAll = false;
         $this->selectPage = false;
@@ -62,11 +58,8 @@ trait WithBulkActions
 
     /**
      * Undocumented function.
-     *
-     * @param  int  $value
-     * @return void
      */
-    public function updatedSelectPage($value)
+    public function updatedSelectPage(int $value): void
     {
         if ($value) {
             $this->selectPageRows();
@@ -80,30 +73,24 @@ trait WithBulkActions
 
     /**
      * Undocumented function.
-     *
-     * @return void
      */
-    public function selectPageRows()
+    public function selectPageRows(): void
     {
         $this->selected = $this->rows->pluck('id')->map(fn ($id) => (string) $id);
     }
 
     /**
      * Undocumented function.
-     *
-     * @return void
      */
-    public function selectAll()
+    public function selectAll(): void
     {
         $this->selectAll = true;
     }
 
     /**
      * Undocumented function.
-     *
-     * @return \Illuminate\Database\Query\Builder
      */
-    public function getSelectedRowsQueryProperty()
+    public function getSelectedRowsQueryProperty(): Builder
     {
         return (clone $this->rowsQuery)
             ->unless($this->selectAll, fn ($query) => $query->whereKey($this->selected));

@@ -14,9 +14,6 @@ class CreateAction extends BaseEventAction
 
     /**
      * Create an event.
-     *
-     * @param  \App\Data\EventData  $eventData
-     * @return \Illuminate\Database\Eloquent\Model
      */
     public function handle(EventData $eventData): Event
     {

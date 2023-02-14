@@ -17,9 +17,6 @@ class EmployAction extends BaseTagTeamAction
     /**
      * Employ a tag team.
      *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Support\Carbon|null  $startDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */

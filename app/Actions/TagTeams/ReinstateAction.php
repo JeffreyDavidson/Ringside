@@ -17,9 +17,6 @@ class ReinstateAction extends BaseTagTeamAction
     /**
      * Reinstate a tag team.
      *
-     * @param  \App\Models\TagTeam  $tagTeam
-     * @param  \Illuminate\Support\Carbon|null  $reinstatementDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeReinstatedException
      */

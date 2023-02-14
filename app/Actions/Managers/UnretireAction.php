@@ -16,9 +16,6 @@ class UnretireAction extends BaseManagerAction
     /**
      * Unretire a manager.
      *
-     * @param  \App\Models\Manager  $manager
-     * @param  \Illuminate\Support\Carbon|null  $unretiredDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */

@@ -17,8 +17,6 @@ class WrestlerCanJoinExistingTagTeam implements Rule
 
     /**
      * Undocumented function.
-     *
-     * @param  \App\Models\TagTeam  $tagTeam
      */
     public function __construct(TagTeam $tagTeam)
     {
@@ -28,13 +26,11 @@ class WrestlerCanJoinExistingTagTeam implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes($attribute, $value)
+    public function passes(string $attribute, $value): bool
     {
         /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
@@ -68,10 +64,8 @@ class WrestlerCanJoinExistingTagTeam implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'This wrestler cannot join the tag team.';
     }

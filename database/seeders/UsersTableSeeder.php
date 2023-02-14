@@ -12,10 +12,8 @@ class UsersTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $userData = [];
         collect(Role::cases())->each(function ($role, $key) use (&$userData): void {

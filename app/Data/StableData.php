@@ -17,8 +17,6 @@ class StableData
     /**
      * Create a new stable data instance.
      *
-     * @param  string  $name
-     * @param  \Illuminate\Support\Carbon|null  $start_date
      * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
      * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
      * @param  Collection<int, \App\Models\Manager>  $managers
@@ -34,9 +32,6 @@ class StableData
 
     /**
      * Create a DTO from the store request.
-     *
-     * @param  \App\Http\Requests\Stables\StoreRequest  $request
-     * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
@@ -51,9 +46,6 @@ class StableData
 
     /**
      * Create a DTO from the update request.
-     *
-     * @param  \App\Http\Requests\Stables\UpdateRequest  $request
-     * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {

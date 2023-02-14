@@ -11,12 +11,6 @@ class VenueData
 {
     /**
      * Create a new venue data instance.
-     *
-     * @param  string  $name
-     * @param  string  $street_address
-     * @param  string  $city
-     * @param  string  $state
-     * @param  string  $zip
      */
     public function __construct(
         public string $name,
@@ -29,9 +23,6 @@ class VenueData
 
     /**
      * Create a DTO from the store request.
-     *
-     * @param  \App\Http\Requests\Venues\StoreRequest  $request
-     * @return self
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
@@ -46,9 +37,6 @@ class VenueData
 
     /**
      * Create a DTO from the update request.
-     *
-     * @param  \App\Http\Requests\Venues\UpdateRequest  $request
-     * @return self
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {

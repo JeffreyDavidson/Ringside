@@ -6,6 +6,7 @@ namespace App\Actions\EventMatches;
 
 use App\Models\EventMatch;
 use App\Models\Referee;
+use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddRefereesToMatchAction extends BaseEventMatchAction
@@ -15,11 +16,9 @@ class AddRefereesToMatchAction extends BaseEventMatchAction
     /**
      * Add referees to an event match.
      *
-     * @param  \App\Models\EventMatch  $eventMatch
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee>  $referees
-     * @return void
      */
-    public function handle(EventMatch $eventMatch, $referees): void
+    public function handle(EventMatch $eventMatch, Collection $referees): void
     {
         $referees->map(
             fn (Referee $referee) => $this->eventMatchRepository->addRefereeToMatch($eventMatch, $referee)

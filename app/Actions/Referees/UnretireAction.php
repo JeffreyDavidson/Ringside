@@ -16,9 +16,6 @@ class UnretireAction extends BaseRefereeAction
     /**
      * Unretire a referee.
      *
-     * @param  \App\Models\Referee  $referee
-     * @param  \Illuminate\Support\Carbon|null  $unretiredDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */

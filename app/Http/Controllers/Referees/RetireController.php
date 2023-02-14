@@ -8,16 +8,14 @@ use App\Actions\Referees\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Controller;
 use App\Models\Referee;
+use Illuminate\Http\RedirectResponse;
 
 class RetireController extends Controller
 {
     /**
      * Retire a referee.
-     *
-     * @param  \App\Models\Referee  $referee
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Referee $referee)
+    public function __invoke(Referee $referee): RedirectResponse
     {
         $this->authorize('retire', $referee);
 

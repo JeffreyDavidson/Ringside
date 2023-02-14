@@ -16,9 +16,6 @@ class EmployAction extends BaseWrestlerAction
     /**
      * Employ a wrestler.
      *
-     * @param  \App\Models\Wrestler  $wrestler
-     * @param  \Illuminate\Support\Carbon|null  $startDate
-     * @return void
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */

@@ -13,9 +13,6 @@ class RemoveFromCurrentTagTeamsAction extends BaseManagerAction
 
     /**
      * Remove manager from currently managed tag teams.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return void
      */
     public function handle(Manager $manager): void
     {

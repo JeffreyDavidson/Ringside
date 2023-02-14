@@ -14,8 +14,6 @@ trait HasEmployments
 {
     /**
      * Get all of the employments of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function employments(): MorphMany
     {
@@ -24,8 +22,6 @@ trait HasEmployments
 
     /**
      * Get the first employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function firstEmployment(): MorphOne
     {
@@ -35,8 +31,6 @@ trait HasEmployments
 
     /**
      * Get the current employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function currentEmployment(): MorphOne
     {
@@ -48,8 +42,6 @@ trait HasEmployments
 
     /**
      * Get the future employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function futureEmployment(): MorphOne
     {
@@ -61,8 +53,6 @@ trait HasEmployments
 
     /**
      * Get the previous employments of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function previousEmployments(): MorphMany
     {
@@ -72,8 +62,6 @@ trait HasEmployments
 
     /**
      * Get the previous employment of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
     public function previousEmployment(): MorphOne
     {
@@ -85,8 +73,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model is employed.
-     *
-     * @return bool
      */
     public function isCurrentlyEmployed(): bool
     {
@@ -95,9 +81,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model is employed.
-     *
-     * @param  \Illuminate\Support\Carbon  $startDate
-     * @return bool
      */
     public function startDateWas(Carbon $startDate): bool
     {
@@ -110,8 +93,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model has been employed.
-     *
-     * @return bool
      */
     public function hasEmployments(): bool
     {
@@ -120,8 +101,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model is not in employment.
-     *
-     * @return bool
      */
     public function isNotInEmployment(): bool
     {
@@ -130,8 +109,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model is unemployed.
-     *
-     * @return bool
      */
     public function isUnemployed(): bool
     {
@@ -140,8 +117,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model has a future employment.
-     *
-     * @return bool
      */
     public function hasFutureEmployment(): bool
     {
@@ -150,8 +125,6 @@ trait HasEmployments
 
     /**
      * Check to see if the model has been released.
-     *
-     * @return bool
      */
     public function isReleased(): bool
     {
@@ -172,8 +145,6 @@ trait HasEmployments
 
     /**
      * Get the model's first employment date.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     public function startedAt(): Attribute
     {
@@ -184,9 +155,6 @@ trait HasEmployments
 
     /**
      * Determine if the roster member was employed on a given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $employmentDate
-     * @return bool
      */
     public function employedOn(Carbon $employmentDate): bool
     {
@@ -199,9 +167,6 @@ trait HasEmployments
 
     /**
      * Determine if the roster member is to be employed on a given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $employmentDate
-     * @return bool
      */
     public function scheduledToBeEmployedOn(Carbon $employmentDate): bool
     {
@@ -214,9 +179,6 @@ trait HasEmployments
 
     /**
      * Determine if the roster member is to be employed on a given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $employmentDate
-     * @return bool
      */
     public function employedBefore(Carbon $employmentDate): bool
     {
@@ -229,9 +191,6 @@ trait HasEmployments
 
     /**
      * Determine if the roster member is employed after a given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $employmentDate
-     * @return bool
      */
     public function employedAfter(Carbon $employmentDate): bool
     {
@@ -244,9 +203,6 @@ trait HasEmployments
 
     /**
      * Determine if the roster member future start date is before the given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $date
-     * @return bool
      */
     public function futureEmploymentIsBefore(Carbon $date): bool
     {
@@ -259,9 +215,6 @@ trait HasEmployments
 
     /**
      * Check to see if employable can have their start date changed.
-     *
-     * @param  \Illuminate\Support\Carbon  $employmentDate
-     * @return bool
      */
     public function canHaveEmploymentStartDateChanged(Carbon $employmentDate): bool
     {

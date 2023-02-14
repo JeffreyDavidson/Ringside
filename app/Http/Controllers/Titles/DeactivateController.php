@@ -8,16 +8,14 @@ use App\Actions\Titles\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Title;
+use Illuminate\Http\RedirectResponse;
 
 class DeactivateController extends Controller
 {
     /**
      * Deactivates a title.
-     *
-     * @param  \App\Models\Title  $title
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function __invoke(Title $title)
+    public function __invoke(Title $title): RedirectResponse
     {
         $this->authorize('deactivate', $title);
 
