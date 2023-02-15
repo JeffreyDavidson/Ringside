@@ -3,34 +3,13 @@
 namespace App\Rules;
 
 use App\Models\Wrestler;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class WrestlerCanJoinExistingStable implements Rule
+class WrestlerCanJoinExistingStable implements ValidationRule
 {
-    /**
-     * @var array
-     */
-    protected $tagTeamIds;
-
-    /**
-     * @var string
-     */
-    protected $date;
-
-    /**
-     * Undocumented variable.
-     *
-     * @var string
-     */
-    protected string $messages;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(array $tagTeamIds, string $date)
+    public function __construct(protected array $tagTeamIds, protected string $date)
     {
         $this->tagTeamIds = $tagTeamIds;
         $this->date = $date;
@@ -39,57 +18,35 @@ class WrestlerCanJoinExistingStable implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! is_array($this->tagTeamIds)) {
-            return false;
-        }
-
         /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::with('currentStable')->whereKey($value)->first();
 
         if ($wrestler->isSuspended()) {
-            $this->messages = "{$wrestler->name} is suspended and cannot join stable.";
-
-            return false;
+            $fail("{$wrestler->name} is suspended and cannot join stable.");
         }
 
         if ($wrestler->isInjured()) {
-            $this->messages = "{$wrestler->name} is injured and cannot join stable.";
-
-            return false;
+            $fail("{$wrestler->name} is injured and cannot join stable.");
         }
 
         if ($wrestler->isCurrentlyEmployed() && ! $wrestler->employedBefore(Carbon::parse($this->date))) {
-            $this->messages = "{$wrestler->name} cannot have an employment start date after stable's start date.";
-
-            return false;
+            $fail("{$wrestler->name} cannot have an employment start date after stable's start date.");
         }
 
         if ($this->tagTeamIds !== 0) {
-            collect($this->tagTeamIds)->map(function ($id) use ($wrestler) {
+            collect($this->tagTeamIds)->map(function ($id) use ($wrestler, $fail) {
                 if ($id === $wrestler->currentTagTeam?->id) {
-                    return false;
+                    $fail("A wrestler in a tag team already belongs to a current stable.");
                 }
             });
         }
 
         if ($wrestler->currentStable !== null && $wrestler->currentStable->exists()) {
-            return false;
+            $fail("This wrestler already belongs to a current stable.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return $this->messages;
     }
 }
