@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             'manager' => \App\Models\Manager::class,
             'title' => \App\Models\Title::class,
             'tagteam' => \App\Models\TagTeam::class,
+            'referee' => \App\Models\Referee::class,
         ]);
     }
 }
