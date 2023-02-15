@@ -6,25 +6,18 @@ namespace App\Rules;
 
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-class CompetitorsAreValid implements Rule
+class CompetitorsAreValid implements ValidationRule
 {
-    /**
-     * The message to be sent as the validation message.
-     *
-     * @var string
-     */
-    protected string $message;
-
     /**
      * Determine if the validation rule passes.
      *
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, array $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $diffWrestlers = [];
         $diffTagTeams = [];
@@ -41,25 +34,11 @@ class CompetitorsAreValid implements Rule
         }
 
         if (count($diffWrestlers) > 0) {
-            $this->message = 'There are wrestlers added to the match that don\'t exist in the database.';
-
-            return false;
+            $fail('There are wrestlers added to the match that don\'t exist in the database.');
         }
 
         if (count($diffTagTeams) > 0) {
-            $this->message = 'There are tag teams added to the match that don\'t exist in the database.';
-
-            return false;
+            $fail('There are tag teams added to the match that don\'t exist in the database.');
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return $this->message;
     }
 }

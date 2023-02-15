@@ -4,21 +4,12 @@ namespace App\Rules;
 
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class WrestlerCanJoinExistingTagTeam implements Rule
+class WrestlerCanJoinExistingTagTeam implements ValidationRule
 {
-    /**
-     * Undocumented variable.
-     *
-     * @var \App\Models\TagTeam
-     */
-    protected $tagTeam;
-
-    /**
-     * Undocumented function.
-     */
-    public function __construct(TagTeam $tagTeam)
+    public function __construct(protected TagTeam $tagTeam)
     {
         $this->tagTeam = $tagTeam;
     }
@@ -26,28 +17,26 @@ class WrestlerCanJoinExistingTagTeam implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 
-        if ($this->tagTeam->currentWrestlers->contains($wrestler)) {
-            return true;
+        if (! $this->tagTeam->currentWrestlers->contains($wrestler)) {
+            $fail("This wrestler cannot join the tag team.");
         }
 
         if ($wrestler->isSuspended() || $wrestler->isInjured()) {
-            return false;
+            $fail("This wrestler cannot join the tag team.");
         }
 
         $bookableTagTeams = TagTeam::query()->bookable()->whereNotIn('id', [$this->tagTeam->id])->get();
 
-        $bookableTagTeams->each(function ($tagTeam) use ($wrestler) {
+        $bookableTagTeams->each(function ($tagTeam) use ($wrestler, $fail) {
             if ($tagTeam->currentWrestlers->contains($wrestler)) {
-                return false;
+                $fail("This wrestler cannot join the tag team.");
             }
         });
 
@@ -56,17 +45,7 @@ class WrestlerCanJoinExistingTagTeam implements Rule
               && $wrestler->currentTagTeam->exists()
               && $wrestler->currentTagTeam->is($this->tagTeam)
         ) {
-            return false;
+            $fail("This wrestler cannot join the tag team.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This wrestler cannot join the tag team.';
     }
 }

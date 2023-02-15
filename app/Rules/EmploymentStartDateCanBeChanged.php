@@ -3,31 +3,13 @@
 namespace App\Rules;
 
 use App\Models\Contracts\Employable;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class EmploymentStartDateCanBeChanged implements Rule
+class EmploymentStartDateCanBeChanged implements ValidationRule
 {
-    /**
-     * Undocumented variable.
-     *
-     * @var \App\Models\Contracts\Employable
-     */
-    protected Employable $rosterMember;
-
-    /**
-     * Undocumented variable.
-     *
-     * @var string
-     */
-    private $message;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(Employable $rosterMember)
+    public function __construct(protected Employable $rosterMember)
     {
         $this->rosterMember = $rosterMember;
     }
@@ -35,33 +17,18 @@ class EmploymentStartDateCanBeChanged implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, string $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $name = $this->rosterMember->name;
 
         if ($this->rosterMember->isReleased() && ! $this->rosterMember->employedOn(Carbon::parse($value))) {
-            $this->message = "{$name} was released and the start date cannot be changed.";
-
-            return false;
+            $fail("{$name} was released and the start date cannot be changed.");
         }
 
         if ($this->rosterMember->isCurrentlyEmployed() && ! $this->rosterMember->employedOn(Carbon::parse($value))) {
-            $this->message = "{$name} is currently employed and the start date cannot be changed.";
-
-            return false;
+            $fail("{$name} is currently employed and the start date cannot be changed.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return $this->message;
     }
 }

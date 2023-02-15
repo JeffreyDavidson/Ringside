@@ -3,24 +3,13 @@
 namespace App\Rules\Stables;
 
 use App\Models\Stable;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class ActivationStartDateCanBeChanged implements Rule
+class ActivationStartDateCanBeChanged implements ValidationRule
 {
-    /**
-     * Undocumented variable.
-     *
-     * @var \App\Models\Stable
-     */
-    private $stable;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(Stable $stable)
+    public function __construct(private Stable $stable)
     {
         $this->stable = $stable;
     }
@@ -28,23 +17,12 @@ class ActivationStartDateCanBeChanged implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, Carbon $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->stable->isCurrentlyActivated() && ! $this->stable->activatedOn(Carbon::parse($value))) {
-            return false;
+            $fail("{$this->stable->name} is currently activated and the activation date cannot be changed.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return "{$this->stable->name} is currently activated and the activation date cannot be changed.";
     }
 }

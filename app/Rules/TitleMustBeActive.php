@@ -5,36 +5,22 @@ declare(strict_types=1);
 namespace App\Rules;
 
 use App\Models\Title;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class TitleMustBeActive implements Rule
+class TitleMustBeActive implements ValidationRule
 {
-    /** @var string */
-    protected $messages;
-
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $title = Title::query()->whereKey($value)->sole();
 
         if (! $title->isCurrentlyActivated()) {
-            return false;
+            $fail("This title is not active and cannot be added to the match.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This title is not active and cannot be added to the match.';
     }
 }

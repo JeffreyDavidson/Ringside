@@ -7,22 +7,13 @@ namespace App\Rules;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
-class TitleChampionIncludedInTitleMatch implements Rule
+class TitleChampionIncludedInTitleMatch implements ValidationRule
 {
-    /**
-     * @var \Illuminate\Support\Collection
-     */
-    protected $titleIds;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(Collection $titleIds)
+    public function __construct(protected Collection $titleIds)
     {
         $this->titleIds = $titleIds;
     }
@@ -30,16 +21,10 @@ class TitleChampionIncludedInTitleMatch implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->titleIds->isEmpty()) {
-            return true;
-        }
-
         $competitors = collect($value)->flatten(1);
 
         $wrestlers = Wrestler::query()
@@ -52,17 +37,13 @@ class TitleChampionIncludedInTitleMatch implements Rule
 
         $competitors = $wrestlers->merge($tagTeams);
 
-        return Title::with('currentChampionship.champion')
+        $champions = Title::with('currentChampionship.champion')
             ->findMany($this->titleIds)
             ->reject(fn ($title) => $title->isVacant())
             ->every(fn ($title) => $competitors->contains($title->currentChampionship->champion));
-    }
 
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This match requires the champion to be involved.';
+        if (! $champions) {
+            $fail("This match requires the champion to be involved.");
+        }
     }
 }

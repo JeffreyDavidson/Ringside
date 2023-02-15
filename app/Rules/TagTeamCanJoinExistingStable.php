@@ -3,27 +3,13 @@
 namespace App\Rules;
 
 use App\Models\TagTeam;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class TagTeamCanJoinExistingStable implements Rule
+class TagTeamCanJoinExistingStable implements ValidationRule
 {
-    /**
-     * @var string
-     */
-    protected $messages;
-
-    /**
-     * Undocumented variable.
-     *
-     * @var \Illuminate\Support\Carbon|null
-     */
-    protected $startDate;
-
-    /**
-     * Undocumented function.
-     */
-    public function __construct(?Carbon $startDate)
+    public function __construct(protected ?Carbon $startDate)
     {
         $this->startDate = $startDate;
     }
@@ -31,42 +17,26 @@ class TagTeamCanJoinExistingStable implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         /** @var \App\Models\TagTeam $tagTeam */
         $tagTeam = TagTeam::with(['currentWrestlers', 'currentStable'])->whereKey($value)->sole();
 
         if ($tagTeam->currentStable !== null) {
-            return false;
+            $fail("{$tagTeam->name} are already members of an existing stable.");
         }
 
         if ($tagTeam->isSuspended()) {
-            $this->messages = "{$tagTeam->name} is supsended and cannot join the stable.";
-
-            return false;
+            $fail("{$tagTeam->name} is supsended and cannot join the stable.");
         }
 
         if ($tagTeam->isCurrentlyEmployed()
             && isset($this->startDate)
             && ! $tagTeam->employedBefore($this->startDate)
         ) {
-            $this->messages = "{$tagTeam->name} cannot have an employment start date after stable's start date.";
-
-            return false;
+            $fail("{$tagTeam->name} cannot have an employment start date after stable's start date.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return $this->messages;
     }
 }

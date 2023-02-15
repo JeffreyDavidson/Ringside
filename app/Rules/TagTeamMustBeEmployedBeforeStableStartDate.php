@@ -5,24 +5,13 @@ declare(strict_types=1);
 namespace App\Rules;
 
 use App\Models\TagTeam;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
+class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
 {
-    /**
-     * The start date of the stable.
-     *
-     * @var \Illuminate\Support\Carbon
-     */
-    private $stableStartDate;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(Carbon $stableStartDate)
+    public function __construct(protected Carbon $stableStartDate)
     {
         $this->stableStartDate = $stableStartDate;
     }
@@ -30,34 +19,22 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $tagTeam = TagTeam::with(['futureEmployment'])->whereKey($value)->sole();
 
-        if ($tagTeam->isCurrentlyEmployed()) {
-            return true;
+        if (! $tagTeam->isCurrentlyEmployed()) {
+            $fail("This tag team is not currently employed.");
         }
 
-        if ($tagTeam->futureEmployment === null) {
-            return true;
+        if ($tagTeam->futureEmployment !== null) {
+            $fail("This tag team has a future employment scheduled.");
         }
 
-        if ($tagTeam->futureEmployment->startedBefore($this->stableStartDate)) {
-            return true;
+        if (! $tagTeam->futureEmployment->startedBefore($this->stableStartDate)) {
+            $fail("This tag team is not employed before the stable\'s activation date");
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This tag team is not employed before the stable\'s activation date';
     }
 }

@@ -3,42 +3,27 @@
 namespace App\Rules;
 
 use App\Models\Wrestler;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class WrestlerCanJoinNewTagTeam implements Rule
+class WrestlerCanJoinNewTagTeam implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (is_null($value)) {
-            return false;
-        }
-
         /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 
         if ($wrestler->isSuspended() || $wrestler->isInjured()) {
-            return false;
+            $fail("This wrestler cannot join the tag team.");
         }
 
         if (($wrestler->currentTagTeam !== null && $wrestler->currentTagTeam->exists())) {
-            return false;
+            $fail("This wrestler cannot join the tag team.");
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This wrestler cannot join the tag team.';
     }
 }

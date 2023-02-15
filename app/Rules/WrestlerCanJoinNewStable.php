@@ -3,21 +3,12 @@
 namespace App\Rules;
 
 use App\Models\Wrestler;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class WrestlerCanJoinNewStable implements Rule
+class WrestlerCanJoinNewStable implements ValidationRule
 {
-    /**
-     * @var array
-     */
-    protected $tagTeamIds;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct(array $tagTeamIds)
+    public function __construct(protected array $tagTeamIds)
     {
         $this->tagTeamIds = $tagTeamIds;
     }
@@ -25,35 +16,23 @@ class WrestlerCanJoinNewStable implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         /** @var \App\Models\Wrestler $wrestler */
         $wrestler = Wrestler::with(['currentStable'])->find($value);
 
         if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
-            return false;
+            $fail("This wrestler is already a member of a stable.");
         }
 
         if (is_array($this->tagTeamIds) && count($this->tagTeamIds) > 0) {
             if (! is_null($wrestler->currentTagTeam)
                 && collect($this->tagTeamIds)->contains($wrestler->currentTagTeam->id)
             ) {
-                return false;
+                $fail("This wrestler is already a member of a stable.");
             }
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This wrestler is already a member of a stable.';
     }
 }

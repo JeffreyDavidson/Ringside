@@ -5,22 +5,12 @@ declare(strict_types=1);
 namespace App\Rules;
 
 use App\Models\MatchType;
-use Countable;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
+class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements ValidationRule
 {
-    /**
-     * The match type to check against.
-     *
-     * @var int
-     */
-    protected $matchTypeId;
-
-    /**
-     * Create a new rule instance.
-     */
-    public function __construct(int $matchTypeId)
+    public function __construct(protected int $matchTypeId)
     {
         $this->matchTypeId = $matchTypeId;
     }
@@ -28,20 +18,12 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  array|Countable  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return MatchType::find($this->matchTypeId)?->number_of_sides === count($value);
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return 'This match does not have the required amount of sides of competitors.';
+        if (MatchType::find($this->matchTypeId)?->number_of_sides !== count($value)) {
+            $fail("This match does not have the required amount of sides of competitors.");
+        };
     }
 }

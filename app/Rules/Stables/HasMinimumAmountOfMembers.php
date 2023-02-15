@@ -3,44 +3,19 @@
 namespace App\Rules\Stables;
 
 use App\Models\Stable;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class HasMinimumAmountOfMembers implements Rule
+class HasMinimumAmountOfMembers implements ValidationRule
 {
-    /**
-     * Undocumented variable.
-     *
-     * @var \App\Models\Stable
-     */
-    protected $stable;
-
-    /**
-     * Undocumented variable.
-     *
-     * @var \Illuminate\Support\Carbon
-     */
-    protected $startDate;
-
-    /**
-     * Undocumented variable.
-     *
-     * @var \Illuminate\Support\Collection
-     */
-    protected $wrestlers;
-
-    /**
-     * Undocumented variable.
-     *
-     * @var \Illuminate\Support\Collection
-     */
-    protected $tagTeams;
-
-    /**
-     * Undocumented function.
-     */
-    public function __construct(Stable $stable, Carbon $startDate, Collection $wrestlers, Collection $tagTeams)
+    public function __construct(
+        private Stable $stable,
+        private Carbon $startDate,
+        private Collection $wrestlers,
+        private Collection $tagTeams
+    )
     {
         $this->stable = $stable;
         $this->startDate = $startDate;
@@ -51,11 +26,9 @@ class HasMinimumAmountOfMembers implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  mixed  $value
-     *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
-    public function passes(string $attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->stable->isCurrentlyActivated()) {
             $tagTeamsCountFromRequest = $this->tagTeams->count();
@@ -64,18 +37,8 @@ class HasMinimumAmountOfMembers implements Rule
             $tagTeamMembersCount = $tagTeamsCountFromRequest * 2;
 
             if ($tagTeamMembersCount + $wrestlersCountFromRequest < 3) {
-                return false;
+                $fail("{$this->stable->name} is currently activated and the activation date cannot be changed.");
             }
         }
-
-        return true;
-    }
-
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return "{$this->stable->name} is currently activated and the activation date cannot be changed.";
     }
 }
