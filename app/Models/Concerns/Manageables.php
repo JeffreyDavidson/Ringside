@@ -25,6 +25,7 @@ trait Manageables
     public function currentWrestlers(): MorphToMany
     {
         return $this->morphedByMany(Wrestler::class, 'manageable')
+            ->withPivot(['hired_at', 'left_at'])
             ->wherePivotNull('left_at');
     }
 
@@ -34,6 +35,7 @@ trait Manageables
     public function previousWrestlers(): MorphToMany
     {
         return $this->morphedByMany(Wrestler::class, 'manageable')
+            ->withPivot(['hired_at', 'left_at'])
             ->wherePivotNotNull('left_at');
     }
 

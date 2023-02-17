@@ -1,11 +1,14 @@
 <?php
 
+use App\Actions\Managers\ReinstateAction;
+use App\Enums\ManagerStatus;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Models\Manager;
+
 test('invoke reinstates a suspended manager and redirects', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReinstateController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    ReinstateAction::run($manager);
 
     expect($manager->fresH())
         ->suspensions->last()->ended_at->not->toBeNull()
@@ -17,8 +20,7 @@ test('invoke throws exception for reinstating a non reinstatable manager', funct
 
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReinstateController::class], $manager));
+    ReinstateAction::run($manager);
 })->throws(CannotBeReinstatedException::class)->with([
     'available',
     'unemployed',

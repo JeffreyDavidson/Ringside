@@ -1,11 +1,14 @@
 <?php
 
+use App\Actions\Managers\SuspendAction;
+use App\Enums\ManagerStatus;
+use App\Exceptions\CannotBeSuspendedException;
+use App\Models\Manager;
+
 test('invoke suspends an available manager and redirects', function () {
     $manager = Manager::factory()->available()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([SuspendController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    SuspendAction::run($manager);
 
     expect($manager->fresh())
         ->suspensions->toHaveCount(1)
@@ -17,8 +20,7 @@ test('invoke throws exception for suspending a non suspendable manager', functio
 
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([SuspendController::class], $manager));
+    SuspendAction::run($manager);
 })->throws(CannotBeSuspendedException::class)->with([
     'unemployed',
     'withFutureEmployment',

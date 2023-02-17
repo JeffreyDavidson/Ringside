@@ -1,9 +1,14 @@
 <?php
 
+use App\Actions\Managers\UnretireAction;
+use App\Enums\ManagerStatus;
+use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Manager;
+
 test('invoke calls unretire action and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([UnretireController::class], $this->manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    $manager = Manager::factory()->retired()->create();
+
+    UnretireAction::run($manager);
 
     expect($manager->fresh())
         ->retirements->last()->ended_at->not->toBeNull()
@@ -15,8 +20,7 @@ test('invoke throws exception for unretiring a non unretirable manager', functio
 
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([UnretireController::class], $manager));
+    UnretireAction::run($manager);
 })->throws(CannotBeUnretiredException::class)->with([
     'available',
     'withFutureEmployment',

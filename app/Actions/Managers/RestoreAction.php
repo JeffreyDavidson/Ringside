@@ -12,7 +12,7 @@ class RestoreAction extends BaseManagerAction
     use AsAction;
 
     /**
-     * Delete a manager.
+     * Restore a deleted manager.
      */
     public function handle(Manager $manager): void
     {

@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 class ClearInjuryController extends Controller
 {
     /**
-     * Clear a manager.
+     * Clear an injured manager.
      */
     public function __invoke(Manager $manager): RedirectResponse
     {

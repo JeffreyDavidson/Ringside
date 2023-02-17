@@ -11,7 +11,6 @@ use App\Models\Contracts\Employable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 
 class Manager extends SingleRosterMember implements CanBeAStableMember, Employable
 {
@@ -55,13 +54,16 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
     }
 
     /**
-     * Determine if the manager is available.
+     * Determine if the manager is available to manager manageables.
      */
     public function isAvailable(): bool
     {
         return $this->currentEmployment()->exists();
     }
 
+    /**
+     * Get the display name of the manager.
+     */
     protected function displayName(): Attribute
     {
         return Attribute::make(

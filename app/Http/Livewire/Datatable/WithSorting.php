@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Datatable;
 
-use Illuminate\Database\Query\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
+
 
 trait WithSorting
 {
@@ -34,7 +35,7 @@ trait WithSorting
     /**
      * Undocumented function.
      */
-    public function applySorting(Builder $query): Builder
+    public function applySorting($query): Builder
     {
         foreach ($this->sorts as $field => $direction) {
             $query->orderBy($field, $direction);
