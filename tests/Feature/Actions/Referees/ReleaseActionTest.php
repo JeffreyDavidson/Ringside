@@ -1,11 +1,14 @@
 <?php
 
-test('invoke releases a bookable referee and redirects', function () {
+use App\Actions\Referees\ReleaseAction;
+use App\Enums\RefereeStatus;
+use App\Exceptions\CannotBeReleasedException;
+use App\Models\Referee;
+
+test('invoke releases a available referee and redirects', function () {
     $referee = Referee::factory()->bookable()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReleaseController::class], $referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+    ReleaseAction::run($referee);
 
     expect($referee->fresh())
         ->employments->last()->ended_at->not->toBeNull()
@@ -15,9 +18,7 @@ test('invoke releases a bookable referee and redirects', function () {
 test('invoke releases an injured referee and redirects', function () {
     $referee = Referee::factory()->injured()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReleaseController::class], $referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+    ReleaseAction::run($referee);
 
     expect($referee->fresh())
         ->injuries->last()->ended_at->not->toBeNull()
@@ -28,9 +29,7 @@ test('invoke releases an injured referee and redirects', function () {
 test('invoke releases an suspended referee and redirects', function () {
     $referee = Referee::factory()->suspended()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReleaseController::class], $referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+    ReleaseAction::run($referee);
 
     expect($referee->fresh())
         ->suspensions->last()->ended_at->not->toBeNull()
@@ -43,8 +42,7 @@ test('invoke throws an exception for releasing a non releasable referee', functi
 
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReleaseController::class], $referee));
+    ReleaseAction::run($referee);
 })->throws(CannotBeReleasedException::class)->with([
     'unemployed',
     'withFutureEmployment',

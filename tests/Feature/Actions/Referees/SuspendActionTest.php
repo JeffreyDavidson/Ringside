@@ -1,11 +1,16 @@
 <?php
 
-test('invoke suspends a bookable referee and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([SuspendController::class], $this->referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\SuspendAction;
+use App\Enums\RefereeStatus;
+use App\Exceptions\CannotBeSuspendedException;
+use App\Models\Referee;
 
-    expect($this->referee->fresh())
+test('invoke suspends an available referee and redirects', function () {
+    $referee = Referee::factory()->bookable()->create();
+
+    SuspendAction::run($referee);
+
+    expect($referee->fresh())
         ->suspensions->toHaveCount(1)
         ->status->toMatchObject(RefereeStatus::SUSPENDED);
 });
@@ -15,8 +20,7 @@ test('invoke throws exception for suspending a non suspendable referee', functio
 
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([SuspendController::class], $referee));
+    SuspendAction::run($referee);
 })->throws(CannotBeSuspendedException::class)->with([
     'unemployed',
     'withFutureEmployment',

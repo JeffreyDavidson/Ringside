@@ -5,6 +5,8 @@ use App\Data\RefereeData;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->referee = Referee::factory()->create();
@@ -13,7 +15,7 @@ beforeEach(function () {
 });
 
 test('update calls update action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->from(action([RefereesController::class, 'edit'], $this->referee))
         ->patch(action([RefereesController::class, 'update'], $this->referee), $this->data)
         ->assertValid()
@@ -23,12 +25,12 @@ test('update calls update action and redirects', function () {
 });
 
 test('a basic user cannot update a referee', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([RefereesController::class, 'update'], $this->referee), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot update a referee', function () {
-    $this->patch(action([RefereesController::class, 'update'], $this->referee), $this->data)
+    patch(action([RefereesController::class, 'update'], $this->referee), $this->data)
         ->assertRedirect(route('login'));
 });

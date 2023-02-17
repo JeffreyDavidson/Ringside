@@ -21,7 +21,7 @@ class UnretireAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
-        throw_if($referee->canBeUnretired(), CannotBeUnretiredException::class);
+        throw_if(! $referee->isRetired(), CannotBeUnretiredException::class, $referee.' is not retired so cannot be unretired.');
 
         $unretiredDate ??= now();
 

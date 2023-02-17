@@ -1,31 +1,36 @@
 <?php
 
-test('store creates a referee and redirects', function () {
-    $this->actingAs(administrator())
-        ->from(action([RefereesController::class, 'create']))
-        ->post(action([RefereesController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\CreateAction;
+use App\Actions\Referees\EmployAction;
+use App\Data\RefereeData;
+use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
 
-    expect(Referee::latest()->first())
-        ->first_name->toBe('Taylor')
-        ->last_name->toBe('Otwell')
-        ->employments->toBeEmpty();
+test('store creates a referee and redirects', function () {
+    $data = new RefereeData('Taylor', 'Otwell', null);
+
+    mock(RefereeRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturns(new App\Models\Referee());
+
+    CreateAction::run($data);
 });
 
 test('an employment is created for the referee if start date is filled in request', function () {
-    $dateTime = Carbon::now()->toDateTimeString();
-    $data = StoreRequest::factory()->create([
-        'start_date' => $dateTime,
-    ]);
+    $data = new RefereeData('Taylor', 'Otwell', Carbon::now());
+    $referee = Referee::factory()->create(['first_name' => $data->first_name, 'last_name' => $data->last_name]);
 
-    $this->actingAs(administrator())
-        ->from(action([RefereesController::class, 'create']))
-        ->post(action([RefereesController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([RefereesController::class, 'index']));
+    mock(RefereeRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturn($referee);
 
-    expect(Referee::latest()->first())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+    EmployAction::mock()->shouldReceive('handle')->with($referee, $data->start_date);
+
+    CreateAction::run($data);
 });

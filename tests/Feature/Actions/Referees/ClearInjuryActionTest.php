@@ -1,13 +1,18 @@
 <?php
 
-test('invoke marks an injured referee as being cleared from injury and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([ClearInjuryController::class], $this->referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\ClearInjuryAction;
+use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Models\Referee;
 
-    expect($this->referee->fresh())
-        ->injuries->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(RefereeStatus::BOOKABLE);
+test('invoke marks an injured referee as being cleared from injury and redirects', function () {
+    $referee = Referee::factory()->injured()->create();
+    $now = now();
+
+    ClearInjuryAction::run($referee);
+
+    expect($referee->fresh())
+        ->isInjured()->toBeFalse()
+        ->injuries->last()->ended_at->toEqual($now->toDateTimeString());
 });
 
 test('invoke throws exception for injuring a non injurable referee', function ($factoryState) {
@@ -15,8 +20,7 @@ test('invoke throws exception for injuring a non injurable referee', function ($
 
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ClearInjuryController::class], $referee));
+    ClearInjuryAction::run($referee);
 })->throws(CannotBeClearedFromInjuryException::class)->with([
     'unemployed',
     'released',

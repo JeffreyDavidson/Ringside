@@ -1,11 +1,16 @@
 <?php
 
-test('invoke unretires a retired referee and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([UnretireController::class], $this->referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\UnretireAction;
+use App\Enums\RefereeStatus;
+use App\Exceptions\CannotBeUnretiredException;
+use App\Models\Referee;
 
-    expect($this->referee->fresh())
+test('invoke calls unretire action and redirects', function () {
+    $referee = Referee::factory()->retired()->create();
+
+    UnretireAction::run($referee);
+
+    expect($referee->fresh())
         ->retirements->last()->ended_at->not->toBeNull()
         ->status->toMatchObject(RefereeStatus::BOOKABLE);
 });
@@ -15,8 +20,7 @@ test('invoke throws exception for unretiring a non unretirable referee', functio
 
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([UnretireController::class], $referee));
+    UnretireAction::run($referee);
 })->throws(CannotBeUnretiredException::class)->with([
     'bookable',
     'withFutureEmployment',

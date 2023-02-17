@@ -4,13 +4,15 @@ use App\Actions\Referees\ReleaseAction;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReleaseController;
 use App\Models\Referee;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->referee = Referee::factory()->bookable()->create();
 });
 
 test('invoke calls release action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([ReleaseController::class], $this->referee))
         ->assertRedirect(action([RefereesController::class, 'index']));
 
@@ -18,12 +20,12 @@ test('invoke calls release action and redirects', function () {
 });
 
 test('a basic user cannot release a referee', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([ReleaseController::class], $this->referee))
         ->assertForbidden();
 });
 
 test('a guest cannot release a referee', function () {
-    $this->patch(action([ReleaseController::class], $this->referee))
+    patch(action([ReleaseController::class], $this->referee))
         ->assertRedirect(route('login'));
 });
