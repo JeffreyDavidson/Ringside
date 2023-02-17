@@ -16,7 +16,6 @@ class SuspendAction extends BaseManagerAction
     /**
      * Suspend a manager.
      *
-     *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void

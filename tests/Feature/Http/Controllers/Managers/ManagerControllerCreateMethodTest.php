@@ -1,21 +1,25 @@
 <?php
 
 use App\Http\Controllers\Managers\ManagersController;
+use App\Models\Manager;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 test('create returns a view', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->get(action([ManagersController::class, 'create']))
-        ->assertStatus(200)
-        ->assertViewIs('managers.create');
+        ->assertSuccessful()
+        ->assertViewIs('managers.create')
+        ->assertViewHas('manager', new Manager);
 });
 
 test('a basic user cannot view the form for creating a manager', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->get(action([ManagersController::class, 'create']))
         ->assertForbidden();
 });
 
 test('a guest cannot view the form for creating a manager', function () {
-    $this->get(action([ManagersController::class, 'create']))
+    get(action([ManagersController::class, 'create']))
         ->assertRedirect(route('login'));
 });

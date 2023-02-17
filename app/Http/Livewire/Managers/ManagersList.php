@@ -8,8 +8,8 @@ use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Manager;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Query\Builder;
 use Illuminate\View\View;
 
 /**
@@ -38,7 +38,7 @@ class ManagersList extends BaseComponent
     ];
 
     /**
-     * Undocumented function.
+     * Get a collection of managers.
      */
     public function getRowsQueryProperty(): Builder
     {
@@ -52,7 +52,7 @@ class ManagersList extends BaseComponent
     }
 
     /**
-     * Undocumented function.
+     * Retreive the rows for the table.
      */
     public function getRowsProperty(): LengthAwarePaginator
     {

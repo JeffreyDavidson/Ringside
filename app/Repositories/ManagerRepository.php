@@ -145,7 +145,7 @@ class ManagerRepository
     }
 
     /**
-     * Get the model's first employment date.
+     * Update the manager's future employment.
      */
     public function updateEmployment(Manager $manager, Carbon $employmentDate): Manager
     {
@@ -155,7 +155,7 @@ class ManagerRepository
     }
 
     /**
-     * Updates a manager's status and saves.
+     * Disassociate a manager from its current tag teams.
      */
     public function removeFromCurrentTagTeams(Manager $manager): void
     {
@@ -167,7 +167,7 @@ class ManagerRepository
     }
 
     /**
-     * Updates a manager's status and saves.
+     * Disassociate a manager from its current wrestlers.
      */
     public function removeFromCurrentWrestlers(Manager $manager): void
     {

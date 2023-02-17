@@ -16,7 +16,7 @@ class ManagerQueryBuilder extends SingleRosterMemberQueryBuilder
     /**
      * Scope a query to only include available managers.
      */
-    public function available(): ManagerQueryBuilder
+    public function available(): self
     {
         return $this->where('status', ManagerStatus::AVAILABLE);
     }

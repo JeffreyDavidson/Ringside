@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Managers\ManagersController;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 test('index returns a view', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->get(action([ManagersController::class, 'index']))
         ->assertOk()
         ->assertViewIs('managers.index')
@@ -11,12 +13,12 @@ test('index returns a view', function () {
 });
 
 test('a basic user cannot view managers index page', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->get(action([ManagersController::class, 'index']))
         ->assertForbidden();
 });
 
 test('a guest cannot view managers index page', function () {
-    $this->get(action([ManagersController::class, 'index']))
+    get(action([ManagersController::class, 'index']))
         ->assertRedirect(route('login'));
 });

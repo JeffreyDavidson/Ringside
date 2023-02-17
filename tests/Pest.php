@@ -22,7 +22,15 @@ uses(TestCase::class, CreatesApplication::class, LazilyRefreshDatabase::class)->
 uses(ValidatesRequests::class)->in('Feature/Http/Requests');
 
 uses()->group('wrestlers', 'feature-wrestlers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Wrestlers');
-uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Managers');
+uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')
+    ->in(
+        'Feature/Http/Controllers/Managers',
+        'Feature/Http/Livewire/Managers',
+        'Feature/Http/Requests/Managers',
+        'Feature/Actions/Managers',
+        'Feature/Policies/ManagerPolicyTest',
+        'Feature/Repositories/Manager',
+    );
 uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Referees');
 uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
 uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');

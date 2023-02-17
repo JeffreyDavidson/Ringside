@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 class RestoreController extends Controller
 {
     /**
-     * Restore a manager.
+     * Restore a deleted manager.
      */
     public function __invoke(int $managerId): RedirectResponse
     {

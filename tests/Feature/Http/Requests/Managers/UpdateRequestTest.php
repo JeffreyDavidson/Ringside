@@ -2,6 +2,7 @@
 
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\ManagerRequestFactory;
 
@@ -130,7 +131,7 @@ test('manager start date cannot be changed if employment start date has past', f
         ->validate(ManagerRequestFactory::new()->create([
             'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => EmploymentStartDateCanBeChanged::class]);
 });
 
 test('manager start date can be changed if employment start date is in the future', function () {

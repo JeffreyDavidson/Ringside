@@ -5,6 +5,8 @@ use App\Data\ManagerData;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->manager = Manager::factory()->create();
@@ -13,7 +15,7 @@ beforeEach(function () {
 });
 
 test('update calls update action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->from(action([ManagersController::class, 'edit'], $this->manager))
         ->patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
         ->assertValid()
@@ -23,12 +25,12 @@ test('update calls update action and redirects', function () {
 });
 
 test('a basic user cannot update a manager', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot update a manager', function () {
-    $this->patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
+    patch(action([ManagersController::class, 'update'], $this->manager), $this->data)
         ->assertRedirect(route('login'));
 });

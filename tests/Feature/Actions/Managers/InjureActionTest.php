@@ -1,11 +1,16 @@
 <?php
 
-test('invoke injures an available manager and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([InjureController::class], $this->manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+use App\Actions\Managers\InjureAction;
+use App\Enums\ManagerStatus;
+use App\Exceptions\CannotBeInjuredException;
+use App\Models\Manager;
 
-    expect($this->manager->fresh())
+test('invoke injures an available manager and redirects', function () {
+    $manager = Manager::factory()->available()->create();
+
+    InjureAction::run($manager);
+
+    expect($manager->fresh())
         ->injuries->toHaveCount(1)
         ->status->toMatchObject(ManagerStatus::INJURED);
 });
@@ -15,8 +20,7 @@ test('invoke throws exception for injuring a non injurable manager', function ($
 
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([InjureController::class], $manager));
+    InjureAction::run($manager);
 })->throws(CannotBeInjuredException::class)->with([
     'unemployed',
     'suspended',

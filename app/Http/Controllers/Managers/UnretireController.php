@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 class UnretireController extends Controller
 {
     /**
-     * Unretire a manager.
+     * Unretire a retired manager.
      */
     public function __invoke(Manager $manager): RedirectResponse
     {

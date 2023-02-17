@@ -1,57 +1,53 @@
 <?php
 
-test('updates a manager and redirects', function () {
-    $manager = Manager::factory()->create([
-        'first_name' => 'Dries',
-        'last_name' => 'Vints',
-    ]);
+use App\Actions\Managers\EmployAction;
+use App\Actions\Managers\UpdateAction;
+use App\Data\ManagerData;
+use App\Models\Manager;
+use App\Repositories\ManagerRepository;
+use Illuminate\Support\Carbon;
 
-    $data = UpdateRequest::factory()->create([
-        'first_name' => 'Taylor',
-        'last_name' => 'Otwell',
-        'start_date' => null,
-    ]);
+test('it can update a manager', function () {
+    $data = new ManagerData('Taylor', 'Otwell', null);
+    $manager = Manager::factory()->create();
 
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'edit'], $manager))
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->mock(ManagerRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($manager, $data)
+        ->andReturns($manager);
 
-    expect($manager->fresh())
-        ->first_name->toBe('Taylor')
-        ->last_name->toBe('Otwell')
-        ->employments->toBeEmpty();
+    UpdateAction::run($manager, $data);
+
+    EmployAction::shouldNotRun();
 });
 
-test('update can employ an unemployed manager when start date is filled', function () {
-    $dateTime = now()->toDateTimeString();
+test('it can employ an unemployed manager when start date is filled', function () {
+    $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
     $manager = Manager::factory()->unemployed()->create();
-    $data = UpdateRequest::factory()->create(['start_date' => $dateTime]);
 
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'edit'], $manager))
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->mock(ManagerRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($manager, $data)
+        ->andReturns($manager);
 
-    expect($manager->fresh())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+    EmployAction::shouldRun();
+
+    UpdateAction::run($manager, $data);
 });
 
-test('update can employ a future employed manager when start date is filled', function () {
-    $dateTime = now()->toDateTimeString();
+test('it can employ a future employed manager when start date is filled', function () {
+    $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
     $manager = Manager::factory()->withFutureEmployment()->create();
-    $data = UpdateRequest::factory()->create(['start_date' => $dateTime]);
 
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'edit'], $manager))
-        ->patch(action([ManagersController::class, 'update'], $manager), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    $this->mock(ManagerRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($manager, $data)
+        ->andReturns($manager);
 
-    expect($manager->fresh())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+    EmployAction::shouldRun();
+
+    UpdateAction::run($manager, $data);
 });

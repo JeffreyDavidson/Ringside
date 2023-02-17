@@ -1,16 +1,13 @@
 <?php
 
+use App\Actions\Managers\EmployAction;
 use App\Enums\ManagerStatus;
-use App\Http\Controllers\Managers\EmployController;
-use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
 
 test('invoke employs an unemployed manager and redirects', function () {
     $manager = Manager::factory()->unemployed()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([EmployController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    EmployAction::run($manager);
 
     expect($manager->fresh())
         ->employments->toHaveCount(1)
@@ -21,9 +18,7 @@ test('invoke employs a future employed manager and redirects', function () {
     $manager = Manager::factory()->withFutureEmployment()->create();
     $startDate = $manager->employments->first()->started_at;
 
-    $this->actingAs(administrator())
-        ->patch(action([EmployController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    EmployAction::run($manager);
 
     expect($manager->fresh())
         ->currentEmployment->started_at->toBeLessThan($startDate)
@@ -33,9 +28,7 @@ test('invoke employs a future employed manager and redirects', function () {
 test('invoke employs a released manager and redirects', function () {
     $manager = Manager::factory()->released()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([EmployController::class], $manager))
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    EmployAction::run($manager);
 
     expect($manager->fresh())
         ->employments->toHaveCount(2)

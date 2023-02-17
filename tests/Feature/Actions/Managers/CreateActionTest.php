@@ -1,31 +1,36 @@
 <?php
 
-test('store creates a manager and redirects', function () {
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'create']))
-        ->post(action([ManagersController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
+use App\Actions\Managers\CreateAction;
+use App\Actions\Managers\EmployAction;
+use App\Data\ManagerData;
+use App\Models\Manager;
+use App\Repositories\ManagerRepository;
+use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
 
-    expect(Manager::latest()->first())
-        ->first_name->toBe('Taylor')
-        ->last_name->toBe('Otwell')
-        ->employments->toBeEmpty();
+test('store creates a manager and redirects', function () {
+    $data = new ManagerData('Taylor', 'Otwell', null);
+
+    mock(ManagerRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturns(new App\Models\Manager());
+
+    CreateAction::run($data);
 });
 
 test('an employment is created for the manager if start date is filled in request', function () {
-    $dateTime = Carbon::now()->toDateTimeString();
-    $data = StoreRequest::factory()->create([
-        'start_date' => $dateTime,
-    ]);
+    $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
+    $manager = Manager::factory()->create(['first_name' => $data->first_name, 'last_name' => $data->last_name]);
 
-    $this->actingAs(administrator())
-        ->from(action([ManagersController::class, 'create']))
-        ->post(action([ManagersController::class, 'store']), $data)
-        ->assertValid()
-        ->assertRedirect(action([ManagersController::class, 'index']));
+    mock(ManagerRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturn($manager);
 
-    expect(Manager::latest()->first())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toEqual($dateTime);
+    EmployAction::mock()->shouldReceive('handle')->with($manager, $data->start_date);
+
+    CreateAction::run($data);
 });
