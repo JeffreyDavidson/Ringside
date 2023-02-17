@@ -1,11 +1,16 @@
 <?php
 
-test('invoke reinstates a suspended referee and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([ReinstateController::class], $this->referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\ReinstateAction;
+use App\Enums\RefereeStatus;
+use App\Exceptions\CannotBeReinstatedException;
+use App\Models\Referee;
 
-    expect($this->referee->fresh())
+test('invoke reinstates a suspended referee and redirects', function () {
+    $referee = Referee::factory()->suspended()->create();
+
+    ReinstateAction::run($referee);
+
+    expect($referee->fresH())
         ->suspensions->last()->ended_at->not->toBeNull()
         ->status->toMatchObject(RefereeStatus::BOOKABLE);
 });
@@ -15,8 +20,7 @@ test('invoke throws exception for reinstating a non reinstatable referee', funct
 
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ReinstateController::class], $referee));
+    ReinstateAction::run($referee);
 })->throws(CannotBeReinstatedException::class)->with([
     'bookable',
     'unemployed',

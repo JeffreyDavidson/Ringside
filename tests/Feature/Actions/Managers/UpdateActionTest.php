@@ -6,12 +6,13 @@ use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
 
 test('it can update a manager', function () {
     $data = new ManagerData('Taylor', 'Otwell', null);
     $manager = Manager::factory()->create();
 
-    $this->mock(ManagerRepository::class)
+    mock(ManagerRepository::class)
         ->shouldReceive('update')
         ->once()
         ->with($manager, $data)
@@ -26,7 +27,7 @@ test('it can employ an unemployed manager when start date is filled', function (
     $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
     $manager = Manager::factory()->unemployed()->create();
 
-    $this->mock(ManagerRepository::class)
+    mock(ManagerRepository::class)
         ->shouldReceive('update')
         ->once()
         ->with($manager, $data)
@@ -41,7 +42,7 @@ test('it can employ a future employed manager when start date is filled', functi
     $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
     $manager = Manager::factory()->withFutureEmployment()->create();
 
-    $this->mock(ManagerRepository::class)
+    mock(ManagerRepository::class)
         ->shouldReceive('update')
         ->once()
         ->with($manager, $data)

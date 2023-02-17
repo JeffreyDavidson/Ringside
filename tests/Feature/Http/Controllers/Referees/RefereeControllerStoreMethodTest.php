@@ -5,6 +5,8 @@ use App\Data\RefereeData;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Requests\Referees\StoreRequest;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\post;
 
 beforeEach(function () {
     $this->data = StoreRequest::factory()->create();
@@ -12,7 +14,7 @@ beforeEach(function () {
 });
 
 test('store calls create action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->from(action([RefereesController::class, 'create']))
         ->post(action([RefereesController::class, 'store']), $this->data)
         ->assertValid()
@@ -22,12 +24,12 @@ test('store calls create action and redirects', function () {
 });
 
 test('a basic user cannot create a referee', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->post(action([RefereesController::class, 'store']), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot create a referee', function () {
-    $this->post(action([RefereesController::class, 'store']), $this->data)
+    post(action([RefereesController::class, 'store']), $this->data)
         ->assertRedirect(route('login'));
 });

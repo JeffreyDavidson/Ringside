@@ -39,7 +39,7 @@ test('invoke releases an suspended manager and redirects', function () {
         ->status->toMatchObject(ManagerStatus::RELEASED);
 });
 
-test('invoke_releases_a_manager_leaving_their_current_tag_teams_and_managers_and_redirects', function () {
+test('Invoke releases a manager leaving their current tag teams and managers and redirects', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
     $manager = Manager::factory()

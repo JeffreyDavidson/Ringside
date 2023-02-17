@@ -1,9 +1,17 @@
 <?php
 
-test('invoke restores a deleted referee and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([RestoreController::class], $this->referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\RestoreAction;
+use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use function Pest\Laravel\mock;
 
-    $this->assertNull($this->referee->fresh()->deleted_at);
+test('handle restores a soft deleted referee', function () {
+    $referee = Referee::factory()->trashed()->create();
+
+    mock(RefereeRepository::class)
+        ->shouldReceive('restore')
+        ->once()
+        ->with($referee);
+
+    RestoreAction::run($referee);
 });

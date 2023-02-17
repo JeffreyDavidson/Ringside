@@ -4,13 +4,14 @@ use App\Actions\Referees\ClearInjuryAction;
 use App\Http\Controllers\Referees\ClearInjuryController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
+use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     $this->referee = Referee::factory()->injured()->create();
 });
 
 test('invoke calls clear injury action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([ClearInjuryController::class], $this->referee))
         ->assertRedirect(action([RefereesController::class, 'index']));
 

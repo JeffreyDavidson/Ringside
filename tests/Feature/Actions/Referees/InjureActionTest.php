@@ -1,11 +1,16 @@
 <?php
 
-test('invoke injures a bookable referee and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([InjureController::class], $this->referee))
-        ->assertRedirect(action([RefereesController::class, 'index']));
+use App\Actions\Referees\InjureAction;
+use App\Enums\RefereeStatus;
+use App\Exceptions\CannotBeInjuredException;
+use App\Models\Referee;
 
-    expect($this->referee->fresh())
+test('invoke injures an available referee and redirects', function () {
+    $referee = Referee::factory()->bookable()->create();
+
+    InjureAction::run($referee);
+
+    expect($referee->fresh())
         ->injuries->toHaveCount(1)
         ->status->toMatchObject(RefereeStatus::INJURED);
 });
@@ -15,8 +20,7 @@ test('invoke throws exception for injuring a non injurable referee', function ($
 
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([InjureController::class], $referee));
+    InjureAction::run($referee);
 })->throws(CannotBeInjuredException::class)->with([
     'unemployed',
     'suspended',

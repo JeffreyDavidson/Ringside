@@ -29,9 +29,17 @@ uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')
         'Feature/Http/Requests/Managers',
         'Feature/Actions/Managers',
         'Feature/Policies/ManagerPolicyTest',
-        'Feature/Repositories/Manager',
+        'Feature/Repositories/ManagerRepositoryTest',
     );
-uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Referees');
+uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')
+    ->in(
+        'Feature/Http/Controllers/Referees',
+        'Feature/Http/Livewire/Referees',
+        'Feature/Http/Requests/Referees',
+        'Feature/Actions/Referees',
+        'Feature/Policies/RefereePolicyTest',
+        'Feature/Repositories/RefereeRepositoryTest',
+    );
 uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
 uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
 uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
