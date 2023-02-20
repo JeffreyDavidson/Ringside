@@ -10,7 +10,7 @@ parameters:
     level: 9
 
     excludePaths:
-        - ./*/*/FileToBeExcluded.php
+        - ./app/Http/Livewire
 
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false
