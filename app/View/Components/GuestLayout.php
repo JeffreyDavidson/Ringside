@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\View\Components;
 
+use Closure;
 use Illuminate\View\Component;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class GuestLayout extends Component
 {
     /**
      * Get the view / contents that represents the component.
      */
-    public function render(): View
+    public function render(): View|Closure|string
     {
         return view('components.layouts.guest');
     }
