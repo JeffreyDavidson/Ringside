@@ -8,8 +8,6 @@ interface Bookable
 {
     /**
      * Check to see if the model is bookable.
-     *
-     * @return bool
      */
-    public function isBookable();
+    public function isBookable(): bool;
 }

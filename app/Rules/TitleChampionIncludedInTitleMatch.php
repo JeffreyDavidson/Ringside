@@ -43,7 +43,7 @@ class TitleChampionIncludedInTitleMatch implements ValidationRule
             ->every(fn ($title) => $competitors->contains($title->currentChampionship->champion));
 
         if (! $champions) {
-            $fail("This match requires the champion to be involved.");
+            $fail('This match requires the champion to be involved.');
         }
     }
 }

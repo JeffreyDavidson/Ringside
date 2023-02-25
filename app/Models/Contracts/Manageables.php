@@ -4,47 +4,37 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
 interface Manageables
 {
     /**
      * Get all of the wrestlers that have been managed by model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function wrestlers();
+    public function wrestlers(): MorphToMany;
 
     /**
      * Get the current wrestlers that is managed by model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function currentWrestlers();
+    public function currentWrestlers(): MorphToMany;
 
     /**
      * Get all previous wrestlers that have been managed by model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function previousWrestlers();
+    public function previousWrestlers(): MorphToMany;
 
     /**
      * Get all of the tag teams that have been managed by model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function tagTeams();
+    public function tagTeams(): MorphToMany;
 
     /**
      * Get the current tag teams that is managed by model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function currentTagTeams();
+    public function currentTagTeams(): MorphToMany;
 
     /**
      * Get all previous tag teams that have been managed by model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function previousTagTeams();
+    public function previousTagTeams(): MorphToMany;
 }

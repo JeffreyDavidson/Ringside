@@ -14,9 +14,7 @@ class AddMatchForEventAction extends BaseEventMatchAction
     use AsAction;
 
     /**
-     * Undocumented function.
-     *
-     * @return \App\Models\EventMatch $cratedMatch
+     * Create a match for an event.
      */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
     {

@@ -9,7 +9,6 @@ use App\Enums\RefereeStatus;
 use App\Models\Contracts\Bookable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 
 class Referee extends SingleRosterMember implements Bookable
 {
@@ -39,8 +38,6 @@ class Referee extends SingleRosterMember implements Bookable
 
     /**
      * Create a new Eloquent query builder for the model.
-     *
-     * @return \App\Builders\RefereeQueryBuilder<Referee>
      */
     public function newEloquentBuilder($query): RefereeQueryBuilder
     {

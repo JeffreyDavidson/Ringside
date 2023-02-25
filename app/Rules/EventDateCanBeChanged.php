@@ -24,11 +24,11 @@ class EventDateCanBeChanged implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->event->date === null) {
-            $fail("The validation error message.");
+            $fail('The validation error message.');
         }
 
-        if ($this->event->date->isFuture() && Carbon::parse($value)->gt(now())) {
-            $fail("The validation error message.");
+        if ($this->event->date?->isFuture() && Carbon::parse($value)->gt(now())) {
+            $fail('The validation error message.');
         }
     }
 }

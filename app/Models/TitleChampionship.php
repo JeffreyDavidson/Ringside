@@ -48,7 +48,7 @@ class TitleChampionship extends Model
     ];
 
     /**
-     * Undocumented function.
+     * Retrieve the title of the championship.
      */
     public function title(): BelongsTo
     {
@@ -63,11 +63,17 @@ class TitleChampionship extends Model
         return $this->mergedRelation('all_title_champions');
     }
 
+    /**
+     * Retrieve the champion of the title championship.
+     */
     public function champion(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * Retrieve the number of days for a title championship.
+     */
     public function lengthInDays(): int
     {
         $datetime = $this->lost_at ?? now();

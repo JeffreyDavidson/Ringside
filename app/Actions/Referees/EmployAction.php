@@ -16,7 +16,6 @@ class EmployAction extends BaseRefereeAction
     /**
      * Employ a referee.
      *
-     *
      * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(Referee $referee, ?Carbon $startDate = null): void

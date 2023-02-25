@@ -16,7 +16,6 @@ class EmployAction extends BaseWrestlerAction
     /**
      * Employ a wrestler.
      *
-     *
      * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void

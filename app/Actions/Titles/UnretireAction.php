@@ -16,7 +16,6 @@ class UnretireAction extends BaseTitleAction
     /**
      * Unretire a title.
      *
-     *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void

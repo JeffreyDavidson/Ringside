@@ -26,11 +26,11 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
         $tagTeam = TagTeam::with(['futureEmployment'])->whereKey($value)->sole();
 
         if (! $tagTeam->isCurrentlyEmployed()) {
-            $fail("This tag team is not currently employed.");
+            $fail('This tag team is not currently employed.');
         }
 
         if ($tagTeam->futureEmployment !== null) {
-            $fail("This tag team has a future employment scheduled.");
+            $fail('This tag team has a future employment scheduled.');
         }
 
         if (! $tagTeam->futureEmployment->startedBefore($this->stableStartDate)) {

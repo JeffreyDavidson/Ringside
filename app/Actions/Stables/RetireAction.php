@@ -8,8 +8,6 @@ use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -19,7 +17,6 @@ class RetireAction extends BaseStableAction
 
     /**
      * Retire a stable.
-     *
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
@@ -31,12 +28,12 @@ class RetireAction extends BaseStableAction
 
         if ($stable->currentTagTeams->isNotEmpty()) {
             $stable->currentTagTeams
-                ->each(fn (TagTeam $tagTeam) => TagTeamsRetireAction::run($tagTeam, $retirementDate));
+                ->each(fn ($tagTeam) => TagTeamsRetireAction::run($tagTeam, $retirementDate));
         }
 
         if ($stable->currentWrestlers->isNotEmpty()) {
             $stable->currentWrestlers
-                ->each(fn (Wrestler $wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
+                ->each(fn ($wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
         }
 
         $this->stableRepository->deactivate($stable, $retirementDate);

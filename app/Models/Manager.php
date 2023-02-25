@@ -67,7 +67,7 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
     protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $this->first_name.' '.$this->last_name,
+            get: fn () => "{$this->first_name} {$this->last_name}",
         );
     }
 }

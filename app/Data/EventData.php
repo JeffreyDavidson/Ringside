@@ -9,7 +9,7 @@ use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Venue;
 use Illuminate\Support\Carbon;
 
-class EventData
+readonly class EventData
 {
     /**
      * Create a new event data instance.

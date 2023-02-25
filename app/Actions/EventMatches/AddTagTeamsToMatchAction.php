@@ -14,7 +14,7 @@ class AddTagTeamsToMatchAction extends BaseEventMatchAction
     use AsAction;
 
     /**
-     * Add titles to an event match.
+     * Add tag teams to an event match.
      *
      * @param  \Illuminate\Support\Collection<int, \App\Models\TagTeam>  $tagTeams
      */

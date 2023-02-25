@@ -20,7 +20,7 @@ class TitleMustBeActive implements ValidationRule
         $title = Title::query()->whereKey($value)->sole();
 
         if (! $title->isCurrentlyActivated()) {
-            $fail("This title is not active and cannot be added to the match.");
+            $fail('This title is not active and cannot be added to the match.');
         }
     }
 }

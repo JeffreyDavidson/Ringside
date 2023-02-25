@@ -12,6 +12,9 @@ class UpdateAction extends BaseTitleAction
 {
     use AsAction;
 
+    /**
+     * Update a title.
+     */
     public function handle(Title $title, TitleData $titleData): Title
     {
         $this->titleRepository->update($title, $titleData);

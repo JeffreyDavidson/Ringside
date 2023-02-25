@@ -6,7 +6,6 @@ namespace App\Http\Livewire\Datatable;
 
 use Illuminate\Contracts\Database\Query\Builder;
 
-
 trait WithSorting
 {
     /**

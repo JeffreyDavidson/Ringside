@@ -17,7 +17,6 @@ class SuspendAction extends BaseTagTeamAction
     /**
      * Suspend a tag team.
      *
-     *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void

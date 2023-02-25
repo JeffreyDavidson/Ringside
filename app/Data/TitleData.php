@@ -8,7 +8,7 @@ use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use Illuminate\Support\Carbon;
 
-class TitleData
+readonly class TitleData
 {
     public function __construct(public string $name, public ?Carbon $activation_date)
     {

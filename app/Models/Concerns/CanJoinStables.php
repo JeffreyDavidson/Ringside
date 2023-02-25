@@ -46,7 +46,7 @@ trait CanJoinStables
     }
 
     /**
-     * Undocumented function.
+     * Determine if the model is currently a member of a stable.
      */
     public function isNotCurrentlyInStable(Stable $stable): bool
     {

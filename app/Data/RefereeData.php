@@ -8,7 +8,7 @@ use App\Http\Requests\Referees\StoreRequest;
 use App\Http\Requests\Referees\UpdateRequest;
 use Illuminate\Support\Carbon;
 
-class RefereeData
+readonly class RefereeData
 {
     /**
      * Create a new referee data instance.

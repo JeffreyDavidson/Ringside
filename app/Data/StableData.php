@@ -12,7 +12,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class StableData
+readonly class StableData
 {
     /**
      * Create a new stable data instance.

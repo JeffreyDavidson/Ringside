@@ -8,15 +8,10 @@ use App\Repositories\TitleRepository;
 
 abstract class BaseTitleAction
 {
-    protected TitleRepository $titleRepository;
-
     /**
-     * Create a new title action instance.
-     *
-     * @param  \App\Repositories\TitleRepository  $titleRepository
+     * Create a new base title action instance.
      */
-    public function __construct(TitleRepository $titleRepository)
+    public function __construct(protected TitleRepository $titleRepository)
     {
-        $this->titleRepository = $titleRepository;
     }
 }

@@ -11,40 +11,12 @@ use App\Repositories\WrestlerRepository;
 abstract class BaseStableAction
 {
     /**
-     * The repository to be used for stables.
-     *
-     * @var \App\Repositories\StableRepository
-     */
-    protected StableRepository $stableRepository;
-
-    /**
-     * The repository to be used for tag teams.
-     *
-     * @var \App\Repositories\TagTeamRepository
-     */
-    protected TagTeamRepository $tagTeamRepository;
-
-    /**
-     * The repository to be used for wrestlers.
-     *
-     * @var \App\Repositories\WrestlerRepository
-     */
-    protected WrestlerRepository $wrestlerRepository;
-
-    /**
-     * Create a new stable action instance.
-     *
-     * @param  \App\Repositories\StableRepository  $stableRepository
-     * @param  \App\Repositories\TagTeamRepository  $tagTeamRepository
-     * @param  \App\Repositories\WrestlerRepository  $wrestlerRepository
+     * Create a new base stable action instance.
      */
     public function __construct(
-        StableRepository $stableRepository,
-        TagTeamRepository $tagTeamRepository,
-        WrestlerRepository $wrestlerRepository
+        protected StableRepository $stableRepository,
+        protected TagTeamRepository $tagTeamRepository,
+        protected WrestlerRepository $wrestlerRepository
     ) {
-        $this->stableRepository = $stableRepository;
-        $this->tagTeamRepository = $tagTeamRepository;
-        $this->wrestlerRepository = $wrestlerRepository;
     }
 }

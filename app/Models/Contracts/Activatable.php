@@ -4,99 +4,75 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
 interface Activatable
 {
     /**
      * Get all of the activations of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function activations();
+    public function activations(): MorphMany;
 
     /**
      * Get the current activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentActivation();
+    public function currentActivation(): MorphOne;
 
     /**
      * Get the first activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function firstActivation();
+    public function firstActivation(): MorphOne;
 
     /**
      * Get the future activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function futureActivation();
+    public function futureActivation(): MorphOne;
 
     /**
      * Get the previous activation of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousActivation();
+    public function previousActivation(): MorphOne;
 
     /**
      * Get the previous activations of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousActivations();
+    public function previousActivations(): MorphMany;
 
     /**
      * Check to see if the model is currently active.
-     *
-     * @return bool
      */
-    public function isCurrentlyActivated();
+    public function isCurrentlyActivated(): bool;
 
     /**
      * Check to see if the model has been activated.
-     *
-     * @return bool
      */
-    public function hasActivations();
+    public function hasActivations(): bool;
 
     /**
      * Check to see if the model is unactivated.
-     *
-     * @return bool
      */
-    public function isUnactivated();
+    public function isUnactivated(): bool;
 
     /**
      * Check to see if the model has a future activation.
-     *
-     * @return bool
      */
-    public function hasFutureActivation();
+    public function hasFutureActivation(): bool;
 
     /**
      * Retrieve the model's first activation date.
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function activatedAt();
+    public function activatedAt(): Attribute;
 
     /**
      * Check to see if the model is not in activation.
-     *
-     * @return bool
      */
-    public function isNotInActivation();
+    public function isNotInActivation(): bool;
 
     /**
-     * Check to see if the model was activated on a given date.
-     *
-     * @param  \Illuminate\Support\Carbon  $activationDate
-     * @return bool
+     * Get the model's first activation date.
      */
-    public function activatedOn(Carbon $activationDate);
+    public function activatedOn(Carbon $activationDate): ?bool;
 }

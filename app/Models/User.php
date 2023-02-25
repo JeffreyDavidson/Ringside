@@ -48,6 +48,9 @@ class User extends Authenticatable
         'role' => Role::class,
     ];
 
+    /**
+     * Get the user's password.
+     */
     public function password(): Attribute
     {
         return new Attribute(

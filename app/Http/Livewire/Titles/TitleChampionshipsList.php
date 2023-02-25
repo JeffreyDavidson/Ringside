@@ -19,8 +19,6 @@ class TitleChampionshipsList extends BaseComponent
 {
     /**
      * Undocumented variable.
-     *
-     * @var \App\Models\Title
      */
     public Title $title;
 

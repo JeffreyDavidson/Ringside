@@ -24,14 +24,14 @@ class WrestlerCanJoinNewStable implements ValidationRule
         $wrestler = Wrestler::with(['currentStable'])->find($value);
 
         if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
-            $fail("This wrestler is already a member of a stable.");
+            $fail('This wrestler is already a member of a stable.');
         }
 
         if (is_array($this->tagTeamIds) && count($this->tagTeamIds) > 0) {
             if (! is_null($wrestler->currentTagTeam)
                 && collect($this->tagTeamIds)->contains($wrestler->currentTagTeam->id)
             ) {
-                $fail("This wrestler is already a member of a stable.");
+                $fail('This wrestler is already a member of a stable.');
             }
         }
     }

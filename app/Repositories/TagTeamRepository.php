@@ -141,7 +141,7 @@ class TagTeamRepository
         $joinDate ??= now();
 
         $wrestlers->each(
-            fn (Wrestler $wrestler) => $this->addTagTeamPartner($tagTeam, $wrestler->id, $joinDate)
+            fn (Wrestler $wrestler) => $this->addTagTeamPartner($tagTeam, $wrestler, $joinDate)
         );
 
         return $tagTeam;
@@ -164,7 +164,7 @@ class TagTeamRepository
         $formerTagTeamPartners->each(
             fn (Wrestler $formerTagTeamPartner) => $this->removeTagTeamPartner(
                 $tagTeam,
-                $formerTagTeamPartner->id,
+                $formerTagTeamPartner,
                 $date
             )
         );
@@ -172,7 +172,7 @@ class TagTeamRepository
         $newTagTeamPartners->each(
             fn (Wrestler $newTagTeamPartner) => $this->addTagTeamPartner(
                 $tagTeam,
-                $newTagTeamPartner->id,
+                $newTagTeamPartner,
                 $date
             )
         );
@@ -183,14 +183,14 @@ class TagTeamRepository
     /**
      * Remove wrestler from a tag team.
      */
-    public function removeTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, ?Carbon $removalDate = null): void
+    public function removeTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, ?Carbon $removalDate = null): void
     {
         $removalDate ??= now();
 
-        $tagTeam->currentWrestlers()->find($tagTeamPartnerId)->update(['current_tag_team_id' => null]);
+        $tagTeamPartner->update(['current_tag_team_id' => null]);
 
         $tagTeam->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
-            $tagTeamPartnerId,
+            $tagTeamPartner->id,
             ['left_at' => $removalDate->toDateTimeString()]
         );
     }
@@ -198,14 +198,14 @@ class TagTeamRepository
     /**
      * Add wrestler to a tag team.
      */
-    public function addTagTeamPartner(TagTeam $tagTeam, int $tagTeamPartnerId, ?Carbon $joinDate = null): void
+    public function addTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, ?Carbon $joinDate = null): void
     {
         $joinDate ??= now();
 
-        Wrestler::find($tagTeamPartnerId)->update(['current_tag_team_id' => $tagTeam->id]);
+        $tagTeamPartner->update(['current_tag_team_id' => $tagTeam->id]);
 
         $tagTeam->wrestlers()->attach(
-            $tagTeamPartnerId,
+            $tagTeamPartner->id,
             ['joined_at' => $joinDate->toDateTimeString()]
         );
     }

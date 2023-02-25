@@ -18,7 +18,7 @@ class TagTeamCanJoinNewStable implements ValidationRule
         $tagTeam = TagTeam::with(['currentWrestlers', 'currentStable'])->whereKey($value)->sole();
 
         if ($tagTeam->currentStable !== null) {
-            $fail("This tag team is already a member of a stable.");
+            $fail('This tag team is already a member of a stable.');
         }
     }
 }

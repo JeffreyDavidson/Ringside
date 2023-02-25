@@ -12,6 +12,9 @@ class UpdateAction extends BaseEventAction
 {
     use AsAction;
 
+    /**
+     * Update an event.
+     */
     public function handle(Event $event, EventData $eventData): Event
     {
         return $this->eventRepository->update($event, $eventData);
