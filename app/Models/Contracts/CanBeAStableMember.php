@@ -4,26 +4,23 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use Fidum\EloquentMorphToOne\MorphToOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+
 interface CanBeAStableMember
 {
     /**
      * Get the stables the stable member has been a member of.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function stables();
+    public function stables(): MorphToMany;
 
     /**
      * Get the current stable the member belongs to.
-     *
-     * @return \Fidum\EloquentMorphToOne\MorphToOne
      */
-    public function currentStable();
+    public function currentStable(): MorphToOne;
 
     /**
      * Get the previous stables the member has belonged to.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function previousStables();
+    public function previousStables(): MorphToMany;
 }

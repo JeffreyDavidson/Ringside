@@ -20,8 +20,6 @@ class MatchCreateForm extends BaseComponent
 
     /**
      * Subview to load competitors.
-     *
-     * @var int
      */
     public int $matchTypeId = 0;
 

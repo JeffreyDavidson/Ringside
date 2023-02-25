@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Builders\SingleRosterMemberQueryBuilder;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 abstract class SingleRosterMember extends RosterMember
 {
     /**
      * Create a new Eloquent query builder for the model.
-     *
-     * @param  \Illuminate\Database\Query\Builder  $query
-     * @return \App\Builders\SingleRosterMemberQueryBuilder
      */
-    public function newEloquentBuilder($query)
+    public function newEloquentBuilder($query): SingleRosterMemberQueryBuilder
     {
         return new SingleRosterMemberQueryBuilder($query);
     }
 
-    public function canBeEmployed()
+    public function canBeEmployed(): bool
     {
         if ($this->isCurrentlyEmployed()) {
             return false;
@@ -32,7 +31,7 @@ abstract class SingleRosterMember extends RosterMember
         return true;
     }
 
-    public function canBeSuspended()
+    public function canBeSuspended(): bool
     {
         if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
@@ -49,12 +48,12 @@ abstract class SingleRosterMember extends RosterMember
         return true;
     }
 
-    public function canBeReinstated()
+    public function canBeReinstated(): bool
     {
         return $this->isSuspended();
     }
 
-    public function canBeUnretired()
+    public function canBeUnretired(): bool
     {
         if (! $this->isRetired()) {
             return false;
@@ -65,20 +64,16 @@ abstract class SingleRosterMember extends RosterMember
 
     /**
      * Get the injuries of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function injuries()
+    public function injuries(): MorphMany
     {
         return $this->morphMany(Injury::class, 'injurable');
     }
 
     /**
      * Get the current injury of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function currentInjury()
+    public function currentInjury(): MorphOne
     {
         return $this->morphOne(Injury::class, 'injurable')
             ->whereNull('ended_at')
@@ -87,10 +82,8 @@ abstract class SingleRosterMember extends RosterMember
 
     /**
      * Get the previous injuries of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
-    public function previousInjuries()
+    public function previousInjuries(): MorphMany
     {
         return $this->injuries()
             ->whereNotNull('ended_at');
@@ -98,10 +91,8 @@ abstract class SingleRosterMember extends RosterMember
 
     /**
      * Get the previous injury of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
      */
-    public function previousInjury()
+    public function previousInjury(): MorphOne
     {
         return $this->morphOne(Injury::class, 'injurable')
             ->latest('ended_at')
@@ -110,30 +101,24 @@ abstract class SingleRosterMember extends RosterMember
 
     /**
      * Check to see if the model is injured.
-     *
-     * @return bool
      */
-    public function isInjured()
+    public function isInjured(): bool
     {
         return $this->currentInjury()->exists();
     }
 
     /**
      * Check to see if the model has been employed.
-     *
-     * @return bool
      */
-    public function hasInjuries()
+    public function hasInjuries(): bool
     {
         return $this->injuries()->count() > 0;
     }
 
     /**
      * Determine if the model can be injured.
-     *
-     * @return bool
      */
-    public function canBeInjured()
+    public function canBeInjured(): bool
     {
         if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;
@@ -152,10 +137,8 @@ abstract class SingleRosterMember extends RosterMember
 
     /**
      * Determine if the model can be cleared from an injury.
-     *
-     * @return bool
      */
-    public function canBeClearedFromInjury()
+    public function canBeClearedFromInjury(): bool
     {
         if (! $this->isInjured()) {
             return false;
@@ -166,10 +149,8 @@ abstract class SingleRosterMember extends RosterMember
 
     /**
      * Check to see if the model is bookable.
-     *
-     * @return bool
      */
-    public function isBookable()
+    public function isBookable(): bool
     {
         if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment()) {
             return false;

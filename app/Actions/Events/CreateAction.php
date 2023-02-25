@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\EventData;
-use App\Models\Event;
+use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction extends BaseEventAction
@@ -15,7 +15,7 @@ class CreateAction extends BaseEventAction
     /**
      * Create an event.
      */
-    public function handle(EventData $eventData): Event
+    public function handle(EventData $eventData): Model
     {
         return $this->eventRepository->create($eventData);
     }

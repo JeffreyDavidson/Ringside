@@ -5,22 +5,12 @@ namespace App\Rules\Stables;
 use App\Models\Stable;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class HasMinimumAmountOfMembers implements ValidationRule
 {
-    public function __construct(
-        private Stable $stable,
-        private Carbon $startDate,
-        private Collection $wrestlers,
-        private Collection $tagTeams
-    )
+    public function __construct(private Stable $stable, private Collection $wrestlers, private Collection $tagTeams)
     {
-        $this->stable = $stable;
-        $this->startDate = $startDate;
-        $this->wrestlers = $wrestlers;
-        $this->tagTeams = $tagTeams;
     }
 
     /**

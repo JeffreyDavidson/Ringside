@@ -23,7 +23,7 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Validati
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (MatchType::find($this->matchTypeId)?->number_of_sides !== count($value)) {
-            $fail("This match does not have the required amount of sides of competitors.");
-        };
+            $fail('This match does not have the required amount of sides of competitors.');
+        }
     }
 }

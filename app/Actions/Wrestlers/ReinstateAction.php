@@ -16,7 +16,6 @@ class ReinstateAction extends BaseWrestlerAction
     /**
      * Reinstate a wrestler.
      *
-     *
      * @throws \App\Exceptions\CannotBeReinstatedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void

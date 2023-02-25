@@ -4,26 +4,22 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 interface Manageable
 {
     /**
      * Get all of the managers of the model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function managers();
+    public function managers(): BelongsToMany;
 
     /**
-     * Undocumented function.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the current managers of the model.
      */
-    public function currentManagers();
+    public function currentManagers(): BelongsToMany;
 
     /**
-     * Undocumented function.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Get the previous managers of the model.
      */
-    public function previousManagers();
+    public function previousManagers(): BelongsToMany;
 }

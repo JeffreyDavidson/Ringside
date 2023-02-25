@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Builders\WrestlerQueryBuilder;
 use App\Data\WrestlerData;
 use App\Enums\WrestlerStatus;
+use App\Exceptions\WrestlerNotOnCurrentTagTeamException;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Model;
@@ -166,6 +167,10 @@ class WrestlerRepository
      */
     public function removeFromCurrentTagTeam(Wrestler $wrestler, Carbon $removalDate): void
     {
+        if ($wrestler->currentTagTeam === null) {
+            throw new WrestlerNotOnCurrentTagTeamException();
+        }
+
         $wrestler->update(['current_tag_team_id' => null]);
 
         $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot($wrestler->currentTagTeam->id, [
@@ -174,7 +179,7 @@ class WrestlerRepository
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      */
     public static function getAvailableWrestlersForNewTagTeam(): WrestlerQueryBuilder
     {
@@ -200,7 +205,7 @@ class WrestlerRepository
     }
 
     /**
-     * Undocumented function
+     * Undocumented function.
      */
     public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): WrestlerQueryBuilder
     {

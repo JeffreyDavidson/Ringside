@@ -18,8 +18,6 @@ abstract class Presenter
 
     /**
      * Create a new Presenter instance.
-     *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
      */
     public function __construct(Model $model)
     {
@@ -29,7 +27,6 @@ abstract class Presenter
     /**
      * Undocumented function.
      *
-     * @param  string  $property
      * @return mixed
      *
      * @throws \Exception

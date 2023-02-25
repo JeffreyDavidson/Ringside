@@ -4,21 +4,24 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
 interface Employable
 {
-    public function employments(): \Illuminate\Database\Eloquent\Relations\MorphMany;
+    public function employments(): MorphMany;
 
-    public function firstEmployment(): \Illuminate\Database\Eloquent\Relations\MorphOne;
+    public function firstEmployment(): MorphOne;
 
-    public function currentEmployment(): \Illuminate\Database\Eloquent\Relations\MorphOne;
+    public function currentEmployment(): MorphOne;
 
-    public function futureEmployment(): \Illuminate\Database\Eloquent\Relations\MorphOne;
+    public function futureEmployment(): MorphOne;
 
-    public function previousEmployments(): \Illuminate\Database\Eloquent\Relations\MorphMany;
+    public function previousEmployments(): MorphMany;
 
-    public function previousEmployment(): \Illuminate\Database\Eloquent\Relations\MorphOne;
+    public function previousEmployment(): MorphOne;
 
     public function isCurrentlyEmployed(): bool;
 
@@ -34,7 +37,7 @@ interface Employable
 
     public function isReleased(): bool;
 
-    public function startedAt(): \Illuminate\Database\Eloquent\Casts\Attribute;
+    public function startedAt(): Attribute;
 
     public function employedOn(Carbon $employmentDate): bool;
 

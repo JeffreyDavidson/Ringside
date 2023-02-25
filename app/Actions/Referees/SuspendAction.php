@@ -16,7 +16,6 @@ class SuspendAction extends BaseRefereeAction
     /**
      * Suspend a referee.
      *
-     *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void

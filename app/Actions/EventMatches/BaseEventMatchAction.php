@@ -9,19 +9,9 @@ use App\Repositories\EventMatchRepository;
 abstract class BaseEventMatchAction
 {
     /**
-     * The repository to save event matches.
-     *
-     * @var \App\Repositories\EventMatchRepository
+     * Create a new base event match action instance.
      */
-    protected EventMatchRepository $eventMatchRepository;
-
-    /**
-     * Create a new add match for event instance.
-     *
-     * @param  \App\Repositories\EventMatchRepository  $eventMatchRepository
-     */
-    public function __construct(EventMatchRepository $eventMatchRepository)
+    public function __construct(protected EventMatchRepository $eventMatchRepository)
     {
-        $this->eventMatchRepository = $eventMatchRepository;
     }
 }

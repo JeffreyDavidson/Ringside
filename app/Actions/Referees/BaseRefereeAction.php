@@ -8,15 +8,10 @@ use App\Repositories\RefereeRepository;
 
 abstract class BaseRefereeAction
 {
-    protected RefereeRepository $refereeRepository;
-
     /**
      * Create a new base referee action instance.
-     *
-     * @param  \App\Repositories\RefereeRepository  $refereeRepository
      */
-    public function __construct(RefereeRepository $refereeRepository)
+    public function __construct(protected RefereeRepository $refereeRepository)
     {
-        $this->refereeRepository = $refereeRepository;
     }
 }

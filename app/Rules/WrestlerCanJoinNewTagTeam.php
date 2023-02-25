@@ -19,11 +19,11 @@ class WrestlerCanJoinNewTagTeam implements ValidationRule
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 
         if ($wrestler->isSuspended() || $wrestler->isInjured()) {
-            $fail("This wrestler cannot join the tag team.");
+            $fail('This wrestler cannot join the tag team.');
         }
 
         if (($wrestler->currentTagTeam !== null && $wrestler->currentTagTeam->exists())) {
-            $fail("This wrestler cannot join the tag team.");
+            $fail('This wrestler cannot join the tag team.');
         }
     }
 }

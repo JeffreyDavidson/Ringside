@@ -13,7 +13,7 @@ class UpdateAction extends BaseRefereeAction
     use AsAction;
 
     /**
-     * Create a referee.
+     * Update a referee.
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {

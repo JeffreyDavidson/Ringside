@@ -15,10 +15,12 @@ class AddCompetitorsToMatchAction extends BaseEventMatchAction
 
     /**
      * Add competitors to an event match.
+     *
+     * @param  Collection<int, array>  $competitors
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
-        $competitors->each(function (array $sideCompetitors, int $sideNumber) use ($eventMatch) {
+        foreach ($competitors as $sideNumber => $sideCompetitors) {
             if (Arr::exists($sideCompetitors, 'wrestlers')) {
                 AddWrestlersToMatchAction::run($eventMatch, Arr::get($sideCompetitors, 'wrestlers'), $sideNumber);
             }
@@ -26,6 +28,6 @@ class AddCompetitorsToMatchAction extends BaseEventMatchAction
             if (Arr::exists($sideCompetitors, 'tag_teams')) {
                 AddTagTeamsToMatchAction::run($eventMatch, Arr::get($sideCompetitors, 'tag_teams'), $sideNumber);
             }
-        });
+        }
     }
 }

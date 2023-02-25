@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Data\TagTeamData;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseTagTeamAction
@@ -30,8 +31,8 @@ class UpdateAction extends BaseTagTeamAction
         if ($tagTeam->currentWrestlers->isNotEmpty()) {
             $tagTeam
                 ->currentWrestlers
-                ->reject(fn ($wrestler) => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
-                ->each(fn ($wrestler) => RemoveTagTeamPartnerAction::run($tagTeam, $wrestler));
+                ->reject(fn (Wrestler $wrestler) => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
+                ->each(fn (Wrestler $wrestler) => RemoveTagTeamPartnerAction::run($tagTeam, $wrestler));
         }
 
         if (isset($tagTeamData->start_date)) {

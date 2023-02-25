@@ -16,7 +16,6 @@ class RetireAction extends BaseTitleAction
     /**
      * Retire a title.
      *
-     *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void

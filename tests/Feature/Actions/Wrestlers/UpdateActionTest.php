@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Wrestler;
+
 test('updates a wrestler and redirects', function () {
     $wrestler = Wrestler::factory()->create([
         'name' => 'Old Wrestler Name',

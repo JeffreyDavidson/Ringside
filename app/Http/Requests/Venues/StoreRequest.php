@@ -8,6 +8,7 @@ use App\Models\Venue;
 use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\VenueRequestFactory;
+
 class StoreRequest extends FormRequest
 {
     /** @var class-string */

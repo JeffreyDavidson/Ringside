@@ -17,7 +17,6 @@ class ReleaseAction extends BaseTagTeamAction
     /**
      * Release a tag team.
      *
-     *
      * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void

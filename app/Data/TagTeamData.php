@@ -9,7 +9,7 @@ use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 
-class TagTeamData
+readonly class TagTeamData
 {
     /**
      * Create a new tag team data instance.

@@ -8,7 +8,7 @@ use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use Illuminate\Support\Carbon;
 
-class ManagerData
+readonly class ManagerData
 {
     /**
      * Create a new manager data instance.

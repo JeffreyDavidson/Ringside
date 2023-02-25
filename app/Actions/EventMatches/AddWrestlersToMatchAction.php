@@ -14,7 +14,7 @@ class AddWrestlersToMatchAction extends BaseEventMatchAction
     use AsAction;
 
     /**
-     * Add titles to an event match.
+     * Add wrestlers to an event match.
      *
      * @param  \Illuminate\Support\Collection<int, \App\Models\Wrestler>  $wrestlers
      */

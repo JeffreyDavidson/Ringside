@@ -134,7 +134,10 @@ trait HasEmployments
                 && $this->currentRetirement()->doesntExist();
     }
 
-    public function canBeReleased()
+    /**
+     * Determine if the model can be released.
+     */
+    public function canBeReleased(): bool
     {
         if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
             return false;

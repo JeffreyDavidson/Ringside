@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 
 class Title extends Model implements Activatable, Deactivatable, Retirable
 {
@@ -46,34 +45,47 @@ class Title extends Model implements Activatable, Deactivatable, Retirable
 
     /**
      * Create a new Eloquent query builder for the model.
-     *
-     * @return \App\Builders\TitleQueryBuilder<Title>
      */
-    public function newEloquentBuilder( $query): TitleQueryBuilder
+    public function newEloquentBuilder($query): TitleQueryBuilder
     {
         return new TitleQueryBuilder($query);
     }
 
+    /**
+     * Retrieve the championships for a title.
+     */
     public function championships(): HasMany
     {
         return $this->hasMany(TitleChampionship::class)->oldest('won_at');
     }
 
+    /**
+     * Retrieve the curren championship for a title.
+     */
     public function currentChampionship(): HasOne
     {
         return $this->hasOne(TitleChampionship::class)->whereNull('lost_at')->latestOfMany();
     }
 
+    /**
+     * Determine if the title is vacant.
+     */
     public function isVacant(): bool
     {
         return $this->currentChampionship?->champion === null;
     }
 
+    /**
+     * Determine if a title can be retired.
+     */
     public function canBeRetired(): bool
     {
         return $this->isCurrentlyActivated() || $this->isDeactivated();
     }
 
+    /**
+     * Determine if a title can be unretired.
+     */
     public function canBeUnretired(): bool
     {
         return $this->isRetired();

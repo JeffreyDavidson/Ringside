@@ -110,7 +110,10 @@ trait Activations
         return $this->futureActivation()->exists();
     }
 
-    public function canBeActivated()
+    /**
+     * Determine if the model can be activated.
+     */
+    public function canBeActivated(): bool
     {
         return $this->isUnactivated() || $this->hasFutureActivation() || $this->isDeactivated();
     }

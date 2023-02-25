@@ -14,7 +14,7 @@ use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
-class EventMatchData
+readonly class EventMatchData
 {
     /**
      * Create a new event match data instance.

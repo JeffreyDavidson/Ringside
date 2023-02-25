@@ -65,7 +65,10 @@ trait HasRetirements
         return $this->retirements()->count() > 0;
     }
 
-    public function canBeRetired()
+    /**
+     * Determine if the model can be retired.
+     */
+    public function canBeRetired(): bool
     {
         if ($this->isNotInEmployment()) {
             return false;
