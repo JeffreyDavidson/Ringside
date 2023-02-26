@@ -42,7 +42,15 @@ uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')
     );
 uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
 uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
-uses()->group('venues', 'feature-venues')->in('Feature/Http/Controllers/Venues');
+uses()->group('venues', 'feature-venues')
+    ->in(
+        'Feature/Http/Controllers/Venues',
+        'Feature/Http/Livewire/Venues',
+        'Feature/Http/Requests/Venues',
+        'Feature/Actions/Venues',
+        'Feature/Policies/VenuePolicyTest',
+        'Feature/Repositories/VenueRepositoryTest',
+    );
 uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
 // uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
 uses()->group('event-matches', 'feature-event-matches')

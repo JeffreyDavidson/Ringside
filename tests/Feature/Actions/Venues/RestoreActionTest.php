@@ -1,9 +1,17 @@
 <?php
 
-test('invoke restores a deleted venue and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([RestoreController::class], $this->venue))
-        ->assertRedirect(action([VenuesController::class, 'index']));
+use App\Actions\Venues\RestoreAction;
+use App\Models\Venue;
+use App\Repositories\VenueRepository;
+use function Pest\Laravel\mock;
 
-    $this->assertNull($this->venue->fresh()->deleted_at);
+test('it restores a soft deleted venue', function () {
+    $venue = Venue::factory()->trashed()->create();
+
+    mock(VenueRepository::class)
+        ->shouldReceive('restore')
+        ->once()
+        ->with($venue);
+
+    RestoreAction::run($venue);
 });

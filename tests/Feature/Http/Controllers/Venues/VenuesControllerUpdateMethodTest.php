@@ -5,6 +5,8 @@ use App\Data\VenueData;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\from;
 
 beforeEach(function () {
     $this->venue = Venue::factory()->create();
@@ -13,7 +15,7 @@ beforeEach(function () {
 });
 
 test('updates calls update action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->from(action([VenuesController::class, 'edit'], $this->venue))
         ->patch(action([VenuesController::class, 'update'], $this->venue), $this->data)
         ->assertValid()
@@ -23,14 +25,14 @@ test('updates calls update action and redirects', function () {
 });
 
 test('a basic user cannot update a venue', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->from(action([VenuesController::class, 'edit'], $this->venue))
         ->patch(action([VenuesController::class, 'update'], $this->venue), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot update a venue', function () {
-    $this->from(action([VenuesController::class, 'edit'], $this->venue))
+    from(action([VenuesController::class, 'edit'], $this->venue))
         ->patch(action([VenuesController::class, 'update'], $this->venue), $this->data)
         ->assertRedirect(route('login'));
 });

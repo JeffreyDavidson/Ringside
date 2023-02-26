@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
+use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\VenueRequestFactory;
 
@@ -35,9 +36,9 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'street_address' => ['required', 'string'],
-            'city' => ['required', 'string'],
+            'name' => ['required', 'string', new LetterSpace, 'min:3', 'unique:App\Models\Venue,name'],
+            'street_address' => ['required', 'string', 'min:3'],
+            'city' => ['required', 'string', 'min:3'],
             'state' => ['required', 'string'],
             'zip' => ['required', 'integer', 'digits:5'],
         ];

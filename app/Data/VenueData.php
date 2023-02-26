@@ -7,7 +7,7 @@ namespace App\Data;
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
 
-class VenueData
+readonly class VenueData
 {
     /**
      * Create a new venue data instance.

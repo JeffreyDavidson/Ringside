@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Venues\VenuesController;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 test('index returns a view', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->get(action([VenuesController::class, 'index']))
         ->assertOk()
         ->assertViewIs('venues.index')
@@ -11,12 +13,12 @@ test('index returns a view', function () {
 });
 
 test('a basic user cannot view venues index page', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->get(action([VenuesController::class, 'index']))
         ->assertForbidden();
 });
 
 test('a guest cannot view venues index page', function () {
-    $this->get(action([VenuesController::class, 'index']))
+    get(action([VenuesController::class, 'index']))
         ->assertRedirect(route('login'));
 });

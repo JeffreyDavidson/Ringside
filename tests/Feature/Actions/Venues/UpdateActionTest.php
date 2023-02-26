@@ -1,16 +1,20 @@
 <?php
 
-test('updates a venue and redirects', function () {
-    $this->actingAs(administrator())
-        ->from(action([VenuesController::class, 'edit'], $this->venue))
-        ->patch(action([VenuesController::class, 'update'], $this->venue), $this->data)
-        ->assertValid()
-        ->assertRedirect(action([VenuesController::class, 'index']));
+use App\Actions\Venues\UpdateAction;
+use App\Data\VenueData;
+use App\Models\Venue;
+use App\Repositories\VenueRepository;
+use function Pest\Laravel\mock;
 
-    expect($venue->fresh())
-        ->name->toBe('New Venue Name')
-        ->street_address->toBe('456 1st Avenue')
-        ->city->toBe('Laraville')
-        ->state->toBe('California')
-        ->zip->toBe('67890');
+test('it updates a venue', function () {
+    $data = new VenueData('Exampel Venue Name', '123 Main Street', 'Laraville', 'New York', '12345');
+    $venue = Venue::factory()->create();
+
+    mock(VenueRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($venue, $data)
+        ->andReturns($venue);
+
+    UpdateAction::run($venue, $data);
 });
