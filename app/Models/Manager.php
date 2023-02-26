@@ -45,8 +45,6 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
 
     /**
      * Create a new Eloquent query builder for the model.
-     *
-     * @return \App\Builders\ManagerQueryBuilder<Manager>
      */
     public function newEloquentBuilder($query): ManagerQueryBuilder
     {
