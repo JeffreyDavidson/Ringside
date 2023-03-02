@@ -1,67 +1,53 @@
 <?php
 
+use App\Actions\Wrestlers\EmployAction;
+use App\Actions\Wrestlers\UpdateAction;
+use App\Data\WrestlerData;
 use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
+use function Pest\Laravel\mock;
 
-test('updates a wrestler and redirects', function () {
-    $wrestler = Wrestler::factory()->create([
-        'name' => 'Old Wrestler Name',
-        'height' => 81,
-        'weight' => 300,
-        'hometown' => 'Old Location',
-    ]);
+test('it updates a wrestler', function () {
+    $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, null);
+    $wrestler = Wrestler::factory()->create();
 
-    $data = UpdateRequest::factory()->create([
-        'name' => 'Example Wrestler Name',
-        'feet' => 6,
-        'inches' => 10,
-        'weight' => 300,
-        'hometown' => 'Laraville, New York',
-        'signature_move' => null,
-        'start_date' => null,
-    ]);
+    mock(WrestlerRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($wrestler, $data)
+        ->andReturns($wrestler);
 
-    $this->actingAs(administrator())
-        ->from(action([WrestlersController::class, 'edit'], $wrestler))
-        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
-        ->assertValid()
-        ->assertRedirect(action([WrestlersController::class, 'index']));
-
-    expect($wrestler->fresh())
-        ->name->toBe('Example Wrestler Name')
-        ->height->toBe(82)
-        ->weight->toBe(300)
-        ->hometown->toBe('Laraville, New York')
-        ->employments->toBeEmpty();
+    UpdateAction::run($wrestler, $data);
 });
 
-test('update can employ an unemployed wrestler when start date is filled', function () {
-    $now = now();
-    $wrestler = Wrestler::factory()->unemployed()->create();
-    $data = UpdateRequest::factory()->create(['start_date' => $now->toDateTimeString()]);
+test('it employs an employable wrestler if start date is filled in request', function () {
+    $datetime = now();
+    $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, $datetime);
+    $wrestler = Wrestler::factory()->create();
 
-    $this->actingAs(administrator())
-        ->from(action([WrestlersController::class, 'edit'], $wrestler))
-        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
-        ->assertValid()
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+    mock(WrestlerRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($wrestler, $data)
+        ->andReturns($wrestler);
 
-    expect($wrestler->fresh())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
+    EmployAction::shouldRun($wrestler, $datetime);
+
+    UpdateAction::run($wrestler, $data);
 });
 
-test('update can employ a future employed wrestler when start date is filled', function () {
-    $now = now();
-    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $data = UpdateRequest::factory()->create(['start_date' => $now->toDateTimeString()]);
+test('it updates a future employed wrestler employment date if start date is filled in request', function () {
+    $datetime = now()->addDays(2);
+    $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, $datetime);
+    $wrestler = Wrestler::factory()->create();
 
-    $this->actingAs(administrator())
-        ->from(action([WrestlersController::class, 'edit'], $wrestler))
-        ->patch(action([WrestlersController::class, 'update'], $wrestler), $data)
-        ->assertValid()
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+    mock(WrestlerRepository::class)
+        ->shouldReceive('update')
+        ->once()
+        ->with($wrestler, $data)
+        ->andReturns($wrestler);
 
-    expect($wrestler->fresh())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($now->toDateTimeString());
+    EmployAction::shouldRun($wrestler, $datetime);
+
+    UpdateAction::run($wrestler, $data);
 });

@@ -2,11 +2,16 @@
 
 use App\Actions\Wrestlers\DeleteAction;
 use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
+use function Pest\Laravel\mock;
 
 test('it deletes a wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
-    DeleteAction::run($wrestler);
+    mock(WrestlerRepository::class)
+        ->shouldReceive('delete')
+        ->once()
+        ->with($wrestler);
 
-    $this->assertSoftDeleted($wrestler);
+    DeleteAction::run($wrestler);
 });

@@ -1,10 +1,7 @@
 <?php
 
 use App\Http\Requests\Venues\UpdateRequest;
-use App\Models\Activation;
 use App\Models\Venue;
-use App\Rules\ActivationStartDateCanBeChanged;
-use Illuminate\Support\Carbon;
 use Tests\RequestFactories\VenueRequestFactory;
 
 test('an administrator is authorized to make this request', function () {

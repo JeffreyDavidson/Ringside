@@ -12,7 +12,6 @@ use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
-
 class VenuesList extends BaseComponent
 {
     use WithBulkActions;

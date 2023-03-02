@@ -15,9 +15,9 @@ class WrestlerData
      */
     public function __construct(
         public string $name,
-        public ?int $height,
-        public ?int $weight,
-        public ?string $hometown,
+        public int $height,
+        public int $weight,
+        public string $hometown,
         public ?string $signature_move,
         public ?Carbon $start_date,
     ) {
@@ -30,8 +30,8 @@ class WrestlerData
     {
         return new self(
             $request->input('name'),
-            ($request->input('feet') * 12) + $request->input('inches'),
-            (int) $request->input('weight'),
+            ($request->integer('feet') * 12) + $request->integer('inches'),
+            $request->integer('weight'),
             $request->input('hometown'),
             $request->input('signature_move'),
             $request->date('start_date')
@@ -45,8 +45,8 @@ class WrestlerData
     {
         return new self(
             $request->input('name'),
-            ($request->input('feet') * 12) + $request->input('inches'),
-            (int) $request->input('weight'),
+            ($request->integer('feet') * 12) + $request->integer('inches'),
+            $request->integer('weight'),
             $request->input('hometown'),
             $request->input('signature_move'),
             $request->date('start_date')

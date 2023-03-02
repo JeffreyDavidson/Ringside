@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Venue;
 use App\Policies\VenuePolicy;
 
 test('it authorizes a user can create a venue', function () {
