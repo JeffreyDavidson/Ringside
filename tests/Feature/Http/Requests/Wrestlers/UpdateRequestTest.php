@@ -3,6 +3,7 @@
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Employment;
 use App\Models\Wrestler;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\WrestlerRequestFactory;
 
@@ -66,7 +67,7 @@ test('wrestler name must be unique', function () {
         ->validate(WrestlerRequestFactory::new()->create([
             'name' => 'Example Wrestler Name B',
         ]))
-        ->assertFailsValidation(['name' => 'unique:wrestlers,NULL,1,id']);
+        ->assertFailsValidation(['name' => 'unique:wrestlers,NULL,'.$wrestlerA->id.',id']);
 });
 
 test('wrestler height in feet is required', function () {
@@ -231,7 +232,7 @@ test('wrestler start date cannot be changed if employment start date has past', 
         ->validate(WrestlerRequestFactory::new()->create([
             'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => EmploymentStartDateCanBeChanged::class]);
 });
 
 test('wrestler start date can be changed if employment start date is in the future', function () {

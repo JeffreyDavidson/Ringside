@@ -1,47 +1,54 @@
 <?php
 
 use App\Actions\Wrestlers\ClearInjuryAction;
-use App\Enums\WrestlerStatus;
+use App\Events\Wrestlers\WrestlerClearedFromInjury;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('run clears an injury a wrestler', function () {
+test('it clears an injury of an injured wrestler at the current datetime by default', function () {
+    Event::fake();
+
+    testTime()->freeze();
     $wrestler = Wrestler::factory()->injured()->create();
+    $datetime = now();
+
+    mock(WrestlerRepository::class)
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->withArgs(function (Wrestler $unretireWrestler, Carbon $recoveryDate) use ($wrestler, $datetime) {
+            $this->assertTrue($unretireWrestler->is($wrestler));
+            $this->assertTrue($recoveryDate->equalTo($datetime));
+
+            return true;
+        })
+        ->andReturn($wrestler);
 
     ClearInjuryAction::run($wrestler);
 
-    expect($wrestler->fresh())
-        ->status->toBe(WrestlerStatus::BOOKABLE)
-        ->injuries->last()->ended_at->toEqual($now->toDateTimeString());
+    Event::assertDispatched(WrestlerClearedFromInjury::class);
 });
 
-test('run makes injured wrestler not injured using specific datetime', function () {
+test('it clears an injury of an injured wrestler at a specific datetime', function () {
+    Event::fake();
+
+    testTime()->freeze();
     $wrestler = Wrestler::factory()->injured()->create();
-    $recoveryDate = Carbon::parse('2022-05-27 12:00:00');
+    $datetime = now()->addDays(2);
 
-    ClearInjuryAction::run($wrestler, $recoveryDate);
+    mock(WrestlerRepository::class)
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturn($wrestler);
 
-    expect($wrestler->fresh())
-        ->isInjured()->toBeFalse()
-        ->injuries->last()->ended_at->toEqual($recoveryDate);
-});
+    ClearInjuryAction::run($wrestler, $datetime);
 
-test('clearing an injured wrestler on an unbookable tag team makes tag team bookable', function () {
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $tagTeam = TagTeam::factory()
-        ->hasAttached($this->wrestler, ['joined_at' => Carbon::yesterday()->toDateTimeString()])
-        ->hasAttached($bookableWrestler, ['joined_at' => Carbon::yesterday()->toDateTimeString()])
-        ->has(Employment::factory()->started(Carbon::yesterday()))
-        ->create();
-
-    ClearInjuryAction::run($this->wrestler);
-
-    expect($this->wrestler->fresh())
-        ->status->toMatchObject(WrestlerStatus::BOOKABLE);
-
-    expect($tagTeam->fresh())
-        ->status->toMatchObject(TagTeamStatus::BOOKABLE);
+    Event::assertDispatched(WrestlerClearedFromInjury::class);
 });
 
 test('it throws exception for injuring a non injurable wrestler', function ($factoryState) {
@@ -51,10 +58,10 @@ test('it throws exception for injuring a non injurable wrestler', function ($fac
 
     ClearInjuryAction::run($wrestler);
 })->throws(CannotBeClearedFromInjuryException::class)->with([
-    WrestlerStatus::UNEMPLOYED,
-    WrestlerStatus::RELEASED,
-    WrestlerStatus::FUTURE_EMPLOYMENT,
-    WrestlerStatus::BOOKABLE,
-    WrestlerStatus::RETIRED,
-    WrestlerStatus::SUSPENDED,
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+    'bookable',
+    'retired',
+    'suspended',
 ]);

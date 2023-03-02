@@ -1,63 +1,81 @@
 <?php
 
-test('invoke retires a bookable wrestler and redirects', function () {
+use App\Actions\Wrestlers\ReleaseAction;
+use App\Actions\Wrestlers\RetireAction;
+use App\Events\Wrestlers\WrestlerRetired;
+use App\Exceptions\CannotBeRetiredException;
+use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
+
+test('it retires a bookable wrestler at the current datetime by default', function () {
+    Event::fake();
+
+    testTime()->freeze();
     $wrestler = Wrestler::factory()->bookable()->create();
+    $datetime = now();
 
-    $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $wrestler))
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+    mock(WrestlerRepository::class)
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Wrestler $unretireWrestler, Carbon $suspensionDate) use ($wrestler, $datetime) {
+            $this->assertTrue($unretireWrestler->is($wrestler));
+            $this->assertTrue($suspensionDate->equalTo($datetime));
 
-    expect($wrestler->fresh())
-        ->retirements->toHaveCount(1)
-        ->status->toMatchObject(WrestlerStatus::RETIRED);
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    ReleaseAction::shouldRun()
+        ->withArgs(function (Wrestler $unretireWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
+            $this->assertTrue($unretireWrestler->is($wrestler));
+            $this->assertTrue($employmentDate->equalTo($datetime));
+
+            return true;
+        });
+
+    RetireAction::run($wrestler);
+
+    Event::assertDispatched(WrestlerRetired::class);
 });
 
-test('invoke retires an injured wrestler and redirects', function () {
-    $wrestler = Wrestler::factory()->injured()->create();
+test('it retires a bookable wrestler at a specific datetime', function () {
+    Event::fake();
 
-    $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $wrestler))
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+    testTime()->freeze();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $datetime = now()->addDays(2);
 
-    expect($wrestler->fresh())
-        ->retirements->toHaveCount(1)
-        ->status->toMatchObject(WrestlerStatus::RETIRED);
+    mock(WrestlerRepository::class)
+        ->shouldReceive('retire')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    ReleaseAction::shouldRun($wrestler, $datetime);
+
+    RetireAction::run($wrestler, $datetime);
+
+    Event::assertDispatched(WrestlerRetired::class);
 });
 
-test('invoke retires a suspended wrestler and redirects', function () {
-    $wrestler = Wrestler::factory()->suspended()->create();
+test('it throws exception trying to retire an unemployed wrestler', function () {
+    $wrestler = Wrestler::factory()->unemployed()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $wrestler))
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+    RetireAction::run($wrestler);
+})->throws(CannotBeRetiredException::class);
 
-    expect($wrestler->fresh())
-        ->retirements->toHaveCount(1)
-        ->status->toMatchObject(WrestlerStatus::RETIRED);
-});
+test('it throws exception trying to retire a wrestler with a future employment', function () {
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-test('retiring a bookable wrestler on a bookable tag team makes tag team unbookable', function () {
-    $tagTeam = TagTeam::factory()->bookable()->create();
-    $wrestler = $tagTeam->wrestlers()->first();
+    RetireAction::run($wrestler);
+})->throws(CannotBeRetiredException::class);
 
-    $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $wrestler))
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+test('it throws exception trying to retire a retired wrestler', function () {
+    $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($tagTeam->fresh())
-        ->status->toMatchObject(TagTeamStatus::UNBOOKABLE);
-});
-
-test('invoke throws exception for retiring a non retirable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $wrestler = Wrestler::factory()->{$factoryState}()->create();
-
-    $this->actingAs(administrator())
-        ->patch(action([RetireController::class], $wrestler));
-})->throws(CannotBeRetiredException::class)->with([
-    'retired',
-    'withFutureEmployment',
-    'released',
-    'unemployed',
-]);
+    RetireAction::run($wrestler);
+})->throws(CannotBeRetiredException::class);

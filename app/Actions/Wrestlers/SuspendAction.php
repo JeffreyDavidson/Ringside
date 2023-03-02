@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Events\Wrestlers\WrestlerSuspended;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
@@ -31,8 +32,6 @@ class SuspendAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->suspend($wrestler, $suspensionDate);
 
-        if ($wrestler->isAMemberOfCurrentTagTeam()) {
-            $wrestler->currentTagTeam->save();
-        }
+        event(new WrestlerSuspended($wrestler));
     }
 }

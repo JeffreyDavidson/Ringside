@@ -1,56 +1,49 @@
 <?php
 
 use App\Actions\Wrestlers\CreateAction;
+use App\Actions\Wrestlers\EmployAction;
 use App\Data\WrestlerData;
-use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 test('it creates a wrestler', function () {
-    $requestData = StoreRequest::factory()->create([
-        'name' => 'Example Wrestler Name',
-        'feet' => 6,
-        'inches' => 10,
-        'weight' => 300,
-        'hometown' => 'Laraville, New York',
-        'signature_move' => null,
-        'start_date' => null,
-    ]);
-    $data = WrestlerData::fromStoreRequest($requestData);
+    $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, null);
+
+    mock(WrestlerRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturns(new Wrestler());
+
+    EmployAction::shouldNotRun();
 
     CreateAction::run($data);
-
-    expect(Wrestler::latest()->first())
-        ->name->toBe('Example Wrestler Name')
-        ->height->toBe(82)
-        ->weight->toBe(300)
-        ->hometown->toBe('Laraville, New York')
-        ->signature_move->toBeNull()
-        ->employments->toBeEmpty();
 });
 
-test('it creates a wrestler with a signature move and redirects', function () {
-    $data = StoreRequest::factory()->create([
-        'signature_move' => 'Example Finishing Move',
-    ]);
-
-    CreateAction::run($data);
-
-    expect(Wrestler::latest()->first())
-        ->signature_move->toBe('Example Finishing Move');
-});
-
-test('an employment is created for the wrestler if start date is filled in request', function () {
+test('it employs a wrestler if start date is filled in request', function () {
     testTime()->freeze();
     $dateTime = Carbon::now();
-    $data = StoreRequest::factory()->create([
-        'start_date' => $dateTime,
+    $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, $dateTime);
+    $wrestler = Wrestler::factory()->create([
+        'name' => $data->name,
+        'height' => $data->height,
+        'weight' => 220,
+        'hometown' => $data->hometown,
     ]);
 
-    CreateAction::run($data);
+    mock(WrestlerRepository::class)
+        ->shouldReceive('create')
+        ->once()
+        ->with($data)
+        ->andReturn($wrestler);
 
-    expect(Wrestler::latest()->first())
-        ->employments->toHaveCount(1)
-        ->employments->first()->started_at->toDateTimeString()->toBe($dateTime);
+    EmployAction::mock()
+        ->shouldReceive('handle')
+        ->once()
+        ->with($wrestler, $data->start_date);
+
+    CreateAction::run($data);
 });

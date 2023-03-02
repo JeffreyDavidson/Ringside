@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\TagTeam;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -30,6 +31,16 @@ trait CanJoinTagTeams
         return $this->tagTeams()
             ->withPivot(['joined_at', 'left_at'])
             ->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * Get the previous tag team the member has belonged to.
+     */
+    public function previousTagTeam(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->previousTagTeams->first(),
+        );
     }
 
     /**

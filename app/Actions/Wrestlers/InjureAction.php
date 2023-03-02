@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Events\Wrestlers\WrestlerInjured;
 use App\Exceptions\CannotBeInjuredException;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
@@ -31,8 +32,6 @@ class InjureAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->injure($wrestler, $injureDate);
 
-        if ($wrestler->isAMemberOfCurrentTagTeam()) {
-            $wrestler->currentTagTeam->save();
-        }
+        event(new WrestlerInjured($wrestler));
     }
 }

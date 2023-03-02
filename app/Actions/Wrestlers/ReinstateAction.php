@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Events\Wrestlers\WrestlerReinstated;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
@@ -31,8 +32,6 @@ class ReinstateAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->reinstate($wrestler, $reinstatementDate);
 
-        if ($wrestler->isAMemberOfCurrentTagTeam()) {
-            $wrestler->currentTagTeam->save();
-        }
+        event(new WrestlerReinstated($wrestler));
     }
 }

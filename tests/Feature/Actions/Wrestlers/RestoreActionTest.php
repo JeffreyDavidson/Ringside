@@ -1,9 +1,17 @@
 <?php
 
-test('invoke restores a deleted wrestler and redirects', function () {
-    $this->actingAs(administrator())
-        ->patch(action([RestoreController::class], $this->wrestler))
-        ->assertRedirect(action([WrestlersController::class, 'index']));
+use App\Actions\Wrestlers\RestoreAction;
+use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
+use function Pest\Laravel\mock;
 
-    $this->assertNull($this->wrestler->fresh()->deleted_at);
+test('it restores a deleted wrestler', function () {
+    $wrestler = Wrestler::factory()->trashed()->create();
+
+    mock(WrestlerRepository::class)
+        ->shouldReceive('restore')
+        ->once()
+        ->with($wrestler);
+
+    RestoreAction::run($wrestler);
 });

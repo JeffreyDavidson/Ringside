@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Builders\WrestlerQueryBuilder;
 use App\Data\WrestlerData;
 use App\Enums\WrestlerStatus;
 use App\Exceptions\WrestlerNotOnCurrentTagTeamException;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
@@ -153,35 +153,23 @@ class WrestlerRepository
     }
 
     /**
-     * Get the model's first employment date.
-     */
-    public function updateEmployment(Wrestler $wrestler, Carbon $employmentDate): Wrestler
-    {
-        $wrestler->futureEmployment()->update(['started_at' => $employmentDate->toDateTimeString()]);
-
-        return $wrestler;
-    }
-
-    /**
      * Remove the given wrestler from their current tag team on a given date.
      */
     public function removeFromCurrentTagTeam(Wrestler $wrestler, Carbon $removalDate): void
     {
-        if ($wrestler->currentTagTeam === null) {
-            throw new WrestlerNotOnCurrentTagTeamException();
-        }
+        $currentTagTeamId = $wrestler->currentTagTeam?->id;
 
-        $wrestler->update(['current_tag_team_id' => null]);
-
-        $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot($wrestler->currentTagTeam->id, [
+        $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot($currentTagTeamId, [
             'left_at' => $removalDate->toDateTimeString(),
         ]);
+
+        $wrestler->update(['current_tag_team_id' => null]);
     }
 
     /**
      * Undocumented function.
      */
-    public static function getAvailableWrestlersForNewTagTeam(): WrestlerQueryBuilder
+    public static function getAvailableWrestlersForNewTagTeam(): Collection
     {
         // Each wrestler must be either:
         // have a currentEmployment (scope called employed)
@@ -201,13 +189,14 @@ class WrestlerRepository
                 $query->employed()
                     ->where('status', WrestlerStatus::BOOKABLE)
                     ->whereDoesntHave('currentTagTeam');
-            });
+            })
+            ->get();
     }
 
     /**
      * Undocumented function.
      */
-    public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): WrestlerQueryBuilder
+    public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
     {
         // Each wrestler must be either:
         // have a currentEmployment (scope called employed)
@@ -231,6 +220,7 @@ class WrestlerRepository
             })
             ->orWhere(function ($query) use ($tagTeam) {
                 $query->where('current_tag_team_id', $tagTeam->id);
-            });
+            })
+            ->get();
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Events\Wrestlers\WrestlerReleased;
 use App\Exceptions\CannotBeReleasedException;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
@@ -37,9 +38,6 @@ class ReleaseAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->release($wrestler, $releaseDate);
 
-        if ($wrestler->isAMemberOfCurrentTagTeam()) {
-            $wrestler->currentTagTeam->save();
-            $this->wrestlerRepository->removeFromCurrentTagTeam($wrestler, $releaseDate);
-        }
+        event(new WrestlerReleased($wrestler, $releaseDate));
     }
 }

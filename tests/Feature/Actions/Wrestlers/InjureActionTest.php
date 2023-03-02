@@ -1,26 +1,54 @@
 <?php
 
 use App\Actions\Wrestlers\InjureAction;
+use App\Events\Wrestlers\WrestlerInjured;
+use App\Exceptions\CannotBeInjuredException;
 use App\Models\Wrestler;
+use App\Repositories\WrestlerRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke injures a bookable wrestler and redirects', function () {
-    $wrestler = Wrestler::factory()->create();
+test('it injures a bookable wrestler at the current datetime by default', function () {
+    Event::fake();
+
+    testTime()->freeze();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $datetime = now();
+
+    mock(WrestlerRepository::class)
+        ->shouldReceive('injure')
+        ->once()
+        ->withArgs(function (Wrestler $unretireWrestler, Carbon $injuryDate) use ($wrestler, $datetime) {
+            $this->assertTrue($unretireWrestler->is($wrestler));
+            $this->assertTrue($injuryDate->equalTo($datetime));
+
+            return true;
+        })
+        ->andReturn($wrestler);
 
     InjureAction::run($wrestler);
 
-    expect($this->wrestler->fresh())
-        ->injuries->toHaveCount(1)
-        ->status->toMatchObject(WrestlerStatus::INJURED);
+    Event::assertDispatched(WrestlerInjured::class);
 });
 
-test('injuring a bookable wrestler on a bookable tag team makes tag team unbookable', function () {
-    $tagTeam = TagTeam::factory()->bookable()->create();
-    $wrestler = $tagTeam->currentWrestlers()->first();
+test('it injures a bookable wrestler at a specific datetime', function () {
+    Event::fake();
 
-    InjureAction::run($wrestler);
+    testTime()->freeze();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $datetime = now()->addDays(2);
 
-    expect($wrestler->currentTagTeam->fresh())
-        ->status->toMatchObject(TagTeamStatus::UNBOOKABLE);
+    mock(WrestlerRepository::class)
+        ->shouldReceive('injure')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturn($wrestler);
+
+    InjureAction::run($wrestler, $datetime);
+
+    Event::assertDispatched(WrestlerInjured::class);
 });
 
 test('invoke throws exception for injuring a non injurable wrestler', function ($factoryState) {
