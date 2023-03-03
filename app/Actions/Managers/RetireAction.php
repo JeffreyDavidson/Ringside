@@ -15,15 +15,10 @@ class RetireAction extends BaseManagerAction
 
     /**
      * Retire a manager.
-     *
-     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {
-        throw_if($manager->isUnemployed(), CannotBeRetiredException::class, $manager.' is unemployed and cannot be retired.');
-        throw_if($manager->hasFutureEmployment(), CannotBeRetiredException::class, $manager.' has not been officially employed and cannot be retired');
-        throw_if($manager->isRetired(), CannotBeRetiredException::class, $manager.' is already retired.');
-        throw_if($manager->isReleased(), CannotBeRetiredException::class, $manager.' was released and cannot be retired. Re-employ this manager to retire them.');
+        $this->ensureCanBeRetired($manager);
 
         $retirementDate ??= now();
 
@@ -44,5 +39,21 @@ class RetireAction extends BaseManagerAction
 
         $manager->currentWrestlers
             ->whenNotEmpty(fn () => RemoveFromCurrentWrestlersAction::run($manager));
+    }
+
+    /**
+     * Ensure a manager can be retired.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
+     */
+    private function ensureCanBeRetired(Manager $manager): void
+    {
+        if ($manager->isUnemployed()) {
+            throw CannotBeRetiredException::unemployed($manager);
+        }
+
+        if ($manager->hasFutureEmployment()) {
+            throw CannotBeRetiredException::hasFutureEmployment($manager);
+        }
     }
 }

@@ -16,22 +16,47 @@ class ReinstateAction extends BaseWrestlerAction
 
     /**
      * Reinstate a wrestler.
-     *
-     * @throws \App\Exceptions\CannotBeReinstatedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
-        throw_if($wrestler->isUnemployed(), CannotBeReinstatedException::class, $wrestler.' is currently unemployed and cannot be reinstated.');
-        throw_if($wrestler->isReleased(), CannotBeReinstatedException::class, $wrestler.' is currently released and cannot be reinstated.');
-        throw_if($wrestler->hasFutureEmployment(), CannotBeReinstatedException::class, $wrestler.' has not been officially employed and cannot be reinstated.');
-        throw_if($wrestler->isInjured(), CannotBeReinstatedException::class, $wrestler.' is injured and cannot be reinstated.');
-        throw_if($wrestler->isBookable(), CannotBeReinstatedException::class, $wrestler.' is currently employed and cannot be reinstated.');
-        throw_if($wrestler->isRetired(), CannotBeReinstatedException::class, $wrestler.' is currently retired and cannot be reinstated.');
+        $this->ensureCanBeReinstated($wrestler);
 
         $reinstatementDate ??= now();
 
         $this->wrestlerRepository->reinstate($wrestler, $reinstatementDate);
 
         event(new WrestlerReinstated($wrestler));
+    }
+
+    /**
+     * Ensure a wrestler can be reinstated.
+     *
+     * @throws \App\Exceptions\CannotBeReinstatedException
+     */
+    private function ensureCanBeReinstated(Wrestler $wrestler): void
+    {
+        if ($wrestler->isUnemployed()) {
+            throw CannotBeReinstatedException::unemployed($wrestler);
+        }
+
+        if ($wrestler->isReleased()) {
+            throw CannotBeReinstatedException::released($wrestler);
+        }
+
+        if ($wrestler->hasFutureEmployment()) {
+            throw CannotBeReinstatedException::hasFutureEmployment($wrestler);
+        }
+
+        if ($wrestler->isInjured()) {
+            throw CannotBeReinstatedException::injured($wrestler);
+        }
+
+        if ($wrestler->isRetired()) {
+            throw CannotBeReinstatedException::retired($wrestler);
+        }
+
+        if ($wrestler->isBookable()) {
+            throw CannotBeReinstatedException::bookable($wrestler);
+        }
     }
 }

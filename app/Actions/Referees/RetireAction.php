@@ -15,15 +15,10 @@ class RetireAction extends BaseRefereeAction
 
     /**
      * Retire a referee.
-     *
-     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        throw_if($referee->isUnemployed(), CannotBeRetiredException::class, $referee.' is unemployed and cannot be retired.');
-        throw_if($referee->hasFutureEmployment(), CannotBeRetiredException::class, $referee.' has not been officially employed and cannot be retired');
-        throw_if($referee->isRetired(), CannotBeRetiredException::class, $referee.' is already retired.');
-        throw_if($referee->isReleased(), CannotBeRetiredException::class, $referee.' was released and cannot be retired. Re-employ this referee to retire them.');
+        $this->ensureCanBeRetired($referee);
 
         $retirementDate ??= now();
 
@@ -38,5 +33,25 @@ class RetireAction extends BaseRefereeAction
         ReleaseAction::run($referee, $retirementDate);
 
         $this->refereeRepository->retire($referee, $retirementDate);
+    }
+
+    /**
+     * Ensure a referee can be retired.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
+     */
+    private function ensureCanBeRetired(Referee $referee): void
+    {
+        if ($referee->isUnemployed()) {
+            throw CannotBeRetiredException::unemployed($referee);
+        }
+
+        if ($referee->hasFutureEmployment()) {
+            throw CannotBeRetiredException::hasFutureEmployment($referee);
+        }
+
+        if ($referee->isRetired()) {
+            throw CannotBeRetiredException::retired($referee);
+        }
     }
 }

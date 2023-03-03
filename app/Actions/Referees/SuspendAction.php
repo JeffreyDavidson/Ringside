@@ -15,20 +15,45 @@ class SuspendAction extends BaseRefereeAction
 
     /**
      * Suspend a referee.
-     *
-     * @throws \App\Exceptions\CannotBeSuspendedException
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
     {
-        throw_if($referee->isUnemployed(), CannotBeSuspendedException::class, $referee.' is unemployed and cannot be suspended.');
-        throw_if($referee->isReleased(), CannotBeSuspendedException::class, $referee.' is released and cannot be suspended.');
-        throw_if($referee->isRetired(), CannotBeSuspendedException::class, $referee.' is retired and cannot be suspended.');
-        throw_if($referee->hasFutureEmployment(), CannotBeSuspendedException::class, $referee.' has not been officially employed and cannot be suspended.');
-        throw_if($referee->isSuspended(), CannotBeSuspendedException::class, $referee.' is already suspended.');
-        throw_if($referee->isInjured(), CannotBeSuspendedException::class, $referee.' is injured and cannot be suspended.');
+        $this->ensureCanBeSuspended($referee);
 
         $suspensionDate ??= now();
 
         $this->refereeRepository->suspend($referee, $suspensionDate);
+    }
+
+    /**
+     * Ensure a referee can be suspended.
+     *
+     * @throws \App\Exceptions\CannotBeSuspendedException
+     */
+    private function ensureCanBeSuspended(Referee $referee): void
+    {
+        if ($referee->isUnemployed()) {
+            throw CannotBeSuspendedException::unemployed($referee);
+        }
+
+        if ($referee->isReleased()) {
+            throw CannotBeSuspendedException::released($referee);
+        }
+
+        if ($referee->isRetired()) {
+            throw CannotBeSuspendedException::retired($referee);
+        }
+
+        if ($referee->hasFutureEmployment()) {
+            throw CannotBeSuspendedException::hasFutureEmployment($referee);
+        }
+
+        if ($referee->isSuspended()) {
+            throw CannotBeSuspendedException::suspended($referee);
+        }
+
+        if ($referee->isInjured()) {
+            throw CannotBeSuspendedException::injured($referee);
+        }
     }
 }

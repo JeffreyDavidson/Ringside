@@ -16,14 +16,10 @@ class RetireAction extends BaseWrestlerAction
 
     /**
      * Retire a wrestler.
-     *
-     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
     {
-        throw_if($wrestler->isUnemployed(), CannotBeRetiredException::class, $wrestler.' is unemployed and cannot be retired.');
-        throw_if($wrestler->hasFutureEmployment(), CannotBeRetiredException::class, $wrestler.' has not been officially employed and cannot be retired');
-        throw_if($wrestler->isRetired(), CannotBeRetiredException::class, $wrestler.' is already retired.');
+        $this->ensureCanBeRetired($wrestler);
 
         $retirementDate ??= now();
 
@@ -42,5 +38,25 @@ class RetireAction extends BaseWrestlerAction
         $this->wrestlerRepository->retire($wrestler, $retirementDate);
 
         event(new WrestlerRetired($wrestler, $retirementDate));
+    }
+
+    /**
+     * Ensure a wrestler can be retired.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
+     */
+    private function ensureCanBeRetired(Wrestler $wrestler): void
+    {
+        if ($wrestler->isUnemployed()) {
+            throw CannotBeRetiredException::unemployed($wrestler);
+        }
+
+        if ($wrestler->hasFutureEmployment()) {
+            throw CannotBeRetiredException::hasFutureEmployment($wrestler);
+        }
+
+        if ($wrestler->isRetired()) {
+            throw CannotBeRetiredException::retired($wrestler);
+        }
     }
 }

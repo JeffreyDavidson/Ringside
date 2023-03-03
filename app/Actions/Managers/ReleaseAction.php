@@ -15,15 +15,10 @@ class ReleaseAction extends BaseManagerAction
 
     /**
      * Release a manager.
-     *
-     * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
-        throw_if($manager->isUnemployed(), CannotBeReleasedException::class, $manager.' is unemployed and cannot be released.');
-        throw_if($manager->isReleased(), CannotBeReleasedException::class, $manager.' is already released.');
-        throw_if($manager->hasFutureEmployment(), CannotBeReleasedException::class, $manager.' has not been officially employed and cannot be released.');
-        throw_if($manager->isRetired(), CannotBeReleasedException::class, $manager.' has is retired and cannot be released.');
+        $this->ensureCanBeReleased($manager);
 
         $releaseDate ??= now();
 
@@ -42,5 +37,29 @@ class ReleaseAction extends BaseManagerAction
 
         $manager->currentWrestlers
             ->whenNotEmpty(fn () => RemoveFromCurrentWrestlersAction::run($manager));
+    }
+
+    /**
+     * Ensure a manager can be released.
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
+     */
+    private function ensureCanBeReleased(Manager $manager): void
+    {
+        if ($manager->isUnemployed()) {
+            throw CannotBeReleasedException::unemployed($manager);
+        }
+
+        if ($manager->isReleased()) {
+            throw CannotBeReleasedException::released($manager);
+        }
+
+        if ($manager->hasFutureEmployment()) {
+            throw CannotBeReleasedException::hasFutureEmployment($manager);
+        }
+
+        if ($manager->isRetired()) {
+            throw CannotBeReleasedException::retired($manager);
+        }
     }
 }

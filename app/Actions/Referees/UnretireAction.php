@@ -15,17 +15,27 @@ class UnretireAction extends BaseRefereeAction
 
     /**
      * Unretire a referee.
-     *
-     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
-        throw_if(! $referee->isRetired(), CannotBeUnretiredException::class, $referee.' is not retired so cannot be unretired.');
+        $this->ensureCanBeUnretired($referee);
 
         $unretiredDate ??= now();
 
         $this->refereeRepository->unretire($referee, $unretiredDate);
 
         EmployAction::run($referee, $unretiredDate);
+    }
+
+    /**
+     * Ensure a referee can be unretired.
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
+     */
+    private function ensureCanBeUnretired(Referee $referee)
+    {
+        if (! $referee->isRetired()) {
+            throw CannotBeUnretiredException::notRetired($referee);
+        }
     }
 }

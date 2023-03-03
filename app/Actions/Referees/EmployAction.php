@@ -15,15 +15,25 @@ class EmployAction extends BaseRefereeAction
 
     /**
      * Employ a referee.
-     *
-     * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(Referee $referee, ?Carbon $startDate = null): void
     {
-        throw_if($referee->isCurrentlyEmployed(), CannotBeEmployedException::class, $referee.' is currently employed and cannot be employed further.');
+        $this->ensureCanBeEmployed($referee);
 
         $startDate ??= now();
 
         $this->refereeRepository->employ($referee, $startDate);
+    }
+
+    /**
+     * Ensure a referee can be employed.
+     *
+     * @throws \App\Exceptions\CannotBeEmployedException
+     */
+    private function ensureCanBeEmployed(Referee $referee): void
+    {
+        if ($referee->isCurrentlyEmployed()) {
+            throw CannotBeEmployedException::employed($referee);
+        }
     }
 }

@@ -16,22 +16,47 @@ class InjureAction extends BaseWrestlerAction
 
     /**
      * Injure a wrestler.
-     *
-     * @throws \App\Exceptions\CannotBeInjuredException
      */
     public function handle(Wrestler $wrestler, ?Carbon $injureDate = null): void
     {
-        throw_if($wrestler->isUnemployed(), CannotBeInjuredException::class, $wrestler.' is unemployed and cannot be injured.');
-        throw_if($wrestler->isReleased(), CannotBeInjuredException::class, $wrestler.' is released and cannot be injured.');
-        throw_if($wrestler->isRetired(), CannotBeInjuredException::class, $wrestler.' is retired and cannot be injured.');
-        throw_if($wrestler->hasFutureEmployment(), CannotBeInjuredException::class, $wrestler.' has not been officially employed and cannot be injured.');
-        throw_if($wrestler->isInjured(), CannotBeInjuredException::class, $wrestler.' is already currently injured.');
-        throw_if($wrestler->isSuspended(), CannotBeInjuredException::class, $wrestler.' is suspended and cannot be injured.');
+        $this->ensureCanBeInjured($wrestler);
 
         $injureDate ??= now();
 
         $this->wrestlerRepository->injure($wrestler, $injureDate);
 
         event(new WrestlerInjured($wrestler));
+    }
+
+    /**
+     * Ensure a wrestler can be injured.
+     *
+     * @throws \App\Exceptions\CannotBeInjuredException
+     */
+    private function ensureCanBeInjured(Wrestler $wrestler): void
+    {
+        if ($wrestler->isUnemployed()) {
+            throw CannotBeInjuredException::unemployed($wrestler);
+        }
+
+        if ($wrestler->isReleased()) {
+            throw CannotBeInjuredException::released($wrestler);
+        }
+
+        if ($wrestler->isRetired()) {
+            throw CannotBeInjuredException::retired($wrestler);
+        }
+
+        if ($wrestler->hasFutureEmployment()) {
+            throw CannotBeInjuredException::hasFutureEmployment($wrestler);
+        }
+
+        if ($wrestler->isInjured()) {
+            throw CannotBeInjuredException::injured($wrestler);
+        }
+
+        if ($wrestler->isSuspended()) {
+            throw CannotBeInjuredException::suspended($wrestler);
+        }
     }
 }

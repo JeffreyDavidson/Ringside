@@ -15,15 +15,25 @@ class EmployAction extends BaseManagerAction
 
     /**
      * Employ a manager.
-     *
-     * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
-        throw_if($manager->isCurrentlyEmployed(), CannotBeEmployedException::class, $manager.' is currently employed and cannot be employed again.');
+        $this->ensureCanBeEmployed($manager);
 
         $startDate ??= now();
 
         $this->managerRepository->employ($manager, $startDate);
+    }
+
+    /**
+     * Ensure a manager can be employed.
+     *
+     * @throws \App\Exceptions\CannotBeEmployedException
+     */
+    private function ensureCanBeEmployed(Manager $manager): void
+    {
+        if ($manager->isCurrentlyEmployed()) {
+            throw CannotBeEmployedException::employed($manager);
+        }
     }
 }
