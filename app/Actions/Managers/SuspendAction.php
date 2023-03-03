@@ -15,20 +15,45 @@ class SuspendAction extends BaseManagerAction
 
     /**
      * Suspend a manager.
-     *
-     * @throws \App\Exceptions\CannotBeSuspendedException
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
     {
-        throw_if($manager->isUnemployed(), CannotBeSuspendedException::class, $manager.' is unemployed and cannot be suspended.');
-        throw_if($manager->isReleased(), CannotBeSuspendedException::class, $manager.' is released and cannot be suspended.');
-        throw_if($manager->isRetired(), CannotBeSuspendedException::class, $manager.' is retired and cannot be suspended.');
-        throw_if($manager->hasFutureEmployment(), CannotBeSuspendedException::class, $manager.' has not been officially employed and cannot be suspended.');
-        throw_if($manager->isSuspended(), CannotBeSuspendedException::class, $manager.' is already suspended.');
-        throw_if($manager->isInjured(), CannotBeSuspendedException::class, $manager.' is injured and cannot be suspended.');
+        $this->ensureCanBeSuspended($manager);
 
         $suspensionDate ??= now();
 
         $this->managerRepository->suspend($manager, $suspensionDate);
+    }
+
+    /**
+     * Ensure a manager can be suspended.
+     *
+     * @throws \App\Exceptions\CannotBeSuspendedException
+     */
+    private function ensureCanBeSuspended(Manager $manager): void
+    {
+        if ($manager->isUnemployed()) {
+            throw CannotBeSuspendedException::unemployed($manager);
+        }
+
+        if ($manager->isReleased()) {
+            throw CannotBeSuspendedException::released($manager);
+        }
+
+        if ($manager->isRetired()) {
+            throw CannotBeSuspendedException::retired($manager);
+        }
+
+        if ($manager->hasFutureEmployment()) {
+            throw CannotBeSuspendedException::hasFutureEmployment($manager);
+        }
+
+        if ($manager->isSuspended()) {
+            throw CannotBeSuspendedException::suspended($manager);
+        }
+
+        if ($manager->isInjured()) {
+            throw CannotBeSuspendedException::injured($manager);
+        }
     }
 }

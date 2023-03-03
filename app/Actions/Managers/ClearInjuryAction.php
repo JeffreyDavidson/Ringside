@@ -15,15 +15,25 @@ class ClearInjuryAction extends BaseManagerAction
 
     /**
      * Clear an injury of a manager.
-     *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
     {
-        throw_if(! $manager->isInjured(), CannotBeClearedFromInjuryException::class, $manager.' is not currently injured and cannot be cleared from an injury.');
+        $this->ensureCanBeClearedFromInjury($manager);
 
         $recoveryDate ??= now();
 
         $this->managerRepository->clearInjury($manager, $recoveryDate);
+    }
+
+    /**
+     * Ensure a manager can be cleared from an injury.
+     *
+     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     */
+    private function ensureCanBeClearedFromInjury(Manager $manager): void
+    {
+        if (! $manager->isInjured()) {
+            throw CannotBeClearedFromInjuryException::notInjured($manager);
+        }
     }
 }

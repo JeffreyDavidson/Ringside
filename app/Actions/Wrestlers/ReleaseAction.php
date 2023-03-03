@@ -16,15 +16,10 @@ class ReleaseAction extends BaseWrestlerAction
 
     /**
      * Release a wrestler.
-     *
-     * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        throw_if($wrestler->isUnemployed(), CannotBeReleasedException::class, $wrestler.' is unemployed and cannot be released.');
-        throw_if($wrestler->isReleased(), CannotBeReleasedException::class, $wrestler.' is already released.');
-        throw_if($wrestler->hasFutureEmployment(), CannotBeReleasedException::class, $wrestler.' has not been officially employed and cannot be released.');
-        throw_if($wrestler->isRetired(), CannotBeReleasedException::class, $wrestler.' has is retired and cannot be released.');
+        $this->ensureCanBeReleased($wrestler);
 
         $releaseDate ??= now();
 
@@ -39,5 +34,29 @@ class ReleaseAction extends BaseWrestlerAction
         $this->wrestlerRepository->release($wrestler, $releaseDate);
 
         event(new WrestlerReleased($wrestler, $releaseDate));
+    }
+
+    /**
+     * Ensure a wrestler can be released.
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
+     */
+    private function ensureCanBeReleased(Wrestler $wrestler): void
+    {
+        if ($wrestler->isUnemployed()) {
+            throw CannotBeReleasedException::unemployed($wrestler);
+        }
+
+        if ($wrestler->isReleased()) {
+            throw CannotBeReleasedException::released($wrestler);
+        }
+
+        if ($wrestler->hasFutureEmployment()) {
+            throw CannotBeReleasedException::hasFutureEmployment($wrestler);
+        }
+
+        if ($wrestler->isRetired()) {
+            throw CannotBeReleasedException::retired($wrestler);
+        }
     }
 }

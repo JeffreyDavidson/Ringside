@@ -15,17 +15,27 @@ class UnretireAction extends BaseWrestlerAction
 
     /**
      * Unretire a wrestler.
-     *
-     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretiredDate = null): void
     {
-        throw_if(! $wrestler->isRetired(), CannotBeUnretiredException::class, $wrestler.' is not retired so cannot be unretired.');
+        $this->ensureCanBeUnretired($wrestler);
 
         $unretiredDate ??= now();
 
         $this->wrestlerRepository->unretire($wrestler, $unretiredDate);
 
         EmployAction::run($wrestler, $unretiredDate);
+    }
+
+    /**
+     * Ensure a wrestler can be unretired.
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
+     */
+    private function ensureCanBeUnretired(Wrestler $wrestler)
+    {
+        if (! $wrestler->isRetired()) {
+            throw CannotBeUnretiredException::notRetired($wrestler);
+        }
     }
 }

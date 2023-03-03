@@ -16,7 +16,6 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
 {
     use Concerns\CanJoinStables;
     use Concerns\HasEmployments;
-    use Concerns\HasFullName;
     use Concerns\Manageables;
     use Concerns\OwnedByUser;
     use HasFactory;
@@ -60,11 +59,11 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
     }
 
     /**
-     * Get the display name of the manager.
+     * Get the name of the manager.
      */
-    protected function displayName(): Attribute
+    protected function name(): Attribute
     {
-        return Attribute::make(
+        return new Attribute(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
     }

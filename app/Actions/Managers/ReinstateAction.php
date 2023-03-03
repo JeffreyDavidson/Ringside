@@ -15,15 +15,45 @@ class ReinstateAction extends BaseManagerAction
 
     /**
      * Reinstate a manager.
-     *
-     * @throws \App\Exceptions\CannotBeReinstatedException
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
-        throw_if(! $manager->isSuspended(), CannotBeReinstatedException::class, $manager.' is not suspended and cannot be reinstated.');
+        $this->ensureCanBeReinstated($manager);
 
         $reinstatementDate ??= now();
 
         $this->managerRepository->reinstate($manager, $reinstatementDate);
+    }
+
+    /**
+     * Ensure a manager can be reinstated.
+     *
+     * @throws \App\Exceptions\CannotBeReinstatedException
+     */
+    private function ensureCanBeReinstated(Manager $manager): void
+    {
+        if ($manager->isUnemployed()) {
+            throw CannotBeReinstatedException::unemployed($manager);
+        }
+
+        if ($manager->isReleased()) {
+            throw CannotBeReinstatedException::released($manager);
+        }
+
+        if ($manager->hasFutureEmployment()) {
+            throw CannotBeReinstatedException::hasFutureEmployment($manager);
+        }
+
+        if ($manager->isInjured()) {
+            throw CannotBeReinstatedException::injured($manager);
+        }
+
+        if ($manager->isRetired()) {
+            throw CannotBeReinstatedException::retired($manager);
+        }
+
+        if ($manager->isBookable()) {
+            throw CannotBeReinstatedException::bookable($manager);
+        }
     }
 }

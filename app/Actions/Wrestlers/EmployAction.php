@@ -15,15 +15,25 @@ class EmployAction extends BaseWrestlerAction
 
     /**
      * Employ a wrestler.
-     *
-     * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void
     {
-        throw_if($wrestler->isCurrentlyEmployed(), CannotBeEmployedException::class, $wrestler.' is already employed.');
+        $this->ensureCanBeEmployed($wrestler);
 
         $startDate ??= now();
 
         $this->wrestlerRepository->employ($wrestler, $startDate);
+    }
+
+    /**
+     * Ensure a wrestler can be employed.
+     *
+     * @throws \App\Exceptions\CannotBeEmployedException
+     */
+    private function ensureCanBeEmployed(Wrestler $wrestler): void
+    {
+        if ($wrestler->isCurrentlyEmployed()) {
+            throw CannotBeEmployedException::employed($wrestler);
+        }
     }
 }

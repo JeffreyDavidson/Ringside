@@ -7,12 +7,12 @@ namespace App\Models;
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
 use App\Models\Contracts\Bookable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends SingleRosterMember implements Bookable
 {
-    use Concerns\HasFullName;
     use HasFactory;
     use SoftDeletes;
 
@@ -42,5 +42,15 @@ class Referee extends SingleRosterMember implements Bookable
     public function newEloquentBuilder($query): RefereeQueryBuilder
     {
         return new RefereeQueryBuilder($query);
+    }
+
+    /**
+     * Get the name of the manager.
+     */
+    protected function name(): Attribute
+    {
+        return new Attribute(
+            get: fn () => "{$this->first_name} {$this->last_name}",
+        );
     }
 }

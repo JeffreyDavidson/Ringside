@@ -19,12 +19,24 @@ class ClearInjuryAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
-        throw_if(! $wrestler->isInjured(), CannotBeClearedFromInjuryException::class, $wrestler->name.' is not currently injured so cannot be cleared from injury.');
+        $this->ensureCanBeClearedFromInjury($wrestler);
 
         $recoveryDate ??= now();
 
         $this->wrestlerRepository->clearInjury($wrestler, $recoveryDate);
 
         event(new WrestlerClearedFromInjury($wrestler));
+    }
+
+    /**
+     * Ensure a wrestler can be cleared from an injury.
+     *
+     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     */
+    private function ensureCanBeClearedFromInjury(Wrestler $wrestler): void
+    {
+        if (! $wrestler->isInjured()) {
+            throw CannotBeClearedFromInjuryException::notInjured($wrestler);
+        }
     }
 }

@@ -15,15 +15,25 @@ class ClearInjuryAction extends BaseRefereeAction
 
     /**
      * Clear an injury of a referee.
-     *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
-        throw_if(! $referee->isInjured(), CannotBeClearedFromInjuryException::class, $referee->first_name.' '.$referee->last_name.' is not injured and cannot be cleared from an injury.');
+        $this->ensureCanBeClearedFromInjury($referee);
 
         $recoveryDate ??= now();
 
         $this->refereeRepository->clearInjury($referee, $recoveryDate);
+    }
+
+    /**
+     * Ensure a referee can be cleared from an injury.
+     *
+     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     */
+    private function ensureCanBeClearedFromInjury(Referee $referee): void
+    {
+        if (! $referee->isInjured()) {
+            throw CannotBeClearedFromInjuryException::notInjured($referee);
+        }
     }
 }

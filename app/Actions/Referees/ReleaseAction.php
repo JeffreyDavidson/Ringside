@@ -15,15 +15,10 @@ class ReleaseAction extends BaseRefereeAction
 
     /**
      * Release a referee.
-     *
-     * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
-        throw_if($referee->isUnemployed(), CannotBeReleasedException::class, $referee.' is unemployed and cannot be released.');
-        throw_if($referee->isReleased(), CannotBeReleasedException::class, $referee.' is already released.');
-        throw_if($referee->hasFutureEmployment(), CannotBeReleasedException::class, $referee.' has not been officially employed and cannot be released.');
-        throw_if($referee->isRetired(), CannotBeReleasedException::class, $referee.' has is retired and cannot be released.');
+        $this->ensureCanBeReleased($referee);
 
         $releaseDate ??= now();
 
@@ -36,5 +31,29 @@ class ReleaseAction extends BaseRefereeAction
         }
 
         $this->refereeRepository->release($referee, $releaseDate);
+    }
+
+    /**
+     * Ensure a referee can be released.
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
+     */
+    private function ensureCanBeReleased(Referee $referee): void
+    {
+        if ($referee->isUnemployed()) {
+            throw CannotBeReleasedException::unemployed($referee);
+        }
+
+        if ($referee->isReleased()) {
+            throw CannotBeReleasedException::released($referee);
+        }
+
+        if ($referee->hasFutureEmployment()) {
+            throw CannotBeReleasedException::hasFutureEmployment($referee);
+        }
+
+        if ($referee->isRetired()) {
+            throw CannotBeReleasedException::retired($referee);
+        }
     }
 }
