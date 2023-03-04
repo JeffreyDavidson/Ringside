@@ -6,7 +6,6 @@ namespace App\Repositories;
 
 use App\Data\WrestlerData;
 use App\Enums\WrestlerStatus;
-use App\Exceptions\WrestlerNotOnCurrentTagTeamException;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;

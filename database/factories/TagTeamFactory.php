@@ -50,7 +50,7 @@ class TagTeamFactory extends Factory
         return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::BOOKABLE])
             ->has(Employment::factory()->started($employmentStartDate))
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
-            ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
+            ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });
     }
@@ -78,7 +78,7 @@ class TagTeamFactory extends Factory
         return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::FUTURE_EMPLOYMENT])
             ->has(Employment::factory()->started($employmentStartDate))
             ->hasAttached($wrestlers, ['joined_at' => Carbon::now()])
-            ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
+            ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });
     }
@@ -97,7 +97,7 @@ class TagTeamFactory extends Factory
             ->has(Employment::factory()->started($employmentStartDate))
             ->has(Suspension::factory()->started($suspensionStartDate))
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
-            ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
+            ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });
     }
@@ -141,7 +141,7 @@ class TagTeamFactory extends Factory
         return $this->state(fn (array $attributes) => ['status' => TagTeamStatus::RELEASED])
             ->has(Employment::factory()->started($employmentStartDate)->ended($employmentEndDate))
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
-            ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
+            ->afterCreating(function (TagTeam $tagTeam) {
                 $tagTeam->save();
             });
     }
