@@ -7,9 +7,9 @@ use App\Models\Contracts\CanBeAStableMember;
 use App\Models\SingleRosterMember;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertTrue;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a wrestler has a name', function () {
     $wrestler = Wrestler::factory()->create(['name' => 'Example Wrestler Name']);

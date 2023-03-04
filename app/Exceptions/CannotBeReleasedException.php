@@ -14,17 +14,17 @@ class CannotBeReleasedException extends Exception
         return new static("`{$model->name}` is unemployed and cannot be released.");
     }
 
-    public static function released(SingleRosterMember $model):  self
+    public static function released(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is alrady released.");
     }
 
-    public static function retired(SingleRosterMember $model):  self
+    public static function retired(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is retired and cannot be released.");
     }
 
-    public static function hasFutureEmployment(SingleRosterMember $model):  self
+    public static function hasFutureEmployment(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` has not been officially employed and cannot be released.");
     }

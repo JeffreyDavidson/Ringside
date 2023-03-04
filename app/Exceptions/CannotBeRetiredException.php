@@ -14,12 +14,12 @@ class CannotBeRetiredException extends Exception
         return new static("`{$model->name}` is unemployed and cannot be retired.");
     }
 
-    public static function hasFutureEmployment(SingleRosterMember $model):  self
+    public static function hasFutureEmployment(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` has not been officially employed and cannot be retired.");
     }
 
-    public static function retired(SingleRosterMember $model):  self
+    public static function retired(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is already retired.");
     }

@@ -14,27 +14,27 @@ class CannotBeReinstatedException extends Exception
         return new static("`{$model->name}` is unemployed and cannot be reinstated.");
     }
 
-    public static function released(SingleRosterMember $model):  self
+    public static function released(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is released and cannot be reinstated.");
     }
 
-    public static function retired(SingleRosterMember $model):  self
+    public static function retired(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is retired and cannot be reinstated.");
     }
 
-    public static function hasFutureEmployment(SingleRosterMember $model):  self
+    public static function hasFutureEmployment(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` has not been officially employed and cannot be reinstated.");
     }
 
-    public static function bookable(SingleRosterMember $model):  self
+    public static function bookable(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is bookable and cannot be reinstated.");
     }
 
-    public static function injured(SingleRosterMember $model):  self
+    public static function injured(SingleRosterMember $model): self
     {
         return new static("`{$model->name}` is injured and cannot be reinstated.");
     }
