@@ -37,7 +37,7 @@ class StoreRequest extends FormRequest
             'feet' => ['required', 'integer', 'max:8'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
-            'hometown' => ['required', 'string', new LetterSpace],
+            'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string', 'regex:/^[a-zA-Z\s\']+$/'],
             'start_date' => ['nullable', 'string', 'date'],
         ];
