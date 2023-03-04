@@ -30,7 +30,9 @@ class RetireAction extends BaseRefereeAction
             ClearInjuryAction::run($referee, $retirementDate);
         }
 
-        ReleaseAction::run($referee, $retirementDate);
+        if ($referee->isCurrentlyEmployed()) {
+            ReleaseAction::run($referee, $retirementDate);
+        }
 
         $this->refereeRepository->retire($referee, $retirementDate);
     }

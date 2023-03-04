@@ -5,7 +5,7 @@ use App\Enums\RefereeStatus;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Referee;
 
-test('invoke retires a retirable referee and redirects', function ($factoryState) {
+test('invoke retires a retirable referee', function ($factoryState) {
     $referee = Referee::factory()->$factoryState()->create();
 
     RetireAction::run($referee);
@@ -17,6 +17,7 @@ test('invoke retires a retirable referee and redirects', function ($factoryState
     'bookable',
     'injured',
     'suspended',
+    'released',
 ]);
 
 test('invoke throws exception for retiring a non retirable referee', function ($factoryState) {
@@ -28,6 +29,5 @@ test('invoke throws exception for retiring a non retirable referee', function ($
 })->throws(CannotBeRetiredException::class)->with([
     'retired',
     'withFutureEmployment',
-    'released',
     'unemployed',
 ]);
