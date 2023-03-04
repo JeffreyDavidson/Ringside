@@ -5,7 +5,10 @@ use App\Models\Concerns\CanJoinStables;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\SingleRosterMember;
+use App\Models\TagTeam;
 use App\Models\Wrestler;
+use function PHPUnit\Framework\assertCount;
+use function PHPUnit\Framework\assertTrue;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a wrestler has a name', function () {
@@ -174,4 +177,29 @@ test('injured wrestlers can be retrieved', function () {
     expect($injuredWrestlers)
         ->toHaveCount(1)
         ->collectionHas($injuredWrestler);
+});
+
+test('a wrestler belongs to many tag teams', function () {
+    $wrestler = Wrestler::factory()->create();
+    $tagTeamA = TagTeam::factory()->bookable()->create(['name' => 'Tag Team A']);
+    $tagTeamB = TagTeam::factory()->bookable()->create(['name' => 'Tag Team B']);
+
+    $wrestler->tagTeams()->attach($tagTeamA, ['joined_at' => now()]);
+
+    $wrestler->refresh();
+
+    assertCount(1, $wrestler->tagTeams);
+    assertCount(0, $wrestler->previousTagTeams);
+    assertTrue($wrestler->currentTagTeam->is($tagTeamA));
+
+    $wrestler->tagTeams()->updateExistingPivot($tagTeamA->id, ['left_at' => now()]);
+
+    $wrestler->tagTeams()->attach($tagTeamB, ['joined_at' => now()]);
+
+    $wrestler->refresh();
+
+    assertCount(2, $wrestler->tagTeams);
+    assertTrue($wrestler->currentTagTeam->is($tagTeamB));
+    assertCount(1, $wrestler->previousTagTeams);
+    assertTrue($wrestler->previousTagTeam->is($tagTeamA));
 });

@@ -162,8 +162,6 @@ class WrestlerRepository
         $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot($currentTagTeamId, [
             'left_at' => $removalDate->toDateTimeString(),
         ]);
-
-        $wrestler->update(['current_tag_team_id' => null]);
     }
 
     /**

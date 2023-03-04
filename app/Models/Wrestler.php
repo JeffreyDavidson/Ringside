@@ -37,7 +37,6 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
         'hometown',
         'signature_move',
         'status',
-        'current_tag_team_id',
     ];
 
     /**

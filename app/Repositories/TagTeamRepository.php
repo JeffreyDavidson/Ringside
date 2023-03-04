@@ -187,8 +187,6 @@ class TagTeamRepository
     {
         $removalDate ??= now();
 
-        $tagTeamPartner->update(['current_tag_team_id' => null]);
-
         $tagTeam->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
             $tagTeamPartner->id,
             ['left_at' => $removalDate->toDateTimeString()]
@@ -201,8 +199,6 @@ class TagTeamRepository
     public function addTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, ?Carbon $joinDate = null): void
     {
         $joinDate ??= now();
-
-        $tagTeamPartner->update(['current_tag_team_id' => $tagTeam->id]);
 
         $tagTeam->wrestlers()->attach(
             $tagTeamPartner->id,

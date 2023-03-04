@@ -14,7 +14,6 @@ use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -73,9 +72,10 @@ class TagTeam extends RosterMember implements Bookable, CanBeAStableMember, Comp
     /**
      * Get current wrestlers of the tag team.
      */
-    public function currentWrestlers(): HasMany
+    public function currentWrestlers(): BelongsToMany
     {
-        return $this->hasMany(Wrestler::class, 'current_tag_team_id');
+        return $this->wrestlers()
+            ->wherePivotNull('left_at');
     }
 
     /**

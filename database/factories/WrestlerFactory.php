@@ -29,7 +29,6 @@ class WrestlerFactory extends Factory
             'hometown' => $this->faker->city().', '.$this->faker->state(),
             'signature_move' => null,
             'status' => WrestlerStatus::UNEMPLOYED,
-            'current_tag_team_id' => null,
         ];
     }
 
@@ -103,15 +102,12 @@ class WrestlerFactory extends Factory
     }
 
     /**
-     * Undocumented function.
-     *
-     * @param  [type] $tagTeam
+     * Add a wrestler to a tag team.
      */
-    public function onCurrentTagTeam($tagTeam = null): static
+    public function onCurrentTagTeam(TagTeam $tagTeam = null): static
     {
         $tagTeam ??= TagTeam::factory()->create();
 
-        return $this->state(fn () => ['current_tag_team_id' => $tagTeam->id])
-            ->hasAttached($tagTeam, ['joined_at' => now()->toDateTimeString()]);
+        return $this->hasAttached($tagTeam, ['joined_at' => now()->toDateTimeString()]);
     }
 }
