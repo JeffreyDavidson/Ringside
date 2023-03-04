@@ -4,8 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d72e32537b3da86194eacda44cf53dc5",
+    "content-hash": "af4dd7ef198a8124e09cfe494eb07a87",
     "packages": [
+        {
+            "name": "ankurk91/laravel-eloquent-relationships",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ankurk91/laravel-eloquent-relationships.git",
+                "reference": "99fffc5e1b9062b4ce8cd864941cd9e1dc3d86fd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ankurk91/laravel-eloquent-relationships/zipball/99fffc5e1b9062b4ce8cd864941cd9e1dc3d86fd",
+                "reference": "99fffc5e1b9062b4ce8cd864941cd9e1dc3d86fd",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^9.34 || ^10",
+                "illuminate/support": "^9.34 || ^10",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ankurk91\\Eloquent\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "ankurk91",
+                    "homepage": "https://ankurk91.github.io"
+                }
+            ],
+            "description": "Add missing eloquent relationships to Laravel php framework.",
+            "homepage": "https://github.com/ankurk91/laravel-eloquent-relationships",
+            "keywords": [
+                "BelongsToOne",
+                "MorphToOne",
+                "eloquent",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/ankurk91/laravel-eloquent-relationships/issues",
+                "source": "https://github.com/ankurk91/laravel-eloquent-relationships/tree/2.0.0"
+            },
+            "time": "2023-02-14T05:28:45+00:00"
+        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.0.4",

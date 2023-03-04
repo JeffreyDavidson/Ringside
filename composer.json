@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "ankurk91/laravel-eloquent-relationships": "^2.0",
         "fidum/laravel-eloquent-morph-to-one": "^2.1",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.0",

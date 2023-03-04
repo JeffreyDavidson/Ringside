@@ -52,10 +52,6 @@ class TagTeamFactory extends Factory
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
             ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
                 $tagTeam->save();
-
-                foreach ($wrestlers as $wrestler) {
-                    $wrestler->update(['current_tag_team_id' => $tagTeam->id]);
-                }
             });
     }
 
@@ -84,10 +80,6 @@ class TagTeamFactory extends Factory
             ->hasAttached($wrestlers, ['joined_at' => Carbon::now()])
             ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
                 $tagTeam->save();
-
-                foreach ($wrestlers as $wrestler) {
-                    $wrestler->update(['current_tag_team_id' => $tagTeam->id]);
-                }
             });
     }
 
@@ -107,10 +99,6 @@ class TagTeamFactory extends Factory
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
             ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
                 $tagTeam->save();
-
-                foreach ($wrestlers as $wrestler) {
-                    $wrestler->update(['current_tag_team_id' => $tagTeam->id]);
-                }
             });
     }
 
@@ -155,10 +143,6 @@ class TagTeamFactory extends Factory
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate])
             ->afterCreating(function (TagTeam $tagTeam) use ($wrestlers) {
                 $tagTeam->save();
-
-                foreach ($wrestlers as $wrestler) {
-                    $wrestler->update(['current_tag_team_id' => $tagTeam->id]);
-                }
             });
     }
 

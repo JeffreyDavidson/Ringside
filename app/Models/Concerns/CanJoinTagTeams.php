@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use Ankurk91\Eloquent\HasBelongsToOne;
+use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\TagTeam;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 trait CanJoinTagTeams
 {
+    use HasBelongsToOne;
+
     /**
      * Get the tag teams the model has been belonged to.
      */
@@ -29,26 +31,28 @@ trait CanJoinTagTeams
     public function previousTagTeams(): BelongsToMany
     {
         return $this->tagTeams()
-            ->withPivot(['joined_at', 'left_at'])
             ->wherePivotNotNull('left_at');
     }
 
     /**
      * Get the previous tag team the member has belonged to.
      */
-    public function previousTagTeam(): Attribute
+    public function previousTagTeam(): BelongsToOne
     {
-        return Attribute::make(
-            get: fn () => $this->previousTagTeams->first(),
-        );
+        return $this->belongsToOne(TagTeam::class)
+            ->latest('joined_at')
+            ->wherePivotNotNull('left_at')
+            ->withPivot(['joined_at', 'left_at']);
     }
 
     /**
      * Get the model's current tag team.
      */
-    public function currentTagTeam(): BelongsTo
+    public function currentTagTeam(): BelongsToOne
     {
-        return $this->belongsTo(TagTeam::class, 'current_tag_team_id');
+        return $this->belongsToOne(TagTeam::class)
+            ->wherePivotNull('left_at')
+            ->withPivot(['joined_at', 'left_at']);
     }
 
     /**
