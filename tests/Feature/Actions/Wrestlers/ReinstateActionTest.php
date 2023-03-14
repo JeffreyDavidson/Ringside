@@ -64,8 +64,6 @@ test('it reinstates a suspended wrestler at a specific datetime', function () {
 });
 
 test('invoke throws exception for reinstating a non reinstatable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
     $datetime = now();
 

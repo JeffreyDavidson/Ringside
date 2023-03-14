@@ -64,8 +64,6 @@ test('it injures a bookable wrestler at a specific datetime', function () {
 });
 
 test('invoke throws exception for injuring a non injurable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
     InjureAction::run($wrestler);
