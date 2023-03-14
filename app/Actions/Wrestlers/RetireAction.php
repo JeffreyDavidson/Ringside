@@ -24,15 +24,15 @@ class RetireAction extends BaseWrestlerAction
         $retirementDate ??= now();
 
         if ($wrestler->isSuspended()) {
-            ReinstateAction::run($wrestler, $retirementDate);
+            $this->wrestlerRepository->reinstate($wrestler, $retirementDate);
         }
 
         if ($wrestler->isInjured()) {
-            ClearInjuryAction::run($wrestler, $retirementDate);
+            $this->wrestlerRepository->clearInjury($wrestler, $retirementDate);
         }
 
         if ($wrestler->isCurrentlyEmployed()) {
-            ReleaseAction::run($wrestler, $retirementDate);
+            $this->wrestlerRepository->release($wrestler, $retirementDate);
         }
 
         $this->wrestlerRepository->retire($wrestler, $retirementDate);

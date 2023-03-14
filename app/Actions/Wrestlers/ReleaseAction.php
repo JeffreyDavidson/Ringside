@@ -24,11 +24,11 @@ class ReleaseAction extends BaseWrestlerAction
         $releaseDate ??= now();
 
         if ($wrestler->isSuspended()) {
-            ReinstateAction::run($wrestler, $releaseDate);
+            $this->wrestlerRepository->reinstate($wrestler, $releaseDate);
         }
 
         if ($wrestler->isInjured()) {
-            ClearInjuryAction::run($wrestler, $releaseDate);
+            $this->wrestlerRepository->clearInjury($wrestler, $releaseDate);
         }
 
         $this->wrestlerRepository->release($wrestler, $releaseDate);

@@ -5,13 +5,15 @@ use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->wrestler = Wrestler::factory()->injured()->create();
 });
 
 test('invoke calls clear injury action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([ClearInjuryController::class], $this->wrestler))
         ->assertRedirect(action([WrestlersController::class, 'index']));
 
@@ -19,24 +21,24 @@ test('invoke calls clear injury action and redirects', function () {
 });
 
 test('a basic user cannot mark an injured wrestler as cleared', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([ClearInjuryController::class], $this->wrestler))
         ->assertForbidden();
 });
 
 test('a guest cannot mark an injured wrestler as cleared', function () {
-    $this->patch(action([ClearInjuryController::class], $this->wrestler))
+    patch(action([ClearInjuryController::class], $this->wrestler))
         ->assertRedirect(route('login'));
 });
 
 test('invoke returns error message if exception is thrown', function () {
-    $wrestler = Wrestler::factory()->unemployed()->create();
+    $wrestler = Wrestler::factory()->create();
 
-    $this->actingAs(administrator())
+    ClearInjuryAction::allowToRun()->andThrow(CannotBeClearedFromInjuryException::class);
+
+    actingAs(administrator())
         ->from(action([WrestlersController::class, 'index']))
         ->patch(action([ClearInjuryController::class], $wrestler))
         ->assertRedirect(action([WrestlersController::class, 'index']))
         ->assertSessionHas('error');
-
-    ClearInjuryAction::shouldRun()->with($wrestler)->andThrow(CannotBeClearedFromInjuryException::class);
 });

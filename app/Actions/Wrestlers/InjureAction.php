@@ -25,7 +25,7 @@ class InjureAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->injure($wrestler, $injureDate);
 
-        event(new WrestlerInjured($wrestler));
+        event(new WrestlerInjured($wrestler, $injureDate));
     }
 
     /**

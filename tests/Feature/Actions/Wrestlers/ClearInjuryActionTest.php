@@ -5,24 +5,29 @@ use App\Events\Wrestlers\WrestlerClearedFromInjury;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 
-test('it clears an injury of an injured wrestler at the current datetime by default', function () {
+beforeEach(function () {
     Event::fake();
 
     testTime()->freeze();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
+
+test('it clears an injury of an injured wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->injured()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('clearInjury')
         ->once()
         ->withArgs(function (Wrestler $unretireWrestler, Carbon $recoveryDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($recoveryDate->equalTo($datetime));
+            expect($unretireWrestler->is($wrestler))->toBeTrue();
+            expect($recoveryDate->equalTo($datetime))->toBeTrue();
 
             return true;
         })
@@ -30,17 +35,19 @@ test('it clears an injury of an injured wrestler at the current datetime by defa
 
     ClearInjuryAction::run($wrestler);
 
-    Event::assertDispatched(WrestlerClearedFromInjury::class);
+    Event::assertDispatched(WrestlerClearedFromInjury::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->recoveryDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('it clears an injury of an injured wrestler at a specific datetime', function () {
-    Event::fake();
-
-    testTime()->freeze();
     $wrestler = Wrestler::factory()->injured()->create();
     $datetime = now()->addDays(2);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('clearInjury')
         ->once()
         ->with($wrestler, $datetime)
@@ -48,12 +55,15 @@ test('it clears an injury of an injured wrestler at a specific datetime', functi
 
     ClearInjuryAction::run($wrestler, $datetime);
 
-    Event::assertDispatched(WrestlerClearedFromInjury::class);
+    Event::assertDispatched(WrestlerClearedFromInjury::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->recoveryDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('it throws exception for injuring a non injurable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
     ClearInjuryAction::run($wrestler);

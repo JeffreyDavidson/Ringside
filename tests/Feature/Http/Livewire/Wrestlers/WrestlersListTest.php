@@ -1,14 +1,16 @@
 <?php
 
+use function Pest\Livewire\livewire;
+
 use App\Http\Livewire\Wrestlers\WrestlersList;
-use Livewire\Livewire;
 
 test('it should return correct view', function () {
-    Livewire::test(WrestlersList::class)
+    livewire(WrestlersList::class)
         ->assertViewIs('livewire.wrestlers.wrestlers-list');
 });
 
+
 test('it should pass correct data', function () {
-    Livewire::test(WrestlersList::class)
+    livewire(WrestlersList::class)
         ->assertViewHas('wrestlers');
 });

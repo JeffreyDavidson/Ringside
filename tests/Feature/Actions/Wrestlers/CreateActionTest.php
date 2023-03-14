@@ -5,27 +5,32 @@ use App\Actions\Wrestlers\EmployAction;
 use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+
+beforeEach(function () {
+    testTime()->freeze();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
 
 test('it creates a wrestler', function () {
     $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, null);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
         ->andReturns(new Wrestler());
 
-    EmployAction::shouldNotRun();
+    $this->wrestlerRepository
+        ->shouldNotReceive('employ');
 
     CreateAction::run($data);
 });
 
 test('it employs a wrestler if start date is filled in request', function () {
-    testTime()->freeze();
-    $dateTime = Carbon::now();
+    $dateTime = now();
     $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, $dateTime);
     $wrestler = Wrestler::factory()->create([
         'name' => $data->name,
@@ -34,14 +39,14 @@ test('it employs a wrestler if start date is filled in request', function () {
         'hometown' => $data->hometown,
     ]);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
         ->andReturn($wrestler);
 
-    EmployAction::mock()
-        ->shouldReceive('handle')
+    $this->wrestlerRepository
+        ->shouldReceive('employ')
         ->once()
         ->with($wrestler, $data->start_date);
 

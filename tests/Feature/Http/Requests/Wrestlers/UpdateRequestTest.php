@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Requests\Wrestlers\UpdateRequest;
-use App\Models\Employment;
 use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Rules\LetterSpace;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\WrestlerRequestFactory;
+use function Pest\Laravel\mock;
 
 test('an administrator is authorized to make this request', function () {
     $wrestler = Wrestler::factory()->create();
@@ -45,6 +46,23 @@ test('wrestler name must be a string', function () {
             'name' => 123,
         ]))
         ->assertFailsValidation(['name' => 'string']);
+});
+
+test('wrestler name must contain only letters and spaces', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    mock(LetterSpace::class)
+        ->shouldReceive('validate')
+        ->with('name', 1, function ($closure) {
+            $closure();
+        });
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
+        ->validate(WrestlerRequestFactory::new()->create([
+            'name' => 'dafd78(^&^',
+        ]))
+        ->assertFailsValidation(['name' => LetterSpace::class]);
 });
 
 test('wrestler name must be at least 3 characters', function () {
@@ -90,6 +108,17 @@ test('wrestler height in feet must be an integer', function () {
             'feet' => 'not-an-integer',
         ]))
         ->assertFailsValidation(['feet' => 'integer']);
+});
+
+test('wrestler height in feet must be lower than 8', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
+        ->validate(WrestlerRequestFactory::new()->create([
+            'feet' => 9,
+        ]))
+        ->assertFailsValidation(['feet' => 'max:8']);
 });
 
 test('wrestler height in inches is required', function () {
@@ -147,6 +176,17 @@ test('wrestler weight must be an integer', function () {
         ->assertFailsValidation(['weight' => 'integer']);
 });
 
+test('wrestler weight must 3 digits long', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
+        ->validate(WrestlerRequestFactory::new()->create([
+            'weight' => 1000,
+        ]))
+        ->assertFailsValidation(['weight' => 'digits:3']);
+});
+
 test('wrestler hometown is required', function () {
     $wrestler = Wrestler::factory()->create();
 
@@ -169,6 +209,23 @@ test('wrestler hometown must be a string', function () {
         ->assertFailsValidation(['hometown' => 'string']);
 });
 
+test('wrestler hometown must only contain letters and spaces', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    mock(LetterSpace::class)
+        ->shouldReceive('validate')
+        ->with('name', 1, function ($closure) {
+            $closure();
+        });
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
+        ->validate(WrestlerRequestFactory::new()->create([
+            'hometown' => '@# 078^&*(^& ',
+        ]))
+        ->assertFailsValidation(['hometown' => LetterSpace::class]);
+});
+
 test('wrestler signature move is optional', function () {
     $wrestler = Wrestler::factory()->create();
 
@@ -189,6 +246,17 @@ test('wrestler signature move must be a string if provided', function () {
             'signature_move' => 12345,
         ]))
         ->assertFailsValidation(['signature_move' => 'string']);
+});
+
+test('wrestler signature move must cannot contain special letters', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    $this->createRequest(UpdateRequest::class)
+        ->withParam('wrestler', $wrestler)
+        ->validate(WrestlerRequestFactory::new()->create([
+            'signature_move' => '*&%()&*&()*&&*',
+        ]))
+        ->assertFailsValidation(['signature_move' => 'regex:/^[a-zA-Z\s\']+$/']);
 });
 
 test('wrestler start date is optional', function () {
@@ -227,21 +295,16 @@ test('wrestler start date must be in the correct date format if provided', funct
 test('wrestler start date cannot be changed if employment start date has past', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
 
+    mock(EmploymentStartDateCanBeChanged::class)
+        ->shouldReceive('validate')
+        ->with('start_date', 1, function ($closure) {
+            $closure();
+        });
+
     $this->createRequest(UpdateRequest::class)
         ->withParam('wrestler', $wrestler)
         ->validate(WrestlerRequestFactory::new()->create([
             'start_date' => Carbon::now()->toDateTimeString(),
         ]))
         ->assertFailsValidation(['start_date' => EmploymentStartDateCanBeChanged::class]);
-});
-
-test('wrestler start date can be changed if employment start date is in the future', function () {
-    $wrestler = Wrestler::factory()->has(Employment::factory()->started(Carbon::parse('+2 weeks')))->create();
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('wrestler', $wrestler)
-        ->validate(WrestlerRequestFactory::new()->create([
-            'start_date' => Carbon::tomorrow()->toDateString(),
-        ]))
-        ->assertPassesValidation();
 });

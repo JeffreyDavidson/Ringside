@@ -3,13 +3,15 @@
 use App\Actions\Wrestlers\DeleteAction;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\delete;
 
 beforeEach(function () {
     $this->wrestler = Wrestler::factory()->create();
 });
 
 test('destroy calls delete action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->delete(action([WrestlersController::class, 'destroy'], $this->wrestler))
         ->assertRedirect(action([WrestlersController::class, 'index']));
 
@@ -17,12 +19,12 @@ test('destroy calls delete action and redirects', function () {
 });
 
 test('a basic user cannot delete a wrestler', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->delete(action([WrestlersController::class, 'destroy'], $this->wrestler))
         ->assertForbidden();
 });
 
 test('a guest cannot delete a wrestler', function () {
-    $this->delete(action([WrestlersController::class, 'destroy'], $this->wrestler))
+    delete(action([WrestlersController::class, 'destroy'], $this->wrestler))
         ->assertRedirect(route('login'));
 });

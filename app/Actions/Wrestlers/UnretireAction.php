@@ -23,8 +23,7 @@ class UnretireAction extends BaseWrestlerAction
         $unretiredDate ??= now();
 
         $this->wrestlerRepository->unretire($wrestler, $unretiredDate);
-
-        EmployAction::run($wrestler, $unretiredDate);
+        $this->wrestlerRepository->employ($wrestler, $unretiredDate);
     }
 
     /**
