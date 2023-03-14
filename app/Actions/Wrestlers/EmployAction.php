@@ -22,6 +22,10 @@ class EmployAction extends BaseWrestlerAction
 
         $startDate ??= now();
 
+        if ($wrestler->isRetired()) {
+            $this->wrestlerRepository->unretire($wrestler, $startDate);
+        }
+
         $this->wrestlerRepository->employ($wrestler, $startDate);
     }
 

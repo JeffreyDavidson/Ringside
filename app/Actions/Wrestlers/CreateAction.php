@@ -21,7 +21,7 @@ class CreateAction extends BaseWrestlerAction
         $wrestler = $this->wrestlerRepository->create($wrestlerData);
 
         if (isset($wrestlerData->start_date)) {
-            EmployAction::run($wrestler, $wrestlerData->start_date);
+            $this->wrestlerRepository->employ($wrestler, $wrestlerData->start_date);
         }
 
         return $wrestler;

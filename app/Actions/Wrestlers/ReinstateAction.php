@@ -25,7 +25,7 @@ class ReinstateAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->reinstate($wrestler, $reinstatementDate);
 
-        event(new WrestlerReinstated($wrestler));
+        event(new WrestlerReinstated($wrestler, $reinstatementDate));
     }
 
     /**

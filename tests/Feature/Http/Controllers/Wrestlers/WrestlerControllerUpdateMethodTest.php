@@ -5,6 +5,8 @@ use App\Data\WrestlerData;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->wrestler = Wrestler::factory()->create();
@@ -13,7 +15,7 @@ beforeEach(function () {
 });
 
 test('update calls update action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->from(action([WrestlersController::class, 'edit'], $this->wrestler))
         ->patch(action([WrestlersController::class, 'update'], $this->wrestler), $this->data)
         ->assertValid()
@@ -23,12 +25,12 @@ test('update calls update action and redirects', function () {
 });
 
 test('a basic user cannot update a wrestler', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([WrestlersController::class, 'update'], $this->wrestler), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot update a wrestler', function () {
-    $this->patch(action([WrestlersController::class, 'update'], $this->wrestler), $this->data)
+    patch(action([WrestlersController::class, 'update'], $this->wrestler), $this->data)
         ->assertRedirect(route('login'));
 });

@@ -5,24 +5,29 @@ use App\Events\Wrestlers\WrestlerInjured;
 use App\Exceptions\CannotBeInjuredException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 
-test('it injures a bookable wrestler at the current datetime by default', function () {
+beforeEach(function () {
     Event::fake();
 
     testTime()->freeze();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
+
+test('it injures a bookable wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('injure')
         ->once()
-        ->withArgs(function (Wrestler $unretireWrestler, Carbon $injuryDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($injuryDate->equalTo($datetime));
+        ->withArgs(function (Wrestler $injurableWrestler, Carbon $injuryDate) use ($wrestler, $datetime) {
+            expect($injurableWrestler->is($wrestler))->toBeTrue();
+            expect($injuryDate->equalTo($datetime))->toBeTrue();
 
             return true;
         })
@@ -30,17 +35,19 @@ test('it injures a bookable wrestler at the current datetime by default', functi
 
     InjureAction::run($wrestler);
 
-    Event::assertDispatched(WrestlerInjured::class);
+    Event::assertDispatched(WrestlerInjured::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->injureDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('it injures a bookable wrestler at a specific datetime', function () {
-    Event::fake();
-
-    testTime()->freeze();
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now()->addDays(2);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('injure')
         ->once()
         ->with($wrestler, $datetime)
@@ -48,7 +55,12 @@ test('it injures a bookable wrestler at a specific datetime', function () {
 
     InjureAction::run($wrestler, $datetime);
 
-    Event::assertDispatched(WrestlerInjured::class);
+    Event::assertDispatched(WrestlerInjured::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->injureDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('invoke throws exception for injuring a non injurable wrestler', function ($factoryState) {

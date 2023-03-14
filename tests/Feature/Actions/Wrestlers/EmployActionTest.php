@@ -4,91 +4,108 @@ use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 
-test('it employs an unemployed wrestler at the current datetime by default', function () {
+beforeEach(function () {
+    Event::fake();
+
     testTime()->freeze();
-    $wrestler = Wrestler::factory()->unemployed()->create();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
+
+test('it employs an employable wrestler at the current datetime by default', function ($factoryState) {
+    $wrestler = Wrestler::factory()->{$factoryState}()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
+        ->shouldNotReceive('unretire');
+
+    $this->wrestlerRepository
         ->shouldReceive('employ')
         ->once()
-        ->withArgs(function (Wrestler $unretireWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($employmentDate->equalTo($datetime));
+        ->withArgs(function (Wrestler $employableWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
+            expect($employableWrestler->is($wrestler))->toBeTrue();
+            expect($employmentDate->equalTo($datetime))->toBeTrue();
 
             return true;
         })
         ->andReturn($wrestler);
 
     EmployAction::run($wrestler);
-});
+})->with([
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+]);
 
-test('it employs an unemployed wrestler at a specific datetime', function () {
-    testTime()->freeze();
-    $wrestler = Wrestler::factory()->unemployed()->create();
+test('it employs an employable wrestler at a specific datetime', function ($factoryState) {
+    $wrestler = Wrestler::factory()->{$factoryState}()->create();
     $datetime = now()->addDays(2);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
+        ->shouldNotReceive('unretire');
+
+    $this->wrestlerRepository
         ->shouldReceive('employ')
         ->once()
         ->with($wrestler, $datetime)
-        ->andReturn($wrestler);
+        ->andReturns($wrestler);
 
     EmployAction::run($wrestler, $datetime);
-});
+})->with([
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+]);
 
-test('it employs an unemployed wrestler', function () {
-    $wrestler = Wrestler::factory()->unemployed()->create();
-    $datetime = now();
-
-    mock(WrestlerRepository::class)
-        ->shouldReceive('employ')
-        ->once()
-        ->with($wrestler, $datetime)
-        ->andReturn($wrestler);
-
-    EmployAction::run($wrestler, $datetime);
-});
-
-test('it employs a future employed wrestler', function () {
-    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $datetime = now();
-
-    mock(WrestlerRepository::class)
-        ->shouldReceive('employ')
-        ->once()
-        ->with($wrestler, $datetime)
-        ->andReturn($wrestler);
-
-    EmployAction::run($wrestler, $datetime);
-});
-
-test('it employs a released wrestler', function () {
-    $wrestler = Wrestler::factory()->released()->create();
-    $datetime = now();
-
-    mock(WrestlerRepository::class)
-        ->shouldReceive('employ')
-        ->once()
-        ->with($wrestler, $datetime)
-        ->andReturn($wrestler);
-
-    EmployAction::run($wrestler, $datetime);
-});
-
-test('it employs a retired wrestler', function () {
+test('it employs a retired wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->retired()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
+        ->shouldReceive('unretire')
+        ->withArgs(function (Wrestler $unretirableWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
+            expect($unretirableWrestler->is($wrestler))->toBeTrue();
+            expect($unretireDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->once()
+        ->andReturn($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->withArgs(function (Wrestler $employedWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
+            expect($employedWrestler->is($wrestler))->toBeTrue();
+            expect($employmentDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    EmployAction::run($wrestler);
+});
+
+test('it employs a retired wrestler at a specific datetime', function () {
+    $wrestler = Wrestler::factory()->retired()->create();
+    $datetime = now()->addDays(2);
+
+    $this->wrestlerRepository
+        ->shouldReceive('unretire')
+        ->with($wrestler, $datetime)
+        ->once()
+        ->andReturn($wrestler);
+
+    $this->wrestlerRepository
         ->shouldReceive('employ')
         ->once()
         ->with($wrestler, $datetime)
-        ->andReturn($wrestler);
+        ->andReturns($wrestler);
 
     EmployAction::run($wrestler, $datetime);
 });

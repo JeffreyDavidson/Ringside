@@ -25,7 +25,7 @@ class ClearInjuryAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->clearInjury($wrestler, $recoveryDate);
 
-        event(new WrestlerClearedFromInjury($wrestler));
+        event(new WrestlerClearedFromInjury($wrestler, $recoveryDate));
     }
 
     /**

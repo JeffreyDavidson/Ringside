@@ -5,24 +5,29 @@ use App\Events\Wrestlers\WrestlerSuspended;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 
-test('it suspends a bookable wrestler at the current datetime by default', function () {
+beforeEach(function () {
     Event::fake();
 
     testTime()->freeze();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
+
+test('it suspends a bookable wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('suspend')
         ->once()
-        ->withArgs(function (Wrestler $unretireWrestler, Carbon $suspensionDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($suspensionDate->equalTo($datetime));
+        ->withArgs(function (Wrestler $suspendableWrestler, Carbon $suspensionDate) use ($wrestler, $datetime) {
+            expect($suspendableWrestler->is($wrestler))->toBeTrue();
+            expect($suspensionDate->equalTo($datetime))->toBeTrue();
 
             return true;
         })
@@ -30,17 +35,19 @@ test('it suspends a bookable wrestler at the current datetime by default', funct
 
     SuspendAction::run($wrestler);
 
-    Event::assertDispatched(WrestlerSuspended::class);
+    Event::assertDispatched(WrestlerSuspended::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->suspensionDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('it suspends a bookable wrestler at a specific datetime', function () {
-    Event::fake();
-
-    testTime()->freeze();
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now()->addDays(2);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('suspend')
         ->once()
         ->with($wrestler, $datetime)
@@ -48,12 +55,15 @@ test('it suspends a bookable wrestler at a specific datetime', function () {
 
     SuspendAction::run($wrestler, $datetime);
 
-    Event::assertDispatched(WrestlerSuspended::class);
+    Event::assertDispatched(WrestlerSuspended::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->suspensionDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('invoke throws exception for suspending a non suspendable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
     SuspendAction::run($wrestler);

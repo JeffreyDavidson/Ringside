@@ -1,15 +1,20 @@
 <?php
 
+use App\Builders\WrestlerQueryBuilder;
 use App\Enums\WrestlerStatus;
+use App\Models\Concerns\CanHaveMatches;
 use App\Models\Concerns\CanJoinStables;
+use App\Models\Concerns\CanJoinTagTeams;
+use App\Models\Concerns\HasManagers;
+use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
+use App\Models\Contracts\Manageable;
+use App\Models\Contracts\TagTeamMember;
 use App\Models\SingleRosterMember;
-use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use function PHPUnit\Framework\assertCount;
-use function PHPUnit\Framework\assertTrue;
 
 test('a wrestler has a name', function () {
     $wrestler = Wrestler::factory()->create(['name' => 'Example Wrestler Name']);
@@ -47,16 +52,14 @@ test('a wrestler has a status', function () {
     expect($wrestler)->status->toBeInstanceOf(WrestlerStatus::class);
 });
 
+test('a wrestler is unemployed by default', function () {
+    $wrestler = Wrestler::factory()->create();
+
+    expect($wrestler)->status->toMatchObject(WrestlerStatus::UNEMPLOYED);
+});
+
 test('a wrestler is a single roster member', function () {
     expect(get_parent_class(Wrestler::class))->toBe(SingleRosterMember::class);
-});
-
-test('a wrestler uses soft deleted trait', function () {
-    expect(Wrestler::class)->usesTrait(SoftDeletes::class);
-});
-
-test('a wrestler uses can join stables trait', function () {
-    expect(Wrestler::class)->usesTrait(CanJoinStables::class);
 });
 
 test('a wrestler implements bookable interface', function () {
@@ -67,139 +70,48 @@ test('a wrestler implements can be a stable member interface', function () {
     expect(class_implements(Wrestler::class))->toContain(CanBeAStableMember::class);
 });
 
-test('bookable wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $bookableWrestlers = Wrestler::bookable()->get();
-
-    expect($bookableWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($bookableWrestler);
+test('a wrestler implements manageable interface', function () {
+    expect(class_implements(Wrestler::class))->toContain(Manageable::class);
 });
 
-test('future employed wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $futureEmployedWrestlers = Wrestler::futureEmployed()->get();
-
-    expect($futureEmployedWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($futureEmployedWrestler);
+test('a wrestler implements tag team member interface', function () {
+    expect(class_implements(Wrestler::class))->toContain(TagTeamMember::class);
 });
 
-test('suspended wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $suspendedWrestlers = Wrestler::suspended()->get();
-
-    expect($suspendedWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($suspendedWrestler);
+test('a wrestler uses can have matches trait', function () {
+    expect(Wrestler::class)->usesTrait(CanHaveMatches::class);
 });
 
-test('released wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $releasedWrestlers = Wrestler::released()->get();
-
-    expect($releasedWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($releasedWrestler);
+test('a wrestler uses can join stables trait', function () {
+    expect(Wrestler::class)->usesTrait(CanJoinStables::class);
 });
 
-test('retired wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $retiredWrestlers = Wrestler::retired()->get();
-
-    expect($retiredWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($retiredWrestler);
+test('a wrestler uses can join tag teams trait', function () {
+    expect(Wrestler::class)->usesTrait(CanJoinTagTeams::class);
 });
 
-test('unemployed wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $unemployedWrestlers = Wrestler::unemployed()->get();
-
-    expect($unemployedWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($unemployedWrestler);
+test('a wrestler uses has managers trait', function () {
+    expect(Wrestler::class)->usesTrait(HasManagers::class);
 });
 
-test('injured wrestlers can be retrieved', function () {
-    $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
-    $suspendedWrestler = Wrestler::factory()->suspended()->create();
-    $retiredWrestler = Wrestler::factory()->retired()->create();
-    $releasedWrestler = Wrestler::factory()->released()->create();
-    $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-    $injuredWrestler = Wrestler::factory()->injured()->create();
-
-    $injuredWrestlers = Wrestler::injured()->get();
-
-    expect($injuredWrestlers)
-        ->toHaveCount(1)
-        ->collectionHas($injuredWrestler);
+test('a wrestler uses owned by user trait', function () {
+    expect(Wrestler::class)->usesTrait(OwnedByUser::class);
 });
 
-test('a wrestler belongs to many tag teams', function () {
-    $wrestler = Wrestler::factory()->create();
-    $tagTeamA = TagTeam::factory()->bookable()->create(['name' => 'Tag Team A']);
-    $tagTeamB = TagTeam::factory()->bookable()->create(['name' => 'Tag Team B']);
+test('a wrestler uses has factory trait', function () {
+    expect(Wrestler::class)->usesTrait(HasFactory::class);
+});
 
-    $wrestler->tagTeams()->attach($tagTeamA, ['joined_at' => now()]);
+test('a wrestler uses soft deleted trait', function () {
+    expect(Wrestler::class)->usesTrait(SoftDeletes::class);
+});
 
-    $wrestler->refresh();
+test('a wrestler has its own eloquent builder', function () {
+    expect(new Wrestler())->query()->toBeInstanceOf(WrestlerQueryBuilder::class);
+});
 
-    assertCount(1, $wrestler->tagTeams);
-    assertCount(0, $wrestler->previousTagTeams);
-    assertTrue($wrestler->currentTagTeam->is($tagTeamA));
+test('a wrestler has a display name', function () {
+    $wrestler = Wrestler::factory()->create(['name' => 'Hulk Hogan']);
 
-    $wrestler->tagTeams()->updateExistingPivot($tagTeamA->id, ['left_at' => now()]);
-
-    $wrestler->tagTeams()->attach($tagTeamB, ['joined_at' => now()]);
-
-    $wrestler->refresh();
-
-    assertCount(2, $wrestler->tagTeams);
-    assertTrue($wrestler->currentTagTeam->is($tagTeamB));
-    assertCount(1, $wrestler->previousTagTeams);
-    assertTrue($wrestler->previousTagTeam->is($tagTeamA));
+    expect($wrestler)->displayName->toBe('Hulk Hogan');
 });

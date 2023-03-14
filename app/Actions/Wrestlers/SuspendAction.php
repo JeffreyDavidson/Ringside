@@ -25,7 +25,7 @@ class SuspendAction extends BaseWrestlerAction
 
         $this->wrestlerRepository->suspend($wrestler, $suspensionDate);
 
-        event(new WrestlerSuspended($wrestler));
+        event(new WrestlerSuspended($wrestler, $suspensionDate));
     }
 
     /**

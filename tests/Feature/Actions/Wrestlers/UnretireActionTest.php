@@ -5,60 +5,71 @@ use App\Actions\Wrestlers\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
 
 test('it unretires a retired wrestler at the current datetime by default', function () {
-    testTime()->freeze();
     $wrestler = Wrestler::factory()->retired()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('unretire')
         ->once()
         ->withArgs(function (Wrestler $unretireWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($unretireDate->equalTo($datetime));
+            expect($unretireWrestler->is($wrestler))->toBeTrue();
+            expect($unretireDate->equalTo($datetime))->toBeTrue();
 
             return true;
         })
         ->andReturn($wrestler);
 
-    EmployAction::shouldRun()
-        ->withArgs(function (Wrestler $unretireWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($employmentDate->equalTo($datetime));
+    $this->wrestlerRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->withArgs(function (Wrestler $employableWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
+            expect($employableWrestler->is($wrestler))->toBeTrue();
+            expect($unretireDate->equalTo($datetime))->toBeTrue();
 
             return true;
-        });
+        })
+        ->andReturn($wrestler);
 
     UnretireAction::run($wrestler);
 });
 
 test('it unretires a retired wrestler at a specific datetime', function () {
-    testTime()->freeze();
     $wrestler = Wrestler::factory()->retired()->create();
     $datetime = now()->addDays(2);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
         ->shouldReceive('unretire')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    EmployAction::shouldRun()->with($wrestler, $datetime);
+    $this->wrestlerRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturn($wrestler);
 
     UnretireAction::run($wrestler, $datetime);
 });
 
 test('invoke throws exception for unretiring a non unretirable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
-    $datetime = now();
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    UnretireAction::run($wrestler, $datetime);
+    UnretireAction::run($wrestler);
 })->throws(CannotBeUnretiredException::class)->with([
     'bookable',
     'withFutureEmployment',

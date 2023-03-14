@@ -20,11 +20,7 @@ class RestoreController extends Controller
 
         $this->authorize('restore', $wrestler);
 
-        try {
-            RestoreAction::run($wrestler);
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
+        RestoreAction::run($wrestler);
 
         return to_route('wrestlers.index');
     }

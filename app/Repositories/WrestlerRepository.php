@@ -8,6 +8,7 @@ use App\Data\WrestlerData;
 use App\Enums\WrestlerStatus;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -69,7 +70,6 @@ class WrestlerRepository
             ['ended_at' => null],
             ['started_at' => $employmentDate->toDateTimeString()]
         );
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -80,7 +80,6 @@ class WrestlerRepository
     public function release(Wrestler $wrestler, Carbon $releaseDate): Wrestler
     {
         $wrestler->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -91,7 +90,6 @@ class WrestlerRepository
     public function injure(Wrestler $wrestler, Carbon $injureDate): Wrestler
     {
         $wrestler->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -102,7 +100,6 @@ class WrestlerRepository
     public function clearInjury(Wrestler $wrestler, Carbon $recoveryDate): Wrestler
     {
         $wrestler->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -113,7 +110,6 @@ class WrestlerRepository
     public function retire(Wrestler $wrestler, Carbon $retirementDate): Wrestler
     {
         $wrestler->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -124,7 +120,6 @@ class WrestlerRepository
     public function unretire(Wrestler $wrestler, Carbon $unretireDate): Wrestler
     {
         $wrestler->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -135,7 +130,6 @@ class WrestlerRepository
     public function suspend(Wrestler $wrestler, Carbon $suspensionDate): Wrestler
     {
         $wrestler->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -146,7 +140,6 @@ class WrestlerRepository
     public function reinstate(Wrestler $wrestler, Carbon $reinstateDate): Wrestler
     {
         $wrestler->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
-        $wrestler->save();
 
         return $wrestler;
     }
@@ -216,7 +209,9 @@ class WrestlerRepository
                     ->whereDoesntHave('currentTagTeam');
             })
             ->orWhere(function ($query) use ($tagTeam) {
-                $query->where('current_tag_team_id', $tagTeam->id);
+                $query->whereHas('currentTagTeam', function (Builder $query) use ( $tagTeam) {
+                    $query->where('tag_team_id', '=', $tagTeam->id);
+                });
             })
             ->get();
     }

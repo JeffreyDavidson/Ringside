@@ -12,11 +12,11 @@ use App\Models\Contracts\Manageable;
 use App\Models\Contracts\TagTeamMember;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMember, Manageable, TagTeamMember
 {
+    use Concerns\CanHaveMatches;
     use Concerns\CanJoinStables;
     use Concerns\CanJoinTagTeams;
     use Concerns\HasManagers;
@@ -49,19 +49,20 @@ class Wrestler extends SingleRosterMember implements Bookable, CanBeAStableMembe
     ];
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => WrestlerStatus::UNEMPLOYED->value,
+    ];
+
+    /**
      * Create a new Eloquent query builder for the model.
      */
     public function newEloquentBuilder($query): WrestlerQueryBuilder
     {
         return new WrestlerQueryBuilder($query);
-    }
-
-    /**
-     * Retrieve the event matches participated by the wrestler.
-     */
-    public function eventMatches(): MorphToMany
-    {
-        return $this->morphToMany(EventMatch::class, 'event_match_competitor');
     }
 
     /**

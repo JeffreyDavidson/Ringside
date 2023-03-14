@@ -1,81 +1,324 @@
 <?php
 
-use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction;
 use App\Events\Wrestlers\WrestlerRetired;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 
-test('it retires a bookable wrestler at the current datetime by default', function () {
+beforeEach(function () {
     Event::fake();
 
     testTime()->freeze();
+
+    $this->wrestlerRepository = mock(WrestlerRepository::class);
+});
+
+test('it retires a bookable wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now();
 
-    mock(WrestlerRepository::class)
-        ->shouldReceive('retire')
+    $this->wrestlerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury');
+
+    $this->wrestlerRepository
+        ->shouldReceive('release')
         ->once()
-        ->withArgs(function (Wrestler $unretireWrestler, Carbon $suspensionDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($suspensionDate->equalTo($datetime));
+        ->withArgs(function (Wrestler $releasableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($releasableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
 
             return true;
         })
         ->andReturns($wrestler);
 
-    ReleaseAction::shouldRun()
-        ->withArgs(function (Wrestler $unretireWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
-            $this->assertTrue($unretireWrestler->is($wrestler));
-            $this->assertTrue($employmentDate->equalTo($datetime));
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($retirableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
 
             return true;
-        });
+        })
+        ->andReturns($wrestler);
 
     RetireAction::run($wrestler);
 
-    Event::assertDispatched(WrestlerRetired::class);
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('it retires a bookable wrestler at a specific datetime', function () {
-    Event::fake();
-
-    testTime()->freeze();
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now()->addDays(2);
 
-    mock(WrestlerRepository::class)
+    $this->wrestlerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury');
+
+    $this->wrestlerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
         ->shouldReceive('retire')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    ReleaseAction::shouldRun($wrestler, $datetime);
+    RetireAction::run($wrestler, $datetime);
+
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a suspended wrestler at the current datetime by default', function () {
+    $wrestler = Wrestler::factory()->suspended()->create();
+    $datetime = now();
+
+    $this->wrestlerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->withArgs(function (Wrestler $reinstatableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($reinstatableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldNotReceive('clearInjury');
+
+    $this->wrestlerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Wrestler $releasableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($releasableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($retirableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    RetireAction::run($wrestler);
+
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a suspended wrestler at a specific datetime', function () {
+    $wrestler = Wrestler::factory()->suspended()->create();
+    $datetime = now()->addDays(2);
+
+    $this->wrestlerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldNotReceive('clearInjury');
+
+    $this->wrestlerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
 
     RetireAction::run($wrestler, $datetime);
 
-    Event::assertDispatched(WrestlerRetired::class);
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
-test('it throws exception trying to retire an unemployed wrestler', function () {
-    $wrestler = Wrestler::factory()->unemployed()->create();
+test('it retires an injured wrestler at the current datetime by default', function () {
+    $wrestler = Wrestler::factory()->injured()->create();
+    $datetime = now();
+
+    $this->wrestlerRepository
+        ->shouldNotReceive('reinstate');
+
+    $this->wrestlerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->withArgs(function (Wrestler $clearableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($clearableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Wrestler $releasableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($releasableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($retirableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
 
     RetireAction::run($wrestler);
-})->throws(CannotBeRetiredException::class);
 
-test('it throws exception trying to retire a wrestler with a future employment', function () {
-    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires an injured wrestler at a specific datetime', function () {
+    $wrestler = Wrestler::factory()->injured()->create();
+    $datetime = now()->addDays(2);
+
+    $this->wrestlerRepository
+        ->shouldNotReceive('reinstate');
+
+    $this->wrestlerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    RetireAction::run($wrestler, $datetime);
+
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a released wrestler at the current datetime by default', function () {
+    $wrestler = Wrestler::factory()->released()->create();
+    $datetime = now();
+
+    $this->wrestlerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury')
+        ->shouldNotReceive('release');
+
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
+            expect($retirableWrestler->is($wrestler))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($wrestler);
 
     RetireAction::run($wrestler);
-})->throws(CannotBeRetiredException::class);
 
-test('it throws exception trying to retire a retired wrestler', function () {
-    $wrestler = Wrestler::factory()->retired()->create();
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a released wrestler at a specific datetime', function () {
+    $wrestler = Wrestler::factory()->released()->create();
+    $datetime = now()->addDays(2);
+
+    $this->wrestlerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury')
+        ->shouldNotReceive('release');
+
+    $this->wrestlerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturns($wrestler);
+
+    RetireAction::run($wrestler, $datetime);
+
+    Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
+        expect($event->wrestler->is($wrestler))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it throws exception trying to retire a non retirable wrestler', function ($factoryState) {
+    $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
     RetireAction::run($wrestler);
-})->throws(CannotBeRetiredException::class);
+})->throws(CannotBeRetiredException::class)->with([
+    'unemployed',
+    'withFutureEmployment',
+    'retired',
+]);
