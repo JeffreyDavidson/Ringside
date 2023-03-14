@@ -4,7 +4,7 @@ namespace App\Models\Concerns;
 
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-trait CanHaveMatches
+trait HasMatches
 {
     /**
      * Retrieve the event matches participated by the model.

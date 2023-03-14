@@ -2,10 +2,10 @@
 
 use App\Builders\WrestlerQueryBuilder;
 use App\Enums\WrestlerStatus;
-use App\Models\Concerns\CanHaveMatches;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\HasManagers;
+use App\Models\Concerns\HasMatches;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
@@ -78,10 +78,6 @@ test('a wrestler implements tag team member interface', function () {
     expect(class_implements(Wrestler::class))->toContain(TagTeamMember::class);
 });
 
-test('a wrestler uses can have matches trait', function () {
-    expect(Wrestler::class)->usesTrait(CanHaveMatches::class);
-});
-
 test('a wrestler uses can join stables trait', function () {
     expect(Wrestler::class)->usesTrait(CanJoinStables::class);
 });
@@ -92,6 +88,10 @@ test('a wrestler uses can join tag teams trait', function () {
 
 test('a wrestler uses has managers trait', function () {
     expect(Wrestler::class)->usesTrait(HasManagers::class);
+});
+
+test('a wrestler uses can have matches trait', function () {
+    expect(Wrestler::class)->usesTrait(HasMatches::class);
 });
 
 test('a wrestler uses owned by user trait', function () {
