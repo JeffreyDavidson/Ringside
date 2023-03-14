@@ -6,10 +6,11 @@ namespace App\Models;
 
 use App\Builders\RosterMemberQueryBuilder;
 use App\Models\Contracts\Employable;
+use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Model;
 
-abstract class RosterMember extends Model implements Employable, Suspendable
+abstract class RosterMember extends Model implements Employable, Retirable, Suspendable
 {
     use Concerns\HasEmployments;
     use Concerns\HasRetirements;
