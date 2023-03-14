@@ -81,7 +81,7 @@ uses()->group('wrestlers', 'feature-wrestlers', 'roster', 'feature-roster')
         'Feature/Http/Requests/Wrestlers',
         'Feature/Listeners/WrestlerSubscriberTest.php',
         'Feature/Policies/WrestlerPolicyTest.php',
-        'Feature/Http/Repositories/WrestlerRepositoryTest.php',
+        'Feature/Repositories/WrestlerRepositoryTest.php',
         'Feature/resources/views/wrestlers'
     );
 
