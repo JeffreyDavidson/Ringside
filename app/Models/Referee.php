@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends SingleRosterMember implements Bookable
 {
-    use Concerns\CanHaveMatches;
+    use Concerns\HasMatches;
     use HasFactory;
     use SoftDeletes;
 
