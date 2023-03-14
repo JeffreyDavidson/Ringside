@@ -111,8 +111,6 @@ test('it employs a retired wrestler at a specific datetime', function () {
 });
 
 test('invoke throws exception for employing a non employable wrestler', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
     EmployAction::run($wrestler);
