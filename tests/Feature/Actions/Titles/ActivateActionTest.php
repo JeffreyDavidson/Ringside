@@ -1,42 +1,119 @@
 <?php
 
 use App\Actions\Titles\ActivateAction;
-use App\Data\TitleData;
+use App\Exceptions\CannotBeActivatedException;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
 
-test('invoke calls activate action', function () {
-    $data = new TitleData('Example Name Title', Carbon::tomorrow());
-    $title = Title::factory()->unactivated()->create();
+beforeEach(function () {
+    Event::fake();
 
-    $this->mock(TitleRepository::class)
-        ->shouldReceive('activate')
-        ->once()
-        ->with($title, $data->activation_date);
+    testTime()->freeze();
 
-    ActivateAction::run($title, $data->activation_date);
+    $this->titleRepository = mock(TitleRepository::class);
 });
 
-test('invoke activates a future activated title', function () {
-    $data = new TitleData('Example Name Title', Carbon::tomorrow());
-    $title = Title::factory()->withFutureActivation()->create();
+test('it activates an activatable title at the current datetime by default', function ($factoryState) {
+    $title = Title::factory()->{$factoryState}()->create();
+    $datetime = now();
 
-    $this->mock(TitleRepository::class)
+    $this->titleRepository
+        ->shouldNotReceive('unretire');
+
+    $this->titleRepository
         ->shouldReceive('activate')
         ->once()
-        ->with($title, $data->activation_date);
+        ->withArgs(function (Title $activatableTitle, Carbon $activationDate) use ($title, $datetime) {
+            expect($activatableTitle->is($title))->toBeTrue();
+            expect($activationDate->equalTo($datetime))->toBeTrue();
 
-    ActivateAction::run($title, $data->activation_date);
+            return true;
+        })
+        ->andReturn($title);
+
+    ActivateAction::run($title);
+})->with([
+    'unactivated',
+    'inactive',
+    'withFutureActivation',
+]);
+
+test('it activates an activatable title at a specific datetime', function ($factoryState) {
+    $title = Title::factory()->{$factoryState}()->create();
+    $datetime = now()->addDays(2);
+
+    $this->titleRepository
+        ->shouldNotReceive('unretire');
+
+    $this->titleRepository
+        ->shouldReceive('activate')
+        ->once()
+        ->with($title, $datetime)
+        ->andReturns($title);
+
+    ActivateAction::run($title, $datetime);
+})->with([
+    'unactivated',
+    'inactive',
+    'withFutureActivation',
+]);
+
+test('it activates a retired title at the current datetime by default', function () {
+    $title = Title::factory()->retired()->create();
+    $datetime = now();
+
+    $this->titleRepository
+        ->shouldReceive('unretire')
+        ->withArgs(function (Title $unretirableTitle, Carbon $unretireDate) use ($title, $datetime) {
+            expect($unretirableTitle->is($title))->toBeTrue();
+            expect($unretireDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->once()
+        ->andReturn($title);
+
+    $this->titleRepository
+        ->shouldReceive('activate')
+        ->once()
+        ->withArgs(function (Title $activatedTitle, Carbon $activationDate) use ($title, $datetime) {
+            expect($activatedTitle->is($title))->toBeTrue();
+            expect($activationDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($title);
+
+    ActivateAction::run($title);
 });
 
-test('invoke throws exception for unretiring a non unretirable title', function ($factoryState) {
-    $this->withoutExceptionHandling();
-    $data = new TitleData('Example Name Title', Carbon::tomorrow());
+test('it activates a retired title at a specific datetime', function () {
+    $title = Title::factory()->retired()->create();
+    $datetime = now()->addDays(2);
+
+    $this->titleRepository
+        ->shouldReceive('unretire')
+        ->with($title, $datetime)
+        ->once()
+        ->andReturn($title);
+
+    $this->titleRepository
+        ->shouldReceive('activate')
+        ->once()
+        ->with($title, $datetime)
+        ->andReturns($title);
+
+    ActivateAction::run($title, $datetime);
+});
+
+test('invoke throws exception for activating a non activatable title', function ($factoryState) {
     $title = Title::factory()->{$factoryState}()->create();
 
-    ActivateAction::run($title, $data->activation_date);
+    ActivateAction::run($title);
 })->throws(CannotBeActivatedException::class)->with([
     'active',
-    'retired',
 ]);

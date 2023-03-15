@@ -7,8 +7,8 @@ namespace App\Http\Livewire\Titles;
 use App\Http\Livewire\BaseComponent;
 use App\Models\Title;
 use App\Models\TitleChampionship;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 
 /**

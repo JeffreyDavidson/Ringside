@@ -20,12 +20,23 @@ class UnretireAction extends BaseTitleAction
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void
     {
-        throw_if(! $title->isRetired(), CannotBeUnretiredException::class, $title.' is not retired and cannot be unretired.');
+        $this->ensureCanBeUnretired($title);
 
         $unretiredDate ??= now();
 
         $this->titleRepository->unretire($title, $unretiredDate);
+        $this->titleRepository->activate($title, $unretiredDate);
+    }
 
-        ActivateAction::run($title, $unretiredDate);
+    /**
+     * Ensure a title can be unretired.
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
+     */
+    private function ensureCanBeUnretired(Title $title)
+    {
+        if (! $title->isRetired()) {
+            throw CannotBeUnretiredException::notRetired($title);
+        }
     }
 }

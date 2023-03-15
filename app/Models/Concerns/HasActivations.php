@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
-trait Activations
+trait HasActivations
 {
     /**
      * Get all of the activations of the model.
@@ -150,5 +150,36 @@ trait Activations
     public function canHaveActivationStartDateChanged(Carbon $activationDate): bool
     {
         return $this->hasFutureActivation() && ! $this->activatedOn($activationDate);
+    }
+
+     /**
+     * Check to see if the model is deactivated.
+     */
+    public function isDeactivated(): bool
+    {
+        return $this->previousActivation()->exists()
+                && $this->currentActivation()->doesntExist()
+                && $this->futureActivation()->doesntExist()
+                && $this->currentRetirement()->doesntExist();
+    }
+
+    /**
+     * Determine if the model can be deactivated.
+     */
+    public function canBeDeactivated(): bool
+    {
+        if ($this->isCurrentlyActivated()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check to see if the model is not in activation.
+     */
+    public function isNotInActivation(): bool
+    {
+        return $this->isNotActivation() || $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
     }
 }

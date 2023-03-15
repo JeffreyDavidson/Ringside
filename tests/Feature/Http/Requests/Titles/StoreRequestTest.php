@@ -32,7 +32,13 @@ test('title name can only be letters and spaces', function () {
         ->assertFailsValidation(['name' => 'string']);
 });
 
-test('title name must be a string', function () {
+test('title name must contain only letters and spaces', function () {
+    mock(LetterSpace::class)
+        ->shouldReceive('validate')
+        ->with('name', 1, function ($closure) {
+            $closure();
+        });
+
     $this->createRequest(StoreRequest::class)
         ->validate(TitleRequestFactory::new()->create([
             'name' => 'Invalid!%%# Title',

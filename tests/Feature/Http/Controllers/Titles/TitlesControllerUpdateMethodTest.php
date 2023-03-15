@@ -5,6 +5,8 @@ use App\Data\TitleData;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->title = Title::factory()->create();
@@ -13,7 +15,7 @@ beforeEach(function () {
 });
 
 test('update calls update action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->from(action([TitlesController::class, 'edit'], $this->title))
         ->patch(action([TitlesController::class, 'update'], $this->title), $this->data)
         ->assertValid()
@@ -23,12 +25,12 @@ test('update calls update action and redirects', function () {
 });
 
 test('a basic user cannot update a title', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([TitlesController::class, 'update'], $this->title), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot update a title', function () {
-    $this->patch(action([TitlesController::class, 'update'], $this->title), $this->data)
+    patch(action([TitlesController::class, 'update'], $this->title), $this->data)
         ->assertRedirect(route('login'));
 });

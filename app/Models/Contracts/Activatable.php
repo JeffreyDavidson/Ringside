@@ -75,4 +75,9 @@ interface Activatable
      * Get the model's first activation date.
      */
     public function activatedOn(Carbon $activationDate): ?bool;
+
+    /**
+     * Check to see if the model is currently deactivated.
+     */
+    public function isDeactivated(): bool;
 }

@@ -15,17 +15,37 @@ class RetireAction extends BaseTitleAction
 
     /**
      * Retire a title.
-     *
-     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
-        throw_if($title->isRetired(), CannotBeRetiredException::class, $title.' is already retired.');
+        $this->ensureCanBeRetired($title);
 
         $retirementDate ??= now();
 
-        DeactivateAction::run($title, $retirementDate);
+        if ($title->isCurrentlyActivated()) {
+            $this->titleRepository->deactivate($title, $retirementDate);
+        }
 
         $this->titleRepository->retire($title, $retirementDate);
+    }
+
+    /**
+     * Ensure a title can be retired.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
+     */
+    private function ensureCanBeRetired(Title $title): void
+    {
+        if ($title->isUnactivated()) {
+            throw CannotBeRetiredException::unemployed($title);
+        }
+
+        if ($title->hasFutureActivation()) {
+            throw CannotBeRetiredException::hasFutureEmployment($title);
+        }
+
+        if ($title->isRetired()) {
+            throw CannotBeRetiredException::retired($title);
+        }
     }
 }

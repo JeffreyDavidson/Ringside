@@ -18,7 +18,7 @@ class CreateAction extends BaseTitleAction
         $title = $this->titleRepository->create($titleData);
 
         if (isset($titleData->activation_date)) {
-            ActivateAction::run($title, $titleData->activation_date);
+            $this->titleRepository->activate($title, $titleData->activation_date);
         }
 
         return $title;

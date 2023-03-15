@@ -22,7 +22,7 @@ class UpdateAction extends BaseTitleAction
         if (isset($titleData->activation_date)
             && ($title->canBeActivated() || $title->canHaveActivationStartDateChanged($titleData->activation_date))
         ) {
-            ActivateAction::run($title, $titleData->activation_date);
+            $this->titleRepository->activate($title, $titleData->activation_date);
         }
 
         return $title;
