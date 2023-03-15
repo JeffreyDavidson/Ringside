@@ -1,52 +1,324 @@
 <?php
 
 use App\Actions\Managers\RetireAction;
-use App\Enums\ManagerStatus;
+use App\Events\Managers\ManagerRetired;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Manager;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Repositories\ManagerRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke retires a retirable manager and redirects', function ($factoryState) {
-    $manager = Manager::factory()->$factoryState()->create();
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->managerRepository = mock(ManagerRepository::class);
+});
+
+test('it retires a available manager at the current datetime by default', function () {
+    $manager = Manager::factory()->available()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($retirableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
 
     RetireAction::run($manager);
 
-    expect($manager->fresh())
-        ->retirements->toHaveCount(1)
-        ->status->toMatchObject(ManagerStatus::RETIRED);
-})->with([
-    'available',
-    'injured',
-    'suspended',
-]);
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
 
-test('invoke retires a manager leaving their current tag teams and wrestlers and redirects', function () {
-    $tagTeam = TagTeam::factory()->bookable()->create();
-    $wrestler = Wrestler::factory()->bookable()->create();
+        return true;
+    });
+});
 
-    $manager = Manager::factory()
-        ->available()
-        ->hasAttached($tagTeam, ['hired_at' => now()->toDateTimeString()])
-        ->hasAttached($wrestler, ['hired_at' => now()->toDateTimeString()])
-        ->create();
+test('it retires a available manager at a specific datetime', function () {
+    $manager = Manager::factory()->available()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    RetireAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a suspended manager at the current datetime by default', function () {
+    $manager = Manager::factory()->suspended()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->withArgs(function (Manager $reinstatableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($reinstatableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($retirableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
 
     RetireAction::run($manager);
 
-    expect($manager->fresh())
-        ->tagTeams()->where('manageable_id', $tagTeam->id)->get()->last()->pivot->left_at->not->toBeNull()
-        ->wrestlers()->where('manageable_id', $wrestler->id)->get()->last()->pivot->left_at->not->toBeNull();
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a suspended manager at a specific datetime', function () {
+    $manager = Manager::factory()->suspended()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    RetireAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires an injured manager at the current datetime by default', function () {
+    $manager = Manager::factory()->injured()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldNotReceive('reinstate');
+
+    $this->managerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->withArgs(function (Manager $clearableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($clearableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($retirableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    RetireAction::run($manager);
+
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires an injured manager at a specific datetime', function () {
+    $manager = Manager::factory()->injured()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldNotReceive('reinstate');
+
+    $this->managerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    RetireAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a released manager at the current datetime by default', function () {
+    $manager = Manager::factory()->released()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury')
+        ->shouldNotReceive('release');
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
+            expect($retirableManager->is($manager))->toBeTrue();
+            expect($retirementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($manager);
+
+    RetireAction::run($manager);
+
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it retires a released manager at a specific datetime', function () {
+    $manager = Manager::factory()->released()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldNotReceive('reinstate')
+        ->shouldNotReceive('clearInjury')
+        ->shouldNotReceive('release');
+
+    $this->managerRepository
+        ->shouldReceive('retire')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturns($manager);
+
+    RetireAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->retirementDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('invoke throws exception for retiring a non retirable manager', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $manager = Manager::factory()->{$factoryState}()->create();
 
     RetireAction::run($manager);
 })->throws(CannotBeRetiredException::class)->with([
     'retired',
     'withFutureEmployment',
-    'released',
     'unemployed',
 ]);

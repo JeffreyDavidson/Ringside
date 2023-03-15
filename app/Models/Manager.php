@@ -7,15 +7,13 @@ namespace App\Models;
 use App\Builders\ManagerQueryBuilder;
 use App\Enums\ManagerStatus;
 use App\Models\Contracts\CanBeAStableMember;
-use App\Models\Contracts\Employable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manager extends SingleRosterMember implements CanBeAStableMember, Employable
+class Manager extends SingleRosterMember implements CanBeAStableMember
 {
     use Concerns\CanJoinStables;
-    use Concerns\HasEmployments;
     use Concerns\Manageables;
     use Concerns\OwnedByUser;
     use HasFactory;
@@ -43,6 +41,15 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
     ];
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => ManagerStatus::UNEMPLOYED->value,
+    ];
+
+    /**
      * Create a new Eloquent query builder for the model.
      */
     public function newEloquentBuilder($query): ManagerQueryBuilder
@@ -59,11 +66,11 @@ class Manager extends SingleRosterMember implements CanBeAStableMember, Employab
     }
 
     /**
-     * Get the name of the manager.
+     * Get the display name of the manager.
      */
-    protected function name(): Attribute
+    protected function displayName(): Attribute
     {
-        return new Attribute(
+        return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
     }

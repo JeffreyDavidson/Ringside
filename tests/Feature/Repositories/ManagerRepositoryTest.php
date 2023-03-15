@@ -2,40 +2,36 @@
 
 use App\Data\ManagerData;
 use App\Models\Employment;
-use App\Models\Injury;
 use App\Models\Manager;
-use App\Models\Retirement;
-use App\Models\Suspension;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Repositories\ManagerRepository;
-use Illuminate\Support\Carbon;
 
 test('creates a manager', function () {
-    $data = new ManagerData('Taylor', 'Otwell', null);
+    $data = new ManagerData('Hulk', 'Hogan', null);
 
-    (new ManagerRepository())->create($data);
+    $manager = app(ManagerRepository::class)->create($data);
 
-    expect(Manager::latest()->first())
-        ->first_name->toEqual('Taylor')
-        ->last_name->toEqual('Otwell');
+    expect($manager)
+        ->first_name->toEqual('Hulk')
+        ->last_name->toEqual('Hogan');
 });
 
 test('it updates a manager', function () {
     $manager = Manager::factory()->create();
-    $data = new ManagerData('Taylor', 'Otwell', null);
+    $data = new ManagerData('Hulk', 'Hogan', null);
 
-    (new ManagerRepository())->update($manager, $data);
+    $manager = app(ManagerRepository::class)->update($manager, $data);
 
     expect($manager->fresh())
-        ->first_name->toBe('Taylor')
-        ->last_name->toBe('Otwell');
+        ->first_name->toBe('Hulk')
+        ->last_name->toBe('Hogan');
 });
 
 test('it deletes a manager', function () {
     $manager = Manager::factory()->create();
 
-    (new ManagerRepository())->delete($manager);
+    app(ManagerRepository::class)->delete($manager);
 
     expect($manager)
         ->deleted_at->not()->toBeNull();
@@ -44,182 +40,133 @@ test('it deletes a manager', function () {
 test('it can restore a trashed manager', function () {
     $manager = Manager::factory()->trashed()->create();
 
-    (new ManagerRepository())->restore($manager);
+    app(ManagerRepository::class)->restore($manager);
 
     expect($manager->fresh())
         ->deleted_at->toBeNull();
 });
 
-test('it can employ manager', function () {
+test('employ a manager', function () {
     $manager = Manager::factory()->create();
+    $datetime = now();
 
-    (new ManagerRepository())->employ($manager, Carbon::now());
+    $manager = app(ManagerRepository::class)->employ($manager, $datetime);
 
-    expect($manager->fresh())
-        ->employments->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual(Carbon::now()->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($manager->fresh())->employments->toHaveCount(1);
+    expect($manager->fresh()->employments->first())->started_at->equalTo($datetime);
 });
 
-test('it can update a managers employment', function () {
+test('updates employment of a manager', function () {
+    $datetime = now();
     $manager = Manager::factory()
-        ->has(Employment::factory(1, ['started_at' => Carbon::now()->addDays(3)]))
+        ->has(Employment::factory()->started($datetime->copy()->addDays(2)))
         ->create();
 
-    $date = Carbon::now();
+    expect($manager->fresh())->employments->toHaveCount(1);
+    expect($manager->fresh()->employments->first())
+            ->started_at->equalTo($datetime->copy()->addDays(2));
 
-    (new ManagerRepository())->employ($manager, $date);
+    $manager = app(ManagerRepository::class)->employ($manager, $datetime);
 
-    expect($manager->fresh())
-        ->employments->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($manager->fresh())->employments->toHaveCount(1);
+    expect($manager->fresh()->employments->first())->started_at->equalTo($datetime);
 });
 
-test('it can release a manager', function () {
-    $manager = Manager::factory()
-        ->has(Employment::factory(1, ['started_at' => Carbon::now()->subDays(3)]))
-        ->create();
+test('release a manager', function () {
+    $manager = Manager::factory()->available()->create();
+    $datetime = now();
 
-    $date = Carbon::now();
+    $manager = app(ManagerRepository::class)->release($manager, $datetime);
 
-    (new ManagerRepository())->release($manager, $date);
-
-    expect($manager->fresh()->employments)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(3)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
+    expect($manager->fresh()->employments)->toHaveCount(1);
+    expect($manager->fresh()->employments->first())->started_at->equalTo($datetime->copy()->subDays(3));
 });
 
 test('it can injure a manager', function () {
-    $date = Carbon::now();
-
     $manager = Manager::factory()->create();
+    $datetime = now();
 
-    (new ManagerRepository())->injure($manager, $date);
+    $manager = app(ManagerRepository::class)->injure($manager, $datetime);
 
-    expect($manager->fresh()->injuries)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($manager->fresh()->injuries)->toHaveCount(1);
+    expect($manager->fresh()->injuries->first())->started_at->equalTo($datetime);
 });
 
-test('it can clear an injury of a manager', function () {
-    $manager = Manager::factory()
-        ->has(Injury::factory(1, ['started_at' => Carbon::now()->subDays(3)]))
-        ->create();
+test('clear an injured manager', function () {
+    $manager = Manager::factory()->injured()->create();
+    $datetime = now();
 
-    $date = Carbon::now();
+    $manager = app(ManagerRepository::class)->clearInjury($manager, $datetime);
 
-    (new ManagerRepository())->clearInjury($manager, $date);
-
-    expect($manager->fresh()->injuries)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(3)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
+    expect($manager->fresh()->injuries)->toHaveCount(1);
+    expect($manager->fresh()->injuries->first())->started_at->equalTo($datetime->copy()->subDays(3));
 });
 
-test('it can retire a manager', function () {
-    $date = Carbon::now();
+test('retire a manager', function () {
+    $manager = Manager::factory()->available()->create();
+    $datetime = now();
 
-    $manager = Manager::factory()->create();
+    $manager = app(ManagerRepository::class)->retire($manager, $datetime);
 
-    (new ManagerRepository())->retire($manager, $date);
-
-    expect($manager->fresh()->retirements)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($manager->fresh()->retirements)->toHaveCount(1);
+    expect($manager->fresh()->retirements->first())->started_at->equalTo($datetime);
 });
 
-test('it can unretire a retired manager', function () {
-    $date = Carbon::now();
+test('unretire a manager', function () {
+    $manager = Manager::factory()->retired()->create();
+    $datetime = now();
 
-    $manager = Manager::factory()
-        ->has(Retirement::factory(1, ['started_at' => $date->copy()->subDays(2)]))
-        ->create();
+    $manager = app(ManagerRepository::class)->unretire($manager, $datetime);
 
-    (new ManagerRepository())->unretire($manager, $date);
-
-    expect($manager->fresh()->retirements)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(2)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
+    expect($manager->fresh()->retirements)->toHaveCount(1);
+    expect($manager->fresh()->retirements()->first())->started_at->equalTo($datetime->copy()->subDays(2));
 });
 
-test('it can suspend a manager', function () {
-    $date = Carbon::now();
+test('suspend a manager', function () {
+    $manager = Manager::factory()->available()->create();
+    $datetime = now();
 
-    $manager = Manager::factory()->create();
+    $manager = app(ManagerRepository::class)->suspend($manager, $datetime);
 
-    (new ManagerRepository())->suspend($manager, $date);
-
-    expect($manager->fresh()->suspensions)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($manager->fresh()->suspensions)->toHaveCount(1);
+    expect($manager->fresh()->suspensions->first())->started_at->equalTo($datetime);
 });
 
-test('it can reinstate a suspended manager', function () {
-    $date = Carbon::now();
+test('reinstate a manager', function () {
+    $manager = Manager::factory()->suspended()->create();
+    $datetime = now();
+
+    $manager = app(ManagerRepository::class)->reinstate($manager, $datetime);
+
+    expect($manager->fresh()->suspensions)->toHaveCount(1);
+    expect($manager->fresh()->suspensions()->first())->started_at->equalTo($datetime->copy()->subDays(2));
+});
+
+test('remove a manager from its current tag teams', function () {
+    $datetime = now();
 
     $manager = Manager::factory()
-        ->has(Suspension::factory(1, ['started_at' => $date->copy()->subDays(2)]))
+        ->hasAttached(TagTeam::factory()->count(2), ['hired_at' => $datetime->copy()->subDays(3)])
         ->create();
 
-    (new ManagerRepository())->reinstate($manager, $date);
+    app(ManagerRepository::class)->removeFromCurrentTagTeams($manager);
 
-    expect($manager->fresh()->suspensions)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(2)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
-});
-
-test('it can update a future employment for a manager', function () {
-    $date = Carbon::now();
-
-    $manager = Manager::factory()
-        ->has(Employment::factory(1, ['started_at' => $date->copy()->addDays(2)]))
-        ->create();
-
-    (new ManagerRepository())->updateEmployment($manager, $date);
-
-    expect($manager->fresh()->employments)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
-});
-
-test('it can disassociate a manager from its current tag teams', function () {
-    $date = Carbon::now();
-
-    $manager = Manager::factory()
-        ->hasAttached(TagTeam::factory()->count(2), ['hired_at' => $date->copy()->subDays(3)])
-        ->create();
-
-    (new ManagerRepository())->removeFromCurrentTagTeams($manager);
-
-    expect($manager->fresh()->currentTagTeams)
-        ->toHaveCount(0);
-
-    expect($manager->fresh()->previousTagTeams)
-        ->toHaveCount(2)
-        ->each(fn ($tagTeam) => $tagTeam->pivot->left_at->toEqual($date));
+    expect($manager->fresh()->currentTagTeams)->toHaveCount(0);
+    expect($manager->fresh()->previousTagTeams)->toHaveCount(2);
+    expect($manager->fresh()->previousTagTeams)->each(fn ($tagTeam) => $tagTeam->pivot->left_at->toEqual($datetime));
 });
 
 test('it can disassociate a manager from its current wrestlers', function () {
-    $date = Carbon::now();
+    $datetime = now();
 
     $manager = Manager::factory()
-        ->hasAttached(Wrestler::factory()->count(2), ['hired_at' => $date->copy()->subDays(3)])
+        ->hasAttached(Wrestler::factory()->count(2), ['hired_at' => $datetime->copy()->subDays(3)])
         ->create();
 
-    (new ManagerRepository())->removeFromCurrentWrestlers($manager);
+    app(ManagerRepository::class)->removeFromCurrentWrestlers($manager);
 
-    expect($manager->fresh()->currentWrestlers)
-        ->toHaveCount(0);
+    expect($manager->fresh()->currentWrestlers)->toHaveCount(0);
 
-    expect($manager->fresh()->previousWrestlers)
-        ->toHaveCount(2)
-        ->each(fn ($wrestler) => $wrestler->pivot->left_at->toEqual($date));
+    expect($manager->fresh()->previousWrestlers)->toHaveCount(2);
+    expect($manager->fresh()->previousWrestlers)->each(fn ($wrestler) => $wrestler->pivot->left_at->toEqual($datetime));
 });

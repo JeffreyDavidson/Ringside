@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Events\Managers\ManagerRetired;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Manager;
 use Illuminate\Support\Carbon;
@@ -23,22 +24,20 @@ class RetireAction extends BaseManagerAction
         $retirementDate ??= now();
 
         if ($manager->isSuspended()) {
-            ReinstateAction::run($manager, $retirementDate);
+            $this->managerRepository->reinstate($manager, $retirementDate);
         }
 
         if ($manager->isInjured()) {
-            ClearInjuryAction::run($manager, $retirementDate);
+            $this->managerRepository->clearInjury($manager, $retirementDate);
         }
 
-        ReleaseAction::run($manager, $retirementDate);
+        if ($manager->isCurrentlyEmployed()) {
+            $this->managerRepository->release($manager, $retirementDate);
+        }
 
         $this->managerRepository->retire($manager, $retirementDate);
 
-        $manager->currentTagTeams
-            ->whenNotEmpty(fn () => RemoveFromCurrentTagTeamsAction::run($manager));
-
-        $manager->currentWrestlers
-            ->whenNotEmpty(fn () => RemoveFromCurrentWrestlersAction::run($manager));
+        event(new ManagerRetired($manager, $retirementDate));
     }
 
     /**
@@ -54,6 +53,10 @@ class RetireAction extends BaseManagerAction
 
         if ($manager->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment($manager);
+        }
+
+        if ($manager->isRetired()) {
+            throw CannotBeRetiredException::retired($manager);
         }
     }
 }

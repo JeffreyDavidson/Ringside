@@ -21,7 +21,7 @@ class CreateAction extends BaseManagerAction
         $manager = $this->managerRepository->create($managerData);
 
         if (isset($managerData->start_date)) {
-            EmployAction::run($manager, $managerData->start_date);
+            $this->managerRepository->employ($manager, $managerData->start_date);
         }
 
         return $manager;

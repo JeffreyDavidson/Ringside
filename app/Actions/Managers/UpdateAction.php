@@ -23,7 +23,7 @@ class UpdateAction extends BaseManagerAction
             if ($manager->canBeEmployed()
                 || $manager->canHaveEmploymentStartDateChanged($managerData->start_date)
             ) {
-                EmployAction::run($manager, $managerData->start_date);
+                $this->managerRepository->employ($manager, $managerData->start_date);
             }
         }
 
