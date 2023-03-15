@@ -1,16 +1,19 @@
 <?php
 
 use App\Actions\Titles\RetireAction;
+use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->title = Title::factory()->active()->create();
 });
 
-test('invoke calls retire action and redirects', function () {
-    $this->actingAs(administrator())
+test('it retires a title and redirects', function () {
+    actingAs(administrator())
         ->patch(action([RetireController::class], $this->title))
         ->assertRedirect(action([TitlesController::class, 'index']));
 
@@ -18,12 +21,24 @@ test('invoke calls retire action and redirects', function () {
 });
 
 test('a basic user cannot retire a title', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([RetireController::class], $this->title))
         ->assertForbidden();
 });
 
 test('a guest cannot retire a title', function () {
-    $this->patch(action([RetireController::class], $this->title))
+    patch(action([RetireController::class], $this->title))
         ->assertRedirect(route('login'));
+});
+
+test('it returns an error when an exception is thrown', function () {
+    $title = Title::factory()->create();
+
+    RetireAction::allowToRun()->andThrow(CannotBeRetiredException::class);
+
+    actingAs(administrator())
+        ->from(action([TitlesController::class, 'index']))
+        ->patch(action([RetireController::class], $title))
+        ->assertRedirect(action([TitlesController::class, 'index']))
+        ->assertSessionHas('error');
 });

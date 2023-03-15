@@ -15,15 +15,37 @@ class DeactivateAction extends BaseTitleAction
 
     /**
      * Deactivate a title.
-     *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
      */
     public function handle(Title $title, ?Carbon $deactivationDate = null): void
     {
-        throw_if(! $title->isCurrentlyActivated(), CannotBeDeactivatedException::class, $title.' is not currently active and cannot be deactivated.');
+        $this->ensureCanBeDeactivated($title);
 
         $deactivationDate ??= now();
 
         $this->titleRepository->deactivate($title, $deactivationDate);
+    }
+
+    /**
+     * Ensure a title can be deactivated.
+     *
+     * @throws \App\Exceptions\CannotBeDeactivatedException
+     */
+    private function ensureCanBeDeactivated(Title $title): void
+    {
+        if ($title->isUnactivated()) {
+            throw CannotBeDeactivatedException::unactivated($title);
+        }
+
+        if ($title->isInactive()) {
+            throw CannotBeDeactivatedException::inactive($title);
+        }
+
+        if ($title->hasFutureActivation()) {
+            throw CannotBeDeactivatedException::hasFutureActivation($title);
+        }
+
+        if ($title->isRetired()) {
+            throw CannotBeDeactivatedException::retired($title);
+        }
     }
 }

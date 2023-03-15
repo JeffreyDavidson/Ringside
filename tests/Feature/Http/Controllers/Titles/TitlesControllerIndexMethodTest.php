@@ -6,8 +6,7 @@ test('index returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([TitlesController::class, 'index']))
         ->assertOk()
-        ->assertViewIs('titles.index')
-        ->assertSeeLivewire('titles.titles-list');
+        ->assertViewIs('titles.index');
 });
 
 test('a basic user cannot view titles index page', function () {

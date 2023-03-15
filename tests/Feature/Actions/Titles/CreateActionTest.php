@@ -6,30 +6,45 @@ use App\Data\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
+
+beforeEach(function () {
+    testTime()->freeze();
+
+    $this->titleRepository = mock(TitleRepository::class);
+});
 
 test('it creates a title', function () {
     $data = new TitleData('Example Title', null);
 
-    $this->mock(TitleRepository::class)
+    $this->titleRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
         ->andReturns(new App\Models\Title());
 
+    $this->titleRepository
+        ->shouldNotReceive('activate');
+
     CreateAction::run($data);
 });
 
-test('it creates a title and activates it if activation date is provided', function () {
-    $data = new TitleData('Example Title', Carbon::tomorrow());
+test('it activates a title if activation date is filled in request', function () {
+    $datetime = now();
+    $data = new TitleData('Example Title', $datetime);
     $title = Title::factory()->create(['name' => $data->name]);
 
-    ActivateAction::shouldRun()->with($title, $data->activation_date)->once();
-
-    $this->mock(TitleRepository::class)
+    $this->titleRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns($title);
+        ->andReturn($title);
+
+    $this->titleRepository
+        ->shouldReceive('activate')
+        ->once()
+        ->with($title, $data->activation_date);
 
     CreateAction::run($data);
 });

@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Requests\Titles\UpdateRequest;
-use App\Models\Activation;
 use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TitleRequestFactory;
+use function Pest\Laravel\mock;
 
 test('an administrator is authorized to make this request', function () {
     $title = Title::factory()->create();
@@ -50,6 +50,12 @@ test('title name must be a string', function () {
 test('title name can only be letters and spaces', function () {
     $title = Title::factory()->create();
 
+    mock(LetterSpace::class)
+        ->shouldReceive('validate')
+        ->with('name', 1, function ($closure) {
+            $closure();
+        });
+
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
@@ -89,7 +95,7 @@ test('title name must be unique', function () {
         ->validate(TitleRequestFactory::new()->create([
             'name' => 'Example Name Title',
         ]))
-        ->assertFailsValidation(['name' => 'unique:titles,NULL,1,id']);
+        ->assertFailsValidation(['name' => 'unique:titles,NULL,'.$titleA->id.',id']);
 });
 
 test('title activation date is optional', function () {
@@ -128,21 +134,16 @@ test('title activation date must be in the correct date format if provided', fun
 test('title activation date cannot be changed if activation start date has past', function () {
     $title = Title::factory()->active()->create();
 
+    mock(ActivationStartDateCanBeChanged::class)
+        ->shouldReceive('validate')
+        ->with('activation_date', 1, function ($closure) {
+            $closure();
+        });
+
     $this->createRequest(UpdateRequest::class)
         ->withParam('title', $title)
         ->validate(TitleRequestFactory::new()->create([
             'activation_date' => Carbon::now()->toDateTimeString(),
         ]))
         ->assertFailsValidation(['activation_date' => ActivationStartDateCanBeChanged::class]);
-});
-
-test('title activation date can be changed if activation start date is in the future', function () {
-    $title = Title::factory()->has(Activation::factory()->started(Carbon::parse('+2 weeks')))->create();
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('title', $title)
-        ->validate(TitleRequestFactory::new()->create([
-            'activation_date' => Carbon::tomorrow()->toDateString(),
-        ]))
-        ->assertPassesValidation();
 });

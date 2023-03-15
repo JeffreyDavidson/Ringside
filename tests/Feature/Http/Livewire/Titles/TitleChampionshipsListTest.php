@@ -1,14 +1,14 @@
 <?php
 
 use App\Http\Livewire\Titles\TitleChampionshipsList;
-use Livewire\Livewire;
+use function Pest\Livewire\livewire;
 
 test('it should return correct view', function () {
-    Livewire::test(TitleChampionshipsList::class)
+    livewire(TitleChampionshipsList::class)
         ->assertViewIs('livewire.titles.title-championships-list');
 });
 
 test('it should pass correct data', function () {
-    Livewire::test(TitleChampionshipsList::class)
+    livewire(TitleChampionshipsList::class)
         ->assertViewHas('titleChampionships');
 });
