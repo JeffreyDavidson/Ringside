@@ -22,6 +22,10 @@ class EmployAction extends BaseRefereeAction
 
         $startDate ??= now();
 
+        if ($referee->isRetired()) {
+            $this->refereeRepository->unretire($referee, $startDate);
+        }
+
         $this->refereeRepository->employ($referee, $startDate);
     }
 

@@ -5,10 +5,14 @@ use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 use function Pest\Laravel\mock;
 
-test('handle deletes a referee', function () {
+beforeEach(function () {
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it deletes a referee', function () {
     $referee = Referee::factory()->create();
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('delete')
         ->once()
         ->with($referee);

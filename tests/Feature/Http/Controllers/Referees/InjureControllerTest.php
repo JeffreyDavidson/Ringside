@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Referees\InjureAction;
+use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Referees\InjureController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
@@ -28,4 +29,16 @@ test('a basic user cannot injure a referee', function () {
 test('a guest user cannot injure a referee', function () {
     patch(action([InjureController::class], $this->referee))
         ->assertRedirect(route('login'));
+});
+
+test('invoke returns error message if exception is thrown', function () {
+    $referee = Referee::factory()->create();
+
+    InjureAction::allowToRun()->andThrow(CannotBeInjuredException::class);
+
+    actingAs(administrator())
+        ->from(action([RefereesController::class, 'index']))
+        ->patch(action([InjureController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']))
+        ->assertSessionHas('error');
 });

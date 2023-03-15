@@ -3,16 +3,49 @@
 use App\Actions\Referees\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke marks an injured referee as being cleared from injury and redirects', function () {
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it clears an injury of an injured referee at the current datetime by default', function () {
     $referee = Referee::factory()->injured()->create();
-    $now = now();
+    $datetime = now();
+
+    $this->refereeRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->withArgs(function (Referee $unretireReferee, Carbon $recoveryDate) use ($referee, $datetime) {
+            expect($unretireReferee->is($referee))->toBeTrue();
+            expect($recoveryDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($referee);
 
     ClearInjuryAction::run($referee);
+});
 
-    expect($referee->fresh())
-        ->isInjured()->toBeFalse()
-        ->injuries->last()->ended_at->toEqual($now->toDateTimeString());
+test('it clears an injury of an injured referee at a specific datetime', function () {
+    $referee = Referee::factory()->injured()->create();
+    $datetime = now()->addDays(2);
+
+    $this->refereeRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->with($referee, $datetime)
+        ->andReturn($referee);
+
+    ClearInjuryAction::run($referee, $datetime);
 });
 
 test('invoke throws exception for injuring a non injurable referee', function ($factoryState) {

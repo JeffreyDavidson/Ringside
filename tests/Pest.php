@@ -32,12 +32,12 @@ uses()->group('managers', 'feature-managers', 'roster', 'feature-roster')
     );
 uses()->group('referees', 'feature-referees', 'roster', 'feature-roster')
     ->in(
+        'Feature/Actions/Referees',
         'Feature/Http/Controllers/Referees',
         'Feature/Http/Livewire/Referees',
         'Feature/Http/Requests/Referees',
-        'Feature/Actions/Referees',
-        'Feature/Policies/RefereePolicyTest',
-        'Feature/Repositories/RefereeRepositoryTest',
+        'Feature/Policies/RefereePolicyTest.php',
+        'Feature/Repositories/RefereeRepositoryTest.php',
     );
 uses()->group('tagteams', 'feature-tagteams', 'roster', 'feature-roster')->in('Feature/Http/Controllers/TagTeams');
 uses()->group('stables', 'feature-stables', 'roster', 'feature-roster')->in('Feature/Http/Controllers/Stables');
@@ -89,6 +89,12 @@ uses()->group('wrestlers', 'unit-wrestlers', 'roster', 'unit-roster')
     ->in(
         'Unit/Builders/WrestlerQueryBuilderTest.php',
         'Unit/Models/WrestlerTest.php',
+    );
+
+uses()->group('referees', 'unit-referees', 'roster', 'unit-roster')
+    ->in(
+        'Unit/Builders/RefereeQueryBuilderTest.php',
+        'Unit/Models/RefereeTest.php',
     );
 
 beforeEach(function () {

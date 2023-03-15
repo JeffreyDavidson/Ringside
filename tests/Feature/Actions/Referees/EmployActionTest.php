@@ -1,36 +1,121 @@
 <?php
 
 use App\Actions\Referees\EmployAction;
-use App\Enums\RefereeStatus;
+use App\Exceptions\CannotBeEmployedException;
 use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke employs an unemployed referee and redirects', function () {
-    $referee = Referee::factory()->unemployed()->create();
+beforeEach(function () {
+    Event::fake();
 
-    EmployAction::run($referee);
+    testTime()->freeze();
 
-    expect($referee->fresh())
-        ->employments->toHaveCount(1)
-        ->status->toMatchObject(RefereeStatus::BOOKABLE);
+    $this->refereeRepository = mock(RefereeRepository::class);
 });
 
-test('invoke employs a future employed referee and redirects', function () {
-    $referee = Referee::factory()->withFutureEmployment()->create();
-    $startDate = $referee->employments->first()->started_at;
+test('it employs an employable referee at the current datetime by default', function ($factoryState) {
+    $referee = Referee::factory()->{$factoryState}()->create();
+    $datetime = now();
+
+    $this->refereeRepository
+        ->shouldNotReceive('unretire');
+
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->withArgs(function (Referee $employableReferee, Carbon $employmentDate) use ($referee, $datetime) {
+            expect($employableReferee->is($referee))->toBeTrue();
+            expect($employmentDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($referee);
 
     EmployAction::run($referee);
+})->with([
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+]);
 
-    expect($referee->fresh())
-        ->currentEmployment->started_at->toBeLessThan($startDate)
-        ->status->toMatchObject(RefereeStatus::BOOKABLE);
-});
+test('it employs an employable referee at a specific datetime', function ($factoryState) {
+    $referee = Referee::factory()->{$factoryState}()->create();
+    $datetime = now()->addDays(2);
 
-test('invoke employs a released referee and redirects', function () {
-    $referee = Referee::factory()->released()->create();
+    $this->refereeRepository
+        ->shouldNotReceive('unretire');
+
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->with($referee, $datetime)
+        ->andReturns($referee);
+
+    EmployAction::run($referee, $datetime);
+})->with([
+    'unemployed',
+    'released',
+    'withFutureEmployment',
+]);
+
+test('it employs a retired referee at the current datetime by default', function () {
+    $referee = Referee::factory()->retired()->create();
+    $datetime = now();
+
+    $this->refereeRepository
+        ->shouldReceive('unretire')
+        ->withArgs(function (Referee $unretirableReferee, Carbon $unretireDate) use ($referee, $datetime) {
+            expect($unretirableReferee->is($referee))->toBeTrue();
+            expect($unretireDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->once()
+        ->andReturn($referee);
+
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->withArgs(function (Referee $employedReferee, Carbon $employmentDate) use ($referee, $datetime) {
+            expect($employedReferee->is($referee))->toBeTrue();
+            expect($employmentDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturns($referee);
 
     EmployAction::run($referee);
-
-    expect($referee->fresh())
-        ->employments->toHaveCount(2)
-        ->status->toMatchObject(RefereeStatus::BOOKABLE);
 });
+
+test('it employs a retired referee at a specific datetime', function () {
+    $referee = Referee::factory()->retired()->create();
+    $datetime = now()->addDays(2);
+
+    $this->refereeRepository
+        ->shouldReceive('unretire')
+        ->with($referee, $datetime)
+        ->once()
+        ->andReturn($referee);
+
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->with($referee, $datetime)
+        ->andReturns($referee);
+
+    EmployAction::run($referee, $datetime);
+});
+
+test('invoke employs a released referee and redirects', function ($factoryState) {
+    $referee = Referee::factory()->{$factoryState}()->create();
+
+    EmployAction::run($referee);
+})->throws(CannotBeEmployedException::class)->with([
+    'suspended',
+    'injured',
+    'bookable',
+]);

@@ -21,7 +21,7 @@ class CreateAction extends BaseRefereeAction
         $referee = $this->refereeRepository->create($refereeData);
 
         if (isset($refereeData->start_date)) {
-            EmployAction::run($referee, $refereeData->start_date);
+            $this->refereeRepository->employ($referee, $refereeData->start_date);
         }
 
         return $referee;

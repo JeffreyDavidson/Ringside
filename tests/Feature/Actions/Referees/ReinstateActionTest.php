@@ -1,23 +1,54 @@
 <?php
 
 use App\Actions\Referees\ReinstateAction;
-use App\Enums\RefereeStatus;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke reinstates a suspended referee and redirects', function () {
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it reinstates a suspended referee at the current datetime by default', function () {
     $referee = Referee::factory()->suspended()->create();
+    $datetime = now();
+
+    $this->refereeRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->withArgs(function (Referee $reinstatableReferee, Carbon $reinstatementDate) use ($referee, $datetime) {
+            expect($reinstatableReferee->is($referee))->toBeTrue();
+            expect($reinstatementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($referee);
 
     ReinstateAction::run($referee);
+});
 
-    expect($referee->fresH())
-        ->suspensions->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(RefereeStatus::BOOKABLE);
+test('it reinstates a suspended referee at a specific datetime', function () {
+    $referee = Referee::factory()->suspended()->create();
+    $datetime = now()->addDays(2);
+
+    $this->refereeRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->with($referee, $datetime)
+        ->andReturn($referee);
+
+    ReinstateAction::run($referee, $datetime);
 });
 
 test('invoke throws exception for reinstating a non reinstatable referee', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $referee = Referee::factory()->{$factoryState}()->create();
 
     ReinstateAction::run($referee);

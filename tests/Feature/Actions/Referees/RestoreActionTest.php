@@ -5,10 +5,14 @@ use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 use function Pest\Laravel\mock;
 
-test('handle restores a soft deleted referee', function () {
+beforeEach(function () {
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it restores a deleted referee', function () {
     $referee = Referee::factory()->trashed()->create();
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('restore')
         ->once()
         ->with($referee);

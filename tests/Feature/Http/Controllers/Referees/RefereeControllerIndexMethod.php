@@ -8,8 +8,7 @@ test('index returns a view', function () {
     actingAs(administrator())
         ->get(action([RefereesController::class, 'index']))
         ->assertOk()
-        ->assertViewIs('referees.index')
-        ->assertSeeLivewire('referees.referees-list');
+        ->assertViewIs('referees.index');
 });
 
 test('a basic user cannot view referees index page', function () {

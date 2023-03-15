@@ -2,7 +2,6 @@
 
 use App\Actions\Referees\CreateAction;
 use App\Data\RefereeData;
-use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Requests\Referees\StoreRequest;
 use function Pest\Laravel\actingAs;
@@ -10,7 +9,7 @@ use function Pest\Laravel\post;
 
 beforeEach(function () {
     $this->data = StoreRequest::factory()->create();
-    $this->request = StoreRequest::create(action([ManagersController::class, 'store']), 'POST', $this->data);
+    $this->request = StoreRequest::create(action([RefereesController::class, 'store']), 'POST', $this->data);
 });
 
 test('store calls create action and redirects', function () {

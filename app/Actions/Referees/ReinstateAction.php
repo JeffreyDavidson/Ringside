@@ -20,8 +20,6 @@ class ReinstateAction extends BaseRefereeAction
     {
         $this->ensureCanBeReinstated($referee);
 
-        throw_if(! $referee->isSuspended(), CannotBeReinstatedException::class, $referee.' is not suspended and cannot be reinstated.');
-
         $reinstatementDate ??= now();
 
         $this->refereeRepository->reinstate($referee, $reinstatementDate);

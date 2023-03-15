@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Requests\Referees\StoreRequest;
+use App\Rules\LetterSpace;
+use function Pest\Laravel\mock;
 use Tests\RequestFactories\RefereeRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
@@ -31,6 +33,20 @@ test('referee first name must be a string', function () {
         ->assertFailsValidation(['first_name' => 'string']);
 });
 
+test('referee first name must contain only letters and spaces', function () {
+    mock(LetterSpace::class)
+        ->shouldReceive('validate')
+        ->with('first_name', 1, function ($closure) {
+            $closure();
+        });
+
+    $this->createRequest(StoreRequest::class)
+        ->validate(RefereeRequestFactory::new()->create([
+            'first_name' => 'hjkhg*&^HJ',
+        ]))
+        ->assertFailsValidation(['first_name' => LetterSpace::class]);
+});
+
 test('referee first name must be at least 3 characters', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(RefereeRequestFactory::new()->create([
@@ -53,6 +69,20 @@ test('referee last name must be a string', function () {
             'last_name' => 123,
         ]))
         ->assertFailsValidation(['last_name' => 'string']);
+});
+
+test('referee last name must contain only letters and spaces', function () {
+    mock(LetterSpace::class)
+        ->shouldReceive('validate')
+        ->with('last_name', 1, function ($closure) {
+            $closure();
+        });
+
+    $this->createRequest(StoreRequest::class)
+        ->validate(RefereeRequestFactory::new()->create([
+            'last_name' => 'hjkhg*&^HJ',
+        ]))
+        ->assertFailsValidation(['last_name' => LetterSpace::class]);
 });
 
 test('referee last name must be at least 3 characters', function () {
