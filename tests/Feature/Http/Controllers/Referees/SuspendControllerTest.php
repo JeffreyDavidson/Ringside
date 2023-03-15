@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Referees\SuspendAction;
+use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\SuspendController;
 use App\Models\Referee;
@@ -28,4 +29,16 @@ test('a basic user cannot suspend a referee', function () {
 test('a guest cannot suspend a referee', function () {
     patch(action([SuspendController::class], $this->referee))
         ->assertRedirect(route('login'));
+});
+
+test('invoke returns error message if exception is thrown', function () {
+    $referee = Referee::factory()->create();
+
+    SuspendAction::allowToRun()->andThrow(CannotBeSuspendedException::class);
+
+    actingAs(administrator())
+        ->from(action([RefereesController::class, 'index']))
+        ->patch(action([SuspendController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']))
+        ->assertSessionHas('error');
 });

@@ -1,36 +1,45 @@
 <?php
 
 use App\Actions\Referees\CreateAction;
-use App\Actions\Referees\EmployAction;
 use App\Data\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
-use Illuminate\Support\Carbon;
 use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('store creates a referee and redirects', function () {
+beforeEach(function () {
+    testTime()->freeze();
+
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it creates a referee', function () {
     $data = new RefereeData('Taylor', 'Otwell', null);
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Referee());
+        ->andReturns(new Referee());
 
     CreateAction::run($data);
 });
 
-test('an employment is created for the referee if start date is filled in request', function () {
-    $data = new RefereeData('Taylor', 'Otwell', Carbon::now());
+test('it employs a referee if start date is filled in request', function () {
+    $datetime = now();
+    $data = new RefereeData('Hulk', 'Hogan', $datetime);
     $referee = Referee::factory()->create(['first_name' => $data->first_name, 'last_name' => $data->last_name]);
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
         ->andReturn($referee);
 
-    EmployAction::mock()->shouldReceive('handle')->with($referee, $data->start_date);
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->once()
+        ->with($referee, $data->start_date);
 
     CreateAction::run($data);
 });

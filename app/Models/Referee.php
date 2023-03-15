@@ -6,14 +6,12 @@ namespace App\Models;
 
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
-use App\Models\Contracts\Bookable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Referee extends SingleRosterMember implements Bookable
+class Referee extends SingleRosterMember
 {
-    use Concerns\HasMatches;
     use HasFactory;
     use SoftDeletes;
 
@@ -38,6 +36,15 @@ class Referee extends SingleRosterMember implements Bookable
     ];
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => RefereeStatus::UNEMPLOYED->value,
+    ];
+
+    /**
      * Create a new Eloquent query builder for the model.
      */
     public function newEloquentBuilder($query): RefereeQueryBuilder
@@ -46,11 +53,11 @@ class Referee extends SingleRosterMember implements Bookable
     }
 
     /**
-     * Get the name of the manager.
+     * Get the display name of the manager.
      */
-    protected function name(): Attribute
+    protected function displayName(): Attribute
     {
-        return new Attribute(
+        return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
     }

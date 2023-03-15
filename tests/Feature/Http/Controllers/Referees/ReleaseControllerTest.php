@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Referees\ReleaseAction;
+use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReleaseController;
 use App\Models\Referee;
@@ -28,4 +29,16 @@ test('a basic user cannot release a referee', function () {
 test('a guest cannot release a referee', function () {
     patch(action([ReleaseController::class], $this->referee))
         ->assertRedirect(route('login'));
+});
+
+test('invoke returns error message if exception is thrown', function () {
+    $referee = Referee::factory()->create();
+
+    ReleaseAction::allowToRun()->andThrow(CannotBeReleasedException::class);
+
+    actingAs(administrator())
+        ->from(action([RefereesController::class, 'index']))
+        ->patch(action([ReleaseController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']))
+        ->assertSessionHas('error');
 });

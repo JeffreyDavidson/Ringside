@@ -1,54 +1,67 @@
 <?php
 
-use App\Actions\Referees\EmployAction;
 use App\Actions\Referees\UpdateAction;
 use App\Data\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
-use Illuminate\Support\Carbon;
 use function Pest\Laravel\mock;
+
+beforeEach(function () {
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
 
 test('it can update a referee', function () {
     $data = new RefereeData('Taylor', 'Otwell', null);
     $referee = Referee::factory()->create();
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('update')
         ->once()
         ->with($referee, $data)
         ->andReturns($referee);
 
-    UpdateAction::run($referee, $data);
+    $this->refereeRepository
+        ->shouldNotReceive('employ');
 
-    EmployAction::shouldNotRun();
+    UpdateAction::run($referee, $data);
 });
 
-test('update can employ an unemployed referee when start date is filled', function () {
-    $data = new RefereeData('Taylor', 'Otwell', Carbon::now());
-    $referee = Referee::factory()->unemployed()->create();
+test('it employs an employable referee if start date is filled in request', function () {
+    $datetime = now();
+    $data = new RefereeData('Taylor', 'Otwell', $datetime);
+    $referee = Referee::factory()->create();
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('update')
         ->once()
         ->with($referee, $data)
         ->andReturns($referee);
 
-    EmployAction::shouldRun();
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->with($referee, $data->start_date)
+        ->once()
+        ->andReturn($referee);
 
     UpdateAction::run($referee, $data);
 });
 
-test('update can employ a future employed referee when start date is filled', function () {
-    $data = new RefereeData('Taylor', 'Otwell', Carbon::now());
+test('it updates a future employed referee employment date if start date is filled in request', function () {
+    $datetime = now()->addDays(2);
+    $data = new RefereeData('Taylor', 'Otwell', $datetime);
     $referee = Referee::factory()->withFutureEmployment()->create();
 
-    mock(RefereeRepository::class)
+    $this->refereeRepository
         ->shouldReceive('update')
         ->once()
         ->with($referee, $data)
         ->andReturns($referee);
 
-    EmployAction::shouldRun();
+    $this->refereeRepository
+        ->shouldReceive('employ')
+        ->with($referee, $data->start_date)
+        ->once()
+        ->andReturn($referee);
 
     UpdateAction::run($referee, $data);
 });

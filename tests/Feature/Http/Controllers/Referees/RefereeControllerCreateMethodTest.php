@@ -8,7 +8,7 @@ use function Pest\Laravel\get;
 test('create returns a view', function () {
     actingAs(administrator())
         ->get(action([RefereesController::class, 'create']))
-        ->assertSuccessful()
+        ->assertOk()
         ->assertViewIs('referees.create')
         ->assertViewHas('referee', new Referee());
 });

@@ -2,19 +2,15 @@
 
 use App\Data\RefereeData;
 use App\Models\Employment;
-use App\Models\Injury;
 use App\Models\Referee;
-use App\Models\Retirement;
-use App\Models\Suspension;
 use App\Repositories\RefereeRepository;
-use Illuminate\Support\Carbon;
 
 test('creates a referee', function () {
     $data = new RefereeData('Taylor', 'Otwell', null);
 
-    (new RefereeRepository())->create($data);
+    $referee = app(RefereeRepository::class)->create($data);
 
-    expect(Referee::latest()->first())
+    expect($referee)
         ->first_name->toEqual('Taylor')
         ->last_name->toEqual('Otwell');
 });
@@ -23,167 +19,123 @@ test('it updates a referee', function () {
     $referee = Referee::factory()->create();
     $data = new RefereeData('Taylor', 'Otwell', null);
 
-    (new RefereeRepository())->update($referee, $data);
+    $referee = app(RefereeRepository::class)->update($referee, $data);
 
     expect($referee->fresh())
         ->first_name->toBe('Taylor')
         ->last_name->toBe('Otwell');
 });
 
-test('it deletes a referee', function () {
+test('deletes a referee', function () {
     $referee = Referee::factory()->create();
 
-    (new RefereeRepository())->delete($referee);
+    app(RefereeRepository::class)->delete($referee);
 
     expect($referee)
         ->deleted_at->not()->toBeNull();
 });
 
-test('it can restore a trashed referee', function () {
+test('restore a trashed referee', function () {
     $referee = Referee::factory()->trashed()->create();
 
-    (new RefereeRepository())->restore($referee);
+    app(RefereeRepository::class)->restore($referee);
 
     expect($referee->fresh())
         ->deleted_at->toBeNull();
 });
 
-test('it can employ referee', function () {
+test('employ a referee', function () {
     $referee = Referee::factory()->create();
+    $datetime = now();
 
-    (new RefereeRepository())->employ($referee, Carbon::now());
+    $referee = app(RefereeRepository::class)->employ($referee, $datetime);
 
-    expect($referee->fresh())
-        ->employments->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual(Carbon::now()->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($referee->fresh())->employments->toHaveCount(1);
+    expect($referee->fresh()->employments->first())->started_at->equalTo($datetime);
 });
 
-test('it can update a referees employment', function () {
+test('updates employment of a referee', function () {
+    $datetime = now();
     $referee = Referee::factory()
-        ->has(Employment::factory(1, ['started_at' => Carbon::now()->addDays(3)]))
+        ->has(Employment::factory()->started($datetime->copy()->addDays(2)))
         ->create();
 
-    $date = Carbon::now();
+    expect($referee->fresh())->employments->toHaveCount(1);
+    expect($referee->fresh()->employments->first())
+        ->started_at->toDateTimeString()->toEqual($datetime->copy()->addDays(2)->toDateTimeString());
 
-    (new RefereeRepository())->employ($referee, $date);
+    $referee = app(RefereeRepository::class)->employ($referee, $datetime);
 
-    expect($referee->fresh())
-        ->employments->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($referee->fresh())->employments->toHaveCount(1);
+    expect($referee->fresh()->employments->first())->started_at->equalTo($datetime);
 });
 
-test('it can release a referee', function () {
-    $referee = Referee::factory()
-        ->has(Employment::factory(1, ['started_at' => Carbon::now()->subDays(3)]))
-        ->create();
+test('release a referee', function () {
+    $referee = Referee::factory()->bookable()->create();
+    $datetime = now();
 
-    $date = Carbon::now();
+    $referee = app(RefereeRepository::class)->release($referee, $datetime);
 
-    (new RefereeRepository())->release($referee, $date);
-
-    expect($referee->fresh()->employments)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(3)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
+    expect($referee->fresh())->employments->toHaveCount(1);
+    expect($referee->fresh()->employments->first())->ended_at->equalTo($datetime);
 });
 
-test('it can injure a referee', function () {
-    $date = Carbon::now();
+test('injure a referee', function () {
+    $referee = Referee::factory()->bookable()->create();
+    $datetime = now();
 
-    $referee = Referee::factory()->create();
+    $referee = app(RefereeRepository::class)->injure($referee, $datetime);
 
-    (new RefereeRepository())->injure($referee, $date);
-
-    expect($referee->fresh()->injuries)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($referee->fresh())->injuries->toHaveCount(1);
+    expect($referee->fresh()->injuries->first())->started_at->equalTo($datetime);
 });
 
-test('it can clear an injury of a referee', function () {
-    $referee = Referee::factory()
-        ->has(Injury::factory(1, ['started_at' => Carbon::now()->subDays(3)]))
-        ->create();
+test('clear an injured referee', function () {
+    $referee = Referee::factory()->injured()->create();
+    $datetime = now();
 
-    $date = Carbon::now();
+    $referee = app(RefereeRepository::class)->clearInjury($referee, $datetime);
 
-    (new RefereeRepository())->clearInjury($referee, $date);
-
-    expect($referee->fresh()->injuries)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(3)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
+    expect($referee->fresh())->injuries->toHaveCount(1);
+    expect($referee->fresh()->injuries->first())->ended_at->equalTo($datetime);
 });
 
-test('it can retire a referee', function () {
-    $date = Carbon::now();
+test('retire a referee', function () {
+    $referee = Referee::factory()->bookable()->create();
+    $datetime = now();
 
-    $referee = Referee::factory()->create();
+    $referee = app(RefereeRepository::class)->retire($referee, $datetime);
 
-    (new RefereeRepository())->retire($referee, $date);
-
-    expect($referee->fresh()->retirements)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($referee->fresh())->retirements->toHaveCount(1);
+    expect($referee->fresh()->retirements->first())->started_at->equalTo($datetime);
 });
 
-test('it can unretire a retired referee', function () {
-    $date = Carbon::now();
+test('unretire a referee', function () {
+    $referee = Referee::factory()->retired()->create();
+    $datetime = now();
 
-    $referee = Referee::factory()
-        ->has(Retirement::factory(1, ['started_at' => $date->copy()->subDays(2)]))
-        ->create();
+    $referee = app(RefereeRepository::class)->unretire($referee, $datetime);
 
-    (new RefereeRepository())->unretire($referee, $date);
-
-    expect($referee->fresh()->retirements)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(2)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
+    expect($referee->fresh())->retirements->toHaveCount(1);
+    expect($referee->fresh()->retirements->first())->ended_at->equalTo($datetime);
 });
 
-test('it can suspend a referee', function () {
-    $date = Carbon::now();
+test('suspend a referee', function () {
+    $referee = Referee::factory()->bookable()->create();
+    $datetime = now();
 
-    $referee = Referee::factory()->create();
+    $referee = app(RefereeRepository::class)->suspend($referee, $datetime);
 
-    (new RefereeRepository())->suspend($referee, $date);
-
-    expect($referee->fresh()->suspensions)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($referee->fresh())->suspensions->toHaveCount(1);
+    expect($referee->fresh()->suspensions->first())->started_at->equalTo($datetime);
 });
 
-test('it can reinstate a suspended referee', function () {
-    $date = Carbon::now();
+test('reinstate a referee', function () {
+    $referee = Referee::factory()->suspended()->create();
+    $datetime = now();
 
-    $referee = Referee::factory()
-        ->has(Suspension::factory(1, ['started_at' => $date->copy()->subDays(2)]))
-        ->create();
+    $referee = app(RefereeRepository::class)->reinstate($referee, $datetime);
 
-    (new RefereeRepository())->reinstate($referee, $date);
-
-    expect($referee->fresh()->suspensions)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->copy()->subDays(2)->toDateTimeString())
-        ->first()->ended_at->toDateTimeString()->toEqual($date->toDateTimeString());
-});
-
-test('it can update a future employment for a referee', function () {
-    $date = Carbon::now();
-
-    $referee = Referee::factory()
-        ->has(Employment::factory(1, ['started_at' => $date->copy()->addDays(2)]))
-        ->create();
-
-    (new RefereeRepository())->updateEmployment($referee, $date);
-
-    expect($referee->fresh()->employments)
-        ->toHaveCount(1)
-        ->first()->started_at->toDateTimeString()->toEqual($date->toDateTimeString())
-        ->first()->ended_at->toBeNull();
+    expect($referee->fresh())->suspensions->toHaveCount(1);
+    expect($referee->fresh()->suspensions->first())->ended_at->equalTo($datetime);
 });

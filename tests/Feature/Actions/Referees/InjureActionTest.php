@@ -1,23 +1,54 @@
 <?php
 
 use App\Actions\Referees\InjureAction;
-use App\Enums\RefereeStatus;
 use App\Exceptions\CannotBeInjuredException;
 use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke injures an available referee and redirects', function () {
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it injures a bookable referee at the current datetime by default', function () {
     $referee = Referee::factory()->bookable()->create();
+    $datetime = now();
+
+    $this->refereeRepository
+        ->shouldReceive('injure')
+        ->once()
+        ->withArgs(function (Referee $injurableReferee, Carbon $injuryDate) use ($referee, $datetime) {
+            expect($injurableReferee->is($referee))->toBeTrue();
+            expect($injuryDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($referee);
 
     InjureAction::run($referee);
+});
 
-    expect($referee->fresh())
-        ->injuries->toHaveCount(1)
-        ->status->toMatchObject(RefereeStatus::INJURED);
+test('it injures a bookable referee at a specific datetime', function () {
+    $referee = Referee::factory()->bookable()->create();
+    $datetime = now()->addDays(2);
+
+    $this->refereeRepository
+        ->shouldReceive('injure')
+        ->once()
+        ->with($referee, $datetime)
+        ->andReturn($referee);
+
+    InjureAction::run($referee, $datetime);
 });
 
 test('invoke throws exception for injuring a non injurable referee', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $referee = Referee::factory()->{$factoryState}()->create();
 
     InjureAction::run($referee);

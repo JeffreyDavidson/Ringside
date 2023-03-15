@@ -1,23 +1,54 @@
 <?php
 
 use App\Actions\Referees\SuspendAction;
-use App\Enums\RefereeStatus;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke suspends an available referee and redirects', function () {
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->refereeRepository = mock(RefereeRepository::class);
+});
+
+test('it suspends a bookable referee at the current datetime by default', function () {
     $referee = Referee::factory()->bookable()->create();
+    $datetime = now();
+
+    $this->refereeRepository
+        ->shouldReceive('suspend')
+        ->once()
+        ->withArgs(function (Referee $suspendableReferee, Carbon $suspensionDate) use ($referee, $datetime) {
+            expect($suspendableReferee->is($referee))->toBeTrue();
+            expect($suspensionDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($referee);
 
     SuspendAction::run($referee);
+});
 
-    expect($referee->fresh())
-        ->suspensions->toHaveCount(1)
-        ->status->toMatchObject(RefereeStatus::SUSPENDED);
+test('it suspends a bookable referee at a specific datetime', function () {
+    $referee = Referee::factory()->bookable()->create();
+    $datetime = now()->addDays(2);
+
+    $this->refereeRepository
+        ->shouldReceive('suspend')
+        ->once()
+        ->with($referee, $datetime)
+        ->andReturn($referee);
+
+    SuspendAction::run($referee, $datetime);
 });
 
 test('invoke throws exception for suspending a non suspendable referee', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $referee = Referee::factory()->{$factoryState}()->create();
 
     SuspendAction::run($referee);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Referees\UnretireAction;
+use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\UnretireController;
 use App\Models\Referee;
@@ -28,4 +29,16 @@ test('a basic user cannot unretire a referee', function () {
 test('a guest cannot unretire a referee', function () {
     patch(action([UnretireController::class], $this->referee))
         ->assertRedirect(route('login'));
+});
+
+test('invoke returns error message if exception is thrown', function () {
+    $referee = Referee::factory()->create();
+
+    UnretireAction::allowToRun()->andThrow(CannotBeUnretiredException::class);
+
+    actingAs(administrator())
+        ->from(action([RefereesController::class, 'index']))
+        ->patch(action([UnretireController::class], $referee))
+        ->assertRedirect(action([RefereesController::class, 'index']))
+        ->assertSessionHas('error');
 });
