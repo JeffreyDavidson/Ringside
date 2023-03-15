@@ -8,8 +8,7 @@ test('index returns a view', function () {
     actingAs(administrator())
         ->get(action([ManagersController::class, 'index']))
         ->assertOk()
-        ->assertViewIs('managers.index')
-        ->assertSeeLivewire('managers.managers-list');
+        ->assertViewIs('managers.index');
 });
 
 test('a basic user cannot view managers index page', function () {

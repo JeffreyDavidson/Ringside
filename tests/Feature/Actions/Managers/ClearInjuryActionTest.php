@@ -3,33 +3,52 @@
 use App\Actions\Managers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Models\Manager;
+use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('run makes injured manager not injured using current datetime', function () {
-    $manager = Manager::factory()->injured()->create();
-    $now = now();
+beforeEach(function () {
+    Event::fake();
 
-    ClearInjuryAction::run($manager);
+    testTime()->freeze();
 
-    expect($manager->fresh())
-        ->isInjured()->toBeFalse()
-        ->injuries->last()->ended_at->toEqual($now->toDateTimeString());
+    $this->managerRepository = mock(ManagerRepository::class);
 });
 
-test('run makes injured manager not injured using specific datetime', function () {
+test('it clears an injury of an injured manager at the current datetime by default', function () {
     $manager = Manager::factory()->injured()->create();
-    $recoveryDate = Carbon::parse('2022-05-27 12:00:00');
+    $datetime = now();
 
-    ClearInjuryAction::run($manager, $recoveryDate);
+    $this->managerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->withArgs(function (Manager $unretireManager, Carbon $recoveryDate) use ($manager, $datetime) {
+            expect($unretireManager->is($manager))->toBeTrue();
+            expect($recoveryDate->equalTo($datetime))->toBeTrue();
 
-    expect($manager->fresh())
-        ->isInjured()->toBeFalse()
-        ->injuries->last()->ended_at->toEqual($recoveryDate);
+            return true;
+        })
+        ->andReturn($manager);
+
+    ClearInjuryAction::run($manager);
+});
+
+test('it clears an injury of an injured manager at a specific datetime', function () {
+    $manager = Manager::factory()->injured()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    ClearInjuryAction::run($manager, $datetime);
 });
 
 test('invoke throws exception for injuring a non injurable manager', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $manager = Manager::factory()->{$factoryState}()->create();
 
     ClearInjuryAction::run($manager);

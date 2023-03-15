@@ -1,58 +1,210 @@
 <?php
 
 use App\Actions\Managers\ReleaseAction;
-use App\Enums\ManagerStatus;
+use App\Events\Managers\ManagerReleased;
 use App\Exceptions\CannotBeReleasedException;
 use App\Models\Manager;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Repositories\ManagerRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke releases a available manager and redirects', function () {
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->managerRepository = mock(ManagerRepository::class);
+});
+
+test('it releases an available manager at the current datetime by default', function () {
     $manager = Manager::factory()->available()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($releaseDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($manager);
 
     ReleaseAction::run($manager);
 
-    expect($manager->fresh())
-        ->employments->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(ManagerStatus::RELEASED);
+    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->releaseDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
-test('invoke releases an injured manager and redirects', function () {
-    $manager = Manager::factory()->injured()->create();
+test('it releases an available manager at a specific datetime', function () {
+    $manager = Manager::factory()->available()->create();
+    $datetime = now()->addDays(2);
 
-    ReleaseAction::run($manager);
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->shouldNotReceive('clearInjury');
 
-    expect($manager->fresh())
-        ->injuries->last()->ended_at->not->toBeNull()
-        ->employments->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(ManagerStatus::RELEASED);
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    ReleaseAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->releaseDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
-test('invoke releases an suspended manager and redirects', function () {
+test('it releases a suspended manager at the current datetime by default', function () {
     $manager = Manager::factory()->suspended()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->withArgs(function (Manager $reinstatableManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($reinstatableManager->is($manager))->toBeTrue();
+            expect($releaseDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($manager);
+
+    $this->managerRepository
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($releaseDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($manager);
 
     ReleaseAction::run($manager);
 
-    expect($manager->fresh())
-        ->suspensions->last()->ended_at->not->toBeNull()
-        ->employments->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(ManagerStatus::RELEASED);
+    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->releaseDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
-test('Invoke releases a manager leaving their current tag teams and managers and redirects', function () {
-    $tagTeam = TagTeam::factory()->bookable()->create();
-    $wrestler = Wrestler::factory()->bookable()->create();
-    $manager = Manager::factory()
-        ->available()
-        ->hasAttached($tagTeam, ['hired_at' => now()->toDateTimeString()])
-        ->hasAttached($wrestler, ['hired_at' => now()->toDateTimeString()])
-        ->create();
+test('it releases a suspended manager at a specific datetime', function () {
+    $manager = Manager::factory()->suspended()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    $this->managerRepository
+        ->shouldNotReceive('clearInjury');
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    ReleaseAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->releaseDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it releases an injured manager at the current datetime by default', function () {
+    $manager = Manager::factory()->injured()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldReceive('reinstate');
+
+    $this->managerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($releaseDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($manager);
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($releasableManager->is($manager))->toBeTrue();
+            expect($releaseDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($manager);
 
     ReleaseAction::run($manager);
 
-    expect($manager->fresh())
-        ->tagTeams()->where('manageable_id', $tagTeam->id)->get()->last()->pivot->left_at->not->toBeNull()
-        ->wrestlers()->where('manageable_id', $wrestler->id)->get()->last()->pivot->left_at->not->toBeNull();
+    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->releaseDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
+});
+
+test('it releases an injured manager at a specific datetime', function () {
+    $manager = Manager::factory()->injured()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldReceive('reinstate');
+
+    $this->managerRepository
+        ->shouldReceive('clearInjury')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    $this->managerRepository
+        ->shouldReceive('release')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    ReleaseAction::run($manager, $datetime);
+
+    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
+        expect($event->manager->is($manager))->toBeTrue();
+        expect($event->releaseDate->is($datetime))->toBeTrue();
+
+        return true;
+    });
 });
 
 test('invoke throws an exception for releasing a non releasable manager', function ($factoryState) {

@@ -5,10 +5,14 @@ use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use function Pest\Laravel\mock;
 
-test('handle restores a soft deleted manager', function () {
+beforeEach(function () {
+    $this->managerRepository = mock(ManagerRepository::class);
+});
+
+test('it restores a deleted manager', function () {
     $manager = Manager::factory()->trashed()->create();
 
-    mock(ManagerRepository::class)
+    $this->managerRepository
         ->shouldReceive('restore')
         ->once()
         ->with($manager);

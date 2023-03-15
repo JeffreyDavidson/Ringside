@@ -22,6 +22,10 @@ class EmployAction extends BaseManagerAction
 
         $startDate ??= now();
 
+        if ($manager->isRetired()) {
+            $this->managerRepository->unretire($manager, $startDate);
+        }
+
         $this->managerRepository->employ($manager, $startDate);
     }
 

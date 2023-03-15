@@ -1,54 +1,67 @@
 <?php
 
-use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\UpdateAction;
 use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
-use Illuminate\Support\Carbon;
 use function Pest\Laravel\mock;
 
-test('it can update a manager', function () {
-    $data = new ManagerData('Taylor', 'Otwell', null);
+beforeEach(function () {
+    $this->managerRepository = mock(ManagerRepository::class);
+});
+
+test('it updates a manager', function () {
+    $data = new ManagerData('Hulk', 'Hogan', null);
     $manager = Manager::factory()->create();
 
-    mock(ManagerRepository::class)
+    $this->managerRepository
         ->shouldReceive('update')
         ->once()
         ->with($manager, $data)
         ->andReturns($manager);
 
-    UpdateAction::run($manager, $data);
+    $this->managerRepository
+        ->shouldNotReceive('employ');
 
-    EmployAction::shouldNotRun();
+    UpdateAction::run($manager, $data);
 });
 
-test('it can employ an unemployed manager when start date is filled', function () {
-    $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
-    $manager = Manager::factory()->unemployed()->create();
+test('it employs an employable manager if start date is filled in request', function () {
+    $datetime = now();
+    $data = new ManagerData('Hulk', 'Hogan', $datetime);
+    $manager = Manager::factory()->create();
 
-    mock(ManagerRepository::class)
+    $this->managerRepository
         ->shouldReceive('update')
         ->once()
         ->with($manager, $data)
         ->andReturns($manager);
 
-    EmployAction::shouldRun();
+    $this->managerRepository
+        ->shouldReceive('employ')
+        ->with($manager, $data->start_date)
+        ->once()
+        ->andReturn($manager);
 
     UpdateAction::run($manager, $data);
 });
 
-test('it can employ a future employed manager when start date is filled', function () {
-    $data = new ManagerData('Taylor', 'Otwell', Carbon::now());
+test('it updates a future employed manager employment date if start date is filled in request', function () {
+    $datetime = now()->addDays(2);
+    $data = new ManagerData('Hulk', 'Hogan', $datetime);
     $manager = Manager::factory()->withFutureEmployment()->create();
 
-    mock(ManagerRepository::class)
+    $this->managerRepository
         ->shouldReceive('update')
         ->once()
         ->with($manager, $data)
         ->andReturns($manager);
 
-    EmployAction::shouldRun();
+    $this->managerRepository
+        ->shouldReceive('employ')
+        ->with($manager, $data->start_date)
+        ->once()
+        ->andReturn($manager);
 
     UpdateAction::run($manager, $data);
 });

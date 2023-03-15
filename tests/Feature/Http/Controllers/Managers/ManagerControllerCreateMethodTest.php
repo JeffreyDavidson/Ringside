@@ -8,7 +8,7 @@ use function Pest\Laravel\get;
 test('create returns a view', function () {
     actingAs(administrator())
         ->get(action([ManagersController::class, 'create']))
-        ->assertSuccessful()
+        ->assertOk()
         ->assertViewIs('managers.create')
         ->assertViewHas('manager', new Manager);
 });

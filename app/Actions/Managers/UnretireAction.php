@@ -23,8 +23,7 @@ class UnretireAction extends BaseManagerAction
         $unretiredDate ??= now();
 
         $this->managerRepository->unretire($manager, $unretiredDate);
-
-        EmployAction::run($manager, $unretiredDate);
+        $this->managerRepository->employ($manager, $unretiredDate);
     }
 
     /**

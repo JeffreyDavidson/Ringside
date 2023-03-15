@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Events\Managers\ManagerReleased;
 use App\Exceptions\CannotBeReleasedException;
 use App\Models\Manager;
 use Illuminate\Support\Carbon;
@@ -23,20 +24,16 @@ class ReleaseAction extends BaseManagerAction
         $releaseDate ??= now();
 
         if ($manager->isSuspended()) {
-            ReinstateAction::run($manager, $releaseDate);
+            $this->managerRepository->reinstate($manager, $releaseDate);
         }
 
         if ($manager->isInjured()) {
-            ClearInjuryAction::run($manager, $releaseDate);
+            $this->managerRepository->clearInjury($manager, $releaseDate);
         }
 
         $this->managerRepository->release($manager, $releaseDate);
 
-        $manager->currentTagTeams
-            ->whenNotEmpty(fn () => RemoveFromCurrentTagTeamsAction::run($manager));
-
-        $manager->currentWrestlers
-            ->whenNotEmpty(fn () => RemoveFromCurrentWrestlersAction::run($manager));
+        event(new ManagerReleased($manager, $releaseDate));
     }
 
     /**

@@ -1,23 +1,54 @@
 <?php
 
 use App\Actions\Managers\ReinstateAction;
-use App\Enums\ManagerStatus;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Manager;
+use App\Repositories\ManagerRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-test('invoke reinstates a suspended manager and redirects', function () {
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->managerRepository = mock(ManagerRepository::class);
+});
+
+test('it reinstates a suspended manager at the current datetime by default', function () {
     $manager = Manager::factory()->suspended()->create();
+    $datetime = now();
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->withArgs(function (Manager $reinstatableManager, Carbon $reinstatementDate) use ($manager, $datetime) {
+            expect($reinstatableManager->is($manager))->toBeTrue();
+            expect($reinstatementDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($manager);
 
     ReinstateAction::run($manager);
+});
 
-    expect($manager->fresH())
-        ->suspensions->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(ManagerStatus::AVAILABLE);
+test('it reinstates a suspended manager at a specific datetime', function () {
+    $manager = Manager::factory()->suspended()->create();
+    $datetime = now()->addDays(2);
+
+    $this->managerRepository
+        ->shouldReceive('reinstate')
+        ->once()
+        ->with($manager, $datetime)
+        ->andReturn($manager);
+
+    ReinstateAction::run($manager, $datetime);
 });
 
 test('invoke throws exception for reinstating a non reinstatable manager', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $manager = Manager::factory()->{$factoryState}()->create();
 
     ReinstateAction::run($manager);
