@@ -4,8 +4,8 @@ use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
-use Tests\RequestFactories\TitleRequestFactory;
 use function Pest\Laravel\mock;
+use Tests\RequestFactories\TitleRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
     $title = Title::factory()->create();

@@ -152,7 +152,7 @@ trait HasActivations
         return $this->hasFutureActivation() && ! $this->activatedOn($activationDate);
     }
 
-     /**
+    /**
      * Check to see if the model is deactivated.
      */
     public function isDeactivated(): bool

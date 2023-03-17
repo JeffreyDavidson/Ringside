@@ -1,14 +1,13 @@
 <?php
 
 use App\Actions\Titles\RetireAction;
-use App\Events\Titles\TitleRetired;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
-use function Pest\Laravel\mock;
-use function Spatie\PestPluginTestTime\testTime;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     Event::fake();

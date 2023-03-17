@@ -3,8 +3,8 @@
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Models\Wrestler;
 use App\Rules\LetterSpace;
-use Tests\RequestFactories\WrestlerRequestFactory;
 use function Pest\Laravel\mock;
+use Tests\RequestFactories\WrestlerRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
     $this->createRequest(StoreRequest::class)

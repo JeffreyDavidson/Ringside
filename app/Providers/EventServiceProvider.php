@@ -11,7 +11,6 @@ use App\Models\Referee;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Title;
-use App\Models\Wrestler;
 use App\Observers\EventObserver;
 use App\Observers\RefereeObserver;
 use App\Observers\StableObserver;
