@@ -1,13 +1,22 @@
-name: tests
-on:
-  pull_request:
+name: Test
+run-name: ${{ github.actor }} is running the test suite
+on: [push]
 jobs:
-  tests:
+  Test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         php: ['8.2']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: ringside_testing
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     name: PHP ${{ matrix.php }}
     steps:
       - name: Checkout code
@@ -19,11 +28,14 @@ jobs:
           tools: composer:v2
           coverage: none
       - name: Install dependencies
-        run: |
-          composer install
-      - name: Execute lint with Laravel preset
-        run: ./vendor/bin/pint
-      - name: Execute lint with PSR 12 preset
-        run: ./vendor/bin/pint --preset=psr12
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       - name: Execute unit/feature tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: ${{ job.services.mysql.ports['3306'] }}
+          DB_USERNAME: root
+          DB_PASSWORD: null
+          DB_DATABASE: ringside_testing
         run: vendor/bin/pest
