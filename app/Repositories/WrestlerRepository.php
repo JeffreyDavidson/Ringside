@@ -209,7 +209,7 @@ class WrestlerRepository
                     ->whereDoesntHave('currentTagTeam');
             })
             ->orWhere(function ($query) use ($tagTeam) {
-                $query->whereHas('currentTagTeam', function (Builder $query) use ( $tagTeam) {
+                $query->whereHas('currentTagTeam', function (Builder $query) use ($tagTeam) {
                     $query->where('tag_team_id', '=', $tagTeam->id);
                 });
             })

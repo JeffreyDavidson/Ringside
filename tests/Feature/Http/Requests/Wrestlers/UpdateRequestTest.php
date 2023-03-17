@@ -5,8 +5,8 @@ use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use App\Rules\LetterSpace;
 use Illuminate\Support\Carbon;
-use Tests\RequestFactories\WrestlerRequestFactory;
 use function Pest\Laravel\mock;
+use Tests\RequestFactories\WrestlerRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
     $wrestler = Wrestler::factory()->create();

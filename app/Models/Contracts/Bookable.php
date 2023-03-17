@@ -17,5 +17,4 @@ interface Bookable
      * Check to see if the model is bookable.
      */
     public function isBookable(): bool;
-
 }

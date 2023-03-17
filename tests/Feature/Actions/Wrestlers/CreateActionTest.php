@@ -1,7 +1,6 @@
 <?php
 
 use App\Actions\Wrestlers\CreateAction;
-use App\Actions\Wrestlers\EmployAction;
 use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;

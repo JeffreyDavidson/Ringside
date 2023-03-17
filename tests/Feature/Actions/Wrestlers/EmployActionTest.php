@@ -4,10 +4,10 @@ use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use function Pest\Laravel\mock;
-use function Spatie\PestPluginTestTime\testTime;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     Event::fake();

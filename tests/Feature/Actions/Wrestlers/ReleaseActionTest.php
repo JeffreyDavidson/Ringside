@@ -5,10 +5,10 @@ use App\Events\Wrestlers\WrestlerReleased;
 use App\Exceptions\CannotBeReleasedException;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
-use function Pest\Laravel\mock;
-use function Spatie\PestPluginTestTime\testTime;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     Event::fake();
@@ -70,11 +70,6 @@ test('it releases an bookable wrestler at a specific datetime', function () {
         return true;
     });
 });
-
-
-
-
-
 
 test('it releases a suspended wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->suspended()->create();

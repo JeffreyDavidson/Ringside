@@ -4,10 +4,10 @@ use App\Actions\Titles\ActivateAction;
 use App\Exceptions\CannotBeActivatedException;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
-use function Pest\Laravel\mock;
-use function Spatie\PestPluginTestTime\testTime;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     Event::fake();
