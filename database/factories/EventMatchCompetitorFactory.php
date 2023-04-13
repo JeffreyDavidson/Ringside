@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\EventMatch;
+use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

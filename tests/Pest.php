@@ -53,9 +53,20 @@ uses()->group('venues', 'feature-venues')
         'Feature/Repositories/VenueRepositoryTest',
     );
 uses()->group('titles', 'feature-titles')->in('Feature/Http/Controllers/Titles');
-// uses()->group('events', 'feature-events')->in('Feature/Http/Controllers/Events');
 uses()->group('event-matches', 'feature-event-matches')
-    ->in('Feature/Http/Controllers/EventMatches', 'Feature/Actions/EventMatches', 'Feature/Http/Requests/EventMatches');
+    ->in(
+        'Feature/Actions/EventMatches',
+        'Feature/Http/Controllers/EventMatches',
+        'Feature/Http/Livewire/EventMatches',
+        'Feature/Http/Requests/EventMatches',
+        'Feature/Policies/EventMatchPolicyTest.php',
+        'Feature/Repositories/EventMatchRepositoryTest.php',
+        'Feature/resources/views/matches'
+    );
+uses()->group('event-matches', 'unit-event-matches')
+    ->in(
+        'Unit/Models/EventMatchTest.php',
+    );
 uses()->group('actions')->in('Feature/Actions');
 uses()
     ->group('events')

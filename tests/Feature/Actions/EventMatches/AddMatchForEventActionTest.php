@@ -5,44 +5,72 @@ use App\Actions\EventMatches\AddMatchForEventAction;
 use App\Actions\EventMatches\AddRefereesToMatchAction;
 use App\Actions\EventMatches\AddTitlesToMatchAction;
 use App\Data\EventMatchData;
-use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
+use App\Models\EventMatch;
+use App\Models\MatchType;
+use App\Models\Referee;
 use App\Models\Title;
+use App\Models\Wrestler;
+use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
+use function Pest\Laravel\mock;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->event = Event::factory()->scheduled()->create();
+    $this->eventMatchRepository = mock(EventMatchRepository::class);
 });
 
 test('add a match to an event', function () {
-    $requestData = StoreRequest::factory()->create([
-        'match_type_id' => 1,
-        'preview' => 'This is a general preview.',
+    $matchType = MatchType::inRandomOrder()->first();
+    $referees = Referee::factory()->count(1)->create();
+    [$wrestlerA, $wrestlerB] = Wrestler::factory()->count(2)->create();
+    $competitors = collect([
+        0 => [
+            'wrestlers' => collect([$wrestlerA]),
+        ],
+        1 => [
+            'wrestlers' => collect([$wrestlerB]),
+        ],
     ]);
-    $eventMatchData = EventMatchData::fromStoreRequest(new StoreRequest($requestData));
+    $data = new EventMatchData($matchType, $referees, collect(), $competitors, null);
 
-    AddMatchForEventAction::run($this->event, $eventMatchData);
+    $this->eventMatchRepository
+        ->shouldReceive('createForEvent')
+        ->with($this->event, $data)
+        ->andReturn($eventMatch = new EventMatch);
 
-    expect($this->event->matches)->toHaveCount(1);
-    expect($this->event->matches->first())
-        ->match_type_id->toEqual(1)
-        ->preview->toEqual('This is a general preview.');
-    AddRefereesToMatchAction::mock()->shouldReceive('run');
-    AddCompetitorsToMatchAction::mock()->shouldReceive('run');
-    AddTitlesToMatchAction::mock()->shouldNotReceive('run');
+    AddRefereesToMatchAction::shouldRun($this->event, $data->referees);
+    AddTitlesToMatchAction::shouldNotRun();
+    AddCompetitorsToMatchAction::shouldRun($eventMatch, $data->competitors);
+
+    AddMatchForEventAction::run($this->event, $data);
 });
 
 test('add a title match to an event', function () {
-    $requestData = StoreRequest::factory()->create([
-        'match_type_id' => 1,
-        'titles' => Title::factory()->count(1)->create()->modelKeys(),
-        'preview' => 'This is a general preview.',
+    $matchType = MatchType::inRandomOrder()->first();
+    $referees = Referee::factory()->count(1)->create();
+    $titles = Title::factory()->count(1)->create();
+    [$wrestlerA, $wrestlerB] = Wrestler::factory()->count(2)->create();
+    $competitors = collect([
+        0 => [
+            'wrestlers' => collect([$wrestlerA]),
+        ],
+        1 => [
+            'wrestlers' => collect([$wrestlerB]),
+        ],
     ]);
-    $eventMatchData = EventMatchData::fromStoreRequest(new StoreRequest($requestData));
+    $data = new EventMatchData($matchType, $referees, $titles, $competitors, null);
 
-    AddMatchForEventAction::run($this->event, $eventMatchData);
+    $this->eventMatchRepository
+        ->shouldReceive('createForEvent')
+        ->with($this->event, $data)
+        ->once()
+        ->andReturn($eventMatch = new EventMatch);
 
-    expect($this->event->matches)->toHaveCount(1);
-    AddTitlesToMatchAction::mock()->shouldReceive('run');
+    AddRefereesToMatchAction::shouldRun($this->event, $data->referees);
+    AddTitlesToMatchAction::shouldRun($this->event, $data->titles);
+    AddCompetitorsToMatchAction::shouldRun($eventMatch, $data->competitors);
+
+    AddMatchForEventAction::run($this->event, $data);
 });
