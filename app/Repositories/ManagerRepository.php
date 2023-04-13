@@ -8,7 +8,6 @@ use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class ManagerRepository
@@ -16,7 +15,7 @@ class ManagerRepository
     /**
      * Create a new manager with the given data.
      */
-    public function create(ManagerData $managerData): Model
+    public function create(ManagerData $managerData): Manager
     {
         return Manager::create([
             'first_name' => $managerData->first_name,

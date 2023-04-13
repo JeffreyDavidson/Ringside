@@ -6,7 +6,6 @@ namespace App\Repositories;
 
 use App\Data\RefereeData;
 use App\Models\Referee;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class RefereeRepository
@@ -14,7 +13,7 @@ class RefereeRepository
     /**
      * Create a new referee with the given data.
      */
-    public function create(RefereeData $refereeData): Model
+    public function create(RefereeData $refereeData): Referee
     {
         return Referee::create([
             'first_name' => $refereeData->first_name,
@@ -130,16 +129,6 @@ class RefereeRepository
     public function reinstate(Referee $referee, Carbon $reinstateDate): Referee
     {
         $referee->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Get the model's first employment date.
-     */
-    public function updateEmployment(Referee $referee, Carbon $employmentDate): Referee
-    {
-        $referee->futureEmployment()->update(['started_at' => $employmentDate->toDateTimeString()]);
 
         return $referee;
     }

@@ -8,14 +8,29 @@ use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Closure;
+use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Collection;
 
-class TitleChampionIncludedInTitleMatch implements ValidationRule
+class TitleChampionIncludedInTitleMatch implements ValidationRule, DataAwareRule
 {
-    public function __construct(protected Collection $titleIds)
+    /**
+     * All of the data under validation.
+     *
+     * @var array
+     */
+    protected $data = [];
+
+    /**
+     * Set the data under validation.
+     *
+     * @param  array  $data
+     * @return $this
+     */
+    public function setData($data)
     {
-        $this->titleIds = $titleIds;
+        $this->data = $data;
+
+        return $this;
     }
 
     /**
@@ -25,20 +40,18 @@ class TitleChampionIncludedInTitleMatch implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $competitors = collect($value)->flatten(1);
+        $competitors = collect($value);
 
-        $wrestlers = Wrestler::query()
-            ->whereIn('id', $competitors->where('competitor_type', 'wrestler')->pluck('competitor_id'))
-            ->get();
+        $wrestlerIds = $competitors->groupBy('wrestlers')->flatten();
+        $tagteamIds = $competitors->groupBy('tag_teams')->flatten();
 
-        $tagTeams = TagTeam::query()
-            ->whereIn('id', $competitors->where('competitor_type', 'tag_team')->pluck('competitor_id'))
-            ->get();
+        $wrestlers = Wrestler::query()->whereIn('id', $wrestlerIds)->get();
+        $tagTeams = TagTeam::query()->whereIn('id', $tagteamIds)->get();
 
         $competitors = $wrestlers->merge($tagTeams);
 
         $champions = Title::with('currentChampionship.champion')
-            ->findMany($this->titleIds)
+            ->findMany($this->data['titles'])
             ->reject(fn ($title) => $title->isVacant())
             ->every(fn ($title) => $competitors->contains($title->currentChampionship->champion));
 

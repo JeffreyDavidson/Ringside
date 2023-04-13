@@ -12,24 +12,35 @@ use App\Models\Referee;
 use App\Models\Title;
 use Illuminate\View\View;
 
-class MatchCreateForm extends BaseComponent
+class MatchForm extends BaseComponent
 {
+    /**
+     * Event that match will be attaached to.
+     */
     public Event $event;
 
+    /**
+     * Match for the event.
+     */
     public EventMatch $match;
 
     /**
-     * Subview to load competitors.
+     * Match type to target for subview.
      */
-    public int $matchTypeId = 0;
+    public int $matchTypeId;
 
-    public $subviewToUse;
+    /**
+     * View to rendor for each match type.
+     */
+    public $subViewToUse;
 
-    public function mount(EventMatch $match): void
+    /**
+     * Undocumented function
+     */
+    public function mount(Event $event, EventMatch $match): void
     {
-        $this->event = request()->route()->parameter('event');
+        $this->event = $event;
         $this->match = $match;
-        $this->subViewToUse = '';
     }
 
     /**

@@ -35,7 +35,7 @@
                 </div>
                 @if ($subViewToUse)
                     <div class="mb-10">
-                        <x-dynamic-component :component="$subViewToUse" class="mt-4" />
+                        @include($subViewToUse)
                     </div>
                 @endif
                 <div class="mb-10">

@@ -13,6 +13,6 @@
         </x-toolbar>
     </x-slot>
 
-    <livewire:event-matches.match-create-form>
+    <livewire:event-matches.match-form :event="$event">
 
 </x-layouts.app>

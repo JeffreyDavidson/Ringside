@@ -15,7 +15,7 @@ use App\Models\Wrestler;
 class EventMatchRepository
 {
     /**
-     * Create a new event with the given data.
+     * Create a new event match for a given event with the given data.
      */
     public function createForEvent(Event $event, EventMatchData $eventMatchData): EventMatch
     {
@@ -26,27 +26,23 @@ class EventMatchRepository
     }
 
     /**
-     * Create a new event with the given data.
+     * Add a title to an event match.
      */
-    public function addTitleToMatch(EventMatch $match, Title $title): EventMatch
+    public function addTitleToMatch(EventMatch $match, Title $title): void
     {
         $match->titles()->attach($title);
-
-        return $match;
     }
 
     /**
-     * Create a new event with the given data.
+     * Add a referee to an event match.
      */
-    public function addRefereeToMatch(EventMatch $match, Referee $referee): EventMatch
+    public function addRefereeToMatch(EventMatch $match, Referee $referee): void
     {
         $match->referees()->attach($referee);
-
-        return $match;
     }
 
     /**
-     * Create a new event with the given data.
+     * Add a wrestler to an event match.
      */
     public function addWrestlerToMatch(EventMatch $match, Wrestler $wrestler, int $sideNumber): void
     {
@@ -54,12 +50,10 @@ class EventMatchRepository
     }
 
     /**
-     * Create a new event with the given data.
+     * Add a tag team to an event match.
      */
-    public function addTagTeamToMatch(EventMatch $match, TagTeam $tagTeam, int $sideNumber): EventMatch
+    public function addTagTeamToMatch(EventMatch $match, TagTeam $tagTeam, int $sideNumber): void
     {
         $match->tagTeams()->attach($tagTeam, ['side_number' => $sideNumber]);
-
-        return $match;
     }
 }

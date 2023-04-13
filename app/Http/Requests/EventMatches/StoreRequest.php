@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Requests\EventMatches;
 
 use App\Models\EventMatch;
-use App\Rules\CompetitorsAreValid;
+use App\Rules\CompetitorsAreNotDuplicated;
 use App\Rules\CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType;
+use App\Rules\RefereeCanRefereeMatch;
+use App\Rules\TagTeamMustBeBookable;
 use App\Rules\TitleChampionIncludedInTitleMatch;
 use App\Rules\TitleMustBeActive;
+use App\Rules\WrestlerMustBeBookable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\EventMatchRequestFactory;
@@ -17,6 +20,8 @@ class StoreRequest extends FormRequest
 {
     /** @var class-string */
     public static $factory = EventMatchRequestFactory::class;
+
+    protected $stopOnFirstFailure = true;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -38,7 +43,7 @@ class StoreRequest extends FormRequest
         return [
             'match_type_id' => ['required', 'integer', Rule::exists('match_types', 'id')],
             'referees' => ['required', 'array'],
-            'referees.*' => ['integer', 'distinct', Rule::exists('referees', 'id')],
+            'referees.*' => ['bail', 'integer', 'distinct', Rule::exists('referees', 'id'), new RefereeCanRefereeMatch()],
             'titles' => ['array'],
             'titles.*' => ['bail', 'integer', 'distinct', Rule::exists('titles', 'id'), new TitleMustBeActive()],
             'competitors' => [
@@ -46,13 +51,27 @@ class StoreRequest extends FormRequest
                 'required',
                 'array',
                 'min:2',
-                new CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType($this->input('match_type_id')),
-                new CompetitorsAreValid(),
-                new TitleChampionIncludedInTitleMatch($this->collect('titles')),
+                new CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType(),
+                new CompetitorsAreNotDuplicated(),
+                new TitleChampionIncludedInTitleMatch(),
             ],
-            'competitors.*' => ['required', 'array', 'min:1'],
+            'competitors.*' => ['required', 'array'],
             'competitors.*.wrestlers' => ['array'],
+            'competitors.*.wrestlers.*' => [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('wrestlers', 'id'),
+                new WrestlerMustBeBookable()
+            ],
             'competitors.*.tagteams' => ['array'],
+            'competitors.*.tagteams.*' => [
+                'bail',
+                'integer',
+                'distinct',
+                Rule::exists('tag_teams', 'id'),
+                new TagTeamMustBeBookable()
+            ],
             'preview' => ['nullable', 'string'],
         ];
     }

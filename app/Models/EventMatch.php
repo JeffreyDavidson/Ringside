@@ -29,6 +29,14 @@ class EventMatch extends Model
     ];
 
     /**
+     * Get the event the match belongs to.
+     */
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    /**
      * Get the match type of the match.
      */
     public function matchType(): BelongsTo
@@ -53,7 +61,7 @@ class EventMatch extends Model
     }
 
     /**
-     * Get all fo the event match competitors for the match.
+     * Get all of the event match competitors for the match.
      */
     public function competitors(): MergedRelation
     {
@@ -66,7 +74,8 @@ class EventMatch extends Model
     public function wrestlers(): MorphToMany
     {
         return $this->morphedByMany(Wrestler::class, 'competitor', 'event_match_competitors')
-            ->using(EventMatchCompetitor::class);
+            ->using(EventMatchCompetitor::class)
+            ->withPivot('side_number');
     }
 
     /**
@@ -75,6 +84,7 @@ class EventMatch extends Model
     public function tagTeams(): MorphToMany
     {
         return $this->morphedByMany(TagTeam::class, 'competitor', 'event_match_competitors')
-            ->using(EventMatchCompetitor::class);
+            ->using(EventMatchCompetitor::class)
+            ->withPivot('side_number');
     }
 }

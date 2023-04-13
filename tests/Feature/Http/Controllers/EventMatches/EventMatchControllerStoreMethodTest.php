@@ -1,39 +1,36 @@
 <?php
 
+use App\Actions\EventMatches\AddMatchForEventAction;
 use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
 use Database\Seeders\MatchTypesTableSeeder;
-use Facades\App\Actions\EventMatches\AddMatchForEventAction;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\post;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->event = Event::factory()->scheduled()->create();
+    $this->data = StoreRequest::factory()->create();
+    $this->request = StoreRequest::create(action([EventMatchesController::class, 'store'], $this->event), 'POST', $this->data);
 });
 
-test('store creates a match for a scheduled event and redirects', function () {
-    $data = StoreRequest::factory()->create();
-
-    $this
-        ->actingAs(administrator())
+test('it saves a match for an event and redirects', function () {
+    actingAs(administrator())
         ->from(action([EventMatchesController::class, 'create'], $this->event))
-        ->post(action([EventMatchesController::class, 'store'], $this->event), $data)
-        ->assertRedirect(route('events.matches.index', $this->event));
+        ->post(action([EventMatchesController::class, 'store'], $this->event), $this->data)
+        ->assertRedirect(action([EventMatchesController::class, 'index'], $this->event));
 
-    AddMatchForEventAction::shouldReceive('run');
+    AddMatchForEventAction::shouldRun($this->event, $this->data);
 });
 
 test('a basic user cannot create a match for an event', function () {
-    $data = StoreRequest::factory()->create();
-
-    $this->actingAs(basicUser())
-        ->post(action([EventMatchesController::class, 'store'], $this->event), $data)
+    actingAs(basicUser())
+        ->post(action([EventMatchesController::class, 'store'], $this->event), $this->data)
         ->assertForbidden();
 });
 
 test('a guest cannot create a match for an event', function () {
-    $data = StoreRequest::factory()->create();
-
-    $this->post(action([EventMatchesController::class, 'store'], $this->event), $data)
+    post(action([EventMatchesController::class, 'store'], $this->event), $this->data)
         ->assertRedirect(route('login'));
 });

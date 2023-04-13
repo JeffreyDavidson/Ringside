@@ -8,7 +8,6 @@ use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class TagTeamRepository
@@ -16,7 +15,7 @@ class TagTeamRepository
     /**
      * Create a new tag team with the given data.
      */
-    public function create(TagTeamData $tagTeamData): Model
+    public function create(TagTeamData $tagTeamData): TagTeam
     {
         return TagTeam::create([
             'name' => $tagTeamData->name,
@@ -136,10 +135,8 @@ class TagTeamRepository
      *
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
      */
-    public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null): TagTeam
+    public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate): TagTeam
     {
-        $joinDate ??= now();
-
         $wrestlers->each(
             fn (Wrestler $wrestler) => $this->addTagTeamPartner($tagTeam, $wrestler, $joinDate)
         );
@@ -157,10 +154,8 @@ class TagTeamRepository
         TagTeam $tagTeam,
         Collection $formerTagTeamPartners,
         Collection $newTagTeamPartners,
-        ?Carbon $date = null
+        Carbon $date
     ): TagTeam {
-        $date ??= now();
-
         $formerTagTeamPartners->each(
             fn (Wrestler $formerTagTeamPartner) => $this->removeTagTeamPartner(
                 $tagTeam,
@@ -183,10 +178,8 @@ class TagTeamRepository
     /**
      * Remove wrestler from a tag team.
      */
-    public function removeTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, ?Carbon $removalDate = null): void
+    public function removeTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, Carbon $removalDate): void
     {
-        $removalDate ??= now();
-
         $tagTeam->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
             $tagTeamPartner->id,
             ['left_at' => $removalDate->toDateTimeString()]
@@ -196,10 +189,8 @@ class TagTeamRepository
     /**
      * Add wrestler to a tag team.
      */
-    public function addTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, ?Carbon $joinDate = null): void
+    public function addTagTeamPartner(TagTeam $tagTeam, Wrestler $tagTeamPartner, Carbon $joinDate): void
     {
-        $joinDate ??= now();
-
         $tagTeam->wrestlers()->attach(
             $tagTeamPartner->id,
             ['joined_at' => $joinDate->toDateTimeString()]

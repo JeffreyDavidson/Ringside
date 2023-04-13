@@ -20,7 +20,7 @@ class AddRefereesToMatchAction extends BaseEventMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $referees): void
     {
-        $referees->map(
+        $referees->each(
             fn (Referee $referee) => $this->eventMatchRepository->addRefereeToMatch($eventMatch, $referee)
         );
     }

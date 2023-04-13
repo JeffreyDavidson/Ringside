@@ -20,7 +20,7 @@ class AddTitlesToMatchAction extends BaseEventMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $titles): void
     {
-        $titles->map(
+        $titles->each(
             fn (Title $title) => $this->eventMatchRepository->addTitleToMatch($eventMatch, $title)
         );
     }
