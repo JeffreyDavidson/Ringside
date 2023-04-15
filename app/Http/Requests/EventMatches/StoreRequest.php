@@ -62,7 +62,7 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerMustBeBookable()
+                new WrestlerMustBeBookable(),
             ],
             'competitors.*.tagteams' => ['array'],
             'competitors.*.tagteams.*' => [
@@ -70,7 +70,7 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('tag_teams', 'id'),
-                new TagTeamMustBeBookable()
+                new TagTeamMustBeBookable(),
             ],
             'preview' => ['nullable', 'string'],
         ];

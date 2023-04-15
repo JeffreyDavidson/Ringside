@@ -32,11 +32,11 @@ class CompetitorsAreNotDuplicated implements ValidationRule
         $tagTeams = Arr::flatten($tagTeams);
 
         if (count($wrestlers) !== count(array_unique($wrestlers))) {
-            $fail("The same wrestler is duplicated in this match.");
+            $fail('The same wrestler is duplicated in this match.');
         }
 
         if (count($tagTeams) !== count(array_unique($tagTeams))) {
-            $fail("The same tag team is duplicated in this match.");
+            $fail('The same tag team is duplicated in this match.');
         }
     }
 }
