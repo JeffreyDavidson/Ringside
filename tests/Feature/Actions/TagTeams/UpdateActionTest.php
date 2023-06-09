@@ -35,7 +35,7 @@ test('wrestlers of tag team are synced when tag team is updated', function () {
     expect($tagTeam->fresh())
         ->wrestlers->toHaveCount(4)
         ->currentWrestlers
-            ->toHaveCount(2)
-            ->toContain([$newTagTeamPartnerA, $newTagTeamPartnerB])
-            ->not->toContain($formerTagTeamPartners->modelKeys());
+        ->toHaveCount(2)
+        ->toContain([$newTagTeamPartnerA, $newTagTeamPartnerB])
+        ->not->toContain($formerTagTeamPartners->modelKeys());
 });

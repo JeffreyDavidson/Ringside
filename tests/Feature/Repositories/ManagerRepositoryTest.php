@@ -64,7 +64,7 @@ test('updates employment of a manager', function () {
 
     expect($manager->fresh())->employments->toHaveCount(1);
     expect($manager->fresh()->employments->first())
-            ->started_at->equalTo($datetime->copy()->addDays(2));
+        ->started_at->equalTo($datetime->copy()->addDays(2));
 
     $manager = app(ManagerRepository::class)->employ($manager, $datetime);
 
