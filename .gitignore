@@ -16,3 +16,4 @@ yarn-error.log
 storage/
 tests/coverage
 .DS_Store
+.idea/
