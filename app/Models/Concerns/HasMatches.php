@@ -2,6 +2,7 @@
 
 namespace App\Models\Concerns;
 
+use App\Models\EventMatch;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait HasMatches
