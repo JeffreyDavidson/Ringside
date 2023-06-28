@@ -33,7 +33,7 @@ class UnretireAction extends BaseTitleAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    private function ensureCanBeUnretired(Title $title)
+    private function ensureCanBeUnretired(Title $title): void
     {
         if (! $title->isRetired()) {
             throw CannotBeUnretiredException::notRetired($title);
