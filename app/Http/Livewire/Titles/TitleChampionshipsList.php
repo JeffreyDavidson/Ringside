@@ -9,7 +9,7 @@ use App\Models\Title;
 use App\Models\TitleChampionship;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows

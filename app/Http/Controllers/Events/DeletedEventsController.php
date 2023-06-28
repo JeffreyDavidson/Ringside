@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Events;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class DeletedEventsController extends Controller
 {

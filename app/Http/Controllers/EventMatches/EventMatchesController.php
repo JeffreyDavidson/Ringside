@@ -10,8 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
 use App\Models\EventMatch;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 
 class EventMatchesController extends Controller
 {

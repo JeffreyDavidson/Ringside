@@ -10,7 +10,7 @@ use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Wrestler;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class WrestlersList extends BaseComponent
 {
