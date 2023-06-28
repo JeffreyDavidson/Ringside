@@ -11,6 +11,6 @@ class CannotBeActivatedException extends Exception
 {
     public static function activated(Activatable $model): self
     {
-        return new static("`{$model->name}` is already employed.");
+        return new self("`{$model->name}` is already employed.");
     }
 }
