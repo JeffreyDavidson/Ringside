@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Events;
 use App\Actions\Events\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 
 class RestoreController extends Controller
@@ -22,7 +23,7 @@ class RestoreController extends Controller
 
         try {
             RestoreAction::run($event);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
