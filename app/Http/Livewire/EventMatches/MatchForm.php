@@ -15,7 +15,7 @@ use Illuminate\Contracts\View\View;
 class MatchForm extends BaseComponent
 {
     /**
-     * Event that match will be attaached to.
+     * Event that match will be attached to.
      */
     public Event $event;
 
@@ -30,7 +30,7 @@ class MatchForm extends BaseComponent
     public int $matchTypeId;
 
     /**
-     * View to rendor for each match type.
+     * View to render for each match type.
      */
     public $subViewToUse;
 

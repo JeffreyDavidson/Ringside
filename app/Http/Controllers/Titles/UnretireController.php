@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 class UnretireController extends Controller
 {
     /**
-     * Unretires a title.
+     * Unretire a title.
      */
     public function __invoke(Title $title): RedirectResponse
     {

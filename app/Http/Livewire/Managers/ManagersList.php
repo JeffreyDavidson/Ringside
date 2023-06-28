@@ -52,7 +52,7 @@ class ManagersList extends BaseComponent
     }
 
     /**
-     * Retreive the rows for the table.
+     * Retrieve the rows for the table.
      */
     public function getRowsProperty(): LengthAwarePaginator
     {
