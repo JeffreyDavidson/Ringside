@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Titles;
 use App\Actions\Titles\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Title;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 
 class RestoreController extends Controller
@@ -22,7 +23,7 @@ class RestoreController extends Controller
 
         try {
             RestoreAction::run($title);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
