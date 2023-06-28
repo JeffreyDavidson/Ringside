@@ -44,7 +44,9 @@ class TitleChampionshipsList extends BaseComponent
      */
     public function getRowsQueryProperty(): Builder
     {
-        return TitleChampionship::where('title_id', $this->title->id)->latest('won_at');
+        return TitleChampionship::query()
+            ->where('title_id', $this->title->id)
+            ->latest('won_at');
     }
 
     /**
