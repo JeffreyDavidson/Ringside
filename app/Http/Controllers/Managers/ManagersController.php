@@ -12,8 +12,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\StoreRequest;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 
 class ManagersController extends Controller
 {

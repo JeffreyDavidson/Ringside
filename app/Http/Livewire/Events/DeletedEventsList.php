@@ -9,8 +9,8 @@ use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Event;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
-use Illuminate\View\View;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows

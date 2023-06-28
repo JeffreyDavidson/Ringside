@@ -12,8 +12,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Titles\StoreRequest;
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 
 class TitlesController extends Controller
 {

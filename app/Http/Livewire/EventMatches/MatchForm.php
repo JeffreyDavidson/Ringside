@@ -10,7 +10,7 @@ use App\Models\EventMatch;
 use App\Models\MatchType;
 use App\Models\Referee;
 use App\Models\Title;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class MatchForm extends BaseComponent
 {
