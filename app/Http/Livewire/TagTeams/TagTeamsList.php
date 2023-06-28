@@ -8,9 +8,9 @@ use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\TagTeam;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Query\Builder;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows
