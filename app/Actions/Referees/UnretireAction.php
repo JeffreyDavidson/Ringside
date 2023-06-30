@@ -31,7 +31,7 @@ class UnretireAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    private function ensureCanBeUnretired(Referee $referee)
+    private function ensureCanBeUnretired(Referee $referee): void
     {
         if (! $referee->isRetired()) {
             throw CannotBeUnretiredException::notRetired($referee);
