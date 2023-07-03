@@ -6,12 +6,15 @@ namespace App\Models;
 
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
+use App\Models\Contracts\Injurable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Referee extends SingleRosterMember
+class Referee extends Model implements Injurable
 {
+    use Concerns\HasInjuries;
     use HasFactory;
     use SoftDeletes;
 
