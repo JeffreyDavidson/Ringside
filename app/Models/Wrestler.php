@@ -8,6 +8,7 @@ use App\Builders\WrestlerQueryBuilder;
 use App\Enums\WrestlerStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
+use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
@@ -18,10 +19,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Wrestler extends Model implements Bookable, CanBeAStableMember, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
+class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
     use Concerns\CanJoinStables;
     use Concerns\CanJoinTagTeams;
+    use Concerns\HasEmployments;
     use Concerns\HasInjuries;
     use Concerns\HasManagers;
     use Concerns\HasMatches;
