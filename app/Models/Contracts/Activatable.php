@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 interface Activatable
 {
     /**
-     * Get all of the activations of the model.
+     * Get all the activations of the model.
      */
     public function activations(): MorphMany;
 

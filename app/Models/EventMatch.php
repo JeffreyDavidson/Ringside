@@ -61,7 +61,7 @@ class EventMatch extends Model
     }
 
     /**
-     * Get all of the event match competitors for the match.
+     * Get all the event match competitors for the match.
      */
     public function competitors(): MergedRelation
     {

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 trait HasManagers
 {
     /**
-     * Get all of the managers the model has had.
+     * Get all the managers the model has had.
      */
     public function managers(): BelongsToMany
     {
@@ -18,7 +18,7 @@ trait HasManagers
     }
 
     /**
-     * Get all of the managers the model has had.
+     * Get all the managers the model has had.
      */
     public function currentManagers(): BelongsToMany
     {
@@ -27,7 +27,7 @@ trait HasManagers
     }
 
     /**
-     * Get all of the managers the model has had.
+     * Get all the managers the model has had.
      */
     public function previousManagers(): BelongsToMany
     {

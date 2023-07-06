@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 interface Manageable
 {
     /**
-     * Get all of the managers of the model.
+     * Get all the managers of the model.
      */
     public function managers(): BelongsToMany;
 

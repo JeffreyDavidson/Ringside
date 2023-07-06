@@ -31,7 +31,7 @@ class EventMatchCompetitor extends MorphPivot
     ];
 
     /**
-     * Retreive the model as the competitor.
+     * Retrieve the model as the competitor.
      */
     public function competitor(): MorphTo
     {
