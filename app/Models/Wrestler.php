@@ -80,7 +80,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->name}",
+            get: fn () => "$this->name",
         );
     }
 }
