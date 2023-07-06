@@ -9,6 +9,7 @@ use App\Enums\TagTeamStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Competitor;
+use App\Models\Contracts\Employable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
@@ -20,9 +21,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TagTeam extends Model implements Bookable, CanBeAStableMember, Competitor, Manageable, Retirable, Suspendable
+class TagTeam extends Model implements Bookable, CanBeAStableMember, Competitor, Employable, Manageable, Retirable, Suspendable
 {
     use Concerns\CanJoinStables;
+    use Concerns\HasEmployments;
     use Concerns\HasManagers;
     use Concerns\HasRetirements;
     use Concerns\HasSuspensions;
