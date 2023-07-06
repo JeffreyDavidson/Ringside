@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 trait HasActivations
 {
     /**
-     * Get all of the activations of the model.
+     * Get all the activations of the model.
      */
     public function activations(): MorphMany
     {

@@ -205,7 +205,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Competitor,
     }
 
     /**
-     * Determinei if the tag team can be unretired.
+     * Determine if the tag team can be unretired.
      */
     public function canBeUnretired(): bool
     {

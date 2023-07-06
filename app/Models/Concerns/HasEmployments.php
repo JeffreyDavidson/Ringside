@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 trait HasEmployments
 {
     /**
-     * Get all of the employments of the model.
+     * Get all the employments of the model.
      */
     public function employments(): MorphMany
     {

@@ -23,7 +23,7 @@ class Stable extends Model implements Activatable, Retirable
     use SoftDeletes;
 
     /**
-     * The minium number of members allowed on a tag team.
+     * The minimum number of members allowed on a tag team.
      */
     public const MIN_MEMBERS_COUNT = 3;
 

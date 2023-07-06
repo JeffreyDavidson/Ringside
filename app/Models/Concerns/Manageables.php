@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 trait Manageables
 {
     /**
-     * Get all of the wrestlers that have been managed by model.
+     * Get all the wrestlers that have been managed by model.
      */
     public function wrestlers(): MorphToMany
     {
@@ -40,7 +40,7 @@ trait Manageables
     }
 
     /**
-     * Get all of the tag teams that have been managed by model.
+     * Get all the tag teams that have been managed by model.
      */
     public function tagTeams(): MorphToMany
     {
