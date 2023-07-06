@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-/**
- * @template TModelClass of \App\Models\Wrestler
- *
- * @extends SingleRosterMemberQueryBuilder<\App\Models\Wrestler>
- */
-class WrestlerQueryBuilder extends SingleRosterMemberQueryBuilder
+use Illuminate\Database\Eloquent\Builder;
+
+class WrestlerQueryBuilder extends Builder
 {
+    use Concerns\HasEmployments;
+    use Concerns\HasInjuries;
+    use Concerns\HasRetirements;
+    use Concerns\HasSuspensions;
+
     /**
      * Scope a query to only include bookable wrestlers.
      */
-    public function bookable(): WrestlerQueryBuilder
+    public function bookable(): self
     {
         return $this->whereHas('currentEmployment')
             ->whereDoesntHave('currentSuspension')

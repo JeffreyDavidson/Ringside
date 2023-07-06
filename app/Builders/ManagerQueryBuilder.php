@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\ManagerStatus;
+use Illuminate\Database\Eloquent\Builder;
 
-/**
- * @template TModelClass of \App\Models\Manager
- *
- * @extends SingleRosterMemberQueryBuilder<\App\Models\Manager>
- */
-class ManagerQueryBuilder extends SingleRosterMemberQueryBuilder
+class ManagerQueryBuilder extends Builder
 {
+    use Concerns\HasEmployments;
+    use Concerns\HasInjuries;
+    use Concerns\HasRetirements;
+    use Concerns\HasSuspensions;
+
     /**
      * Scope a query to only include available managers.
      */
