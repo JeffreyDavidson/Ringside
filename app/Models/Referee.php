@@ -67,7 +67,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->first_name} {$this->last_name}",
+            get: fn () => "$this->first_name $this->last_name",
         );
     }
 }
