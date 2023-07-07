@@ -6,10 +6,11 @@ use App\Models\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class WrestlerCanJoinExistingStable implements ValidationRule
 {
-    public function __construct(protected array $tagTeamIds, protected string $date)
+    public function __construct(protected Collection $tagTeamIds, protected ?Carbon $date)
     {
         $this->tagTeamIds = $tagTeamIds;
         $this->date = $date;
