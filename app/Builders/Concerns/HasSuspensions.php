@@ -33,6 +33,6 @@ trait HasSuspensions
      */
     public function orderByCurrentSuspendedAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(current_suspended_at) $direction");
+        return $this->orderByRaw("DATE(current_suspended_at) {$direction}");
     }
 }

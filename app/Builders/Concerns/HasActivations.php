@@ -34,7 +34,7 @@ trait HasActivations
      */
     public function orderByLastDeactivationDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(last_deactivated_at) $direction");
+        return $this->orderByRaw("DATE(last_deactivated_at) {$direction}");
     }
 
     /**
@@ -91,6 +91,6 @@ trait HasActivations
      */
     public function orderByFirstActivatedAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(first_activated_at) $direction");
+        return $this->orderByRaw("DATE(first_activated_at) {$direction}");
     }
 }

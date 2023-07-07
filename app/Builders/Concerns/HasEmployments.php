@@ -35,7 +35,7 @@ trait HasEmployments
      */
     public function orderByCurrentReleasedAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(current_released_at) $direction");
+        return $this->orderByRaw("DATE(current_released_at) {$direction}");
     }
 
     /**
@@ -81,6 +81,6 @@ trait HasEmployments
      */
     public function orderByFirstEmployedAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(first_employed_at) $direction");
+        return $this->orderByRaw("DATE(first_employed_at) {$direction}");
     }
 }

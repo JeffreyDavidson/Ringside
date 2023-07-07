@@ -33,6 +33,6 @@ trait HasInjuries
      */
     public function orderByCurrentInjuredAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(current_injured_at) $direction");
+        return $this->orderByRaw("DATE(current_injured_at) {$direction}");
     }
 }

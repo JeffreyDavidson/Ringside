@@ -86,6 +86,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
 
     public function getIdentifier(): string
     {
-        return "$this->first_name $this->last_name";
+        return "{$this->first_name} {$this->last_name}";
     }
 }

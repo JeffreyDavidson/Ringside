@@ -33,6 +33,6 @@ trait HasRetirements
      */
     public function orderByCurrentRetiredAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(current_retired_at) $direction");
+        return $this->orderByRaw("DATE(current_retired_at) {$direction}");
     }
 }
