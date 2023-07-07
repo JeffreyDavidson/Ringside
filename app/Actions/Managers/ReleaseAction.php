@@ -16,6 +16,8 @@ class ReleaseAction extends BaseManagerAction
 
     /**
      * Release a manager.
+     *
+     * @throws CannotBeReleasedException
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
@@ -39,7 +41,7 @@ class ReleaseAction extends BaseManagerAction
     /**
      * Ensure a manager can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(Manager $manager): void
     {

@@ -16,6 +16,8 @@ class RetireAction extends BaseManagerAction
 
     /**
      * Retire a manager.
+     *
+     * @throws CannotBeRetiredException
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {
@@ -43,7 +45,7 @@ class RetireAction extends BaseManagerAction
     /**
      * Ensure a manager can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(Manager $manager): void
     {
