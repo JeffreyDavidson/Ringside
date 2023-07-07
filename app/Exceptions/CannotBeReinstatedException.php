@@ -38,4 +38,9 @@ class CannotBeReinstatedException extends Exception
     {
         return new self("`{$model->name}` is injured and cannot be reinstated.");
     }
+
+    public static function available(Suspendable $model): self
+    {
+        return new self("`{$model->name}` is available and cannot be reinstated.");
+    }
 }
