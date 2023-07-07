@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\SingleRosterMember;
+use App\Models\Contracts\Employable;
 use Exception;
 
 class CannotBeEmployedException extends Exception
 {
-    public static function employed(SingleRosterMember $model): self
+    public static function employed(Employable $model): self
     {
         return new self("`{$model->name}` is already employed.");
     }
