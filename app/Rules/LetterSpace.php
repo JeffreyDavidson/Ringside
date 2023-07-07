@@ -12,12 +12,10 @@ class LetterSpace implements ValidationRule
      *
      * @var bool
      */
-    public $implicit = true;
+    public bool $implicit = true;
 
     /**
      * Run the validation rule.
-     *
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      *
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
