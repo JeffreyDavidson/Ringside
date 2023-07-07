@@ -37,7 +37,7 @@ class StoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('stables', 'name')],
             'start_date' => ['nullable', 'string', 'date'],
-            'members_count' => ['nullable', 'integer', Rule::when($this->input('start_date'), 'min:3')],
+            'members_count' => ['nullable', 'integer', Rule::when((bool) $this->input('start_date'), 'min:3')],
             'wrestlers' => ['array'],
             'tag_teams' => ['array'],
             'managers' => ['array'],
@@ -46,7 +46,7 @@ class StoreRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinNewStable($this->input('tag_teams')),
+                new WrestlerCanJoinNewStable($this->collect('tag_teams')),
             ],
             'tag_teams.*' => [
                 'bail',
@@ -69,8 +69,8 @@ class StoreRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $wrestlersCount = count($this->input('wrestlers', []));
-        $tagTeamsCount = count($this->input('tag_teams', [])) * 2;
+        $wrestlersCount = count($this->collect('wrestlers'));
+        $tagTeamsCount = count($this->collect('tag_teams')) * 2;
 
         $this->mergeIfMissing([
             'members_count' => $tagTeamsCount + $wrestlersCount,
