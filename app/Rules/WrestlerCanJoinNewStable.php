@@ -5,10 +5,11 @@ namespace App\Rules;
 use App\Models\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Collection;
 
 class WrestlerCanJoinNewStable implements ValidationRule
 {
-    public function __construct(protected array $tagTeamIds)
+    public function __construct(protected Collection $tagTeamIds)
     {
         $this->tagTeamIds = $tagTeamIds;
     }
