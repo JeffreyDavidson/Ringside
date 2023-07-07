@@ -54,8 +54,8 @@ class ReinstateAction extends BaseManagerAction
             throw CannotBeReinstatedException::retired($manager);
         }
 
-        if ($manager->isBookable()) {
-            throw CannotBeReinstatedException::bookable($manager);
+        if ($manager->isAvailable()) {
+            throw CannotBeReinstatedException::available($manager);
         }
     }
 }
