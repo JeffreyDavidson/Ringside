@@ -7,7 +7,7 @@ namespace App\Models\Contracts;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-interface Suspendable
+interface Suspendable extends Identifiable
 {
     /**
      * Get the suspensions of the model.

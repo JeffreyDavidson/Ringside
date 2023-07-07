@@ -11,6 +11,6 @@ class CannotBeClearedFromInjuryException extends Exception
 {
     public static function notInjured(Injurable $model): self
     {
-        return new self("`{$model->name}` is not injured and cannot be cleared from an injury.");
+        return new self("`{$model->getIdentifier()}` is not injured and cannot be cleared from an injury.");
     }
 }

@@ -7,7 +7,7 @@ namespace App\Models\Contracts;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-interface Retirable
+interface Retirable extends Identifiable
 {
     /**
      * Get the retirements of the model.

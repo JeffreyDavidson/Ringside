@@ -168,4 +168,9 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
 
         return ! $this->currentWrestlers->every(fn (Wrestler $wrestler) => $wrestler->isBookable());
     }
+
+    public function getIdentifier(): string
+    {
+        return $this->name;
+    }
 }
