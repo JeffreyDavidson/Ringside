@@ -75,6 +75,18 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
+     * Determine if the model can be retired.
+     */
+    public function canBeRetired(): bool
+    {
+        if ($this->isNotInEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get the display name of the manager.
      */
     protected function displayName(): Attribute

@@ -146,6 +146,15 @@ trait HasEmployments
         return true;
     }
 
+    public function canBeEmployed(): bool
+    {
+        if ($this->isCurrentlyEmployed()) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Get the model's first employment date.
      */
