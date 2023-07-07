@@ -8,6 +8,7 @@ use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class TagTeamRepository
@@ -15,7 +16,7 @@ class TagTeamRepository
     /**
      * Create a new tag team with the given data.
      */
-    public function create(TagTeamData $tagTeamData): TagTeam
+    public function create(TagTeamData $tagTeamData): Model
     {
         return TagTeam::create([
             'name' => $tagTeamData->name,

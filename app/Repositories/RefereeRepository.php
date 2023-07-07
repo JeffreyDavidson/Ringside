@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Data\RefereeData;
 use App\Models\Referee;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class RefereeRepository
@@ -13,7 +14,7 @@ class RefereeRepository
     /**
      * Create a new referee with the given data.
      */
-    public function create(RefereeData $refereeData): Referee
+    public function create(RefereeData $refereeData): Model
     {
         return Referee::create([
             'first_name' => $refereeData->first_name,

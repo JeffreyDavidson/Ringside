@@ -10,6 +10,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class WrestlerRepository
@@ -17,7 +18,7 @@ class WrestlerRepository
     /**
      * Create a new wrestler with the given data.
      */
-    public function create(WrestlerData $wrestlerData): Wrestler
+    public function create(WrestlerData $wrestlerData): Model
     {
         return Wrestler::create([
             'name' => $wrestlerData->name,

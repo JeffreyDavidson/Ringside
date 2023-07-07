@@ -6,11 +6,12 @@ namespace App\Repositories;
 
 use App\Data\TitleData;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 class TitleRepository
 {
-    public function create(TitleData $titleData): Title
+    public function create(TitleData $titleData): Model
     {
         return Title::create(['name' => $titleData->name]);
     }
