@@ -13,7 +13,6 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
 {
     public function __construct(protected Carbon $stableStartDate)
     {
-        $this->stableStartDate = $stableStartDate;
     }
 
     /**
@@ -23,6 +22,7 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        /** @var TagTeam $tagTeam */
         $tagTeam = TagTeam::with(['futureEmployment'])->whereKey($value)->sole();
 
         if (! $tagTeam->isCurrentlyEmployed()) {

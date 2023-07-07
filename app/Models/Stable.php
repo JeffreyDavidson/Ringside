@@ -10,14 +10,13 @@ use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stable extends Model implements Activatable, Retirable
 {
     use Concerns\HasActivations;
     use Concerns\HasMembers;
+    use Concerns\HasRetirements;
     use Concerns\OwnedByUser;
     use HasFactory;
     use SoftDeletes;
@@ -53,60 +52,6 @@ class Stable extends Model implements Activatable, Retirable
     public function newEloquentBuilder($query): StableQueryBuilder
     {
         return new StableQueryBuilder($query);
-    }
-
-    /**
-     * Get the retirements of the model.
-     */
-    public function retirements(): MorphMany
-    {
-        return $this->morphMany(Retirement::class, 'retiree');
-    }
-
-    /**
-     * Get the current retirement of the model.
-     */
-    public function currentRetirement(): MorphOne
-    {
-        return $this->morphOne(Retirement::class, 'retiree')
-            ->where('started_at', '<=', now())
-            ->whereNull('ended_at')
-            ->limit(1);
-    }
-
-    /**
-     * Get the previous retirements of the model.
-     */
-    public function previousRetirements(): MorphMany
-    {
-        return $this->morphMany(Retirement::class, 'retiree')
-            ->whereNotNull('ended_at');
-    }
-
-    /**
-     * Get the previous retirement of the model.
-     */
-    public function previousRetirement(): MorphOne
-    {
-        return $this->morphOne(Retirement::class, 'retiree')
-            ->latest('ended_at')
-            ->limit(1);
-    }
-
-    /**
-     * Check to see if the model is retired.
-     */
-    public function isRetired(): bool
-    {
-        return $this->currentRetirement()->exists();
-    }
-
-    /**
-     * Check to see if the model has been activated.
-     */
-    public function hasRetirements(): bool
-    {
-        return $this->retirements()->count() > 0;
     }
 
     /**

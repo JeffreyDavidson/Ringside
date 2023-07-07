@@ -10,15 +10,15 @@ class CompetitorsAreNotDuplicated implements ValidationRule
 {
     /**
      * Run the validation rule.
-     *
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $wrestlers = [];
         $tagTeams = [];
+        $matchCompetitors = (array) $value;
 
-        foreach ($value as $competitors) {
+        foreach ($matchCompetitors as $competitors) {
+            /** @var array $competitors */
             if (Arr::has($competitors, 'wrestlers')) {
                 $wrestlers[] = $competitors['wrestlers'];
             }

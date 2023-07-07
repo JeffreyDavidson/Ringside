@@ -15,6 +15,7 @@ class WrestlerMustBeBookable implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        /** @var Wrestler $wrestler */
         $wrestler = Wrestler::find($value);
 
         if (! $wrestler->isBookable()) {

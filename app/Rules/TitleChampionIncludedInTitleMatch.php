@@ -14,19 +14,16 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class TitleChampionIncludedInTitleMatch implements ValidationRule, DataAwareRule
 {
     /**
-     * All of the data under validation.
-     *
-     * @var array
+     * All the data under validation.
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Set the data under validation.
      *
-     * @param  array  $data
      * @return $this
      */
-    public function setData($data)
+    public function setData(array $data): self
     {
         $this->data = $data;
 
@@ -40,20 +37,20 @@ class TitleChampionIncludedInTitleMatch implements ValidationRule, DataAwareRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $competitors = collect($value);
+        $competitors = collect((array) $value);
 
         $wrestlerIds = $competitors->groupBy('wrestlers')->flatten();
-        $tagteamIds = $competitors->groupBy('tag_teams')->flatten();
+        $tagTeamIds = $competitors->groupBy('tag_teams')->flatten();
 
         $wrestlers = Wrestler::query()->whereIn('id', $wrestlerIds)->get();
-        $tagTeams = TagTeam::query()->whereIn('id', $tagteamIds)->get();
+        $tagTeams = TagTeam::query()->whereIn('id', $tagTeamIds)->get();
 
         $competitors = $wrestlers->merge($tagTeams);
 
         $champions = Title::with('currentChampionship.champion')
             ->findMany($this->data['titles'])
-            ->reject(fn ($title) => $title->isVacant())
-            ->every(fn ($title) => $competitors->contains($title->currentChampionship->champion));
+            ->reject(fn (Title $title) => $title->isVacant())
+            ->every(fn (Title $title) => $competitors->contains($title->currentChampionship?->champion));
 
         if (! $champions) {
             $fail('This match requires the champion to be involved.');

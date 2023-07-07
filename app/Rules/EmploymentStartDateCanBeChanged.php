@@ -11,7 +11,6 @@ class EmploymentStartDateCanBeChanged implements ValidationRule
 {
     public function __construct(protected Employable $rosterMember)
     {
-        $this->rosterMember = $rosterMember;
     }
 
     /**
@@ -21,7 +20,7 @@ class EmploymentStartDateCanBeChanged implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $name = $this->rosterMember->name;
+        $name = '';
 
         if ($this->rosterMember->isReleased() && ! $this->rosterMember->employedOn(Carbon::parse($value))) {
             $fail("{$name} was released and the start date cannot be changed.");

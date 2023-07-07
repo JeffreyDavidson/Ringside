@@ -15,6 +15,7 @@ class RefereeCanRefereeMatch implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        /** @var Referee $referee */
         $referee = Referee::find($value);
 
         if (! $referee->isBookable()) {

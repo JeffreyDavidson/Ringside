@@ -17,6 +17,7 @@ class CreateAction extends BaseManagerAction
      */
     public function handle(ManagerData $managerData): Manager
     {
+        /** @var Manager $manager */
         $manager = $this->managerRepository->create($managerData);
 
         if (isset($managerData->start_date)) {

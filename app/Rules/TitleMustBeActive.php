@@ -17,6 +17,7 @@ class TitleMustBeActive implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        /** @var Title $title */
         $title = Title::query()->whereKey($value)->sole();
 
         if (! $title->isCurrentlyActivated()) {

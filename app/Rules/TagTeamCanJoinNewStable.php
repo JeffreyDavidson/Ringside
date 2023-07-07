@@ -15,6 +15,7 @@ class TagTeamCanJoinNewStable implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        /** @var TagTeam $tagTeam */
         $tagTeam = TagTeam::with(['currentWrestlers', 'currentStable'])->whereKey($value)->sole();
 
         if ($tagTeam->currentStable !== null) {
