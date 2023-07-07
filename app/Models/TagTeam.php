@@ -15,7 +15,6 @@ use App\Models\Contracts\Suspendable;
 use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable, Manageable, Retirable, Suspendable
@@ -23,6 +22,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     use Concerns\CanJoinStables;
     use Concerns\HasEmployments;
     use Concerns\HasManagers;
+    use Concerns\HasMatches;
     use Concerns\HasRetirements;
     use Concerns\HasSuspensions;
     use Concerns\HasWrestlers;
@@ -83,14 +83,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function isUnbookable(): bool
     {
         return ! $this->currentWrestlers->every->isBookable();
-    }
 
-    /**
-     * Undocumented function.
-     */
-    public function eventMatches(): MorphToMany
-    {
-        return $this->morphToMany(EventMatch::class, 'event_match_competitor');
     }
 
     /**
