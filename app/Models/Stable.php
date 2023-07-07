@@ -69,4 +69,9 @@ class Stable extends Model implements Activatable, Retirable
     {
         return $this->isRetired();
     }
+
+    public function getIdentifier(): string
+    {
+        return $this->name;
+    }
 }

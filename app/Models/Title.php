@@ -67,4 +67,9 @@ class Title extends Model implements Activatable, Retirable
 
         return true;
     }
+
+    public function getIdentifier(): string
+    {
+        return $this->name;
+    }
 }

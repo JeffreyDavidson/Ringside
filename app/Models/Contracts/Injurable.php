@@ -5,7 +5,7 @@ namespace App\Models\Contracts;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-interface Injurable
+interface Injurable extends Identifiable
 {
     /**
      * Get the injuries of the model.

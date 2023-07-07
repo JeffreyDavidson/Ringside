@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
-interface Activatable
+interface Activatable extends Identifiable
 {
     /**
      * Get all the activations of the model.

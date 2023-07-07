@@ -11,6 +11,6 @@ class CannotBeUnretiredException extends Exception
 {
     public static function notRetired(Retirable $model): self
     {
-        return new self("`{$model->name}` is not retired and cannot be unretired.");
+        return new self("`{$model->getIdentifier()}` is not retired and cannot be unretired.");
     }
 }
