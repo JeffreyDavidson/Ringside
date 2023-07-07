@@ -90,6 +90,6 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
      */
     public function getIdentifier(): string
     {
-        return "$this->first_name $this->last_name";
+        return "{$this->first_name} {$this->last_name}";
     }
 }
