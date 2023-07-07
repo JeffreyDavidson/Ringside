@@ -13,16 +13,11 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Validati
 {
     /**
      * All the data under validation.
-     *
-     * @var array
      */
     protected array $data = [];
 
     /**
      * Set the data under validation.
-     *
-     * @param  array  $data
-     * @return $this
      */
     public function setData(array $data): self
     {
