@@ -9,8 +9,6 @@ class LetterSpace implements ValidationRule
 {
     /**
      * Indicates whether the rule should be implicit.
-     *
-     * @var bool
      */
     public bool $implicit = true;
 
