@@ -62,6 +62,30 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
+     * Check to see if the model is bookable.
+     */
+    public function isBookable(): bool
+    {
+        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if the model can be retired.
+     */
+    public function canBeRetired(): bool
+    {
+        if ($this->isNotInEmployment()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get the display name of the manager.
      */
     protected function displayName(): Attribute

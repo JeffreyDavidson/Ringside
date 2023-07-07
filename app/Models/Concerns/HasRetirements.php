@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 trait HasRetirements
 {
+    abstract public function canBeRetired(): bool;
+
     /**
      * Get the retirements of the model.
      */
@@ -63,18 +65,6 @@ trait HasRetirements
     public function hasRetirements(): bool
     {
         return $this->retirements()->count() > 0;
-    }
-
-    /**
-     * Determine if the model can be retired.
-     */
-    public function canBeRetired(): bool
-    {
-        if ($this->isNotInEmployment()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
