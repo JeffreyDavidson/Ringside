@@ -37,7 +37,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         /** @var \App\Models\Event $event */
-        $event = $this->route()->parameter('event');
+        $event = $this->route()?->parameter('event');
 
         return [
             'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('events')->ignore($event)],
