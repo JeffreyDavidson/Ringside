@@ -39,7 +39,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         /** @var \App\Models\TagTeam $tagTeam */
-        $tagTeam = $this->route()->parameter('tag_team');
+        $tagTeam = $this->route()?->parameter('tag_team');
 
         return [
             'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],

@@ -36,7 +36,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         /** @var \App\Models\Manager $manager */
-        $manager = $this->route()->parameter('manager');
+        $manager = $this->route()?->parameter('manager');
 
         return [
             'first_name' => ['required', 'string', 'min:3'],

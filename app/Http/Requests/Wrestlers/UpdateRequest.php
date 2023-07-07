@@ -38,7 +38,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         /** @var \App\Models\Wrestler $wrestler */
-        $wrestler = $this->route()->parameter('wrestler');
+        $wrestler = $this->route()?->parameter('wrestler');
 
         return [
             'name' => [

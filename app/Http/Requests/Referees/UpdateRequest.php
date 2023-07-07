@@ -36,7 +36,7 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        if (is_null($this->route()->parameter('referee'))) {
+        if (is_null($this->route()?->parameter('referee'))) {
             return [];
         }
 

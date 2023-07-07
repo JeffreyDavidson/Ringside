@@ -40,7 +40,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         /** @var \App\Models\Stable $stable */
-        $stable = $this->route()->parameter('stable');
+        $stable = $this->route()?->parameter('stable');
 
         return [
             'name' => ['required', 'string', 'min:3', Rule::unique('stables')->ignore($stable->id)],
