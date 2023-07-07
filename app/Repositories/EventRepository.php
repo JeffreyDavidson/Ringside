@@ -6,13 +6,14 @@ namespace App\Repositories;
 
 use App\Data\EventData;
 use App\Models\Event;
+use Illuminate\Database\Eloquent\Model;
 
 class EventRepository
 {
     /**
      * Create a new event with the given data.
      */
-    public function create(EventData $eventData): Event
+    public function create(EventData $eventData): Model
     {
         return Event::create([
             'name' => $eventData->name,

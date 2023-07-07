@@ -6,13 +6,14 @@ namespace App\Repositories;
 
 use App\Data\VenueData;
 use App\Models\Venue;
+use Illuminate\Database\Eloquent\Model;
 
 class VenueRepository
 {
     /**
      * Create a new venue with the given data.
      */
-    public function create(VenueData $venueData): Venue
+    public function create(VenueData $venueData): Model
     {
         return Venue::create([
             'name' => $venueData->name,

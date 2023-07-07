@@ -11,13 +11,14 @@ use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Model;
 
 class EventMatchRepository
 {
     /**
      * Create a new event match for a given event with the given data.
      */
-    public function createForEvent(Event $event, EventMatchData $eventMatchData): EventMatch
+    public function createForEvent(Event $event, EventMatchData $eventMatchData): Model
     {
         return $event->matches()->create([
             'match_type_id' => $eventMatchData->matchType->id,
