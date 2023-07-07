@@ -59,6 +59,8 @@ trait HasMembers
 
     /**
      * Get all current tag teams that are members of the stable.
+     *
+     * @return MorphToMany<TagTeam>
      */
     public function currentTagTeams(): MorphToMany
     {

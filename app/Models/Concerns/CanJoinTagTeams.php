@@ -40,9 +40,9 @@ trait CanJoinTagTeams
     public function previousTagTeam(): BelongsToOne
     {
         return $this->belongsToOne(TagTeam::class)
-            ->latest('joined_at')
             ->wherePivotNotNull('left_at')
-            ->withPivot(['joined_at', 'left_at']);
+            ->withPivot(['joined_at', 'left_at'])
+            ->latest('joined_at');
     }
 
     /**

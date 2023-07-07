@@ -33,7 +33,7 @@ class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
             $fail('This tag team has a future employment scheduled.');
         }
 
-        if (! $tagTeam->futureEmployment->startedBefore($this->stableStartDate)) {
+        if (! $tagTeam->futureEmployment?->startedBefore($this->stableStartDate)) {
             $fail("This tag team is not employed before the stable\'s activation date");
         }
     }
