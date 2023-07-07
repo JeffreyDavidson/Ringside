@@ -11,7 +11,6 @@ class WrestlerCanJoinExistingTagTeam implements ValidationRule
 {
     public function __construct(protected TagTeam $tagTeam)
     {
-        $this->tagTeam = $tagTeam;
     }
 
     /**
@@ -21,7 +20,7 @@ class WrestlerCanJoinExistingTagTeam implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        /** @var \App\Models\Wrestler $wrestler */
+        /** @var Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 
         if (! $this->tagTeam->currentWrestlers->contains($wrestler)) {
@@ -34,7 +33,7 @@ class WrestlerCanJoinExistingTagTeam implements ValidationRule
 
         $bookableTagTeams = TagTeam::query()->bookable()->whereNotIn('id', [$this->tagTeam->id])->get();
 
-        $bookableTagTeams->each(function ($tagTeam) use ($wrestler, $fail) {
+        $bookableTagTeams->each(function (TagTeam $tagTeam) use ($wrestler, $fail) {
             if ($tagTeam->currentWrestlers->contains($wrestler)) {
                 $fail('This wrestler cannot join the tag team.');
             }

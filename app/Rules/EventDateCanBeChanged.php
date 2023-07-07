@@ -13,7 +13,6 @@ class EventDateCanBeChanged implements ValidationRule
 {
     public function __construct(protected Event $event)
     {
-        $this->event = $event;
     }
 
     /**

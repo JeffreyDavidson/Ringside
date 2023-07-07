@@ -19,9 +19,9 @@ readonly class EventMatchData
     /**
      * Create a new event match data instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee>  $referees
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title>  $titles
-     * @param  \Illuminate\Support\Collection<int, mixed>  $competitors
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Referee>  $referees
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Title>  $titles
+     * @param  Collection<int, mixed>  $competitors
      */
     public function __construct(
         public MatchType $matchType,
@@ -38,7 +38,7 @@ readonly class EventMatchData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            MatchType::query()->whereKey($request->input('match_type_id'))->sole(),
+            MatchType::query()->whereKey($request->integer('match_type_id'))->sole(),
             Referee::query()->findMany($request->collect('referees')),
             Title::query()->findMany($request->collect('titles')),
             self::getCompetitors($request->collect('competitors')),

@@ -15,6 +15,7 @@ class TagTeamMustBeBookable implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        /** @var TagTeam $tagTeam */
         $tagTeam = TagTeam::find($value);
 
         if (! $tagTeam->isBookable()) {

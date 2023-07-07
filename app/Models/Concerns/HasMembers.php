@@ -17,6 +17,8 @@ trait HasMembers
 
     /**
      * Get the wrestlers belonging to the stable.
+     *
+     * @return MorphToMany<Wrestler>
      */
     public function wrestlers(): MorphToMany
     {
@@ -27,6 +29,8 @@ trait HasMembers
 
     /**
      * Get all current wrestlers that are members of the stable.
+     *
+     * @return MorphToMany<Wrestler>
      */
     public function currentWrestlers(): MorphToMany
     {

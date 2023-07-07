@@ -11,7 +11,6 @@ class ActivationStartDateCanBeChanged implements ValidationRule
 {
     public function __construct(protected Title $title)
     {
-        $this->title = $title;
     }
 
     /**

@@ -12,11 +12,11 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements ValidationRule, DataAwareRule
 {
     /**
-     * All of the data under validation.
+     * All the data under validation.
      *
      * @var array
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Set the data under validation.
@@ -24,7 +24,7 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Validati
      * @param  array  $data
      * @return $this
      */
-    public function setData($data)
+    public function setData(array $data): self
     {
         $this->data = $data;
 
@@ -38,7 +38,10 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Validati
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (MatchType::find($this->data['match_type_id'])?->number_of_sides !== count($value)) {
+        /** @var MatchType $matchType */
+        $matchType = MatchType::find($this->data['match_type_id']);
+
+        if ($matchType->number_of_sides !== count((array) $value)) {
             $fail('This match does not have the required amount of sides of competitors.');
         }
     }

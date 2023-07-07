@@ -9,12 +9,10 @@ use App\Listeners\WrestlerSubscriber;
 use App\Models\Event;
 use App\Models\Referee;
 use App\Models\Stable;
-use App\Models\TagTeam;
 use App\Models\Title;
 use App\Observers\EventObserver;
 use App\Observers\RefereeObserver;
 use App\Observers\StableObserver;
-use App\Observers\TagTeamObserver;
 use App\Observers\TitleObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -47,6 +45,16 @@ class EventServiceProvider extends ServiceProvider
     ];
 
     /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        WrestlerSubscriber::class,
+        ManagerSubscriber::class,
+    ];
+
+    /**
      * Register any events for your application.
      */
     public function boot(): void
@@ -60,14 +68,4 @@ class EventServiceProvider extends ServiceProvider
     {
         return false;
     }
-
-    /**
-     * The subscriber classes to register.
-     *
-     * @var array
-     */
-    protected $subscribe = [
-        WrestlerSubscriber::class,
-        ManagerSubscriber::class,
-    ];
 }

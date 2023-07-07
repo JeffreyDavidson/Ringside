@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateTagTeamPartnersAction extends BaseTagTeamAction
@@ -15,16 +17,18 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
     /**
      * Update a given tag team with given wrestlers.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
-    public function handle(TagTeam $tagTeam, Collection $wrestlers): void
+    public function handle(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null): void
     {
+        $joinDate ??= now();
+
         if ($tagTeam->currentWrestlers->isEmpty()) {
             if ($wrestlers->isNotEmpty()) {
-                $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlers);
+                $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlers, $joinDate);
             }
         } else {
-            /** @var \Illuminate\Database\Eloquent\Collection<\App\Models\Wrestler> $formerTagTeamPartners */
+            /** @var Collection<Wrestler> $formerTagTeamPartners */
             $formerTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotNotIn(
                 'wrestler_id',
                 $wrestlers->modelKeys()
@@ -32,7 +36,7 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
 
             $newTagTeamPartners = $wrestlers->except($formerTagTeamPartners->modelKeys());
 
-            $this->tagTeamRepository->syncTagTeamPartners($tagTeam, $formerTagTeamPartners, $newTagTeamPartners);
+            $this->tagTeamRepository->syncTagTeamPartners($tagTeam, $formerTagTeamPartners, $newTagTeamPartners, $joinDate);
         }
     }
 }

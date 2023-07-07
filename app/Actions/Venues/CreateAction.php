@@ -17,6 +17,9 @@ class CreateAction extends BaseVenueAction
      */
     public function handle(VenueData $venueData): Venue
     {
-        return $this->venueRepository->create($venueData);
+        /** @var Venue $venue */
+        $venue = $this->venueRepository->create($venueData);
+
+        return $venue;
     }
 }
