@@ -6,6 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Data\ManagerData;
 use App\Models\Manager;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseManagerAction
@@ -20,13 +21,16 @@ class UpdateAction extends BaseManagerAction
         $this->managerRepository->update($manager, $managerData);
 
         if (isset($managerData->start_date)) {
-            if ($manager->canBeEmployed()
-                || $manager->canHaveEmploymentStartDateChanged($managerData->start_date)
-            ) {
-                $this->managerRepository->employ($manager, $managerData->start_date);
-            }
+            $this->employManager($manager, $managerData->start_date);
         }
 
         return $manager;
+    }
+
+    private function employManager(Manager $manager, Carbon $startDate): void
+    {
+        if ($manager->canBeEmployed() || $manager->canHaveEmploymentStartDateChanged($startDate)) {
+            $this->managerRepository->employ($manager, $startDate);
+        }
     }
 }
