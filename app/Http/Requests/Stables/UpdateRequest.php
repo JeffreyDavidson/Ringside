@@ -55,7 +55,7 @@ class UpdateRequest extends FormRequest
                 'bail',
                 'integer',
                 Rule::when(
-                    $this->date('start_date'),
+                    (bool) $this->input('start_date'),
                     function () use ($stable) {
                         new HasMinimumAmountOfMembers(
                             $stable,
@@ -73,7 +73,7 @@ class UpdateRequest extends FormRequest
                 'integer',
                 'distinct',
                 Rule::exists('wrestlers', 'id'),
-                new WrestlerCanJoinExistingStable($this->input('tag_teams'), $this->input('start_date')),
+                new WrestlerCanJoinExistingStable($this->collect('tag_teams'), $this->date('start_date')),
             ],
             'tag_teams.*' => [
                 'bail',
