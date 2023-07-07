@@ -1,0 +1,56 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#2 \\$referees of class App\\\\Data\\\\EventMatchData constructor expects Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, App\\\\Models\\\\Referee\\>, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\> given\\.$#"
+			count: 1
+			path: app/Data/EventMatchData.php
+
+		-
+			message: "#^Parameter \\#3 \\$titles of class App\\\\Data\\\\EventMatchData constructor expects Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, App\\\\Models\\\\Title\\>, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\> given\\.$#"
+			count: 1
+			path: app/Data/EventMatchData.php
+
+		-
+			message: "#^Parameter \\#3 \\$tagTeams of class App\\\\Data\\\\StableData constructor expects Illuminate\\\\Support\\\\Collection\\<int, App\\\\Models\\\\TagTeam\\>, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\> given\\.$#"
+			count: 2
+			path: app/Data/StableData.php
+
+		-
+			message: "#^Parameter \\#4 \\$wrestlers of class App\\\\Data\\\\StableData constructor expects Illuminate\\\\Support\\\\Collection\\<int, App\\\\Models\\\\Wrestler\\>, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\> given\\.$#"
+			count: 2
+			path: app/Data/StableData.php
+
+		-
+			message: "#^Parameter \\#5 \\$managers of class App\\\\Data\\\\StableData constructor expects Illuminate\\\\Support\\\\Collection\\<int, App\\\\Models\\\\Manager\\>, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\> given\\.$#"
+			count: 2
+			path: app/Data/StableData.php
+
+		-
+			message: "#^Parameter \\#4 \\$wrestlerA of class App\\\\Data\\\\TagTeamData constructor expects App\\\\Models\\\\Wrestler\\|null, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\|Illuminate\\\\Database\\\\Eloquent\\\\Model\\|null given\\.$#"
+			count: 2
+			path: app/Data/TagTeamData.php
+
+		-
+			message: "#^Parameter \\#5 \\$wrestlerB of class App\\\\Data\\\\TagTeamData constructor expects App\\\\Models\\\\Wrestler\\|null, Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\|Illuminate\\\\Database\\\\Eloquent\\\\Model\\|null given\\.$#"
+			count: 2
+			path: app/Data/TagTeamData.php
+
+		-
+			message: "#^Call to private method latest\\(\\) of parent class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\.$#"
+			count: 1
+			path: app/Models/Wrestler.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:reject\\(\\) expects bool\\|\\(callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\)\\: bool\\)\\|Illuminate\\\\Database\\\\Eloquent\\\\Model, Closure\\(App\\\\Models\\\\Title\\)\\: bool given\\.$#"
+			count: 1
+			path: app/Rules/TitleChampionIncludedInTitleMatch.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Illuminate\\\\Support\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:every\\(\\) expects \\(callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\)\\: bool\\)\\|Illuminate\\\\Database\\\\Eloquent\\\\Model\\|string, Closure\\(App\\\\Models\\\\Title\\)\\: bool given\\.$#"
+			count: 1
+			path: app/Rules/TitleChampionIncludedInTitleMatch.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<int,Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:each\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\)\\: mixed, Closure\\(App\\\\Models\\\\TagTeam\\)\\: void given\\.$#"
+			count: 1
+			path: app/Rules/WrestlerCanJoinExistingTagTeam.php
