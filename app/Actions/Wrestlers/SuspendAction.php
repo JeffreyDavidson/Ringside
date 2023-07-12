@@ -17,7 +17,7 @@ class SuspendAction extends BaseWrestlerAction
     /**
      * Suspend a wrestler.
      */
-    public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
+    public function handle(Wrestler $wrestler, Carbon $suspensionDate = null): void
     {
         $this->ensureCanBeSuspended($wrestler);
 

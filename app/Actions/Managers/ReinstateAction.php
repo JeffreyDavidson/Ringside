@@ -18,7 +18,7 @@ class ReinstateAction extends BaseManagerAction
      *
      * @throws CannotBeReinstatedException
      */
-    public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
+    public function handle(Manager $manager, Carbon $reinstatementDate = null): void
     {
         $this->ensureCanBeReinstated($manager);
 

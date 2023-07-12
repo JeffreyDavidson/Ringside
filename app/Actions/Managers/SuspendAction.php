@@ -18,7 +18,7 @@ class SuspendAction extends BaseManagerAction
      *
      * @throws CannotBeSuspendedException
      */
-    public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
+    public function handle(Manager $manager, Carbon $suspensionDate = null): void
     {
         $this->ensureCanBeSuspended($manager);
 

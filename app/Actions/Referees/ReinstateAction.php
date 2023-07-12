@@ -16,7 +16,7 @@ class ReinstateAction extends BaseRefereeAction
     /**
      * Reinstate a referee.
      */
-    public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
+    public function handle(Referee $referee, Carbon $reinstatementDate = null): void
     {
         $this->ensureCanBeReinstated($referee);
 

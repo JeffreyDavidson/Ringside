@@ -16,7 +16,7 @@ class ActivateAction extends BaseTitleAction
     /**
      * @throws \App\Exceptions\CannotBeActivatedException
      */
-    public function handle(Title $title, ?Carbon $activationDate = null): void
+    public function handle(Title $title, Carbon $activationDate = null): void
     {
         $this->ensureCanBeActivated($title);
 

@@ -19,7 +19,7 @@ class RetireAction extends BaseTagTeamAction
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void
+    public function handle(TagTeam $tagTeam, Carbon $retirementDate = null): void
     {
         throw_if($tagTeam->isUnemployed(), CannotBeRetiredException::class, $tagTeam.' is unemployed and cannot be retired.');
         throw_if($tagTeam->isReleased(), CannotBeRetiredException::class, $tagTeam.' is released and cannot be retired.');

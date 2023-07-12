@@ -103,7 +103,7 @@ return [
         LineLengthSniff::class,
         FunctionLengthSniff::class,
         SideEffectsSniff::class,
-        ForbiddenSetterSniff::class
+        ForbiddenSetterSniff::class,
     ],
 
     'config' => [

@@ -18,7 +18,7 @@ class UnretireAction extends BaseStableAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    public function handle(Stable $stable, ?Carbon $unretiredDate = null): void
+    public function handle(Stable $stable, Carbon $unretiredDate = null): void
     {
         throw_if($stable->canBeUnretired(), CannotBeUnretiredException::class);
 

@@ -20,7 +20,7 @@ class RetireAction extends BaseStableAction
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
-    public function handle(Stable $stable, ?Carbon $retirementDate = null): void
+    public function handle(Stable $stable, Carbon $retirementDate = null): void
     {
         throw_if($stable->canBeRetired(), CannotBeRetiredException::class);
 

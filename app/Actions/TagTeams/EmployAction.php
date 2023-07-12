@@ -19,7 +19,7 @@ class EmployAction extends BaseTagTeamAction
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void
+    public function handle(TagTeam $tagTeam, Carbon $startDate = null): void
     {
         throw_if($tagTeam->canBeEmployed(), CannotBeEmployedException::class);
 

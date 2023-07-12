@@ -16,7 +16,7 @@ class RetireAction extends BaseTitleAction
     /**
      * Retire a title.
      */
-    public function handle(Title $title, ?Carbon $retirementDate = null): void
+    public function handle(Title $title, Carbon $retirementDate = null): void
     {
         $this->ensureCanBeRetired($title);
 

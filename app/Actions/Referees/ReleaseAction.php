@@ -16,7 +16,7 @@ class ReleaseAction extends BaseRefereeAction
     /**
      * Release a referee.
      */
-    public function handle(Referee $referee, ?Carbon $releaseDate = null): void
+    public function handle(Referee $referee, Carbon $releaseDate = null): void
     {
         $this->ensureCanBeReleased($referee);
 

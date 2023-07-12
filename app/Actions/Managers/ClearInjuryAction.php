@@ -18,7 +18,7 @@ class ClearInjuryAction extends BaseManagerAction
      *
      * @throws CannotBeClearedFromInjuryException
      */
-    public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
+    public function handle(Manager $manager, Carbon $recoveryDate = null): void
     {
         $this->ensureCanBeClearedFromInjury($manager);
 

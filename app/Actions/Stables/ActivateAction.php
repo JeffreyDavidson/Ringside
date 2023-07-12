@@ -20,7 +20,7 @@ class ActivateAction extends BaseStableAction
      *
      * @throws \App\Exceptions\CannotBeActivatedException
      */
-    public function handle(Stable $stable, ?Carbon $startDate = null): void
+    public function handle(Stable $stable, Carbon $startDate = null): void
     {
         throw_if($stable->canBeActivated(), CannotBeActivatedException::class);
 

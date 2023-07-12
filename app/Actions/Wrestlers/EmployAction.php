@@ -16,7 +16,7 @@ class EmployAction extends BaseWrestlerAction
     /**
      * Employ a wrestler.
      */
-    public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void
+    public function handle(Wrestler $wrestler, Carbon $startDate = null): void
     {
         $this->ensureCanBeEmployed($wrestler);
 
