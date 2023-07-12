@@ -19,7 +19,7 @@ class RetireAction extends BaseManagerAction
      *
      * @throws CannotBeRetiredException
      */
-    public function handle(Manager $manager, ?Carbon $retirementDate = null): void
+    public function handle(Manager $manager, Carbon $retirementDate = null): void
     {
         $this->ensureCanBeRetired($manager);
 

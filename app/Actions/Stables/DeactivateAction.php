@@ -18,7 +18,7 @@ class DeactivateAction extends BaseStableAction
      *
      * @throws \App\Exceptions\CannotBeDeactivatedException
      */
-    public function handle(Stable $stable, ?Carbon $deactivationDate = null): void
+    public function handle(Stable $stable, Carbon $deactivationDate = null): void
     {
         throw_if($stable->canBeDeactivated(), CannotBeDeactivatedException::class);
 

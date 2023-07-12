@@ -19,7 +19,7 @@ class ReleaseAction extends BaseManagerAction
      *
      * @throws CannotBeReleasedException
      */
-    public function handle(Manager $manager, ?Carbon $releaseDate = null): void
+    public function handle(Manager $manager, Carbon $releaseDate = null): void
     {
         $this->ensureCanBeReleased($manager);
 

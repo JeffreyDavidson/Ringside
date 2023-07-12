@@ -19,7 +19,7 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
      *
      * @param  Collection<int, Wrestler>  $wrestlers
      */
-    public function handle(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null): void
+    public function handle(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate = null): void
     {
         $joinDate ??= now();
 

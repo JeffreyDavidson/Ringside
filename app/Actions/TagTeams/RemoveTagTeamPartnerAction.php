@@ -16,7 +16,7 @@ class RemoveTagTeamPartnerAction extends BaseTagTeamAction
     /**
      * Remove the wrestler from the tag team.
      */
-    public function handle(TagTeam $tagTeam, Wrestler $wrestler, ?Carbon $removalDate = null): void
+    public function handle(TagTeam $tagTeam, Wrestler $wrestler, Carbon $removalDate = null): void
     {
         $removalDate ??= now();
 

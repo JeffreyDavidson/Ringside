@@ -16,7 +16,7 @@ class UnretireAction extends BaseWrestlerAction
     /**
      * Unretire a wrestler.
      */
-    public function handle(Wrestler $wrestler, ?Carbon $unretiredDate = null): void
+    public function handle(Wrestler $wrestler, Carbon $unretiredDate = null): void
     {
         $this->ensureCanBeUnretired($wrestler);
 

@@ -18,7 +18,7 @@ class InjureAction extends BaseManagerAction
      *
      * @throws CannotBeInjuredException
      */
-    public function handle(Manager $manager, ?Carbon $injureDate = null): void
+    public function handle(Manager $manager, Carbon $injureDate = null): void
     {
         $this->ensureCanBeInjured($manager);
 

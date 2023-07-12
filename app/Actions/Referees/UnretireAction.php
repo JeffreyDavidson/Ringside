@@ -16,7 +16,7 @@ class UnretireAction extends BaseRefereeAction
     /**
      * Unretire a referee.
      */
-    public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
+    public function handle(Referee $referee, Carbon $unretiredDate = null): void
     {
         $this->ensureCanBeUnretired($referee);
 

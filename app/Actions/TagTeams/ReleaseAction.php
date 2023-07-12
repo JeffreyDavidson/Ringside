@@ -19,7 +19,7 @@ class ReleaseAction extends BaseTagTeamAction
      *
      * @throws \App\Exceptions\CannotBeReleasedException
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
+    public function handle(TagTeam $tagTeam, Carbon $releaseDate = null): void
     {
         throw_if($tagTeam->canBeReleased(), CannotBeReleasedException::class);
 

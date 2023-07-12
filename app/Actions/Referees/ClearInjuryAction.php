@@ -16,7 +16,7 @@ class ClearInjuryAction extends BaseRefereeAction
     /**
      * Clear an injury of a referee.
      */
-    public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
+    public function handle(Referee $referee, Carbon $recoveryDate = null): void
     {
         $this->ensureCanBeClearedFromInjury($referee);
 

@@ -17,7 +17,7 @@ class ReleaseAction extends BaseWrestlerAction
     /**
      * Release a wrestler.
      */
-    public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
+    public function handle(Wrestler $wrestler, Carbon $releaseDate = null): void
     {
         $this->ensureCanBeReleased($wrestler);
 

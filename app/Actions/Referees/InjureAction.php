@@ -16,7 +16,7 @@ class InjureAction extends BaseRefereeAction
     /**
      * Injure a referee.
      */
-    public function handle(Referee $referee, ?Carbon $injureDate = null): void
+    public function handle(Referee $referee, Carbon $injureDate = null): void
     {
         $this->ensureCanBeInjured($referee);
 

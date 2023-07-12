@@ -23,7 +23,7 @@ class AddMembersAction extends BaseStableAction
         Stable $stable,
         Collection $wrestlers,
         Collection $tagTeams,
-        ?Carbon $joinedDate = null
+        Carbon $joinedDate = null
     ): void {
         $joinedDate ??= now();
 

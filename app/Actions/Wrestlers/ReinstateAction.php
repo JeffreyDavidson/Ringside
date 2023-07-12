@@ -17,7 +17,7 @@ class ReinstateAction extends BaseWrestlerAction
     /**
      * Reinstate a wrestler.
      */
-    public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
+    public function handle(Wrestler $wrestler, Carbon $reinstatementDate = null): void
     {
         $this->ensureCanBeReinstated($wrestler);
 

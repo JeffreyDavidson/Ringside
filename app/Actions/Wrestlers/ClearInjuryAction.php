@@ -17,7 +17,7 @@ class ClearInjuryAction extends BaseWrestlerAction
     /**
      * Clear an injury of a wrestler.
      */
-    public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
+    public function handle(Wrestler $wrestler, Carbon $recoveryDate = null): void
     {
         $this->ensureCanBeClearedFromInjury($wrestler);
 

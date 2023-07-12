@@ -16,7 +16,7 @@ class SuspendAction extends BaseRefereeAction
     /**
      * Suspend a referee.
      */
-    public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
+    public function handle(Referee $referee, Carbon $suspensionDate = null): void
     {
         $this->ensureCanBeSuspended($referee);
 

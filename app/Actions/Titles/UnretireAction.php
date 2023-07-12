@@ -18,7 +18,7 @@ class UnretireAction extends BaseTitleAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    public function handle(Title $title, ?Carbon $unretiredDate = null): void
+    public function handle(Title $title, Carbon $unretiredDate = null): void
     {
         $this->ensureCanBeUnretired($title);
 
