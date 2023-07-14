@@ -14,15 +14,15 @@ class MatchDecisionsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        MatchDecision::create(['name' => 'Pinfall', 'slug' => 'pinfall']);
-        MatchDecision::create(['name' => 'Submission', 'slug' => 'submission']);
-        MatchDecision::create(['name' => 'Disqualification', 'slug' => 'dq']);
-        MatchDecision::create(['name' => 'Countout', 'slug' => 'countout']);
-        MatchDecision::create(['name' => 'Knockout', 'slug' => 'knockout']);
-        MatchDecision::create(['name' => 'Stipulation', 'slug' => 'stipulation']);
-        MatchDecision::create(['name' => 'Forfeit', 'slug' => 'forfeit']);
-        MatchDecision::create(['name' => 'Time Limit Draw', 'slug' => 'draw']);
-        MatchDecision::create(['name' => 'No Decision', 'slug' => 'nodecision']);
-        MatchDecision::create(['name' => 'Reverse Decision', 'slug' => 'revdecision']);
+        MatchDecision::query()->create(['name' => 'Pinfall', 'slug' => 'pinfall']);
+        MatchDecision::query()->create(['name' => 'Submission', 'slug' => 'submission']);
+        MatchDecision::query()->create(['name' => 'Disqualification', 'slug' => 'dq']);
+        MatchDecision::query()->create(['name' => 'Countout', 'slug' => 'countout']);
+        MatchDecision::query()->create(['name' => 'Knockout', 'slug' => 'knockout']);
+        MatchDecision::query()->create(['name' => 'Stipulation', 'slug' => 'stipulation']);
+        MatchDecision::query()->create(['name' => 'Forfeit', 'slug' => 'forfeit']);
+        MatchDecision::query()->create(['name' => 'Time Limit Draw', 'slug' => 'draw']);
+        MatchDecision::query()->create(['name' => 'No Decision', 'slug' => 'nodecision']);
+        MatchDecision::query()->create(['name' => 'Reverse Decision', 'slug' => 'revdecision']);
     }
 }

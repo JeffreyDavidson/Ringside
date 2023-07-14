@@ -33,7 +33,7 @@ class TitlesTableSeeder extends Seeder
         /**
          * We need to create 5 titles at this time X years ago but since by
          * the time we reach the current date these titles should be
-         * released so we need to make them released and figure out
+         * released, so we need to make them released and figure out
          * their started and ended activation date.
          */
         for ($j = $eNum; $j <= 5; $j++) {
@@ -52,7 +52,7 @@ class TitlesTableSeeder extends Seeder
         /**
          * We need to create 1 title at this time X years ago but since by
          * the time we reach the current date these titles should be
-         * released so we need to make them released and figure out
+         * released, so we need to make them released and figure out
          * their started and ended activation date.
          */
         $start = $startDate;
@@ -89,7 +89,7 @@ class TitlesTableSeeder extends Seeder
         }
 
         /*
-         * We need to create 1 title for the the future activation.
+         * We need to create 1 title for the future activation.
          */
         Title::factory()
             ->withFutureActivation()
