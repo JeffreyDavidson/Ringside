@@ -13,10 +13,15 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Retirement>
+ */
 class RetirementFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -29,27 +34,21 @@ class RetirementFactory extends Factory
         ];
     }
 
-    /**
-     * @param  string|Carbon  $retirementDate
-     */
-    public function started($retirementDate = 'now')
+    public function started(Carbon $retirementDate): static
     {
         return $this->state([
-            'started_at' => $retirementDate instanceof Carbon ? $retirementDate : new Carbon($retirementDate),
+            'started_at' => $retirementDate->toDateTimeString(),
         ]);
     }
 
-    /**
-     * @param  string|Carbon  $unretireDate
-     */
-    public function ended($unretireDate = 'now')
+    public function ended(Carbon $unretireDate): static
     {
         return $this->state([
-            'ended_at' => $unretireDate instanceof Carbon ? $unretireDate : new Carbon($unretireDate),
+            'ended_at' => $unretireDate->toDateTimeString(),
         ]);
     }
 
-    public function retirable()
+    public function retirable(): mixed
     {
         return $this->faker->randomElement([
             Manager::class,

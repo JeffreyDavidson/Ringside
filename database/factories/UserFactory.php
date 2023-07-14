@@ -8,10 +8,15 @@ use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ */
 class UserFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -26,24 +31,23 @@ class UserFactory extends Factory
         ];
     }
 
-    public function administrator(): self
+    /**
+     * Indicates the user should be an administrator.
+     */
+    public function administrator(): static
     {
         return $this->state([
             'role' => Role::ADMINISTRATOR,
         ]);
     }
 
-    public function basicUser(): self
+    /**
+     * Indicates the user should be a normal user.
+     */
+    public function basicUser(): static
     {
         return $this->state([
             'role' => Role::BASIC,
-        ]);
-    }
-
-    public function withRole($role)
-    {
-        return $this->state([
-            'role' => $role,
         ]);
     }
 }

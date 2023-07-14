@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\EventStatus;
-use App\Models\Event;
 use App\Models\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -15,16 +14,6 @@ use Illuminate\Support\Carbon;
  */
 class EventFactory extends Factory
 {
-    /**
-     * Configure the model factory.
-     */
-    public function configure(): static
-    {
-        return $this->afterCreating(function (Event $event) {
-            $event->save();
-        });
-    }
-
     /**
      * Define the model's default state.
      *
@@ -92,8 +81,6 @@ class EventFactory extends Factory
 
     /**
      * Define the event's preview.
-     *
-     * @param  string  $preview
      */
     public function withPreview(): static
     {
@@ -102,8 +89,6 @@ class EventFactory extends Factory
 
     /**
      * Define the event's preview.
-     *
-     * @param  string  $preview
      */
     public function withVenue(): static
     {

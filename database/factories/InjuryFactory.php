@@ -10,10 +10,15 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Injury>
+ */
 class InjuryFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -27,26 +32,26 @@ class InjuryFactory extends Factory
     }
 
     /**
-     * @param  string|Carbon  $injureDate
+     * Set the start date of the injury.
      */
-    public function started($injureDate = 'now')
+    public function started(Carbon $injureDate): static
     {
         return $this->state([
-            'started_at' => $injureDate instanceof Carbon ? $injureDate : new Carbon($injureDate),
+            'started_at' => $injureDate->toDateTimeString(),
         ]);
     }
 
     /**
-     * @param  string|Carbon  $recoveryDate
+     * Set the end date of the injury.
      */
-    public function ended($recoveryDate = 'now'): self
+    public function ended(Carbon $recoveryDate): static
     {
         return $this->state([
-            'ended_at' => $recoveryDate instanceof Carbon ? $recoveryDate : new Carbon($recoveryDate),
+            'ended_at' => $recoveryDate->toDateTimeString(),
         ]);
     }
 
-    public function injurable()
+    public function injurable(): mixed
     {
         return $this->faker->randomElement([
             Manager::class,

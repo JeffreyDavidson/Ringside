@@ -13,21 +13,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class EventMatchFactory extends Factory
 {
-    public function withReferees($referees)
-    {
-        $this->hasAttached($referees);
-    }
-
-    public function withTitles($titles)
-    {
-        $this->hasAttached($titles);
-    }
-
-    public function withCompetitors($competitors)
-    {
-        $this->hasAttached($competitors, ['side_number' => 0]);
-    }
-
     /**
      * Define the model's default state.
      *
@@ -40,5 +25,26 @@ class EventMatchFactory extends Factory
             'match_type_id' => MatchType::first()->id,
             'preview' => null,
         ];
+    }
+
+    public function withReferees($referees): static
+    {
+        $this->hasAttached($referees);
+
+        return $this;
+    }
+
+    public function withTitles($titles): static
+    {
+        $this->hasAttached($titles);
+
+        return $this;
+    }
+
+    public function withCompetitors($competitors): static
+    {
+        $this->hasAttached($competitors, ['side_number' => 0]);
+
+        return $this;
     }
 }

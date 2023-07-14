@@ -11,10 +11,15 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Employment>
+ */
 class EmploymentFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -28,24 +33,21 @@ class EmploymentFactory extends Factory
         ];
     }
 
-    public function started(Carbon $employmentDate)
+    public function started(Carbon $employmentDate): static
     {
         return $this->state([
-            'started_at' => $employmentDate->toDateTimeString() ?? now()->toDateTimeString(),
+            'started_at' => $employmentDate->toDateTimeString(),
         ]);
     }
 
-    /**
-     * @param  string|Carbon  $releaseDate
-     */
-    public function ended($releaseDate = 'now')
+    public function ended(Carbon $releaseDate): static
     {
         return $this->state([
-            'ended_at' => $releaseDate instanceof Carbon ? $releaseDate : new Carbon($releaseDate),
+            'ended_at' => $releaseDate->toDateTimeString(),
         ]);
     }
 
-    public function employable()
+    public function employable(): mixed
     {
         return $this->faker->randomElement([
             Manager::class,

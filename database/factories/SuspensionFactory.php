@@ -11,10 +11,15 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Suspension>
+ */
 class SuspensionFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -27,27 +32,21 @@ class SuspensionFactory extends Factory
         ];
     }
 
-    /**
-     * @param  string|Carbon  $suspensionDate
-     */
-    public function started($suspensionDate = 'now'): self
+    public function started(Carbon $suspensionDate): static
     {
         return $this->state([
-            'started_at' => $suspensionDate instanceof Carbon ? $suspensionDate : new Carbon($suspensionDate),
+            'started_at' => $suspensionDate->toDateTimeString(),
         ]);
     }
 
-    /**
-     * @param  string|Carbon  $reinstateDate
-     */
-    public function ended($reinstateDate = 'now'): self
+    public function ended(Carbon $reinstateDate): static
     {
         return $this->state([
-            'ended_at' => $reinstateDate instanceof Carbon ? $reinstateDate : new Carbon($reinstateDate),
+            'ended_at' => $reinstateDate->toDateTimeString(),
         ]);
     }
 
-    public function suspendable()
+    public function suspendable(): mixed
     {
         return $this->faker->randomElement([
             Manager::class,
