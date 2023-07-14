@@ -7,15 +7,19 @@ namespace Database\Factories;
 use App\Enums\TitleStatus;
 use App\Models\Activation;
 use App\Models\Retirement;
-use App\Models\Title;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Title>
+ */
 class TitleFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -25,61 +29,47 @@ class TitleFactory extends Factory
         ];
     }
 
-    public function active()
+    public function active(): static
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->state(fn (array $attributes) => ['status' => TitleStatus::ACTIVE])
-            ->has(Activation::factory()->started($activationDate))
-            ->afterCreating(function (Title $title) {
-                $title->save();
-            });
+        return $this->state(fn () => ['status' => TitleStatus::ACTIVE])
+            ->has(Activation::factory()->started($activationDate));
     }
 
-    public function inactive()
+    public function inactive(): static
     {
         $now = now();
         $start = $now->copy()->subDays(3);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => TitleStatus::INACTIVE])
-            ->has(Activation::factory()->started($start)->ended($end))
-            ->afterCreating(function (Title $title) {
-                $title->save();
-            });
+        return $this->state(fn () => ['status' => TitleStatus::INACTIVE])
+            ->has(Activation::factory()->started($start)->ended($end));
     }
 
-    public function withFutureActivation()
+    public function withFutureActivation(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => TitleStatus::FUTURE_ACTIVATION])
-            ->has(Activation::factory()->started(Carbon::tomorrow()))
-            ->afterCreating(function (Title $title) {
-                $title->save();
-            });
+        return $this->state(fn () => ['status' => TitleStatus::FUTURE_ACTIVATION])
+            ->has(Activation::factory()->started(Carbon::tomorrow()));
     }
 
-    public function retired()
+    public function retired(): static
     {
         $now = now();
         $start = $now->copy()->subDays(3);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => TitleStatus::RETIRED])
+        return $this->state(fn () => ['status' => TitleStatus::RETIRED])
             ->has(Activation::factory()->started($start)->ended($end))
-            ->has(Retirement::factory()->started($end))
-            ->afterCreating(function (Title $title) {
-                $title->save();
-            });
+            ->has(Retirement::factory()->started($end));
     }
 
-    public function unactivated()
+    public function unactivated(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => TitleStatus::UNACTIVATED])->afterCreating(function (Title $title) {
-            $title->save();
-        });
+        return $this->state(fn () => ['status' => TitleStatus::UNACTIVATED]);
     }
 
-    public function withChampion($champion)
+    public function withChampion($champion): static
     {
         return $this->has(
             TitleChampionship::factory()->for($champion, 'champion'),
@@ -87,9 +77,9 @@ class TitleFactory extends Factory
         );
     }
 
-    public function nonActive()
+    public function nonActive(): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function () {
             return [
                 'status' => $this->faker->randomElement([
                     TitleStatus::INACTIVE,

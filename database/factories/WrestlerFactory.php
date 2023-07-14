@@ -10,14 +10,18 @@ use App\Models\Injury;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use App\Models\TagTeam;
-use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Wrestler>
+ */
 class WrestlerFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -33,70 +37,81 @@ class WrestlerFactory extends Factory
     }
 
     /**
-     * Configure the model factory.
+     * Set the wrestler as bookable.
      */
-    public function configure(): static
+    public function bookable(): static
     {
-        return $this->afterCreating(function (Wrestler $wrestler) {
-            $wrestler->save();
-        });
-    }
-
-    public function bookable()
-    {
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::BOOKABLE])
+        return $this->state(fn () => ['status' => WrestlerStatus::BOOKABLE])
             ->has(Employment::factory()->started(Carbon::yesterday()));
     }
 
-    public function withFutureEmployment()
+    /**
+     * Set the wrestler as having a future employment.
+     */
+    public function withFutureEmployment(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::FUTURE_EMPLOYMENT])
+        return $this->state(fn () => ['status' => WrestlerStatus::FUTURE_EMPLOYMENT])
             ->has(Employment::factory()->started(Carbon::tomorrow()));
     }
 
-    public function unemployed()
+    /**
+     * Set the wrestler as being unemployed.
+     */
+    public function unemployed(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::UNEMPLOYED]);
+        return $this->state(fn () => ['status' => WrestlerStatus::UNEMPLOYED]);
     }
 
-    public function retired()
+    /**
+     * Set the wrestler as retired.
+     */
+    public function retired(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::RETIRED])
+        return $this->state(fn () => ['status' => WrestlerStatus::RETIRED])
             ->has(Employment::factory()->started($start)->ended($end))
             ->has(Retirement::factory()->started($end));
     }
 
-    public function released()
+    /**
+     * Set the wrestler as released.
+     */
+    public function released(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::RELEASED])
+        return $this->state(fn () => ['status' => WrestlerStatus::RELEASED])
             ->has(Employment::factory()->started($start)->ended($end));
     }
 
-    public function suspended()
+    /**
+     * Set the wrestler as suspended.
+     */
+    public function suspended(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::SUSPENDED])
+        return $this->state(fn () => ['status' => WrestlerStatus::SUSPENDED])
             ->has(Employment::factory()->started($start))
             ->has(Suspension::factory()->started($end));
     }
 
-    public function injured()
+    /**
+     * Set the wrestler as injured.
+     */
+    public function injured(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state(fn (array $attributes) => ['status' => WrestlerStatus::INJURED])
+        return $this->state(fn () => ['status' => WrestlerStatus::INJURED])
             ->has(Employment::factory()->started($start))
             ->has(Injury::factory()->started($now));
     }

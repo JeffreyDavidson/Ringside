@@ -7,16 +7,20 @@ namespace Database\Factories;
 use App\Enums\RefereeStatus;
 use App\Models\Employment;
 use App\Models\Injury;
-use App\Models\Referee;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Referee>
+ */
 class RefereeFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -27,83 +31,62 @@ class RefereeFactory extends Factory
         ];
     }
 
-    public function bookable()
+    public function bookable(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::BOOKABLE])
-            ->has(Employment::factory()->started(Carbon::yesterday()))
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+        return $this->state(fn () => ['status' => RefereeStatus::BOOKABLE])
+            ->has(Employment::factory()->started(Carbon::yesterday()));
     }
 
-    public function withFutureEmployment()
+    public function withFutureEmployment(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::FUTURE_EMPLOYMENT])
-            ->has(Employment::factory()->started(Carbon::tomorrow()))
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+        return $this->state(fn () => ['status' => RefereeStatus::FUTURE_EMPLOYMENT])
+            ->has(Employment::factory()->started(Carbon::tomorrow()));
     }
 
-    public function unemployed()
+    public function unemployed(): static
     {
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::UNEMPLOYED])
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+        return $this->state(fn () => ['status' => RefereeStatus::UNEMPLOYED]);
     }
 
-    public function retired()
+    public function retired(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::RETIRED])
+        return $this->state(fn () => ['status' => RefereeStatus::RETIRED])
             ->has(Employment::factory()->started($start)->ended($end))
-            ->has(Retirement::factory()->started($end))
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+            ->has(Retirement::factory()->started($end));
     }
 
-    public function released()
+    public function released(): static
     {
         $now = now();
         $start = $now->copy()->subWeeks(2);
-        $end = $now->copy()->subWeeks(1);
+        $end = $now->copy()->subWeeks();
 
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::RELEASED])
-            ->has(Employment::factory()->started($start)->ended($end))
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+        return $this->state(fn () => ['status' => RefereeStatus::RELEASED])
+            ->has(Employment::factory()->started($start)->ended($end));
     }
 
-    public function suspended()
+    public function suspended(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
-        $end = $now->copy()->subDays(1);
+        $end = $now->copy()->subDays();
 
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::SUSPENDED])
+        return $this->state(fn () => ['status' => RefereeStatus::SUSPENDED])
             ->has(Employment::factory()->started($start))
-            ->has(Suspension::factory()->started($end))
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+            ->has(Suspension::factory()->started($end));
     }
 
-    public function injured()
+    public function injured(): static
     {
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state(fn (array $attributes) => ['status' => RefereeStatus::INJURED])
+        return $this->state(fn () => ['status' => RefereeStatus::INJURED])
             ->has(Employment::factory()->started($start))
-            ->has(Injury::factory()->started($now))
-            ->afterCreating(function (Referee $referee) {
-                $referee->save();
-            });
+            ->has(Injury::factory()->started($now));
     }
 }

@@ -9,10 +9,15 @@ use App\Models\Title;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Activation>
+ */
 class ActivationFactory extends Factory
 {
     /**
      * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -25,27 +30,21 @@ class ActivationFactory extends Factory
         ];
     }
 
-    /**
-     * @param  string|Carbon  $activationDate
-     */
-    public function started($activationDate = 'now')
+    public function started(Carbon $activationDate): static
     {
         return $this->state([
-            'started_at' => $activationDate instanceof Carbon ? $activationDate : new Carbon($activationDate),
+            'started_at' => $activationDate->toDateTimeString(),
         ]);
     }
 
-    /**
-     * @param  string|Carbon  $deactivationDate
-     */
-    public function ended($deactivationDate = 'now')
+    public function ended(Carbon $deactivationDate): static
     {
         return $this->state([
-            'ended_at' => $deactivationDate instanceof Carbon ? $deactivationDate : new Carbon($deactivationDate),
+            'ended_at' => $deactivationDate->toDateTimeString(),
         ]);
     }
 
-    public function activatable()
+    public function activatable(): mixed
     {
         return $this->faker->randomElement([
             Stable::class,
