@@ -14,7 +14,7 @@ class EventRepository
      */
     public function create(EventData $eventData): Event
     {
-        return Event::create([
+        return Event::query()->create([
             'name' => $eventData->name,
             'date' => $eventData->date,
             'venue_id' => $eventData->venue->id ?? null,

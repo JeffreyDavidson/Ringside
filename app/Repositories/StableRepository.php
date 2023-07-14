@@ -8,7 +8,6 @@ use App\Data\StableData;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -17,9 +16,9 @@ class StableRepository
     /**
      * Create a new stable with the given data.
      */
-    public function create(StableData $stableData): Model
+    public function create(StableData $stableData): Stable
     {
-        return Stable::create([
+        return Stable::query()->create([
             'name' => $stableData->name,
         ]);
     }
