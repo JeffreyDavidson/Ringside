@@ -14,10 +14,10 @@ class TitlesTestTableSeeder extends Seeder
      */
     public function run(): void
     {
-        Title::factory()->active()->times(3)->create();
-        Title::factory()->withFutureActivation()->times(3)->create();
-        Title::factory()->unactivated()->times(3)->create();
-        Title::factory()->inactive()->times(3)->create();
-        Title::factory()->retired()->times(3)->create();
+        Title::factory()->active()->count(3)->create();
+        Title::factory()->withFutureActivation()->count(3)->create();
+        Title::factory()->unactivated()->count(3)->create();
+        Title::factory()->inactive()->count(3)->create();
+        Title::factory()->retired()->count(3)->create();
     }
 }

@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         $this->call(EventsTableSeeder::class);
     }
 
-    public function call($class, $silent = false, $extra = null)
+    public function call($class, $silent = false, $parameters = null): void
     {
         $this->resolve($class)->run($extra);
 

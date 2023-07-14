@@ -14,20 +14,7 @@ class EventsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $eNum = 1;
-
-        for ($w = 1; $w <= 5; $w++) {
-            Event::factory()->scheduled()->create([
-                'name' => 'Event '.$eNum,
-            ]);
-
-            $eNum++;
-        }
-
-        Event::factory()->past()->create([
-            'name' => 'Title '.$eNum,
-        ]);
-
-        $eNum++;
+        Event::factory()->scheduled()->count(5)->create();
+        Event::factory()->past()->create();
     }
 }
