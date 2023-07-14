@@ -14,7 +14,7 @@ class VenueRepository
      */
     public function create(VenueData $venueData): Venue
     {
-        return Venue::create([
+        return Venue::query()->create([
             'name' => $venueData->name,
             'street_address' => $venueData->street_address,
             'city' => $venueData->city,
