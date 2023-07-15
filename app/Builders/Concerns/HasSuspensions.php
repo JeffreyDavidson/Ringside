@@ -20,7 +20,7 @@ trait HasSuspensions
     public function withCurrentSuspendedAtDate(): self
     {
         return $this->addSelect([
-            'current_suspended_at' => Suspension::select('started_at')
+            'current_suspended_at' => Suspension::query()->select('started_at')
                 ->whereColumn('suspendable_id', $this->qualifyColumn('id'))
                 ->where('suspendable_type', $this->getModel())
                 ->latest('started_at')

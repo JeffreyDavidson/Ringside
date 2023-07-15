@@ -20,7 +20,7 @@ trait HasRetirements
     public function withCurrentRetiredAtDate(): self
     {
         return $this->addSelect([
-            'current_retired_at' => Retirement::select('started_at')
+            'current_retired_at' => Retirement::query()->select('started_at')
                 ->whereColumn('retiree_id', $this->getModel()->getTable().'.id')
                 ->where('retiree_type', $this->getModel())
                 ->latest('started_at')
