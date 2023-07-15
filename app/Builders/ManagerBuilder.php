@@ -7,7 +7,7 @@ namespace App\Builders;
 use App\Enums\ManagerStatus;
 use Illuminate\Database\Eloquent\Builder;
 
-class ManagerQueryBuilder extends Builder
+class ManagerBuilder extends Builder
 {
     use Concerns\HasEmployments;
     use Concerns\HasInjuries;

@@ -6,7 +6,7 @@ namespace App\Builders;
 
 use Illuminate\Database\Eloquent\Builder;
 
-class WrestlerQueryBuilder extends Builder
+class WrestlerBuilder extends Builder
 {
     use Concerns\HasEmployments;
     use Concerns\HasInjuries;

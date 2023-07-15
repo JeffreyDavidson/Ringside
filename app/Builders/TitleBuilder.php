@@ -7,7 +7,7 @@ namespace App\Builders;
 use App\Enums\TitleStatus;
 use Illuminate\Database\Eloquent\Builder;
 
-class TitleQueryBuilder extends Builder
+class TitleBuilder extends Builder
 {
     use Concerns\HasActivations;
     use Concerns\HasRetirements;

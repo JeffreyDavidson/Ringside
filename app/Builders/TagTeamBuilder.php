@@ -6,7 +6,7 @@ namespace App\Builders;
 
 use Illuminate\Database\Eloquent\Builder;
 
-class TagTeamQueryBuilder extends Builder
+class TagTeamBuilder extends Builder
 {
     use Concerns\HasEmployments;
     use Concerns\HasRetirements;
