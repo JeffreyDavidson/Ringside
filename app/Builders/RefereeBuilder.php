@@ -6,7 +6,7 @@ namespace App\Builders;
 
 use Illuminate\Database\Eloquent\Builder;
 
-class RefereeQueryBuilder extends Builder
+class RefereeBuilder extends Builder
 {
     use Concerns\HasEmployments;
     use Concerns\HasInjuries;

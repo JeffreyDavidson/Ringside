@@ -7,7 +7,7 @@ namespace App\Builders;
 use App\Enums\EventStatus;
 use Illuminate\Database\Eloquent\Builder;
 
-class EventQueryBuilder extends Builder
+class EventBuilder extends Builder
 {
     /**
      * Scope a query to include scheduled events.
