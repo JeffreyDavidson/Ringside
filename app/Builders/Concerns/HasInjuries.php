@@ -20,7 +20,7 @@ trait HasInjuries
     public function withCurrentInjuredAtDate(): self
     {
         return $this->addSelect([
-            'current_injured_at' => Injury::select('started_at')
+            'current_injured_at' => Injury::query()->select('started_at')
                 ->whereColumn('injurable_id', $this->qualifyColumn('id'))
                 ->where('injurable_type', $this->getModel())
                 ->latest('started_at')

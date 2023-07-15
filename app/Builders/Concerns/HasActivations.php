@@ -21,7 +21,7 @@ trait HasActivations
     public function withLastDeactivationDate(): self
     {
         return $this->addSelect([
-            'last_deactivated_at' => Activation::select('ended_at')
+            'last_deactivated_at' => Activation::query()->select('ended_at')
                 ->whereColumn('activatable_id', $this->qualifyColumn('id'))
                 ->where('activatable_type', $this->model)
                 ->latest('ended_at')
@@ -78,7 +78,7 @@ trait HasActivations
     public function withFirstActivatedAtDate(): self
     {
         return $this->addSelect([
-            'first_activated_at' => Activation::select('started_at')
+            'first_activated_at' => Activation::query()->select('started_at')
                 ->whereColumn('activatable_id', $this->qualifyColumn('id'))
                 ->where('activatable_type', $this->model)
                 ->oldest('started_at')

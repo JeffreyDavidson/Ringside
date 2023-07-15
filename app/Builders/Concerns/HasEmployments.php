@@ -22,7 +22,7 @@ trait HasEmployments
     public function withReleasedAtDate(): self
     {
         return $this->addSelect([
-            'released_at' => Employment::select('ended_at')
+            'released_at' => Employment::query()->select('ended_at')
                 ->whereColumn('employable_id', $this->getModel()->getTable().'.id')
                 ->where('employable_type', $this->getModel())
                 ->latest('ended_at')
@@ -68,7 +68,7 @@ trait HasEmployments
     public function withFirstEmployedAtDate(): self
     {
         return $this->addSelect([
-            'first_employed_at' => Employment::select('started_at')
+            'first_employed_at' => Employment::query()->select('started_at')
                 ->whereColumn('employable_id', $this->qualifyColumn('id'))
                 ->where('employable_type', $this->getModel())
                 ->oldest('started_at')
