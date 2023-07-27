@@ -16,6 +16,8 @@ class ReleaseAction extends BaseWrestlerAction
 
     /**
      * Release a wrestler.
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(Wrestler $wrestler, Carbon $releaseDate = null): void
     {

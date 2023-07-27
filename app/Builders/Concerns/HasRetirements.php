@@ -7,25 +7,29 @@ use App\Models\Retirement;
 trait HasRetirements
 {
     /**
-     * Scope a query to only include retired models.
+     * Scope a query to include retired models.
      */
     public function retired(): self
     {
-        return $this->whereHas('currentRetirement');
+        $this->whereHas('currentRetirement');
+
+        return $this;
     }
 
     /**
-     * Scope a query to include current retirement date.
+     * Scope a query to include the model's current retirement date.
      */
     public function withCurrentRetiredAtDate(): self
     {
-        return $this->addSelect([
+        $this->addSelect([
             'current_retired_at' => Retirement::query()->select('started_at')
                 ->whereColumn('retiree_id', $this->getModel()->getTable().'.id')
                 ->where('retiree_type', $this->getModel())
                 ->latest('started_at')
                 ->limit(1),
         ])->withCasts(['current_retired_at' => 'datetime']);
+
+        return $this;
     }
 
     /**
@@ -33,6 +37,8 @@ trait HasRetirements
      */
     public function orderByCurrentRetiredAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(current_retired_at) {$direction}");
+        $this->orderByRaw("DATE(current_retired_at) {$direction}");
+
+        return $this;
     }
 }

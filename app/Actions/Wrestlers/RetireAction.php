@@ -16,6 +16,8 @@ class RetireAction extends BaseWrestlerAction
 
     /**
      * Retire a wrestler.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Wrestler $wrestler, Carbon $retirementDate = null): void
     {

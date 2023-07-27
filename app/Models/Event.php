@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\EventQueryBuilder;
+use App\Builders\EventBuilder;
 use App\Enums\EventStatus;
 use App\Presenters\EventPresenter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,12 +41,17 @@ class Event extends Model
         'status' => EventStatus::class,
     ];
 
+    public static function query(): EventBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): EventQueryBuilder
+    public function newEloquentBuilder($query): EventBuilder
     {
-        return new EventQueryBuilder($query);
+        return new EventBuilder($query);
     }
 
     /**

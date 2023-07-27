@@ -14,6 +14,8 @@ class ActivateAction extends BaseTitleAction
     use AsAction;
 
     /**
+     * Activate a title.
+     *
      * @throws \App\Exceptions\CannotBeActivatedException
      */
     public function handle(Title $title, Carbon $activationDate = null): void

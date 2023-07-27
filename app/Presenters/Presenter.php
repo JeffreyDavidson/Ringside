@@ -10,28 +10,18 @@ use Illuminate\Database\Eloquent\Model;
 abstract class Presenter
 {
     /**
-     * The presentable model.
-     *
-     * @var \Illuminate\Database\Eloquent\Model
-     */
-    protected $model;
-
-    /**
      * Create a new Presenter instance.
      */
-    public function __construct(Model $model)
+    public function __construct(protected Model $model)
     {
-        $this->model = $model;
     }
 
     /**
-     * Undocumented function.
-     *
-     * @return mixed
+     * Get the presenter for the assigned class.
      *
      * @throws \Exception
      */
-    public function __get(string $property)
+    public function __get(string $property): mixed
     {
         $callable = [$this, $property];
 

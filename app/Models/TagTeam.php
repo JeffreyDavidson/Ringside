@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\TagTeamQueryBuilder;
+use App\Builders\TagTeamBuilder;
 use App\Enums\TagTeamStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
@@ -57,12 +57,17 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
         'status' => TagTeamStatus::class,
     ];
 
+    public static function query(): TagTeamBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): TagTeamQueryBuilder
+    public function newEloquentBuilder($query): TagTeamBuilder
     {
-        return new TagTeamQueryBuilder($query);
+        return new TagTeamBuilder($query);
     }
 
     /**

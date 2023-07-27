@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\StableQueryBuilder;
+use App\Builders\StableBuilder;
 use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
@@ -46,12 +46,17 @@ class Stable extends Model implements Activatable, Retirable
         'status' => StableStatus::class,
     ];
 
+    public static function query(): StableBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): StableQueryBuilder
+    public function newEloquentBuilder($query): StableBuilder
     {
-        return new StableQueryBuilder($query);
+        return new StableBuilder($query);
     }
 
     /**

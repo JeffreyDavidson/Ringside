@@ -121,19 +121,7 @@ class TagTeamRepository
     }
 
     /**
-     * Get the model's first employment date.
-     */
-    public function updateEmployment(TagTeam $tagTeam, Carbon $employmentDate): TagTeam
-    {
-        $tagTeam->futureEmployment()->update(['started_at' => $employmentDate->toDateTimeString()]);
-
-        return $tagTeam;
-    }
-
-    /**
      * Add wrestlers to a tag team.
-     *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
      */
     public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate): TagTeam
     {
@@ -146,9 +134,6 @@ class TagTeamRepository
 
     /**
      * Add wrestlers to a tag team.
-     *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $formerTagTeamPartners
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $newTagTeamPartners
      */
     public function syncTagTeamPartners(
         TagTeam $tagTeam,

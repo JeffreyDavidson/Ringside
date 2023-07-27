@@ -7,90 +7,108 @@ use App\Models\Activation;
 trait HasActivations
 {
     /**
-     * Scope a query to only include unactivated models.
+     * Scope a query to include deactivated models.
      */
     public function deactivated(): self
     {
-        return $this->whereDoesntHave('currentActivation')
+        $this->whereDoesntHave('currentActivation')
             ->orWhereDoesntHave('previousActivations');
+
+        return $this;
     }
 
     /**
-     * Scope a query to include current deactivation date.
+     * Scope a query to include model's last deactivation date.
      */
     public function withLastDeactivationDate(): self
     {
-        return $this->addSelect([
+        $this->addSelect([
             'last_deactivated_at' => Activation::query()->select('ended_at')
                 ->whereColumn('activatable_id', $this->qualifyColumn('id'))
                 ->where('activatable_type', $this->model)
                 ->latest('ended_at')
                 ->limit(1),
         ])->withCasts(['last_deactivated_at' => 'datetime']);
+
+        return $this;
     }
 
     /**
-     * Scope a query to order by the models current deactivation date.
+     * Scope a query to order by the model's last deactivation date.
      */
     public function orderByLastDeactivationDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(last_deactivated_at) {$direction}");
+        $this->orderByRaw("DATE(last_deactivated_at) {$direction}");
+
+        return $this;
     }
 
     /**
-     * Scope a query to only include active models.
+     * Scope a query to include active models.
      */
     public function active(): self
     {
-        return $this->whereHas('currentActivation');
+        $this->whereHas('currentActivation');
+
+        return $this;
     }
 
     /**
-     * Scope a query to only include future activated models.
+     * Scope a query to include models with future activation.
      */
     public function withFutureActivation(): self
     {
-        return $this->whereHas('futureActivation');
+        $this->whereHas('futureActivation');
+
+        return $this;
     }
 
     /**
-     * Scope a query to only include inactive models.
+     * Scope a query to include inactive models.
      */
     public function inactive(): self
     {
-        return $this->whereHas('previousActivation')
+        $this->whereHas('previousActivation')
             ->whereDoesntHave('futureActivation')
             ->whereDoesntHave('currentActivation')
             ->whereDoesntHave('currentRetirement');
+
+        return $this;
     }
 
     /**
-     * Scope a query to only include inactive models.
+     * Scope a query to include unactivated models.
      */
     public function unactivated(): self
     {
-        return $this->whereDoesntHave('activations');
+        $this->whereDoesntHave('activations');
+
+        return $this;
     }
 
     /**
-     * Scope a query to include current activation date.
+     * Scope a query to include the model's first activation date.
      */
     public function withFirstActivatedAtDate(): self
     {
-        return $this->addSelect([
+        $this->addSelect([
             'first_activated_at' => Activation::query()->select('started_at')
                 ->whereColumn('activatable_id', $this->qualifyColumn('id'))
                 ->where('activatable_type', $this->model)
                 ->oldest('started_at')
                 ->limit(1),
         ])->withCasts(['first_activated_at' => 'datetime']);
+
+        return $this;
     }
 
     /**
-     * Scope a query to order by the models first activation date.
+     * Scope a query to order by the model's first activation date.
      */
     public function orderByFirstActivatedAtDate(string $direction = 'asc'): self
     {
-        return $this->orderByRaw("DATE(first_activated_at) {$direction}");
+        $this->orderByRaw("DATE(first_activated_at) {$direction}");
+
+        return $this;
     }
 }

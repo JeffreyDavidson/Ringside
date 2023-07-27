@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\WrestlerQueryBuilder;
+use App\Builders\WrestlerBuilder;
 use App\Enums\WrestlerStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
@@ -17,6 +17,7 @@ use App\Models\Contracts\TagTeamMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
@@ -65,12 +66,17 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
         'status' => WrestlerStatus::UNEMPLOYED->value,
     ];
 
+    public static function query(): WrestlerBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): WrestlerQueryBuilder
+    public function newEloquentBuilder($query)
     {
-        return new WrestlerQueryBuilder($query);
+        return new WrestlerBuilder($query);
     }
 
     /**

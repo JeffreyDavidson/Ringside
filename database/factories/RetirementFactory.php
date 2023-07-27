@@ -50,7 +50,7 @@ class RetirementFactory extends Factory
 
     public function retirable(): mixed
     {
-        return $this->faker->randomElement([
+        return fake()->randomElement([
             Manager::class,
             Referee::class,
             Stable::class,

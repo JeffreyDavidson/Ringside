@@ -6,6 +6,11 @@ namespace App\Builders;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ *
+ * @extends Builder<TModelClass>
+ */
 class WrestlerBuilder extends Builder
 {
     use Concerns\HasEmployments;
@@ -14,12 +19,14 @@ class WrestlerBuilder extends Builder
     use Concerns\HasSuspensions;
 
     /**
-     * Scope a query to only include bookable wrestlers.
+     * Scope a query to include bookable wrestlers.
      */
     public function bookable(): self
     {
-        return $this->whereHas('currentEmployment')
+        $this->whereHas('currentEmployment')
             ->whereDoesntHave('currentSuspension')
             ->whereDoesntHave('currentInjury');
+
+        return $this;
     }
 }

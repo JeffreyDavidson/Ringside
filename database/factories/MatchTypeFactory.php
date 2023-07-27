@@ -18,12 +18,12 @@ class MatchTypeFactory extends Factory
      */
     public function definition(): array
     {
-        $name = $this->faker->words(2, true);
+        $name = fake()->words(2, true);
 
         return [
             'name' => str($name)->title(),
             'slug' => str($name)->slug(),
-            'number_of_sides' => $this->faker->randomDigit(),
+            'number_of_sides' => fake()->randomDigit(),
         ];
     }
 }

@@ -15,6 +15,8 @@ class DeactivateAction extends BaseTitleAction
 
     /**
      * Deactivate a title.
+     *
+     * @throws \App\Exceptions\CannotBeDeactivatedException
      */
     public function handle(Title $title, Carbon $deactivationDate = null): void
     {

@@ -46,7 +46,7 @@ class ActivationFactory extends Factory
 
     public function activatable(): mixed
     {
-        return $this->faker->randomElement([
+        return fake()->randomElement([
             Stable::class,
             Title::class,
         ]);

@@ -48,7 +48,7 @@ class SuspensionFactory extends Factory
 
     public function suspendable(): mixed
     {
-        return $this->faker->randomElement([
+        return fake()->randomElement([
             Manager::class,
             Referee::class,
             TagTeam::class,

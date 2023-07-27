@@ -42,7 +42,7 @@ trait CanJoinTagTeams
         return $this->belongsToOne(TagTeam::class)
             ->wherePivotNotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
-            ->latest('joined_at');
+            ->orderByPivot('joined_at', 'desc');
     }
 
     /**

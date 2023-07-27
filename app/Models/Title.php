@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\TitleQueryBuilder;
+use App\Builders\TitleBuilder;
 use App\Enums\TitleStatus;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
@@ -48,12 +48,17 @@ class Title extends Model implements Activatable, Retirable
         'status' => TitleStatus::UNACTIVATED->value,
     ];
 
+    public static function query(): TitleBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): TitleQueryBuilder
+    public function newEloquentBuilder($query): TitleBuilder
     {
-        return new TitleQueryBuilder($query);
+        return new TitleBuilder($query);
     }
 
     /**

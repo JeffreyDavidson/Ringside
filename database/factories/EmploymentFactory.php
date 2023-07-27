@@ -49,7 +49,7 @@ class EmploymentFactory extends Factory
 
     public function employable(): mixed
     {
-        return $this->faker->randomElement([
+        return fake()->randomElement([
             Manager::class,
             Referee::class,
             TagTeam::class,

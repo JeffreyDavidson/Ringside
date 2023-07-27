@@ -15,6 +15,8 @@ class RetireAction extends BaseRefereeAction
 
     /**
      * Retire a referee.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
      */
     public function handle(Referee $referee, Carbon $retirementDate = null): void
     {

@@ -15,6 +15,8 @@ class ReleaseAction extends BaseRefereeAction
 
     /**
      * Release a referee.
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
      */
     public function handle(Referee $referee, Carbon $releaseDate = null): void
     {

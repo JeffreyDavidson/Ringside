@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\RefereeQueryBuilder;
+use App\Builders\RefereeBuilder;
 use App\Enums\RefereeStatus;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
@@ -52,12 +52,17 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         'status' => RefereeStatus::UNEMPLOYED->value,
     ];
 
+    public static function query(): RefereeBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): RefereeQueryBuilder
+    public function newEloquentBuilder($query): RefereeBuilder
     {
-        return new RefereeQueryBuilder($query);
+        return new RefereeBuilder($query);
     }
 
     /**

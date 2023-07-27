@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Builders\ManagerQueryBuilder;
+use App\Builders\ManagerBuilder;
 use App\Enums\ManagerStatus;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Employable;
@@ -57,12 +57,17 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
         'status' => ManagerStatus::UNEMPLOYED->value,
     ];
 
+    public static function query(): ManagerBuilder
+    {
+        return parent::query();
+    }
+
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query): ManagerQueryBuilder
+    public function newEloquentBuilder($query): ManagerBuilder
     {
-        return new ManagerQueryBuilder($query);
+        return new ManagerBuilder($query);
     }
 
     /**

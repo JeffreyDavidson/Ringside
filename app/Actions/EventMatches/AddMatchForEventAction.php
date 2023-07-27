@@ -18,7 +18,6 @@ class AddMatchForEventAction extends BaseEventMatchAction
      */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
     {
-        /** @var \App\Models\EventMatch $createdMatch */
         $createdMatch = $this->eventMatchRepository->createForEvent($event, $eventMatchData);
 
         AddRefereesToMatchAction::run($createdMatch, $eventMatchData->referees);
