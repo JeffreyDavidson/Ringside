@@ -15,6 +15,8 @@ class UnretireAction extends BaseRefereeAction
 
     /**
      * Unretire a referee.
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Referee $referee, Carbon $unretiredDate = null): void
     {

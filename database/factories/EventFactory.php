@@ -22,7 +22,7 @@ class EventFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str($this->faker->words(2, true))->title()->value(),
+            'name' => str(fake()->words(2, true))->title()->value(),
             'date' => null,
             'status' => EventStatus::UNSCHEDULED,
             'venue_id' => null,

@@ -18,7 +18,7 @@ class MatchDecisionFactory extends Factory
      */
     public function definition(): array
     {
-        $name = $this->faker->words(2, true);
+        $name = fake()->words(2, true);
 
         return [
             'name' => str($name)->title(),

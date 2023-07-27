@@ -16,7 +16,7 @@ class UnretireAction extends BaseManagerAction
     /**
      * Unretire a manager.
      *
-     * @throws CannotBeUnretiredException
+     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Manager $manager, Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseManagerAction
     /**
      * Ensure a manager can be unretired.
      *
-     * @throws CannotBeUnretiredException
+     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Manager $manager): void
     {

@@ -16,6 +16,8 @@ class ClearInjuryAction extends BaseWrestlerAction
 
     /**
      * Clear an injury of a wrestler.
+     *
+     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
     public function handle(Wrestler $wrestler, Carbon $recoveryDate = null): void
     {

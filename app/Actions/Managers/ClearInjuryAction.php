@@ -16,7 +16,7 @@ class ClearInjuryAction extends BaseManagerAction
     /**
      * Clear an injury of a manager.
      *
-     * @throws CannotBeClearedFromInjuryException
+     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
     public function handle(Manager $manager, Carbon $recoveryDate = null): void
     {
@@ -30,7 +30,7 @@ class ClearInjuryAction extends BaseManagerAction
     /**
      * Ensure a manager can be cleared from an injury.
      *
-     * @throws CannotBeClearedFromInjuryException
+     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
     private function ensureCanBeClearedFromInjury(Manager $manager): void
     {

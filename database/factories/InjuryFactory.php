@@ -53,7 +53,7 @@ class InjuryFactory extends Factory
 
     public function injurable(): mixed
     {
-        return $this->faker->randomElement([
+        return fake()->randomElement([
             Manager::class,
             Referee::class,
             Wrestler::class,

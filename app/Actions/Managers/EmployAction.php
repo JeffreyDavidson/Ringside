@@ -16,7 +16,7 @@ class EmployAction extends BaseManagerAction
     /**
      * Employ a manager.
      *
-     * @throws CannotBeEmployedException
+     * @throws \App\Exceptions\CannotBeEmployedException
      */
     public function handle(Manager $manager, Carbon $startDate = null): void
     {
@@ -34,7 +34,7 @@ class EmployAction extends BaseManagerAction
     /**
      * Ensure a manager can be employed.
      *
-     * @throws CannotBeEmployedException
+     * @throws \App\Exceptions\CannotBeEmployedException
      */
     private function ensureCanBeEmployed(Manager $manager): void
     {

@@ -7,6 +7,11 @@ namespace App\Builders;
 use App\Enums\EventStatus;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ *
+ * @extends Builder<TModelClass>
+ */
 class EventBuilder extends Builder
 {
     /**
@@ -14,15 +19,9 @@ class EventBuilder extends Builder
      */
     public function scheduled(): self
     {
-        return $this->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
-    }
+        $this->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
 
-    /**
-     * Scope a query to include unscheduled events.
-     */
-    public function unscheduled(): self
-    {
-        return $this->where('status', EventStatus::UNSCHEDULED)->whereNull('date');
+        return $this;
     }
 
     /**
@@ -30,6 +29,8 @@ class EventBuilder extends Builder
      */
     public function past(): self
     {
-        return $this->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
+        $this->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
+
+        return $this;
     }
 }

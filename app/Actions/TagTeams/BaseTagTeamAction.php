@@ -12,7 +12,9 @@ abstract class BaseTagTeamAction
     /**
      * Create a new base tag team action instance.
      */
-    public function __construct(protected TagTeamRepository $tagTeamRepository, protected WrestlerRepository $wrestlerRepository)
-    {
+    public function __construct(
+        protected TagTeamRepository $tagTeamRepository,
+        protected WrestlerRepository $wrestlerRepository
+    ) {
     }
 }

@@ -15,6 +15,8 @@ class UnretireAction extends BaseWrestlerAction
 
     /**
      * Unretire a wrestler.
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
      */
     public function handle(Wrestler $wrestler, Carbon $unretiredDate = null): void
     {

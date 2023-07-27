@@ -136,16 +136,6 @@ class ManagerRepository
     }
 
     /**
-     * Update the manager's future employment.
-     */
-    public function updateEmployment(Manager $manager, Carbon $employmentDate): Manager
-    {
-        $manager->futureEmployment()->update(['started_at' => $employmentDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
      * Disassociate a manager from its current tag teams.
      */
     public function removeFromCurrentTagTeams(Manager $manager): void

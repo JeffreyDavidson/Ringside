@@ -7,6 +7,11 @@ namespace App\Builders;
 use App\Enums\ManagerStatus;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ *
+ * @extends Builder<TModelClass>
+ */
 class ManagerBuilder extends Builder
 {
     use Concerns\HasEmployments;
@@ -15,10 +20,12 @@ class ManagerBuilder extends Builder
     use Concerns\HasSuspensions;
 
     /**
-     * Scope a query to only include available managers.
+     * Scope a query to include available managers.
      */
     public function available(): self
     {
-        return $this->where('status', ManagerStatus::AVAILABLE);
+        $this->where('status', ManagerStatus::AVAILABLE);
+
+        return $this;
     }
 }

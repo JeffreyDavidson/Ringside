@@ -16,6 +16,8 @@ class SuspendAction extends BaseWrestlerAction
 
     /**
      * Suspend a wrestler.
+     *
+     * @throws \App\Exceptions\CannotBeSuspendedException
      */
     public function handle(Wrestler $wrestler, Carbon $suspensionDate = null): void
     {

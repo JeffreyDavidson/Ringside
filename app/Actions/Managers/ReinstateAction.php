@@ -16,7 +16,7 @@ class ReinstateAction extends BaseManagerAction
     /**
      * Reinstate a manager.
      *
-     * @throws CannotBeReinstatedException
+     * @throws \App\Exceptions\CannotBeReinstatedException
      */
     public function handle(Manager $manager, Carbon $reinstatementDate = null): void
     {
@@ -30,7 +30,7 @@ class ReinstateAction extends BaseManagerAction
     /**
      * Ensure a manager can be reinstated.
      *
-     * @throws CannotBeReinstatedException
+     * @throws \App\Exceptions\CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(Manager $manager): void
     {

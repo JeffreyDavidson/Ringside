@@ -26,7 +26,7 @@ class TagTeamFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => Str::title($this->faker->words(2, true)),
+            'name' => Str::title(fake()->words(2, true)),
             'signature_move' => null,
             'status' => TagTeamStatus::UNEMPLOYED,
         ];

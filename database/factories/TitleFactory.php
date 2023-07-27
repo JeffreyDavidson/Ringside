@@ -24,7 +24,7 @@ class TitleFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str($this->faker->unique()->words(2, true))->title().' Title',
+            'name' => str(fake()->unique()->words(2, true))->title().' Title',
             'status' => TitleStatus::UNACTIVATED,
         ];
     }
@@ -81,7 +81,7 @@ class TitleFactory extends Factory
     {
         return $this->state(function () {
             return [
-                'status' => $this->faker->randomElement([
+                'status' => fake()->randomElement([
                     TitleStatus::INACTIVE,
                     TitleStatus::RETIRED,
                     TitleStatus::FUTURE_ACTIVATION,
