@@ -29,3 +29,8 @@ test('repositories')
         'App\Enums',
         'Illuminate\Database\Eloquent\Builder',
     ]);
+
+
+test('strict types')
+    ->expect('App')
+    ->toUseStrictTypes();
