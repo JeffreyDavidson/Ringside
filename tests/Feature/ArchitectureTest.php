@@ -30,7 +30,14 @@ test('repositories')
         'Illuminate\Database\Eloquent\Builder',
     ]);
 
+test('enums')
+    ->expect('App\Enums')
+    ->toBeEnums();
 
 test('strict types')
     ->expect('App')
     ->toUseStrictTypes();
+
+test('model traits')
+    ->expect('App\Models\Concerns')
+    ->toBeTraits();
