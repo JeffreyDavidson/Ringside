@@ -21,10 +21,7 @@ class RetireAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, Carbon $retirementDate = null): void
     {
-        throw_if($tagTeam->isUnemployed(), CannotBeRetiredException::class, $tagTeam.' is unemployed and cannot be retired.');
-        throw_if($tagTeam->isReleased(), CannotBeRetiredException::class, $tagTeam.' is released and cannot be retired.');
-        throw_if($tagTeam->hasFutureEmployment(), CannotBeRetiredException::class, $tagTeam.' is currently not  and cannot be retired.');
-        throw_if($tagTeam->isRetired(), CannotBeRetiredException::class, $tagTeam.' is already retired and cannot be retired again.');
+        $this->ensureCanBeRetired($tagTeam);
 
         $retirementDate ??= now();
 
@@ -36,5 +33,25 @@ class RetireAction extends BaseTagTeamAction
 
         $this->tagTeamRepository->release($tagTeam, $retirementDate);
         $this->tagTeamRepository->retire($tagTeam, $retirementDate);
+    }
+
+    /**
+     * Ensure a tag team can be retired.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
+     */
+    private function ensureCanBeRetired(TagTeam $tagTeam): void
+    {
+        if ($tagTeam->isUnemployed()) {
+            throw CannotBeRetiredException::unemployed($tagTeam);
+        }
+
+        if ($tagTeam->isReleased()) {
+            throw CannotBeRetiredException::hasFutureEmployment($tagTeam);
+        }
+
+        if ($tagTeam->isRetired()) {
+            throw CannotBeRetiredException::retired($tagTeam);
+        }
     }
 }

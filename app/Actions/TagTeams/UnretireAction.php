@@ -21,7 +21,7 @@ class UnretireAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, Carbon $unretiredDate = null): void
     {
-        throw_if($tagTeam->canBeUnretired(), CannotBeUnretiredException::class);
+        $this->ensureCanBeUnretired($tagTeam);
 
         $unretiredDate ??= now();
 
@@ -30,5 +30,17 @@ class UnretireAction extends BaseTagTeamAction
         $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersUnretireAction::run($wrestler, $unretiredDate));
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
+    }
+
+    /**
+     * Ensure tag team can be unretired.
+     *
+     * @throws \App\Exceptions\CannotBeUnretiredException
+     */
+    private function ensureCanBeUnretired(TagTeam $tagTeam): void
+    {
+        if (! $tagTeam->isRetired()) {
+            throw CannotBeUnretiredException::notRetired($tagTeam);
+        }
     }
 }

@@ -21,7 +21,7 @@ class ReleaseAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, Carbon $releaseDate = null): void
     {
-        throw_if($tagTeam->canBeReleased(), CannotBeReleasedException::class);
+        $this->ensureCanBeReleased($tagTeam);
 
         $releaseDate ??= now();
 
@@ -32,5 +32,21 @@ class ReleaseAction extends BaseTagTeamAction
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
 
         $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersReleaseAction::run($wrestler, $releaseDate));
+    }
+
+    /**
+     * Ensure a tag team can be released.
+     *
+     * @throws \App\Exceptions\CannotBeReleasedException
+     */
+    private function ensureCanBeReleased(TagTeam $tagTeam): void
+    {
+        if ($tagTeam->isUnemployed()) {
+            throw CannotBeReleasedException::unemployed($tagTeam);
+        }
+
+        if ($tagTeam->hasFutureEmployment()) {
+            throw CannotBeReleasedException::hasFutureEmployment($tagTeam);
+        }
     }
 }

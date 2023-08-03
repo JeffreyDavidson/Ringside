@@ -21,7 +21,7 @@ class ReinstateAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, Carbon $reinstatementDate = null): void
     {
-        throw_if($tagTeam->canBeReinstated(), CannotBeReinstatedException::class);
+        $this->ensureCanBeReinstated($tagTeam);
 
         $reinstatementDate ??= now();
 
@@ -29,5 +29,17 @@ class ReinstateAction extends BaseTagTeamAction
             ->each(fn ($wrestler) => WrestlersReinstateAction::run($wrestler, $reinstatementDate));
 
         $this->tagTeamRepository->reinstate($tagTeam, $reinstatementDate);
+    }
+
+    /**
+     * Ensure a tag team can be reinstated.
+     *
+     * @throws \App\Exceptions\CannotBeReinstatedException
+     */
+    private function ensureCanBeReinstated(TagTeam $tagTeam): void
+    {
+        if (! $tagTeam->isUnemployed()) {
+            throw CannotBeReinstatedException::unemployed($tagTeam);
+        }
     }
 }
