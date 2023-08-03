@@ -21,12 +21,24 @@ class EmployAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, Carbon $startDate = null): void
     {
-        throw_if($tagTeam->canBeEmployed(), CannotBeEmployedException::class);
+        $this->ensureCanBeEmployed($tagTeam);
 
         $startDate ??= now();
 
         $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersEmployAction::run($wrestler, $startDate));
 
         $this->tagTeamRepository->employ($tagTeam, $startDate);
+    }
+
+    /**
+     * Ensure a tag team can be employed.
+     *
+     * @throws \App\Exceptions\CannotBeEmployedException
+     */
+    private function ensureCanBeEmployed(TagTeam $tagTeam): void
+    {
+        if ($tagTeam->isCurrentlyEmployed()) {
+            throw CannotBeEmployedException::employed($tagTeam);
+        }
     }
 }
