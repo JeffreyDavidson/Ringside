@@ -20,11 +20,23 @@ class UnretireAction extends BaseStableAction
      */
     public function handle(Stable $stable, Carbon $unretiredDate = null): void
     {
-        throw_if($stable->canBeUnretired(), CannotBeUnretiredException::class);
+        $this->ensureCanBeUnretired($stable);
 
         $unretiredDate ??= now();
 
         $this->stableRepository->unretire($stable, $unretiredDate);
         $this->stableRepository->activate($stable, $unretiredDate);
+    }
+
+    /**
+     * Ensure a stable can be unretired.
+
+     * @throws \App\Exceptions\CannotBeUnretiredException
+     */
+    private function ensureCanBeUnretired(Stable $stable): void
+    {
+        if (! $stable->isRetired()) {
+            throw CannotBeUnretiredException::notRetired($stable);
+        }
     }
 }

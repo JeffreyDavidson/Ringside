@@ -22,7 +22,7 @@ class ActivateAction extends BaseStableAction
      */
     public function handle(Stable $stable, Carbon $startDate = null): void
     {
-        throw_if($stable->canBeActivated(), CannotBeActivatedException::class);
+        $this->ensureCanBeActivated($stable);
 
         $startDate ??= now();
 
@@ -39,5 +39,17 @@ class ActivateAction extends BaseStableAction
         }
 
         $this->stableRepository->activate($stable, $startDate);
+    }
+
+    /**
+     * Ensure a stable can be activated.
+     *
+     * @throws \App\Exceptions\CannotBeActivatedException
+     */
+    private function ensureCanBeActivated(Stable $stable): void
+    {
+        if ($stable->isUnactivated()) {
+            throw CannotBeActivatedException::activated($stable);
+        }
     }
 }

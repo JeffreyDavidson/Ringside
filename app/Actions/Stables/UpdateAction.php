@@ -19,14 +19,26 @@ class UpdateAction extends BaseStableAction
     {
         $this->stableRepository->update($stable, $stableData);
 
-        if (isset($stableData->start_date)) {
-            if ($stable->canBeActivated() || $stable->canHaveActivationStartDateChanged($stableData->start_date)) {
-                ActivateAction::run($stable, $stableData->start_date);
-            }
+        if (isset($stableData->start_date) && $this->ensureStartDateCanBeChanged($stable)) {
+            ActivateAction::run($stable, $stableData->start_date);
         }
 
         UpdateMembersAction::run($stable, $stableData->wrestlers, $stableData->tagTeams);
 
         return $stable;
+    }
+
+    /**
+     * Ensure a stable's start date can be changed.
+     */
+    private function ensureStartDateCanBeChanged(Stable $stable): bool
+    {
+        if ($stable->isUnactivated() || $stable->hasFutureActivation()) {
+            return true;
+        }
+
+        // Add check on start date from request
+
+        return false;
     }
 }

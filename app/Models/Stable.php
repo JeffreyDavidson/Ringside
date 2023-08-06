@@ -59,22 +59,6 @@ class Stable extends Model implements Activatable, Retirable
         return new StableBuilder($query);
     }
 
-    /**
-     * Determine if the stable can be retired.
-     */
-    public function canBeRetired(): bool
-    {
-        return $this->isCurrentlyActivated() || $this->isDeactivated();
-    }
-
-    /**
-     * Determine if the stable can be unretired.
-     */
-    public function canBeUnretired(): bool
-    {
-        return $this->isRetired();
-    }
-
     public function getIdentifier(): string
     {
         return $this->name;
