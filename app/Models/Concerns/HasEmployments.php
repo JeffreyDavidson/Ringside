@@ -135,27 +135,6 @@ trait HasEmployments
     }
 
     /**
-     * Determine if the model can be released.
-     */
-    public function canBeReleased(): bool
-    {
-        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function canBeEmployed(): bool
-    {
-        if ($this->isCurrentlyEmployed()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Get the model's first employment date.
      */
     public function startedAt(): Attribute
@@ -223,13 +202,5 @@ trait HasEmployments
         }
 
         return $this->futureEmployment->started_at->lt($date);
-    }
-
-    /**
-     * Check to see if employable can have their start date changed.
-     */
-    public function canHaveEmploymentStartDateChanged(Carbon $employmentDate): bool
-    {
-        return $this->hasFutureEmployment() && ! $this->scheduledToBeEmployedOn($employmentDate);
     }
 }

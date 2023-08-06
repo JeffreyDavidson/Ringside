@@ -48,6 +48,4 @@ interface Employable extends Identifiable
     public function employedAfter(Carbon $employmentDate): bool;
 
     public function futureEmploymentIsBefore(Carbon $employmentDate): bool;
-
-    public function canHaveEmploymentStartDateChanged(Carbon $employmentDate): bool;
 }

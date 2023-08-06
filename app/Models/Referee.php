@@ -77,18 +77,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         return true;
     }
 
-    /**
-     * Determine if the model can be retired.
-     */
-    public function canBeRetired(): bool
-    {
-        if ($this->isNotInEmployment()) {
-            return false;
-        }
-
-        return true;
-    }
-
     public function getIdentifier(): string
     {
         return "{$this->first_name} {$this->last_name}";
