@@ -61,18 +61,6 @@ class Title extends Model implements Activatable, Retirable
         return new TitleBuilder($query);
     }
 
-    /**
-     * Determine if the model can be retired.
-     */
-    public function canBeRetired(): bool
-    {
-        if ($this->isNotInActivation()) {
-            return false;
-        }
-
-        return true;
-    }
-
     public function getIdentifier(): string
     {
         return $this->name;

@@ -80,18 +80,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * Determine if the model can be retired.
-     */
-    public function canBeRetired(): bool
-    {
-        if ($this->isNotInEmployment()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Get the display name of the wrestler.
      */
     public function getIdentifier(): string
