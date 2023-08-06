@@ -20,11 +20,23 @@ class DeactivateAction extends BaseStableAction
      */
     public function handle(Stable $stable, Carbon $deactivationDate = null): void
     {
-        throw_if($stable->canBeDeactivated(), CannotBeDeactivatedException::class);
+        $this->ensureCanBeDeactivated($stable);
 
         $deactivationDate ??= now();
 
         $this->stableRepository->deactivate($stable, $deactivationDate);
         $this->stableRepository->disassemble($stable, $deactivationDate);
+    }
+
+    /**
+     * Ensure a stable can be deactivated.
+     *
+     * @throws \App\Exceptions\CannotBeDeactivatedException
+     */
+    private function ensureCanBeDeactivated(Stable $stable): void
+    {
+        if ($stable->isUnactivated()) {
+            throw CannotBeDeactivatedException::unactivated($stable);
+        }
     }
 }

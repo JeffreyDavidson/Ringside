@@ -22,7 +22,7 @@ class RetireAction extends BaseStableAction
      */
     public function handle(Stable $stable, Carbon $retirementDate = null): void
     {
-        throw_if($stable->canBeRetired(), CannotBeRetiredException::class);
+        $this->ensureCanBeRetired($stable);
 
         $retirementDate ??= now();
 
@@ -38,5 +38,17 @@ class RetireAction extends BaseStableAction
 
         $this->stableRepository->deactivate($stable, $retirementDate);
         $this->stableRepository->retire($stable, $retirementDate);
+    }
+
+    /**
+     * Ensure a stable can be retired.
+     *
+     * @throws \App\Exceptions\CannotBeRetiredException
+     */
+    private function ensureCanBeRetired(Stable $stable): void
+    {
+        if ($stable->isRetired()) {
+            throw CannotBeRetiredException::retired($stable);
+        }
     }
 }

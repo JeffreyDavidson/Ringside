@@ -111,14 +111,6 @@ trait HasActivations
     }
 
     /**
-     * Determine if the model can be activated.
-     */
-    public function canBeActivated(): bool
-    {
-        return $this->isUnactivated() || $this->hasFutureActivation() || $this->isDeactivated();
-    }
-
-    /**
      * Retrieve the model's first activation date.
      */
     public function activatedAt(): Attribute
@@ -161,18 +153,6 @@ trait HasActivations
                 && $this->currentActivation()->doesntExist()
                 && $this->futureActivation()->doesntExist()
                 && $this->currentRetirement()->doesntExist();
-    }
-
-    /**
-     * Determine if the model can be deactivated.
-     */
-    public function canBeDeactivated(): bool
-    {
-        if ($this->isCurrentlyActivated()) {
-            return true;
-        }
-
-        return false;
     }
 
     /**

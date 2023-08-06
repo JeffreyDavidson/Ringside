@@ -11,8 +11,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 trait HasRetirements
 {
-    abstract public function canBeRetired(): bool;
-
     /**
      * Get the retirements of the model.
      */
