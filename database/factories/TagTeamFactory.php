@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\TagTeamStatus;
+use App\Enums\WrestlerStatus;
 use App\Models\Employment;
 use App\Models\Retirement;
 use App\Models\Suspension;
@@ -74,11 +75,12 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $suspensionStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
+            ->state(fn () => ['status' => WrestlerStatus::SUSPENDED])
             ->has(Employment::factory()->started($employmentStartDate))
             ->has(Suspension::factory()->started($suspensionStartDate))
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::UNBOOKABLE])
+        return $this->state(fn () => ['status' => TagTeamStatus::SUSPENDED])
             ->has(Employment::factory()->started($employmentStartDate))
             ->has(Suspension::factory()->started($suspensionStartDate))
             ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate]);
