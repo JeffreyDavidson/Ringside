@@ -43,4 +43,9 @@ class CannotBeReinstatedException extends Exception
     {
         return new self("`{$model->getIdentifier()}` is available and cannot be reinstated.");
     }
+
+    public static function unbookable(Suspendable $model): self
+    {
+        return new self("`{$model->getIdentifier()}` is unbookable and cannot be reinstated.");
+    }
 }

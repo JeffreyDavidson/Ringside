@@ -13,9 +13,6 @@ beforeEach(function () {
         ->hasAttached($wrestlerB, ['joined_at' => now()->toDateTimeString()])
         ->unemployed()
         ->create();
-
-    $wrestlerA->currentTagTeam()->associate($this->tagTeam)->save();
-    $wrestlerB->currentTagTeam()->associate($this->tagTeam)->save();
 });
 
 test('invoke calls employ action and redirects', function () {
