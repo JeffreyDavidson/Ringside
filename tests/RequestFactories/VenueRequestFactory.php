@@ -11,7 +11,7 @@ class VenueRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->words(3, true),
             'street_address' => $this->faker->buildingNumber().' '.$this->faker->streetName(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),

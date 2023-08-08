@@ -16,7 +16,7 @@ class CannotBeReleasedException extends Exception
 
     public static function released(Employable $model): self
     {
-        return new self("`{$model->getIdentifier()}` is alrady released.");
+        return new self("`{$model->getIdentifier()}` is already released.");
     }
 
     public static function retired(Employable $model): self

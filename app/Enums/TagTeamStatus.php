@@ -34,7 +34,7 @@ enum TagTeamStatus: string
             self::UNBOOKABLE => 'Unbookable',
             self::FUTURE_EMPLOYMENT => 'Awaiting Employment',
             self::SUSPENDED => 'Suspended',
-            self::RELEASED => 'Retired',
+            self::RELEASED => 'Released',
             self::RETIRED => 'Retired',
             self::UNEMPLOYED => 'Unemployed',
         };

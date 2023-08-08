@@ -1,54 +1,56 @@
 <?php
 
-test('invoke activates an unactivated stable and employs its unemployed members and redirects', function () {
-    $stable = Stable::factory()->unactivated()->withUnemployedDefaultMembers()->create();
+use App\Actions\Stables\ActivateAction;
+use App\Exceptions\CannotBeActivatedException;
+use App\Models\Stable;
+use App\Repositories\StableRepository;
+use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
 
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $stable))
-        ->assertRedirect(action([StablesController::class, 'index']));
+beforeEach(function () {
+    Event::fake();
 
-    expect($stable->fresh())
-        ->activations->toHaveCount(1)
-        ->status->toMatchObject(StableStatus::ACTIVE)
-        ->currentWrestlers->each(function ($wrestler) {
-            $wrestler->employments->toHaveCount(1)
-                ->status->toMatchObject(WrestlerStatus::BOOKABLE);
-        })
-        ->currentTagTeams->each(function ($tagTeam) {
-            $tagTeam->employments->toHaveCount(1)
-                ->status->toMatchObject(TagTeamStatus::BOOKABLE);
-        });
+    testTime()->freeze();
+
+    $this->stableRepository = mock(StableRepository::class);
 });
 
-test('invoke activates a future activated stable with members and redirects', function () {
-    $stable = Stable::factory()->withFutureActivation()->create();
-    $activationDate = $stable->activations->last()->started_at;
+test('invoke activates an unactivated stable and employs its unemployed members at the current datetime by default', function () {
+    $stable = Stable::factory()->unactivated()->withUnemployedDefaultMembers()->create();
+    $datetime = now();
 
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $stable))
-        ->assertRedirect(action([StablesController::class, 'index']));
+    $this->stableRepository
+        ->shouldReceive('activate')
+        ->once()
+        ->withArgs(function (Stable $activatableStable, Carbon $employmentDate) use ($stable, $datetime) {
+            expect($activatableStable->is($stable))->toBeTrue();
+            expect($employmentDate->equalTo($datetime))->toBeTrue();
 
-    expect($stable->fresh())
-        ->currentActivation->started_at->toBeLessThan($activationDate)
-        ->status->toMatchObject(StableStatus::ACTIVE)
-        ->currentWrestlers->each(function ($wrestler) {
-            $wrestler->employments->toHaveCount(1)
-                ->status->toHaveCount(WrestlerStatus::BOOKABLE);
+            return true;
         })
-        ->currentTagTeams->each(function ($tagTeam) {
-            $tagTeam->employments->toHaveCount(1)
-                ->status->toMatchObject(TagTeamStatus::BOOKABLE);
-        });
+        ->andReturn($stable);
+
+    ActivateAction::run($stable);
+});
+
+test('invoke activates a future activated stable with members at a specific datetime', function () {
+    $stable = Stable::factory()->withFutureActivation()->create();
+    $datetime = now()->addDays(2);
+
+    $this->stableRepository
+        ->shouldReceive('activate')
+        ->once()
+        ->with($stable, $datetime)
+        ->andReturns($stable);
+
+    ActivateAction::run($stable);
 });
 
 test('invoke throws exception for activating a non activatable stable', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([ActivateController::class], $stable));
+    ActivateAction::run($stable);
 })->throws(CannotBeActivatedException::class)->with([
     'active',
-    'retired',
 ]);

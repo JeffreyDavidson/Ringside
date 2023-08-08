@@ -28,12 +28,18 @@ readonly class TagTeamData
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
+        /** @var Wrestler $wrestlerA */
+        $wrestlerA = Wrestler::query()->find($request->input('wrestlerA'));
+
+        /** @var Wrestler $wrestlerB */
+        $wrestlerB = Wrestler::query()->find($request->input('wrestlerB'));
+
         return new self(
             $request->input('name'),
             $request->input('signature_move'),
             $request->date('start_date'),
-            Wrestler::query()->find($request->input('wrestlerA')),
-            Wrestler::query()->find($request->input('wrestlerB')),
+            $wrestlerA,
+            $wrestlerB,
         );
     }
 
@@ -42,12 +48,18 @@ readonly class TagTeamData
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
+        /** @var Wrestler $wrestlerA */
+        $wrestlerA = Wrestler::query()->find($request->input('wrestlerA'));
+
+        /** @var Wrestler $wrestlerB */
+        $wrestlerB = Wrestler::query()->find($request->input('wrestlerB'));
+
         return new self(
             $request->input('name'),
             $request->input('signature_move'),
             $request->date('start_date'),
-            Wrestler::query()->find($request->input('wrestlerA')),
-            Wrestler::query()->find($request->input('wrestlerB')),
+            $wrestlerA,
+            $wrestlerB,
         );
     }
 }

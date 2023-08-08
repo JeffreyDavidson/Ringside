@@ -24,11 +24,6 @@ test('the correct wrestlers are available to join an editable team', function ()
         ->hasAttached($wrestlerB = Wrestler::factory()->create(['name' => 'Shawn Michaels']))
         ->create();
 
-    $wrestlerA->currentTagTeam()->associate($tagTeam);
-    $wrestlerA->save();
-    $wrestlerB->currentTagTeam()->associate($tagTeam);
-    $wrestlerB->save();
-
     $unemployedWrestler = Wrestler::factory()->unemployed()->create(['name' => 'Hulk Hogan']);
     $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create(['name' => 'The Rock']);
     $bookableWrestlerNotOnBookableTagTeam = Wrestler::factory()->bookable()->create(['name' => 'Stone Cold Steve Austin']);

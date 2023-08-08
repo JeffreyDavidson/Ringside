@@ -9,17 +9,17 @@ use App\Http\Requests\Stables\UpdateRequest;
 use App\Models\Manager;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 readonly class StableData
 {
     /**
      * Create a new stable data instance.
      *
-     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
-     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @param  Collection<int, \App\Models\Manager>  $managers
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
      */
     public function __construct(
         public string $name,
@@ -35,12 +35,21 @@ readonly class StableData
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams */
+        $tagTeams = TagTeam::query()->findMany($request->collect('tag_teams'));
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers */
+        $wrestlers = Wrestler::query()->findMany($request->collect('wrestlers'));
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers */
+        $managers = Manager::query()->findMany($request->collect('managers'));
+
         return new self(
             $request->input('name'),
             $request->date('start_date'),
-            TagTeam::query()->findMany($request->collect('tag_teams')),
-            Wrestler::query()->findMany($request->collect('wrestlers')),
-            Manager::query()->findMany($request->collect('managers')),
+            $tagTeams,
+            $wrestlers,
+            $managers,
         );
     }
 
@@ -49,12 +58,21 @@ readonly class StableData
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams */
+        $tagTeams = TagTeam::query()->findMany($request->collect('tag_teams'));
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers */
+        $wrestlers = Wrestler::query()->findMany($request->collect('wrestlers'));
+
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers */
+        $managers = Manager::query()->findMany($request->collect('managers'));
+
         return new self(
             $request->input('name'),
             $request->date('start_date'),
-            TagTeam::query()->findMany($request->collect('tag_teams')),
-            Wrestler::query()->findMany($request->collect('wrestlers')),
-            Manager::query()->findMany($request->collect('managers')),
+            $tagTeams,
+            $wrestlers,
+            $managers,
         );
     }
 }
