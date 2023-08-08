@@ -25,7 +25,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('viewList', TagTeam::class);
 
-        return view('tagteams.index');
+        return view('tag-teams.index');
     }
 
     /**
@@ -35,7 +35,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('create', TagTeam::class);
 
-        return view('tagteams.create', [
+        return view('tag-teams.create', [
             'wrestlers' => WrestlerRepository::getAvailableWrestlersForNewTagTeam()->pluck('name', 'id'),
         ]);
     }
@@ -57,7 +57,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('view', $tagTeam);
 
-        return view('tagteams.show', [
+        return view('tag-teams.show', [
             'tagTeam' => $tagTeam,
         ]);
     }
@@ -69,7 +69,7 @@ class TagTeamsController extends Controller
     {
         $this->authorize('update', $tagTeam);
 
-        return view('tagteams.edit', [
+        return view('tag-teams.edit', [
             'tagTeam' => $tagTeam,
             'wrestlers' => WrestlerRepository::getAvailableWrestlersForExistingTagTeam($tagTeam)->pluck('name', 'id'),
         ]);

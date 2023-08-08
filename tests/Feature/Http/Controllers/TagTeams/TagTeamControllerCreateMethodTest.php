@@ -10,7 +10,7 @@ test('create returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([TagTeamsController::class, 'create']))
         ->assertStatus(200)
-        ->assertViewIs('tagteams.create')
+        ->assertViewIs('tag-teams.create')
         ->assertViewHas('wrestlers');
 });
 
@@ -33,7 +33,7 @@ test('the correct wrestlers are available to join a new tag team', function () {
     $this->actingAs(administrator())
         ->get(action([TagTeamsController::class, 'create']))
         ->assertStatus(200)
-        ->assertViewIs('tagteams.create')
+        ->assertViewIs('tag-teams.create')
         ->assertViewHas('wrestlers', fn ($data) => $data->keys()->all() == $wrestlers->modelKeys())
         ->assertSeeText('Hulk Hogan')
         ->assertSeeText('The Rock')

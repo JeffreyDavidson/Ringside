@@ -11,7 +11,7 @@ beforeEach(function () {
 test('show returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
-        ->assertViewIs('tagteams.show')
+        ->assertViewIs('tag-teams.show')
         ->assertViewHas('tagTeam', $this->tagTeam);
 });
 

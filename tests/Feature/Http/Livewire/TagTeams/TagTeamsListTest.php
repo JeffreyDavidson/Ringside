@@ -5,7 +5,7 @@ use Livewire\Livewire;
 
 test('it should return correct view', function () {
     Livewire::test(TagTeamsList::class)
-        ->assertViewIs('livewire.tagteams.tagteams-list');
+        ->assertViewIs('livewire.tag-teams.tag-teams-list');
 });
 
 test('it should pass correct data', function () {

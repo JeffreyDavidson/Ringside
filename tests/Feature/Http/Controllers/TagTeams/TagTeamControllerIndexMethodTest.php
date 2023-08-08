@@ -6,7 +6,7 @@ test('index returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([TagTeamsController::class, 'index']))
         ->assertOk()
-        ->assertViewIs('tagteams.index')
+        ->assertViewIs('tag-teams.index')
         ->assertSeeLivewire('tag-teams.tag-teams-list');
 });
 

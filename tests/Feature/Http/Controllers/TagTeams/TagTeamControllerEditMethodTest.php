@@ -14,7 +14,7 @@ test('edit returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([TagTeamsController::class, 'edit'], $this->tagTeam))
         ->assertStatus(200)
-        ->assertViewIs('tagteams.edit')
+        ->assertViewIs('tag-teams.edit')
         ->assertViewHas('tagTeam', $this->tagTeam);
 });
 
@@ -42,7 +42,7 @@ test('the correct wrestlers are available to join an editable team', function ()
     $this->actingAs(administrator())
         ->get(action([TagTeamsController::class, 'edit'], $tagTeam))
         ->assertStatus(200)
-        ->assertViewIs('tagteams.edit')
+        ->assertViewIs('tag-teams.edit')
         ->assertViewHas('wrestlers', function ($data) use ($wrestlers) {
             return $data->keys()->all() == $wrestlers->modelKeys() && count($wrestlers->modelKeys()) === 5;
         })
