@@ -62,7 +62,7 @@ class TagTeamsList extends BaseComponent
      */
     public function render(): View
     {
-        return view('livewire.tagteams.tagteams-list', [
+        return view('livewire.tag-teams.tag-teams-list', [
             'tagTeams' => $this->rows,
         ]);
     }

@@ -1,40 +1,44 @@
 <div class="card">
-    @include('livewire.tagteams.partials.header')
+    @include('livewire.tag-teams.partials.header')
     <div class="py-4 card-body">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
-                    <x-table.heading class="w-10px pe-2 sorting_disabled"><x-form.inputs.checkbox wire:model="selectPage" /></x-table.heading>
+                    <x-table.heading class="w-10px pe-2 sorting_disabled">
+                        <x-form.inputs.checkbox wire:model="selectPage"/>
+                    </x-table.heading>
                     <x-table.heading
-                        sortable
-                        multi-column
-                        wire:click="sortBy('name')"
-                        :direction="$sorts['name'] ?? null"
-                        class="min-w-125px sorting">Tag Team Name</x-table.heading>
+                            sortable
+                            multi-column
+                            wire:click="sortBy('name')"
+                            :direction="$sorts['name'] ?? null"
+                            class="min-w-125px sorting">Tag Team Name
+                    </x-table.heading>
                     <x-table.heading
-                        sortable
-                        multi-column
-                        wire:click="sortBy('status')"
-                        :direction="$sorts['status'] ?? null"
-                        class="min-w-125px sorting">Status</x-table.heading>
+                            sortable
+                            multi-column
+                            wire:click="sortBy('status')"
+                            :direction="$sorts['status'] ?? null"
+                            class="min-w-125px sorting">Status
+                    </x-table.heading>
                     <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
                     @forelse ($tagTeams as $tagTeam)
                         <x-table.row
-                            :class="$loop->odd ? 'odd' : 'even'"
-                            wire:loading.class.delay="opacity-50"
-                            wire:key="row-{{ $tagTeam->id }}"
+                                :class="$loop->odd ? 'odd' : 'even'"
+                                wire:loading.class.delay="opacity-50"
+                                wire:key="row-{{ $tagTeam->id }}"
                         >
                             <x-table.cell>
-                                <x-form.inputs.checkbox wire:model="selected" value="{{ $tagTeam->id }}" />
+                                <x-form.inputs.checkbox wire:model="selected" value="{{ $tagTeam->id }}"/>
                             </x-table.cell>
 
                             <x-table.cell>
                                 <a
-                                    class="mb-1 text-gray-800 text-hover-primary"
-                                    href="{{ route('tag-teams.show', $tagTeam) }}"
+                                        class="mb-1 text-gray-800 text-hover-primary"
+                                        href="{{ route('tag-teams.show', $tagTeam) }}"
                                 >{{ $tagTeam->name }}</a>
                             </x-table.cell>
 
@@ -47,7 +51,7 @@
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
-                                @include('livewire.tagteams.partials.action-cell')
+                                @include('livewire.tag-teams.partials.action-cell')
                             </x-table.cell>
 
                         </x-table.row>
