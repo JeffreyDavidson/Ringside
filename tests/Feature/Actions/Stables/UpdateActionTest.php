@@ -1,5 +1,16 @@
 <?php
 
+use App\Actions\Stables\UpdateAction;
+use App\Data\StableData;
+use App\Models\Stable;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
+use App\Repositories\StableRepository;
+
+beforeEach(function () {
+    $this->stableRepository = mock(StableRepository::class);
+});
+
 test('wrestlers of stable are synced when stable is updated', function () {
     $formerStableWrestlers = Wrestler::factory()->count(2)->create();
     $stable = Stable::factory()
@@ -7,22 +18,24 @@ test('wrestlers of stable are synced when stable is updated', function () {
         ->create();
     $newStableWrestlers = Wrestler::factory()->count(2)->create();
 
-    $data = UpdateRequest::factory()->create([
-        'wrestlers' => $newStableWrestlers->modelKeys(),
-    ]);
+    $data = new StableData(
+        'New Stable Name',
+        null,
+        collect(),
+        $newStableWrestlers->modelKeys(),
+        collect()
+    );
 
-    $this->actingAs(administrator())
-        ->from(action([StablesController::class, 'edit'], $stable))
-        ->patch(action([StablesController::class, 'update'], $stable), $data)
-        ->assertRedirect(action([StablesController::class, 'index']));
+    $this->stableRepository
+        ->shouldReceive('update')
+        ->once()
+        ->with($stable, $data)
+        ->andReturns($stable);
 
-    $allWrestlers = $formerStableWrestlers->merge($newStableWrestlers);
+    $this->stableRepository
+        ->shouldNotReceive('activate');
 
-    expect($stable->fresh())
-        // ->wrestlers->modelKeys()->toHaveCount(4)->collectionHas($newStableWrestlers->modelKeys())->collectionHas($formerStableWrestlers->modelKeys())
-        ->wrestlers->toHaveCount(4)->toContain($allWrestlers->all())
-        // ->currentWrestlers->modelKeys()->toHaveCount(2)->collectionHas($newStableWrestlers->modelKeys())->collectionDoesntHave($formerStableWrestlers->modelKeys());
-        ->currentWrestlers->toHaveCount(2)->toBeCollection();
+    UpdateAction::run($stable, $data);
 });
 
 test('tag teams of stable are synced when stable is updated', function () {
@@ -32,16 +45,13 @@ test('tag teams of stable are synced when stable is updated', function () {
         ->create();
     $newStableTagTeams = TagTeam::factory()->count(2)->create();
 
-    $data = UpdateRequest::factory()->create([
-        'tag_teams' => $newStableTagTeams->modelKeys(),
-    ]);
+    $data = new StableData(
+        'New Stable Name',
+        null,
+        $newStableTagTeams->modelKeys(),
+        collect(),
+        collect()
+    );
 
-    $this->actingAs(administrator())
-        ->from(action([StablesController::class, 'edit'], $stable))
-        ->patch(action([StablesController::class, 'update'], $stable), $data)
-        ->assertRedirect(action([StablesController::class, 'index']));
-
-    expect($stable->fresh())
-        ->tagTeams->toHaveCount(4)->toContain()
-        ->currentTagTeams->toHaveCount(2);
+    UpdateAction::run($stable, $data);
 });

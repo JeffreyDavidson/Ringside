@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Models\Event;
+
 class EventPresenter extends Presenter
 {
     /**
      * The event to be presented.
-     *
-     * @var \App\Models\Event
      */
-    protected $model;
+    protected Event $model;
 
     /**
      * Retrieve the formatted event date.

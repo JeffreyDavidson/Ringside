@@ -30,7 +30,7 @@ readonly class EventData
         return new self(
             $request->input('name'),
             $request->date('date'),
-            $request->input('venue_id') ? Venue::whereKey($request->input('venue_id'))->sole() : null,
+            $request->input('venue_id') ? Venue::query()->whereKey($request->input('venue_id'))->sole() : null,
             $request->input('preview')
         );
     }
@@ -43,7 +43,7 @@ readonly class EventData
         return new self(
             $request->input('name'),
             $request->date('date'),
-            $request->input('venue_id') ? Venue::whereKey($request->input('venue_id'))->sole() : null,
+            $request->input('venue_id') ? Venue::query()->whereKey($request->input('venue_id'))->sole() : null,
             $request->input('preview')
         );
     }

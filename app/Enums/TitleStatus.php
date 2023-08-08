@@ -30,7 +30,7 @@ enum TitleStatus: string
             self::INACTIVE => 'Inactive',
             self::FUTURE_ACTIVATION => 'Awaiting Activation',
             self::RETIRED => 'Retired',
-            self::UNACTIVATED => 'Unactived',
+            self::UNACTIVATED => 'Unactivated',
         };
     }
 }

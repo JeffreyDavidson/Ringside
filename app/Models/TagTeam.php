@@ -57,6 +57,15 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
         'status' => TagTeamStatus::class,
     ];
 
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'status' => TagTeamStatus::UNEMPLOYED->value,
+    ];
+
     public static function query(): TagTeamBuilder
     {
         return parent::query();

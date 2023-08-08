@@ -26,8 +26,8 @@ readonly class ManagerData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            (string) $request->input('first_name'),
-            (string) $request->input('last_name'),
+            $request->input('first_name'),
+            $request->input('last_name'),
             $request->date('start_date')
         );
     }
@@ -38,8 +38,8 @@ readonly class ManagerData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            (string) $request->input('first_name'),
-            (string) $request->input('last_name'),
+            $request->input('first_name'),
+            $request->input('last_name'),
             $request->date('start_date')
         );
     }
