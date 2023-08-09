@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Models\Manager;
 use App\Models\StableMember;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -74,6 +75,36 @@ trait HasMembers
     public function previousTagTeams(): MorphToMany
     {
         return $this->tagTeams()
+            ->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * Get the tag teams belonging to the stable.
+     */
+    public function managers(): MorphToMany
+    {
+        return $this->morphedByMany(Manager::class, 'member', 'stable_members')
+            ->using(StableMember::class)
+            ->withPivot(['joined_at', 'left_at']);
+    }
+
+    /**
+     * Get all current tag teams that are members of the stable.
+     *
+     * @return MorphToMany<Manager>
+     */
+    public function currentManagers(): MorphToMany
+    {
+        return $this->managers()
+            ->wherePivotNull('left_at');
+    }
+
+    /**
+     * Get all previous tag teams that were members of the stable.
+     */
+    public function previousManagers(): MorphToMany
+    {
+        return $this->managers()
             ->wherePivotNotNull('left_at');
     }
 

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::createOrReplaceMergeView(
             'current_stable_members',
-            [(new Stable)->currentTagTeams(), (new Stable)->currentWrestlers()]
+            [(new Stable)->currentTagTeams(), (new Stable)->currentWrestlers(), (new Stable)->currentManagers()]
         );
     }
 };

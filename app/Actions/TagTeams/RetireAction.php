@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -29,7 +30,8 @@ class RetireAction extends BaseTagTeamAction
             ReinstateAction::run($tagTeam, $retirementDate);
         }
 
-        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
+        $tagTeam->currentWrestlers
+            ->each(fn (Wrestler $wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
 
         $this->tagTeamRepository->release($tagTeam, $retirementDate);
         $this->tagTeamRepository->retire($tagTeam, $retirementDate);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Repositories\ManagerRepository;
 use App\Repositories\StableRepository;
 use App\Repositories\TagTeamRepository;
 use App\Repositories\WrestlerRepository;
@@ -16,7 +17,8 @@ abstract class BaseStableAction
     public function __construct(
         protected StableRepository $stableRepository,
         protected TagTeamRepository $tagTeamRepository,
-        protected WrestlerRepository $wrestlerRepository
+        protected WrestlerRepository $wrestlerRepository,
+        protected ManagerRepository $managerRepository
     ) {
     }
 }

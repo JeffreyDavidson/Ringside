@@ -23,17 +23,15 @@ class TitlesList extends BaseComponent
 
     /**
      * Determines if the filters should be shown.
-     *
-     * @var bool
      */
-    public $showFilters = false;
+    public bool $showFilters = false;
 
     /**
      * Shows list of accepted filters and direction to be displayed.
      *
      * @var array<string, string>
      */
-    public $filters = [
+    public array $filters = [
         'search' => '',
     ];
 
@@ -43,7 +41,7 @@ class TitlesList extends BaseComponent
     public function getRowsQueryProperty(): Builder
     {
         $query = Title::query()
-            ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
+            ->when($this->filters['search'], fn (Builder $query, string $search) => $query->where('name', 'like', '%'.$search.'%'))
             ->oldest('name');
 
         return $this->applySorting($query);

@@ -38,6 +38,7 @@
         "pestphp/pest-plugin-laravel": "^2.0",
         "pestphp/pest-plugin-livewire": "^2.0",
         "pestphp/pest-plugin-mock": "^2.0",
+        "pestphp/pest-plugin-type-coverage": "^2.0",
         "spatie/laravel-ignition": "^2.0",
         "spatie/laravel-ray": "^1.32",
         "worksome/request-factories": "^3.1"

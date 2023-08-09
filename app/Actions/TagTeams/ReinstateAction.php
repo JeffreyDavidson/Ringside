@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Wrestlers\ReinstateAction as WrestlersReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -26,7 +27,7 @@ class ReinstateAction extends BaseTagTeamAction
         $reinstatementDate ??= now();
 
         $tagTeam->currentWrestlers
-            ->each(fn ($wrestler) => WrestlersReinstateAction::run($wrestler, $reinstatementDate));
+            ->each(fn (Wrestler $wrestler) => WrestlersReinstateAction::run($wrestler, $reinstatementDate));
 
         $this->tagTeamRepository->reinstate($tagTeam, $reinstatementDate);
     }
