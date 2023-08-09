@@ -27,7 +27,7 @@ class TitleChampionshipsList extends BaseComponent
      *
      * @var array<string, string>
      */
-    public $filters = [
+    public array $filters = [
         'search' => '',
     ];
 

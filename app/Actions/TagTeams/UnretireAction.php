@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -27,7 +28,8 @@ class UnretireAction extends BaseTagTeamAction
 
         $this->tagTeamRepository->unretire($tagTeam, $unretiredDate);
 
-        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersUnretireAction::run($wrestler, $unretiredDate));
+        $tagTeam->currentWrestlers
+            ->each(fn (Wrestler $wrestler) => WrestlersUnretireAction::run($wrestler, $unretiredDate));
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
     }

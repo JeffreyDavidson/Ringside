@@ -14,7 +14,14 @@ beforeEach(function () {
 });
 
 test('it creates a wrestler', function () {
-    $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, null);
+    $data = new WrestlerData(
+        'Example Wrestler Name',
+        70,
+        220,
+        'Laraville, New York',
+        null,
+        null
+    );
 
     $this->wrestlerRepository
         ->shouldReceive('create')

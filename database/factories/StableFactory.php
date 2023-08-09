@@ -7,6 +7,7 @@ namespace Database\Factories;
 use App\Enums\StableStatus;
 use App\Models\Activation;
 use App\Models\Employment;
+use App\Models\Manager;
 use App\Models\Retirement;
 use App\Models\Stable;
 use App\Models\TagTeam;
@@ -126,6 +127,7 @@ class StableFactory extends Factory
         return $this
             ->hasAttached(Wrestler::factory()->has(Employment::factory()->started(Carbon::yesterday())), ['joined_at' => now()])
             ->hasAttached(TagTeam::factory()->has(Employment::factory()->started(Carbon::yesterday())), ['joined_at' => now()])
+            ->hasAttached(Manager::factory()->has(Employment::factory()->started(Carbon::yesterday())), ['joined_at' => now()])
             ->afterCreating(function (Stable $stable) {
                 $stable->save();
             });

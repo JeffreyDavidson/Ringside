@@ -23,17 +23,15 @@ class DeletedEventsList extends BaseComponent
 
     /**
      * Determines if the filters should be shown.
-     *
-     * @var bool
      */
-    public $showFilters = false;
+    public bool $showFilters = false;
 
     /**
      * Shows list of accepted filters and direction to be displayed.
      *
      * @var array<string, string>
      */
-    public $filters = [
+    public array $filters = [
         'search' => '',
     ];
 

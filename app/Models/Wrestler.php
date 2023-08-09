@@ -74,7 +74,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder($query)
+    public function newEloquentBuilder(Builder $query)
     {
         return new WrestlerBuilder($query);
     }

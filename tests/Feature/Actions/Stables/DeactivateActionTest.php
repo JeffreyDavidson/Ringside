@@ -1,26 +1,73 @@
 <?php
 
-test('invoke deactivates an active stable and its members and redirects', function () {
+use App\Actions\Stables\DeactivateAction;
+use App\Exceptions\CannotBeDeactivatedException;
+use App\Models\Stable;
+use App\Repositories\StableRepository;
+use Illuminate\Support\Carbon;
+use function Pest\Laravel\mock;
+use function Spatie\PestPluginTestTime\testTime;
+
+beforeEach(function () {
+    Event::fake();
+
+    testTime()->freeze();
+
+    $this->stableRepository = mock(StableRepository::class);
+});
+
+test('it deactivates a stable at the current datetime by default', function () {
     $stable = Stable::factory()->active()->create();
+    $datetime = now();
 
-    $this->actingAs(administrator())
-        ->patch(action([DeactivateController::class], $stable))
-        ->assertRedirect(action([StablesController::class, 'index']));
+    $this->stableRepository
+        ->shouldReceive('deactivate')
+        ->once()
+        ->withArgs(function (Stable $deactivatableStable, Carbon $deactivationDate) use ($stable, $datetime) {
+            expect($deactivatableStable->is($stable))->toBeTrue();
+            expect($deactivationDate->equalTo($datetime))->toBeTrue();
 
-    expect($stable->fresh())
-        ->activations->last()->ended_at->not->toBeNull()
-        ->status->toMatchObject(StableStatus::INACTIVE)
-        ->currentWrestlers->each(fn ($wrestler) => $wrestler->status->toMatchObject(WrestlerStatus::RELEASED))
-        ->currentTagTeams->each(fn ($tagTeam) => $tagTeam->status->toMatchObject(TagTeamStatus::RELEASED));
+            return true;
+        })
+        ->andReturn($stable);
+
+    $this->stableRepository
+        ->shouldReceive('disassemble')
+        ->once()
+        ->withArgs(function (Stable $deactivatableStable, Carbon $deactivationDate) use ($stable, $datetime) {
+            expect($deactivatableStable->is($stable))->toBeTrue();
+            expect($deactivationDate->equalTo($datetime))->toBeTrue();
+
+            return true;
+        })
+        ->andReturn($stable);
+
+    DeactivateAction::run($stable);
+});
+
+test('it deactivates a stable at a specific datetime', function () {
+    $stable = Stable::factory()->active()->create();
+    $datetime = now()->addDays(2);
+
+    $this->stableRepository
+        ->shouldReceive('deactivate')
+        ->once()
+        ->with($stable, $datetime)
+        ->andReturn($stable);
+
+    $this->stableRepository
+        ->shouldReceive('disassemble')
+        ->once()
+        ->with($stable, $datetime)
+        ->andReturn($stable);
+
+    DeactivateAction::run($stable, $datetime);
 });
 
 test('invoke throws exception for deactivating a non deactivatable stable', function ($factoryState) {
-    $this->withoutExceptionHandling();
-
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    $this->actingAs(administrator())
-        ->patch(action([DeactivateController::class], $stable));
+    DeactivateAction::run($stable);
 })->throws(CannotBeDeactivatedException::class)->with([
     'inactive',
     'retired',

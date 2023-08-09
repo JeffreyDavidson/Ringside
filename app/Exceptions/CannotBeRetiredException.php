@@ -14,6 +14,11 @@ class CannotBeRetiredException extends Exception
         return new self("`{$model->getIdentifier()}` is unemployed and cannot be retired.");
     }
 
+    public static function unactivated(Retirable $model): self
+    {
+        return new self("`{$model->getIdentifier()}` is unactivated and cannot be retired.");
+    }
+
     public static function hasFutureEmployment(Retirable $model): self
     {
         return new self("`{$model->getIdentifier()}` has not been officially employed and cannot be retired.");
@@ -22,5 +27,10 @@ class CannotBeRetiredException extends Exception
     public static function retired(Retirable $model): self
     {
         return new self("`{$model->getIdentifier()}` is already retired.");
+    }
+
+    public static function hasFutureActivation(Retirable $model): self
+    {
+        return new self("`{$model->getIdentifier()}` has not been officially activated and cannot be retired.");
     }
 }

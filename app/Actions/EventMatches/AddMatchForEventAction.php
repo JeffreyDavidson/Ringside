@@ -7,6 +7,7 @@ namespace App\Actions\EventMatches;
 use App\Data\EventMatchData;
 use App\Models\Event;
 use App\Models\EventMatch;
+use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddMatchForEventAction extends BaseEventMatchAction
@@ -22,7 +23,7 @@ class AddMatchForEventAction extends BaseEventMatchAction
 
         AddRefereesToMatchAction::run($createdMatch, $eventMatchData->referees);
 
-        $eventMatchData->titles->whenNotEmpty(function ($titles) use ($createdMatch) {
+        $eventMatchData->titles->whenNotEmpty(function (Collection $titles) use ($createdMatch) {
             AddTitlesToMatchAction::run($createdMatch, $titles);
         });
 

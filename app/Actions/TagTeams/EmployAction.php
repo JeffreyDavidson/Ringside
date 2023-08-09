@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -25,7 +26,7 @@ class EmployAction extends BaseTagTeamAction
 
         $startDate ??= now();
 
-        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlersEmployAction::run($wrestler, $startDate));
+        $tagTeam->currentWrestlers->each(fn (Wrestler $wrestler) => WrestlersEmployAction::run($wrestler, $startDate));
 
         $this->tagTeamRepository->employ($tagTeam, $startDate);
     }

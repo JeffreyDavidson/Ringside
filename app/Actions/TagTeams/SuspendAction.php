@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Wrestlers\SuspendAction as WrestlerSuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -25,7 +26,8 @@ class SuspendAction extends BaseTagTeamAction
 
         $suspensionDate ??= now();
 
-        $tagTeam->currentWrestlers->each(fn ($wrestler) => WrestlerSuspendAction::run($wrestler, $suspensionDate));
+        $tagTeam->currentWrestlers
+            ->each(fn (Wrestler $wrestler) => WrestlerSuspendAction::run($wrestler, $suspensionDate));
 
         $this->tagTeamRepository->suspend($tagTeam, $suspensionDate);
     }

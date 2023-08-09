@@ -16,15 +16,15 @@ class AddMembersAction extends BaseStableAction
     /**
      * Add members to a given stable.
      *
-     * @param  \App\Models\Stable $stable
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
-     * @param  \Illuminate\Support\Carbon|null $joinedDate
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
      */
     public function handle(
         Stable $stable,
         Collection $wrestlers,
         Collection $tagTeams,
+        Collection $managers,
         Carbon $joinedDate = null
     ): void {
         $joinedDate ??= now();
@@ -35,6 +35,10 @@ class AddMembersAction extends BaseStableAction
 
         if ($tagTeams->isNotEmpty()) {
             $this->stableRepository->addTagTeams($stable, $tagTeams, $joinedDate);
+        }
+
+        if ($managers->isNotEmpty()) {
+            $this->stableRepository->addManagers($stable, $managers, $joinedDate);
         }
     }
 }

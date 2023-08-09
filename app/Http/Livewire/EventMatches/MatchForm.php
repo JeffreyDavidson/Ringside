@@ -32,7 +32,7 @@ class MatchForm extends BaseComponent
     /**
      * View to render for each match type.
      */
-    public $subViewToUse;
+    public View $subViewToUse;
 
     /**
      * Undocumented function

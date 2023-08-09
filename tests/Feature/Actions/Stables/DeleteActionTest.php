@@ -1,9 +1,21 @@
 <?php
 
-test('deletes a stable and redirects', function () {
-    $this->actingAs(administrator())
-        ->delete(action([StablesController::class, 'destroy'], $this->stable))
-        ->assertRedirect(action([StablesController::class, 'index']));
+use App\Actions\Stables\DeleteAction;
+use App\Models\Stable;
+use App\Repositories\StableRepository;
+use function Pest\Laravel\mock;
 
-    $this->assertSoftDeleted($this->stable);
+beforeEach(function () {
+    $this->stableRepository = mock(StableRepository::class);
+});
+
+test('it deletes a stable', function () {
+    $stable = Stable::factory()->create();
+
+    $this->stableRepository
+        ->shouldReceive('delete')
+        ->once()
+        ->with($stable);
+
+    DeleteAction::run($stable);
 });
