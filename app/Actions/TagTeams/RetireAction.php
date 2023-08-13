@@ -33,7 +33,10 @@ class RetireAction extends BaseTagTeamAction
         $tagTeam->currentWrestlers
             ->each(fn (Wrestler $wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
 
-        $this->tagTeamRepository->release($tagTeam, $retirementDate);
+        if ($tagTeam->isCurrentlyEmployed()) {
+            $this->tagTeamRepository->release($tagTeam, $retirementDate);
+        }
+        
         $this->tagTeamRepository->retire($tagTeam, $retirementDate);
     }
 
@@ -48,7 +51,7 @@ class RetireAction extends BaseTagTeamAction
             throw CannotBeRetiredException::unemployed($tagTeam);
         }
 
-        if ($tagTeam->isReleased()) {
+        if ($tagTeam->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment($tagTeam);
         }
 

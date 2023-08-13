@@ -6,7 +6,6 @@ namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\WrestlerRequestFactory;
@@ -44,14 +43,13 @@ class UpdateRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                new LetterSpace,
                 'min:3',
                 Rule::unique('wrestlers')->ignore($wrestler->id),
             ],
             'feet' => ['required', 'integer', 'max:8'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
-            'hometown' => ['required', 'string', new LetterSpace],
+            'hometown' => ['required', 'string'],
             'signature_move' => ['nullable', 'string', 'regex:/^[a-zA-Z\s\']+$/'],
             'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($wrestler)],
         ];

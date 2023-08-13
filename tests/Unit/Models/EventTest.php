@@ -16,12 +16,6 @@ test('an event has a date', function () {
     expect($event)->date->toDateTimeString()->toBe('2022-10-11 07:00:00');
 });
 
-test('an event date can be formatted', function () {
-    $event = Event::factory()->create(['date' => '2020-03-05 00:00:00']);
-
-    expect($event)->present()->date->toEqual('March 5, 2020');
-});
-
 test('an event takes place at a venue', function () {
     $venue = Venue::factory()->create();
     $event = Event::factory()->create(['venue_id' => $venue->id]);

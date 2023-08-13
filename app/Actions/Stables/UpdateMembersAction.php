@@ -19,13 +19,15 @@ class UpdateMembersAction extends BaseStableAction
      * @param  \App\Models\Stable $stable
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
      */
-    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams): void
+    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams, Collection $managers): void
     {
         $now = now();
 
         $this->updateWrestlers($stable, $wrestlers, $now);
         $this->updateTagTeams($stable, $tagTeams, $now);
+        $this->updateManagers($stable, $managers, $now);
     }
 
     /**
@@ -67,6 +69,27 @@ class UpdateMembersAction extends BaseStableAction
 
             $this->stableRepository->removeTagTeams($stable, $formerTagTeams, $now);
             $this->stableRepository->addTagTeams($stable, $newTagTeams, $now);
+        }
+    }
+
+    /**
+     * Update managers attached to a stable.
+     *
+     * @param  \App\Models\Stable $stable
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
+     * @param  \Illuminate\Support\Carbon  $now
+     */
+    protected function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
+    {
+        if ($stable->currentManagers->isEmpty()) {
+            $this->stableRepository->addManagers($stable, $managers, $now);
+        } else {
+            $currentManagers = $stable->currentManagers;
+            $formerManagers = $currentManagers->diff($managers);
+            $newManagers = $managers->diff($currentManagers);
+
+            $this->stableRepository->removeManagers($stable, $formerManagers, $now);
+            $this->stableRepository->addManagers($stable, $newManagers, $now);
         }
     }
 }

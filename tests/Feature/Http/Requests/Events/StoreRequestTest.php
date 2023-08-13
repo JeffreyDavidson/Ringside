@@ -2,7 +2,6 @@
 
 use App\Http\Requests\Events\StoreRequest;
 use App\Models\Event;
-use App\Rules\LetterSpace;
 use Tests\RequestFactories\EventRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
@@ -33,15 +32,7 @@ test('event name must be a string', function () {
         ->assertFailsValidation(['name' => 'string']);
 });
 
-test('event name can only be letters and spaces', function () {
-    $this->createRequest(StoreRequest::class)
-        ->validate(EventRequestFactory::new()->create([
-            'name' => 'Invalid!%%# Event Name',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
-});
-
-test('event name must be at leaset 3 characters', function () {
+test('event name must be at least 3 characters', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(EventRequestFactory::new()->create([
             'name' => 'ab',

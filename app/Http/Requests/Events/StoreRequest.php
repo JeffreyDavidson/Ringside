@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Events;
 
 use App\Models\Event;
-use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\EventRequestFactory;
@@ -33,7 +32,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('events', 'name')],
+            'name' => ['required', 'string', 'min:3', Rule::unique('events', 'name')],
             'date' => ['nullable', 'string', 'date'],
             'venue_id' => ['nullable', 'required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string', 'min:3'],

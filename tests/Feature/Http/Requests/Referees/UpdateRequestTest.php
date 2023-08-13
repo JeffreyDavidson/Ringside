@@ -3,10 +3,9 @@
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use App\Rules\LetterSpace;
 use Illuminate\Support\Carbon;
-use function Pest\Laravel\mock;
 use Tests\RequestFactories\RefereeRequestFactory;
+use function Pest\Laravel\mock;
 
 test('an administrator is authorized to make this request', function () {
     $referee = Referee::factory()->create();
@@ -48,23 +47,6 @@ test('referee first name must be a string', function () {
         ->assertFailsValidation(['first_name' => 'string']);
 });
 
-test('referee first name must contain only letters and spaces', function () {
-    $referee = Referee::factory()->create();
-
-    mock(LetterSpace::class)
-        ->shouldReceive('validate')
-        ->with('first_name', 1, function ($closure) {
-            $closure();
-        });
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('referee', $referee)
-        ->validate(RefereeRequestFactory::new()->create([
-            'first_name' => 12345,
-        ]))
-        ->assertFailsValidation(['first_name' => LetterSpace::class]);
-});
-
 test('referee first name must be at least 3 characters', function () {
     $referee = Referee::factory()->create();
 
@@ -96,23 +78,6 @@ test('referee last name must be a string', function () {
             'last_name' => 12345,
         ]))
         ->assertFailsValidation(['last_name' => 'string']);
-});
-
-test('referee last name must contain only letters and spaces', function () {
-    $referee = Referee::factory()->create();
-
-    mock(LetterSpace::class)
-        ->shouldReceive('validate')
-        ->with('last_name', 1, function ($closure) {
-            $closure();
-        });
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('referee', $referee)
-        ->validate(RefereeRequestFactory::new()->create([
-            'last_name' => 12345,
-        ]))
-        ->assertFailsValidation(['last_name' => LetterSpace::class]);
 });
 
 test('referee last name must be at least 3 characters', function () {

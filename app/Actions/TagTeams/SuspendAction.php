@@ -50,5 +50,13 @@ class SuspendAction extends BaseTagTeamAction
         if ($tagTeam->isSuspended()) {
             throw CannotBeSuspendedException::suspended($tagTeam);
         }
+
+        if ($tagTeam->isReleased()) {
+            throw CannotBeSuspendedException::released($tagTeam);
+        }
+
+        if ($tagTeam->isRetired()) {
+            throw CannotBeSuspendedException::retired($tagTeam);
+        }
     }
 }

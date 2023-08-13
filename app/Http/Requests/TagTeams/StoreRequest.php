@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
-use App\Rules\LetterSpace;
 use App\Rules\WrestlerCanJoinNewTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -34,24 +33,28 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('tag_teams', 'name')],
+            'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams', 'name')],
             'signature_move' => ['nullable', 'string', 'regex:/^[a-zA-Z\s\']+$/'],
             'start_date' => ['nullable', 'string', 'date'],
             'wrestlerA' => [
                 'nullable',
+                'bail',
                 'integer',
                 'different:wrestlerB',
                 'required_with:start_date',
                 'required_with:wrestlerB',
+                'required_with:signature_move',
                 Rule::exists('wrestlers', 'id'),
                 new WrestlerCanJoinNewTagTeam,
             ],
             'wrestlerB' => [
                 'nullable',
+                'bail',
                 'integer',
                 'different:wrestlerA',
                 'required_with:start_date',
                 'required_with:wrestlerA',
+                'required_with:signature_move',
                 Rule::exists('wrestlers', 'id'),
                 new WrestlerCanJoinNewTagTeam,
             ],

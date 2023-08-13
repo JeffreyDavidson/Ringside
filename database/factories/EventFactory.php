@@ -76,7 +76,10 @@ class EventFactory extends Factory
      */
     public function scheduledOn(string $date): static
     {
-        return $this->state(['date' => $date]);
+        return $this->state([
+            'date' => $date,
+            'venue_id' => Venue::factory(),
+        ]);
     }
 
     /**

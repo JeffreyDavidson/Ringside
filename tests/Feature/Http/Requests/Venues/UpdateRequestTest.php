@@ -44,17 +44,6 @@ test('venue name must be a string', function () {
         ->assertFailsValidation(['name' => 'string']);
 });
 
-test('venue name can only be letters and spaces', function () {
-    $venue = Venue::factory()->create();
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('venue', $venue)
-        ->validate(VenueRequestFactory::new()->create([
-            'name' => 'Invalid!%%# Name Venue',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
-});
-
 test('venue name must be at least 3 characters', function () {
     $venue = Venue::factory()->create();
 

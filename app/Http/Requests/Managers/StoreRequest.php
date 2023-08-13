@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Managers;
 
 use App\Models\Manager;
-use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\ManagerRequestFactory;
 
@@ -32,8 +31,8 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string', new LetterSpace, 'min:3'],
-            'last_name' => ['required', 'string', new LetterSpace, 'min:3'],
+            'first_name' => ['required', 'string', 'min:3'],
+            'last_name' => ['required', 'string', 'min:3'],
             'start_date' => ['nullable', 'string', 'date'],
         ];
     }

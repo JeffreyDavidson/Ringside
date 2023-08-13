@@ -1,6 +1,6 @@
 <?php
 
-use App\Builders\WrestlerQueryBuilder;
+use App\Builders\WrestlerBuilder;
 use App\Enums\WrestlerStatus;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
@@ -55,11 +55,7 @@ test('a wrestler has a status', function () {
 test('a wrestler is unemployed by default', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler)->status->toMatchObject(WrestlerStatus::UNEMPLOYED);
-});
-
-test('a wrestler is a single roster member', function () {
-    expect(get_parent_class(Wrestler::class))->toBe(SingleRosterMember::class);
+    expect($wrestler->status->value)->toBe(WrestlerStatus::UNEMPLOYED->value);
 });
 
 test('a wrestler implements bookable interface', function () {
@@ -107,11 +103,11 @@ test('a wrestler uses soft deleted trait', function () {
 });
 
 test('a wrestler has its own eloquent builder', function () {
-    expect(new Wrestler())->query()->toBeInstanceOf(WrestlerQueryBuilder::class);
+    expect(new Wrestler())->query()->toBeInstanceOf(WrestlerBuilder::class);
 });
 
 test('a wrestler has a display name', function () {
     $wrestler = Wrestler::factory()->create(['name' => 'Hulk Hogan']);
 
-    expect($wrestler)->displayName->toBe('Hulk Hogan');
+    expect($wrestler)->getIdentifier()->toBe('Hulk Hogan');
 });

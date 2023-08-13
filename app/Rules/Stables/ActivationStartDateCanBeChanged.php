@@ -13,7 +13,6 @@ class ActivationStartDateCanBeChanged implements ValidationRule
 {
     public function __construct(private Stable $stable)
     {
-        $this->stable = $stable;
     }
 
     /**

@@ -17,7 +17,6 @@ use App\Models\Contracts\TagTeamMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
@@ -74,7 +73,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Create a new Eloquent query builder for the model.
      */
-    public function newEloquentBuilder(Builder $query)
+    public function newEloquentBuilder($query)
     {
         return new WrestlerBuilder($query);
     }

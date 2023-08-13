@@ -55,14 +55,6 @@ class Event extends Model
     }
 
     /**
-     * Present the event model.
-     */
-    public function present(): EventPresenter
-    {
-        return new EventPresenter($this);
-    }
-
-    /**
      * Retrieve the venue of the event.
      */
     public function venue(): BelongsTo

@@ -26,4 +26,14 @@ class TagTeamBuilder extends Builder
 
         return $this;
     }
+
+    /**
+     * Scope a query to include bookable tag teams.
+     */
+    public function unbookable(): self
+    {
+        $this->where('status', 'unbookable');
+
+        return $this;
+    }
 }

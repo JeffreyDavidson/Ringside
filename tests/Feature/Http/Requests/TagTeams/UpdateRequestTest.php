@@ -3,6 +3,7 @@
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\Employment;
 use App\Models\TagTeam;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TagTeamRequestFactory;
 
@@ -66,7 +67,7 @@ test('tag team name must be unique', function () {
         ->validate(TagTeamRequestFactory::new()->create([
             'name' => 'Example Tag Team Name B',
         ]))
-        ->assertFailsValidation(['name' => 'unique:tag_teams,NULL,1,id']);
+        ->assertFailsValidation(['name' => 'unique:tag_teams,NULL,'.$tagTeamA->id.',id']);
 });
 
 test('tag team signature move is optional if wrestlers are not provided', function () {
@@ -133,7 +134,7 @@ test('tag team start date cannot be changed if employment start date has past', 
         ->validate(TagTeamRequestFactory::new()->create([
             'start_date' => Carbon::now()->toDateTImeString(),
         ]))
-        ->assertFailsValidation(['start_date' => 'app\rules\employmentstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => EmploymentStartDateCanBeChanged::class]);
 });
 
 test('tag_team_start_date_can_be_changed_if_employment_start_date_is_in_the_future', function () {

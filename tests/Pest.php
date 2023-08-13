@@ -18,7 +18,9 @@ use Tests\ValidatesRequests;
 |
 */
 
-uses(TestCase::class, CreatesApplication::class, RefreshDatabase::class)->in('Feature', 'Unit');
+uses(TestCase::class, CreatesApplication::class, RefreshDatabase::class)
+    ->in('Feature', 'Integration', 'Unit');
+
 uses(ValidatesRequests::class)->in('Feature/Http/Requests');
 
 /*

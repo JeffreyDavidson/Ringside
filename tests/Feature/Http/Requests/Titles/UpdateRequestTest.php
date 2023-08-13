@@ -4,8 +4,8 @@ use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
-use function Pest\Laravel\mock;
 use Tests\RequestFactories\TitleRequestFactory;
+use function Pest\Laravel\mock;
 
 test('an administrator is authorized to make this request', function () {
     $title = Title::factory()->create();
@@ -45,23 +45,6 @@ test('title name must be a string', function () {
             'name' => 123,
         ]))
         ->assertFailsValidation(['name' => 'string']);
-});
-
-test('title name can only be letters and spaces', function () {
-    $title = Title::factory()->create();
-
-    mock(LetterSpace::class)
-        ->shouldReceive('validate')
-        ->with('name', 1, function ($closure) {
-            $closure();
-        });
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('title', $title)
-        ->validate(TitleRequestFactory::new()->create([
-            'name' => 'Invalid!%%# Name Title',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
 });
 
 test('title name must be at least 3 characters', function () {

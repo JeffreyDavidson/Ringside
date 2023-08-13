@@ -1,11 +1,9 @@
 <?php
 
 use App\Enums\StableStatus;
-use App\Models\Concerns\Activations;
-use App\Models\Concerns\Deactivations;
+use App\Models\Concerns\HasActivations;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
-use App\Models\Contracts\Deactivatable;
 use App\Models\Contracts\Retirable;
 use App\Models\Stable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,11 +25,7 @@ test('a stable uses soft deleted trait', function () {
 });
 
 test('a stable uses activations trait', function () {
-    expect(Stable::class)->usesTrait(Activations::class);
-});
-
-test('a stable uses deactivations trait', function () {
-    expect(Stable::class)->usesTrait(Deactivations::class);
+    expect(Stable::class)->usesTrait(HasActivations::class);
 });
 
 test('a stable uses owned by user trait', function () {
@@ -40,10 +34,6 @@ test('a stable uses owned by user trait', function () {
 
 test('a stable implements activatable interface', function () {
     expect(class_implements(Stable::class))->toContain(Activatable::class);
-});
-
-test('a stable implements deactivatable interface', function () {
-    expect(class_implements(Stable::class))->toContain(Deactivatable::class);
 });
 
 test('a stable implements retirable interface', function () {

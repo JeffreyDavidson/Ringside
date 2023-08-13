@@ -2,7 +2,6 @@
 
 use App\Http\Requests\Venues\StoreRequest;
 use App\Models\Venue;
-use App\Rules\LetterSpace;
 use Tests\RequestFactories\VenueRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
@@ -28,17 +27,9 @@ test('venue name is required', function () {
 test('venue name must be a string', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(VenueRequestFactory::new()->create([
-            'name' => '123',
+            'name' => 123,
         ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
-});
-
-test('venue name can only be letters and spaces', function () {
-    $this->createRequest(StoreRequest::class)
-        ->validate(VenueRequestFactory::new()->create([
-            'name' => 'Invalid!%%# Venue',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
+        ->assertFailsValidation(['name' => 'string']);
 });
 
 test('venue name must be at least 3 characters', function () {
