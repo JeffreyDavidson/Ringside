@@ -6,7 +6,6 @@ namespace App\Http\Requests\TagTeams;
 
 use App\Models\TagTeam;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use App\Rules\LetterSpace;
 use App\Rules\WrestlerCanJoinExistingTagTeam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -42,7 +41,7 @@ class UpdateRequest extends FormRequest
         $tagTeam = $this->route()?->parameter('tag_team');
 
         return [
-            'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
+            'name' => ['required', 'string', 'min:3', Rule::unique('tag_teams')->ignore($tagTeam->id)],
             'signature_move' => ['nullable', 'string', 'regex:/^[a-zA-Z\s\']+$/'],
             'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($tagTeam)],
             'wrestlerA' => [

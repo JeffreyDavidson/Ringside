@@ -13,5 +13,11 @@ parameters:
     excludePaths:
         - ./app/Http/Livewire
 
+    ignoreErrors:
+        -
+            message: '#Undefined variable: \$this#'
+            paths:
+                - ./tests/*
+
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false

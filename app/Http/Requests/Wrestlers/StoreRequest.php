@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Wrestlers;
 
 use App\Models\Wrestler;
-use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\WrestlerRequestFactory;
@@ -33,7 +32,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', new LetterSpace, 'min:3', Rule::unique('wrestlers')],
+            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')],
             'feet' => ['required', 'integer', 'max:8'],
             'inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],

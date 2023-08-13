@@ -20,17 +20,26 @@ class UpdateAction extends BaseManagerAction
     {
         $this->managerRepository->update($manager, $managerData);
 
-        if (isset($managerData->start_date)) {
-            $this->employManager($manager, $managerData->start_date);
+        if ($this->shouldBeEmployed($manager, $managerData->start_date)) {
+            $this->managerRepository->employ($manager, $managerData->start_date);
         }
 
         return $manager;
     }
 
-    private function employManager(Manager $manager, Carbon $startDate): void
+    /**
+     * Find out if the manager can be employed.
+     */
+    private function shouldBeEmployed(Manager $manager, ?Carbon $startDate): bool
     {
-        if ($manager->canBeEmployed() || $manager->canHaveEmploymentStartDateChanged($startDate)) {
-            $this->managerRepository->employ($manager, $startDate);
+        if (is_null($startDate)) {
+            return false;
         }
+
+        if ($manager->isCurrentlyEmployed()) {
+            return false;
+        }
+
+        return true;
     }
 }

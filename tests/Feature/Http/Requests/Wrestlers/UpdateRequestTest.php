@@ -3,10 +3,9 @@
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
-use App\Rules\LetterSpace;
 use Illuminate\Support\Carbon;
-use function Pest\Laravel\mock;
 use Tests\RequestFactories\WrestlerRequestFactory;
+use function Pest\Laravel\mock;
 
 test('an administrator is authorized to make this request', function () {
     $wrestler = Wrestler::factory()->create();
@@ -46,23 +45,6 @@ test('wrestler name must be a string', function () {
             'name' => 123,
         ]))
         ->assertFailsValidation(['name' => 'string']);
-});
-
-test('wrestler name must contain only letters and spaces', function () {
-    $wrestler = Wrestler::factory()->create();
-
-    mock(LetterSpace::class)
-        ->shouldReceive('validate')
-        ->with('name', 1, function ($closure) {
-            $closure();
-        });
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('wrestler', $wrestler)
-        ->validate(WrestlerRequestFactory::new()->create([
-            'name' => 'dafd78(^&^',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
 });
 
 test('wrestler name must be at least 3 characters', function () {
@@ -207,23 +189,6 @@ test('wrestler hometown must be a string', function () {
             'hometown' => 12345,
         ]))
         ->assertFailsValidation(['hometown' => 'string']);
-});
-
-test('wrestler hometown must only contain letters and spaces', function () {
-    $wrestler = Wrestler::factory()->create();
-
-    mock(LetterSpace::class)
-        ->shouldReceive('validate')
-        ->with('name', 1, function ($closure) {
-            $closure();
-        });
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('wrestler', $wrestler)
-        ->validate(WrestlerRequestFactory::new()->create([
-            'hometown' => '@# 078^&*(^& ',
-        ]))
-        ->assertFailsValidation(['hometown' => LetterSpace::class]);
 });
 
 test('wrestler signature move is optional', function () {

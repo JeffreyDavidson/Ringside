@@ -11,6 +11,7 @@ use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 use Exception;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -25,8 +26,8 @@ readonly class EventMatchData
      */
     public function __construct(
         public MatchType $matchType,
-        public Collection $referees,
-        public Collection $titles,
+        public EloquentCollection $referees,
+        public EloquentCollection $titles,
         public Collection $competitors,
         public ?string $preview
     ) {

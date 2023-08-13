@@ -3,6 +3,7 @@
 use App\Http\Requests\TagTeams\StoreRequest;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use App\Rules\WrestlerCanJoinNewTagTeam;
 use Tests\RequestFactories\TagTeamRequestFactory;
 
 test('an administrator is authorized to make this request', function () {
@@ -94,50 +95,47 @@ test('tag team start date must be in the correct date format', function () {
 test('tag team wrestlers are optional', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => [],
+            'wrestlerA' => null,
+            'wrestlerB' => null,
         ]))
         ->assertPassesValidation();
-});
-
-test('tag team wrestlers must be an array if provided', function () {
-    $this->createRequest(StoreRequest::class)
-        ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => 'not-an-array',
-        ]))
-        ->assertFailsValidation(['wrestlers' => 'array']);
 });
 
 test('tag team wrestlers is required with a tag team signature move', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => null,
+            'wrestlerA' => null,
+            'wrestlerB' => null,
             'signature_move' => 'Example Signature Move',
         ]))
-        ->assertFailsValidation(['wrestlers' => 'requiredwith:signature_move']);
+        ->assertFailsValidation(['wrestlerA' => 'required_with:signature_move']);
 });
 
 test('each tag team wrestler must be an integer', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => ['not-an-integer'],
+            'wrestlerA' => 'not-an-integer',
+            'wrestlerB' => 'not-an-integer'
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'integer']);
+        ->assertFailsValidation(['wrestlerA' => 'integer', 'wrestlerB' => 'integer']);
 });
 
 test('each tag team wrestler must be distinct', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => [1, 1],
+            'wrestlerA' => 1,
+            'wrestlerB' => 1,
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'distinct']);
+        ->assertFailsValidation(['wrestlerA' => 'different:wrestlerB', 'wrestlerB' => 'different:wrestlerA']);
 });
 
 test('each tag team wrestler must exist', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => [1, 2],
+            'wrestlerA' => 1,
+            'wrestlerB' => 2,
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'exist']);
+        ->assertFailsValidation(['wrestlerA' => 'exists', 'wrestlerB' => 'exists']);
 });
 
 test('each tag team wrestler cannot be suspended to join a tag team', function () {
@@ -146,9 +144,10 @@ test('each tag team wrestler cannot be suspended to join a tag team', function (
 
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
+            'wrestlerA' => $wrestlerA->id,
+            'wrestlerB' => $wrestlerB->id,
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewtagteam']);
+        ->assertFailsValidation(['wrestlerA' => WrestlerCanJoinNewTagTeam::class]);
 });
 
 test('each tag team wrestler cannot be injured to join a tag team', function () {
@@ -157,9 +156,10 @@ test('each tag team wrestler cannot be injured to join a tag team', function () 
 
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => [$wrestlerA->id, $wrestlerB->id],
+            'wrestlerA' => $wrestlerA->id,
+            'wrestlerB' => $wrestlerB->id,
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewtagteam']);
+        ->assertFailsValidation(['wrestlerA' => WrestlerCanJoinNewTagTeam::class]);
 });
 
 test('each tag team wrestler cannot join multiple bookable tag team', function () {
@@ -175,7 +175,8 @@ test('each tag team wrestler cannot join multiple bookable tag team', function (
 
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
-            'wrestlers' => [$tagTeam->currentWrestlers->first()->getKey(), $wrestlerB->getKey()],
+            'wrestlerA' => $tagTeam->currentWrestlers->first()->getKey(),
+            'wrestlerB' => $wrestlerB->getKey(),
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewtagteam']);
+        ->assertFailsValidation(['wrestlerA' => WrestlerCanJoinNewTagTeam::class]);
 });

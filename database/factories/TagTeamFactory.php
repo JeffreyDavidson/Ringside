@@ -44,29 +44,31 @@ class TagTeamFactory extends Factory
 
         return $this->state(fn () => ['status' => TagTeamStatus::BOOKABLE])
             ->has(Employment::factory()->started($employmentStartDate))
-            ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate]);
+            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
     public function unbookable(): static
     {
         $now = now();
         $employmentStartDate = $now->copy()->subDays(3);
+        $wrestlers = Wrestler::factory()->bookable()->count(1);
 
         return $this->state(fn () => ['status' => TagTeamStatus::UNBOOKABLE])
             ->has(Employment::factory()->started($employmentStartDate))
             ->hasAttached(Wrestler::factory()->injured(), ['joined_at' => $employmentStartDate])
-            ->hasAttached(Wrestler::factory()->bookable()->count(1), ['joined_at' => $employmentStartDate]);
+            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
     public function withFutureEmployment(): static
     {
         $employmentStartDate = Carbon::tomorrow();
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(Employment::factory()->started($employmentStartDate))->create();
+            ->has(Employment::factory()->started($employmentStartDate))
+            ->create();
 
         return $this->state(fn () => ['status' => TagTeamStatus::FUTURE_EMPLOYMENT])
             ->has(Employment::factory()->started($employmentStartDate))
-            ->hasAttached($wrestlers, ['joined_at' => Carbon::now()]);
+            ->withCurrentWrestlers($wrestlers, Carbon::now());
     }
 
     public function suspended(): static
@@ -83,7 +85,7 @@ class TagTeamFactory extends Factory
         return $this->state(fn () => ['status' => TagTeamStatus::SUSPENDED])
             ->has(Employment::factory()->started($employmentStartDate))
             ->has(Suspension::factory()->started($suspensionStartDate))
-            ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate]);
+            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
     public function retired(): static
@@ -99,7 +101,7 @@ class TagTeamFactory extends Factory
         return $this->state(fn () => ['status' => TagTeamStatus::RETIRED])
             ->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate))
             ->has(Retirement::factory()->started($retirementStartDate))
-            ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate]);
+            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
     public function unemployed(): static
@@ -118,10 +120,10 @@ class TagTeamFactory extends Factory
 
         return $this->state(fn () => ['status' => TagTeamStatus::RELEASED])
             ->has(Employment::factory()->started($employmentStartDate)->ended($employmentEndDate))
-            ->hasAttached($wrestlers, ['joined_at' => $employmentStartDate]);
+            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
-    public function withCurrentWrestler($wrestler, $joinDate = null): static
+    public function withCurrentWrestlers($wrestler, $joinDate = null): static
     {
         $this->hasAttached($wrestler, ['joined_at' => $joinDate ?? now()]);
 

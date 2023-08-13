@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Data\StableData;
+use App\Models\Manager;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
@@ -137,6 +138,16 @@ class StableRepository
     }
 
     /**
+     * Add managers to a given stable.
+     */
+    public function addManagers(Stable $stable, Collection $managers, Carbon $joinDate): void
+    {
+        $managers->each(function (Manager $manager) use ($stable, $joinDate) {
+            $stable->currentManagers()->attach($manager->id, ['joined_at' => $joinDate->toDateTimeString()]);
+        });
+    }
+
+    /**
      * Undocumented function.
      */
     public function removeWrestlers(Stable $stable, Collection $currentWrestlers, Carbon $removalDate): void
@@ -157,6 +168,19 @@ class StableRepository
         $currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $removalDate) {
             $stable->currentTagTeams()->updateExistingPivot(
                 $tagTeam->id,
+                ['left_at' => $removalDate->toDateTimeString()]
+            );
+        });
+    }
+
+    /**
+     * Undocumented function.
+     */
+    public function removeManagers(Stable $stable, Collection $currentManagers, Carbon $removalDate): void
+    {
+        $currentManagers->each(function (Manager $manager) use ($stable, $removalDate) {
+            $stable->currentManagers()->updateExistingPivot(
+                $manager->id,
                 ['left_at' => $removalDate->toDateTimeString()]
             );
         });

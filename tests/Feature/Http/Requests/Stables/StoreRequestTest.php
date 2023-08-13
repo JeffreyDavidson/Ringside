@@ -4,6 +4,8 @@ use App\Http\Requests\Stables\StoreRequest;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use App\Rules\TagTeamCanJoinNewStable;
+use App\Rules\WrestlerCanJoinNewStable;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\StableRequestFactory;
 
@@ -77,7 +79,7 @@ test('stable start date must be in the correct date format', function () {
         ->assertFailsValidation(['start_date' => 'date']);
 });
 
-test('stable wreslters must be an array', function () {
+test('stable wrestlers must be an array', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
             'wrestlers' => 'not-an-array',
@@ -135,7 +137,7 @@ test('each wrestler must not already be in stable to join stable', function () {
                 $wrestlerNotInStableC->getKey(),
             ],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinnewstable']);
+        ->assertFailsValidation(['wrestlers.0' => WrestlerCanJoinNewStable::class]);
 });
 
 test('each tag team in a stable must be an integer', function () {
@@ -180,7 +182,7 @@ test('each tag team must not already be in stable to join stable', function () {
                 $tagTeamNotInStableC->getKey(),
             ],
         ]))
-        ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinnewstable']);
+        ->assertFailsValidation(['tag_teams.0' => TagTeamCanJoinNewStable::class]);
 });
 
 test('stable must have a minimum number of 3 members when start date is set', function () {
@@ -254,7 +256,10 @@ test('a stable can contain at least three wrestlers with no tag teams', function
 
 test('a stable cannot contain a wrestler that is added in a tag team', function () {
     [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
-    $tagTeam = TagTeam::factory()->bookable()->create();
+    $tagTeam = TagTeam::factory()
+        ->bookable()
+        ->hasAttached($wrestlerC = Wrestler::factory()->bookable()->create())
+        ->create();
 
     $this->createRequest(StoreRequest::class)
         ->validate(StableRequestFactory::new()->create([
@@ -263,9 +268,9 @@ test('a stable cannot contain a wrestler that is added in a tag team', function 
             'wrestlers' => [
                 $wrestlerA->getKey(),
                 $wrestlerB->getKey(),
-                $tagTeam->currentWrestlers->first()->getKey(),
+                $wrestlerC->getKey(),
             ],
             'tag_teams' => [$tagTeam->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers.2' => 'app\rules\wrestlercanjoinnewstable']);
+        ->assertFailsValidation(['wrestlers.2' => WrestlerCanJoinNewStable::class]);
 });

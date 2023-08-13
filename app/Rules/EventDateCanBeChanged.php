@@ -7,7 +7,6 @@ namespace App\Rules;
 use App\Models\Event;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Carbon;
 
 class EventDateCanBeChanged implements ValidationRule
 {
@@ -26,7 +25,7 @@ class EventDateCanBeChanged implements ValidationRule
             $fail('The validation error message.');
         }
 
-        if ($this->event->date?->isFuture() && Carbon::parse($value)->gt(now())) {
+        if ($this->event->date?->isPast()) {
             $fail('The validation error message.');
         }
     }

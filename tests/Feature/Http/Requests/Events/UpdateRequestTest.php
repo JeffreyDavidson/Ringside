@@ -2,9 +2,7 @@
 
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
-use App\Models\Venue;
 use App\Rules\EventDateCanBeChanged;
-use App\Rules\LetterSpace;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\EventRequestFactory;
 
@@ -48,17 +46,6 @@ test('event name must be a string', function () {
         ->assertFailsValidation(['name' => 'string']);
 });
 
-test('event name can only be letters and spaces', function () {
-    $event = Event::factory()->create();
-
-    $this->createRequest(UpdateRequest::class)
-        ->withParam('event', $event)
-        ->validate(EventRequestFactory::new()->create([
-            'name' => 'Invalid!%%# Event Name',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
-});
-
 test('event name must be a at least characters', function () {
     $event = Event::factory()->create();
 
@@ -79,7 +66,7 @@ test('event name must be unique', function () {
         ->validate(EventRequestFactory::new()->create([
             'name' => 'Example Event',
         ]))
-        ->assertFailsValidation(['name' => 'unique:events,NULL,1,id']);
+        ->assertFailsValidation(['name' => 'unique:events,NULL,'.$eventA->id.',id']);
 });
 
 test('event date is optional', function () {
@@ -133,7 +120,7 @@ test('event date can be changed if activation start date is in the future', func
         ->withParam('event', $event)
         ->validate(EventRequestFactory::new()->create([
             'date' => Carbon::tomorrow()->toDateString(),
-            'venue_id' => Venue::factory()->create()->id,
+            'venue_id' => $event->venue_id,
         ]))
         ->assertPassesValidation();
 });
@@ -205,7 +192,7 @@ test('event preview must be a string if provided', function () {
         ->assertFailsValidation(['preview' => 'string']);
 });
 
-test('event preview must be be at least three lettes long if provided', function () {
+test('event preview must be be at least three letters long if provided', function () {
     $event = Event::factory()->create();
 
     $this->createRequest(UpdateRequest::class)

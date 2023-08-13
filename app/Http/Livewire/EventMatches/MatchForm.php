@@ -50,7 +50,7 @@ class MatchForm extends BaseComponent
     {
         $matchTypeSlug = MatchType::findOrFail($this->matchTypeId)->slug;
 
-        return $this->subViewToUse = 'matches.types.'.$matchTypeSlug;
+        return $this->subViewToUse = view('matches.types.'.$matchTypeSlug);
     }
 
     /**

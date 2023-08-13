@@ -33,4 +33,14 @@ class EventBuilder extends Builder
 
         return $this;
     }
+
+    /**
+     * Scope a query to include unscheduled events.
+     */
+    public function unscheduled(): self
+    {
+        $this->whereNull('date');
+
+        return $this;
+    }
 }

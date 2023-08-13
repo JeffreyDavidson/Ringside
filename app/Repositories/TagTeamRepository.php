@@ -112,10 +112,9 @@ class TagTeamRepository
     /**
      * Reinstate a given tag team on a given date.
      */
-    public function reinstate(TagTeam $tagTeam, Carbon $reinstateDate): TagTeam
+    public function reinstate(TagTeam $tagTeam, Carbon $reinstatementDate): TagTeam
     {
-        $tagTeam->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
-        $tagTeam->save();
+        $tagTeam->currentSuspension()->update(['ended_at' => $reinstatementDate->toDateTimeString()]);
 
         return $tagTeam;
     }

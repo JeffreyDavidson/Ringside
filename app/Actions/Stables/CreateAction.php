@@ -24,7 +24,12 @@ class CreateAction extends BaseStableAction
             ActivateAction::run($stable, $stableData->start_date);
         }
 
-        AddMembersAction::run($stable, $stableData->wrestlers, $stableData->tagTeams);
+        AddMembersAction::run(
+            $stable,
+            $stableData->wrestlers,
+            $stableData->tagTeams,
+            $stableData->managers
+        );
 
         return $stable;
     }

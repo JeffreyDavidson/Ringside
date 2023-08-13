@@ -84,11 +84,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
      */
     public function isBookable(): bool
     {
-        if ($this->isNotInEmployment() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        return true;
+        return $this->status->value === TagTeamStatus::BOOKABLE->value;
     }
 
     /**

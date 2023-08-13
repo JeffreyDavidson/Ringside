@@ -1,13 +1,12 @@
 <?php
 
-use App\Builders\ManagerQueryBuilder;
+use App\Builders\ManagerBuilder;
 use App\Enums\ManagerStatus;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\Manageables;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Manager;
-use App\Models\SingleRosterMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -32,11 +31,7 @@ test('a manager has a status', function () {
 test('a manager is unemployed by default', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager)->status->toMatchObject(ManagerStatus::UNEMPLOYED);
-});
-
-test('a manager is a single roster member', function () {
-    expect(get_parent_class(Manager::class))->toBe(SingleRosterMember::class);
+    expect($manager->status->value)->toBe(ManagerStatus::UNEMPLOYED->value);
 });
 
 test('a manager implements can be stable manager interface', function () {
@@ -64,11 +59,12 @@ test('a manager uses soft deleted trait', function () {
 });
 
 test('a manager has its own eloquent builder', function () {
-    expect(new Manager())->query()->toBeInstanceOf(ManagerQueryBuilder::class);
+
+    expect(new Manager())->query()->toBeInstanceOf(ManagerBuilder::class);
 });
 
 test('a manager has a display name', function () {
     $manager = Manager::factory()->create(['first_name' => 'Hulk', 'last_name' => 'Hogan']);
 
-    expect($manager)->displayName->toBe('Hulk Hogan');
+    expect($manager)->getIdentifier()->toBe('Hulk Hogan');
 });

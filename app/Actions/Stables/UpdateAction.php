@@ -23,7 +23,12 @@ class UpdateAction extends BaseStableAction
             ActivateAction::run($stable, $stableData->start_date);
         }
 
-        UpdateMembersAction::run($stable, $stableData->wrestlers, $stableData->tagTeams);
+        UpdateMembersAction::run(
+            $stable,
+            $stableData->wrestlers,
+            $stableData->tagTeams,
+            $stableData->managers
+        );
 
         return $stable;
     }

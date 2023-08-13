@@ -19,17 +19,19 @@ class CreateAction extends BaseTagTeamAction
     {
         /** @var \App\Models\TagTeam $tagTeam */
         $tagTeam = $this->tagTeamRepository->create($tagTeamData);
+        
+        $datetime = now();
 
         if ($tagTeamData->wrestlerA) {
-            AddTagTeamPartnerAction::run($tagTeam, $tagTeamData->wrestlerA, now());
+            $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerA, $datetime);
         }
 
         if ($tagTeamData->wrestlerB) {
-            AddTagTeamPartnerAction::run($tagTeam, $tagTeamData->wrestlerB, now());
+            $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerB, $datetime);
         }
 
         if (isset($tagTeamData->start_date)) {
-            EmployAction::run($tagTeam, $tagTeamData->start_date);
+            $this->tagTeamRepository->employ($tagTeam, $tagTeamData->start_date);
         }
 
         return $tagTeam;

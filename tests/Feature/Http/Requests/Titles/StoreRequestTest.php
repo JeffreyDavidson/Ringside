@@ -24,26 +24,12 @@ test('title name is required', function () {
         ->assertFailsValidation(['name' => 'required']);
 });
 
-test('title name can only be letters and spaces', function () {
+test('title name must be a string', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TitleRequestFactory::new()->create([
             'name' => 123,
         ]))
         ->assertFailsValidation(['name' => 'string']);
-});
-
-test('title name must contain only letters and spaces', function () {
-    mock(LetterSpace::class)
-        ->shouldReceive('validate')
-        ->with('name', 1, function ($closure) {
-            $closure();
-        });
-
-    $this->createRequest(StoreRequest::class)
-        ->validate(TitleRequestFactory::new()->create([
-            'name' => 'Invalid!%%# Title',
-        ]))
-        ->assertFailsValidation(['name' => LetterSpace::class]);
 });
 
 test('title name must be at least 3 characters', function () {

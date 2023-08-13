@@ -91,8 +91,11 @@ class UpdateRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $tagTeamsCount = $this->collect('tag_teams')->count() * 2;
+        $wrestlersCount = $this->collect('wrestlers')->count();
+
         $this->merge([
-            'members_count' => ($this->collect('tag_teams')->count() * 2) + $this->collect('wrestlers')->count(),
+            'members_count' => $tagTeamsCount + $wrestlersCount,
         ]);
     }
 }

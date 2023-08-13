@@ -27,7 +27,7 @@ class ReleaseAction extends BaseTagTeamAction
         $releaseDate ??= now();
 
         if ($tagTeam->isSuspended()) {
-            ReinstateAction::run($tagTeam, $releaseDate);
+            $this->tagTeamRepository->reinstate($tagTeam, $releaseDate);
         }
 
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
@@ -49,6 +49,14 @@ class ReleaseAction extends BaseTagTeamAction
 
         if ($tagTeam->hasFutureEmployment()) {
             throw CannotBeReleasedException::hasFutureEmployment($tagTeam);
+        }
+
+        if ($tagTeam->isRetired()) {
+            throw CannotBeReleasedException::retired($tagTeam);
+        }
+
+        if ($tagTeam->isReleased()) {
+            throw CannotBeReleasedException::released($tagTeam);
         }
     }
 }

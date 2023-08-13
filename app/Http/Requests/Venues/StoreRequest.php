@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
-use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Tests\RequestFactories\VenueRequestFactory;
 
@@ -32,7 +31,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', new LetterSpace, 'min:3', 'unique:App\Models\Venue,name'],
+            'name' => ['required', 'string', 'min:3', 'unique:App\Models\Venue,name'],
             'street_address' => ['required', 'string', 'min:3'],
             'city' => ['required', 'string', 'min:3'],
             'state' => ['required', 'string'],

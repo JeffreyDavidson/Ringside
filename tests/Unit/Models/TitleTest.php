@@ -1,6 +1,6 @@
 <?php
 
-use App\Builders\TitleQueryBuilder;
+use App\Builders\TitleBuilder;
 use App\Enums\TitleStatus;
 use App\Models\Concerns\HasActivations;
 use App\Models\Concerns\HasChampionships;
@@ -24,7 +24,7 @@ test('a title has a status', function () {
 test('a title is unactivated by default', function () {
     $title = Title::factory()->create();
 
-    expect($title)->status->toMatchObject(TitleStatus::UNACTIVATED);
+    expect($title->status->value)->toBe(TitleStatus::UNACTIVATED->value);
 });
 
 test('a title uses has activation trait', function () {
@@ -48,5 +48,5 @@ test('a title uses soft deleted trait', function () {
 });
 
 test('a title has its own eloquent builder', function () {
-    expect(new Title())->query()->toBeInstanceOf(TitleQueryBuilder::class);
+    expect(new Title())->query()->toBeInstanceOf(TitleBuilder::class);
 });

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Requests\Titles;
 
 use App\Models\Title;
-use App\Rules\LetterSpace;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Tests\RequestFactories\TitleRequestFactory;
@@ -36,7 +35,6 @@ class StoreRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                new LetterSpace,
                 'min:3',
                 'ends_with:Title,Titles',
                 Rule::unique('titles', 'name'),

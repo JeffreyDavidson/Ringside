@@ -4,6 +4,10 @@ use App\Http\Requests\Stables\UpdateRequest;
 use App\Models\Stable;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use App\Rules\Stables\ActivationStartDateCanBeChanged;
+use App\Rules\Stables\HasMinimumAmountOfMembers;
+use App\Rules\TagTeamCanJoinExistingStable;
+use App\Rules\WrestlerCanJoinExistingStable;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\StableRequestFactory;
 
@@ -60,14 +64,14 @@ test('stable name must be at least 3 characters', function () {
 
 test('stable name must be unique', function () {
     $stableA = Stable::factory()->create();
-    Stable::factory()->create(['name' => 'Example Stable']);
+    $stableB = Stable::factory()->create(['name' => 'Example Stable']);
 
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stableA)
         ->validate(StableRequestFactory::new()->create([
             'name' => 'Example Stable',
         ]))
-        ->assertFailsValidation(['name' => 'unique:stables,NULL,1,id']);
+        ->assertFailsValidation(['name' => 'unique:stables,NULL,'.$stableA->id.',id']);
 });
 
 test('stable start date is optional if not started', function () {
@@ -109,7 +113,7 @@ test('stable start date must be in the correct date format', function () {
     $this->createRequest(UpdateRequest::class)
         ->withParam('stable', $stable)
         ->validate(StableRequestFactory::new()->create([
-            'start_date' => 'not-a-date-format',
+            'start_date' => 'not-a-date',
         ]))
         ->assertFailsValidation(['start_date' => 'date']);
 });
@@ -122,7 +126,7 @@ test('stable start date cannot be changed if stable date has past', function () 
         ->validate(StableRequestFactory::new()->create([
             'start_date' => Carbon::now()->toDateTimeString(),
         ]))
-        ->assertFailsValidation(['start_date' => 'app\rules\stables\activationstartdatecanbechanged']);
+        ->assertFailsValidation(['start_date' => ActivationStartDateCanBeChanged::class]);
 });
 
 test('stable start date can be changed if activation start date is in the future', function () {
@@ -203,7 +207,7 @@ test('a suspended wrestler cannot join the stable', function () {
         ->validate(StableRequestFactory::new()->create([
             'wrestlers' => [$wrestlerNotInStable->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinexistingstable']);
+        ->assertFailsValidation(['wrestlers.0' => WrestlerCanJoinExistingStable::class]);
 });
 
 test('an injured wrestler cannot join the stable', function () {
@@ -215,7 +219,7 @@ test('an injured wrestler cannot join the stable', function () {
         ->validate(StableRequestFactory::new()->create([
             'wrestlers' => [$wrestlerNotInStable->getKey()],
         ]))
-        ->assertFailsValidation(['wrestlers.0' => 'app\rules\wrestlercanjoinexistingstable']);
+        ->assertFailsValidation(['wrestlers.0' => WrestlerCanJoinExistingStable::class]);
 });
 
 test('each tag team in a stable must be an integer', function () {
@@ -268,7 +272,7 @@ test('suspended tag teams cannot join a stable', function () {
         ->validate(StableRequestFactory::new()->create([
             'tag_teams' => [$tagTeamNotInStable->getKey()],
         ]))
-        ->assertFailsValidation(['tag_teams.0' => 'app\rules\tagteamcanjoinexistingstable']);
+        ->assertFailsValidation(['tag_teams.0' => TagTeamCanJoinExistingStable::class]);
 });
 
 test('stable must have a minimum number of members if start date is filled', function () {
@@ -282,5 +286,5 @@ test('stable must have a minimum number of members if start date is filled', fun
             'wrestlers' => $wrestlersToJoinStable->modelKeys(),
             'tag_teams' => [],
         ]))
-        ->assertFailsValidation(['members_count' => 'app\rules\stables\hasminimumamountofmembers']);
+        ->assertFailsValidation(['members_count' => HasMinimumAmountOfMembers::class]);
 });

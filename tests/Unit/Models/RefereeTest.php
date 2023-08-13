@@ -1,5 +1,6 @@
 <?php
 
+use App\Builders\RefereeBuilder;
 use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
 use App\Models\Referee;
@@ -28,11 +29,7 @@ test('a referee has a status', function () {
 test('a referee is unemployed by default', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee)->status->toMatchObject(RefereeStatus::UNEMPLOYED);
-});
-
-test('a referee is a single roster member', function () {
-    expect(get_parent_class(Referee::class))->toBe(SingleRosterMember::class);
+    expect($referee->status->value)->toBe(RefereeStatus::UNEMPLOYED->value);
 });
 
 test('a referee uses has factory trait', function () {
@@ -44,11 +41,11 @@ test('a referee uses soft deleted trait', function () {
 });
 
 test('a referee has its own eloquent builder', function () {
-    expect(new Referee())->query()->toBeInstanceOf(RefereeQueryBuilder::class);
+    expect(new Referee())->query()->toBeInstanceOf(RefereeBuilder::class);
 });
 
 test('a referee has a display name', function () {
     $referee = Referee::factory()->create(['first_name' => 'Hulk', 'last_name' => 'Hogan']);
 
-    expect($referee)->displayName->toBe('Hulk Hogan');
+    expect($referee)->getIdentifier()->toBe('Hulk Hogan');
 });

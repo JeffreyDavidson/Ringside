@@ -21,7 +21,7 @@ test('it saves a match for an event and redirects', function () {
         ->post(action([EventMatchesController::class, 'store'], $this->event), $this->data)
         ->assertRedirect(action([EventMatchesController::class, 'index'], $this->event));
 
-    AddMatchForEventAction::shouldRun($this->event, $this->data);
+    AddMatchForEventAction::shouldRun()->with($this->event, $this->data);
 });
 
 test('a basic user cannot create a match for an event', function () {
