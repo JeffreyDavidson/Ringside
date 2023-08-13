@@ -31,6 +31,10 @@ jobs:
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Prepare Laravel Application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
       - name: Execute unit/feature tests
         env:
           DB_HOST: 127.0.0.1
