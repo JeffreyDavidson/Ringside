@@ -9,9 +9,10 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
+use Symfony\Component\HttpFoundation\ParameterBag;
+
 use function PHPUnit\Framework\assertFalse;
 use function PHPUnit\Framework\assertTrue;
-use Symfony\Component\HttpFoundation\ParameterBag;
 
 class TestFormRequest
 {
