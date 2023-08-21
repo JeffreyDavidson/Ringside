@@ -30,7 +30,7 @@ class UnretireAction extends BaseStableAction
 
     /**
      * Ensure a stable can be unretired.
-
+     *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Stable $stable): void

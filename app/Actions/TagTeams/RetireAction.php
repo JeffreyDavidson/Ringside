@@ -36,7 +36,7 @@ class RetireAction extends BaseTagTeamAction
         if ($tagTeam->isCurrentlyEmployed()) {
             $this->tagTeamRepository->release($tagTeam, $retirementDate);
         }
-        
+
         $this->tagTeamRepository->retire($tagTeam, $retirementDate);
     }
 
