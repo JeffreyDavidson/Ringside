@@ -5,6 +5,7 @@ use App\Data\WrestlerData;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

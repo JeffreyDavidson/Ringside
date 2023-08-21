@@ -5,6 +5,7 @@ use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TitleRequestFactory;
+
 use function Pest\Laravel\mock;
 
 test('an administrator is authorized to make this request', function () {

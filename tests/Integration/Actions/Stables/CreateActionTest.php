@@ -6,6 +6,7 @@ use App\Data\StableData;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
+
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 

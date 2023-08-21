@@ -3,6 +3,7 @@
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
 use App\Models\User;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Models\Event;
 use App\Models\EventMatch;
 use Database\Seeders\MatchTypesTableSeeder;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 

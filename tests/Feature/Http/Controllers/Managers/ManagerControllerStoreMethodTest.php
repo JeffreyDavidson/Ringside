@@ -4,6 +4,7 @@ use App\Actions\Managers\CreateAction;
 use App\Data\ManagerData;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Managers\StoreRequest;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 

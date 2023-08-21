@@ -4,6 +4,7 @@ use App\Actions\Managers\RemoveFromCurrentWrestlersAction;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Facades\Event;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Wrestlers\RetireController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

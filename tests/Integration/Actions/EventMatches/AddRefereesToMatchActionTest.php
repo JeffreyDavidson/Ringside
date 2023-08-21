@@ -5,6 +5,7 @@ use App\Models\EventMatch;
 use App\Models\Referee;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Livewire\Titles\TitleChampionshipsList;
+
 use function Pest\Livewire\livewire;
 
 test('it should return correct view', function () {

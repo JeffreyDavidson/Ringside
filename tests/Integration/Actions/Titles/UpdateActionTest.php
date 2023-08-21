@@ -4,6 +4,7 @@ use App\Actions\Titles\UpdateAction;
 use App\Data\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

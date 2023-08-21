@@ -4,6 +4,7 @@ use App\Actions\Wrestlers\UpdateAction;
 use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

@@ -4,6 +4,7 @@ use App\Actions\Managers\RestoreAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\RestoreController;
 use App\Models\Manager;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

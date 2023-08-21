@@ -9,6 +9,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

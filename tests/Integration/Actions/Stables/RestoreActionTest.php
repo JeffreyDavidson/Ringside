@@ -3,6 +3,7 @@
 use App\Actions\Stables\RestoreAction;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

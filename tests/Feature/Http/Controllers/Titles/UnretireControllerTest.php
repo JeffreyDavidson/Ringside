@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Titles\UnretireController;
 use App\Models\Title;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

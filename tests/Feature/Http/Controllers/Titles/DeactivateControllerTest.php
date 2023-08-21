@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Titles\DeactivateController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

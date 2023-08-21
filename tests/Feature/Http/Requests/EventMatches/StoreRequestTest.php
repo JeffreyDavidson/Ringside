@@ -11,8 +11,9 @@ use App\Rules\RefereeCanRefereeMatch;
 use App\Rules\TitleChampionIncludedInTitleMatch;
 use App\Rules\TitleMustBeActive;
 use Database\Seeders\MatchTypesTableSeeder;
-use function Pest\Laravel\mock;
 use Tests\RequestFactories\EventMatchRequestFactory;
+
+use function Pest\Laravel\mock;
 
 beforeEach(fn () => $this->seed(MatchTypesTableSeeder::class));
 

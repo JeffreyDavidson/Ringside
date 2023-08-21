@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Wrestlers\ClearInjuryController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 
