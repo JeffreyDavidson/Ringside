@@ -19,7 +19,7 @@ class CreateAction extends BaseTagTeamAction
     {
         /** @var \App\Models\TagTeam $tagTeam */
         $tagTeam = $this->tagTeamRepository->create($tagTeamData);
-        
+
         $datetime = now();
 
         if ($tagTeamData->wrestlerA) {
