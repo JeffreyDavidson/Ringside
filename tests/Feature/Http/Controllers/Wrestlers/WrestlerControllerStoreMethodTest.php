@@ -4,6 +4,7 @@ use App\Actions\Wrestlers\CreateAction;
 use App\Data\WrestlerData;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Http\Requests\Wrestlers\StoreRequest;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 

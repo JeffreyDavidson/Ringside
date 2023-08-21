@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Artisan;
+
 use function Pest\Laravel\assertDatabaseHas;
 
 test('all needed match decisions are saved in database', function () {

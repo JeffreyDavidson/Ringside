@@ -3,6 +3,7 @@
 use App\Actions\Managers\DeleteAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\delete;
 

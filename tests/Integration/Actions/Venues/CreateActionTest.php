@@ -4,6 +4,7 @@ use App\Actions\Venues\CreateAction;
 use App\Data\VenueData;
 use App\Models\Venue;
 use App\Repositories\VenueRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

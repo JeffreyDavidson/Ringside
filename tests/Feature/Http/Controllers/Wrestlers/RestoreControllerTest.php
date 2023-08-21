@@ -4,6 +4,7 @@ use App\Actions\Wrestlers\RestoreAction;
 use App\Http\Controllers\Wrestlers\RestoreController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Referees\InjureController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

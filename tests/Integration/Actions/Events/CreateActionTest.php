@@ -3,6 +3,7 @@
 use App\Actions\Events\CreateAction;
 use App\Data\EventData;
 use App\Repositories\EventRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

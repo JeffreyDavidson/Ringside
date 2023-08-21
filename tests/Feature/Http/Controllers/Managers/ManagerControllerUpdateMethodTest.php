@@ -5,6 +5,7 @@ use App\Data\ManagerData;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

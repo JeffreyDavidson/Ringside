@@ -4,6 +4,7 @@ use App\Actions\Managers\InjureAction;
 use App\Http\Controllers\Managers\InjureController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

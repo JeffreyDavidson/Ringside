@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Managers\ManagersController;
 use App\Models\Manager;
+
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {

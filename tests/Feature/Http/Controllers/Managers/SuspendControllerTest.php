@@ -4,6 +4,7 @@ use App\Actions\Managers\SuspendAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\SuspendController;
 use App\Models\Manager;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

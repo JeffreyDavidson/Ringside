@@ -3,6 +3,7 @@
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\User;
 use App\Models\Wrestler;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 

@@ -5,6 +5,7 @@ use App\Data\RefereeData;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

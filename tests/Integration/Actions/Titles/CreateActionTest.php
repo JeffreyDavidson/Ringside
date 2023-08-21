@@ -4,6 +4,7 @@ use App\Actions\Titles\CreateAction;
 use App\Data\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
+
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 

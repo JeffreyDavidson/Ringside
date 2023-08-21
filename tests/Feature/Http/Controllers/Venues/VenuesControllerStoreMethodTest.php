@@ -4,6 +4,7 @@ use App\Actions\Venues\CreateAction;
 use App\Data\VenueData;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Requests\Venues\StoreRequest;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 

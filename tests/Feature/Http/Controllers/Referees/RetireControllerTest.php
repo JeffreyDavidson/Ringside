@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\RetireController;
 use App\Models\Referee;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

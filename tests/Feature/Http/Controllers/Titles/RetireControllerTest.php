@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Titles\RetireController;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

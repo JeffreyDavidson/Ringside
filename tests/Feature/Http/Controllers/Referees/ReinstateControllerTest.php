@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\ReinstateController;
 use App\Models\Referee;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

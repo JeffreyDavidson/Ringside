@@ -5,6 +5,7 @@ use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\Event;
 use Database\Seeders\MatchTypesTableSeeder;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 

@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Referees\SuspendController;
 use App\Models\Referee;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\patch;
 

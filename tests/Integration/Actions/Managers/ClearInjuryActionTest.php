@@ -6,6 +6,7 @@ use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 

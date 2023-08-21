@@ -4,6 +4,7 @@ use App\Actions\Managers\UpdateAction;
 use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

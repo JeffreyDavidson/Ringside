@@ -5,6 +5,7 @@ use App\Data\VenueData;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\from;
 

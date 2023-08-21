@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Managers\ManagersController;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 

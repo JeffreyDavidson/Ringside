@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 

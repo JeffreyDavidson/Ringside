@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeDeactivatedException;
 use App\Models\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
+
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 

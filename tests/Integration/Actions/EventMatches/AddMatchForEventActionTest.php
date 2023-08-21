@@ -14,6 +14,7 @@ use App\Models\Wrestler;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Database\Eloquent\Collection;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {

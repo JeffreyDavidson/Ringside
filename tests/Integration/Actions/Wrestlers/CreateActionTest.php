@@ -4,6 +4,7 @@ use App\Actions\Wrestlers\CreateAction;
 use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
+
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 

@@ -5,6 +5,7 @@ use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
+
 use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 

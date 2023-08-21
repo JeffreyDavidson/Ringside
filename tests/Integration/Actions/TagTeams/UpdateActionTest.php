@@ -5,6 +5,7 @@ use App\Data\TagTeamData;
 use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
+
 use function Pest\Laravel\mock;
 
 beforeEach(function () {
