@@ -26,7 +26,7 @@ test('it retires a bookable referee at the current datetime by default', functio
 
     $this->refereeRepository
         ->shouldNotReceive('reinstate');
-    
+
     $this->refereeRepository
         ->shouldNotReceive('clearInjury');
 
