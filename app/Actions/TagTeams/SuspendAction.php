@@ -20,7 +20,7 @@ class SuspendAction extends BaseTagTeamAction
      *
      * @throws \App\Exceptions\CannotBeSuspendedException
      */
-    public function handle(TagTeam $tagTeam, Carbon $suspensionDate = null): void
+    public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void
     {
         $this->ensureCanBeSuspended($tagTeam);
 

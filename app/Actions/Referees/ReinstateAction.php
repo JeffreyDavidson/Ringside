@@ -18,7 +18,7 @@ class ReinstateAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeReinstatedException
      */
-    public function handle(Referee $referee, Carbon $reinstatementDate = null): void
+    public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
         $this->ensureCanBeReinstated($referee);
 

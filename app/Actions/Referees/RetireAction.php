@@ -18,7 +18,7 @@ class RetireAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
-    public function handle(Referee $referee, Carbon $retirementDate = null): void
+    public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
         $this->ensureCanBeRetired($referee);
 

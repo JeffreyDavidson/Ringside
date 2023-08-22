@@ -18,7 +18,7 @@ class ClearInjuryAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
-    public function handle(Referee $referee, Carbon $recoveryDate = null): void
+    public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
         $this->ensureCanBeClearedFromInjury($referee);
 

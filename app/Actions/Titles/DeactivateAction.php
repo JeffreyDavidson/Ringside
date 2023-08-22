@@ -18,7 +18,7 @@ class DeactivateAction extends BaseTitleAction
      *
      * @throws \App\Exceptions\CannotBeDeactivatedException
      */
-    public function handle(Title $title, Carbon $deactivationDate = null): void
+    public function handle(Title $title, ?Carbon $deactivationDate = null): void
     {
         $this->ensureCanBeDeactivated($title);
 

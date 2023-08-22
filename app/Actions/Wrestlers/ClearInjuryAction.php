@@ -19,7 +19,7 @@ class ClearInjuryAction extends BaseWrestlerAction
      *
      * @throws \App\Exceptions\CannotBeClearedFromInjuryException
      */
-    public function handle(Wrestler $wrestler, Carbon $recoveryDate = null): void
+    public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
         $this->ensureCanBeClearedFromInjury($wrestler);
 

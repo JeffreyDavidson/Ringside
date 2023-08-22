@@ -18,7 +18,7 @@ class RetireAction extends BaseTitleAction
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
-    public function handle(Title $title, Carbon $retirementDate = null): void
+    public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
         $this->ensureCanBeRetired($title);
 

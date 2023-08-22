@@ -18,7 +18,7 @@ class ReleaseAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeReleasedException
      */
-    public function handle(Referee $referee, Carbon $releaseDate = null): void
+    public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
         $this->ensureCanBeReleased($referee);
 
