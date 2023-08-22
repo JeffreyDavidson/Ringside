@@ -52,7 +52,6 @@ test('it releases a bookable wrestler at the current datetime by default', funct
     });
 });
 
-
 test('it releases an bookable wrestler at a specific datetime', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
     $datetime = now()->addDays(2);
