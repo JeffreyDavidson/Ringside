@@ -3,10 +3,8 @@
 declare(strict_types=1);
 
 use App\Builders\RefereeBuilder;
-use App\Builders\RefereeQueryBuilder;
 use App\Enums\RefereeStatus;
 use App\Models\Referee;
-use App\Models\SingleRosterMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
