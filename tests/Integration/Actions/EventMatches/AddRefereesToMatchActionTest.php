@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\EventMatches\AddRefereesToMatchAction;
 use App\Models\EventMatch;
 use App\Models\Referee;

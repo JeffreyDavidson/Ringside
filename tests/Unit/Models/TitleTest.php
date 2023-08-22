@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Builders\TitleBuilder;
 use App\Enums\TitleStatus;
 use App\Models\Concerns\HasActivations;

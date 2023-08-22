@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\CreateAction;
 use App\Data\TitleData;
 use App\Models\Title;

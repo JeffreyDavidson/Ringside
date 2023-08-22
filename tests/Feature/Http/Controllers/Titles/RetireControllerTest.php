@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Titles\RetireController;

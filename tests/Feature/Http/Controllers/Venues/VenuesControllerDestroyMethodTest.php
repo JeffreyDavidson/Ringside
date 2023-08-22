@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Venues\DeleteAction;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Models\Venue;

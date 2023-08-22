@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Models\Title;

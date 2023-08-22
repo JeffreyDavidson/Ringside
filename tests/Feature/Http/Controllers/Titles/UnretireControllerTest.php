@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Titles\TitlesController;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\CreateAction;
 use App\Data\TagTeamData;
 use App\Models\TagTeam;

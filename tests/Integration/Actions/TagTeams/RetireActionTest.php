@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\TagTeam;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Events\RestoreAction;
 use App\Http\Controllers\Events\DeletedEventsController;
 use App\Http\Controllers\Events\EventsController;

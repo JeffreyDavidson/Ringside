@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Venues\RestoreAction;
 use App\Http\Controllers\Venues\RestoreController;
 use App\Http\Controllers\Venues\VenuesController;

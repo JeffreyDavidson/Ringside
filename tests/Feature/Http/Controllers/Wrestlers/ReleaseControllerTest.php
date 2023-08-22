@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Wrestlers\ReleaseController;

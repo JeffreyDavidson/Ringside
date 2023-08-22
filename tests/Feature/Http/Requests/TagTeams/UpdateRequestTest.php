@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\TagTeams\UpdateRequest;
 use App\Models\Employment;
 use App\Models\TagTeam;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\RestoreAction;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;

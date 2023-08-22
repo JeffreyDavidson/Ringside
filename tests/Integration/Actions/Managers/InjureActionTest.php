@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
 use App\Models\Manager;

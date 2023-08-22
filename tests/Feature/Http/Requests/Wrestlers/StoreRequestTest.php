@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Models\Wrestler;
 use Tests\RequestFactories\WrestlerRequestFactory;

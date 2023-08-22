@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\DeleteAction;
 use App\Http\Controllers\Titles\TitlesController;
 use App\Models\Title;

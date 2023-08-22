@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\ReleaseAction;
 use App\Http\Controllers\TagTeams\ReleaseController;
 use App\Http\Controllers\TagTeams\TagTeamsController;

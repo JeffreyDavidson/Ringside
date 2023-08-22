@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\EventMatches\AddCompetitorsToMatchAction;
 use App\Actions\EventMatches\AddMatchForEventAction;
 use App\Actions\EventMatches\AddRefereesToMatchAction;

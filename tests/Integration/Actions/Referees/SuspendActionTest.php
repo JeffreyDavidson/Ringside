@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Referees\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Referee;

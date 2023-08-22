@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\DeleteAction;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;

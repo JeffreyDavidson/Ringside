@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Events\EventsController;
 
 test('index returns a view', function () {

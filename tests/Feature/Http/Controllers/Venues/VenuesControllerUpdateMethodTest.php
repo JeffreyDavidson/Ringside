@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Venues\UpdateAction;
 use App\Data\VenueData;
 use App\Http\Controllers\Venues\VenuesController;

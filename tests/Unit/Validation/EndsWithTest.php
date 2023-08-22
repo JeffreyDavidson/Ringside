@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Facades\Validator;
 
 test('it formats ends with message correctly', function ($arguments, $message) {

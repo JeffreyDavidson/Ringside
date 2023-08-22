@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Builders\ManagerBuilder;
 use App\Enums\ManagerStatus;
 use App\Models\Concerns\CanJoinStables;

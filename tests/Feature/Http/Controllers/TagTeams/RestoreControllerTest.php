@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\RestoreAction;
 use App\Http\Controllers\TagTeams\RestoreController;
 use App\Http\Controllers\TagTeams\TagTeamsController;

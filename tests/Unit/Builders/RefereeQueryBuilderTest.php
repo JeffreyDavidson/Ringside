@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Referee;
 
 test('bookable referees can be retrieved', function () {

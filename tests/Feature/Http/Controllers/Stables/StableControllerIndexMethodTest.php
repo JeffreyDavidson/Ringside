@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Stables\StablesController;
 
 test('index returns a view', function () {

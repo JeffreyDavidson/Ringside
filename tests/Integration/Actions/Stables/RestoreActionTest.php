@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Stables\RestoreAction;
 use App\Models\Stable;
 use App\Repositories\StableRepository;

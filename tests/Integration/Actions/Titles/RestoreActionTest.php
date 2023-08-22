@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\RestoreAction;
 use App\Models\Title;
 use App\Repositories\TitleRepository;

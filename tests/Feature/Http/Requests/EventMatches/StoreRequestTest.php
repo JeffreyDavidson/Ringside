@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\EventMatches\StoreRequest;
 use App\Models\MatchType;
 use App\Models\Referee;

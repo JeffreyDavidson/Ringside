@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\InjureAction;
 use App\Events\Wrestlers\WrestlerInjured;
 use App\Exceptions\CannotBeInjuredException;

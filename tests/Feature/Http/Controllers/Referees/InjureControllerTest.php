@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Referees\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Referees\InjureController;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\ReinstateAction;
 use App\Http\Controllers\TagTeams\ReinstateController;
 use App\Http\Controllers\TagTeams\TagTeamsController;

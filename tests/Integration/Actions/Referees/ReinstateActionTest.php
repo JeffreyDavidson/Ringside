@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Referees\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Referee;

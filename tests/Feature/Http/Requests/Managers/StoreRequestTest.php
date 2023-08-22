@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Managers\StoreRequest;
 use Tests\RequestFactories\ManagerRequestFactory;
 

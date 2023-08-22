@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\TagTeam;
 
 test('bookable tag teams can be retrieved', function () {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
 use App\Models\Manager;

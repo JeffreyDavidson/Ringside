@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Events\DeleteAction;
 use App\Http\Controllers\Events\EventsController;
 use App\Models\Event;

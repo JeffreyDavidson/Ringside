@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
 use App\Models\Manager;

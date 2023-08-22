@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Livewire\Wrestlers\WrestlersList;
 
 use function Pest\Livewire\livewire;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;

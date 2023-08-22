@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\UpdateAction;
 use App\Data\TitleData;
 use App\Http\Controllers\Titles\TitlesController;

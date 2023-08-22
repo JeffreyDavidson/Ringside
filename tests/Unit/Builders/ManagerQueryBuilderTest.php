@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Manager;
 
 test('available managers can be retrieved', function () {
