@@ -18,7 +18,7 @@ class UnretireAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    public function handle(Referee $referee, Carbon $unretiredDate = null): void
+    public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
         $this->ensureCanBeUnretired($referee);
 

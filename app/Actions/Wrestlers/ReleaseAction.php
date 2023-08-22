@@ -19,7 +19,7 @@ class ReleaseAction extends BaseWrestlerAction
      *
      * @throws \App\Exceptions\CannotBeReleasedException
      */
-    public function handle(Wrestler $wrestler, Carbon $releaseDate = null): void
+    public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
         $this->ensureCanBeReleased($wrestler);
 

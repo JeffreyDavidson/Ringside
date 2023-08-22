@@ -20,7 +20,7 @@ class ReinstateAction extends BaseTagTeamAction
      *
      * @throws \App\Exceptions\CannotBeReinstatedException
      */
-    public function handle(TagTeam $tagTeam, Carbon $reinstatementDate = null): void
+    public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
         $this->ensureCanBeReinstated($tagTeam);
 

@@ -25,7 +25,7 @@ class RetireAction extends BaseStableAction
      *
      * @throws \App\Exceptions\CannotBeRetiredException
      */
-    public function handle(Stable $stable, Carbon $retirementDate = null): void
+    public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {
         $this->ensureCanBeRetired($stable);
 

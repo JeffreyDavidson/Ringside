@@ -20,7 +20,7 @@ class UnretireAction extends BaseTagTeamAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    public function handle(TagTeam $tagTeam, Carbon $unretiredDate = null): void
+    public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
     {
         $this->ensureCanBeUnretired($tagTeam);
 

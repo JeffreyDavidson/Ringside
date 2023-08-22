@@ -19,7 +19,7 @@ class InjureAction extends BaseWrestlerAction
      *
      * @throws \App\Exceptions\CannotBeInjuredException
      */
-    public function handle(Wrestler $wrestler, Carbon $injureDate = null): void
+    public function handle(Wrestler $wrestler, ?Carbon $injureDate = null): void
     {
         $this->ensureCanBeInjured($wrestler);
 

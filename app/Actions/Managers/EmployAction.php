@@ -18,7 +18,7 @@ class EmployAction extends BaseManagerAction
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */
-    public function handle(Manager $manager, Carbon $startDate = null): void
+    public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
         $this->ensureCanBeEmployed($manager);
 

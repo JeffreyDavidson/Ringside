@@ -18,7 +18,7 @@ class EmployAction extends BaseRefereeAction
      *
      * @throws \App\Exceptions\CannotBeEmployedException
      */
-    public function handle(Referee $referee, Carbon $startDate = null): void
+    public function handle(Referee $referee, ?Carbon $startDate = null): void
     {
         $this->ensureCanBeEmployed($referee);
 

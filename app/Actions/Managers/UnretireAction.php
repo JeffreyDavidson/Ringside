@@ -18,7 +18,7 @@ class UnretireAction extends BaseManagerAction
      *
      * @throws \App\Exceptions\CannotBeUnretiredException
      */
-    public function handle(Manager $manager, Carbon $unretiredDate = null): void
+    public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
     {
         $this->ensureCanBeUnretired($manager);
 
