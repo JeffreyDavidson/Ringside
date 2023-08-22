@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
 use App\Rules\EventDateCanBeChanged;

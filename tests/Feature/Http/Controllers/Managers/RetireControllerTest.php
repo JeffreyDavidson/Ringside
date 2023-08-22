@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\RetireAction;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Managers\RetireController;

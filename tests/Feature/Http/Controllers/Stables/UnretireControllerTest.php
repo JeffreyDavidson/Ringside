@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Stables\UnretireAction;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\Stables\UnretireController;

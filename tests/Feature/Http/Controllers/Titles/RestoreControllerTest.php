@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Titles\RestoreAction;
 use App\Http\Controllers\Titles\RestoreController;
 use App\Http\Controllers\Titles\TitlesController;

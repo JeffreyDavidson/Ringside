@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MatchDecision;
 
 test('a match decision has a name', function () {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\SuspendAction;
 use App\Http\Controllers\TagTeams\SuspendController;
 use App\Http\Controllers\TagTeams\TagTeamsController;

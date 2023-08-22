@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Stables\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
 use App\Models\Stable;

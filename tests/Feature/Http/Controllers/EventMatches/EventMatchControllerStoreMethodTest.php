@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\EventMatches\AddMatchForEventAction;
 use App\Http\Controllers\EventMatches\EventMatchesController;
 use App\Http\Requests\EventMatches\StoreRequest;

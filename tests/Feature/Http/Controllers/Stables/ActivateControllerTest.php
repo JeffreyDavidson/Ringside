@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Stables\ActivateAction;
 use App\Http\Controllers\Stables\ActivateController;
 use App\Http\Controllers\Stables\StablesController;

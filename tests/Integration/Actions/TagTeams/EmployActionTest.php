@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\EmployAction;
 use App\Models\TagTeam;
 use App\Models\Wrestler;

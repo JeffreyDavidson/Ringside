@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\UpdateAction;
 use App\Data\ManagerData;
 use App\Models\Manager;

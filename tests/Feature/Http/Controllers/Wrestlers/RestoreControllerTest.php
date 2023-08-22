@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\RestoreAction;
 use App\Http\Controllers\Wrestlers\RestoreController;
 use App\Http\Controllers\Wrestlers\WrestlersController;

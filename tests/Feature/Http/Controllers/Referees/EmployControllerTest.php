@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Referees\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Referees\EmployController;

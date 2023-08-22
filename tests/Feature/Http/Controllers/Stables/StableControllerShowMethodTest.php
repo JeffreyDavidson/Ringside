@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
 use App\Models\User;

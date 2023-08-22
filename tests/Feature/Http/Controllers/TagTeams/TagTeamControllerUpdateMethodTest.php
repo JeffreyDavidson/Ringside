@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeamData;
 use App\Http\Controllers\TagTeams\TagTeamsController;

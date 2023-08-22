@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\CreateAction;
 use App\Data\WrestlerData;
 use App\Http\Controllers\Wrestlers\WrestlersController;

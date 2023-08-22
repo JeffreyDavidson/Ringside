@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Referees\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Referees\ClearInjuryController;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Wrestlers\RetireController;

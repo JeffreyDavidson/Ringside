@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Stables\UpdateAction;
 use App\Actions\Stables\UpdateMembersAction;
 use App\Data\StableData;

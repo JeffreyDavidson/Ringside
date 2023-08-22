@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;

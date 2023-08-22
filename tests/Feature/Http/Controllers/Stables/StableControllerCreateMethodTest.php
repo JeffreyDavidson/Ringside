@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Stables\StablesController;
 
 test('create returns a view', function () {

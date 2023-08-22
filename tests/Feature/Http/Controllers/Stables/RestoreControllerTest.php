@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Stables\RestoreAction;
 use App\Http\Controllers\Stables\RestoreController;
 use App\Http\Controllers\Stables\StablesController;

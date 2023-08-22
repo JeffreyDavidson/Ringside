@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Builders\WrestlerBuilder;
 use App\Enums\WrestlerStatus;
 use App\Models\Concerns\CanJoinStables;

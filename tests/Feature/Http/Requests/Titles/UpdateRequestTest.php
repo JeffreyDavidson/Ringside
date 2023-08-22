@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;

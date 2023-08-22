@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\TagTeams\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
 use App\Models\TagTeam;

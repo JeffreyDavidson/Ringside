@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Titles\StoreRequest;
 use App\Models\Title;
 use Tests\RequestFactories\TitleRequestFactory;

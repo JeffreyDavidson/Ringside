@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Events\StoreRequest;
 use App\Models\Event;
 use Tests\RequestFactories\EventRequestFactory;

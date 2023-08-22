@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Data\RefereeData;
 use App\Models\Employment;
 use App\Models\Referee;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Events\CreateAction;
 use App\Data\EventData;
 use App\Repositories\EventRepository;

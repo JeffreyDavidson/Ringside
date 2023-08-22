@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\ReinstateAction;
 use App\Events\Wrestlers\WrestlerReinstated;
 use App\Exceptions\CannotBeReinstatedException;

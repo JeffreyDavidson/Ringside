@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\SuspendAction;
 use App\Events\Wrestlers\WrestlerSuspended;
 use App\Exceptions\CannotBeSuspendedException;

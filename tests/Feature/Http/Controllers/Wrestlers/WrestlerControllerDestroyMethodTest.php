@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Wrestlers\DeleteAction;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use App\Models\Wrestler;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Referees\RefereesController;
 use App\Models\Referee;
 

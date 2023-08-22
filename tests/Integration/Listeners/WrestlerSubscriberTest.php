@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\TagTeamStatus;
 use App\Events\Wrestlers\WrestlerClearedFromInjury;
 use App\Events\Wrestlers\WrestlerInjured;

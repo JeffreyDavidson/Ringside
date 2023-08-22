@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Data\TitleData;
 use App\Models\Activation;
 use App\Models\Title;

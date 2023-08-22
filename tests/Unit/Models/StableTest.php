@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\StableStatus;
 use App\Models\Concerns\HasActivations;
 use App\Models\Concerns\OwnedByUser;

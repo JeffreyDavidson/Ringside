@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
 use App\Rules\EmploymentStartDateCanBeChanged;

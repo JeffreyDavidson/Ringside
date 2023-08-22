@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\MatchType;
 
 test('a match type has a name', function () {

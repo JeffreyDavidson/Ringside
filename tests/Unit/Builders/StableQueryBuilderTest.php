@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Stable;
 
 test('active stables can be retrieved', function () {

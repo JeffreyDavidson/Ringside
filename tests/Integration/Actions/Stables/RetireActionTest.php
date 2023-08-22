@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\Managers\RetireAction as ManagerRetireAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamRetireAction;

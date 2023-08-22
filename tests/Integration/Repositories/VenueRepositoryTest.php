@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Data\VenueData;
 use App\Models\Venue;
 use App\Repositories\VenueRepository;

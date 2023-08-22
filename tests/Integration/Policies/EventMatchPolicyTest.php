@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Policies\EventMatchPolicy;
 
 test('it authorizes a user can create a EventMatch', function () {
