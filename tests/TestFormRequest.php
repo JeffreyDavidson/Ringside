@@ -41,7 +41,7 @@ class TestFormRequest
         return new TestValidationResult($validator);
     }
 
-    public function by(Authenticatable $user = null)
+    public function by(?Authenticatable $user = null)
     {
         $this->request->setUserResolver(fn () => $user);
 

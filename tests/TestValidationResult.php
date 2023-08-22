@@ -19,7 +19,7 @@ class TestValidationResult
 
     private ?ValidationException $failed;
 
-    public function __construct(Validator $validator, ValidationException $failed = null)
+    public function __construct(Validator $validator, ?ValidationException $failed = null)
     {
         $this->validator = $validator;
         $this->failed = $failed;
