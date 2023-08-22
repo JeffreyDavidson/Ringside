@@ -117,7 +117,7 @@ test('each tag team wrestler must be an integer', function () {
     $this->createRequest(StoreRequest::class)
         ->validate(TagTeamRequestFactory::new()->create([
             'wrestlerA' => 'not-an-integer',
-            'wrestlerB' => 'not-an-integer'
+            'wrestlerB' => 'not-an-integer',
         ]))
         ->assertFailsValidation(['wrestlerA' => 'integer', 'wrestlerB' => 'integer']);
 });
