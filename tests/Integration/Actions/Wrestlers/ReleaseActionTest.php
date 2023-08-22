@@ -27,7 +27,7 @@ test('it releases a bookable wrestler at the current datetime by default', funct
 
     $this->wrestlerRepository
         ->shouldReceive('reinstate');
-    
+
     $this->wrestlerRepository
         ->shouldNotReceive('clearInjury');
 

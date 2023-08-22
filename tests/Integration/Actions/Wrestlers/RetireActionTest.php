@@ -69,7 +69,7 @@ test('it retires a bookable wrestler at a specific datetime', function () {
 
     $this->wrestlerRepository
         ->shouldNotReceive('reinstate');
-    
+
     $this->wrestlerRepository
         ->shouldNotReceive('clearInjury');
 
