@@ -55,7 +55,7 @@ test('employ a manager', function () {
     $manager = app(ManagerRepository::class)->employ($manager, $datetime);
 
     expect($manager->fresh())->employments->toHaveCount(1);
-    expect($manager->fresh()->employments->first())->started_at->equalTo($datetime);
+    expect($manager->fresh()->employments->first())->started_at->eq($datetime);
 });
 
 test('updates employment of a manager', function () {
@@ -66,12 +66,12 @@ test('updates employment of a manager', function () {
 
     expect($manager->fresh())->employments->toHaveCount(1);
     expect($manager->fresh()->employments->first())
-        ->started_at->equalTo($datetime->copy()->addDays(2));
+        ->started_at->eq($datetime->copy()->addDays(2));
 
     $manager = app(ManagerRepository::class)->employ($manager, $datetime);
 
     expect($manager->fresh())->employments->toHaveCount(1);
-    expect($manager->fresh()->employments->first())->started_at->equalTo($datetime);
+    expect($manager->fresh()->employments->first())->started_at->eq($datetime);
 });
 
 test('release a manager', function () {
@@ -81,7 +81,7 @@ test('release a manager', function () {
     $manager = app(ManagerRepository::class)->release($manager, $datetime);
 
     expect($manager->fresh()->employments)->toHaveCount(1);
-    expect($manager->fresh()->employments->first())->started_at->equalTo($datetime->copy()->subDays(3));
+    expect($manager->fresh()->employments->first())->started_at->eq($datetime->copy()->subDays(3));
 });
 
 test('it can injure a manager', function () {
@@ -91,7 +91,7 @@ test('it can injure a manager', function () {
     $manager = app(ManagerRepository::class)->injure($manager, $datetime);
 
     expect($manager->fresh()->injuries)->toHaveCount(1);
-    expect($manager->fresh()->injuries->first())->started_at->equalTo($datetime);
+    expect($manager->fresh()->injuries->first())->started_at->eq($datetime);
 });
 
 test('clear an injured manager', function () {
@@ -101,7 +101,7 @@ test('clear an injured manager', function () {
     $manager = app(ManagerRepository::class)->clearInjury($manager, $datetime);
 
     expect($manager->fresh()->injuries)->toHaveCount(1);
-    expect($manager->fresh()->injuries->first())->started_at->equalTo($datetime->copy()->subDays(3));
+    expect($manager->fresh()->injuries->first())->started_at->eq($datetime->copy()->subDays(3));
 });
 
 test('retire a manager', function () {
@@ -111,7 +111,7 @@ test('retire a manager', function () {
     $manager = app(ManagerRepository::class)->retire($manager, $datetime);
 
     expect($manager->fresh()->retirements)->toHaveCount(1);
-    expect($manager->fresh()->retirements->first())->started_at->equalTo($datetime);
+    expect($manager->fresh()->retirements->first())->started_at->eq($datetime);
 });
 
 test('unretire a manager', function () {
@@ -121,7 +121,7 @@ test('unretire a manager', function () {
     $manager = app(ManagerRepository::class)->unretire($manager, $datetime);
 
     expect($manager->fresh()->retirements)->toHaveCount(1);
-    expect($manager->fresh()->retirements()->first())->started_at->equalTo($datetime->copy()->subDays(2));
+    expect($manager->fresh()->retirements()->first())->started_at->eq($datetime->copy()->subDays(2));
 });
 
 test('suspend a manager', function () {
@@ -131,7 +131,7 @@ test('suspend a manager', function () {
     $manager = app(ManagerRepository::class)->suspend($manager, $datetime);
 
     expect($manager->fresh()->suspensions)->toHaveCount(1);
-    expect($manager->fresh()->suspensions->first())->started_at->equalTo($datetime);
+    expect($manager->fresh()->suspensions->first())->started_at->eq($datetime);
 });
 
 test('reinstate a manager', function () {
@@ -141,7 +141,7 @@ test('reinstate a manager', function () {
     $manager = app(ManagerRepository::class)->reinstate($manager, $datetime);
 
     expect($manager->fresh()->suspensions)->toHaveCount(1);
-    expect($manager->fresh()->suspensions()->first())->started_at->equalTo($datetime->copy()->subDays(2));
+    expect($manager->fresh()->suspensions()->first())->started_at->eq($datetime->copy()->subDays(2));
 });
 
 test('remove a manager from its current tag teams', function () {

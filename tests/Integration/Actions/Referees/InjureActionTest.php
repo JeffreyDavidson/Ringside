@@ -26,7 +26,7 @@ test('it injures a bookable referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $injurableReferee, Carbon $injuryDate) use ($referee, $datetime) {
             expect($injurableReferee->is($referee))->toBeTrue()
-                ->and($injuryDate->equalTo($datetime))->toBeTrue();
+                ->and($injuryDate->eq($datetime))->toBeTrue();
 
             return true;
         })

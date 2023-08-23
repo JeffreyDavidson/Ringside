@@ -26,7 +26,7 @@ test('it activates an unactivated stable and employs its unemployed members at t
         ->once()
         ->withArgs(function (Stable $activatableStable, Carbon $activationDate) use ($stable, $datetime) {
             expect($activatableStable->is($stable))->toBeTrue()
-                ->and($activationDate->equalTo($datetime))->toBeTrue();
+                ->and($activationDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -57,7 +57,7 @@ test('it activates a future activated stable and employs its unemployed members 
         ->once()
         ->withArgs(function (Stable $activatableStable, Carbon $activationDate) use ($stable, $datetime) {
             expect($activatableStable->is($stable))->toBeTrue()
-                ->and($activationDate->equalTo($datetime))->toBeTrue();
+                ->and($activationDate->eq($datetime))->toBeTrue();
 
             return true;
         })

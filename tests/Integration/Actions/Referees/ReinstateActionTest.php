@@ -26,7 +26,7 @@ test('it reinstates a suspended referee at the current datetime by default', fun
         ->once()
         ->withArgs(function (Referee $reinstatableReferee, Carbon $reinstatementDate) use ($referee, $datetime) {
             expect($reinstatableReferee->is($referee))->toBeTrue()
-                ->and($reinstatementDate->equalTo($datetime))->toBeTrue();
+                ->and($reinstatementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

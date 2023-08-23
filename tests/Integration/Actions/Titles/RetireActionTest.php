@@ -26,7 +26,7 @@ test('it retires an active title at the current datetime by default', function (
         ->once()
         ->withArgs(function (Title $deactivatableTitle, Carbon $deactivationDate) use ($title, $datetime) {
             expect($deactivatableTitle->is($title))->toBeTrue()
-                ->and($deactivationDate->equalTo($datetime))->toBeTrue();
+                ->and($deactivationDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -37,7 +37,7 @@ test('it retires an active title at the current datetime by default', function (
         ->once()
         ->withArgs(function (Title $retirableTitle, Carbon $retirementDate) use ($title, $datetime) {
             expect($retirableTitle->is($title))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -77,7 +77,7 @@ test('it retires an inactive title at the current datetime by default', function
         ->once()
         ->withArgs(function (Title $retirableTitle, Carbon $retirementDate) use ($title, $datetime) {
             expect($retirableTitle->is($title))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

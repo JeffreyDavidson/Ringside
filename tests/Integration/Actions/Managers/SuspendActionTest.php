@@ -29,7 +29,7 @@ test('it suspends an available manager at the current datetime by default', func
         ->once()
         ->withArgs(function (Manager $suspendableManager, Carbon $suspensionDate) use ($manager, $datetime) {
             expect($suspendableManager->is($manager))->toBeTrue()
-                ->and($suspensionDate->equalTo($datetime))->toBeTrue();
+                ->and($suspensionDate->eq($datetime))->toBeTrue();
 
             return true;
         })

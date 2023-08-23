@@ -70,7 +70,7 @@ test('it employs a tag team and tag team partners and employment when start date
         ->withArgs(function (TagTeam $tagTeamToAddWrestlers, Wrestler $wrestlerToAdd, Carbon $joinDate) use ($tagTeam, $wrestlerA, $datetime) {
             expect($tagTeamToAddWrestlers->is($tagTeam))->toBeTrue()
                 ->and($wrestlerToAdd->is($wrestlerA))->toBeTrue()
-                ->and($joinDate->equalTo($datetime))->toBeTrue();
+                ->and($joinDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -82,7 +82,7 @@ test('it employs a tag team and tag team partners and employment when start date
         ->withArgs(function (TagTeam $tagTeamToAddWrestlers, Wrestler $wrestlerToAdd, Carbon $joinDate) use ($tagTeam, $wrestlerB, $datetime) {
             expect($tagTeamToAddWrestlers->is($tagTeam))->toBeTrue()
                 ->and($wrestlerToAdd->is($wrestlerB))->toBeTrue()
-                ->and($joinDate->equalTo($datetime))->toBeTrue();
+                ->and($joinDate->eq($datetime))->toBeTrue();
 
             return true;
         })

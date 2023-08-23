@@ -29,7 +29,7 @@ test('it employs an employable manager at the current datetime by default', func
         ->once()
         ->withArgs(function (Manager $employableManager, Carbon $employmentDate) use ($manager, $datetime) {
             expect($employableManager->is($manager))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -70,7 +70,7 @@ test('it employs a retired manager at the current datetime by default', function
         ->shouldReceive('unretire')
         ->withArgs(function (Manager $unretirableManager, Carbon $unretireDate) use ($manager, $datetime) {
             expect($unretirableManager->is($manager))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -82,7 +82,7 @@ test('it employs a retired manager at the current datetime by default', function
         ->once()
         ->withArgs(function (Manager $employedManager, Carbon $employmentDate) use ($manager, $datetime) {
             expect($employedManager->is($manager))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })

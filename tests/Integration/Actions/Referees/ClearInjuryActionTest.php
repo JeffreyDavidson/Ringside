@@ -26,7 +26,7 @@ test('it clears an injury of an injured referee at the current datetime by defau
         ->once()
         ->withArgs(function (Referee $healedReferee, Carbon $recoveryDate) use ($referee, $datetime) {
             expect($healedReferee->is($referee))->toBeTrue()
-                ->and($recoveryDate->equalTo($datetime))->toBeTrue();
+                ->and($recoveryDate->eq($datetime))->toBeTrue();
 
             return true;
         })

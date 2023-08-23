@@ -29,7 +29,7 @@ test('it employs an employable wrestler at the current datetime by default', fun
         ->once()
         ->withArgs(function (Wrestler $employableWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
             expect($employableWrestler->is($wrestler))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -70,7 +70,7 @@ test('it employs a retired wrestler at the current datetime by default', functio
         ->shouldReceive('unretire')
         ->withArgs(function (Wrestler $unretirableWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
             expect($unretirableWrestler->is($wrestler))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -82,7 +82,7 @@ test('it employs a retired wrestler at the current datetime by default', functio
         ->once()
         ->withArgs(function (Wrestler $employedWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
             expect($employedWrestler->is($wrestler))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })

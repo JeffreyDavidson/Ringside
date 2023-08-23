@@ -32,7 +32,7 @@ test('it releases a bookable referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $releaseDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -69,7 +69,7 @@ test('it releases a suspended referee at the current datetime by default', funct
         ->once()
         ->withArgs(function (Referee $reinstatableReferee, Carbon $releaseDate) use ($referee, $datetime) {
             expect($reinstatableReferee->is($referee))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -83,7 +83,7 @@ test('it releases a suspended referee at the current datetime by default', funct
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $releaseDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })

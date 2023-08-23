@@ -29,7 +29,7 @@ test('it reinstates a suspended manager at the current datetime by default', fun
         ->once()
         ->withArgs(function (Manager $reinstatableManager, Carbon $reinstatementDate) use ($manager, $datetime) {
             expect($reinstatableManager->is($manager))->toBeTrue()
-                ->and($reinstatementDate->equalTo($datetime))->toBeTrue();
+                ->and($reinstatementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

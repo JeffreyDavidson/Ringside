@@ -33,7 +33,7 @@ test('it employs an unemployed tag team at the current datetime by default', fun
         ->once()
         ->withArgs(function (TagTeam $employableTagTeam, Carbon $employmentDate) use ($tagTeam, $datetime) {
             expect($employableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })

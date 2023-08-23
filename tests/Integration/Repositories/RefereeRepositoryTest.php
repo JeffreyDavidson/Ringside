@@ -53,7 +53,7 @@ test('employ a referee', function () {
     $referee = app(RefereeRepository::class)->employ($referee, $datetime);
 
     expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())->started_at->equalTo($datetime);
+    expect($referee->fresh()->employments->first())->started_at->eq($datetime);
 });
 
 test('updates employment of a referee', function () {
@@ -69,7 +69,7 @@ test('updates employment of a referee', function () {
     $referee = app(RefereeRepository::class)->employ($referee, $datetime);
 
     expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())->started_at->equalTo($datetime);
+    expect($referee->fresh()->employments->first())->started_at->eq($datetime);
 });
 
 test('release a referee', function () {
@@ -79,7 +79,7 @@ test('release a referee', function () {
     $referee = app(RefereeRepository::class)->release($referee, $datetime);
 
     expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())->ended_at->equalTo($datetime);
+    expect($referee->fresh()->employments->first())->ended_at->eq($datetime);
 });
 
 test('injure a referee', function () {
@@ -89,7 +89,7 @@ test('injure a referee', function () {
     $referee = app(RefereeRepository::class)->injure($referee, $datetime);
 
     expect($referee->fresh())->injuries->toHaveCount(1);
-    expect($referee->fresh()->injuries->first())->started_at->equalTo($datetime);
+    expect($referee->fresh()->injuries->first())->started_at->eq($datetime);
 });
 
 test('clear an injured referee', function () {
@@ -99,7 +99,7 @@ test('clear an injured referee', function () {
     $referee = app(RefereeRepository::class)->clearInjury($referee, $datetime);
 
     expect($referee->fresh())->injuries->toHaveCount(1);
-    expect($referee->fresh()->injuries->first())->ended_at->equalTo($datetime);
+    expect($referee->fresh()->injuries->first())->ended_at->eq($datetime);
 });
 
 test('retire a referee', function () {
@@ -109,7 +109,7 @@ test('retire a referee', function () {
     $referee = app(RefereeRepository::class)->retire($referee, $datetime);
 
     expect($referee->fresh())->retirements->toHaveCount(1);
-    expect($referee->fresh()->retirements->first())->started_at->equalTo($datetime);
+    expect($referee->fresh()->retirements->first())->started_at->eq($datetime);
 });
 
 test('unretire a referee', function () {
@@ -119,7 +119,7 @@ test('unretire a referee', function () {
     $referee = app(RefereeRepository::class)->unretire($referee, $datetime);
 
     expect($referee->fresh())->retirements->toHaveCount(1);
-    expect($referee->fresh()->retirements->first())->ended_at->equalTo($datetime);
+    expect($referee->fresh()->retirements->first())->ended_at->eq($datetime);
 });
 
 test('suspend a referee', function () {
@@ -129,7 +129,7 @@ test('suspend a referee', function () {
     $referee = app(RefereeRepository::class)->suspend($referee, $datetime);
 
     expect($referee->fresh())->suspensions->toHaveCount(1);
-    expect($referee->fresh()->suspensions->first())->started_at->equalTo($datetime);
+    expect($referee->fresh()->suspensions->first())->started_at->eq($datetime);
 });
 
 test('reinstate a referee', function () {
@@ -139,5 +139,5 @@ test('reinstate a referee', function () {
     $referee = app(RefereeRepository::class)->reinstate($referee, $datetime);
 
     expect($referee->fresh())->suspensions->toHaveCount(1);
-    expect($referee->fresh()->suspensions->first())->ended_at->equalTo($datetime);
+    expect($referee->fresh()->suspensions->first())->ended_at->eq($datetime);
 });

@@ -26,7 +26,7 @@ test('it unretires a retired title and redirects', function () {
         ->once()
         ->withArgs(function (Title $unretireTitle, Carbon $unretireDate) use ($title, $datetime) {
             expect($unretireTitle->is($title))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -37,7 +37,7 @@ test('it unretires a retired title and redirects', function () {
         ->once()
         ->withArgs(function (Title $employableTitle, Carbon $unretireDate) use ($title, $datetime) {
             expect($employableTitle->is($title))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })

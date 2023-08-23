@@ -28,7 +28,7 @@ test('it unretires a retired tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $unretirableTagTeam, Carbon $unretireDate) use ($tagTeam, $datetime) {
             expect($unretirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -39,7 +39,7 @@ test('it unretires a retired tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $employableTagTeam, Carbon $employmentDate) use ($tagTeam, $datetime) {
             expect($employableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })

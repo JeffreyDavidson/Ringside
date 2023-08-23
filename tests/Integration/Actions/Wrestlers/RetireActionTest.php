@@ -36,7 +36,7 @@ test('it retires a bookable wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -47,7 +47,7 @@ test('it retires a bookable wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($retirableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -57,7 +57,7 @@ test('it retires a bookable wrestler at the current datetime by default', functi
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -89,7 +89,7 @@ test('it retires a bookable wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -104,7 +104,7 @@ test('it retires a suspended wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $reinstatableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($reinstatableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -118,7 +118,7 @@ test('it retires a suspended wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -129,7 +129,7 @@ test('it retires a suspended wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($retirableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -139,7 +139,7 @@ test('it retires a suspended wrestler at the current datetime by default', funct
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -174,7 +174,7 @@ test('it retires a suspended wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -192,7 +192,7 @@ test('it retires an injured wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $clearableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($clearableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -203,7 +203,7 @@ test('it retires an injured wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -214,7 +214,7 @@ test('it retires an injured wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($retirableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -224,7 +224,7 @@ test('it retires an injured wrestler at the current datetime by default', functi
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -259,7 +259,7 @@ test('it retires an injured wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -283,7 +283,7 @@ test('it retires a released wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $retirableWrestler, Carbon $retirementDate) use ($wrestler, $datetime) {
             expect($retirableWrestler->is($wrestler))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -293,7 +293,7 @@ test('it retires a released wrestler at the current datetime by default', functi
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -322,7 +322,7 @@ test('it retires a released wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });

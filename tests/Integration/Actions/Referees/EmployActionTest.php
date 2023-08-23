@@ -32,7 +32,7 @@ test('it employs an employable referee at the current datetime by default', func
         ->once()
         ->withArgs(function (Referee $employableReferee, Carbon $employmentDate) use ($referee, $datetime) {
             expect($employableReferee->is($referee))->toBeTrue()
-                ->and($employmentDate->equalTo($datetime))->toBeTrue();
+                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -73,7 +73,7 @@ test('it employs a retired referee at the current datetime by default', function
         ->shouldReceive('unretire')
         ->withArgs(function (Referee $unretirableReferee, Carbon $unretireDate) use ($referee, $datetime) {
             expect($unretirableReferee->is($referee))->toBeTrue();
-            expect($unretireDate->equalTo($datetime))->toBeTrue();
+            expect($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -85,7 +85,7 @@ test('it employs a retired referee at the current datetime by default', function
         ->once()
         ->withArgs(function (Referee $employedReferee, Carbon $employmentDate) use ($referee, $datetime) {
             expect($employedReferee->is($referee))->toBeTrue();
-            expect($employmentDate->equalTo($datetime))->toBeTrue();
+            expect($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })

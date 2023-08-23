@@ -30,7 +30,7 @@ test('it suspends a bookable wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $suspendableWrestler, Carbon $suspensionDate) use ($wrestler, $datetime) {
             expect($suspendableWrestler->is($wrestler))->toBeTrue()
-                ->and($suspensionDate->equalTo($datetime))->toBeTrue();
+                ->and($suspensionDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it suspends a bookable wrestler at the current datetime by default', funct
 
     Event::assertDispatched(WrestlerSuspended::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->suspensionDate->is($datetime))->toBeTrue();
+            ->and($event->suspensionDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -60,7 +60,7 @@ test('it suspends a bookable wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerSuspended::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->suspensionDate->is($datetime))->toBeTrue();
+            ->and($event->suspensionDate->eq($datetime))->toBeTrue();
 
         return true;
     });

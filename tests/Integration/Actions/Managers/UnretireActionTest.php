@@ -26,7 +26,7 @@ test('it unretires a retired manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $unretireManager, Carbon $unretireDate) use ($manager, $datetime) {
             expect($unretireManager->is($manager))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -37,7 +37,7 @@ test('it unretires a retired manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $employableManager, Carbon $unretireDate) use ($manager, $datetime) {
             expect($employableManager->is($manager))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })

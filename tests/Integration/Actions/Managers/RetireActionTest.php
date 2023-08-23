@@ -36,7 +36,7 @@ test('it retires a available manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -47,7 +47,7 @@ test('it retires a available manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($retirableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -57,7 +57,7 @@ test('it retires a available manager at the current datetime by default', functi
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -87,7 +87,7 @@ test('it retires a available manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -102,7 +102,7 @@ test('it retires a suspended manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $reinstatableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($reinstatableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -116,7 +116,7 @@ test('it retires a suspended manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -127,7 +127,7 @@ test('it retires a suspended manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($retirableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -137,7 +137,7 @@ test('it retires a suspended manager at the current datetime by default', functi
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -172,7 +172,7 @@ test('it retires a suspended manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -190,7 +190,7 @@ test('it retires an injured manager at the current datetime by default', functio
         ->once()
         ->withArgs(function (Manager $clearableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($clearableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -201,7 +201,7 @@ test('it retires an injured manager at the current datetime by default', functio
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -212,7 +212,7 @@ test('it retires an injured manager at the current datetime by default', functio
         ->once()
         ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($retirableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -222,7 +222,7 @@ test('it retires an injured manager at the current datetime by default', functio
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -257,7 +257,7 @@ test('it retires an injured manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -281,7 +281,7 @@ test('it retires a released manager at the current datetime by default', functio
         ->once()
         ->withArgs(function (Manager $retirableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($retirableManager->is($manager))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -291,7 +291,7 @@ test('it retires a released manager at the current datetime by default', functio
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -320,7 +320,7 @@ test('it retires a released manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->retirementDate->is($datetime))->toBeTrue();
+            ->and($event->retirementDate->eq($datetime))->toBeTrue();
 
         return true;
     });

@@ -36,7 +36,7 @@ test('it releases a bookable wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $releaseDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -46,7 +46,7 @@ test('it releases a bookable wrestler at the current datetime by default', funct
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -72,7 +72,7 @@ test('it releases an bookable wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -87,7 +87,7 @@ test('it releases a suspended wrestler at the current datetime by default', func
         ->once()
         ->withArgs(function (Wrestler $reinstatableWrestler, Carbon $releaseDate) use ($wrestler, $datetime) {
             expect($reinstatableWrestler->is($wrestler))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -101,7 +101,7 @@ test('it releases a suspended wrestler at the current datetime by default', func
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $releaseDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -111,7 +111,7 @@ test('it releases a suspended wrestler at the current datetime by default', func
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -140,7 +140,7 @@ test('it releases a suspended wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });

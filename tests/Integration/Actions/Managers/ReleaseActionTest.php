@@ -36,7 +36,7 @@ test('it releases an available manager at the current datetime by default', func
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -46,7 +46,7 @@ test('it releases an available manager at the current datetime by default', func
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -72,7 +72,7 @@ test('it releases an available manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -87,7 +87,7 @@ test('it releases a suspended manager at the current datetime by default', funct
         ->once()
         ->withArgs(function (Manager $reinstatableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($reinstatableManager->is($manager))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -101,7 +101,7 @@ test('it releases a suspended manager at the current datetime by default', funct
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -111,7 +111,7 @@ test('it releases a suspended manager at the current datetime by default', funct
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -140,7 +140,7 @@ test('it releases a suspended manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -158,7 +158,7 @@ test('it releases an injured manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -169,7 +169,7 @@ test('it releases an injured manager at the current datetime by default', functi
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -179,7 +179,7 @@ test('it releases an injured manager at the current datetime by default', functi
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -208,7 +208,7 @@ test('it releases an injured manager at a specific datetime', function () {
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->is($datetime))->toBeTrue();
+            ->and($event->releaseDate->eq($datetime))->toBeTrue();
 
         return true;
     });

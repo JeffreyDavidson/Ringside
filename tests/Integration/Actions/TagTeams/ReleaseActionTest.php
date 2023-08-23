@@ -26,7 +26,7 @@ test('it releases a bookable tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -57,7 +57,7 @@ test('it releases a suspended tag team at the current datetime by default', func
         ->once()
         ->withArgs(function (TagTeam $reinstatableTagTeam, Carbon $reinstatementDate) use ($tagTeam, $datetime) {
             expect($reinstatableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($reinstatementDate->equalTo($datetime))->toBeTrue();
+                ->and($reinstatementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -68,7 +68,7 @@ test('it releases a suspended tag team at the current datetime by default', func
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -108,7 +108,7 @@ test('it releases an unbookable tag team at the current datetime by default', fu
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
