@@ -51,7 +51,7 @@ test('it activates a title', function () {
     $title = app(TitleRepository::class)->activate($title, $datetime);
 
     expect($title->fresh())->activations->toHaveCount(1);
-    expect($title->fresh()->activations->first())->started_at->equalTo($datetime);
+    expect($title->fresh()->activations->first())->started_at->eq($datetime);
 });
 
 test('it updates an activation of a title', function () {
@@ -67,7 +67,7 @@ test('it updates an activation of a title', function () {
     $title = app(TitleRepository::class)->activate($title, $datetime);
 
     expect($title->fresh())->activations->toHaveCount(1);
-    expect($title->fresh()->activations->first())->started_at->equalTo($datetime);
+    expect($title->fresh()->activations->first())->started_at->eq($datetime);
 });
 
 test('it deactivates a title', function () {
@@ -77,7 +77,7 @@ test('it deactivates a title', function () {
     $title = app(TitleRepository::class)->deactivate($title, $datetime);
 
     expect($title->fresh())->activations->toHaveCount(1);
-    expect($title->fresh()->activations->first())->ended_at->equalTo($datetime);
+    expect($title->fresh()->activations->first())->ended_at->eq($datetime);
 });
 
 test('it retire a title', function () {
@@ -87,7 +87,7 @@ test('it retire a title', function () {
     $title = app(TitleRepository::class)->retire($title, $datetime);
 
     expect($title->fresh())->retirements->toHaveCount(1);
-    expect($title->fresh()->retirements->first())->started_at->equalTo($datetime);
+    expect($title->fresh()->retirements->first())->started_at->eq($datetime);
 });
 
 test('it unretire a title', function () {
@@ -97,5 +97,5 @@ test('it unretire a title', function () {
     $title = app(TitleRepository::class)->unretire($title, $datetime);
 
     expect($title->fresh())->retirements->toHaveCount(1);
-    expect($title->fresh()->retirements->first())->ended_at->equalTo($datetime);
+    expect($title->fresh()->retirements->first())->ended_at->eq($datetime);
 });

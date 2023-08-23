@@ -29,7 +29,7 @@ test('it unretires a retired wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $unretireWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
             expect($unretireWrestler->is($wrestler))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it unretires a retired wrestler at the current datetime by default', funct
         ->once()
         ->withArgs(function (Wrestler $employableWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
             expect($employableWrestler->is($wrestler))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })

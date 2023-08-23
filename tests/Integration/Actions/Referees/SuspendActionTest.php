@@ -26,7 +26,7 @@ test('it suspends a bookable referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $suspendableReferee, Carbon $suspensionDate) use ($referee, $datetime) {
             expect($suspendableReferee->is($referee))->toBeTrue()
-                ->and($suspensionDate->equalTo($datetime))->toBeTrue();
+                ->and($suspensionDate->eq($datetime))->toBeTrue();
 
             return true;
         })

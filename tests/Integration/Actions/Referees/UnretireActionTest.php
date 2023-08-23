@@ -29,7 +29,7 @@ test('it unretires a retired referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $unretireReferee, Carbon $unretireDate) use ($referee, $datetime) {
             expect($unretireReferee->is($referee))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it unretires a retired referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $employableReferee, Carbon $unretireDate) use ($referee, $datetime) {
             expect($employableReferee->is($referee))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })

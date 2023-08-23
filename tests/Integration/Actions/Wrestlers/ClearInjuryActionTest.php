@@ -30,7 +30,7 @@ test('it clears an injury of an injured wrestler at the current datetime by defa
         ->once()
         ->withArgs(function (Wrestler $unretireWrestler, Carbon $recoveryDate) use ($wrestler, $datetime) {
             expect($unretireWrestler->is($wrestler))->toBeTrue()
-                ->and($recoveryDate->equalTo($datetime))->toBeTrue();
+                ->and($recoveryDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it clears an injury of an injured wrestler at the current datetime by defa
 
     Event::assertDispatched(WrestlerClearedFromInjury::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->recoveryDate->is($datetime))->toBeTrue();
+            ->and($event->recoveryDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -60,7 +60,7 @@ test('it clears an injury of an injured wrestler at a specific datetime', functi
 
     Event::assertDispatched(WrestlerClearedFromInjury::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->recoveryDate->is($datetime))->toBeTrue();
+            ->and($event->recoveryDate->eq($datetime))->toBeTrue();
 
         return true;
     });

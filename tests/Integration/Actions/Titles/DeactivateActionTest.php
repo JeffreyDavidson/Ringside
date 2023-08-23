@@ -29,7 +29,7 @@ test('it deactivates an active title at the current datetime by default', functi
         ->once()
         ->withArgs(function (Title $deactivatableTitle, Carbon $deactivationDate) use ($title, $datetime) {
             expect($deactivatableTitle->is($title))->toBeTrue()
-                ->and($deactivationDate->equalTo($datetime))->toBeTrue();
+                ->and($deactivationDate->eq($datetime))->toBeTrue();
 
             return true;
         })

@@ -29,7 +29,7 @@ test('it injures an available manager at the current datetime by default', funct
         ->once()
         ->withArgs(function (Manager $injurableManager, Carbon $injuryDate) use ($manager, $datetime) {
             expect($injurableManager->is($manager))->toBeTrue()
-                ->and($injuryDate->equalTo($datetime))->toBeTrue();
+                ->and($injuryDate->eq($datetime))->toBeTrue();
 
             return true;
         })

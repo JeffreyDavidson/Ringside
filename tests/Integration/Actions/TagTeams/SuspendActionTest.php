@@ -32,7 +32,7 @@ test('it suspends a bookable tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $suspendableTagTeam, Carbon $suspensionDate) use ($tagTeam, $datetime) {
             expect($suspendableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($suspensionDate->equalTo($datetime))->toBeTrue();
+                ->and($suspensionDate->eq($datetime))->toBeTrue();
 
             return true;
         })

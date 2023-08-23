@@ -26,7 +26,7 @@ test('it deactivates a stable at the current datetime by default', function () {
         ->once()
         ->withArgs(function (Stable $deactivatableStable, Carbon $deactivationDate) use ($stable, $datetime) {
             expect($deactivatableStable->is($stable))->toBeTrue()
-                ->and($deactivationDate->equalTo($datetime))->toBeTrue();
+                ->and($deactivationDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -37,7 +37,7 @@ test('it deactivates a stable at the current datetime by default', function () {
         ->once()
         ->withArgs(function (Stable $deactivatableStable, Carbon $deactivationDate) use ($stable, $datetime) {
             expect($deactivatableStable->is($stable))->toBeTrue()
-                ->and($deactivationDate->equalTo($datetime))->toBeTrue();
+                ->and($deactivationDate->eq($datetime))->toBeTrue();
 
             return true;
         })

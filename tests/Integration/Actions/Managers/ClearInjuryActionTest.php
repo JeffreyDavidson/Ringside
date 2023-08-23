@@ -29,7 +29,7 @@ test('it clears an injury of an injured manager at the current datetime by defau
         ->once()
         ->withArgs(function (Manager $unretireManager, Carbon $recoveryDate) use ($manager, $datetime) {
             expect($unretireManager->is($manager))->toBeTrue()
-                ->and($recoveryDate->equalTo($datetime))->toBeTrue();
+                ->and($recoveryDate->eq($datetime))->toBeTrue();
 
             return true;
         })

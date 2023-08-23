@@ -32,7 +32,7 @@ test('it retires an active stable at the current datetime by default', function 
         ->once()
         ->withArgs(function (Stable $retirableStable, Carbon $retirementDate) use ($stable, $datetime) {
             expect($retirableStable->is($stable))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -43,7 +43,7 @@ test('it retires an active stable at the current datetime by default', function 
         ->once()
         ->withArgs(function (Stable $retirableStable, Carbon $retirementDate) use ($stable, $datetime) {
             expect($retirableStable->is($stable))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -83,7 +83,7 @@ test('it retires an inactive stable at the current datetime by default', functio
         ->once()
         ->withArgs(function (Stable $retirableStable, Carbon $retirementDate) use ($stable, $datetime) {
             expect($retirableStable->is($stable))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

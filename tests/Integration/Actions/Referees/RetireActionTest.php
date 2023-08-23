@@ -35,7 +35,7 @@ test('it retires a bookable referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -46,7 +46,7 @@ test('it retires a bookable referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -89,7 +89,7 @@ test('it retires a suspended referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $reinstatableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($reinstatableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -103,7 +103,7 @@ test('it retires a suspended referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -114,7 +114,7 @@ test('it retires a suspended referee at the current datetime by default', functi
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -163,7 +163,7 @@ test('it retires an injured referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $clearableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($clearableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -174,7 +174,7 @@ test('it retires an injured referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -185,7 +185,7 @@ test('it retires an injured referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -240,7 +240,7 @@ test('it retires a released referee at the current datetime by default', functio
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

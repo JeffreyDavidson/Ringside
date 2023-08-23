@@ -29,7 +29,7 @@ test('it retires a bookable tag team at the current datetime by default', functi
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it retires a bookable tag team at the current datetime by default', functi
         ->once()
         ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
             expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -86,7 +86,7 @@ test('it retires a released tag team at the current datetime by default', functi
         ->once()
         ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
             expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -126,7 +126,7 @@ test('it retires a suspended tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $reinstatableTagTeam, Carbon $reinstatementDate) use ($tagTeam, $datetime) {
             expect($reinstatableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($reinstatementDate->equalTo($datetime))->toBeTrue();
+                ->and($reinstatementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -137,7 +137,7 @@ test('it retires a suspended tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -148,7 +148,7 @@ test('it retires a suspended tag team at the current datetime by default', funct
         ->once()
         ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
             expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -194,7 +194,7 @@ test('it retires an unbookable tag team at the current datetime by default', fun
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->equalTo($datetime))->toBeTrue();
+                ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -205,7 +205,7 @@ test('it retires an unbookable tag team at the current datetime by default', fun
         ->once()
         ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
             expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->equalTo($datetime))->toBeTrue();
+                ->and($retirementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

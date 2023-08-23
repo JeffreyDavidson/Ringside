@@ -29,7 +29,7 @@ test('it activates an activatable title at the current datetime by default', fun
         ->once()
         ->withArgs(function (Title $activatableTitle, Carbon $activationDate) use ($title, $datetime) {
             expect($activatableTitle->is($title))->toBeTrue()
-                ->and($activationDate->equalTo($datetime))->toBeTrue();
+                ->and($activationDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -70,7 +70,7 @@ test('it activates a retired title at the current datetime by default', function
         ->shouldReceive('unretire')
         ->withArgs(function (Title $unretirableTitle, Carbon $unretireDate) use ($title, $datetime) {
             expect($unretirableTitle->is($title))->toBeTrue()
-                ->and($unretireDate->equalTo($datetime))->toBeTrue();
+                ->and($unretireDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -82,7 +82,7 @@ test('it activates a retired title at the current datetime by default', function
         ->once()
         ->withArgs(function (Title $activatedTitle, Carbon $activationDate) use ($title, $datetime) {
             expect($activatedTitle->is($title))->toBeTrue()
-                ->and($activationDate->equalTo($datetime))->toBeTrue();
+                ->and($activationDate->eq($datetime))->toBeTrue();
 
             return true;
         })

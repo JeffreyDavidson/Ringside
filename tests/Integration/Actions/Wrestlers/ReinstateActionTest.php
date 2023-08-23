@@ -30,7 +30,7 @@ test('it reinstates a suspended wrestler at the current datetime by default', fu
         ->once()
         ->withArgs(function (Wrestler $reinstatableWrestler, Carbon $reinstatementDate) use ($wrestler, $datetime) {
             expect($reinstatableWrestler->is($wrestler))->toBeTrue()
-                ->and($reinstatementDate->equalTo($datetime))->toBeTrue();
+                ->and($reinstatementDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it reinstates a suspended wrestler at the current datetime by default', fu
 
     Event::assertDispatched(WrestlerReinstated::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->reinstatementDate->is($datetime))->toBeTrue();
+            ->and($event->reinstatementDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -60,7 +60,7 @@ test('it reinstates a suspended wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerReinstated::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->reinstatementDate->is($datetime))->toBeTrue();
+            ->and($event->reinstatementDate->eq($datetime))->toBeTrue();
 
         return true;
     });

@@ -26,7 +26,7 @@ test('it reinstates a suspended tag team at the current datetime by default', fu
         ->once()
         ->withArgs(function (TagTeam $reinstatableTagTeam, Carbon $reinstatementDate) use ($tagTeam, $datetime) {
             expect($reinstatableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($reinstatementDate->equalTo($datetime))->toBeTrue();
+                ->and($reinstatementDate->eq($datetime))->toBeTrue();
 
             return true;
         })

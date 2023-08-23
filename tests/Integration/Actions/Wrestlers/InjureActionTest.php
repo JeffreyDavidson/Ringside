@@ -30,7 +30,7 @@ test('it injures a bookable wrestler at the current datetime by default', functi
         ->once()
         ->withArgs(function (Wrestler $injurableWrestler, Carbon $injuryDate) use ($wrestler, $datetime) {
             expect($injurableWrestler->is($wrestler))->toBeTrue()
-                ->and($injuryDate->equalTo($datetime))->toBeTrue();
+                ->and($injuryDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -40,7 +40,7 @@ test('it injures a bookable wrestler at the current datetime by default', functi
 
     Event::assertDispatched(WrestlerInjured::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->injureDate->is($datetime))->toBeTrue();
+            ->and($event->injureDate->eq($datetime))->toBeTrue();
 
         return true;
     });
@@ -60,7 +60,7 @@ test('it injures a bookable wrestler at a specific datetime', function () {
 
     Event::assertDispatched(WrestlerInjured::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->injureDate->is($datetime))->toBeTrue();
+            ->and($event->injureDate->eq($datetime))->toBeTrue();
 
         return true;
     });
