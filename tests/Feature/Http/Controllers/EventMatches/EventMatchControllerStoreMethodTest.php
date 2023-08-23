@@ -15,7 +15,11 @@ beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->event = Event::factory()->scheduled()->create();
     $this->data = StoreRequest::factory()->create();
-    $this->request = StoreRequest::create(action([EventMatchesController::class, 'store'], $this->event), 'POST', $this->data);
+    $this->request = StoreRequest::create(
+        action([EventMatchesController::class, 'store'], $this->event),
+        'POST',
+        $this->data
+    );
 });
 
 test('it saves a match for an event and redirects', function () {

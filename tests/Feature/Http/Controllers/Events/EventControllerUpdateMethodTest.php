@@ -11,7 +11,11 @@ use App\Models\Event;
 beforeEach(function () {
     $this->event = Event::factory()->create();
     $this->data = UpdateRequest::factory()->create();
-    $this->request = UpdateRequest::create(action([EventsController::class, 'update'], $this->event), 'PATCH', $this->data);
+    $this->request = UpdateRequest::create(
+        action([EventsController::class, 'update'], $this->event),
+        'PATCH',
+        $this->data
+    );
 });
 
 test('update calls update action and redirects', function () {

@@ -14,7 +14,11 @@ use function Pest\Laravel\from;
 beforeEach(function () {
     $this->venue = Venue::factory()->create();
     $this->data = UpdateRequest::factory()->create();
-    $this->request = UpdateRequest::create(action([VenuesController::class, 'update'], $this->venue), 'PATCH', $this->data);
+    $this->request = UpdateRequest::create(
+        action([VenuesController::class, 'update'], $this->venue),
+        'PATCH',
+        $this->data
+    );
 });
 
 test('updates calls update action and redirects', function () {

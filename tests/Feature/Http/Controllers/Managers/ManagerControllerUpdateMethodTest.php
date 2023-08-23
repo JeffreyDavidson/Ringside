@@ -14,7 +14,11 @@ use function Pest\Laravel\patch;
 beforeEach(function () {
     $this->manager = Manager::factory()->create();
     $this->data = UpdateRequest::factory()->create();
-    $this->request = UpdateRequest::create(action([ManagersController::class, 'update'], $this->manager), 'PATCH', $this->data);
+    $this->request = UpdateRequest::create(
+        action([ManagersController::class, 'update'], $this->manager),
+        'PATCH',
+        $this->data
+    );
 });
 
 test('update calls update action and redirects', function () {

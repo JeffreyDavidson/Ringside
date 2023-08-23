@@ -35,7 +35,12 @@ test('the correct wrestlers are available to join an editable team', function ()
     Wrestler::factory()->released()->create();
     Wrestler::factory()->retired()->create();
 
-    $wrestlers = (new Collection([$wrestlerA, $wrestlerB, $unemployedWrestler, $futureEmployedWrestler, $bookableWrestlerNotOnBookableTagTeam]));
+    $wrestlers = (new Collection([
+        $wrestlerA,
+        $wrestlerB, $unemployedWrestler,
+        $futureEmployedWrestler,
+        $bookableWrestlerNotOnBookableTagTeam,
+    ]));
 
     $this->mock(WrestlerRepository::class, function (MockInterface $mock) use ($wrestlers) {
         $mock->shouldReceive('getAvailableWrestlersForExistingTagTeam')->andReturn($wrestlers);
