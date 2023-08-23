@@ -14,7 +14,11 @@ use function Pest\Laravel\patch;
 beforeEach(function () {
     $this->referee = Referee::factory()->create();
     $this->data = UpdateRequest::factory()->create();
-    $this->request = UpdateRequest::create(action([RefereesController::class, 'update'], $this->referee), 'PATCH', $this->data);
+    $this->request = UpdateRequest::create(
+        action([RefereesController::class, 'update'], $this->referee),
+        'PATCH',
+        $this->data
+    );
 });
 
 test('update calls update action and redirects', function () {

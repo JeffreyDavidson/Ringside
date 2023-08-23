@@ -9,7 +9,11 @@ use App\Http\Requests\Events\StoreRequest;
 
 beforeEach(function () {
     $this->data = StoreRequest::factory()->create();
-    $this->request = StoreRequest::create(action([EventsController::class, 'store']), 'POST', $this->data);
+    $this->request = StoreRequest::create(
+        action([EventsController::class, 'store']),
+        'POST',
+        $this->data
+    );
 });
 
 test('store calls create action and redirects', function () {

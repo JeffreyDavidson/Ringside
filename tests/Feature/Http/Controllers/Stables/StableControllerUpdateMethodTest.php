@@ -11,7 +11,11 @@ use App\Models\Stable;
 beforeEach(function () {
     $this->stable = Stable::factory()->create();
     $this->data = UpdateRequest::factory()->create();
-    $this->request = UpdateRequest::create(action([StablesController::class, 'update'], $this->stable), 'PATCH', $this->data);
+    $this->request = UpdateRequest::create(
+        action([StablesController::class, 'update'], $this->stable),
+        'PATCH',
+        $this->data
+    );
 });
 
 test('updates calls update action and redirects', function () {

@@ -12,7 +12,11 @@ use function Pest\Laravel\post;
 
 beforeEach(function () {
     $this->data = StoreRequest::factory()->create();
-    $this->request = StoreRequest::create(action([RefereesController::class, 'store']), 'POST', $this->data);
+    $this->request = StoreRequest::create(
+        action([RefereesController::class, 'store']),
+        'POST',
+        $this->data
+    );
 });
 
 test('store calls create action and redirects', function () {

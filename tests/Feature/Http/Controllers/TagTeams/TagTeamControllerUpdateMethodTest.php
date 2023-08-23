@@ -11,7 +11,11 @@ use App\Models\TagTeam;
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->create();
     $this->data = UpdateRequest::factory()->create();
-    $this->request = UpdateRequest::create(action([TagTeamsController::class, 'update'], $this->tagTeam), 'PATCH', $this->data);
+    $this->request = UpdateRequest::create(
+        action([TagTeamsController::class, 'update'], $this->tagTeam),
+        'PATCH',
+        $this->data
+    );
 });
 
 test('update calls update action and redirects', function () {

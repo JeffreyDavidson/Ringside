@@ -9,7 +9,11 @@ use App\Http\Requests\TagTeams\StoreRequest;
 
 beforeEach(function () {
     $this->data = StoreRequest::factory()->create();
-    $this->request = StoreRequest::create(action([TagTeamsController::class, 'store']), 'POST', $this->data);
+    $this->request = StoreRequest::create(
+        action([TagTeamsController::class, 'store']),
+        'POST',
+        $this->data
+    );
 });
 
 test('store calls create action and redirects', function () {
