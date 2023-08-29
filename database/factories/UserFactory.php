@@ -27,7 +27,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => 'secret',
             'remember_token' => Str::random(10),
-            'role' => Role::BASIC,
+            'role' => Role::Basic,
         ];
     }
 
@@ -37,7 +37,7 @@ class UserFactory extends Factory
     public function administrator(): static
     {
         return $this->state([
-            'role' => Role::ADMINISTRATOR,
+            'role' => Role::Administrator,
         ]);
     }
 
@@ -47,7 +47,7 @@ class UserFactory extends Factory
     public function basicUser(): static
     {
         return $this->state([
-            'role' => Role::BASIC,
+            'role' => Role::Basic,
         ]);
     }
 }
