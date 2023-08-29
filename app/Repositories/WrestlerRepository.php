@@ -176,7 +176,7 @@ class WrestlerRepository
             })
             ->orWhere(function ($query) {
                 $query->employed()
-                    ->where('status', WrestlerStatus::BOOKABLE)
+                    ->where('status', WrestlerStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
             })
             ->get();
@@ -204,7 +204,7 @@ class WrestlerRepository
             })
             ->orWhere(function ($query) {
                 $query->employed()
-                    ->where('status', WrestlerStatus::BOOKABLE)
+                    ->where('status', WrestlerStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
             })
             ->orWhere(function ($query) use ($tagTeam) {

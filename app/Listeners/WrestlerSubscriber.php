@@ -58,7 +58,7 @@ class WrestlerSubscriber
     public function handleTagTeamWrestlerClearedFromInjury(WrestlerClearedFromInjury $event): void
     {
         if ($event->wrestler->isAMemberOfCurrentTagTeam()) {
-            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::BOOKABLE]);
+            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::Bookable]);
         }
     }
 
@@ -68,7 +68,7 @@ class WrestlerSubscriber
     public function handleTagTeamWrestlerInjured(WrestlerInjured $event): void
     {
         if ($event->wrestler->isAMemberOfCurrentTagTeam()) {
-            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::UNBOOKABLE]);
+            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::Unbookable]);
         }
     }
 
@@ -78,7 +78,7 @@ class WrestlerSubscriber
     public function handleTagTeamWrestlerReinstated(WrestlerReinstated $event): void
     {
         if ($event->wrestler->isAMemberOfCurrentTagTeam()) {
-            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::BOOKABLE]);
+            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::Bookable]);
         }
     }
 
@@ -88,7 +88,7 @@ class WrestlerSubscriber
     public function handleTagTeamWrestlerReleased(WrestlerReleased $event): void
     {
         if ($event->wrestler->isAMemberOfCurrentTagTeam()) {
-            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::UNBOOKABLE]);
+            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::Unbookable]);
 
             app(WrestlerRepository::class)->removeFromCurrentTagTeam($event->wrestler, $event->releaseDate);
         }
@@ -100,7 +100,7 @@ class WrestlerSubscriber
     public function handleTagTeamWrestlerRetired(WrestlerRetired $event): void
     {
         if ($event->wrestler->isAMemberOfCurrentTagTeam()) {
-            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::UNBOOKABLE]);
+            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::Unbookable]);
 
             app(WrestlerRepository::class)->removeFromCurrentTagTeam($event->wrestler, $event->retirementDate);
         }
@@ -112,7 +112,7 @@ class WrestlerSubscriber
     public function handleTagTeamWrestlerSuspended(WrestlerSuspended $event): void
     {
         if ($event->wrestler->isAMemberOfCurrentTagTeam()) {
-            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::UNBOOKABLE]);
+            $event->wrestler->currentTagTeam?->update(['status' => TagTeamStatus::Unbookable]);
         }
     }
 }

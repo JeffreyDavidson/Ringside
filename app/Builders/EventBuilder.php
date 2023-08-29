@@ -19,7 +19,7 @@ class EventBuilder extends Builder
      */
     public function scheduled(): self
     {
-        $this->where('status', EventStatus::SCHEDULED)->whereNotNull('date');
+        $this->where('status', EventStatus::Scheduled)->whereNotNull('date');
 
         return $this;
     }
@@ -29,7 +29,7 @@ class EventBuilder extends Builder
      */
     public function past(): self
     {
-        $this->where('status', EventStatus::PAST)->where('date', '<', now()->toDateString());
+        $this->where('status', EventStatus::Past)->where('date', '<', now()->toDateString());
 
         return $this;
     }

@@ -6,25 +6,25 @@ namespace App\Enums;
 
 enum EventStatus: string
 {
-    case PAST = 'past';
-    case SCHEDULED = 'scheduled';
-    case UNSCHEDULED = 'unscheduled';
+    case Past = 'past';
+    case Scheduled = 'scheduled';
+    case Unscheduled = 'unscheduled';
 
     public function color(): string
     {
         return match ($this) {
-            self::PAST => 'dark',
-            self::SCHEDULED => 'success',
-            self::UNSCHEDULED => 'danger',
+            self::Past => 'dark',
+            self::Scheduled => 'success',
+            self::Unscheduled => 'danger',
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::PAST => 'Past',
-            self::SCHEDULED => 'Scheduled',
-            self::UNSCHEDULED => 'Unscheduled',
+            self::Past => 'Past',
+            self::Scheduled => 'Scheduled',
+            self::Unscheduled => 'Unscheduled',
         };
     }
 }

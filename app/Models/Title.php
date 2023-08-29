@@ -45,7 +45,7 @@ class Title extends Model implements Activatable, Retirable
      * @var array
      */
     protected $attributes = [
-        'status' => TitleStatus::UNACTIVATED->value,
+        'status' => TitleStatus::Unactivated->value,
     ];
 
     public static function query(): TitleBuilder

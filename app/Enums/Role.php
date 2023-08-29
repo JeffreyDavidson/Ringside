@@ -6,22 +6,22 @@ namespace App\Enums;
 
 enum Role: string
 {
-    case ADMINISTRATOR = 'administrator';
-    case BASIC = 'basic';
+    case Administrator = 'administrator';
+    case Basic = 'basic';
 
     public function color(): string
     {
         return match ($this) {
-            self::ADMINISTRATOR => 'success',
-            self::BASIC => 'secondary',
+            self::Administrator => 'success',
+            self::Basic => 'secondary',
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::ADMINISTRATOR => 'Administrator',
-            self::BASIC => 'Basic',
+            self::Administrator => 'Administrator',
+            self::Basic => 'Basic',
         };
     }
 }

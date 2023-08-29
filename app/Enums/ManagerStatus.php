@@ -6,37 +6,37 @@ namespace App\Enums;
 
 enum ManagerStatus: string
 {
-    case AVAILABLE = 'available';
-    case INJURED = 'injured';
-    case FUTURE_EMPLOYMENT = 'future_employment';
-    case RELEASED = 'released';
-    case RETIRED = 'retired';
-    case SUSPENDED = 'suspended';
-    case UNEMPLOYED = 'unemployed';
+    case Available = 'available';
+    case Injured = 'injured';
+    case FutureEmployment = 'future_employment';
+    case Released = 'released';
+    case Retired = 'retired';
+    case Suspended = 'suspended';
+    case Unemployed = 'unemployed';
 
     public function color(): string
     {
         return match ($this) {
-            self::AVAILABLE => 'success',
-            self::INJURED => 'light',
-            self::FUTURE_EMPLOYMENT => 'warning',
-            self::RELEASED => 'dark',
-            self::RETIRED => 'secondary',
-            self::SUSPENDED => 'danger',
-            self::UNEMPLOYED => 'info',
+            self::Available => 'success',
+            self::Injured => 'light',
+            self::FutureEmployment => 'warning',
+            self::Released => 'dark',
+            self::Retired => 'secondary',
+            self::Suspended => 'danger',
+            self::Unemployed => 'info',
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::AVAILABLE => 'Available',
-            self::INJURED => 'Injured',
-            self::FUTURE_EMPLOYMENT => 'Awaiting Employment',
-            self::RELEASED => 'Released',
-            self::RETIRED => 'Retired',
-            self::SUSPENDED => 'Suspended',
-            self::UNEMPLOYED => 'Unemployed',
+            self::Available => 'Available',
+            self::Injured => 'Injured',
+            self::FutureEmployment => 'Awaiting Employment',
+            self::Released => 'Released',
+            self::Retired => 'Retired',
+            self::Suspended => 'Suspended',
+            self::Unemployed => 'Unemployed',
         };
     }
 }

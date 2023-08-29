@@ -26,7 +26,7 @@ test('a title has a status', function () {
 test('a title is unactivated by default', function () {
     $title = Title::factory()->create();
 
-    expect($title->status->value)->toBe(TitleStatus::UNACTIVATED->value);
+    expect($title->status->value)->toBe(TitleStatus::Unactivated->value);
 });
 
 test('a title uses has activation trait', function () {

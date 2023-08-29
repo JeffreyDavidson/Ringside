@@ -15,11 +15,11 @@ class TitleObserver
     public function saving(Title $title): void
     {
         $title->status = match (true) {
-            $title->isCurrentlyActivated() => TitleStatus::ACTIVE,
-            $title->hasFutureActivation() => TitleStatus::FUTURE_ACTIVATION,
-            $title->isDeactivated() => TitleStatus::INACTIVE,
-            $title->isRetired() => TitleStatus::RETIRED,
-            default => TitleStatus::UNACTIVATED
+            $title->isCurrentlyActivated() => TitleStatus::Active,
+            $title->hasFutureActivation() => TitleStatus::FutureActivation,
+            $title->isDeactivated() => TitleStatus::Inactive,
+            $title->isRetired() => TitleStatus::Retired,
+            default => TitleStatus::Unactivated
         };
     }
 }

@@ -25,7 +25,7 @@ class TitleFactory extends Factory
     {
         return [
             'name' => str(fake()->unique()->words(2, true))->title().' Title',
-            'status' => TitleStatus::UNACTIVATED,
+            'status' => TitleStatus::Unactivated,
         ];
     }
 
@@ -33,7 +33,7 @@ class TitleFactory extends Factory
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->state(fn () => ['status' => TitleStatus::ACTIVE])
+        return $this->state(fn () => ['status' => TitleStatus::Active])
             ->has(Activation::factory()->started($activationDate));
     }
 
@@ -43,13 +43,13 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => TitleStatus::INACTIVE])
+        return $this->state(fn () => ['status' => TitleStatus::Inactive])
             ->has(Activation::factory()->started($start)->ended($end));
     }
 
     public function withFutureActivation(): static
     {
-        return $this->state(fn () => ['status' => TitleStatus::FUTURE_ACTIVATION])
+        return $this->state(fn () => ['status' => TitleStatus::FutureActivation])
             ->has(Activation::factory()->started(Carbon::tomorrow()));
     }
 
@@ -59,14 +59,14 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => TitleStatus::RETIRED])
+        return $this->state(fn () => ['status' => TitleStatus::Retired])
             ->has(Activation::factory()->started($start)->ended($end))
             ->has(Retirement::factory()->started($end));
     }
 
     public function unactivated(): static
     {
-        return $this->state(fn () => ['status' => TitleStatus::UNACTIVATED]);
+        return $this->state(fn () => ['status' => TitleStatus::Unactivated]);
     }
 
     public function withChampion($champion): static
@@ -82,10 +82,10 @@ class TitleFactory extends Factory
         return $this->state(function () {
             return [
                 'status' => fake()->randomElement([
-                    TitleStatus::INACTIVE,
-                    TitleStatus::RETIRED,
-                    TitleStatus::FUTURE_ACTIVATION,
-                    TitleStatus::UNACTIVATED,
+                    TitleStatus::Inactive,
+                    TitleStatus::Retired,
+                    TitleStatus::FutureActivation,
+                    TitleStatus::Unactivated,
                 ]),
             ];
         });

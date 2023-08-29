@@ -24,7 +24,7 @@ class ManagerBuilder extends Builder
      */
     public function available(): self
     {
-        $this->where('status', ManagerStatus::AVAILABLE);
+        $this->where('status', ManagerStatus::Available);
 
         return $this;
     }

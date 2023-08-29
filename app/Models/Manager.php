@@ -54,7 +54,7 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
      * @var array
      */
     protected $attributes = [
-        'status' => ManagerStatus::UNEMPLOYED->value,
+        'status' => ManagerStatus::Unemployed->value,
     ];
 
     public static function query(): ManagerBuilder
@@ -75,7 +75,7 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
      */
     public function isAvailable(): bool
     {
-        return $this->status->label() == ManagerStatus::AVAILABLE->label();
+        return $this->status->label() == ManagerStatus::Available->label();
     }
 
     /**
