@@ -15,11 +15,11 @@ class StableObserver
     public function saving(Stable $stable): void
     {
         $stable->status = match (true) {
-            $stable->isCurrentlyActivated() => StableStatus::ACTIVE,
-            $stable->hasFutureActivation() => StableStatus::FUTURE_ACTIVATION,
-            $stable->isDeactivated() => StableStatus::INACTIVE,
-            $stable->isRetired() => StableStatus::RETIRED,
-            default => StableStatus::UNACTIVATED
+            $stable->isCurrentlyActivated() => StableStatus::Active,
+            $stable->hasFutureActivation() => StableStatus::FutureActivation,
+            $stable->isDeactivated() => StableStatus::Inactive,
+            $stable->isRetired() => StableStatus::Retired,
+            default => StableStatus::Unactivated
         };
     }
 }

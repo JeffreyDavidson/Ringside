@@ -22,7 +22,7 @@ class TitleBuilder extends Builder
      */
     public function competable(): self
     {
-        $this->where('status', TitleStatus::ACTIVE);
+        $this->where('status', TitleStatus::Active);
 
         return $this;
     }

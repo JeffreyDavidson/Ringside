@@ -49,7 +49,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
      * @var array
      */
     protected $attributes = [
-        'status' => RefereeStatus::UNEMPLOYED->value,
+        'status' => RefereeStatus::Unemployed->value,
     ];
 
     public static function query(): RefereeBuilder

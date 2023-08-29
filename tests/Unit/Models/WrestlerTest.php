@@ -56,7 +56,7 @@ test('a wrestler has a status', function () {
 test('a wrestler is unemployed by default', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->status->value)->toBe(WrestlerStatus::UNEMPLOYED->value);
+    expect($wrestler->status->value)->toBe(WrestlerStatus::Unemployed->value);
 });
 
 test('a wrestler implements bookable interface', function () {

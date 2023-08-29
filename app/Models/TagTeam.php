@@ -63,7 +63,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
      * @var array
      */
     protected $attributes = [
-        'status' => TagTeamStatus::UNEMPLOYED->value,
+        'status' => TagTeamStatus::Unemployed->value,
     ];
 
     public static function query(): TagTeamBuilder
@@ -84,7 +84,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
      */
     public function isBookable(): bool
     {
-        return $this->status->value === TagTeamStatus::BOOKABLE->value;
+        return $this->status->value === TagTeamStatus::Bookable->value;
     }
 
     /**

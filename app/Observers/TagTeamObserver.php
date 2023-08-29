@@ -16,14 +16,14 @@ class TagTeamObserver
     {
         $tagTeam->status = match (true) {
             $tagTeam->isCurrentlyEmployed() => match (true) {
-                $tagTeam->isSuspended() => TagTeamStatus::SUSPENDED,
-                $tagTeam->isUnbookable() => TagTeamStatus::UNBOOKABLE,
-                default => TagTeamStatus::BOOKABLE,
+                $tagTeam->isSuspended() => TagTeamStatus::Suspended,
+                $tagTeam->isUnbookable() => TagTeamStatus::Unbookable,
+                default => TagTeamStatus::Bookable,
             },
-            $tagTeam->hasFutureEmployment() => TagTeamStatus::FUTURE_EMPLOYMENT,
-            $tagTeam->isReleased() => TagTeamStatus::RELEASED,
-            $tagTeam->isRetired() => TagTeamStatus::RETIRED,
-            default => TagTeamStatus::UNEMPLOYED
+            $tagTeam->hasFutureEmployment() => TagTeamStatus::FutureEmployment,
+            $tagTeam->isReleased() => TagTeamStatus::Released,
+            $tagTeam->isRetired() => TagTeamStatus::Retired,
+            default => TagTeamStatus::Unemployed
         };
     }
 }

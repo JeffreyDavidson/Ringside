@@ -16,14 +16,14 @@ class ManagerObserver
     {
         $manager->status = match (true) {
             $manager->isCurrentlyEmployed() => match (true) {
-                $manager->isInjured() => ManagerStatus::INJURED,
-                $manager->isSuspended() => ManagerStatus::SUSPENDED,
-                default => ManagerStatus::AVAILABLE,
+                $manager->isInjured() => ManagerStatus::Injured,
+                $manager->isSuspended() => ManagerStatus::Suspended,
+                default => ManagerStatus::Available,
             },
-            $manager->hasFutureEmployment() => ManagerStatus::FUTURE_EMPLOYMENT,
-            $manager->isReleased() => ManagerStatus::RELEASED,
-            $manager->isRetired() => ManagerStatus::RETIRED,
-            default => ManagerStatus::UNEMPLOYED
+            $manager->hasFutureEmployment() => ManagerStatus::FutureEmployment,
+            $manager->isReleased() => ManagerStatus::Released,
+            $manager->isRetired() => ManagerStatus::Retired,
+            default => ManagerStatus::Unemployed
         };
     }
 }

@@ -62,7 +62,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
      * @var array
      */
     protected $attributes = [
-        'status' => WrestlerStatus::UNEMPLOYED->value,
+        'status' => WrestlerStatus::Unemployed->value,
     ];
 
     public static function query(): WrestlerBuilder

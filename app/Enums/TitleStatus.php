@@ -6,31 +6,31 @@ namespace App\Enums;
 
 enum TitleStatus: string
 {
-    case ACTIVE = 'active';
-    case INACTIVE = 'inactive';
-    case FUTURE_ACTIVATION = 'future_activation';
-    case RETIRED = 'retired';
-    case UNACTIVATED = 'unactivated';
+    case Active = 'active';
+    case Inactive = 'inactive';
+    case FutureActivation = 'future_activation';
+    case Retired = 'retired';
+    case Unactivated = 'unactivated';
 
     public function color(): string
     {
         return match ($this) {
-            self::ACTIVE => 'success',
-            self::INACTIVE => 'light',
-            self::FUTURE_ACTIVATION => 'warning',
-            self::RETIRED => 'secondary',
-            self::UNACTIVATED => 'info',
+            self::Active => 'success',
+            self::Inactive => 'light',
+            self::FutureActivation => 'warning',
+            self::Retired => 'secondary',
+            self::Unactivated => 'info',
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => 'Active',
-            self::INACTIVE => 'Inactive',
-            self::FUTURE_ACTIVATION => 'Awaiting Activation',
-            self::RETIRED => 'Retired',
-            self::UNACTIVATED => 'Unactivated',
+            self::Active => 'Active',
+            self::Inactive => 'Inactive',
+            self::FutureActivation => 'Awaiting Activation',
+            self::Retired => 'Retired',
+            self::Unactivated => 'Unactivated',
         };
     }
 }

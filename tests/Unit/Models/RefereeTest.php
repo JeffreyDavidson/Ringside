@@ -29,7 +29,7 @@ test('a referee has a status', function () {
 test('a referee is unemployed by default', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->status->value)->toBe(RefereeStatus::UNEMPLOYED->value);
+    expect($referee->status->value)->toBe(RefereeStatus::Unemployed->value);
 });
 
 test('a referee uses has factory trait', function () {

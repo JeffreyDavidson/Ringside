@@ -6,37 +6,37 @@ namespace App\Enums;
 
 enum TagTeamStatus: string
 {
-    case BOOKABLE = 'bookable';
-    case UNBOOKABLE = 'unbookable';
-    case FUTURE_EMPLOYMENT = 'future_employment';
-    case SUSPENDED = 'suspended';
-    case RELEASED = 'released';
-    case RETIRED = 'retired';
-    case UNEMPLOYED = 'unemployed';
+    case Bookable = 'bookable';
+    case Unbookable = 'unbookable';
+    case FutureEmployment = 'future_employment';
+    case Suspended = 'suspended';
+    case Released = 'released';
+    case Retired = 'retired';
+    case Unemployed = 'unemployed';
 
     public function color(): string
     {
         return match ($this) {
-            self::BOOKABLE => 'success',
-            self::UNBOOKABLE => 'light',
-            self::FUTURE_EMPLOYMENT => 'warning',
-            self::SUSPENDED => 'danger',
-            self::RELEASED => 'dark',
-            self::RETIRED => 'secondary',
-            self::UNEMPLOYED => 'info',
+            self::Bookable => 'success',
+            self::Unbookable => 'light',
+            self::FutureEmployment => 'warning',
+            self::Suspended => 'danger',
+            self::Released => 'dark',
+            self::Retired => 'secondary',
+            self::Unemployed => 'info',
         };
     }
 
     public function label(): string
     {
         return match ($this) {
-            self::BOOKABLE => 'Bookable',
-            self::UNBOOKABLE => 'Unbookable',
-            self::FUTURE_EMPLOYMENT => 'Awaiting Employment',
-            self::SUSPENDED => 'Suspended',
-            self::RELEASED => 'Released',
-            self::RETIRED => 'Retired',
-            self::UNEMPLOYED => 'Unemployed',
+            self::Bookable => 'Bookable',
+            self::Unbookable => 'Unbookable',
+            self::FutureEmployment => 'Awaiting Employment',
+            self::Suspended => 'Suspended',
+            self::Released => 'Released',
+            self::Retired => 'Retired',
+            self::Unemployed => 'Unemployed',
         };
     }
 }

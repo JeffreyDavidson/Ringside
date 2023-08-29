@@ -33,7 +33,7 @@ test('a manager has a status', function () {
 test('a manager is unemployed by default', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->status->value)->toBe(ManagerStatus::UNEMPLOYED->value);
+    expect($manager->status->value)->toBe(ManagerStatus::Unemployed->value);
 });
 
 test('a manager implements can be stable manager interface', function () {

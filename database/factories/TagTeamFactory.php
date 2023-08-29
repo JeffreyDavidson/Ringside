@@ -29,7 +29,7 @@ class TagTeamFactory extends Factory
         return [
             'name' => Str::title(fake()->words(2, true)),
             'signature_move' => null,
-            'status' => TagTeamStatus::UNEMPLOYED,
+            'status' => TagTeamStatus::Unemployed,
         ];
     }
 
@@ -42,7 +42,7 @@ class TagTeamFactory extends Factory
             ->has(Employment::factory()->started($employmentStartDate))
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::BOOKABLE])
+        return $this->state(fn () => ['status' => TagTeamStatus::Bookable])
             ->has(Employment::factory()->started($employmentStartDate))
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
@@ -53,7 +53,7 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $wrestlers = Wrestler::factory()->bookable()->count(1);
 
-        return $this->state(fn () => ['status' => TagTeamStatus::UNBOOKABLE])
+        return $this->state(fn () => ['status' => TagTeamStatus::Unbookable])
             ->has(Employment::factory()->started($employmentStartDate))
             ->hasAttached(Wrestler::factory()->injured(), ['joined_at' => $employmentStartDate])
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
@@ -66,7 +66,7 @@ class TagTeamFactory extends Factory
             ->has(Employment::factory()->started($employmentStartDate))
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::FUTURE_EMPLOYMENT])
+        return $this->state(fn () => ['status' => TagTeamStatus::FutureEmployment])
             ->has(Employment::factory()->started($employmentStartDate))
             ->withCurrentWrestlers($wrestlers, Carbon::now());
     }
@@ -77,12 +77,12 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $suspensionStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
-            ->state(fn () => ['status' => WrestlerStatus::SUSPENDED])
+            ->state(fn () => ['status' => WrestlerStatus::Suspended])
             ->has(Employment::factory()->started($employmentStartDate))
             ->has(Suspension::factory()->started($suspensionStartDate))
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::SUSPENDED])
+        return $this->state(fn () => ['status' => TagTeamStatus::Suspended])
             ->has(Employment::factory()->started($employmentStartDate))
             ->has(Suspension::factory()->started($suspensionStartDate))
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
@@ -98,7 +98,7 @@ class TagTeamFactory extends Factory
             ->has(Retirement::factory()->started($retirementStartDate))
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::RETIRED])
+        return $this->state(fn () => ['status' => TagTeamStatus::Retired])
             ->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate))
             ->has(Retirement::factory()->started($retirementStartDate))
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
@@ -106,7 +106,7 @@ class TagTeamFactory extends Factory
 
     public function unemployed(): static
     {
-        return $this->state(fn () => ['status' => TagTeamStatus::UNEMPLOYED]);
+        return $this->state(fn () => ['status' => TagTeamStatus::Unemployed]);
     }
 
     public function released(): static
@@ -118,7 +118,7 @@ class TagTeamFactory extends Factory
             ->has(Employment::factory()->started($employmentStartDate)->ended($employmentEndDate))
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::RELEASED])
+        return $this->state(fn () => ['status' => TagTeamStatus::Released])
             ->has(Employment::factory()->started($employmentStartDate)->ended($employmentEndDate))
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
