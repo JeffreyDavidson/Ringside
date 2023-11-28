@@ -11,6 +11,7 @@ use App\Models\Manager;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows
@@ -40,7 +41,8 @@ class ManagersList extends BaseComponent
     /**
      * Get a collection of managers.
      */
-    public function getRowsQueryProperty(): Builder
+    #[Computed]
+    public function rowsQuery(): Builder
     {
         $query = Manager::query()
             ->when($this->filters['search'], function ($query, $search) {
@@ -54,7 +56,8 @@ class ManagersList extends BaseComponent
     /**
      * Retrieve the rows for the table.
      */
-    public function getRowsProperty(): LengthAwarePaginator
+    #[Computed]
+    public function rows(): LengthAwarePaginator
     {
         return $this->applyPagination($this->rowsQuery);
     }

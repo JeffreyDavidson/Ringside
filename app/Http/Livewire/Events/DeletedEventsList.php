@@ -11,6 +11,7 @@ use App\Models\Event;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
 
 /**
  * @property \Illuminate\Database\Eloquent\Collection $rows
@@ -38,7 +39,8 @@ class DeletedEventsList extends BaseComponent
     /**
      * Undocumented function.
      */
-    public function getRowsQueryProperty(): Builder
+    #[Computed]
+    public function rowsQuery(): Builder
     {
         $query = Event::query()
             ->onlyTrashed()
@@ -51,7 +53,8 @@ class DeletedEventsList extends BaseComponent
     /**
      * Undocumented function.
      */
-    public function getRowsProperty(): LengthAwarePaginator
+    #[Computed]
+    public function rows(): LengthAwarePaginator
     {
         return $this->applyPagination($this->rowsQuery);
     }

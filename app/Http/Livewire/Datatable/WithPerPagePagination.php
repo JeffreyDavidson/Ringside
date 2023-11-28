@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Datatable;
 
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\WithPagination;
 
 trait WithPerPagePagination
