@@ -15,7 +15,7 @@
         "laravel/framework": "^10.0",
         "laravel/tinker": "^2.8",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "livewire/livewire": "^2.11",
+        "livewire/livewire": "^3.0",
         "lorisleiva/laravel-actions": "^2.5",
         "spatie/pest-plugin-test-time": "^2.0",
         "staudenmeir/laravel-merged-relations": "^1.6"
