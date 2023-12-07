@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
 
-        Relation::enforceMorphMap([
+        Relation::morphMap([
             'wrestler' => \App\Models\Wrestler::class,
             'manager' => \App\Models\Manager::class,
             'title' => \App\Models\Title::class,
