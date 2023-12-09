@@ -46,7 +46,7 @@ class MatchForm extends BaseComponent
     /**
      * Run action hook when match type id is changed.
      */
-    public function updatedMatchTypeId(): string
+    public function updatedMatchTypeId(): View
     {
         $matchTypeSlug = MatchType::findOrFail($this->matchTypeId)->slug;
 
