@@ -11,7 +11,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class TitleChampionIncludedInTitleMatch implements ValidationRule, DataAwareRule
+class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
 {
     /**
      * All the data under validation.

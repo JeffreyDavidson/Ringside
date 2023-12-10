@@ -9,7 +9,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements ValidationRule, DataAwareRule
+class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements DataAwareRule, ValidationRule
 {
     /**
      * All the data under validation.
