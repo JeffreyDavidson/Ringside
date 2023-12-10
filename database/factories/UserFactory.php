@@ -1,24 +1,53 @@
 <?php
 
-use Faker\Generator as Faker;
+declare(strict_types=1);
 
-/*
-|--------------------------------------------------------------------------
-| Model Factories
-|--------------------------------------------------------------------------
-|
-| This directory should contain each of the model factory definitions for
-| your application. Factories provide a convenient way to generate new
-| model instances for testing / seeding your application's database.
-|
-*/
+namespace Database\Factories;
 
-$factory->define(App\User::class, function (Faker $faker) {
-    return [
-        'name' => $faker->name,
-        'email' => $faker->unique()->safeEmail,
-        'email_verified_at' => now(),
-        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
-        'remember_token' => str_random(10),
-    ];
-});
+use App\Enums\Role;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ */
+class UserFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => 'secret',
+            'remember_token' => Str::random(10),
+            'role' => Role::Basic,
+        ];
+    }
+
+    /**
+     * Indicates the user should be an administrator.
+     */
+    public function administrator(): static
+    {
+        return $this->state([
+            'role' => Role::Administrator,
+        ]);
+    }
+
+    /**
+     * Indicates the user should be a normal user.
+     */
+    public function basicUser(): static
+    {
+        return $this->state([
+            'role' => Role::Basic,
+        ]);
+    }
+}
