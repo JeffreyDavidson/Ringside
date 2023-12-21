@@ -11,6 +11,9 @@ use Illuminate\Support\Collection;
 
 class WrestlerCanJoinNewStable implements ValidationRule
 {
+    /**
+     * @param  Collection<int, int>  $tagTeamIds
+     */
     public function __construct(protected Collection $tagTeamIds)
     {
     }

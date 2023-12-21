@@ -12,10 +12,11 @@ use Illuminate\Support\Collection;
 
 class WrestlerCanJoinExistingStable implements ValidationRule
 {
+    /**
+     * @param  Collection<int, int>  $tagTeamIds
+     */
     public function __construct(protected Collection $tagTeamIds, protected ?Carbon $date)
     {
-        $this->tagTeamIds = $tagTeamIds;
-        $this->date = $date;
     }
 
     /**

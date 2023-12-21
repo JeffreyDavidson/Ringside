@@ -12,6 +12,8 @@ trait HasInjuries
 {
     /**
      * Get the injuries of the model.
+     *
+     * @return MorphMany<Injury>
      */
     public function injuries(): MorphMany
     {
@@ -20,6 +22,8 @@ trait HasInjuries
 
     /**
      * Get the current injury of the model.
+     *
+     * @return MorphOne<Injury>
      */
     public function currentInjury(): MorphOne
     {
@@ -30,6 +34,8 @@ trait HasInjuries
 
     /**
      * Get the previous injuries of the model.
+     *
+     * @return MorphMany<Injury>
      */
     public function previousInjuries(): MorphMany
     {
@@ -39,6 +45,8 @@ trait HasInjuries
 
     /**
      * Get the previous injury of the model.
+     *
+     * @return MorphOne<Injury>
      */
     public function previousInjury(): MorphOne
     {

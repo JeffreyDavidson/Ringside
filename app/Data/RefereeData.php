@@ -26,8 +26,8 @@ readonly class RefereeData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            $request->input('first_name'),
-            $request->input('last_name'),
+            $request->string('first_name')->value(),
+            $request->string('last_name')->value(),
             $request->date('start_date')
         );
     }
@@ -38,8 +38,8 @@ readonly class RefereeData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            $request->input('first_name'),
-            $request->input('last_name'),
+            $request->string('first_name')->value(),
+            $request->string('last_name')->value(),
             $request->date('start_date')
         );
     }

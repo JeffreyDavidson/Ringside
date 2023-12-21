@@ -37,6 +37,8 @@ class Activation extends Model
 
     /**
      * Get the activated model.
+     *
+     * @return MorphTo<Model, Activation>
      */
     public function activatable(): MorphTo
     {

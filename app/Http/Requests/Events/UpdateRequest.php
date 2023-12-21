@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Requests\Events;
 
 use App\Rules\EventDateCanBeChanged;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\EventRequestFactory;
 
 class UpdateRequest extends FormRequest
@@ -32,6 +35,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, string|Exists|Unique|ValidationRule>>
      */
     public function rules(): array
     {

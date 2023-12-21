@@ -12,6 +12,8 @@ trait HasWrestlers
 {
     /**
      * Get the wrestlers that have been tag team partners of the tag team.
+     *
+     * @return BelongsToMany<Wrestler>
      */
     public function wrestlers(): BelongsToMany
     {
@@ -32,6 +34,8 @@ trait HasWrestlers
 
     /**
      * Get previous tag team partners of the tag team.
+     *
+     * @return BelongsToMany<Wrestler>
      */
     public function previousWrestlers(): BelongsToMany
     {
@@ -41,6 +45,8 @@ trait HasWrestlers
 
     /**
      * Get the combined weight of both tag team partners in a tag team.
+     *
+     * @return Attribute<string, never>
      */
     public function combinedWeight(): Attribute
     {

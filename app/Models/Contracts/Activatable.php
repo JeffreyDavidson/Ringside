@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use App\Models\Activation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -13,31 +14,43 @@ interface Activatable extends Identifiable
 {
     /**
      * Get all the activations of the model.
+     *
+     * @return MorphMany<Activation>
      */
     public function activations(): MorphMany;
 
     /**
      * Get the current activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function currentActivation(): MorphOne;
 
     /**
      * Get the first activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function firstActivation(): MorphOne;
 
     /**
      * Get the future activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function futureActivation(): MorphOne;
 
     /**
      * Get the previous activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function previousActivation(): MorphOne;
 
     /**
      * Get the previous activations of the model.
+     *
+     * @return MorphMany<Activation>
      */
     public function previousActivations(): MorphMany;
 
@@ -63,6 +76,8 @@ interface Activatable extends Identifiable
 
     /**
      * Retrieve the model's first activation date.
+     *
+     * @return Attribute<string, never>
      */
     public function activatedAt(): Attribute;
 

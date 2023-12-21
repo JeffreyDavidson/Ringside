@@ -47,7 +47,7 @@ class EventServiceProvider extends ServiceProvider
     /**
      * The subscriber classes to register.
      *
-     * @var array
+     * @var array<int, class-string>
      */
     protected $subscribe = [
         WrestlerSubscriber::class,

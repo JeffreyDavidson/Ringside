@@ -157,6 +157,8 @@ class WrestlerRepository
 
     /**
      * Undocumented function.
+     *
+     * @return Collection<int, Wrestler>
      */
     public static function getAvailableWrestlersForNewTagTeam(): Collection
     {
@@ -184,6 +186,8 @@ class WrestlerRepository
 
     /**
      * Undocumented function.
+     *
+     * @return Collection<int, Wrestler>
      */
     public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
     {

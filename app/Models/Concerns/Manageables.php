@@ -12,6 +12,8 @@ trait Manageables
 {
     /**
      * Get all the wrestlers that have been managed by model.
+     *
+     * @return MorphToMany<Wrestler>
      */
     public function wrestlers(): MorphToMany
     {
@@ -21,6 +23,8 @@ trait Manageables
 
     /**
      * Get the current wrestlers that is managed by model.
+     *
+     * @return MorphToMany<Wrestler>
      */
     public function currentWrestlers(): MorphToMany
     {
@@ -31,6 +35,8 @@ trait Manageables
 
     /**
      * Get all previous wrestlers that have been managed by model.
+     *
+     * @return MorphToMany<Wrestler>
      */
     public function previousWrestlers(): MorphToMany
     {
@@ -41,6 +47,8 @@ trait Manageables
 
     /**
      * Get all the tag teams that have been managed by model.
+     *
+     * @return MorphToMany<TagTeam>
      */
     public function tagTeams(): MorphToMany
     {
@@ -50,6 +58,8 @@ trait Manageables
 
     /**
      * Get all previous tag teams that have been managed by model.
+     *
+     * @return MorphToMany<TagTeam>
      */
     public function currentTagTeams(): MorphToMany
     {
@@ -60,6 +70,8 @@ trait Manageables
 
     /**
      * Get all previous tag teams that have been managed by model.
+     *
+     * @return MorphToMany<TagTeam>
      */
     public function previousTagTeams(): MorphToMany
     {

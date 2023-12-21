@@ -6,7 +6,6 @@ namespace App\Actions\Managers;
 
 use App\Data\ManagerData;
 use App\Models\Manager;
-use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseManagerAction
@@ -20,7 +19,7 @@ class UpdateAction extends BaseManagerAction
     {
         $this->managerRepository->update($manager, $managerData);
 
-        if ($this->shouldBeEmployed($manager, $managerData->start_date)) {
+        if (! is_null($managerData->start_date) && $this->shouldBeEmployed($manager)) {
             $this->managerRepository->employ($manager, $managerData->start_date);
         }
 
@@ -30,12 +29,8 @@ class UpdateAction extends BaseManagerAction
     /**
      * Find out if the manager can be employed.
      */
-    private function shouldBeEmployed(Manager $manager, ?Carbon $startDate): bool
+    private function shouldBeEmployed(Manager $manager): bool
     {
-        if (is_null($startDate)) {
-            return false;
-        }
-
         if ($manager->isCurrentlyEmployed()) {
             return false;
         }

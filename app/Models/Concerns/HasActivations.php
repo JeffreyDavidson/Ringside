@@ -14,6 +14,8 @@ trait HasActivations
 {
     /**
      * Get all the activations of the model.
+     *
+     * @return MorphMany<Activation>
      */
     public function activations(): MorphMany
     {
@@ -22,6 +24,8 @@ trait HasActivations
 
     /**
      * Get the current activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function currentActivation(): MorphOne
     {
@@ -33,6 +37,8 @@ trait HasActivations
 
     /**
      * Get the first activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function firstActivation(): MorphOne
     {
@@ -42,6 +48,8 @@ trait HasActivations
 
     /**
      * Get the future activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function futureActivation(): MorphOne
     {
@@ -53,6 +61,8 @@ trait HasActivations
 
     /**
      * Get the previous activation of the model.
+     *
+     * @return MorphOne<Activation>
      */
     public function previousActivation(): MorphOne
     {
@@ -63,6 +73,8 @@ trait HasActivations
 
     /**
      * Get the previous activations of the model.
+     *
+     * @return MorphMany<Activation>
      */
     public function previousActivations(): MorphMany
     {
@@ -112,6 +124,8 @@ trait HasActivations
 
     /**
      * Retrieve the model's first activation date.
+     *
+     * @return Attribute<string, never>
      */
     public function activatedAt(): Attribute
     {

@@ -6,7 +6,6 @@ namespace App\Actions\Wrestlers;
 
 use App\Data\WrestlerData;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseWrestlerAction
@@ -20,7 +19,7 @@ class UpdateAction extends BaseWrestlerAction
     {
         $this->wrestlerRepository->update($wrestler, $wrestlerData);
 
-        if ($this->shouldBeEmployed($wrestler, $wrestlerData->start_date)) {
+        if (! is_null($wrestlerData->start_date) && $this->shouldBeEmployed($wrestler)) {
             $this->wrestlerRepository->employ($wrestler, $wrestlerData->start_date);
         }
 
@@ -30,12 +29,8 @@ class UpdateAction extends BaseWrestlerAction
     /**
      * Find out if the wrestler can be employed.
      */
-    private function shouldBeEmployed(Wrestler $wrestler, ?Carbon $startDate): bool
+    private function shouldBeEmployed(Wrestler $wrestler): bool
     {
-        if (is_null($startDate)) {
-            return false;
-        }
-
         if ($wrestler->isCurrentlyEmployed()) {
             return false;
         }

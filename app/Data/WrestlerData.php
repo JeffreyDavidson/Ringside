@@ -29,11 +29,11 @@ class WrestlerData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             ($request->integer('feet') * 12) + $request->integer('inches'),
             $request->integer('weight'),
-            $request->input('hometown'),
-            $request->input('signature_move'),
+            $request->string('hometown')->value(),
+            $request->string('signature_move')->value(),
             $request->date('start_date')
         );
     }
@@ -44,11 +44,11 @@ class WrestlerData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             ($request->integer('feet') * 12) + $request->integer('inches'),
             $request->integer('weight'),
-            $request->input('hometown'),
-            $request->input('signature_move'),
+            $request->string('hometown')->value(),
+            $request->string('signature_move')->value(),
             $request->date('start_date')
         );
     }

@@ -14,8 +14,8 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 
 /**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
+ * @property-read LengthAwarePaginator $rows
+ * @property-read Builder $rowsQuery
  */
 class EventsList extends BaseComponent
 {
@@ -45,7 +45,12 @@ class EventsList extends BaseComponent
     public function rowsQuery(): EventBuilder
     {
         $query = Event::query()
-            ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
+            ->when(
+                $this->filters['search'],
+                function (EventBuilder $query, string $search) {
+                    $query->where('name', 'like', '%'.$search.'%');
+                }
+            )
             ->oldest('name');
 
         return $this->applySorting($query);

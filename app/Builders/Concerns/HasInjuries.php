@@ -11,7 +11,7 @@ trait HasInjuries
     /**
      * Scope a query to include injured models.
      */
-    public function injured(): self
+    public function injured(): static
     {
         $this->whereHas('currentInjury');
 
@@ -21,7 +21,7 @@ trait HasInjuries
     /**
      * Scope a query to include the mode's current injury date.
      */
-    public function withCurrentInjuredAtDate(): self
+    public function withCurrentInjuredAtDate(): static
     {
         $this->addSelect([
             'current_injured_at' => Injury::query()->select('started_at')
@@ -37,7 +37,7 @@ trait HasInjuries
     /**
      * Scope a query to order by the model's current injury date.
      */
-    public function orderByCurrentInjuredAtDate(string $direction = 'asc'): self
+    public function orderByCurrentInjuredAtDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(current_injured_at) {$direction}");
 

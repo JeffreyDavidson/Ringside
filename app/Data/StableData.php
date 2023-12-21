@@ -45,7 +45,7 @@ readonly class StableData
         $managers = Manager::query()->findMany($request->collect('managers'));
 
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             $request->date('start_date'),
             $tagTeams,
             $wrestlers,
@@ -68,7 +68,7 @@ readonly class StableData
         $managers = Manager::query()->findMany($request->collect('managers'));
 
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             $request->date('start_date'),
             $tagTeams,
             $wrestlers,

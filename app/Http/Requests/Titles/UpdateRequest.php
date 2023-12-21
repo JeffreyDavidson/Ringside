@@ -6,8 +6,10 @@ namespace App\Http\Requests\Titles;
 
 use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\TitleRequestFactory;
 
 class UpdateRequest extends FormRequest
@@ -33,6 +35,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, string|Unique|ValidationRule>>
      */
     public function rules(): array
     {
@@ -53,6 +57,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
      */
     public function messages(): array
     {
@@ -63,6 +69,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
      */
     public function attributes(): array
     {

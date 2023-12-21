@@ -11,6 +11,8 @@ interface CanBeAStableMember
 {
     /**
      * Get the stables the stable member has been a member of.
+     *
+     * @return MorphToMany<\App\Models\Stable>
      */
     public function stables(): MorphToMany;
 
@@ -21,6 +23,8 @@ interface CanBeAStableMember
 
     /**
      * Get the previous stables the member has belonged to.
+     *
+     * @return MorphToMany<\App\Models\Stable>
      */
     public function previousStables(): MorphToMany;
 }

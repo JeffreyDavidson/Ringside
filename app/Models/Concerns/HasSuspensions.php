@@ -12,6 +12,8 @@ trait HasSuspensions
 {
     /**
      * Get the suspensions of the model.
+     *
+     * @return MorphMany<Suspension>
      */
     public function suspensions(): MorphMany
     {
@@ -20,6 +22,8 @@ trait HasSuspensions
 
     /**
      * Get the current suspension of the model.
+     *
+     * @return MorphOne<Suspension>
      */
     public function currentSuspension(): MorphOne
     {
@@ -30,6 +34,8 @@ trait HasSuspensions
 
     /**
      * Get the current suspension of the model.
+     *
+     * @return MorphMany<Suspension>
      */
     public function previousSuspensions(): MorphMany
     {
@@ -39,6 +45,8 @@ trait HasSuspensions
 
     /**
      * Get the previous suspension of the model.
+     *
+     * @return MorphOne<Suspension>
      */
     public function previousSuspension(): MorphOne
     {

@@ -46,19 +46,16 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     /**
      * The model's default values for attributes.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $attributes = [
         'status' => RefereeStatus::Unemployed->value,
     ];
 
-    public static function query(): RefereeBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return RefereeBuilder<Referee>
      */
     public function newEloquentBuilder($query): RefereeBuilder
     {

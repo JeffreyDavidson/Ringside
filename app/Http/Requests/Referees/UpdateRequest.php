@@ -32,6 +32,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<string|\Illuminate\Contracts\Validation\ValidationRule>>
      */
     public function rules(): array
     {
@@ -39,7 +41,7 @@ class UpdateRequest extends FormRequest
             return [];
         }
 
-        /** @var \App\Models\Referee $referee */
+        /** @var Referee $referee */
         $referee = $this->route()->parameter('referee');
 
         return [
@@ -51,6 +53,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
      */
     public function attributes(): array
     {
