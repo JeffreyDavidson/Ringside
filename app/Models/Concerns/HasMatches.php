@@ -11,6 +11,8 @@ trait HasMatches
 {
     /**
      * Retrieve the event matches participated by the model.
+     *
+     * @return MorphToMany<EventMatch>
      */
     public function eventMatches(): MorphToMany
     {

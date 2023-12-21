@@ -33,6 +33,7 @@ class WrestlerCanJoinExistingTagTeam implements ValidationRule
             $fail('This wrestler cannot join the tag team.');
         }
 
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $bookableTagTeams */
         $bookableTagTeams = TagTeam::query()->bookable()->whereNotIn('id', [$this->tagTeam->id])->get();
 
         $bookableTagTeams->each(function (TagTeam $tagTeam) use ($wrestler, $fail) {

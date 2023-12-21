@@ -13,8 +13,8 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 
 /**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
+ * @property-read LengthAwarePaginator $rows
+ * @property-read Builder $rowsQuery
  */
 class TitleChampionshipsList extends BaseComponent
 {

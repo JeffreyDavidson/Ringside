@@ -50,6 +50,8 @@ class User extends Authenticatable
 
     /**
      * Get the user's password.
+     *
+     * @return Attribute<string, never>
      */
     public function password(): Attribute
     {
@@ -68,6 +70,8 @@ class User extends Authenticatable
 
     /**
      * Get the user's wrestler.
+     *
+     * @return HasOne<Wrestler>
      */
     public function wrestler(): HasOne
     {

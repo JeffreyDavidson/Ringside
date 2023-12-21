@@ -11,7 +11,7 @@ trait HasEmployments
     /**
      * Scope a query to include released models.
      */
-    public function released(): self
+    public function released(): static
     {
         $this->whereHas('previousEmployment')
             ->whereDoesntHave('currentEmployment')
@@ -23,7 +23,7 @@ trait HasEmployments
     /**
      * Scope a query to include the model's release date.
      */
-    public function withReleasedAtDate(): self
+    public function withReleasedAtDate(): static
     {
         $this->addSelect([
             'released_at' => Employment::query()->select('ended_at')
@@ -39,7 +39,7 @@ trait HasEmployments
     /**
      * Scope a query to order by the model's current released date.
      */
-    public function orderByCurrentReleasedAtDate(string $direction = 'asc'): self
+    public function orderByCurrentReleasedAtDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(current_released_at) {$direction}");
 
@@ -49,7 +49,7 @@ trait HasEmployments
     /**
      * Scope a query to include employed models.
      */
-    public function employed(): self
+    public function employed(): static
     {
         $this->whereHas('currentEmployment');
 
@@ -59,7 +59,7 @@ trait HasEmployments
     /**
      * Scope a query to include model's that have future employment.
      */
-    public function futureEmployed(): self
+    public function futureEmployed(): static
     {
         $this->whereHas('futureEmployment');
 
@@ -69,7 +69,7 @@ trait HasEmployments
     /**
      * Scope a query to include unemployed models.
      */
-    public function unemployed(): self
+    public function unemployed(): static
     {
         $this->whereDoesntHave('employments');
 
@@ -79,7 +79,7 @@ trait HasEmployments
     /**
      * Scope a query to include the model's first employment date.
      */
-    public function withFirstEmployedAtDate(): self
+    public function withFirstEmployedAtDate(): static
     {
         $this->addSelect([
             'first_employed_at' => Employment::query()->select('started_at')
@@ -95,7 +95,7 @@ trait HasEmployments
     /**
      * Scope a query to order by the model's first employment date.
      */
-    public function orderByFirstEmployedAtDate(string $direction = 'asc'): self
+    public function orderByFirstEmployedAtDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(first_employed_at) {$direction}");
 

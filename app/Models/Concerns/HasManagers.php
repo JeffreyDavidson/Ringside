@@ -11,6 +11,8 @@ trait HasManagers
 {
     /**
      * Get all the managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
      */
     public function managers(): BelongsToMany
     {
@@ -19,6 +21,8 @@ trait HasManagers
 
     /**
      * Get all the managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
      */
     public function currentManagers(): BelongsToMany
     {
@@ -28,6 +32,8 @@ trait HasManagers
 
     /**
      * Get all the managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
      */
     public function previousManagers(): BelongsToMany
     {

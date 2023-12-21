@@ -36,6 +36,8 @@ class Injury extends Model
 
     /**
      * Retrieve the injured model.
+     *
+     * @return MorphTo<Model, Injury>
      */
     public function injurable(): MorphTo
     {

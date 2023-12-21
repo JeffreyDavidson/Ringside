@@ -36,6 +36,8 @@ class Retirement extends Model
 
     /**
      * Retrieve the retired model.
+     *
+     * @return MorphTo<Model, Retirement>
      */
     public function retiree(): MorphTo
     {

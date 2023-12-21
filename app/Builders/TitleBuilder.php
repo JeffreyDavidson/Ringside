@@ -8,9 +8,9 @@ use App\Enums\TitleStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ * @template TModelClass of \App\Models\Title
  *
- * @extends Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
  */
 class TitleBuilder extends Builder
 {
@@ -20,7 +20,7 @@ class TitleBuilder extends Builder
     /**
      * Scope a query to include competable titles.
      */
-    public function competable(): self
+    public function competable(): static
     {
         $this->where('status', TitleStatus::Active);
 

@@ -15,6 +15,8 @@ class AddRefereesToMatchAction extends BaseEventMatchAction
 
     /**
      * Add referees to an event match.
+     *
+     * @param  Collection<int, \App\Models\Referee>  $referees
      */
     public function handle(EventMatch $eventMatch, Collection $referees): void
     {

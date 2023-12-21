@@ -5,14 +5,23 @@ declare(strict_types=1);
 namespace App\Rules\Stables;
 
 use App\Models\Stable;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
 class HasMinimumAmountOfMembers implements ValidationRule
 {
-    public function __construct(private Stable $stable, private Collection $wrestlers, private Collection $tagTeams)
-    {
+    /**
+     * @param  Collection<int, Wrestler>  $wrestlers
+     * @param  Collection<int, TagTeam>  $tagTeams
+     */
+    public function __construct(
+        private Stable $stable,
+        private readonly Collection $wrestlers,
+        private readonly Collection $tagTeams
+    ) {
     }
 
     /**

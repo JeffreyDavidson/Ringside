@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Referees;
 
+use App\Builders\RefereeBuilder;
 use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
@@ -14,8 +15,8 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 
 /**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
+ * @property-read LengthAwarePaginator $rows
+ * @property-read Builder $rowsQuery
  */
 class RefereesList extends BaseComponent
 {
@@ -45,9 +46,12 @@ class RefereesList extends BaseComponent
     public function rowsQuery(): Builder
     {
         $query = Referee::query()
-            ->when($this->filters['search'], function ($query, $search) {
-                $query->where('first_name', 'like', '%'.$search.'%')->orWhere('last_name', 'like', '%'.$search.'%');
-            })
+            ->when(
+                $this->filters['search'],
+                function (RefereeBuilder $query, string $search) {
+                    $query->where('first_name', 'like', '%'.$search.'%')
+                        ->orWhere('last_name', 'like', '%'.$search.'%');
+                })
             ->oldest('last_name');
 
         return $this->applySorting($query);

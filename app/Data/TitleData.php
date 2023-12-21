@@ -10,13 +10,18 @@ use Illuminate\Support\Carbon;
 
 readonly class TitleData
 {
-    public function __construct(public string $name, public ?Carbon $activation_date)
-    {
+    public function __construct(
+        public string $name,
+        public ?Carbon $activation_date
+    ) {
     }
 
     public static function fromStoreRequest(StoreRequest $request): self
     {
-        return new self($request->input('name'), $request->date('activation_date'));
+        return new self(
+            $request->string('name')->value(),
+            $request->date('activation_date')
+        );
     }
 
     /**
@@ -25,7 +30,7 @@ readonly class TitleData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             $request->date('activation_date'),
         );
     }

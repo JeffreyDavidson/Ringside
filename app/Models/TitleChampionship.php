@@ -49,6 +49,8 @@ class TitleChampionship extends Model
 
     /**
      * Retrieve the title of the championship.
+     *
+     * @return BelongsTo<Title, TitleChampionship>
      */
     public function title(): BelongsTo
     {
@@ -65,6 +67,8 @@ class TitleChampionship extends Model
 
     /**
      * Retrieve the champion of the title championship.
+     *
+     * @return MorphTo<Model, TitleChampionship>
      */
     public function champion(): MorphTo
     {

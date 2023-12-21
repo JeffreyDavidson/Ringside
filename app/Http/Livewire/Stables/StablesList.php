@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Stables;
 
+use App\Builders\StableBuilder;
 use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
@@ -14,8 +15,8 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 
 /**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
+ * @property-read LengthAwarePaginator $rows
+ * @property-read Builder $rowsQuery
  */
 class StablesList extends BaseComponent
 {
@@ -45,7 +46,11 @@ class StablesList extends BaseComponent
     public function rowsQuery(): Builder
     {
         $query = Stable::query()
-            ->when($this->filters['search'], fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
+            ->when(
+                $this->filters['search'],
+                function (StableBuilder $query, string $search) {
+                    $query->where('name', 'like', '%'.$search.'%');
+                })
             ->oldest('name');
 
         return $this->applySorting($query);

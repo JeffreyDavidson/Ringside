@@ -11,7 +11,7 @@ trait HasRetirements
     /**
      * Scope a query to include retired models.
      */
-    public function retired(): self
+    public function retired(): static
     {
         $this->whereHas('currentRetirement');
 
@@ -21,7 +21,7 @@ trait HasRetirements
     /**
      * Scope a query to include the model's current retirement date.
      */
-    public function withCurrentRetiredAtDate(): self
+    public function withCurrentRetiredAtDate(): static
     {
         $this->addSelect([
             'current_retired_at' => Retirement::query()->select('started_at')
@@ -37,7 +37,7 @@ trait HasRetirements
     /**
      * Scope a query to order by the model's current retirement date.
      */
-    public function orderByCurrentRetiredAtDate(string $direction = 'asc'): self
+    public function orderByCurrentRetiredAtDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(current_retired_at) {$direction}");
 

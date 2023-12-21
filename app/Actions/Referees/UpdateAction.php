@@ -6,7 +6,6 @@ namespace App\Actions\Referees;
 
 use App\Data\RefereeData;
 use App\Models\Referee;
-use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseRefereeAction
@@ -20,7 +19,7 @@ class UpdateAction extends BaseRefereeAction
     {
         $this->refereeRepository->update($referee, $refereeData);
 
-        if ($this->shouldBeEmployed($referee, $refereeData->start_date)) {
+        if (! is_null($refereeData->start_date) && $this->shouldBeEmployed($referee)) {
             $this->refereeRepository->employ($referee, $refereeData->start_date);
         }
 
@@ -30,12 +29,8 @@ class UpdateAction extends BaseRefereeAction
     /**
      * Find out if the referee can be employed.
      */
-    private function shouldBeEmployed(Referee $referee, ?Carbon $startDate): bool
+    private function shouldBeEmployed(Referee $referee): bool
     {
-        if (is_null($startDate)) {
-            return false;
-        }
-
         if ($referee->isCurrentlyEmployed()) {
             return false;
         }

@@ -46,13 +46,10 @@ class Stable extends Model implements Activatable, Retirable
         'status' => StableStatus::class,
     ];
 
-    public static function query(): StableBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return StableBuilder<Stable>
      */
     public function newEloquentBuilder($query): StableBuilder
     {

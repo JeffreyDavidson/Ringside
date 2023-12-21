@@ -22,7 +22,7 @@ class CompetitorsAreNotDuplicated implements ValidationRule
         $matchCompetitors = (array) $value;
 
         foreach ($matchCompetitors as $competitors) {
-            /** @var array $competitors */
+            /** @var array<'wrestlers'|'tagteams', \App\Models\Wrestler|\App\Models\TagTeam> $competitors */
             if (Arr::has($competitors, 'wrestlers')) {
                 $wrestlers[] = $competitors['wrestlers'];
             }

@@ -28,10 +28,10 @@ readonly class EventData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             $request->date('date'),
             $request->input('venue_id') ? Venue::query()->whereKey($request->input('venue_id'))->sole() : null,
-            $request->input('preview')
+            $request->string('preview')->value()
         );
     }
 
@@ -41,10 +41,10 @@ readonly class EventData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            $request->input('name'),
+            $request->string('name')->value(),
             $request->date('date'),
             $request->input('venue_id') ? Venue::query()->whereKey($request->input('venue_id'))->sole() : null,
-            $request->input('preview')
+            $request->string('preview')->value()
         );
     }
 }

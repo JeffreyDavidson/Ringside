@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\TagTeams;
 
+use App\Builders\TagTeamBuilder;
 use App\Http\Livewire\BaseComponent;
 use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
@@ -14,8 +15,8 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 
 /**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
+ * @property-read LengthAwarePaginator $rows
+ * @property-read Builder $rowsQuery
  */
 class TagTeamsList extends BaseComponent
 {
@@ -43,7 +44,11 @@ class TagTeamsList extends BaseComponent
     public function rowsQuery(): Builder
     {
         $query = TagTeam::query()
-            ->when($this->filters['search'], fn (Builder $query, string $search) => $query->where('name', 'like', '%'.$search.'%'))
+            ->when(
+                $this->filters['search'],
+                function (TagTeamBuilder $query, string $search) {
+                    $query->where('name', 'like', '%'.$search.'%');
+                })
             ->oldest('name');
 
         return $this->applySorting($query);

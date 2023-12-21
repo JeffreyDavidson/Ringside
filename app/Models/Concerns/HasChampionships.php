@@ -12,6 +12,8 @@ trait HasChampionships
 {
     /**
      * Retrieve the championships for a title.
+     *
+     * @return HasMany<TitleChampionship>
      */
     public function championships(): HasMany
     {
@@ -20,6 +22,8 @@ trait HasChampionships
 
     /**
      * Retrieve the curren championship for a title.
+     *
+     * @return HasOne<TitleChampionship>
      */
     public function currentChampionship(): HasOne
     {

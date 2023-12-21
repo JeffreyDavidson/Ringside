@@ -6,7 +6,6 @@ namespace App\Actions\Titles;
 
 use App\Data\TitleData;
 use App\Models\Title;
-use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseTitleAction
@@ -20,7 +19,7 @@ class UpdateAction extends BaseTitleAction
     {
         $this->titleRepository->update($title, $titleData);
 
-        if ($this->shouldBeActivated($title, $titleData->activation_date)) {
+        if (! is_null($titleData->activation_date) && $this->shouldBeActivated($title)) {
             $this->titleRepository->activate($title, $titleData->activation_date);
         }
 
@@ -30,12 +29,8 @@ class UpdateAction extends BaseTitleAction
     /**
      * Find out if the title can be activated.
      */
-    private function shouldBeActivated(Title $title, ?Carbon $activationDate): bool
+    private function shouldBeActivated(Title $title): bool
     {
-        if (is_null($activationDate)) {
-            return false;
-        }
-
         if ($title->isCurrentlyActivated()) {
             return false;
         }

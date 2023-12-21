@@ -36,6 +36,8 @@ class Suspension extends Model
 
     /**
      * Retrieve the suspended model.
+     *
+     * @return MorphTo<Model, Suspension>
      */
     public function suspendable(): MorphTo
     {

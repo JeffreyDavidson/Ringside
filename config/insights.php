@@ -111,7 +111,12 @@ return [
             'title' => 'The usage of private methods is not idiomatic in Laravel.',
         ],
         DocCommentSpacingSniff::class => [
-            'annotationsGroups' => ['@var, @param, @return'],
+            'annotationsGroups' => [
+                '@var',
+                '@template',
+                '@extends',
+                '@phpcsSuppress',
+            ],
         ],
         LineLengthSniff::class => [
             'lineLimit' => 120,

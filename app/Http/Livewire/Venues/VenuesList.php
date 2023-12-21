@@ -13,6 +13,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 
+/**
+ * @property-read LengthAwarePaginator $rows
+ * @property-read Builder $rowsQuery
+ */
 class VenuesList extends BaseComponent
 {
     use WithBulkActions;
@@ -39,7 +43,11 @@ class VenuesList extends BaseComponent
     public function rowsQuery(): Builder
     {
         $query = Venue::query()
-            ->when($this->filters['search'], fn (Builder $query, string $search) => $query->where('name', 'like', '%'.$search.'%'))
+            ->when(
+                $this->filters['search'],
+                function (Builder $query, string $search) {
+                    $query->where('name', 'like', '%'.$search.'%');
+                })
             ->oldest('name');
 
         return $this->applySorting($query);

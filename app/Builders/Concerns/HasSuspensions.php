@@ -11,7 +11,7 @@ trait HasSuspensions
     /**
      * Scope a query to include suspended models.
      */
-    public function suspended(): self
+    public function suspended(): static
     {
         $this->whereHas('currentSuspension');
 
@@ -21,7 +21,7 @@ trait HasSuspensions
     /**
      * Scope a query to include the mode's current suspension date.
      */
-    public function withCurrentSuspendedAtDate(): self
+    public function withCurrentSuspendedAtDate(): static
     {
         $this->addSelect([
             'current_suspended_at' => Suspension::query()->select('started_at')
@@ -37,7 +37,7 @@ trait HasSuspensions
     /**
      * Scope a query to order by the model's current suspension date.
      */
-    public function orderByCurrentSuspendedAtDate(string $direction = 'asc'): self
+    public function orderByCurrentSuspendedAtDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(current_suspended_at) {$direction}");
 

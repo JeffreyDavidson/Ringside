@@ -30,6 +30,8 @@ class EventMatch extends Model
 
     /**
      * Get the event the match belongs to.
+     *
+     * @return BelongsTo<Event, EventMatch>
      */
     public function event(): BelongsTo
     {
@@ -38,6 +40,8 @@ class EventMatch extends Model
 
     /**
      * Get the match type of the match.
+     *
+     * @return BelongsTo<MatchType, EventMatch>
      */
     public function matchType(): BelongsTo
     {
@@ -46,6 +50,8 @@ class EventMatch extends Model
 
     /**
      * Get the referees assigned to the match.
+     *
+     * @return BelongsToMany<Referee>
      */
     public function referees(): BelongsToMany
     {
@@ -54,6 +60,8 @@ class EventMatch extends Model
 
     /**
      * Get the titles being competed for in the match.
+     *
+     * @return BelongsToMany<Title>
      */
     public function titles(): BelongsToMany
     {
@@ -70,6 +78,8 @@ class EventMatch extends Model
 
     /**
      * Get the wrestlers involved in the match.
+     *
+     * @return MorphToMany<Wrestler>
      */
     public function wrestlers(): MorphToMany
     {
@@ -80,6 +90,8 @@ class EventMatch extends Model
 
     /**
      * Get the tag teams involved in the match.
+     *
+     * @return MorphToMany<TagTeam>
      */
     public function tagTeams(): MorphToMany
     {

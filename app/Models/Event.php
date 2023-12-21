@@ -40,13 +40,10 @@ class Event extends Model
         'status' => EventStatus::class,
     ];
 
-    public static function query(): EventBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return EventBuilder<Event>
      */
     public function newEloquentBuilder($query): EventBuilder
     {
@@ -55,6 +52,8 @@ class Event extends Model
 
     /**
      * Retrieve the venue of the event.
+     *
+     * @return BelongsTo<Venue, Event>
      */
     public function venue(): BelongsTo
     {
@@ -63,6 +62,8 @@ class Event extends Model
 
     /**
      * Retrieve the matches for the event.
+     *
+     * @return HasMany<EventMatch>
      */
     public function matches(): HasMany
     {

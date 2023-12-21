@@ -7,9 +7,9 @@ namespace App\Builders;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ * @template TModelClass of \App\Models\TagTeam
  *
- * @extends Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
  */
 class TagTeamBuilder extends Builder
 {
@@ -20,7 +20,7 @@ class TagTeamBuilder extends Builder
     /**
      * Scope a query to include bookable tag teams.
      */
-    public function bookable(): self
+    public function bookable(): static
     {
         $this->where('status', 'bookable');
 
@@ -30,7 +30,7 @@ class TagTeamBuilder extends Builder
     /**
      * Scope a query to include bookable tag teams.
      */
-    public function unbookable(): self
+    public function unbookable(): static
     {
         $this->where('status', 'unbookable');
 

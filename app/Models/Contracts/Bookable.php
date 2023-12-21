@@ -10,6 +10,8 @@ interface Bookable
 {
     /**
      * Retrieve the event matches participated by the model.
+     *
+     * @return MorphToMany<\App\Models\EventMatch>
      */
     public function eventMatches(): MorphToMany;
 

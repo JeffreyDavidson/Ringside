@@ -37,6 +37,8 @@ class Employment extends Model
 
     /**
      * Get the employed model.
+     *
+     * @return MorphTo<Model, Employment>
      */
     public function employable(): MorphTo
     {

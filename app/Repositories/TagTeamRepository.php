@@ -121,6 +121,8 @@ class TagTeamRepository
 
     /**
      * Add wrestlers to a tag team.
+     *
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
      */
     public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate): TagTeam
     {
@@ -133,6 +135,9 @@ class TagTeamRepository
 
     /**
      * Add wrestlers to a tag team.
+     *
+     * @param  Collection<int, \App\Models\Wrestler>  $formerTagTeamPartners
+     * @param  Collection<int, \App\Models\Wrestler>  $newTagTeamPartners
      */
     public function syncTagTeamPartners(
         TagTeam $tagTeam,
