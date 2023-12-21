@@ -47,7 +47,8 @@ class VenuesList extends BaseComponent
                 $this->filters['search'],
                 function (Builder $query, string $search) {
                     $query->where('name', 'like', '%'.$search.'%');
-                })
+                }
+            )
             ->oldest('name');
 
         return $this->applySorting($query);

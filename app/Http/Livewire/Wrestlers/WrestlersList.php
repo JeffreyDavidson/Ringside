@@ -48,7 +48,8 @@ class WrestlersList extends BaseComponent
                 $this->filters['search'],
                 function (WrestlerBuilder $query, string $search) {
                     $query->where('name', 'like', '%'.$search.'%');
-                })
+                }
+            )
             ->orderBy('name');
 
         return $this->applySorting($query);

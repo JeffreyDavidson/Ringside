@@ -50,7 +50,8 @@ class StablesList extends BaseComponent
                 $this->filters['search'],
                 function (StableBuilder $query, string $search) {
                     $query->where('name', 'like', '%'.$search.'%');
-                })
+                }
+            )
             ->oldest('name');
 
         return $this->applySorting($query);
