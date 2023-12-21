@@ -48,7 +48,8 @@ class TitlesList extends BaseComponent
                 $this->filters['search'],
                 function (TitleBuilder $query, string $search) {
                     $query->where('name', 'like', '%'.$search.'%');
-                })
+                }
+            )
             ->oldest('name');
 
         return $this->applySorting($query);

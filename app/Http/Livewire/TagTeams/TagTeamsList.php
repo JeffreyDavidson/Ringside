@@ -48,7 +48,8 @@ class TagTeamsList extends BaseComponent
                 $this->filters['search'],
                 function (TagTeamBuilder $query, string $search) {
                     $query->where('name', 'like', '%'.$search.'%');
-                })
+                }
+            )
             ->oldest('name');
 
         return $this->applySorting($query);

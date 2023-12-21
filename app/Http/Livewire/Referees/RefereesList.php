@@ -51,7 +51,8 @@ class RefereesList extends BaseComponent
                 function (RefereeBuilder $query, string $search) {
                     $query->where('first_name', 'like', '%'.$search.'%')
                         ->orWhere('last_name', 'like', '%'.$search.'%');
-                })
+                }
+            )
             ->oldest('last_name');
 
         return $this->applySorting($query);
