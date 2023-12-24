@@ -19,15 +19,17 @@
                 <x-separator />
                 <x-card.detail-container id="kt_tag_team_view_details">
                     <x-card.detail-row property="Name" value="{{ $tagTeam->name }}" />
-                    <x-card.detail-row property="Start Date" value="{{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}" />
 
                     @if ($tagTeam->currentWrestlers)
+                        <x-card.detail-row property="Tag Team Partners" :value="$tagTeam->currentWrestlers->pluck('name')->join(', ', ' and ')" />
                         <x-card.detail-row property="Combined Weight" value="{{ $tagTeam->combined_weight }} lbs." />
                     @endif
 
                     @if ($tagTeam->signature_move)
                         <x-card.detail-row property="Signature Move" value="{{ $tagTeam->signature_move }}" />
                     @endif
+
+                    <x-card.detail-row property="Start Date" value="{{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}" />
                 </x-card.detail-container>
 
                 @if ($tagTeam->isUnemployed())
