@@ -35,7 +35,7 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                {{ $wrestler->getFormattedHeight() }}
+                                {{ $wrestler->height }}
                             </x-table.cell>
 
                             <x-table.cell>

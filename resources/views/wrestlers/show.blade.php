@@ -19,7 +19,7 @@
                 <x-separator />
                 <x-card.detail-container id="kt_wrestler_view_details">
                     <x-card.detail-row property="Name" value="{{ $wrestler->name }}" />
-                    <x-card.detail-row property="Height" :value="$wrestler->getFormattedHeight()" />
+                    <x-card.detail-row property="Height" :value="$wrestler->height" />
                     <x-card.detail-row property="Weight" value="{{ $wrestler->weight }} lbs." />
                     <x-card.detail-row property="Hometown" value="{{ $wrestler->hometown }}" />
                     @if ($wrestler->signature_move)

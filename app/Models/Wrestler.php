@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Builders\WrestlerBuilder;
+use App\Casts\HeightCast;
 use App\Enums\WrestlerStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
@@ -53,6 +54,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
      * @var array<string, string>
      */
     protected $casts = [
+        'height' => HeightCast::class,
         'status' => WrestlerStatus::class,
     ];
 
