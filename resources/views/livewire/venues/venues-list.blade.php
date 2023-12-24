@@ -1,6 +1,9 @@
-<div class="card">
-    @include('livewire.venues.partials.header')
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        @include('livewire.venues.partials.header')
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
@@ -10,7 +13,6 @@
                     <x-table.heading class="min-w-70px sorting_disabled">City</x-table.heading>
                     <x-table.heading class="min-w-70px sorting_disabled">State</x-table.heading>
                     <x-table.heading class="min-w-70px sorting_disabled">Zip Code</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -40,10 +42,6 @@
                                 {{ $venue->zip }}
                             </x-table.cell>
 
-                            <x-table.cell>
-                                {{ $venue->created_at->toFormattedDateString() }}
-                            </x-table.cell>
-
                             <x-table.cell class="text-end">
                                 @include('livewire.venues.partials.action-cell')
                             </x-table.cell>
@@ -67,5 +65,5 @@
                 {{ $venues->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

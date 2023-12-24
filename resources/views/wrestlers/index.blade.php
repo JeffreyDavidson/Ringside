@@ -10,5 +10,5 @@
         </x-toolbar>
     </x-slot>
 
-    <livewire:wrestlers.wrestlers-list>
+    <livewire:wrestlers.wrestlers-list />
 </x-layouts.app>

@@ -1,60 +1,31 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="{{ $referee->full_name }}">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('referees.index')" label="Referees" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :label="$referee->full_name" />
+        <x-toolbar>
+            <x-page-heading>View Referee Details</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('referees.index')" label="Referees" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :label="$referee->full_name" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
-    <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
-        <!--begin::Card header-->
-        <div class="card-header">
-            <!--begin::Card title-->
-            <div class="m-0 card-title">
-                <h3 class="m-0 fw-bold">Referee Details</h3>
-            </div>
-            <!--end::Card title-->
-            <!--begin::Action-->
-            <a href="{{ route('referees.edit', $referee) }}" class="btn btn-primary align-self-center">Edit Referee</a>
-            <!--end::Action-->
-        </div>
-        <!--begin::Card header-->
-        <!--begin::Card body-->
-        <div class="card-body p-9">
-            <!--begin::Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Referee Name</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $referee->full_name }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            <!--begin::Input group-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Start Date</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8 fv-row">
-                    <span class="text-gray-800 fw-semibold fs-6">{{ $referee->startedAt?->toDateString() ?? 'No Start Date Set' }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Input group-->
-            @if ($referee->isUnemployed())
-                <x-notice
-                    title="This referee needs your attention!"
-                    description="This referee does not have a start date and needs to be employed."
-                />
-            @endif
-        </div>
-        <!--end::Card body-->
-    </div>
+    <x-details-card>
+        <x-card>
+            <x-card.body>
+                <x-card.detail-link collapsibleLink="kt_referee_view_details" resource="referee" :href="route('referees.edit', $referee)" />
+                <x-separator />
+                <x-card.detail-container id="kt_referee_view_details">
+                    <x-card.detail-row property="Name" value="{{ $referee->full_name }}" />
+                    <x-card.detail-row property="Start Date" value="{{ $referee->startedAt?->toDateString() ?? 'No Start Date Set' }}" />
+                </x-card.detail-container>
+
+                @if ($referee->isUnemployed())
+                    <x-notice class="mt-4" title="This referee needs your attention!" description="This referee does not have a start date and needs to be employed." />
+                @endif
+            </x-card.body>
+        </x-card>
+    </x-details-card>
 </x-layouts.app>

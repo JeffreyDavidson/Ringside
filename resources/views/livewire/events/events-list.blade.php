@@ -1,6 +1,9 @@
-<div class="card">
-    @include('livewire.events.partials.header')
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        @include('livewire.events.partials.header')
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
@@ -9,7 +12,8 @@
                     </x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Event Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('venue')" :direction="$sorts['date'] ?? null" class="min-w-125px sorting">Date</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('venue')" :direction="$sorts['venue'] ?? null" class="min-w-125px sorting">Venue</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -30,7 +34,11 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                {{ $event->created_at->toFormattedDateString() }}
+                                {{ $event->date?->format('F m, Y') }}
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                {{ $event->venue->name ?? "" }}
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
@@ -57,5 +65,5 @@
                 {{ $events->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

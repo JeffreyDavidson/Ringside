@@ -1,6 +1,9 @@
-<div class="card">
-    @include('livewire.titles.partials.header')
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        @include('livewire.titles.partials.header')
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
@@ -10,10 +13,6 @@
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Title Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
                     <x-table.heading class="min-w-70px sorting_disabled">Current Champion</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Date Won</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Reign Length</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Updated At</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -35,22 +34,6 @@
 
                             <x-table.cell>
                                 {{ $title->currentChampionship->champion->display_name ?? 'Vacant' }}
-                            </x-table.cell>
-
-                            <x-table.cell>
-                                {{ $title->currentChampionship?->won_at->toDateString() ?? 'TBD'}}
-                            </x-table.cell>
-
-                            <x-table.cell>
-                                {{ $title->currentChampionship?->lengthInDays() ?? '0' }} Days
-                            </x-table.cell>
-
-                            <x-table.cell>
-                                {{ $title->created_at->toFormattedDateString() }}
-                            </x-table.cell>
-
-                            <x-table.cell>
-                                {{ $title->updated_at->toFormattedDateString() }}
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
@@ -77,5 +60,5 @@
                 {{ $titles->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

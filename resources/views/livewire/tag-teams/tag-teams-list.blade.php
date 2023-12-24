@@ -1,6 +1,9 @@
-<div class="card">
-    @include('livewire.tag-teams.partials.header')
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        @include('livewire.tag-teams.partials.header')
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
@@ -21,7 +24,6 @@
                             :direction="$sorts['status'] ?? null"
                             class="min-w-125px sorting">Status
                     </x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -46,10 +48,6 @@
                                 <div class="badge badge-{{ $tagTeam->status->color() }}">{{ $tagTeam->status->label() }}</div>
                             </x-table.cell>
 
-                            <x-table.cell>
-                                {{ $tagTeam->created_at->toFormattedDateString() }}
-                            </x-table.cell>
-
                             <x-table.cell class="text-end">
                                 @include('livewire.tag-teams.partials.action-cell')
                             </x-table.cell>
@@ -69,11 +67,10 @@
         </div>
 
         <div class="row">
-            <div class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start">
-            </div>
+            <div class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start"></div>
             <div class="col-sm-12 col-md-7 d-flex align-items-center justify-content-center justify-content-md-end">
                 {{ $tagTeams->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

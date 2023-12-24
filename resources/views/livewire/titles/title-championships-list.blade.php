@@ -1,17 +1,15 @@
-<div class="card">
-    <div class="card-header">
-        <!--begin::Card title-->
-        <div class="m-0 card-title">
-            <h3 class="m-0 fw-bold">Title Champions</h3>
-        </div>
-        <!--end::Card title-->
-    </div>
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        <x-card.header title="Title Championships" />
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
                     <x-table.heading class="min-w-125px sorting_disabled">Champion</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Date of Reign</x-table.heading>
+                    <x-table.heading class="min-w-70px sorting_disabled">Date Won</x-table.heading>
+                    <x-table.heading class="min-w-70px sorting_disabled">Reign Length</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
                     @forelse ($titleChampionships as $titleChampionship)
@@ -51,5 +49,5 @@
                 {{ $titleChampionships->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

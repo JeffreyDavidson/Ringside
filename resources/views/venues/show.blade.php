@@ -1,55 +1,27 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="{{ $venue->name }}">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('venues.index')" label="Venues" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :label="$venue->name" />
+        <x-toolbar>
+            <x-page-heading>Venue Details</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('venues.index')" label="Venues" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :label="$venue->name" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
-    <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
-        <!--begin::Card header-->
-        <div class="card-header">
-            <!--begin::Card title-->
-            <div class="m-0 card-title">
-                <h3 class="m-0 fw-bolder">{{ $venue->name }} Details</h3>
-            </div>
-            <!--end::Card title-->
-            <!--begin::Action-->
-            <a href="{{ route('venues.edit', $venue) }}" class="btn btn-primary align-self-center">Edit Venue</a>
-            <!--end::Action-->
-        </div>
-        <!--begin::Card header-->
-        <!--begin::Card body-->
-        <div class="card-body p-9">
-            <!--begin::Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-bold text-muted">Name</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $venue->name }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            <!--begin::Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-bold text-muted">Address</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $venue->street_address }}</span>
-                    <span class="text-gray-800 fs-6">{{ $venue->city }}, {{ $venue->state }} {{ $venue->zip }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-        </div>
-        <!--end::Card body-->
-    </div>
+    <x-details-card>
+        <x-card>
+            <x-card.body>
+                <x-card.detail-link collapsibleLink="kt_venue_view_details" resource="venue" :href="route('venues.edit', $venue)" />
+                <x-separator />
+                <x-card.detail-container id="kt_venue_view_details">
+                    <x-card.detail-row property="Name" value="{{ $venue->name }}" />
+                    <x-card.detail-row property="Address" value="{{ $venue->street_address }} {{ $venue->city }}, {{ $venue->state }} {{ $venue->zip }}" />
+                </x-card.detail-container>
+            </x-card.body>
+        </x-card>
+    </x-details-card>
 </x-layouts.app>

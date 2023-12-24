@@ -1,13 +1,16 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="Tag Teams">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('tag-teams.index')" label="Tag Teams" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('tag-teams.show', $tagTeam)" :label="$tagTeam->name" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item label="Edit" />
+        <x-toolbar>
+            <x-page-heading>Edit Tag Team</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('tag-teams.index')" label="Tag Teams" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('tag-teams.show', $tagTeam)" :label="$tagTeam->name" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item label="Edit" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
