@@ -1,11 +1,14 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="Stables">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('stables.index')" label="Stables" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item label="Create" />
+        <x-toolbar>
+            <x-page-heading>Create Stable</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('stables.index')" label="Stables" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item label="Create" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 

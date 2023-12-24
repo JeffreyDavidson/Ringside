@@ -1,12 +1,14 @@
 <x-layouts.app>
     <x-slot name="toolbar">
         <x-toolbar>
-            <x-page-heading>Wrestlers</x-page-heading>
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('wrestlers.index')" label="Wrestlers" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item label="Create" />
+            <x-page-heading>Create Wrestler</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('wrestlers.index')" label="Wrestlers" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item label="Create" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 

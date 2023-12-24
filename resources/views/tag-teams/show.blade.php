@@ -1,88 +1,39 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="{{ $tagTeam->name }}">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('tag-teams.index')" label="Tag Teams" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :label="$tagTeam->name" />
+        <x-toolbar>
+            <x-page-heading>View Tag Team Details</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('tag-teams.index')" label="Tag Teams" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :label="$tagTeam->name" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
-    <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
-        <!--begin::Card header-->
-        <div class="card-header">
-            <!--begin::Card title-->
-            <div class="m-0 card-title">
-                <h3 class="m-0 fw-bold">Tag Team Details</h3>
-            </div>
-            <!--end::Card title-->
-            <!--begin::Action-->
-            <a href="{{ route('tag-teams.edit', $tagTeam) }}" class="btn btn-primary align-self-center">Edit Tag Team</a>
-            <!--end::Action-->
-        </div>
-        <!--begin::Card header-->
-        <!--begin::Card body-->
-        <div class="card-body p-9">
-            <!--begin::Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Tag Team Name</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $tagTeam->name }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            <!--begin:Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Start Date</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8 fv-row">
-                    <span class="text-gray-800 fw-semibold fs-6">{{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            @unless ($tagTeam->currentWrestlers)
-            <!--begin::Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Combined Weight</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $tagTeam->combined_weight }} lbs.</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            @endunless
-            @if ($tagTeam->signature_move)
-            <!--begin:Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Signature Move</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8 fv-row">
-                    <span class="text-gray-800 fw-semibold fs-6">{{ $tagTeam->signature_move }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            @endif
-            @if ($tagTeam->isUnemployed())
-                <x-notice
-                    title="This tag team needs your attention!"
-                    description="This tag team does not have a start date and needs to be employed."
-                />
-            @endif
-        </div>
-        <!--end::Card body-->
-    </div>
+    <x-details-card>
+        <x-card>
+            <x-card.body>
+                <x-card.detail-link collapsibleLink="kt_tag_team_view_details" resource="tag team" :href="route('tag-teams.edit', $tagTeam)" />
+                <x-separator />
+                <x-card.detail-container id="kt_tag_team_view_details">
+                    <x-card.detail-row property="Name" value="{{ $tagTeam->name }}" />
+                    <x-card.detail-row property="Start Date" value="{{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}" />
+
+                    @if ($tagTeam->currentWrestlers)
+                        <x-card.detail-row property="Combined Weight" value="{{ $tagTeam->combined_weight }} lbs." />
+                    @endif
+
+                    @if ($tagTeam->signature_move)
+                        <x-card.detail-row property="Signature Move" value="{{ $tagTeam->signature_move }}" />
+                    @endif
+                </x-card.detail-container>
+
+                @if ($tagTeam->isUnemployed())
+                    <x-notice class="mt-4" title="This tag team needs your attention!" description="This tag team does not have a start date and needs to be employed." />
+                @endif
+            </x-card.body>
+        </x-card>
+    </x-details-card>
 </x-layouts.app>

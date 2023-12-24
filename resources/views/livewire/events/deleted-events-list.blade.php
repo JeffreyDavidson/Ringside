@@ -1,6 +1,9 @@
-<div class="card">
-    @include('livewire.events.partials.header')
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        @include('livewire.events.partials.header')
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
@@ -61,5 +64,5 @@
                 {{ $events->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

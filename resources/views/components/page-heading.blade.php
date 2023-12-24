@@ -1,1 +1,1 @@
-<h1 class="my-0 page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center">{{  $slot }}</h1>
+<h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">{{  $slot }}</h1>

@@ -1,64 +1,37 @@
 <x-layouts.app>
-
     <x-slot name="toolbar">
         <x-toolbar>
-            <x-page-heading>{{  $wrestler->name }}</x-page-heading>
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('wrestlers.index')" label="Wrestlers" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :label="$wrestler->name" />
+            <x-page-heading>View Wrestler Details</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('wrestlers.index')" label="Wrestlers" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :label="$wrestler->name" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
-    <x-card>
-        <x-slot name="header">
-            <div class="m-0 card-title">
-                <h3 class="m-0 fw-bold">Wrestler Details</h3>
-            </div>
-            <x-button.primary :url="route('wrestlers.edit', $wrestler)" label="Edit Wrestler" />
-        </x-slot>
-        <div class="row mb-7">
-            <label class="col-lg-4 fw-semibold text-muted">Wrestler Name</label>
-            <div class="col-lg-8">
-                <span class="text-gray-800 fs-6">{{ $wrestler->name }}</span>
-            </div>
-        </div>
-        <div class="row mb-7">
-            <label class="col-lg-4 fw-semibold text-muted">Height</label>
-            <div class="col-lg-8">
-                <span class="text-gray-800 fs-6">{{ floor($wrestler->height / 12) }}' {{ $wrestler->height % 12 }}"</span>
-            </div>
-        </div>
-        <div class="row mb-7">
-            <label class="col-lg-4 fw-semibold text-muted">Weight</label>
-            <div class="col-lg-8">
-                <span class="text-gray-800 fs-6">{{ $wrestler->weight }} lbs.</span>
-            </div>
-        </div>
-        <div class="row mb-7">
-            <label class="col-lg-4 fw-semibold text-muted">Hometown</label>
-            <div class="col-lg-8">
-                <span class="text-gray-800 fs-6">{{ $wrestler->hometown }}</span>
-            </div>
-        </div>
-        <div class="row mb-7">
-            <label class="col-lg-4 fw-semibold text-muted">Signature Move</label>
-            <div class="col-lg-8">
-                <span class="text-gray-800 fs-6">{{ $wrestler->signature_move }}</span>
-            </div>
-        </div>
-        <div class="row mb-7">
-            <label class="col-lg-4 fw-semibold text-muted">Start Date</label>
-            <div class="col-lg-8 fv-row">
-                <span class="text-gray-800 fw-semibold fs-6">{{ $wrestler->employedAt?->toDateString() ?? 'No Start Date Set' }}</span>
-            </div>
-        </div>
-        @if ($wrestler->isUnemployed())
-            <x-notice
-                title="This wrestler needs your attention!"
-                description="This wrestler does not have a start date and needs to be employed."
-            />
-        @endif
-    </x-card>
+    <x-details-card>
+        <x-card>
+            <x-card.body>
+                <x-card.detail-link collapsibleLink="kt_wrestler_view_details" resource="wrestler" :href="route('wrestlers.edit', $wrestler)" />
+                <x-separator />
+                <x-card.detail-container id="kt_wrestler_view_details">
+                    <x-card.detail-row property="Name" value="{{ $wrestler->name }}" />
+                    <x-card.detail-row property="Height" :value="$wrestler->getFormattedHeight()" />
+                    <x-card.detail-row property="Weight" value="{{ $wrestler->weight }} lbs." />
+                    <x-card.detail-row property="Hometown" value="{{ $wrestler->hometown }}" />
+                    @if ($wrestler->signature_move)
+                        <x-card.detail-row property="Signature Move" value="{{ $wrestler->signature_move }}" />
+                    @endif
+                    <x-card.detail-row property="Start Date" value="{{ $wrestler->startedAt?->toDateString() ?? 'No Start Date Set' }}" />
+                </x-card.detail-container>
+
+                @if ($wrestler->isUnemployed())
+                    <x-notice class="mt-4" title="This wrestler needs your attention!" description="This wrestler does not have a start date and needs to be employed." />
+                @endif
+            </x-card.body>
+        </x-card>
+    </x-details-card>
 </x-layouts.app>

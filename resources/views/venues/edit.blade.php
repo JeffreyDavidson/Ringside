@@ -1,14 +1,16 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="Venues">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('venues.index')" label="Venues" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('venues.show', $venue)" :label="$venue->name" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item label="Edit" />
-            <!--end::Item-->
+        <x-toolbar>
+            <x-page-heading>Edit Venue</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('venues.index')" label="Venues" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('venues.show', $venue)" :label="$venue->name" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item label="Edit" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
