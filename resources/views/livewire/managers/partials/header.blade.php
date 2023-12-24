@@ -1,6 +1,6 @@
 <x-table.header>
     <x-card.title>
-        <x-search resource="Referees" />
+        <x-search resource="Managers" />
     </x-card.title>
 
     <x-card.toolbar>
