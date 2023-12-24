@@ -24,6 +24,34 @@
                             :direction="$sorts['status'] ?? null"
                             class="min-w-125px sorting">Status
                     </x-table.heading>
+                    <x-table.heading
+                        sortable
+                        multi-column
+                        wire:click="sortBy('wrestlerA')"
+                        :direction="$sorts['wrestlerA'] ?? null"
+                        class="min-w-125px sorting">Tag Team Partner
+                    </x-table.heading>
+                    <x-table.heading
+                        sortable
+                        multi-column
+                        wire:click="sortBy('wrestlerB')"
+                        :direction="$sorts['wrestlerB'] ?? null"
+                        class="min-w-125px sorting">Tag Team Partner
+                    </x-table.heading>
+                    <x-table.heading
+                        sortable
+                        multi-column
+                        wire:click="sortBy('combined_weight')"
+                        :direction="$sorts['combined_weight'] ?? null"
+                        class="min-w-125px sorting">Combined Weight
+                    </x-table.heading>
+                    <x-table.heading
+                        sortable
+                        multi-column
+                        wire:click="sortBy('start_date')"
+                        :direction="$sorts['start_date'] ?? null"
+                        class="min-w-125px sorting">Start Date
+                    </x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -46,6 +74,22 @@
 
                             <x-table.cell>
                                 <div class="badge badge-{{ $tagTeam->status->color() }}">{{ $tagTeam->status->label() }}</div>
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                <div>{{ $tagTeam->currentWrestlers->first()->name ?? 'No wrestler chosen' }}</div>
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                <div>{{ $tagTeam->currentWrestlers->last()->name ?? 'No wrestler chosen' }}</div>
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                <div>{{ $tagTeam->combined_weight }}</div>
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                {{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
