@@ -23,9 +23,9 @@
             <div class="app-header-menu app-header-mobile-drawer align-items-stretch"></div>
             <div class="flex-shrink-0 app-navbar">
                 <!--begin::User menu-->
-                <div class="app-navbar-item ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
+                <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
                     <!--begin::Menu wrapper-->
-                    <div class="cursor-pointer symbol symbol-35px symbol-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+                    <div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                         <img src="{{ asset('assets/media/avatars/blank.png') }}" alt="{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}">
                     </div>
                     <!--begin::User account menu-->
