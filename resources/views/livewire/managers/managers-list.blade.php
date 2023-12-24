@@ -12,6 +12,13 @@
                     </x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">manager Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
+                    <x-table.heading
+                        sortable
+                        multi-column
+                        wire:click="sortBy('start_date')"
+                        :direction="$sorts['start_date'] ?? null"
+                        class="min-w-125px sorting">Start Date
+                    </x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -29,6 +36,10 @@
                                 <div class="badge badge-{{ $manager->status->color() }}">
                                     {{ $manager->status->label() }}
                                 </div>
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                {{ $manager->startedAt?->toDateString() ?? 'No Start Date Set' }}
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
