@@ -66,13 +66,33 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the champion of the title championship.
+     * Retrieve the current champion of the title championship.
      *
      * @return MorphTo<Model, TitleChampionship>
      */
-    public function champion(): MorphTo
+    public function currentChampion(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
+    }
+
+    /**
+     * Retrieve the previous champion of the title championship.
+     *
+     * @return MorphTo<Model, TitleChampionship>
+     */
+    public function previousChampion(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
+    }
+
+    /**
+     * Retrieve the event match where the title championship switched hands.
+     *
+     * @return BelongsTo<EventMatch, TitleChampionship>
+     */
+    public function eventMatch(): BelongsTo
+    {
+        return $this->belongsTo(EventMatch::class);
     }
 
     /**

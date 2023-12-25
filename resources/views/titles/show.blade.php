@@ -12,22 +12,26 @@
         </x-toolbar>
     </x-slot>
 
-    <x-details-card>
-        <x-card>
-            <x-card.body>
-                <x-card.detail-link collapsibleLink="kt_title_view_details" resource="title" :href="route('titles.edit', $title)" />
-                <x-separator />
-                <x-card.detail-container id="kt_title_view_details">
-                    <x-card.detail-row property="Name" value="{{ $title->name }}" />
-                    <x-card.detail-row property="Activation Date" value="{{ $title->activatedAt?->toDateString() ?? 'Unscheduled' }}" />
-                </x-card.detail-container>
+    <div class="d-flex flex-column flex-xl-row">
+        <x-details-card>
+            <x-card>
+                <x-card.body>
+                    <x-card.detail-link collapsibleLink="kt_title_view_details" resource="title" :href="route('titles.edit', $title)" />
+                    <x-separator />
+                    <x-card.detail-container id="kt_title_view_details">
+                        <x-card.detail-row property="Name" value="{{ $title->name }}" />
+                        <x-card.detail-row property="Activation Date" value="{{ $title->activatedAt?->toDateString() ?? 'Unscheduled' }}" />
+                    </x-card.detail-container>
 
-                @if ($title->isUnactivated())
-                    <x-notice class="mt-4" title="This title needs your attention!" description="This title does not have an activation date and needs to be activated." />
-                @endif
-            </x-card.body>
-        </x-card>
-    </x-details-card>
+                    @if ($title->isUnactivated())
+                        <x-notice class="mt-4" title="This title needs your attention!" description="This title does not have an activation date and needs to be activated." />
+                    @endif
+                </x-card.body>
+            </x-card>
+        </x-details-card>
 
-    <livewire:titles.title-championships-list :title="$title" />
+        <div class="flex-lg-row-fluid ms-lg-15">
+            <livewire:titles.title-championships-list :title="$title" />
+        </div>
+    </div>
 </x-layouts.app>
