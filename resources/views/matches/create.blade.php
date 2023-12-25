@@ -1,18 +1,28 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="Event Matches">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('events.index')" label="Events" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('events.show', $event)" :label="$event->name" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('events.matches.index', $event)" label="Matches" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item label="Create" />
+        <x-toolbar>
+            <x-page-heading>Create Event Match</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('events.index')" label="Events" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('events.show', $event)" :label="$event->name" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('events.matches.index', $event)" label="Matches" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item label="Create" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
-    <livewire:event-matches.match-form :event="$event" />
+    <x-card>
+        <x-slot name="header">
+            <x-card.header title="Create Match Form" />
+        </x-slot>
+        <x-card.body>
+            <livewire:event-matches.match-form :event="$event" />
+        </x-card.body>
+    </x-card>
 
 </x-layouts.app>

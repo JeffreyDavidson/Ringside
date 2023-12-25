@@ -58,7 +58,7 @@ class MatchForm extends BaseComponent
      */
     public function render(): View
     {
-        return view('livewire.matches.create', [
+        return view('livewire.matches.partials.form', [
             'match' => $this->match,
             'matchTypes' => MatchType::pluck('name', 'id'),
             'referees' => Referee::query()->get()->pluck('full_name', 'id'),
