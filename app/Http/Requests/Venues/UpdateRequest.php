@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
+use App\Models\Wrestler;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Tests\RequestFactories\VenueRequestFactory;
 
 class UpdateRequest extends FormRequest
@@ -36,8 +38,11 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        /** @var Venue $venue */
+        $venue = $this->route()?->parameter('venue');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'unique:App\Models\Venue,name'],
+            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($venue->id)],
             'street_address' => ['required', 'string', 'min:3'],
             'city' => ['required', 'string', 'min:3'],
             'state' => ['required', 'string'],

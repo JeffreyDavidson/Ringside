@@ -12,16 +12,22 @@
         </x-toolbar>
     </x-slot>
 
-    <x-details-card>
-        <x-card>
-            <x-card.body>
-                <x-card.detail-link collapsibleLink="kt_venue_view_details" resource="venue" :href="route('venues.edit', $venue)" />
-                <x-separator />
-                <x-card.detail-container id="kt_venue_view_details">
-                    <x-card.detail-row property="Name" value="{{ $venue->name }}" />
-                    <x-card.detail-row property="Address" value="{{ $venue->street_address }} {{ $venue->city }}, {{ $venue->state }} {{ $venue->zip }}" />
-                </x-card.detail-container>
-            </x-card.body>
-        </x-card>
-    </x-details-card>
+    <x-details-page>
+        <x-details-card>
+            <x-card>
+                <x-card.body>
+                    <x-card.detail-link collapsibleLink="kt_venue_view_details" resource="venue" :href="route('venues.edit', $venue)" />
+                    <x-separator />
+                    <x-card.detail-container id="kt_venue_view_details">
+                        <x-card.detail-row property="Name" value="{{ $venue->name }}" />
+                        <x-card.detail-row property="Address" value="{{ $venue->street_address }} {{ $venue->city }}, {{ $venue->state }} {{ $venue->zip }}" />
+                    </x-card.detail-container>
+                </x-card.body>
+            </x-card>
+        </x-details-card>
+
+        <x-details-data>
+            <livewire:venues.events-list :venue="$venue" />
+        </x-details-data>
+    </x-details-page>
 </x-layouts.app>
