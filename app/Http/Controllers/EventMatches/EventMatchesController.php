@@ -37,4 +37,27 @@ class EventMatchesController extends Controller
 
         return to_route('events.matches.index', $event);
     }
+
+    /**
+     * Show the form for creating a new match for a given event.
+     */
+    public function edit(Event $event, EventMatch $match): View
+    {
+        $this->authorize('update', EventMatch::class);
+
+        return view('matches.edit', [
+            'event' => $event,
+            'match' => $match,
+        ]);
+    }
+
+    /**
+     * Create a new match for a given event.
+     */
+    public function update(Event $event, EventMatch $match, StoreRequest $request): RedirectResponse
+    {
+        AddMatchForEventAction::run($event, EventMatchData::fromStoreRequest($request));
+
+        return to_route('events.matches.index', $event);
+    }
 }

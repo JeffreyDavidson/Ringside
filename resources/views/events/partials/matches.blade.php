@@ -7,9 +7,9 @@
         @forelse($matches as $match)
             <div class="mb-12">
                 @if ($loop->last)
-                    <h3>Main Event</h3>
+                    <a href="{{ route('events.matches.edit', [$match->event, $match]) }}"><h3>Main Event</h3></a>
                 @else
-                    <h3>Match #{{ $loop->iteration }}</h3>
+                    <a href="{{ route('events.matches.edit', [$match->event, $match]) }}"><h3>Match #{{ $loop->iteration }}</h3></a>
                 @endif
 
                 <p>Refereed By {{ $match->referees->pluck('full_name')->implode(', ') }}</p>

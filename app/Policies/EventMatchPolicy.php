@@ -18,4 +18,12 @@ class EventMatchPolicy
     {
         return $user->isAdministrator();
     }
+
+    /**
+     * Determine whether the user can update an event match.
+     */
+    public function update(User $user): bool
+    {
+        return $user->isAdministrator();
+    }
 }

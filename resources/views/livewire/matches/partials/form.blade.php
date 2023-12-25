@@ -5,7 +5,7 @@
             id="match_type_id"
             name="match_type_id"
             :options="$matchTypes"
-            :selected="old('match_type_id')"
+            :selected="old('match_type_id', $match->match_type_id)"
             wire:model="matchTypeId"
         />
     </div>
@@ -15,7 +15,7 @@
             id="referees"
             name="referees"
             :options="$referees"
-            :selected="old('referees')"
+            :selected="old('referees', $match->referees?->modelKeys())"
         />
     </div>
     <div class="mb-10">
@@ -24,7 +24,7 @@
             id="titles"
             name="titles"
             :options="$titles"
-            :selected="old('titles')"
+            :selected="old('titles', $match->titles?->modelKeys())"
         />
     </div>
     @if ($subViewToUse)
@@ -36,7 +36,7 @@
         <x-form.inputs.textarea
             name="preview"
             label="Preview"
-            :value="old('preview')"
+            :value="old('preview', $match->preview)"
         />
     </div>
 
