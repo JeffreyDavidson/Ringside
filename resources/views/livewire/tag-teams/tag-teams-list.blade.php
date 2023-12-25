@@ -29,14 +29,7 @@
                         multi-column
                         wire:click="sortBy('wrestlerA')"
                         :direction="$sorts['wrestlerA'] ?? null"
-                        class="min-w-125px sorting">Tag Team Partner
-                    </x-table.heading>
-                    <x-table.heading
-                        sortable
-                        multi-column
-                        wire:click="sortBy('wrestlerB')"
-                        :direction="$sorts['wrestlerB'] ?? null"
-                        class="min-w-125px sorting">Tag Team Partner
+                        class="min-w-125px sorting">Current Tag Team Partners
                     </x-table.heading>
                     <x-table.heading
                         sortable
@@ -77,11 +70,15 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                <div>{{ $tagTeam->currentWrestlers->first()->name ?? 'No wrestler chosen' }}</div>
-                            </x-table.cell>
-
-                            <x-table.cell>
-                                <div>{{ $tagTeam->currentWrestlers->last()->name ?? 'No wrestler chosen' }}</div>
+                                @if ($tagTeam->currentWrestlers->isNotEmpty())
+                                    @if ($tagTeam->currentWrestlers->count() === 2)
+                                        <div>{{ $tagTeam->currentWrestlers->pluck('name')->join(', ', ' and ') }}</div>
+                                    @else
+                                        <div>{{ $tagTeam->currentWrestlers->first()->name }} and TBD</div>
+                                    @endif
+                                @else
+                                    <div>No Wrestlers Assigned</div>
+                                @endif
                             </x-table.cell>
 
                             <x-table.cell>

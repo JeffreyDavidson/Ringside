@@ -1,5 +1,5 @@
 <form action="{{ $action }}" method="post">
-    @method('PATCH')
+    @method('DELETE')
     @csrf
     {{ $slot }}
 </form>
