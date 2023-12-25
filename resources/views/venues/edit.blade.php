@@ -14,63 +14,15 @@
         </x-toolbar>
     </x-slot>
 
-    <div class="shadow-sm card">
-        <div class="card-header">
-            <h3 class="card-title">Edit Venue Form</h3>
-        </div>
-        <div class="card-body">
-            <form method="post" action="{{ route('venues.update', $venue) }}">
-                @method('patch')
-                @csrf
-                <div class="mb-10">
-                    <x-form.inputs.text
-                        label="Name:"
-                        name="name"
-                        placeholder="Venue Name Here"
-                        :value="old('name', $venue->name)"
-                    />
-                </div>
-                <div class="mb-10">
-                    <x-form.inputs.text
-                        label="Street Address:"
-                        name="street_address"
-                        placeholder="Street Address Here"
-                        :value="old('street_address', $venue->street_address)"
-                    />
-                </div>
-                <div class="mb-10">
-                    <div class="mb-5 row gx-10">
-                        <div class="col-lg-4">
-                            <x-form.inputs.text
-                                label="City:"
-                                name="city"
-                                placeholder="Orlando"
-                                :value="old('city', $venue->city)"
-                            />
-                        </div>
-                        <div class="col-lg-4">
-                            <x-form.inputs.text
-                                label="State:"
-                                name="state"
-                                placeholder="Florida"
-                                :value="old('state', $venue->state)"
-                            />
-                        </div>
-                        <div class="col-lg-4">
-                            <x-form.inputs.text
-                                label="Zip:"
-                                 name="zip"
-                                placeholder="12345"
-                                :value="old('zip', $venue->zip)"
-                            />
-                        </div>
-                    </div>
-                </div>
-        </div>
-        <div class="card-footer">
-            <x-form.buttons.submit />
-            <x-form.buttons.reset />
-        </div>
-        </form>
-    </div>
+    <x-card>
+        <x-slot name="header">
+            <x-card.header title="Edit Venue Form" />
+        </x-slot>
+        <x-card.body>
+            <x-form :action="route('venues.update', $venue)">
+                @method('PATCH')
+                @include('venues.partials.form')
+            </x-form>
+        </x-card.body>
+    </x-card>
 </x-layouts.app>

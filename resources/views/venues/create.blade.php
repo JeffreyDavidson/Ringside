@@ -12,62 +12,14 @@
         </x-toolbar>
     </x-slot>
 
-    <div class="shadow-sm card">
-        <div class="card-header">
-            <h3 class="card-title">Create A New Venue Form</h3>
-        </div>
-        <div class="card-body">
-            <form method="post" action="{{ route('venues.store') }}">
-                @csrf
-                <div class="mb-10">
-                    <x-form.inputs.text
-                        label="Name:"
-                        name="name"
-                        placeholder="Venue Name Here"
-                        :value="old('name')"
-                    />
-                </div>
-                <div class="mb-10">
-                    <x-form.inputs.text
-                        label="Street Address:"
-                        name="street_address"
-                        placeholder="Street Address Here"
-                        :value="old('street_address')"
-                    />
-                </div>
-                <div class="mb-10">
-                    <div class="mb-5 row gx-10">
-                        <div class="col-lg-4">
-                            <x-form.inputs.text
-                                label="City:"
-                                name="city"
-                                placeholder="Orlando"
-                                :value="old('city')"
-                            />
-                        </div>
-                        <div class="col-lg-4">
-                            <x-form.inputs.text
-                                label="State:"
-                                name="state"
-                                placeholder="Florida"
-                                :value="old('state')"
-                            />
-                        </div>
-                        <div class="col-lg-4">
-                            <x-form.inputs.text
-                                label="Zip:"
-                                name="zip"
-                                placeholder="12345"
-                                :value="old('zip')"
-                            />
-                        </div>
-                    </div>
-                </div>
-        </div>
-        <div class="card-footer">
-            <x-form.buttons.submit />
-            <x-form.buttons.reset />
-        </div>
-        </form>
-    </div>
+    <x-card>
+        <x-slot name="header">
+            <x-card.header title="Create Venue Form" />
+        </x-slot>
+        <x-card.body>
+            <x-form :action="route('venues.store')">
+                @include('venues.partials.form')
+            </x-form>
+        </x-card.body>
+    </x-card>
 </x-layouts.app>
