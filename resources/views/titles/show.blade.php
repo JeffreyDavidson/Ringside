@@ -12,7 +12,7 @@
         </x-toolbar>
     </x-slot>
 
-    <div class="d-flex flex-column flex-xl-row">
+    <x-details-page>
         <x-details-card>
             <x-card>
                 <x-card.body>
@@ -30,8 +30,8 @@
             </x-card>
         </x-details-card>
 
-        <div class="flex-lg-row-fluid ms-lg-15">
+        <x-details-data>
             <livewire:titles.title-championships-list :title="$title" />
-        </div>
-    </div>
+        </x-details-data>
+    </x-details-page>
 </x-layouts.app>
