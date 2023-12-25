@@ -12,7 +12,7 @@
                     </x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Event Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('venue')" :direction="$sorts['date'] ?? null" class="min-w-125px sorting">Date</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('date')" :direction="$sorts['date'] ?? null" class="min-w-125px sorting">Date</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('venue')" :direction="$sorts['venue'] ?? null" class="min-w-125px sorting">Venue</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
@@ -34,11 +34,11 @@
                             </x-table.cell>
 
                             <x-table.cell>
-                                {{ $event->date?->format('F m, Y') }}
+                                {{ $event->date?->toDateString() ?? 'No Date Set' }}
                             </x-table.cell>
 
                             <x-table.cell>
-                                {{ $event->venue->name ?? "" }}
+                                {{ $event->venue->name ?? "No Venue Set" }}
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
