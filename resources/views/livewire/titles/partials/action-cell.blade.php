@@ -1,10 +1,14 @@
 <x-actions-dropdown>
+    @can('view', $title)
+        <x-buttons.view :route="route('titles.show', $title)" />
+    @endcan
+
     @can('update', $title)
         <x-buttons.edit :route="route('titles.edit', $title)" />
     @endcan
 
     @can('delete', $title)
-        <x-buttons.delete wire:click="delete($title)" />
+        <x-buttons.delete :route="route('titles.destroy', $title)" />
     @endcan
 
 {{--    @if ($title->canBeRetired())--}}

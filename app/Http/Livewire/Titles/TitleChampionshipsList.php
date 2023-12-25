@@ -48,7 +48,8 @@ class TitleChampionshipsList extends BaseComponent
     {
         return TitleChampionship::query()
             ->where('title_id', $this->title->id)
-            ->latest('won_at');
+            ->latest('won_at')
+            ->latest('id');
     }
 
     /**
