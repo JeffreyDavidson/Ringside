@@ -10,7 +10,7 @@
 <textarea
     class="form-control"
     name="{{ $name }}"
-    :placeholder="$label ?? Enter {{ $label }} : null"
+    :placeholder="$label ? Enter {{ $label }} : ''"
     style="height: 100px"
 >
 @isset($value){{ $value }}@endisset
