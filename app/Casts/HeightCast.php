@@ -20,6 +20,6 @@ class HeightCast implements CastsAttributes
 
     public function set(Model $model, string $key, mixed $value, array $attributes)
     {
-        return $value->feet * 12 + $value->inches;
+        return $value;
     }
 }

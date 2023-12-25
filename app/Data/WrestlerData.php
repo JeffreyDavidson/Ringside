@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Http\Requests\Wrestlers\StoreRequest;
 use App\Http\Requests\Wrestlers\UpdateRequest;
+use App\ValueObjects\Height;
 use Illuminate\Support\Carbon;
 
 class WrestlerData
@@ -28,9 +29,11 @@ class WrestlerData
      */
     public static function fromStoreRequest(StoreRequest $request): self
     {
+        $height = new Height($request->integer('feet'), $request->integer('inches'));
+
         return new self(
             $request->string('name')->value(),
-            ($request->integer('feet') * 12) + $request->integer('inches'),
+            $height->toInches(),
             $request->integer('weight'),
             $request->string('hometown')->value(),
             $request->string('signature_move')->value(),
@@ -43,9 +46,11 @@ class WrestlerData
      */
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
+        $height = new Height($request->integer('feet'), $request->integer('inches'));
+
         return new self(
             $request->string('name')->value(),
-            ($request->integer('feet') * 12) + $request->integer('inches'),
+            $height->toInches(),
             $request->integer('weight'),
             $request->string('hometown')->value(),
             $request->string('signature_move')->value(),
