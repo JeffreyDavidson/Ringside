@@ -14,4 +14,9 @@ class Height
     {
         return "{$this->feet}'{$this->inches}\"";
     }
+
+    public function toInches(): int
+    {
+        return (int) $this->feet * 12 + $this->inches;
+    }
 }

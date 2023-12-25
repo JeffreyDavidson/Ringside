@@ -1,1 +1,1 @@
-<button type="reset" class="btn btn-primary">Clear</button>
+<button type="reset" class="btn btn-light me-3">Cancel</button>
