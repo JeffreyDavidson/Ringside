@@ -31,13 +31,13 @@ class EventMatchCompetitor extends MorphPivot
     ];
 
     /**
-     * Retrieve the model as the competitor.
+     * Retrieve the previous champion of the title championship.
      *
      * @return MorphTo<Model, EventMatchCompetitor>
      */
     public function competitor(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'competitor_type', 'competitor_id');
     }
 
     /**

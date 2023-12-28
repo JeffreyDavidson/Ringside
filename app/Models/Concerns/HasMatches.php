@@ -16,7 +16,7 @@ trait HasMatches
      */
     public function eventMatches(): MorphToMany
     {
-        return $this->morphToMany(EventMatch::class, 'event_match_competitor');
+        return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
     }
 
     /**

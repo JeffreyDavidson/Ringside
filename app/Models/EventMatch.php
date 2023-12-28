@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
@@ -98,5 +99,15 @@ class EventMatch extends Model
         return $this->morphedByMany(TagTeam::class, 'competitor', 'event_match_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
+    }
+
+    /**
+     * Get the tag teams involved in the match.
+     *
+     * @return HasOne<EventMatchResult>
+     */
+    public function result(): HasOne
+    {
+        return $this->hasOne(EventMatchResult::class);
     }
 }
