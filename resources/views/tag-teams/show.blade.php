@@ -60,6 +60,26 @@
                             </x-card.detail-row>
                         @endif
 
+                        @if ($tagTeam->currentManagers->isNotEmpty())
+                            <x-card.detail-row>
+                                <x-card.detail-property label="Current Managers" />
+                                <x-card.detail-value>
+                                    @forelse ($tagTeam->currentManagers as $manager)
+                                        <x-route-link
+                                            :route="route('managers.show', $manager)"
+                                            label="{{ $manager->full_name }}"
+                                        />
+
+                                        @if (! $loop->last)
+                                            and
+                                        @endif
+                                    @empty
+                                        No Current Wrestlers Assigned
+                                    @endforelse
+                                </x-card.detail-value>
+                            </x-card.detail-row>
+                        @endif
+
                         @if ($tagTeam->currentWrestlers->isNotEmpty())
                             <x-card.detail-row value="{{ $tagTeam->combined_weight }} lbs.">
                                 <x-card.detail-property label="Combined Weight" />
@@ -99,6 +119,10 @@
 
             @if ($tagTeam->previousWrestlers->isNotEmpty())
                 <livewire:tag-teams.wrestlers-list :tagTeam="$tagTeam" />
+            @endif
+
+            @if ($tagTeam->previousManagers->isNotEmpty())
+                <livewire:tag-teams.managers-list :tagTeam="$tagTeam" />
             @endif
         </x-details-data>
     </x-details-page>
