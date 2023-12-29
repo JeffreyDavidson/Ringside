@@ -45,6 +45,7 @@ class TitleChampionship extends Model
     protected $casts = [
         'won_at' => 'datetime',
         'lost_at' => 'datetime',
+        'last_held_reign' => 'datetime',
     ];
 
     /**

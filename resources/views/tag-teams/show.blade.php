@@ -42,6 +42,18 @@
                             </x-card.detail-value>
                         </x-card.detail-row>
 
+                        @if ($tagTeam->currentChampionship)
+                            <x-card.detail-row>
+                                <x-card.detail-property label="Current Title Championship" />
+                                <x-card.detail-value>
+                                    <x-route-link
+                                        :route="route('titles.show', $tagTeam->currentChampionship->title)"
+                                        label="{{ $tagTeam->currentChampionship->title->name }}"
+                                    />
+                                </x-card.detail-value>
+                            </x-card.detail-row>
+                        @endif
+
                         @if ($tagTeam->currentWrestlers->isNotEmpty())
                             <x-card.detail-row value="{{ $tagTeam->combined_weight }} lbs.">
                                 <x-card.detail-property label="Combined Weight" />
@@ -71,6 +83,7 @@
 
         <x-details-data>
             <livewire:tag-teams.match-list :tagTeam="$tagTeam" />
+            <livewire:tag-teams.title-championships-list :tagTeam="$tagTeam" />
         </x-details-data>
     </x-details-page>
 </x-layouts.app>
