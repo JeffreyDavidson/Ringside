@@ -16,7 +16,10 @@
         <x-details-card>
             <x-card>
                 <x-card.body>
-                    <x-card.detail-link collapsibleLink="kt_tag_team_view_details" resource="tag team" :href="route('tag-teams.edit', $tagTeam)" />
+                    <x-card.detail-link
+                        collapsibleLink="kt_tag_team_view_details"
+                        resource="tag team" :href="route('tag-teams.edit', $tagTeam)"
+                    />
                     <x-separator />
                     <x-card.detail-container id="kt_tag_team_view_details">
                         <x-card.detail-row property="Name" value="{{ $tagTeam->name }}">
@@ -27,7 +30,10 @@
                             <x-card.detail-property label="Current Tag Team Partners" />
                             <x-card.detail-value>
                             @forelse ($tagTeam->currentWrestlers as $wrestler)
-                                <x-route-link :route="route('wrestlers.show', $wrestler)" label="{{ $wrestler->name }}" />
+                                <x-route-link
+                                    :route="route('wrestlers.show', $wrestler)"
+                                    label="{{ $wrestler->name }}"
+                                />
 
                                 @if ($loop->count === 1)
                                     and TBD
@@ -70,12 +76,18 @@
 
                         <x-card.detail-row>
                             <x-card.detail-property label="Start Date" />
-                            <x-card.detail-value>{{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}</x-card.detail-value>
+                            <x-card.detail-value>
+                                {{ $tagTeam->startedAt?->toDateString() ?? 'No Start Date Set' }}
+                            </x-card.detail-value>
                         </x-card.detail-row>
                     </x-card.detail-container>
 
                     @if ($tagTeam->isUnemployed())
-                        <x-notice class="mt-4" title="This tag team needs your attention!" description="This tag team does not have a start date and needs to be employed." />
+                        <x-notice
+                            class="mt-4"
+                            title="This tag team needs your attention!"
+                            description="This tag team does not have a start date and needs to be employed."
+                        />
                     @endif
                 </x-card.body>
             </x-card>
