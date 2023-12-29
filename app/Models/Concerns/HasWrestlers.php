@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Models\TagTeamPartner;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -18,7 +19,8 @@ trait HasWrestlers
     public function wrestlers(): BelongsToMany
     {
         return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
-            ->withPivot('joined_at', 'left_at');
+            ->withPivot('joined_at', 'left_at')
+            ->using(TagTeamPartner::class);
     }
 
     /**
