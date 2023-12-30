@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\TagTeams;
 
-use App\Http\Livewire\BaseComponent;
+use App\Http\Livewire\Datatable\WithPerPagePagination;
 use App\Models\TagTeam;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 /**
  * @property-read LengthAwarePaginator $rows
  * @property-read Builder $rowsQuery
  */
-class ManagersList extends BaseComponent
+class ManagersList extends Component
 {
+    use WithPerPagePagination;
+
     /**
      * Tag Team to use for component.
      */
