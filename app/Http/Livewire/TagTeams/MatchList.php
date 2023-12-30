@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Livewire\TagTeams;
 
 use App\Http\Livewire\Datatable\WithPerPagePagination;
+use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\TagTeam;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -19,6 +20,7 @@ use Livewire\Component;
 class MatchList extends Component
 {
     use WithPerPagePagination;
+    use WithSorting;
 
     /**
      * Undocumented variable.
@@ -48,8 +50,11 @@ class MatchList extends Component
     #[Computed]
     public function rowsQuery(): Builder
     {
-        return $this->tagTeam
-            ->eventMatches();
+        $query = $this->tagTeam
+            ->eventMatches()
+            ->join('events', 'events.id', '=', 'event_matches.event_id');
+
+        return $this->applySorting($query);
     }
 
     /**

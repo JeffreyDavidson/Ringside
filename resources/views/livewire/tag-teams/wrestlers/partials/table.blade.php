@@ -1,6 +1,11 @@
 <x-datatable>
     <x-slot name="head">
-        <x-table.heading class="min-w-125px sorting_disabled">Wrestler Name</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('name')"
+            :direction="$sorts['name'] ?? null"
+            class="min-w-125px sorting">Wrestler Name</x-table.heading>
         <x-table.heading class="min-w-70px sorting_disabled">Date Joined</x-table.heading>
         <x-table.heading class="min-w-70px sorting_disabled">Date Left</x-table.heading>
     </x-slot>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Livewire\TagTeams;
 
 use App\Http\Livewire\Datatable\WithPerPagePagination;
+use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\TagTeam;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -19,6 +20,7 @@ use Livewire\Component;
 class WrestlersList extends Component
 {
     use WithPerPagePagination;
+    use WithSorting;
 
     /**
      * Tag Team to use for component.
@@ -39,8 +41,10 @@ class WrestlersList extends Component
     #[Computed]
     public function rowsQuery(): Builder
     {
-        return $this->tagTeam
+        $query = $this->tagTeam
             ->previousWrestlers();
+
+        return $this->applySorting($query);
     }
 
     /**

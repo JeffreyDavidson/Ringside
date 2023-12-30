@@ -1,8 +1,23 @@
 <x-datatable>
     <x-slot name="head">
-        <x-table.heading class="min-w-125px sorting_disabled">Title Name</x-table.heading>
-        <x-table.heading class="min-w-70px sorting_disabled">Times Held</x-table.heading>
-        <x-table.heading class="min-w-70px sorting_disabled">Date Last Held</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('name')"
+            :direction="$sorts['name'] ?? null"
+            class="min-w-125px sorting">Title Name</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('title_count')"
+            :direction="$sorts['title_count'] ?? null"
+            class="min-w-70px sorting">Times Held</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('won_at')"
+            :direction="$sorts['won_at'] ?? null"
+            class="min-w-70px sorting">Date Last Held</x-table.heading>
     </x-slot>
     <x-slot name="body">
         @forelse ($titlesChampionships as $titleChampionship)
