@@ -1,7 +1,12 @@
 <x-datatable>
     <x-slot name="head">
-        <x-table.heading class="min-w-125px sorting_disabled">Manager Name</x-table.heading>
-        <x-table.heading class="min-w-70px sorting_disabled">Date Joined</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('full_name')"
+            :direction="$sorts['full_name'] ?? null"
+            class="min-w-125px sorting">Manager Name</x-table.heading>
+        <x-table.heading class="min-w-70px sorting_disabled">Date Hired</x-table.heading>
         <x-table.heading class="min-w-70px sorting_disabled">Date Left</x-table.heading>
     </x-slot>
     <x-slot name="body">

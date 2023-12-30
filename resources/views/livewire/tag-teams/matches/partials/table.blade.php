@@ -1,7 +1,17 @@
 <x-datatable>
     <x-slot name="head">
-        <x-table.heading class="min-w-125px sorting_disabled">Event</x-table.heading>
-        <x-table.heading class="min-w-70px sorting_disabled">Date</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('name')"
+            :direction="$sorts['name'] ?? null"
+            class="min-w-125px sorting">Event Name</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('date')"
+            :direction="$sorts['date'] ?? null"
+            class="min-w-70px sorting">Date</x-table.heading>
         <x-table.heading class="min-w-70px sorting_disabled">Opponent(s)</x-table.heading>
         <x-table.heading class="min-w-70px sorting_disabled">Title Match?</x-table.heading>
         <x-table.heading class="min-w-70px sorting_disabled">Result</x-table.heading>

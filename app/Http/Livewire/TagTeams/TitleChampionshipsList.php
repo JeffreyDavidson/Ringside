@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Livewire\TagTeams;
 
 use App\Http\Livewire\Datatable\WithPerPagePagination;
+use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\TagTeam;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -20,6 +21,7 @@ use Livewire\Component;
 class TitleChampionshipsList extends Component
 {
     use WithPerPagePagination;
+    use WithSorting;
 
     /**
      * Tag team to use for component.
@@ -49,9 +51,9 @@ class TitleChampionshipsList extends Component
     #[Computed]
     public function rowsQuery(): Builder
     {
-        return $this->tagTeam
+        $query = $this->tagTeam
             ->titleChampionships()
-            ->with('title')
+            ->join('titles', 'titles.id', '=', 'title_championships.title_id')
             ->addSelect(
                 'title_championships.title_id',
                 DB::raw('count(title_id) as title_count'),
@@ -59,6 +61,8 @@ class TitleChampionshipsList extends Component
                 DB::raw('case when MAX(lost_at IS NULL) = 0 THEN max(lost_at) END AS lost_at')
             )
             ->groupBy('title_id');
+
+        return $this->applySorting($query);
     }
 
     /**
