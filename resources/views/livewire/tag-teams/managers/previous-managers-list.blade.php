@@ -1,6 +1,6 @@
 @aware(['tagTeam'])
 
-<x-card>
+<x-card class="card-flush mb-6 mb-xl-9">
     <x-slot name="header">
         @include('livewire.tag-teams.managers.partials.header')
     </x-slot>
