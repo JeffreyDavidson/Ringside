@@ -4,8 +4,8 @@
     </x-card.title>
 
     <x-card.toolbar>
-        <div class="d-flex justify-content-end" data-kt-venue-table-toolbar="base">
+        <card.toolbar.actions>
             <x-buttons.create route="{{ route('tag-teams.create') }}" resource="Tag Team" />
-        </div>
+        </card.toolbar.actions>
     </x-card.toolbar>
 </x-table.header>
