@@ -1,4 +1,4 @@
-<div class="card">
+<div {{ $attributes->class(['card']) }}>
     @isset($header)
         {{ $header }}
     @endif
