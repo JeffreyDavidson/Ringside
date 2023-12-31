@@ -4,6 +4,7 @@
 /public/js
 /public/css
 /public/assets/
+/public/build
 /storage/*.key
 /vendor
 /report

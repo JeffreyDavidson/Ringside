@@ -1,6 +1,7 @@
-const defaultTheme = require('tailwindcss/defaultTheme');
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
 
-module.exports = {
+export default {
     purge: ['./storage/framework/views/*.php', './resources/views/**/*.blade.php'],
 
     theme: {
@@ -17,5 +18,5 @@ module.exports = {
         },
     },
 
-    plugins: [require('@tailwindcss/forms')],
+    plugins: [forms],
 };
