@@ -28,4 +28,13 @@ trait CanWinTitles
         return $this->morphOne(TitleChampionship::class, 'champion')
             ->whereNull('lost_at');
     }
+
+    /**
+     * Retrieve the current championships held by the model.
+     */
+    public function currentChampionships(): MorphMany
+    {
+        return $this->morphMany(TitleChampionship::class, 'champion')
+            ->whereNull('lost_at');
+    }
 }
