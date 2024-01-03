@@ -115,7 +115,10 @@
 
         <x-details-data>
             <livewire:tag-teams.title-championships-list :tagTeam="$tagTeam" />
-            <livewire:tag-teams.match-list :tagTeam="$tagTeam" />
+
+            @if ($tagTeam->previousMatches->isNotEmpty())
+                <livewire:tag-teams.previous-matches-list :tagTeam="$tagTeam" />
+            @endif
 
             @if ($tagTeam->previousWrestlers->isNotEmpty())
                 <livewire:tag-teams.wrestlers-list :tagTeam="$tagTeam" />

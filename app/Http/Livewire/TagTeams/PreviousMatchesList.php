@@ -17,13 +17,13 @@ use Livewire\Component;
  * @property-read LengthAwarePaginator $rows
  * @property-read Builder $rowsQuery
  */
-class MatchList extends Component
+class PreviousMatchesList extends Component
 {
     use WithPerPagePagination;
     use WithSorting;
 
     /**
-     * Undocumented variable.
+     * Tag Team to use for component.
      */
     public TagTeam $tagTeam;
 
@@ -37,7 +37,7 @@ class MatchList extends Component
     ];
 
     /**
-     * Undocumented function.
+     * Set the Tag Team to be used for this component.
      */
     public function mount(TagTeam $tagTeam): void
     {
@@ -45,20 +45,19 @@ class MatchList extends Component
     }
 
     /**
-     * Undocumented function.
+     * Run the query for this component.
      */
     #[Computed]
     public function rowsQuery(): Builder
     {
         $query = $this->tagTeam
-            ->eventMatches()
-            ->join('events', 'events.id', '=', 'event_matches.event_id');
+            ->previousMatches();
 
         return $this->applySorting($query);
     }
 
     /**
-     * Undocumented function.
+     * Apply pagination to the component query results.
      */
     #[Computed]
     public function rows(): LengthAwarePaginator
@@ -71,8 +70,8 @@ class MatchList extends Component
      */
     public function render(): View
     {
-        return view('livewire.tag-teams.matches.match-list', [
-            'eventMatches' => $this->rows,
+        return view('livewire.tag-teams.previous-matches.previous-matches-list', [
+            'previousMatches' => $this->rows,
         ]);
     }
 }

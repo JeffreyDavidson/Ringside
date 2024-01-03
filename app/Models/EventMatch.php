@@ -32,7 +32,7 @@ class EventMatch extends Model
     /**
      * Get the event the match belongs to.
      *
-     * @return BelongsTo<Event, EventMatch>
+     * @return BelongsTo<Event, Match>
      */
     public function event(): BelongsTo
     {
@@ -42,7 +42,7 @@ class EventMatch extends Model
     /**
      * Get the match type of the match.
      *
-     * @return BelongsTo<MatchType, EventMatch>
+     * @return BelongsTo<MatchType, Match>
      */
     public function matchType(): BelongsTo
     {
