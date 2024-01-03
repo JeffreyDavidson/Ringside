@@ -126,6 +126,8 @@
         </x-details-card>
 
         <x-details-data>
+            <livewire:wrestlers.match-list :wrestler="$wrestler" />
+
             @if ($wrestler->previousManagers->isNotEmpty())
                 <livewire:wrestlers.previous-managers-list :wrestler="$wrestler" />
             @endif
