@@ -99,6 +99,10 @@
             @if ($manager->previousWrestlers->isNotEmpty())
                 <livewire:managers.previous-wrestlers-list :manager="$manager" />
             @endif
+
+            @if ($manager->previousTagTeams->isNotEmpty())
+                <livewire:managers.previous-tag-teams-list :manager="$manager" />
+            @endif
         </x-details-data>
     </x-details-page>
 </x-layouts.app>
