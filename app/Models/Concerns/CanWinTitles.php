@@ -21,6 +21,17 @@ trait CanWinTitles
     }
 
     /**
+     * Retrieve the titles won by the model.
+     *
+     * @return MorphMany<TitleChampionship>
+     */
+    public function previousTitleChampionships(): MorphMany
+    {
+        return $this->morphMany(TitleChampionship::class, 'champion')
+            ->whereNotNull('lost_at');
+    }
+
+    /**
      * Retrieve the current championship held by the model.
      */
     public function currentChampionship(): MorphOne

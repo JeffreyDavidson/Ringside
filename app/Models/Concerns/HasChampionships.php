@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use Ankurk91\Eloquent\HasBelongsToOne;
+use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait HasChampionships
 {
+    use HasBelongsToOne;
+
     /**
      * Retrieve the championships for a title.
      *
@@ -28,6 +32,18 @@ trait HasChampionships
     public function currentChampionship(): HasOne
     {
         return $this->hasOne(TitleChampionship::class)->whereNull('lost_at')->latestOfMany();
+    }
+
+    /**
+     * Retrieve the curren championship for a title.
+     *
+     * @return HasOne<TitleChampionship>
+     */
+    public function previousChampionship(): BelongsToOne
+    {
+        return $this->belongsToOne(TitleChampionship::class, 'title_championships')
+            ->wherePivotNotNull('lost_at')
+            ->latest('lost_at');
     }
 
     /**
