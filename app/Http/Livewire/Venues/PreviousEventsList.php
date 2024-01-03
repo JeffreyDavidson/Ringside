@@ -17,7 +17,7 @@ use Livewire\Attributes\Computed;
  * @property-read LengthAwarePaginator $rows
  * @property-read Builder $rowsQuery
  */
-class EventsList extends BaseComponent
+class PreviousEventsList extends BaseComponent
 {
     use WithBulkActions;
     use WithSorting;
@@ -50,7 +50,7 @@ class EventsList extends BaseComponent
     public function rowsQuery(): Builder
     {
         $query = $this->venue
-            ->events()
+            ->previousEvents()
             ->when(
                 $this->filters['search'],
                 function (Builder $query, string $search) {
@@ -76,8 +76,8 @@ class EventsList extends BaseComponent
      */
     public function render(): View
     {
-        return view('livewire.venues.events.events-list', [
-            'events' => $this->rows,
+        return view('livewire.venues.previous-events.previous-events-list', [
+            'previousEvents' => $this->rows,
         ]);
     }
 }

@@ -43,7 +43,9 @@
         </x-details-card>
 
         <x-details-data>
-            <livewire:venues.events-list :venue="$venue" />
+            @if ($venue->previousEvents->isNotEmpty())
+                <livewire:venues.previous-events-list :venue="$venue" />
+            @endif
         </x-details-data>
     </x-details-page>
 </x-layouts.app>
