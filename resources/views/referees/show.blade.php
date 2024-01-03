@@ -47,7 +47,9 @@
         </x-details-card>
 
         <x-details-data>
-
+            @if ($referee->previousMatches->isNotEmpty())
+                <livewire:referees.previous-matches-list :referee="$referee" />
+            @endif
         </x-details-data>
     </x-details-page>
 </x-layouts.app>

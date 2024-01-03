@@ -13,6 +13,7 @@ use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
@@ -88,5 +89,27 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
+    }
+
+    /**
+     * Retrieve the event matches participated by the model.
+     *
+     * @return BelongsToMany<EventMatch>
+     */
+    public function matches(): BelongsToMany
+    {
+        return $this->belongsToMany(EventMatch::class);
+    }
+
+    /**
+     * Retrieve the event matches participated by the model.
+     *
+     * @return BelongsToMany<EventMatch>
+     */
+    public function previousMatches(): BelongsToMany
+    {
+        return $this->matches()
+            ->join('events', 'event_matches.event_id', '=', 'events.id')
+            ->where('events.date', '<', today());
     }
 }
