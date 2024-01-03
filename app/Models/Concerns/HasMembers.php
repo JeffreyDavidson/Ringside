@@ -85,7 +85,7 @@ trait HasMembers
     }
 
     /**
-     * Get the tag teams belonging to the stable.
+     * Get the managers belonging to the stable.
      *
      * @return MorphToMany<Manager>
      */
@@ -97,7 +97,7 @@ trait HasMembers
     }
 
     /**
-     * Get all current tag teams that are members of the stable.
+     * Get all current managers that are members of the stable.
      *
      * @return MorphToMany<Manager>
      */
@@ -108,7 +108,7 @@ trait HasMembers
     }
 
     /**
-     * Get all previous tag teams that were members of the stable.
+     * Get all previous managers that were members of the stable.
      *
      * @return MorphToMany<Manager>
      */
