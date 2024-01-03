@@ -126,6 +126,10 @@
         </x-details-card>
 
         <x-details-data>
+            @if ($wrestler->previousTitleChampionships->isNotEmpty())
+                <livewire:wrestlers.previous-title-championships-list :wrestler="$wrestler" />
+            @endif
+
             @if ($wrestler->previousMatches->isNotEmpty())
                 <livewire:wrestlers.previous-matches-list :wrestler="$wrestler" />
             @endif
