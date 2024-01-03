@@ -14,9 +14,21 @@ trait HasMatches
      *
      * @return MorphToMany<EventMatch>
      */
-    public function eventMatches(): MorphToMany
+    public function matches(): MorphToMany
     {
         return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
+    }
+
+    /**
+     * Retrieve the event matches participated by the model.
+     *
+     * @return MorphToMany<EventMatch>
+     */
+    public function previousMatches(): MorphToMany
+    {
+        return $this->matches()
+            ->join('events', 'event_matches.event_id', '=', 'events.id')
+            ->where('events.date', '<', today());
     }
 
     /**

@@ -13,7 +13,7 @@ interface Bookable
      *
      * @return MorphToMany<\App\Models\EventMatch>
      */
-    public function eventMatches(): MorphToMany;
+    public function matches(): MorphToMany;
 
     /**
      * Check to see if the model is bookable.

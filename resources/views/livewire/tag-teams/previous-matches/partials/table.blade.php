@@ -17,21 +17,21 @@
         <x-table.heading class="min-w-70px sorting_disabled">Result</x-table.heading>
     </x-slot>
     <x-slot name="body">
-        @forelse ($eventMatches as $eventMatch)
-            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $eventMatch->id }}">
+        @forelse ($previousMatches as $previousMatch)
+            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $previousMatch->id }}">
                 <x-table.cell>
                     <x-route-link
-                        :route="route('events.show', $eventMatch->event)"
-                        label="{{ $eventMatch->event->name }}"
+                        :route="route('events.show', $previousMatch->event)"
+                        label="{{ $previousMatch->event->name }}"
                     />
                 </x-table.cell>
 
                 <x-table.cell>
-                    {{ $eventMatch->event->date->toDateString() }}
+                    {{ $previousMatch->event->date->toDateString() }}
                 </x-table.cell>
 
                 <x-table.cell>
-                    @foreach ($eventMatch->competitors->except($this->tagTeam->id) as $opponent)
+                    @foreach ($previousMatch->competitors->except($this->tagTeam->id) as $opponent)
                         <x-route-link
                             :route="route(str($opponent->getTable())->replace('_', '-').'.show', $opponent)"
                             label="{{ $opponent->name }}"
@@ -40,16 +40,20 @@
                 </x-table.cell>
 
                 <x-table.cell>
-                    @foreach($eventMatch->titles as $title)
-                        <x-route-link
-                            :route="route('titles.show', $title)"
-                            label="{{ $title->name }}" />
-                    @endforeach
+                    @if ($previousMatch->titles->isNotEmpty())
+                        @foreach($previousMatch->titles as $title)
+                            <x-route-link
+                                :route="route('titles.show', $title)"
+                                label="{{ $title->name }}" />
+                        @endforeach
+                    @else
+                        {{ "N/A" }}
+                    @endif
                 </x-table.cell>
 
                 <x-table.cell>
-                    {{ $eventMatch->result->winner->is($this->tagTeam) ? "Won" : "Lost" }}
-                    by {{ $eventMatch->result->decision->name }}
+                    {{ $previousMatch->result->winner->is($this->tagTeam) ? "Won" : "Lost" }}
+                    by {{ $previousMatch->result->decision->name }}
                 </x-table.cell>
 
             </x-table.row>
@@ -58,6 +62,6 @@
         @endforelse
     </x-slot>
     <x-slot name="footer">
-        <x-table.footer :collection="$eventMatches" />
+        <x-table.footer :collection="$previousMatches" />
     </x-slot>
 </x-datatable>
