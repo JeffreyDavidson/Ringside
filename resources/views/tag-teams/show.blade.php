@@ -114,7 +114,9 @@
         </x-details-card>
 
         <x-details-data>
-            <livewire:tag-teams.title-championships-list :tagTeam="$tagTeam" />
+            @if ($tagTeam->previousTitleChampionships->isNotEmpty())
+                <livewire:tag-teams.previous-title-championships-list :tagTeam="$tagTeam" />
+            @endif
 
             @if ($tagTeam->previousMatches->isNotEmpty())
                 <livewire:tag-teams.previous-matches-list :tagTeam="$tagTeam" />

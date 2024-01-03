@@ -1,0 +1,56 @@
+<x-datatable>
+    <x-slot name="head">
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('name')"
+            :direction="$sorts['name'] ?? null"
+            class="min-w-125px sorting">Title Name</x-table.heading>
+        <x-table.heading class="min-w-125px sorting_disabled">Previous Champion</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('days_held')"
+            :direction="$sorts['days_held'] ?? null"
+            class="min-w-70px sorting">Days Held</x-table.heading>
+        <x-table.heading
+            sortable
+            multi-column
+            wire:click="sortBy('won_at')"
+            :direction="$sorts['won_at'] ?? null"
+            class="min-w-70px sorting">Dates Held</x-table.heading>
+    </x-slot>
+    <x-slot name="body">
+        @forelse ($previousTitleChampionships as $previousTitleChampionship)
+            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $previousTitleChampionship->title_id }}">
+                <x-table.cell>
+                    <x-route-link
+                        :route="route('titles.show', $previousTitleChampionship->title)"
+                        label="{{ $previousTitleChampionship->title->name }}"
+                    />
+                </x-table.cell>
+                <x-table.cell>
+                    @if ($previousTitleChampionship->title->championships->first()->currentChampion->is($this->tagTeam))
+                        {{  "First Champion" }}
+                    @else
+                        <x-route-link
+                            :route="route('tag-teams.show', $previousTitleChampionship->title->championships->first()->currentChampion)"
+                            label="{{ $previousTitleChampionship->title->championships->first()->currentChampion->name }}"
+                        />
+                    @endif
+                </x-table.cell>
+                <x-table.cell>{{ $previousTitleChampionship->days_held_count }}</x-table.cell>
+                <x-table.cell>
+                    {{ $previousTitleChampionship->won_at?->toDateString() ?? "no won at" }}
+                        -
+                    {{ $previousTitleChampionship->lost_at?->toDateString() ?? "Present" }}
+                </x-table.cell>
+            </x-table.row>
+        @empty
+            <x-table.row-no-data colspan="4"/>
+        @endforelse
+    </x-slot>
+    <x-slot name="footer">
+        <x-table.footer :collection="$previousTitleChampionships" />
+    </x-slot>
+</x-datatable>

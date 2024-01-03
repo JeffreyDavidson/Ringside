@@ -18,7 +18,7 @@ use Livewire\Component;
  * @property-read LengthAwarePaginator $rows
  * @property-read Builder $rowsQuery
  */
-class TitleChampionshipsList extends Component
+class PreviousTitleChampionshipsList extends Component
 {
     use WithPerPagePagination;
     use WithSorting;
@@ -52,15 +52,14 @@ class TitleChampionshipsList extends Component
     public function rowsQuery(): Builder
     {
         $query = $this->tagTeam
-            ->titleChampionships()
-            ->join('titles', 'titles.id', '=', 'title_championships.title_id')
+            ->previousTitleChampionships()
+            ->with('title')
             ->addSelect(
                 'title_championships.title_id',
-                DB::raw('count(title_id) as title_count'),
-                DB::raw('max(won_at) as won_at'),
-                DB::raw('case when MAX(lost_at IS NULL) = 0 THEN max(lost_at) END AS lost_at')
-            )
-            ->groupBy('title_id');
+                'title_championships.won_at',
+                'title_championships.lost_at',
+                DB::raw('DATEDIFF(COALESCE(lost_at, NOW()), won_at) AS days_held_count')
+            );
 
         return $this->applySorting($query);
     }
@@ -79,8 +78,8 @@ class TitleChampionshipsList extends Component
      */
     public function render(): View
     {
-        return view('livewire.tag-teams.title-championships.title-championships-list', [
-            'titlesChampionships' => $this->rows,
+        return view('livewire.tag-teams.previous-title-championships.previous-title-championships-list', [
+            'previousTitleChampionships' => $this->rows,
         ]);
     }
 }
