@@ -10,22 +10,22 @@
         <x-table.heading class="min-w-70px sorting_disabled">Date Left</x-table.heading>
     </x-slot>
     <x-slot name="body">
-        @forelse ($wrestlers as $wrestler)
-            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $wrestler->id }}">
+        @forelse ($previousWrestlers as $previousWrestler)
+            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $previousWrestler->id }}">
                 <x-table.cell>
                     <x-route-link
-                        :route="route('wrestlers.show', $wrestler)"
-                        label="{{ $wrestler->name }}"
+                        :route="route('wrestlers.show', $previousWrestler)"
+                        label="{{ $previousWrestler->name }}"
                     />
                 </x-table.cell>
-                <x-table.cell>{{ $wrestler->pivot->joined_at->toDateString() }}</x-table.cell>
-                <x-table.cell>{{ $wrestler->pivot->left_at->toDateString() }}</x-table.cell>
+                <x-table.cell>{{ $previousWrestler->pivot->joined_at->toDateString() }}</x-table.cell>
+                <x-table.cell>{{ $previousWrestler->pivot->left_at->toDateString() }}</x-table.cell>
             </x-table.row>
         @empty
             <x-table.row-no-data colspan="3"/>
         @endforelse
     </x-slot>
     <x-slot name="footer">
-        <x-table.footer :collection="$wrestlers" />
+        <x-table.footer :collection="$previousWrestlers" />
     </x-slot>
 </x-datatable>

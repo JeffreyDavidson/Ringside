@@ -10,22 +10,22 @@
         <x-table.heading class="min-w-70px sorting_disabled">Date Left</x-table.heading>
     </x-slot>
     <x-slot name="body">
-        @forelse ($managers as $manager)
-            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $manager->id }}">
+        @forelse ($previousManagers as $previousManager)
+            <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:key="row-{{ $previousManager->id }}">
                 <x-table.cell>
                     <x-route-link
-                        :route="route('managers.show', $manager)"
-                        label="{{ $manager->full_name }}"
+                        :route="route('managers.show', $previousManager)"
+                        label="{{ $previousManager->full_name }}"
                     />
                 </x-table.cell>
-                <x-table.cell>{{ $manager->pivot->hired_at->toDateString() }}</x-table.cell>
-                <x-table.cell>{{ $manager->pivot->left_at->toDateString() }}</x-table.cell>
+                <x-table.cell>{{ $previousManager->pivot->hired_at->toDateString() }}</x-table.cell>
+                <x-table.cell>{{ $previousManager->pivot->left_at->toDateString() }}</x-table.cell>
             </x-table.row>
         @empty
             <x-table.row-no-data colspan="3"/>
         @endforelse
     </x-slot>
     <x-slot name="footer">
-        <x-table.footer :collection="$managers" />
+        <x-table.footer :collection="$previousManagers" />
     </x-slot>
 </x-datatable>
