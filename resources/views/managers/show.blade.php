@@ -96,7 +96,9 @@
         </x-details-card>
 
         <x-details-data>
-
+            @if ($manager->previousWrestlers->isNotEmpty())
+                <livewire:managers.previous-wrestlers-list :manager="$manager" />
+            @endif
         </x-details-data>
     </x-details-page>
 </x-layouts.app>
