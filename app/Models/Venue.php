@@ -36,4 +36,15 @@ class Venue extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    /**
+     * Retrieve the events for a venue.
+     *
+     * @return HasMany<Event>
+     */
+    public function previousEvents(): HasMany
+    {
+        return $this->events()
+            ->where('date', '<', today());
+    }
 }
