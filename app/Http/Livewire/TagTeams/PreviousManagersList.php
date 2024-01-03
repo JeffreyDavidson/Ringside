@@ -18,7 +18,7 @@ use Livewire\Component;
  * @property-read LengthAwarePaginator $rows
  * @property-read Builder $rowsQuery
  */
-class ManagersList extends Component
+class PreviousManagersList extends Component
 {
     use WithPerPagePagination;
     use WithSorting;
@@ -65,8 +65,8 @@ class ManagersList extends Component
      */
     public function render(): View
     {
-        return view('livewire.tag-teams.managers.previous-managers-list', [
-            'managers' => $this->rows,
+        return view('livewire.tag-teams.previous-managers.previous-managers-list', [
+            'previousManagers' => $this->rows,
         ]);
     }
 }

@@ -17,7 +17,7 @@ use Livewire\Component;
  * @property-read LengthAwarePaginator $rows
  * @property-read Builder $rowsQuery
  */
-class WrestlersList extends Component
+class PreviousWrestlersList extends Component
 {
     use WithPerPagePagination;
     use WithSorting;
@@ -61,8 +61,8 @@ class WrestlersList extends Component
      */
     public function render(): View
     {
-        return view('livewire.tag-teams.wrestlers.previous-wrestlers-list', [
-            'wrestlers' => $this->rows,
+        return view('livewire.tag-teams.previous-wrestlers.previous-wrestlers-list', [
+            'previousWrestlers' => $this->rows,
         ]);
     }
 }
