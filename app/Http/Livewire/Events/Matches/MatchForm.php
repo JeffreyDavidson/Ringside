@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Livewire\EventMatches;
+namespace App\Http\Livewire\Events\Matches;
 
 use App\Http\Livewire\BaseComponent;
 use App\Models\Event;
