@@ -63,7 +63,7 @@ class Event extends Model
     /**
      * Retrieve the matches for the event.
      *
-     * @return HasMany<Match>
+     * @return HasMany<EventMatch>
      */
     public function matches(): HasMany
     {

@@ -21,8 +21,10 @@ class EventMatchCompetitorsCollection extends Collection
      *
      * @return Collection<array-key, Collection<(int|string), EventMatchCompetitor>>
      */
-    public function groupedBySide(): Collection
+    public function propertlyFormattedCompetitors(): Collection
     {
-        return EventMatchCompetitor::findMany($this->modelKeys())->groupBy('side_number');
+        $groupedCollection = $this->groupBy('side_number');
+
+        return $groupedCollection;
     }
 }
