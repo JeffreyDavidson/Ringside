@@ -59,7 +59,19 @@ class EventsController extends Controller
         $this->authorize('view', $event);
 
         return view('events.show', [
-            'event' => $event->load('venue'),
+            'event' => $event->load([
+                'venue',
+                'matches.matchType',
+                'matches.referees' => function ($query) {
+                    $query->withTrashed();
+                },
+                'matches.titles' => function ($query) {
+                    $query->withTrashed();
+                },
+                'matches.competitors.competitor' => function ($query) {
+                    $query->withTrashed();
+                },
+            ]),
         ]);
     }
 

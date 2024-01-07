@@ -7,12 +7,23 @@
         @endif
 
         @if ($match->titles->isNotEmpty())
-            <p>{{ $match->titles->pluck('name')->implode(', ') }} Championship Match</p>
-        @else
-            <p>{{ $match->matchType->name }} Match</p>
+            <p>
+                @foreach ($match->titles as $title)
+                    <x-route-link
+                        :route="route('titles.show', $title)"
+                        label="{{ $title->name }}"
+                    />
+
+                    @if (! $loop->last)
+                        @php echo " & " @endphp
+                    @endif
+                @endforeach
+
+                {{ str('Championship')->plural($match->titles->count()) }}
+            </p>
         @endif
 
-        <p>Refereed By {{ $match->referees->pluck('full_name')->implode(', ') }}</p>
+        <p>{{ $match->matchType->name }} Match</p>
 
         <div class="flex-row">
             @foreach ($match->competitors->propertlyFormattedCompetitors() as $eventMatchCompetitors)
@@ -37,6 +48,21 @@
                 @endif
             @endforeach
         </div>
+
+        <p>
+            {{ str('Referee')->plural($match->referees->count()) }}:
+
+            @foreach ($match->referees as $referee)
+                <x-route-link
+                    :route="route('referees.show', $referee)"
+                    label="{{ $referee->full_name }}"
+                />
+
+                @if (! $loop->last)
+                    @php echo " & " @endphp
+                @endif
+            @endforeach
+        </p>
 
         <p class="mt-4">{{ $match->preview }}</p>
     </div>
