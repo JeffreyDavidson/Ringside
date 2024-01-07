@@ -65,7 +65,7 @@
 
         <x-details-data>
             @if ($event->matches->isNotEmpty())
-                <livewire:events.matches.matches-list :event="$event" />
+                <x-events.matches-list :matches="$event->matches" />
             @endif
         </x-details-data>
     </x-details-page>
