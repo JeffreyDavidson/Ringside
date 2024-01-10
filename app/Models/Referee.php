@@ -59,7 +59,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
      *
      * @return RefereeBuilder<Referee>
      */
-    public function newEloquentBuilder(Builder $query): RefereeBuilder
+    public function newEloquentBuilder($query): RefereeBuilder
     {
         return new RefereeBuilder($query);
     }
