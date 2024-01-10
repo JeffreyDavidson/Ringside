@@ -124,7 +124,7 @@ class StableRepository
      */
     public function addWrestlers(Stable $stable, Collection $wrestlers, Carbon $joinDate): void
     {
-        $wrestlers->each(function ($wrestler) use ($stable, $joinDate) {
+        $wrestlers->each(function (Wrestler $wrestler) use ($stable, $joinDate) {
             $stable->currentWrestlers()->attach($wrestler->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }

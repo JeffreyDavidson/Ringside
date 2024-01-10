@@ -16,7 +16,7 @@ use Tests\RequestFactories\TagTeamRequestFactory;
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = TagTeamRequestFactory::class;
+    public static string $factory = TagTeamRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

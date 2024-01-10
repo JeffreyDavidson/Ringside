@@ -56,7 +56,7 @@ class User extends Authenticatable
     public function password(): Attribute
     {
         return new Attribute(
-            set: fn ($value) => bcrypt($value),
+            set: fn (string $value) => bcrypt($value),
         );
     }
 

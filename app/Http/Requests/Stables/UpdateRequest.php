@@ -21,7 +21,7 @@ use Tests\RequestFactories\StableRequestFactory;
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = StableRequestFactory::class;
+    public static string $factory = StableRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
