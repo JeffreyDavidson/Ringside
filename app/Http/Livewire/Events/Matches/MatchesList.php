@@ -10,6 +10,7 @@ use App\Models\Event;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -49,7 +50,7 @@ class MatchesList extends Component
      * Apply pagination to the component query results.
      */
     #[Computed]
-    public function rows()
+    public function rows(): Collection
     {
         return $this->rowsQuery->get();
     }

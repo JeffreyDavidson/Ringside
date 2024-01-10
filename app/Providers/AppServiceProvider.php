@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\ServiceProvider;
@@ -22,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('orderByNullsLast', function ($column, $direction = 'asc') {
+        Builder::macro('orderByNullsLast', function (Expression|string|float|int $column, string $direction = 'asc') {
             /** @var Builder $builder */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);

@@ -21,7 +21,7 @@ use Tests\RequestFactories\EventMatchRequestFactory;
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = EventMatchRequestFactory::class;
+    public static string $factory = EventMatchRequestFactory::class;
 
     protected $stopOnFirstFailure = true;
 

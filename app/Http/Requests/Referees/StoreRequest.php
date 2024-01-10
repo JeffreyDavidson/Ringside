@@ -11,7 +11,7 @@ use Tests\RequestFactories\RefereeRequestFactory;
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = RefereeRequestFactory::class;
+    public static string $factory = RefereeRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

@@ -15,7 +15,7 @@ use Tests\RequestFactories\EventRequestFactory;
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = EventRequestFactory::class;
+    public static string $factory = EventRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

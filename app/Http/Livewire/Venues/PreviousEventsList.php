@@ -38,7 +38,7 @@ class PreviousEventsList extends BaseComponent
         'search' => '',
     ];
 
-    public function mount(Venue $venue)
+    public function mount(Venue $venue): void
     {
         $this->venue = $venue;
     }

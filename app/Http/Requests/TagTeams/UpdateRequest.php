@@ -13,11 +13,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\TagTeamRequestFactory;
+use Worksome\RequestFactories\RequestFactory;
 
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = TagTeamRequestFactory::class;
+    public static string $factory = TagTeamRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

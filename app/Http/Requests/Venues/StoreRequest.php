@@ -11,7 +11,7 @@ use Tests\RequestFactories\VenueRequestFactory;
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = VenueRequestFactory::class;
+    public static string $factory = VenueRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

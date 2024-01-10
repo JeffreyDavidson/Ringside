@@ -13,7 +13,7 @@ use Tests\RequestFactories\TitleRequestFactory;
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = TitleRequestFactory::class;
+    public static string $factory = TitleRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

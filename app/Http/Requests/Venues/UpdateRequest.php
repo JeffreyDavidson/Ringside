@@ -12,7 +12,7 @@ use Tests\RequestFactories\VenueRequestFactory;
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = VenueRequestFactory::class;
+    public static string $factory = VenueRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.

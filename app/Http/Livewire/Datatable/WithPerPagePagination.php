@@ -17,7 +17,7 @@ trait WithPerPagePagination
      *
      * @var int
      */
-    protected $perPage = 10;
+    protected int $perPage = 10;
 
     /**
      * Apply number of records pages from session.

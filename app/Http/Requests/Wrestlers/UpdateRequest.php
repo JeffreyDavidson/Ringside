@@ -15,7 +15,7 @@ use Tests\RequestFactories\WrestlerRequestFactory;
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = WrestlerRequestFactory::class;
+    public static string $factory = WrestlerRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
