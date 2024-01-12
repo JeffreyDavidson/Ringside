@@ -9,7 +9,6 @@ use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -17,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->titleRepository = mock(TitleRepository::class);
+    $this->titleRepository = Mockery::mock(TitleRepository::class);
 });
 
 test('it deactivates an active title at the current datetime by default', function () {

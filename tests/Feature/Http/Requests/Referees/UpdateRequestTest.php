@@ -8,8 +8,6 @@ use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\RefereeRequestFactory;
 
-use function Pest\Laravel\mock;
-
 test('an administrator is authorized to make this request', function () {
     $referee = Referee::factory()->create();
 
@@ -130,7 +128,7 @@ test('referee start date must be in the correct date format', function () {
 test('referee start date cannot be changed if employment start date has past', function () {
     $referee = Referee::factory()->bookable()->create();
 
-    mock(EmploymentStartDateCanBeChanged::class)
+    Mockery::mock(EmploymentStartDateCanBeChanged::class)
         ->shouldReceive('validate')
         ->with('start_date', 1, function ($closure) {
             $closure();

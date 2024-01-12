@@ -9,13 +9,12 @@ use App\Models\Wrestler;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->tagTeamRepository = mock(TagTeamRepository::class);
+    $this->tagTeamRepository = Mockery::mock(TagTeamRepository::class);
 });
 
 test('it suspends a bookable tag team at the current datetime by default', function () {

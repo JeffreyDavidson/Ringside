@@ -42,7 +42,7 @@ test('the correct wrestlers are available to join an editable team', function ()
         $bookableWrestlerNotOnBookableTagTeam,
     ]));
 
-    $this->mock(WrestlerRepository::class, function (MockInterface $mock) use ($wrestlers) {
+    Mockery::mock(WrestlerRepository::class, function (MockInterface $mock) use ($wrestlers) {
         $mock->shouldReceive('getAvailableWrestlersForExistingTagTeam')->andReturn($wrestlers);
     });
 

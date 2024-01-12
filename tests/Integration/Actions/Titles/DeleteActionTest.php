@@ -6,10 +6,8 @@ use App\Actions\Titles\DeleteAction;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->titleRepository = mock(TitleRepository::class);
+    $this->titleRepository = Mockery::mock(TitleRepository::class);
 });
 
 test('it deletes a title', function () {

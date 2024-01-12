@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cef0924ddc19f6b9d079471df8c0a020",
+    "content-hash": "bfc36ff194dbc4728d7caeb1bab79b3f",
     "packages": [
         {
             "name": "ankurk91/laravel-eloquent-relationships",
@@ -9083,74 +9083,6 @@
                 }
             ],
             "time": "2023-07-20T16:28:21+00:00"
-        },
-        {
-            "name": "pestphp/pest-plugin-mock",
-            "version": "v2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/pestphp/pest-plugin-mock.git",
-                "reference": "5b5535a7cfbb8ddf071285ede1019213198e87d4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest-plugin-mock/zipball/5b5535a7cfbb8ddf071285ede1019213198e87d4",
-                "reference": "5b5535a7cfbb8ddf071285ede1019213198e87d4",
-                "shasum": ""
-            },
-            "require": {
-                "mockery/mockery": "^1.5.1",
-                "pestphp/pest": "^2.0.0",
-                "pestphp/pest-plugin": "^2.0.0",
-                "php": "^8.1"
-            },
-            "require-dev": {
-                "pestphp/pest-dev-tools": "^2.5.0"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/Autoload.php"
-                ],
-                "psr-4": {
-                    "Pest\\Mock\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Adds mocking capabilities to Pest or PHPUnit",
-            "keywords": [
-                "framework",
-                "mock",
-                "mocking",
-                "pest",
-                "php",
-                "plugin",
-                "test",
-                "testing",
-                "unit"
-            ],
-            "support": {
-                "source": "https://github.com/pestphp/pest-plugin-mock/tree/v2.0.0"
-            },
-            "funding": [
-                {
-                    "url": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=66BYDWAT92N6L",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/nunomaduro",
-                    "type": "github"
-                },
-                {
-                    "url": "https://www.patreon.com/nunomaduro",
-                    "type": "patreon"
-                }
-            ],
-            "abandoned": "mockery/mockery",
-            "time": "2023-03-20T10:00:51+00:00"
         },
         {
             "name": "pestphp/pest-plugin-type-coverage",

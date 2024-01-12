@@ -8,11 +8,9 @@ use App\Models\Referee;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = mock(EventMatchRepository::class);
+    $this->eventMatchRepository = Mockery::mock(EventMatchRepository::class);
 });
 
 test('it adds referees to a match', function () {

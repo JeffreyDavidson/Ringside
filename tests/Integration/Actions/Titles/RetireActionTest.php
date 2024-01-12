@@ -8,13 +8,12 @@ use App\Models\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->titleRepository = mock(TitleRepository::class);
+    $this->titleRepository = Mockery::mock(TitleRepository::class);
 });
 
 test('it retires an active title at the current datetime by default', function () {

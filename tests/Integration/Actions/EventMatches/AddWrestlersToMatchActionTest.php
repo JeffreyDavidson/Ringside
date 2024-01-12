@@ -8,11 +8,9 @@ use App\Models\Wrestler;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = mock(EventMatchRepository::class);
+    $this->eventMatchRepository = Mockery::mock(EventMatchRepository::class);
 });
 
 test('it adds wrestlers to a match', function () {

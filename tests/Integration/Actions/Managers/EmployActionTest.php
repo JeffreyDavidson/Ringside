@@ -8,13 +8,12 @@ use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->managerRepository = mock(ManagerRepository::class);
+    $this->managerRepository = Mockery::mock(ManagerRepository::class);
 });
 
 test('it employs an employable manager at the current datetime by default', function ($factoryState) {

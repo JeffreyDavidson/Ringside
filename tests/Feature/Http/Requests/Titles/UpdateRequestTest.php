@@ -8,8 +8,6 @@ use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\TitleRequestFactory;
 
-use function Pest\Laravel\mock;
-
 test('an administrator is authorized to make this request', function () {
     $title = Title::factory()->create();
 
@@ -120,7 +118,7 @@ test('title activation date must be in the correct date format if provided', fun
 test('title activation date cannot be changed if activation start date has past', function () {
     $title = Title::factory()->active()->create();
 
-    mock(ActivationStartDateCanBeChanged::class)
+    Mockery::mock(ActivationStartDateCanBeChanged::class)
         ->shouldReceive('validate')
         ->with('activation_date', 1, function ($closure) {
             $closure();

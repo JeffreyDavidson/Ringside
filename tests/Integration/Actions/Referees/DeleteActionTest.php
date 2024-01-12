@@ -6,10 +6,8 @@ use App\Actions\Referees\DeleteAction;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->refereeRepository = mock(RefereeRepository::class);
+    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
 });
 
 test('it deletes a referee', function () {

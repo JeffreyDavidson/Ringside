@@ -6,10 +6,8 @@ use App\Actions\Titles\RestoreAction;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->titleRepository = mock(TitleRepository::class);
+    $this->titleRepository = Mockery::mock(TitleRepository::class);
 });
 
 test('it restores a deleted title', function () {

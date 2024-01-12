@@ -7,13 +7,12 @@ use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->wrestlerRepository = mock(WrestlerRepository::class);
+    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
 });
 
 test('it creates a wrestler', function () {

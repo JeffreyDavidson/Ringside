@@ -8,11 +8,9 @@ use App\Models\TagTeam;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = mock(EventMatchRepository::class);
+    $this->eventMatchRepository = Mockery::mock(EventMatchRepository::class);
 });
 
 test('it adds tag teams to a match', function () {
