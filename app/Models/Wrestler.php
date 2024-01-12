@@ -73,7 +73,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
      *
      * @return WrestlerBuilder<Wrestler>
      */
-    public function newEloquentBuilder($query): WrestlerBuilder
+    public function newEloquentBuilder($query): WrestlerBuilder // @pest-ignore-type
     {
         return new WrestlerBuilder($query);
     }

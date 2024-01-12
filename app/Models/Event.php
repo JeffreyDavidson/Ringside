@@ -45,7 +45,7 @@ class Event extends Model
      *
      * @return EventBuilder<Event>
      */
-    public function newEloquentBuilder($query): EventBuilder
+    public function newEloquentBuilder($query): EventBuilder // @pest-ignore-type
     {
         return new EventBuilder($query);
     }

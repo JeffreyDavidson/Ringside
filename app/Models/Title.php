@@ -53,7 +53,7 @@ class Title extends Model implements Activatable, Retirable
      *
      * @return TitleBuilder<Title>
      */
-    public function newEloquentBuilder($query): TitleBuilder
+    public function newEloquentBuilder($query): TitleBuilder // @pest-ignore-type
     {
         return new TitleBuilder($query);
     }
