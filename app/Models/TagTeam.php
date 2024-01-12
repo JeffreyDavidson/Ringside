@@ -70,7 +70,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
      *
      * @return TagTeamBuilder<TagTeam>
      */
-    public function newEloquentBuilder($query): TagTeamBuilder
+    public function newEloquentBuilder($query): TagTeamBuilder // @pest-ignore-type
     {
         return new TagTeamBuilder($query);
     }

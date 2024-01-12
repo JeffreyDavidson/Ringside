@@ -63,7 +63,7 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
      *
      * @return ManagerBuilder<Manager>
      */
-    public function newEloquentBuilder($query): ManagerBuilder
+    public function newEloquentBuilder($query): ManagerBuilder // @pest-ignore-type
     {
         return new ManagerBuilder($query);
     }

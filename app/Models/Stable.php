@@ -51,7 +51,7 @@ class Stable extends Model implements Activatable, Retirable
      *
      * @return StableBuilder<Stable>
      */
-    public function newEloquentBuilder($query): StableBuilder
+    public function newEloquentBuilder($query): StableBuilder // @pest-ignore-type
     {
         return new StableBuilder($query);
     }

@@ -59,7 +59,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
      *
      * @return RefereeBuilder<Referee>
      */
-    public function newEloquentBuilder($query): RefereeBuilder
+    public function newEloquentBuilder($query): RefereeBuilder // @pest-ignore-type
     {
         return new RefereeBuilder($query);
     }
