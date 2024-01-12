@@ -7,12 +7,10 @@ use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Facades\Event;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
     Event::fake();
 
-    $this->managerRepository = mock(ManagerRepository::class);
+    $this->managerRepository = Mockery::mock(ManagerRepository::class);
 });
 
 test('it can remove current tag teams from a manager', function () {

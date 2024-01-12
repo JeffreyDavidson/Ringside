@@ -8,8 +8,6 @@ use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Tests\RequestFactories\WrestlerRequestFactory;
 
-use function Pest\Laravel\mock;
-
 test('an administrator is authorized to make this request', function () {
     $wrestler = Wrestler::factory()->create();
 
@@ -263,7 +261,7 @@ test('wrestler start date must be in the correct date format if provided', funct
 test('wrestler start date cannot be changed if employment start date has past', function () {
     $wrestler = Wrestler::factory()->bookable()->create();
 
-    mock(EmploymentStartDateCanBeChanged::class)
+    Mockery::mock(EmploymentStartDateCanBeChanged::class)
         ->shouldReceive('validate')
         ->with('start_date', 1, function ($closure) {
             $closure();

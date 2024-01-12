@@ -8,7 +8,6 @@ use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -16,7 +15,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->tagTeamRepository = mock(TagTeamRepository::class);
+    $this->tagTeamRepository = Mockery::mock(TagTeamRepository::class);
 });
 
 test('it unretires a retired tag team at the current datetime by default', function () {

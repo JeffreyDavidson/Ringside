@@ -10,7 +10,6 @@ use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -18,7 +17,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->wrestlerRepository = mock(WrestlerRepository::class);
+    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
 });
 
 test('it retires a bookable wrestler at the current datetime by default', function () {

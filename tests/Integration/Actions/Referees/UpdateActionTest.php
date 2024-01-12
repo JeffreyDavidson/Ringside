@@ -7,10 +7,8 @@ use App\Data\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->refereeRepository = mock(RefereeRepository::class);
+    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
 });
 
 test('it can update a referee', function () {

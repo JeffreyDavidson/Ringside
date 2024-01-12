@@ -8,13 +8,12 @@ use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->wrestlerRepository = mock(WrestlerRepository::class);
+    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
 });
 
 test('it employs an employable wrestler at the current datetime by default', function ($factoryState) {

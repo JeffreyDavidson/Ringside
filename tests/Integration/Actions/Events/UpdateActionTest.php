@@ -7,10 +7,8 @@ use App\Data\EventData;
 use App\Models\Event;
 use App\Repositories\EventRepository;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->eventRepository = mock(EventRepository::class);
+    $this->eventRepository = Mockery::mock(EventRepository::class);
 });
 
 test('it updates a event', function () {

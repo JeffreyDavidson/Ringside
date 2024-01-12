@@ -9,13 +9,12 @@ use App\Models\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->stableRepository = mock(StableRepository::class);
+    $this->stableRepository = Mockery::mock(StableRepository::class);
 });
 
 test('it creates a stable', function () {

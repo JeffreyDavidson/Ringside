@@ -7,13 +7,12 @@ use App\Data\ManagerData;
 use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->managerRepository = mock(ManagerRepository::class);
+    $this->managerRepository = Mockery::mock(ManagerRepository::class);
 });
 
 test('it creates a manager', function () {

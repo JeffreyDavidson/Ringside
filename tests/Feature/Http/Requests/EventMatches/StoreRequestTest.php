@@ -15,8 +15,6 @@ use App\Rules\TitleMustBeActive;
 use Database\Seeders\MatchTypesTableSeeder;
 use Tests\RequestFactories\EventMatchRequestFactory;
 
-use function Pest\Laravel\mock;
-
 beforeEach(fn () => $this->seed(MatchTypesTableSeeder::class));
 
 test('an administrator is authorized to make this request', function () {
@@ -98,7 +96,7 @@ test('each event match referees must exist', function () {
 test('each event match referees must be able to referee the match', function () {
     $referee = Referee::factory()->create();
 
-    mock(RefereeCanRefereeMatch::class)
+    Mockery::mock(RefereeCanRefereeMatch::class)
         ->shouldReceive('validate')
         ->with('referees.0', $referee->id, function ($closure) {
             $closure();
@@ -154,7 +152,7 @@ test('each event match titles must be exist', function () {
 test('each event match titles must be active', function () {
     $title = Title::factory()->nonActive()->create();
 
-    mock(TitleMustBeActive::class)
+    Mockery::mock(TitleMustBeActive::class)
         ->shouldReceive('validate')
         ->with('titles.0', $title->id, function ($closure) {
             $closure();

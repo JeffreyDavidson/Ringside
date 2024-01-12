@@ -9,7 +9,6 @@ use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -17,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->managerRepository = mock(ManagerRepository::class);
+    $this->managerRepository = Mockery::mock(ManagerRepository::class);
 });
 
 test('it injures an available manager at the current datetime by default', function () {

@@ -6,10 +6,8 @@ use App\Actions\Events\CreateAction;
 use App\Data\EventData;
 use App\Repositories\EventRepository;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->eventRepository = mock(EventRepository::class);
+    $this->eventRepository = Mockery::mock(EventRepository::class);
 });
 
 test('it creates an event', function () {
