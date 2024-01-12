@@ -87,7 +87,7 @@
         "analyze": [
             "./vendor/bin/phpstan analyze --memory-limit=2G app"
         ],
-        "pest-test-coverage": [
+        "type-coverage": [
             "./vendor/bin/pest --type-coverage"
         ]
     }
