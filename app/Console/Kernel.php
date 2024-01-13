@@ -11,8 +11,6 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
-     *
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     protected function schedule(Schedule $schedule): void
     {

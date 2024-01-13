@@ -3,11 +3,9 @@
 declare(strict_types=1);
 
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenDefineFunctions;
-use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenFinalClasses;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenNormalClasses;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenPrivateMethods;
 use NunoMaduro\PhpInsights\Domain\Insights\ForbiddenTraits;
-use NunoMaduro\PhpInsights\Domain\Metrics\Architecture\Classes;
 use NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PHP_CodeSniffer\Standards\PSR1\Sniffs\Files\SideEffectsSniff;
@@ -19,6 +17,7 @@ use SlevomatCodingStandard\Sniffs\Commenting\DocCommentSpacingSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\UselessFunctionDocCommentSniff;
 use SlevomatCodingStandard\Sniffs\ControlStructures\DisallowShortTernaryOperatorSniff;
 use SlevomatCodingStandard\Sniffs\Functions\FunctionLengthSniff;
+use SlevomatCodingStandard\Sniffs\Functions\UnusedParameterSniff;
 use SlevomatCodingStandard\Sniffs\Namespaces\AlphabeticallySortedUsesSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\DeclareStrictTypesSniff;
 use SlevomatCodingStandard\Sniffs\TypeHints\DisallowMixedTypeHintSniff;
@@ -61,7 +60,7 @@ return [
     |
     */
 
-    'ide' => null,
+    'ide' => 'phpstorm',
 
     /*
     |--------------------------------------------------------------------------
@@ -79,31 +78,29 @@ return [
     ],
 
     'add' => [
-        Classes::class => [
-            ForbiddenFinalClasses::class,
-        ],
     ],
 
     'remove' => [
         AlphabeticallySortedUsesSniff::class,
+        ClassInstantiationSniff::class,
         DeclareStrictTypesSniff::class,
         DisallowMixedTypeHintSniff::class,
+        DisallowShortTernaryOperatorSniff::class,
         ForbiddenDefineFunctions::class,
         ForbiddenNormalClasses::class,
+        ForbiddenPublicPropertySniff::class,
+        ForbiddenSetterSniff::class,
         ForbiddenTraits::class,
+        FunctionLengthSniff::class,
+        LineLengthSniff::class,
+        NewWithBracesFixer::class,
         ParameterTypeHintSniff::class,
         PropertyTypeHintSniff::class,
         ReturnTypeHintSniff::class,
-        UselessFunctionDocCommentSniff::class,
-        SuperfluousExceptionNamingSniff::class,
-        ClassInstantiationSniff::class,
-        NewWithBracesFixer::class,
-        DisallowShortTernaryOperatorSniff::class,
-        ForbiddenPublicPropertySniff::class,
-        LineLengthSniff::class,
-        FunctionLengthSniff::class,
         SideEffectsSniff::class,
-        ForbiddenSetterSniff::class,
+        SuperfluousExceptionNamingSniff::class,
+        UnusedParameterSniff::class,
+        UselessFunctionDocCommentSniff::class,
     ],
 
     'config' => [
@@ -115,11 +112,10 @@ return [
                 '@var',
                 '@template',
                 '@extends',
-                '@phpcsSuppress',
             ],
         ],
         LineLengthSniff::class => [
-            'lineLimit' => 120,
+            'lineLimit' => 80,
             'absoluteLineLimit' => 120,
         ],
     ],

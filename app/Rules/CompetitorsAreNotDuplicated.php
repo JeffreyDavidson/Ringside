@@ -12,8 +12,6 @@ class CompetitorsAreNotDuplicated implements ValidationRule
 {
     /**
      * Run the validation rule.
-     *
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
