@@ -23,8 +23,8 @@ class EventMatchCompetitorsCollection extends Collection
      */
     public function propertlyFormattedCompetitors(): Collection
     {
-        $groupedCollection = $this->groupBy('side_number');
+        $this->groupBy('side_number');
 
-        return $groupedCollection;
+        return $this;
     }
 }

@@ -17,8 +17,6 @@ class WrestlerCanJoinExistingTagTeam implements ValidationRule
 
     /**
      * Determine if the validation rule passes.
-     *
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

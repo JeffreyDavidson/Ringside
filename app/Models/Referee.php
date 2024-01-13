@@ -82,16 +82,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * Get the manager's full name.
-     */
-    protected function fullName(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => "{$this->first_name} {$this->last_name}",
-        );
-    }
-
-    /**
      * Retrieve the event matches participated by the model.
      *
      * @return BelongsToMany<EventMatch>
@@ -111,5 +101,15 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         return $this->matches()
             ->join('events', 'event_matches.event_id', '=', 'events.id')
             ->where('events.date', '<', today());
+    }
+
+    /**
+     * Get the referee's full name.
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => "{$this->first_name} {$this->last_name}",
+        );
     }
 }
