@@ -13,7 +13,6 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\TagTeamRequestFactory;
-use Worksome\RequestFactories\RequestFactory;
 
 class UpdateRequest extends FormRequest
 {

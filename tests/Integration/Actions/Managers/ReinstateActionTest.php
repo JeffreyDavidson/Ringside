@@ -16,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->managerRepository = Mockery::mockManagerRepository::class);
+    $this->managerRepository = Mockery::mock(ManagerRepository::class);
 });
 
 test('it reinstates a suspended manager at the current datetime by default', function () {
