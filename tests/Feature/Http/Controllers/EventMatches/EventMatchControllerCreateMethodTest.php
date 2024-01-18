@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\EventMatches\EventMatchesController;
+use App\Http\Livewire\Events\Matches\MatchForm;
 use App\Models\Event;
 use App\Models\EventMatch;
 use Database\Seeders\MatchTypesTableSeeder;
@@ -19,7 +20,8 @@ test('it loads the correct view', function () {
     actingAs(administrator())
         ->get(action([EventMatchesController::class, 'create'], $this->event))
         ->assertOk()
-        ->assertViewIs('matches.create');
+        ->assertViewIs('matches.create')
+        ->assertSeeLivewire(MatchForm::class);
 });
 
 test('it passes the correct data to the view', function () {
