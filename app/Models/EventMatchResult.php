@@ -13,7 +13,7 @@ class EventMatchResult extends Model
     /**
      * Get the winner of the event match.
      *
-     * @return MorphTo<Model, Model>
+     * @return MorphTo<Model, EventMatchResult>
      */
     public function winner(): MorphTo
     {

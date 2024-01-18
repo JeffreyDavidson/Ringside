@@ -5,21 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Livewire\Events;
 
 use App\Builders\EventBuilder;
-use App\Http\Livewire\BaseComponent;
-use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Event;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-/**
- * @property-read LengthAwarePaginator $rows
- * @property-read Builder $rowsQuery
- */
-class EventsList extends BaseComponent
+class EventsList extends Component
 {
-    use WithBulkActions;
+    use WithPagination;
     use WithSorting;
 
     /**
@@ -39,10 +33,9 @@ class EventsList extends BaseComponent
     ];
 
     /**
-     * Undocumented function.
+     * Display a listing of the resource.
      */
-    #[Computed]
-    public function rowsQuery(): EventBuilder
+    public function render(): View
     {
         $query = Event::query()
             ->when(
@@ -53,25 +46,12 @@ class EventsList extends BaseComponent
             )
             ->oldest('name');
 
-        return $this->applySorting($query);
-    }
+        $query = $this->applySorting($query);
 
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
+        $events = $query->paginate();
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
-    {
         return view('livewire.events.events-list', [
-            'events' => $this->rows,
+            'events' => $events,
         ]);
     }
 }

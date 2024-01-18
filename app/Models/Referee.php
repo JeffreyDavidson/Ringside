@@ -104,7 +104,9 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * Get the referee's full name.
+     * Get the manager's full name.
+     *
+     * @return Attribute<string, never>
      */
     protected function fullName(): Attribute
     {

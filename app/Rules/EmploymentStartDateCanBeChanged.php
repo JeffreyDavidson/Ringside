@@ -6,6 +6,7 @@ namespace App\Rules;
 
 use App\Models\Contracts\Employable;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
@@ -17,6 +18,8 @@ class EmploymentStartDateCanBeChanged implements ValidationRule
 
     /**
      * Determine if the validation rule passes.
+     *
+     * @param  DateTimeInterface|string|null  $value
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

@@ -5,22 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Livewire\Referees;
 
 use App\Builders\RefereeBuilder;
-use App\Http\Livewire\BaseComponent;
-use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Referee;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-/**
- * @property-read LengthAwarePaginator $rows
- * @property-read Builder $rowsQuery
- */
-class RefereesList extends BaseComponent
+class RefereesList extends Component
 {
-    use WithBulkActions;
+    use WithPagination;
     use WithSorting;
 
     /**
@@ -40,10 +33,9 @@ class RefereesList extends BaseComponent
     ];
 
     /**
-     * Undocumented function.
+     * Display a listing of the resource.
      */
-    #[Computed]
-    public function rowsQuery(): Builder
+    public function render(): View
     {
         $query = Referee::query()
             ->when(
@@ -55,25 +47,12 @@ class RefereesList extends BaseComponent
             )
             ->oldest('last_name');
 
-        return $this->applySorting($query);
-    }
+        $query = $this->applySorting($query);
 
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
+        $referees = $query->paginate();
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
-    {
         return view('livewire.referees.referees-list', [
-            'referees' => $this->rows,
+            'referees' => $referees,
         ]);
     }
 }
