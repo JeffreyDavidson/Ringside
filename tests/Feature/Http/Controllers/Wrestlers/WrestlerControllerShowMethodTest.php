@@ -18,7 +18,8 @@ test('show returns a view', function () {
         ->get(action([WrestlersController::class, 'show'], $this->wrestler))
         ->assertOk()
         ->assertViewIs('wrestlers.show')
-        ->assertViewHas('wrestler', $this->wrestler);
+        ->assertViewHas('wrestler', $this->wrestler)
+        ->assertSeeLivewire('wrestlers.wrestlers-list');
 });
 
 test('a basic user can view their wrestler profile', function () {

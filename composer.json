@@ -29,7 +29,6 @@
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",
         "larastan/larastan": "^2.7",
-        "nunomaduro/laravel-mojito": "^0.2.10",
         "nunomaduro/phpinsights": "^2.4",
         "pestphp/pest": "^2.13",
         "pestphp/pest-plugin-faker": "^2.0",
