@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('orderByNullsLast', function (Expression|string|float|int $column, string $direction = 'asc') {
+        Builder::macro('orderByNullsLast', function (Expression|string $column, string $direction = 'asc') {
             /** @var Builder $builder */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);

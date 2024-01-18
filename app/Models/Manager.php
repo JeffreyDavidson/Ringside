@@ -98,6 +98,8 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
 
     /**
      * Get the manager's full name.
+     *
+     * @return Attribute<string, never>
      */
     protected function fullName(): Attribute
     {

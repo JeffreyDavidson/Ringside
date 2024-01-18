@@ -4,23 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Wrestlers;
 
-use App\Http\Livewire\Datatable\WithPerPagePagination;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Wrestler;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithPagination;
 
-/**
- * @property-read LengthAwarePaginator $rows
- * @property-read Builder $rowsQuery
- */
 class PreviousTitleChampionshipsList extends Component
 {
-    use WithPerPagePagination;
+    use WithPagination;
     use WithSorting;
 
     /**
@@ -46,10 +39,9 @@ class PreviousTitleChampionshipsList extends Component
     }
 
     /**
-     * Undocumented function.
+     * Display a listing of the resource.
      */
-    #[Computed]
-    public function rowsQuery(): Builder
+    public function render(): View
     {
         $query = $this->wrestler
             ->previousTitleChampionships()
@@ -61,25 +53,12 @@ class PreviousTitleChampionshipsList extends Component
                 DB::raw('DATEDIFF(COALESCE(lost_at, NOW()), won_at) AS days_held_count')
             );
 
-        return $this->applySorting($query);
-    }
+        $query = $this->applySorting($query);
 
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
+        $previousTitleChampionships = $query->paginate();
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
-    {
         return view('livewire.wrestlers.previous-title-championships.previous-title-championships-list', [
-            'previousTitleChampionships' => $this->rows,
+            'previousTitleChampionships' => $previousTitleChampionships,
         ]);
     }
 }

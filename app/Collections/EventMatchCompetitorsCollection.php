@@ -19,7 +19,7 @@ class EventMatchCompetitorsCollection extends Collection
     /**
      * Get all competitors for a match grouped by side.
      *
-     * @return Collection<array-key, Collection<(int|string), EventMatchCompetitor>>
+     * @return Collection<array-key, EventMatchCompetitor>
      */
     public function propertlyFormattedCompetitors(): Collection
     {

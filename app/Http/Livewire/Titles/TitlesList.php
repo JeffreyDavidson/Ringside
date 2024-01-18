@@ -5,22 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Livewire\Titles;
 
 use App\Builders\TitleBuilder;
-use App\Http\Livewire\BaseComponent;
-use App\Http\Livewire\Datatable\WithBulkActions;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Title;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-/**
- * @property-read LengthAwarePaginator $rows
- * @property-read Builder $rowsQuery
- */
-class TitlesList extends BaseComponent
+class TitlesList extends Component
 {
-    use WithBulkActions;
+    use WithPagination;
     use WithSorting;
 
     /**
@@ -38,10 +31,9 @@ class TitlesList extends BaseComponent
     ];
 
     /**
-     * Undocumented function.
+     * Display a listing of the resource.
      */
-    #[Computed]
-    public function rowsQuery(): Builder
+    public function render(): View
     {
         $query = Title::query()
             ->when(
@@ -52,25 +44,12 @@ class TitlesList extends BaseComponent
             )
             ->oldest('name');
 
-        return $this->applySorting($query);
-    }
+        $query = $this->applySorting($query);
 
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
+        $titles = $query->paginate();
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
-    {
         return view('livewire.titles.titles-list', [
-            'titles' => $this->rows,
+            'titles' => $titles,
         ]);
     }
 }

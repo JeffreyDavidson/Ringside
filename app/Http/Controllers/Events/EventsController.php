@@ -13,7 +13,6 @@ use App\Http\Requests\Events\StoreRequest;
 use App\Http\Requests\Events\UpdateRequest;
 use App\Models\Event;
 use App\Models\Venue;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -63,15 +62,9 @@ class EventsController extends Controller
             'event' => $event->load([
                 'venue',
                 'matches.matchType',
-                'matches.referees' => function (Builder $query) {
-                    $query->withTrashed();
-                },
-                'matches.titles' => function (Builder $query) {
-                    $query->withTrashed();
-                },
-                'matches.competitors.competitor' => function (Builder $query) {
-                    $query->withTrashed();
-                },
+                'matches.referees',
+                'matches.titles',
+                'matches.competitors.competitor',
             ]),
         ]);
     }

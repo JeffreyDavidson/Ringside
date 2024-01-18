@@ -28,4 +28,23 @@ class EventMatchRequestFactory extends RequestFactory
             'preview' => null,
         ];
     }
+
+    /**
+     * Indicate that the event match should be a singles match.
+     */
+    public function singles(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'competitors' => [
+                    0 => [
+                        'wrestlers' => [Wrestler::factory()->bookable()->create()->id],
+                    ],
+                    1 => [
+                        'wrestlers' => [Wrestler::factory()->bookable()->create()->id],
+                    ],
+                ],
+            ];
+        });
+    }
 }

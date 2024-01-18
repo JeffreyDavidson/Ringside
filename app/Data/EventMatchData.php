@@ -10,9 +10,7 @@ use App\Models\Referee;
 use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
-use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 readonly class EventMatchData
@@ -56,29 +54,25 @@ readonly class EventMatchData
     /**
      * Undocumented function.
      *
-     * @param  Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>>  $competitors
+     * @param  Collection<int, array<"wrestlers"|"tag_teams", Wrestler|TagTeam>>  $competitors
      * @return Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>>
      */
     private static function getCompetitors(Collection $competitors): Collection
     {
-        return $competitors->transform(function (array $sideCompetitors) {
-            if (Arr::exists($sideCompetitors, 'wrestlers')) {
-                return data_set(
-                    $sideCompetitors,
-                    'wrestlers',
-                    Wrestler::query()->findMany(Arr::get($sideCompetitors, 'wrestlers'))
-                );
-            }
+        $foundCompetitors = collect();
 
-            if (Arr::exists($sideCompetitors, 'tag_teams')) {
-                return data_set(
-                    $sideCompetitors,
-                    'tag_teams',
-                    TagTeam::query()->findMany(Arr::get($sideCompetitors, 'tag_teams'))
-                );
+        foreach ($competitors as $side => $opponents) {
+            $sideCollection = collect();
+            foreach ($opponents as $type => $id) {
+                if ($type === 'wrestlers') {
+                    $sideCollection->put($type, Wrestler::query()->find($id));
+                } else {
+                    $sideCollection->put($type, TagTeam::query()->find($id));
+                }
             }
+            $foundCompetitors->put($side, $sideCollection);
+        }
 
-            throw new Exception('Roster member type not found');
-        });
+        return $foundCompetitors;
     }
 }

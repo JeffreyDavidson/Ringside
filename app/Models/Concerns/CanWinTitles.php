@@ -33,6 +33,8 @@ trait CanWinTitles
 
     /**
      * Retrieve the current championship held by the model.
+     *
+     * @return MorphOne<TitleChampionship>
      */
     public function currentChampionship(): MorphOne
     {
@@ -42,6 +44,8 @@ trait CanWinTitles
 
     /**
      * Retrieve the current championships held by the model.
+     *
+     * @return MorphMany<TitleChampionship>
      */
     public function currentChampionships(): MorphMany
     {

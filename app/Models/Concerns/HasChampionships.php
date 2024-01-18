@@ -36,14 +36,12 @@ trait HasChampionships
 
     /**
      * Retrieve the curren championship for a title.
-     *
-     * @return HasOne<TitleChampionship>
      */
     public function previousChampionship(): BelongsToOne
     {
         return $this->belongsToOne(TitleChampionship::class, 'title_championships')
             ->wherePivotNotNull('lost_at')
-            ->latest('lost_at');
+            ->orderByPivot('lost_at', 'desc');
     }
 
     /**
@@ -51,6 +49,6 @@ trait HasChampionships
      */
     public function isVacant(): bool
     {
-        return $this->currentChampionship?->champion === null;
+        return $this->currentChampionship?->currentChampion === null;
     }
 }
