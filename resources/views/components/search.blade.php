@@ -5,6 +5,6 @@
     </i>
     <input type="text"
            wire:model="filters.search"
-           class="form-control form-control-solid w-250px ps-12"
+           class="form-control form-control-solid w-250px ps-13"
            placeholder="Search {{ $resource }}">
 </div>
