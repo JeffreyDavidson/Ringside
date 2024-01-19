@@ -7,35 +7,29 @@
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
-                    <x-table.heading class="w-10px pe-2 sorting_disabled">
-                        <x-form.inputs.checkbox wire:model="selectPage"/>
+                    <x-table.heading class="w-10px pe-2">
+                        <x-wrestler.index.check-all/>
                     </x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('name')"
-                                     :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Wrestler Name
-                    </x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('status')"
-                                     :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status
-                    </x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('height')"
-                                     :direction="$sorts['height'] ?? null" class="min-w-125px sorting">Height
-                    </x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('weight')"
-                                     :direction="$sorts['weight'] ?? null" class="min-w-125px sorting">Weight
-                    </x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('hometown')"
-                                     :direction="$sorts['hometown'] ?? null" class="min-w-125px sorting">Hometown
-                    </x-table.heading>
-                    <x-table.heading sortable multi-column wire:click="sortBy('hometown')"
-                                     :direction="$sorts['start_date'] ?? null" class="min-w-125px sorting">Start Date
-                    </x-table.heading>
+                    <x-wrestler.index.sortable
+                        class="min-w-125px"
+                        column="name"
+                        :$sortCol :$sortAsc>Wrestler Name
+                    </x-wrestler.index.sortable>
+
+                    <x-table.heading class="min-w-125px">Status</x-table.heading>
+                    <x-table.heading class="min-w-125px">Height</x-table.heading>
+                    <x-table.heading class="min-w-125px">Weight</x-table.heading>
+                    <x-table.heading class="min-w-125px">Hometown</x-table.heading>
+                    <x-table.heading class="min-w-125px">Start Date</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
                     @forelse ($wrestlers as $wrestler)
-                        <x-table.row :class="$loop->odd ? 'odd' : 'even'" wire:loading.class.delay="opacity-50"
-                                     wire:key="row-{{ $wrestler->id }}">
+                        <x-table.row :class="$loop->odd ? 'odd' : 'even'"
+                                     wire:loading.class.delay="opacity-50"
+                                     wire:key="wrestler-row-{{ $wrestler->id }}">
                             <x-table.cell>
-                                <x-form.inputs.checkbox wire:model="selected" value="{{ $wrestler->id }}"/>
+                                <x-form.inputs.checkbox wire:model="selectedWrestlerIds" value="{{ $wrestler->id }}"/>
                             </x-table.cell>
 
                             <x-table.cell>
@@ -66,7 +60,6 @@
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
-                                @include('livewire.wrestlers.partials.action-cell')
                             </x-table.cell>
 
                         </x-table.row>

@@ -9,12 +9,12 @@ use Livewire\Attributes\Url;
 trait Sortable
 {
     #[Url]
-    public $sortCol = [];
+    public array $sortCol = [];
 
     #[Url]
-    public $sortAsc = false;
+    public bool $sortAsc = false;
 
-    public function sortBy($column)
+    public function sortBy($column): void
     {
         if ($this->sortCol === $column) {
             $this->sortAsc = ! $this->sortAsc;
@@ -29,6 +29,7 @@ trait Sortable
         if ($this->sortCol) {
             $column = match ($this->sortCol) {
                 'name' => 'name',
+                default => throw new \Exception('Unexpected sort column value'),
             };
 
             $query->orderBy($column, $this->sortAsc ? 'asc' : 'desc');

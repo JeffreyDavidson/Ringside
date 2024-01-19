@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestler\Index;
 
-use App\Builders\WrestlerBuilder;
+use App\Livewire\Wrestler\Index\Traits\Searchable;
 use App\Livewire\Wrestler\Index\Traits\Sortable;
 use App\Models\Wrestler;
 use Illuminate\Contracts\View\View;
@@ -13,22 +13,29 @@ use Livewire\WithPagination;
 
 class Table extends Component
 {
-    use WithPagination;
+    use Searchable;
     use Sortable;
+    use WithPagination;
 
-    /**
-     * Determines if the filters should be shown.
-     */
-    public bool $showFilters = false;
+    public array $selectedWrestlerIds = [];
 
-    /**
-     * Shows list of accepted filters and direction to be displayed.
-     *
-     * @var array<string, string>
-     */
-    public array $filters = [
-        'search' => '',
-    ];
+    public array $wrestlerIdsOnPage = [];
+
+    public function deleteSelected(): void
+    {
+        $wrestlers = Wrestler::query()->whereIn('id', $this->selectedWrestlerIds)->get();
+
+        foreach ($wrestlers as $wrestler) {
+            $this->delete($wrestler);
+        }
+    }
+
+    public function delete(Wrestler $wrestler): void
+    {
+        $this->authorize('delete', $wrestler);
+
+        $wrestler->delete();
+    }
 
     /**
      * Display a listing of the resource.
@@ -36,17 +43,15 @@ class Table extends Component
     public function render(): View
     {
         $query = Wrestler::query()
-            ->when(
-                $this->filters['search'],
-                function (WrestlerBuilder $query, string $search) {
-                    $query->where('name', 'like', '%'.$search.'%');
-                }
-            )
             ->orderBy('name');
+
+        $query = $this->applySearch($query);
 
         $query = $this->applySorting($query);
 
-        $wrestlers = $query->paginate();
+        $wrestlers = $query->paginate(10);
+
+        $this->wrestlerIdsOnPage = $wrestlers->map(fn ($wrestler) => (string) $wrestler->id)->toArray();
 
         return view('livewire.wrestler.index.table', [
             'wrestlers' => $wrestlers,
