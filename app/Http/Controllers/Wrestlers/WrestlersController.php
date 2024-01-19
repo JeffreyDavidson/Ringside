@@ -18,7 +18,7 @@ use Illuminate\Http\RedirectResponse;
 class WrestlersController extends Controller
 {
     /**
-     * View a list of employed wrestlers.
+     * View a list of wrestlers.
      */
     public function index(): View
     {
