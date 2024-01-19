@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'class_namespace' => 'App\\Http\\Livewire',
+    'class_namespace' => 'App\\Livewire',
 
     /*
     |--------------------------------------------------------------------------
@@ -92,4 +92,14 @@ return [
     */
 
     'manifest_path' => null,
+
+    'legacy_model_binding' => false,
+
+    'inject_assets' => true,
+
+    'inject_morph_markers' => true,
+
+    'navigate' => false,
+
+    'pagination_theme' => 'tailwind',
 ];
