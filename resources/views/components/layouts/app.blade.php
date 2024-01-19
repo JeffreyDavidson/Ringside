@@ -8,9 +8,9 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
+        @vite('resources/css/app.css')
         <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css"/>
         <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css"/>
-        @vite('resources/css/app.css')
         @livewireStyles
     </head>
     <body id="kt_app_body" data-kt-app-layout="dark-sidebar" data-kt-app-header-fixed="true"
