@@ -1,0 +1,1 @@
+<livewire:wrestler.index.table/>
