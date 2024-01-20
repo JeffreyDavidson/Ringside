@@ -9,7 +9,7 @@ use Livewire\Attributes\Url;
 trait Sortable
 {
     #[Url]
-    public array $sortCol = [];
+    public $sortCol;
 
     #[Url]
     public bool $sortAsc = false;

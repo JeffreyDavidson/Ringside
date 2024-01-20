@@ -28,6 +28,8 @@ class Table extends Component
         foreach ($wrestlers as $wrestler) {
             $this->delete($wrestler);
         }
+
+        $this->reset('selectedWrestlerIds');
     }
 
     public function delete(Wrestler $wrestler): void
@@ -42,8 +44,7 @@ class Table extends Component
      */
     public function render(): View
     {
-        $query = Wrestler::query()
-            ->orderBy('name');
+        $query = Wrestler::query();
 
         $query = $this->applySearch($query);
 
