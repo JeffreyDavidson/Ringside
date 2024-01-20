@@ -101,5 +101,5 @@ return [
 
     'navigate' => false,
 
-    'pagination_theme' => 'tailwind',
+    'pagination_theme' => 'bootstrap',
 ];
