@@ -8,6 +8,7 @@ use App\Livewire\Wrestler\Index\Traits\Searchable;
 use App\Livewire\Wrestler\Index\Traits\Sortable;
 use App\Models\Wrestler;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -16,6 +17,9 @@ class Table extends Component
     use Searchable;
     use Sortable;
     use WithPagination;
+
+    #[Reactive]
+    public Filters $filters;
 
     public array $selectedWrestlerIds = [];
 
@@ -49,6 +53,8 @@ class Table extends Component
         $query = $this->applySearch($query);
 
         $query = $this->applySorting($query);
+
+        $query = $this->filters->apply($query);
 
         $wrestlers = $query->paginate(10);
 

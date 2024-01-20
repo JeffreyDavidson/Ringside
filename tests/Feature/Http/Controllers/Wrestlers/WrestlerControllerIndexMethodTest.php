@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Wrestlers\WrestlersController;
-
 use App\Http\Livewire\Wrestlers\WrestlersList;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
@@ -23,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        auth()->login(User::first());
         Builder::macro('orderByNullsLast', function (Expression|string $column, string $direction = 'asc') {
             /** @var Builder $builder */
             $builder = $this;

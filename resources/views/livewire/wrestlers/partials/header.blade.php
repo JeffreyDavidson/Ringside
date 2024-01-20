@@ -5,6 +5,7 @@
 
     <x-card.toolbar>
         <x-card.toolbar.actions>
+            <x-wrestler.index.filters/>
             <x-buttons.create
                 route="{{ route('wrestlers.create') }}"
                 resource="Wrestler"
