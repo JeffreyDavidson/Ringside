@@ -4,17 +4,16 @@
     </x-card.title>
 
     <x-card.toolbar>
-        <x-card.toolbar.actions>
+        <x-card.toolbar.actions x-show.important="$wire.selectedWrestlerIds.length == 0">
             <x-wrestler.index.filters/>
             <x-buttons.create
                 route="{{ route('wrestlers.create') }}"
                 resource="Wrestler"
-                x-show="$wire.selectedWrestlerIds.length == 0"
                 x-cloak
             />
-            <x-wrestler.index.delete-selected
-                x-show="$wire.selectedWrestlerIds.length > 0"
-            />
         </x-card.toolbar.actions>
+        <x-wrestler.index.delete-selected
+            x-show="$wire.selectedWrestlerIds.length > 0"
+        />
     </x-card.toolbar>
 </x-table.header>
