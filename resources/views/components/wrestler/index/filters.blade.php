@@ -5,7 +5,7 @@
 <x-filters>
     <div class="mb-10">
         <x-form.inputs.select name="status" label="Status"
-                              :options="\App\Enums\WrestlerStatus::cases()"
+                              :options="$this->filters->statuses()->pluck('label', 'value')"
                               class="form-select-solid fw-bold"/>
     </div>
 </x-filters>
