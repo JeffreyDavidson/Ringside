@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Ankurk91\Eloquent\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ class TitleChampionship extends Model
 {
     use HasFactory;
     use HasMergedRelationships;
+    use HasMorphToOne;
 
     /**
      * The attributes that are mass assignable.
@@ -45,10 +47,13 @@ class TitleChampionship extends Model
     protected $casts = [
         'won_at' => 'datetime',
         'lost_at' => 'datetime',
+        'last_held_reign' => 'datetime',
     ];
 
     /**
      * Retrieve the title of the championship.
+     *
+     * @return BelongsTo<Title, TitleChampionship>
      */
     public function title(): BelongsTo
     {
@@ -64,11 +69,23 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the champion of the title championship.
+     * Retrieve the current champion of the title championship.
+     *
+     * @return MorphTo<Model, TitleChampionship>
      */
-    public function champion(): MorphTo
+    public function currentChampion(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
+    }
+
+    /**
+     * Retrieve the event match where the title championship switched hands.
+     *
+     * @return BelongsTo<EventMatch, TitleChampionship>
+     */
+    public function eventMatch(): BelongsTo
+    {
+        return $this->belongsTo(EventMatch::class);
     }
 
     /**

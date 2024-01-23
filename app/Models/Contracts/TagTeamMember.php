@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Models\Contracts;
 
 use Ankurk91\Eloquent\Relations\BelongsToOne;
+use App\Models\TagTeam;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 interface TagTeamMember
 {
     /**
      * Get the tag teams the member has been a member of.
+     *
+     * @return BelongsToMany<TagTeam>
      */
     public function tagTeams(): BelongsToMany;
 
@@ -26,6 +29,8 @@ interface TagTeamMember
 
     /**
      * Get the previous tag teams the member has belonged to.
+     *
+     * @return BelongsToMany<TagTeam>
      */
     public function previousTagTeams(): BelongsToMany;
 

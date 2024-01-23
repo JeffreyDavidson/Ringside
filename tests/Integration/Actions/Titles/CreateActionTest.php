@@ -7,13 +7,12 @@ use App\Data\TitleData;
 use App\Models\Title;
 use App\Repositories\TitleRepository;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->titleRepository = mock(TitleRepository::class);
+    $this->titleRepository = Mockery::mock(TitleRepository::class);
 });
 
 test('it creates a title', function () {

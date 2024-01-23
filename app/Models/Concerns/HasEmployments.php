@@ -14,6 +14,8 @@ trait HasEmployments
 {
     /**
      * Get all the employments of the model.
+     *
+     * @return MorphMany<Employment>
      */
     public function employments(): MorphMany
     {
@@ -22,6 +24,8 @@ trait HasEmployments
 
     /**
      * Get the first employment of the model.
+     *
+     * @return MorphOne<Employment>
      */
     public function firstEmployment(): MorphOne
     {
@@ -31,6 +35,8 @@ trait HasEmployments
 
     /**
      * Get the current employment of the model.
+     *
+     * @return MorphOne<Employment>
      */
     public function currentEmployment(): MorphOne
     {
@@ -42,6 +48,8 @@ trait HasEmployments
 
     /**
      * Get the future employment of the model.
+     *
+     * @return MorphOne<Employment>
      */
     public function futureEmployment(): MorphOne
     {
@@ -53,6 +61,8 @@ trait HasEmployments
 
     /**
      * Get the previous employments of the model.
+     *
+     * @return MorphMany<Employment>
      */
     public function previousEmployments(): MorphMany
     {
@@ -62,6 +72,8 @@ trait HasEmployments
 
     /**
      * Get the previous employment of the model.
+     *
+     * @return MorphOne<Employment>
      */
     public function previousEmployment(): MorphOne
     {

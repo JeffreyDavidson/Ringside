@@ -7,14 +7,18 @@ namespace App\Http\Requests\Stables;
 use App\Models\Stable;
 use App\Rules\TagTeamCanJoinNewStable;
 use App\Rules\WrestlerCanJoinNewStable;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ConditionalRules;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\StableRequestFactory;
 
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = StableRequestFactory::class;
+    public static string $factory = StableRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -30,6 +34,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, string|ConditionalRules|Exists|Unique|ValidationRule>>
      */
     public function rules(): array
     {

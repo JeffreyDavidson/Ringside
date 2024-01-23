@@ -9,14 +9,19 @@ use App\Rules\Stables\ActivationStartDateCanBeChanged;
 use App\Rules\Stables\HasMinimumAmountOfMembers;
 use App\Rules\TagTeamCanJoinExistingStable;
 use App\Rules\WrestlerCanJoinExistingStable;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ConditionalRules;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\RequiredIf;
+use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\StableRequestFactory;
 
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = StableRequestFactory::class;
+    public static string $factory = StableRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -36,6 +41,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, string|ValidationRule|Unique|Exists|ConditionalRules|RequiredIf>>
      */
     public function rules(): array
     {

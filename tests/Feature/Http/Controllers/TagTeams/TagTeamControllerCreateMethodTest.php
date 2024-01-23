@@ -28,7 +28,7 @@ test('the correct wrestlers are available to join a new tag team', function () {
 
     $wrestlers = (new Collection([$unemployedWrestler, $futureEmployedWrestler, $bookableWrestlerNotOnBookableTagTeam]));
 
-    $this->mock(WrestlerRepository::class, function (MockInterface $mock) use ($wrestlers) {
+    Mockery::mock(WrestlerRepository::class, function (MockInterface $mock) use ($wrestlers) {
         $mock->shouldReceive('getAvailableWrestlersForNewTagTeam')->andReturn($wrestlers);
     });
 

@@ -4,7 +4,7 @@
 ])
 
 <!--begin::Notice-->
-<div class="p-6 border border-dashed rounded notice d-flex bg-light-warning border-warning">
+<div {{ $attributes->merge(["class" => "p-6 border border-dashed rounded notice d-flex bg-light-warning border-warning"]) }}>
     <!--begin::Icon-->
     <!--begin::Svg Icon | path: icons/duotune/general/gen044.svg-->
     <span class="svg-icon svg-icon-2tx svg-icon-warning me-4">

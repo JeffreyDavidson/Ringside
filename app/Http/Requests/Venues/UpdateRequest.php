@@ -6,12 +6,14 @@ namespace App\Http\Requests\Venues;
 
 use App\Models\Venue;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\VenueRequestFactory;
 
 class UpdateRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = VenueRequestFactory::class;
+    public static string $factory = VenueRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -31,11 +33,16 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, Unique|string>>
      */
     public function rules(): array
     {
+        /** @var Venue $venue */
+        $venue = $this->route()?->parameter('venue');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'unique:App\Models\Venue,name'],
+            'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($venue->id)],
             'street_address' => ['required', 'string', 'min:3'],
             'city' => ['required', 'string', 'min:3'],
             'state' => ['required', 'string'],
@@ -45,6 +52,8 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
      */
     public function attributes(): array
     {

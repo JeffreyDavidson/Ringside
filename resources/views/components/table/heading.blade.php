@@ -1,5 +1,5 @@
 <th
-    {{ $attributes->merge(['class' => ''])->only('class') }}
+    {{ $attributes }}
 >
     {{ $slot }}
 </th>

@@ -9,7 +9,6 @@ use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -17,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->refereeRepository = mock(RefereeRepository::class);
+    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
 });
 
 test('it unretires a retired referee at the current datetime by default', function () {

@@ -13,6 +13,8 @@ trait HasRetirements
 {
     /**
      * Get the retirements of the model.
+     *
+     * @return MorphMany<Retirement>
      */
     public function retirements(): MorphMany
     {
@@ -21,6 +23,8 @@ trait HasRetirements
 
     /**
      * Get the current retirement of the model.
+     *
+     * @return MorphOne<Retirement>
      */
     public function currentRetirement(): MorphOne
     {
@@ -32,6 +36,8 @@ trait HasRetirements
 
     /**
      * Get the previous retirements of the model.
+     *
+     * @return MorphMany<Retirement>
      */
     public function previousRetirements(): MorphMany
     {
@@ -41,6 +47,8 @@ trait HasRetirements
 
     /**
      * Get the previous retirement of the model.
+     *
+     * @return MorphOne<Retirement>
      */
     public function previousRetirement(): MorphOne
     {
@@ -67,6 +75,8 @@ trait HasRetirements
 
     /**
      * Retrieve the retirement start date.
+     *
+     * @return Attribute<string, never>
      */
     public function retiredAt(): Attribute
     {

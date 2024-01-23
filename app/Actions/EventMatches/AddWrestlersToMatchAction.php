@@ -15,6 +15,8 @@ class AddWrestlersToMatchAction extends BaseEventMatchAction
 
     /**
      * Add wrestlers to an event match.
+     *
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
      */
     public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
     {

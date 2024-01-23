@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Collections\EventMatchCompetitorsCollection;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -31,17 +31,22 @@ class EventMatchCompetitor extends MorphPivot
     ];
 
     /**
-     * Retrieve the model as the competitor.
+     * Retrieve the previous champion of the title championship.
+     *
+     * @return MorphTo<Model, EventMatchCompetitor>
      */
     public function competitor(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'competitor_type', 'competitor_id');
     }
 
     /**
      * Create a new Eloquent Collection instance.
+     *
+     * @param  array<int, EventMatchCompetitor>  $models
+     * @return EventMatchCompetitorsCollection<array-key, Model>
      */
-    public function newCollection(array $models = []): Collection
+    public function newCollection(array $models = []): EventMatchCompetitorsCollection
     {
         return new EventMatchCompetitorsCollection($models);
     }

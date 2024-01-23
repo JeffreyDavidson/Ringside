@@ -119,16 +119,20 @@ class StableRepository
 
     /**
      * Add wrestlers to a given stable.
+     *
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
      */
     public function addWrestlers(Stable $stable, Collection $wrestlers, Carbon $joinDate): void
     {
-        $wrestlers->each(function ($wrestler) use ($stable, $joinDate) {
+        $wrestlers->each(function (Wrestler $wrestler) use ($stable, $joinDate) {
             $stable->currentWrestlers()->attach($wrestler->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
 
     /**
      * Add tag teams to a given stable at a given date.
+     *
+     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
      */
     public function addTagTeams(Stable $stable, Collection $tagTeams, Carbon $joinDate): void
     {
@@ -139,6 +143,8 @@ class StableRepository
 
     /**
      * Add managers to a given stable.
+     *
+     * @param  Collection<int, \App\Models\Manager>  $managers
      */
     public function addManagers(Stable $stable, Collection $managers, Carbon $joinDate): void
     {
@@ -149,6 +155,8 @@ class StableRepository
 
     /**
      * Undocumented function.
+     *
+     * @param  Collection<int, \App\Models\Wrestler>  $currentWrestlers
      */
     public function removeWrestlers(Stable $stable, Collection $currentWrestlers, Carbon $removalDate): void
     {
@@ -162,6 +170,8 @@ class StableRepository
 
     /**
      * Undocumented function.
+     *
+     * @param  Collection<int, \App\Models\TagTeam>  $currentTagTeams
      */
     public function removeTagTeams(Stable $stable, Collection $currentTagTeams, Carbon $removalDate): void
     {
@@ -175,6 +185,8 @@ class StableRepository
 
     /**
      * Undocumented function.
+     *
+     * @param  Collection<int, \App\Models\Manager>  $currentManagers
      */
     public function removeManagers(Stable $stable, Collection $currentManagers, Carbon $removalDate): void
     {

@@ -6,12 +6,15 @@ namespace App\Builders\Concerns;
 
 use App\Models\Activation;
 
+/**
+ * @mixin \Eloquent
+ */
 trait HasActivations
 {
     /**
      * Scope a query to include deactivated models.
      */
-    public function deactivated(): self
+    public function deactivated(): static
     {
         $this->whereDoesntHave('currentActivation')
             ->orWhereDoesntHave('previousActivations');
@@ -22,7 +25,7 @@ trait HasActivations
     /**
      * Scope a query to include model's last deactivation date.
      */
-    public function withLastDeactivationDate(): self
+    public function withLastDeactivationDate(): static
     {
         $this->addSelect([
             'last_deactivated_at' => Activation::query()->select('ended_at')
@@ -38,7 +41,7 @@ trait HasActivations
     /**
      * Scope a query to order by the model's last deactivation date.
      */
-    public function orderByLastDeactivationDate(string $direction = 'asc'): self
+    public function orderByLastDeactivationDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(last_deactivated_at) {$direction}");
 
@@ -48,7 +51,7 @@ trait HasActivations
     /**
      * Scope a query to include active models.
      */
-    public function active(): self
+    public function active(): static
     {
         $this->whereHas('currentActivation');
 
@@ -58,7 +61,7 @@ trait HasActivations
     /**
      * Scope a query to include models with future activation.
      */
-    public function withFutureActivation(): self
+    public function withFutureActivation(): static
     {
         $this->whereHas('futureActivation');
 
@@ -68,7 +71,7 @@ trait HasActivations
     /**
      * Scope a query to include inactive models.
      */
-    public function inactive(): self
+    public function inactive(): static
     {
         $this->whereHas('previousActivation')
             ->whereDoesntHave('futureActivation')
@@ -81,7 +84,7 @@ trait HasActivations
     /**
      * Scope a query to include unactivated models.
      */
-    public function unactivated(): self
+    public function unactivated(): static
     {
         $this->whereDoesntHave('activations');
 
@@ -91,7 +94,7 @@ trait HasActivations
     /**
      * Scope a query to include the model's first activation date.
      */
-    public function withFirstActivatedAtDate(): self
+    public function withFirstActivatedAtDate(): static
     {
         $this->addSelect([
             'first_activated_at' => Activation::query()->select('started_at')
@@ -107,7 +110,7 @@ trait HasActivations
     /**
      * Scope a query to order by the model's first activation date.
      */
-    public function orderByFirstActivatedAtDate(string $direction = 'asc'): self
+    public function orderByFirstActivatedAtDate(string $direction = 'asc'): static
     {
         $this->orderByRaw("DATE(first_activated_at) {$direction}");
 

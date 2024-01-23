@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Builders\WrestlerBuilder;
 use App\Data\WrestlerData;
 use App\Enums\WrestlerStatus;
 use App\Models\TagTeam;
@@ -157,6 +158,8 @@ class WrestlerRepository
 
     /**
      * Undocumented function.
+     *
+     * @return Collection<int, Wrestler>
      */
     public static function getAvailableWrestlersForNewTagTeam(): Collection
     {
@@ -168,13 +171,13 @@ class WrestlerRepository
         // or has not been employed (scope called unemployed)
 
         return Wrestler::query()
-            ->where(function ($query) {
+            ->where(function (WrestlerBuilder $query) {
                 $query->unemployed();
             })
-            ->orWhere(function ($query) {
+            ->orWhere(function (WrestlerBuilder $query) {
                 $query->futureEmployed();
             })
-            ->orWhere(function ($query) {
+            ->orWhere(function (WrestlerBuilder $query) {
                 $query->employed()
                     ->where('status', WrestlerStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
@@ -184,6 +187,8 @@ class WrestlerRepository
 
     /**
      * Undocumented function.
+     *
+     * @return Collection<int, Wrestler>
      */
     public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
     {
@@ -196,18 +201,18 @@ class WrestlerRepository
         // or is currently on the tag team
 
         return Wrestler::query()
-            ->where(function ($query) {
+            ->where(function (WrestlerBuilder $query) {
                 $query->unemployed();
             })
-            ->orWhere(function ($query) {
+            ->orWhere(function (WrestlerBuilder $query) {
                 $query->futureEmployed();
             })
-            ->orWhere(function ($query) {
+            ->orWhere(function (WrestlerBuilder $query) {
                 $query->employed()
                     ->where('status', WrestlerStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
             })
-            ->orWhere(function ($query) use ($tagTeam) {
+            ->orWhere(function (WrestlerBuilder $query) use ($tagTeam) {
                 $query->whereHas('currentTagTeam', function (Builder $query) use ($tagTeam) {
                     $query->where('tag_team_id', '=', $tagTeam->id);
                 });

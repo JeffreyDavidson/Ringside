@@ -1,15 +1,20 @@
 
-<div class="card">
-    @include('livewire.wrestlers.partials.header')
-    <div class="py-4 card-body">
+<x-card>
+    <x-slot name="header">
+        @include('livewire.wrestlers.partials.header')
+    </x-slot>
+
+    <x-card.body class="pt-0">
         <div class="table-responsive">
             <x-table class="table-row-dashed fs-6 gy-5 dataTable no-footer">
                 <x-slot name="head">
                     <x-table.heading class="w-10px pe-2 sorting_disabled"><x-form.inputs.checkbox wire:model="selectPage" /></x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Wrestler Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('height')" :direction="$sorts['height'] ?? null" class="min-w-125px sorting">Height</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('weight')" :direction="$sorts['weight'] ?? null" class="min-w-125px sorting">Weight</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('hometown')" :direction="$sorts['hometown'] ?? null" class="min-w-125px sorting">Hometown</x-table.heading>
-                    <x-table.heading class="min-w-70px sorting_disabled">Created At</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('hometown')" :direction="$sorts['start_date'] ?? null" class="min-w-125px sorting">Start Date</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-slot>
                 <x-slot name="body">
@@ -30,11 +35,19 @@
                             </x-table.cell>
 
                             <x-table.cell>
+                                {{ $wrestler->height }}
+                            </x-table.cell>
+
+                            <x-table.cell>
+                                {{ $wrestler->weight }} lbs.
+                            </x-table.cell>
+
+                            <x-table.cell>
                                 {{ $wrestler->hometown }}
                             </x-table.cell>
 
                             <x-table.cell>
-                                {{ $wrestler->created_at->toFormattedDateString() }}
+                                {{ $wrestler->startedAt?->toDateString() ?? 'No Start Date Set' }}
                             </x-table.cell>
 
                             <x-table.cell class="text-end">
@@ -61,5 +74,5 @@
                 {{ $wrestlers->links() }}
             </div>
         </div>
-    </div>
-</div>
+    </x-card.body>
+</x-card>

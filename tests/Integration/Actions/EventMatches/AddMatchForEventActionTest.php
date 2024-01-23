@@ -17,12 +17,10 @@ use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Database\Eloquent\Collection;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->event = Event::factory()->scheduled()->create();
-    $this->eventMatchRepository = mock(EventMatchRepository::class);
+    $this->eventMatchRepository = Mockery::mock(EventMatchRepository::class);
 });
 
 test('add a match to an event', function () {

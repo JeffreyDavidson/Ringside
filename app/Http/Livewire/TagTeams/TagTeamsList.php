@@ -4,22 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\TagTeams;
 
-use App\Http\Livewire\BaseComponent;
-use App\Http\Livewire\Datatable\WithBulkActions;
+use App\Builders\TagTeamBuilder;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\TagTeam;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-/**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
- */
-class TagTeamsList extends BaseComponent
+class TagTeamsList extends Component
 {
-    use WithBulkActions;
+    use WithPagination;
     use WithSorting;
 
     /**
@@ -37,34 +31,25 @@ class TagTeamsList extends BaseComponent
     ];
 
     /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rowsQuery(): Builder
-    {
-        $query = TagTeam::query()
-            ->when($this->filters['search'], fn (Builder $query, string $search) => $query->where('name', 'like', '%'.$search.'%'))
-            ->oldest('name');
-
-        return $this->applySorting($query);
-    }
-
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
-
-    /**
      * Display a listing of the resource.
      */
     public function render(): View
     {
+        $query = TagTeam::query()
+            ->when(
+                $this->filters['search'],
+                function (TagTeamBuilder $query, string $search) {
+                    $query->where('name', 'like', '%'.$search.'%');
+                }
+            )
+            ->oldest('name');
+
+        $query = $this->applySorting($query);
+
+        $tagTeams = $query->paginate();
+
         return view('livewire.tag-teams.tag-teams-list', [
-            'tagTeams' => $this->rows,
+            'tagTeams' => $tagTeams,
         ]);
     }
 }

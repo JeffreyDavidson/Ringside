@@ -1,60 +1,118 @@
 <x-layouts.app>
     <x-slot name="toolbar">
-        <x-toolbar title="{{ $stable->name }}">
-            <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :url="route('stables.index')" label="Stables" />
-            <x-breadcrumbs.separator />
-            <x-breadcrumbs.item :label="$stable->name" />
+        <x-toolbar>
+            <x-page-heading>View Stable Details</x-page-heading>
+            <x-breadcrumbs.list>
+                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :url="route('stables.index')" label="Stables" />
+                <x-breadcrumbs.separator />
+                <x-breadcrumbs.item :label="$stable->name" />
+            </x-breadcrumbs.list>
         </x-toolbar>
     </x-slot>
 
-    <div class="mb-5 card mb-xl-10" id="kt_profile_details_view">
-        <!--begin::Card header-->
-        <div class="card-header">
-            <!--begin::Card title-->
-            <div class="m-0 card-title">
-                <h3 class="m-0 fw-bold">Stable Details</h3>
-            </div>
-            <!--end::Card title-->
-            <!--begin::Action-->
-            <a href="{{ route('stables.edit', $stable) }}" class="btn btn-primary align-self-center">Edit Stable</a>
-            <!--end::Action-->
-        </div>
-        <!--begin::Card header-->
-        <!--begin::Card body-->
-        <div class="card-body p-9">
-            <!--begin::Row-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Stable Name</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8">
-                    <span class="text-gray-800 fs-6">{{ $stable->name }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Row-->
-            <!--begin::Input group-->
-            <div class="row mb-7">
-                <!--begin::Label-->
-                <label class="col-lg-4 fw-semibold text-muted">Start Date</label>
-                <!--end::Label-->
-                <!--begin::Col-->
-                <div class="col-lg-8 fv-row">
-                    <span class="text-gray-800 fw-semibold fs-6">{{ $stable->activatedAt?->toDateString() ?? 'No Start Date Set' }}</span>
-                </div>
-                <!--end::Col-->
-            </div>
-            <!--end::Input group-->
-            @if ($stable->isUnactivated())
-                <x-notice
-                    title="This stable needs your attention!"
-                    description="This stable does not have a start date and needs to be started."
-                />
+    <x-details-page>
+        <x-details-card>
+            <x-card>
+                <x-card.body>
+                    <x-card.detail-link
+                        collapsibleLink="kt_stable_view_details"
+                        resource="stable"
+                        :href="route('stables.edit', $stable)"
+                    />
+                    <x-separator />
+                    <x-card.detail-container id="kt_stable_view_details">
+                        <x-card.detail-row>
+                            <x-card.detail-property label="Name" />
+                            <x-card.detail-value>{{ $stable->name }}</x-card.detail-value>
+                        </x-card.detail-row>
+
+                        @if ($stable->currentWrestlers->isNotEmpty())
+                            <x-card.detail-row>
+                                <x-card.detail-property label="Current Wrestler(s)" />
+                                <x-card.detail-value>
+                                    @foreach ($stable->currentWrestlers as $wrestler)
+                                        <x-route-link
+                                            :route="route('wrestlers.show', $wrestler)"
+                                            label="{{ $wrestler->name }}"
+                                        />
+
+                                        @if (! $loop->last)
+                                            @php echo "<br>" @endphp
+                                        @endif
+                                    @endforeach
+                                </x-card.detail-value>
+                            </x-card.detail-row>
+                        @endif
+                        
+                        @if ($stable->currentTagTeams->isNotEmpty())
+                            <x-card.detail-row>
+                                <x-card.detail-property label="Current Tag Team(s)" />
+                                <x-card.detail-value>
+                                    @foreach ($stable->currentTagTeams as $tagTeam)
+                                        <x-route-link
+                                            :route="route('tag-teams.show', $tagTeam)"
+                                            label="{{ $tagTeam->name }}"
+                                        />
+
+                                        @if (! $loop->last)
+                                            @php echo "<br>" @endphp
+                                        @endif
+                                    @endforeach
+                                </x-card.detail-value>
+                            </x-card.detail-row>
+                        @endif
+
+                        @if ($stable->currentManagers->isNotEmpty())
+                            <x-card.detail-row>
+                                <x-card.detail-property label="Current Manager(s)" />
+                                <x-card.detail-value>
+                                    @foreach ($stable->currentManagers as $manager)
+                                        <x-route-link
+                                            :route="route('managers.show', $manager)"
+                                            label="{{ $manager->full_name }}"
+                                        />
+
+                                        @if (! $loop->last)
+                                            @php echo "<br>" @endphp
+                                        @endif
+                                    @endforeach
+                                </x-card.detail-value>
+                            </x-card.detail-row>
+                        @endif
+
+                        <x-card.detail-row>
+                            <x-card.detail-property label="Start Date" />
+                            <x-card.detail-value>
+                                {{ $stable->activatedAt?->toDateString() ?? 'No Activation Date Set' }}
+                            </x-card.detail-value>
+                        </x-card.detail-row>
+                    </x-card.detail-container>
+
+                    @if ($stable->isUnactivated())
+                        <x-notice
+                            class="mt-4"
+                            title="This stable needs your attention!"
+                            description="This stable does not have a start date and needs to be started."
+                        />
+                    @endif
+                </x-card.body>
+            </x-card>
+        </x-details-card>
+
+        <x-details-data>
+            @if ($stable->previousWrestlers->isNotEmpty())
+                <livewire:stables.previous-wrestlers-list :stable="$stable" />
             @endif
-        </div>
-        <!--end::Card body-->
-    </div>
+
+            @if ($stable->previousTagTeams->isNotEmpty())
+                <livewire:stables.previous-tag-teams-list :stable="$stable" />
+            @endif
+
+            @if ($stable->previousManagers->isNotEmpty())
+                <livewire:stables.previous-managers-list :stable="$stable" />
+            @endif
+        </x-details-data>
+    </x-details-page>
 </x-layouts.app>

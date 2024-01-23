@@ -7,6 +7,7 @@ namespace App\Models\Concerns;
 use Ankurk91\Eloquent\HasBelongsToOne;
 use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\TagTeam;
+use App\Models\TagTeamPartner;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -18,15 +19,20 @@ trait CanJoinTagTeams
 
     /**
      * Get the tag teams the model has been belonged to.
+     *
+     * @return BelongsToMany<TagTeam>
      */
     public function tagTeams(): BelongsToMany
     {
         return $this->belongsToMany(TagTeam::class, 'tag_team_wrestler')
-            ->withPivot(['joined_at', 'left_at']);
+            ->withPivot(['joined_at', 'left_at'])
+            ->using(TagTeamPartner::class);
     }
 
     /**
      * Get the previous tag teams the member has belonged to.
+     *
+     * @return BelongsToMany<TagTeam>
      */
     public function previousTagTeams(): BelongsToMany
     {

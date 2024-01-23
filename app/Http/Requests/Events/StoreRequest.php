@@ -12,7 +12,7 @@ use Tests\RequestFactories\EventRequestFactory;
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = EventRequestFactory::class;
+    public static string $factory = EventRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -28,6 +28,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, string|\Illuminate\Validation\Rules\Unique|\Illuminate\Validation\Rules\Exists>>
      */
     public function rules(): array
     {
@@ -41,6 +43,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
      */
     public function attributes(): array
     {

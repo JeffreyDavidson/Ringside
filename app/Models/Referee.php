@@ -10,8 +10,10 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
@@ -46,21 +48,18 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     /**
      * The model's default values for attributes.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $attributes = [
         'status' => RefereeStatus::Unemployed->value,
     ];
 
-    public static function query(): RefereeBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return RefereeBuilder<Referee>
      */
-    public function newEloquentBuilder($query): RefereeBuilder
+    public function newEloquentBuilder($query): RefereeBuilder // @pest-ignore-type
     {
         return new RefereeBuilder($query);
     }
@@ -80,5 +79,39 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     public function getIdentifier(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    /**
+     * Retrieve the event matches participated by the model.
+     *
+     * @return BelongsToMany<EventMatch>
+     */
+    public function matches(): BelongsToMany
+    {
+        return $this->belongsToMany(EventMatch::class);
+    }
+
+    /**
+     * Retrieve the event matches participated by the model.
+     *
+     * @return BelongsToMany<EventMatch>
+     */
+    public function previousMatches(): BelongsToMany
+    {
+        return $this->matches()
+            ->join('events', 'event_matches.event_id', '=', 'events.id')
+            ->where('events.date', '<', today());
+    }
+
+    /**
+     * Get the manager's full name.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => "{$this->first_name} {$this->last_name}",
+        );
     }
 }

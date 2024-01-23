@@ -1,4 +1,4 @@
-<div id="kt_app_header" style="" class="app-header">
+<div id="kt_app_header" class="app-header" data-kt-sticky="true" data-kt-sticky-activate="{default: true, lg: true}" data-kt-sticky-name="app-header-minimize" data-kt-sticky-offset="{default: '200px', lg: '0'}" data-kt-sticky-animation="false">
     <div class="app-container container-fluid d-flex align-items-stretch justify-content-between">
         <div class="d-flex align-items-center d-lg-none ms-n2 me-2" title="Show sidebar menu">
             <div class="btn btn-icon btn-active-color-primary w-35px h-35px" id="kt_app_sidebar_mobile_toggle">
@@ -23,9 +23,9 @@
             <div class="app-header-menu app-header-mobile-drawer align-items-stretch"></div>
             <div class="flex-shrink-0 app-navbar">
                 <!--begin::User menu-->
-                <div class="app-navbar-item ms-1 ms-lg-3" id="kt_header_user_menu_toggle">
+                <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
                     <!--begin::Menu wrapper-->
-                    <div class="cursor-pointer symbol symbol-35px symbol-md-40px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+                    <div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                         <img src="{{ asset('assets/media/avatars/blank.png') }}" alt="{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}">
                     </div>
                     <!--begin::User account menu-->

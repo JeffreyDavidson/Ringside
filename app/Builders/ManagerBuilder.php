@@ -8,9 +8,9 @@ use App\Enums\ManagerStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \Illuminate\Database\Eloquent\Model
+ * @template TModelClass of \App\Models\Manager
  *
- * @extends Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
  */
 class ManagerBuilder extends Builder
 {
@@ -22,7 +22,7 @@ class ManagerBuilder extends Builder
     /**
      * Scope a query to include available managers.
      */
-    public function available(): self
+    public function available(): static
     {
         $this->where('status', ManagerStatus::Available);
 

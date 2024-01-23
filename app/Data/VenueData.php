@@ -27,11 +27,11 @@ readonly class VenueData
     public static function fromStoreRequest(StoreRequest $request): self
     {
         return new self(
-            $request->input('name'),
-            $request->input('street_address'),
-            $request->input('city'),
-            $request->input('state'),
-            $request->input('zip')
+            $request->string('name')->value(),
+            $request->string('street_address')->value(),
+            $request->string('city')->value(),
+            $request->string('state')->value(),
+            $request->string('zip')->value()
         );
     }
 
@@ -41,11 +41,11 @@ readonly class VenueData
     public static function fromUpdateRequest(UpdateRequest $request): self
     {
         return new self(
-            $request->input('name'),
-            $request->input('street_address'),
-            $request->input('city'),
-            $request->input('state'),
-            $request->input('zip')
+            $request->string('name')->value(),
+            $request->string('street_address')->value(),
+            $request->string('city')->value(),
+            $request->string('state')->value(),
+            $request->string('zip')->value()
         );
     }
 }

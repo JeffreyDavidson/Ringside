@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Models\TagTeamPartner;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,11 +13,14 @@ trait HasWrestlers
 {
     /**
      * Get the wrestlers that have been tag team partners of the tag team.
+     *
+     * @return BelongsToMany<Wrestler>
      */
     public function wrestlers(): BelongsToMany
     {
         return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
-            ->withPivot('joined_at', 'left_at');
+            ->withPivot('joined_at', 'left_at')
+            ->using(TagTeamPartner::class);
     }
 
     /**
@@ -32,6 +36,8 @@ trait HasWrestlers
 
     /**
      * Get previous tag team partners of the tag team.
+     *
+     * @return BelongsToMany<Wrestler>
      */
     public function previousWrestlers(): BelongsToMany
     {
@@ -41,6 +47,8 @@ trait HasWrestlers
 
     /**
      * Get the combined weight of both tag team partners in a tag team.
+     *
+     * @return Attribute<string, never>
      */
     public function combinedWeight(): Attribute
     {

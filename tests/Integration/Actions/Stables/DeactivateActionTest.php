@@ -8,13 +8,12 @@ use App\Models\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->stableRepository = mock(StableRepository::class);
+    $this->stableRepository = Mockery::mock(StableRepository::class);
 });
 
 test('it deactivates a stable at the current datetime by default', function () {

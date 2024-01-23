@@ -7,13 +7,12 @@ use App\Data\RefereeData;
 use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->refereeRepository = mock(RefereeRepository::class);
+    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
 });
 
 test('it creates a referee', function () {

@@ -12,16 +12,15 @@ use Illuminate\Support\Collection;
 
 class WrestlerCanJoinExistingStable implements ValidationRule
 {
+    /**
+     * @param  Collection<int, int>  $tagTeamIds
+     */
     public function __construct(protected Collection $tagTeamIds, protected ?Carbon $date)
     {
-        $this->tagTeamIds = $tagTeamIds;
-        $this->date = $date;
     }
 
     /**
      * Determine if the validation rule passes.
-     *
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -41,7 +40,7 @@ class WrestlerCanJoinExistingStable implements ValidationRule
         }
 
         if ($this->tagTeamIds !== 0) {
-            collect($this->tagTeamIds)->map(function (int $id) use ($wrestler, $fail) {
+            collect($this->tagTeamIds)->map(function (mixed $id) use ($wrestler, $fail) {
                 if ($id === $wrestler->currentTagTeam?->id) {
                     $fail('A wrestler in a tag team already belongs to a current stable.');
                 }

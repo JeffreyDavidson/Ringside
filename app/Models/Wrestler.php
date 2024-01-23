@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Builders\WrestlerBuilder;
+use App\Casts\HeightCast;
 use App\Enums\WrestlerStatus;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
@@ -22,6 +23,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
 {
     use Concerns\CanJoinStables;
     use Concerns\CanJoinTagTeams;
+    use Concerns\CanWinTitles;
     use Concerns\HasEmployments;
     use Concerns\HasInjuries;
     use Concerns\HasManagers;
@@ -53,27 +55,25 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
      * @var array<string, string>
      */
     protected $casts = [
+        'height' => HeightCast::class,
         'status' => WrestlerStatus::class,
     ];
 
     /**
      * The model's default values for attributes.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $attributes = [
         'status' => WrestlerStatus::Unemployed->value,
     ];
 
-    public static function query(): WrestlerBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return WrestlerBuilder<Wrestler>
      */
-    public function newEloquentBuilder($query)
+    public function newEloquentBuilder($query): WrestlerBuilder // @pest-ignore-type
     {
         return new WrestlerBuilder($query);
     }

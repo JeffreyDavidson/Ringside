@@ -6,14 +6,25 @@ namespace App\Collections;
 
 use App\Models\EventMatchCompetitor;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @template TKey of array-key
+ * @template TModel of Model
+ *
+ * @extends \Illuminate\Database\Eloquent\Collection<TKey, TModel>
+ */
 class EventMatchCompetitorsCollection extends Collection
 {
     /**
      * Get all competitors for a match grouped by side.
+     *
+     * @return Collection<array-key, EventMatchCompetitor>
      */
-    public function groupedBySide(): Collection
+    public function propertlyFormattedCompetitors(): Collection
     {
-        return EventMatchCompetitor::findMany($this->modelKeys())->groupBy('side_number');
+        $this->groupBy('side_number');
+
+        return $this;
     }
 }

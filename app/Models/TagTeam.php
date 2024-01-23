@@ -12,7 +12,6 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
-use Fidum\EloquentMorphToOne\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable, Manageable, Retirable, Suspendable
 {
     use Concerns\CanJoinStables;
+    use Concerns\CanWinTitles;
     use Concerns\HasEmployments;
     use Concerns\HasManagers;
     use Concerns\HasMatches;
@@ -28,7 +28,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     use Concerns\HasWrestlers;
     use Concerns\OwnedByUser;
     use HasFactory;
-    use HasMorphToOne;
     use SoftDeletes;
 
     /**
@@ -60,21 +59,18 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * The model's default values for attributes.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $attributes = [
         'status' => TagTeamStatus::Unemployed->value,
     ];
 
-    public static function query(): TagTeamBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return TagTeamBuilder<TagTeam>
      */
-    public function newEloquentBuilder($query): TagTeamBuilder
+    public function newEloquentBuilder($query): TagTeamBuilder // @pest-ignore-type
     {
         return new TagTeamBuilder($query);
     }

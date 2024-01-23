@@ -7,7 +7,6 @@ namespace App\Actions\TagTeams;
 use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseTagTeamAction
@@ -37,7 +36,7 @@ class UpdateAction extends BaseTagTeamAction
                 ->each(fn (Wrestler $wrestler) => $this->tagTeamRepository->removeTagTeamPartner($tagTeam, $wrestler, $datetime));
         }
 
-        if ($this->shouldBeEmployed($tagTeam, $tagTeamData->start_date)) {
+        if (! is_null($tagTeamData->start_date) && $this->shouldBeEmployed($tagTeam)) {
             $this->tagTeamRepository->employ($tagTeam, $tagTeamData->start_date);
         }
 
@@ -47,12 +46,8 @@ class UpdateAction extends BaseTagTeamAction
     /**
      * Find out if the tag team can be employed.
      */
-    private function shouldBeEmployed(TagTeam $tagTeam, ?Carbon $startDate): bool
+    private function shouldBeEmployed(TagTeam $tagTeam): bool
     {
-        if (is_null($startDate)) {
-            return false;
-        }
-
         if ($tagTeam->isCurrentlyEmployed()) {
             return false;
         }

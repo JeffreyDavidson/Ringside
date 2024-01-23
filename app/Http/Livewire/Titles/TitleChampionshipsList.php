@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Titles;
 
-use App\Http\Livewire\BaseComponent;
 use App\Models\Title;
-use App\Models\TitleChampionship;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-/**
- * @property \Illuminate\Database\Eloquent\Collection $rows
- * @property \Illuminate\Database\Eloquent\Builder $rowsQuery
- */
-class TitleChampionshipsList extends BaseComponent
+class TitleChampionshipsList extends Component
 {
+    use WithPagination;
+
     /**
      * Undocumented variable.
      */
@@ -41,32 +36,19 @@ class TitleChampionshipsList extends BaseComponent
     }
 
     /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rowsQuery(): Builder
-    {
-        return TitleChampionship::query()
-            ->where('title_id', $this->title->id)
-            ->latest('won_at');
-    }
-
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
-
-    /**
      * Display a listing of the resource.
      */
     public function render(): View
     {
-        return view('livewire.titles.title-championships-list', [
-            'titleChampionships' => $this->rows,
+        $query = $this->title
+            ->championships()
+            ->latest('won_at')
+            ->latest('id');
+
+        $titleChampionships = $query->paginate();
+
+        return view('livewire.titles.title-championships.title-championships-list', [
+            'titleChampionships' => $titleChampionships,
         ]);
     }
 }

@@ -35,8 +35,8 @@ readonly class TagTeamData
         $wrestlerB = Wrestler::query()->find($request->input('wrestlerB'));
 
         return new self(
-            $request->input('name'),
-            $request->input('signature_move'),
+            $request->string('name')->value(),
+            $request->string('signature_move')->value(),
             $request->date('start_date'),
             $wrestlerA,
             $wrestlerB,
@@ -55,8 +55,8 @@ readonly class TagTeamData
         $wrestlerB = Wrestler::query()->find($request->input('wrestlerB'));
 
         return new self(
-            $request->input('name'),
-            $request->input('signature_move'),
+            $request->string('name')->value(),
+            $request->string('signature_move')->value(),
             $request->date('start_date'),
             $wrestlerA,
             $wrestlerB,

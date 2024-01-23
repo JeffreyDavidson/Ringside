@@ -6,6 +6,7 @@ namespace App\Rules\Stables;
 
 use App\Models\Stable;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
@@ -18,7 +19,7 @@ class ActivationStartDateCanBeChanged implements ValidationRule
     /**
      * Determine if the validation rule passes.
      *
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
+     * @param  DateTimeInterface|string|null  $value
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

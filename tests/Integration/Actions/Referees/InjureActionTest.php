@@ -8,13 +8,12 @@ use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
 
-use function Pest\Laravel\mock;
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->refereeRepository = mock(RefereeRepository::class);
+    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
 });
 
 test('it injures a bookable referee at the current datetime by default', function () {

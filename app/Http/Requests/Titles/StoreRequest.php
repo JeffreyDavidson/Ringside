@@ -7,12 +7,13 @@ namespace App\Http\Requests\Titles;
 use App\Models\Title;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Tests\RequestFactories\TitleRequestFactory;
 
 class StoreRequest extends FormRequest
 {
     /** @var class-string */
-    public static $factory = TitleRequestFactory::class;
+    public static string $factory = TitleRequestFactory::class;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -28,6 +29,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, array<int, string|Unique>>
      */
     public function rules(): array
     {
@@ -45,6 +48,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
      */
     public function messages(): array
     {
@@ -55,6 +60,8 @@ class StoreRequest extends FormRequest
 
     /**
      * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
      */
     public function attributes(): array
     {

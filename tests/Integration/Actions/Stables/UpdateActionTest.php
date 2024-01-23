@@ -12,10 +12,8 @@ use App\Models\Wrestler;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
 
-use function Pest\Laravel\mock;
-
 beforeEach(function () {
-    $this->stableRepository = mock(StableRepository::class);
+    $this->stableRepository = Mockery::mock(StableRepository::class);
 });
 
 test('wrestlers of stable are synced when stable is updated', function () {

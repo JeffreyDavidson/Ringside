@@ -55,10 +55,6 @@ class ReinstateAction extends BaseTagTeamAction
             throw CannotBeReinstatedException::retired($tagTeam);
         }
 
-        if ($tagTeam->isRetired()) {
-            throw CannotBeReinstatedException::retired($tagTeam);
-        }
-
         if ($tagTeam->isBookable()) {
             throw CannotBeReinstatedException::bookable($tagTeam);
         }

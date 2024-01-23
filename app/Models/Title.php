@@ -42,21 +42,18 @@ class Title extends Model implements Activatable, Retirable
     /**
      * The model's default values for attributes.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $attributes = [
         'status' => TitleStatus::Unactivated->value,
     ];
 
-    public static function query(): TitleBuilder
-    {
-        return parent::query();
-    }
-
     /**
      * Create a new Eloquent query builder for the model.
+     *
+     * @return TitleBuilder<Title>
      */
-    public function newEloquentBuilder($query): TitleBuilder
+    public function newEloquentBuilder($query): TitleBuilder // @pest-ignore-type
     {
         return new TitleBuilder($query);
     }

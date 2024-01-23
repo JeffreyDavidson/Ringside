@@ -20,7 +20,7 @@ class StablesTableSeeder extends Seeder
         $eNum = 1;
         $now = Carbon::now();
 
-        if (null === $dateToStart) {
+        if ($dateToStart === null) {
             $dateToStart = Carbon::now()->subYears(5);
         }
 

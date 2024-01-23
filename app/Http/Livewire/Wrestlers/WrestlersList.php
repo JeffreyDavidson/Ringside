@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Livewire\Wrestlers;
 
-use App\Http\Livewire\BaseComponent;
-use App\Http\Livewire\Datatable\WithBulkActions;
+use App\Builders\WrestlerBuilder;
 use App\Http\Livewire\Datatable\WithSorting;
 use App\Models\Wrestler;
-use Illuminate\Contracts\Database\Query\Builder;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-class WrestlersList extends BaseComponent
+class WrestlersList extends Component
 {
-    use WithBulkActions;
+    use WithPagination;
     use WithSorting;
 
     /**
@@ -33,34 +31,25 @@ class WrestlersList extends BaseComponent
     ];
 
     /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rowsQuery(): Builder
-    {
-        $query = Wrestler::query()
-            ->when($this->filters['search'], fn (Builder $query, string $search) => $query->where('name', 'like', '%'.$search.'%'))
-            ->orderBy('name');
-
-        return $this->applySorting($query);
-    }
-
-    /**
-     * Undocumented function.
-     */
-    #[Computed]
-    public function rows(): LengthAwarePaginator
-    {
-        return $this->applyPagination($this->rowsQuery);
-    }
-
-    /**
      * Display a listing of the resource.
      */
     public function render(): View
     {
+        $query = Wrestler::query()
+            ->when(
+                $this->filters['search'],
+                function (WrestlerBuilder $query, string $search) {
+                    $query->where('name', 'like', '%'.$search.'%');
+                }
+            )
+            ->orderBy('name');
+
+        $query = $this->applySorting($query);
+
+        $wrestlers = $query->paginate();
+
         return view('livewire.wrestlers.wrestlers-list', [
-            'wrestlers' => $this->rows,
+            'wrestlers' => $wrestlers,
         ]);
     }
 }

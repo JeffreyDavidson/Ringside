@@ -13,11 +13,15 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements DataAwar
 {
     /**
      * All the data under validation.
+     *
+     * @var array<string, string>
      */
     protected array $data = [];
 
     /**
      * Set the data under validation.
+     *
+     * @param  array<string, string>  $data
      */
     public function setData(array $data): self
     {
@@ -28,8 +32,6 @@ class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements DataAwar
 
     /**
      * Determine if the validation rule passes.
-     *
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
