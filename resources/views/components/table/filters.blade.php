@@ -38,7 +38,7 @@
         x-transition.origin.top.left
         x-on:click.outside="close($refs.button)"
         :id="$id('dropdown-button')"
-        class="menu menu-sub menu-sub-dropdown dropdown-menu-end w-300px w-md-325px show absolute"
+        class="menu menu-sub menu-sub-dropdown w-300px w-md-325px show absolute"
     >
         <div class="px-7 py-5">
             <div class="fs-5 text-gray-900 fw-bold">Filter Options</div>
