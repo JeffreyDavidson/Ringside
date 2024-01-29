@@ -8,7 +8,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/app.css',
                 'resources/css/plugins.bundle.css',
-                'resources/css/styles.bundle.css',
+                'resources/css/style.bundle.css',
             ],
             refresh: true
         }),
