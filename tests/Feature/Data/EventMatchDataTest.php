@@ -20,6 +20,4 @@ beforeEach(function () {
 
 test('it can get competitors for a match', function () {
     $eventMatchData = EventMatchData::fromStoreRequest($this->request);
-
-    dd($eventMatchData->competitors);
 });
