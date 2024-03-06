@@ -9,6 +9,7 @@ use App\Models\MatchType;
 use App\Models\Referee;
 use App\Models\Title;
 
+use Database\Seeders\MatchTypesTableSeeder;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
@@ -20,18 +21,32 @@ test('it loads the correct view', function () {
     livewire(MatchForm::class, ['event' => $this->event, 'match' => new EventMatch()])
         ->assertSet('event', $this->event)
         ->assertSet('match', new EventMatch())
-        ->assertViewIs('livewire.matches.create');
+        ->assertViewIs('livewire.event-matches.match-form');
 });
 
-test('it passes the correct data to the view', function () {
+test('it passes the the match to the view', function () {
+    livewire(MatchForm::class, ['event' => $this->event, 'match' => $match = new EventMatch()])
+        ->assertViewHas('match', $match);
+});
+
+test('it passes the match types to the view', function () {
     $matchTypes = MatchType::pluck('name', 'id');
+
+    livewire(MatchForm::class, ['event' => $this->event, 'match' => new EventMatch()])
+        ->assertViewHas('matchTypes', $matchTypes->escapeWhenCastingToString());
+});
+
+test('it passes the referees to the view', function () {
     $referees = Referee::query()->get()->pluck('full_name', 'id');
+
+    livewire(MatchForm::class, ['event' => $this->event, 'match' => new EventMatch()])
+        ->assertViewHas('referees', $referees->escapeWhenCastingToString());
+});
+
+test('it passes the titles to the view', function () {
     $titles = Title::pluck('name', 'id');
 
-    livewire(MatchForm::class, ['event' => $this->event, 'match' => $match = new EventMatch()])
-        ->assertViewHas('match', $match)
-        ->assertViewHas('matchTypes', $matchTypes->escapeWhenCastingToString())
-        ->assertViewHas('referees', $referees->escapeWhenCastingToString())
+    livewire(MatchForm::class, ['event' => $this->event, 'match' => new EventMatch()])
         ->assertViewHas('titles', $titles->escapeWhenCastingToString());
 });
 
@@ -43,5 +58,5 @@ test('it updates the competitors view when the match type is changed', function 
 
     livewire(MatchForm::class, ['event' => $this->event, 'match' => new EventMatch()])
         ->set('matchTypeId', $matchType->id)
-        ->assertSet('subViewToUse', 'matches.types.'.$matchType->slug);
+        ->assertSet('subViewToUse', 'event-matches.types.'.$matchType->slug);
 });

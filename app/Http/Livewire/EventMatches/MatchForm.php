@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Livewire\Events\Matches;
+namespace App\Http\Livewire\EventMatches;
 
 use App\Models\Event;
 use App\Models\EventMatch;
@@ -30,9 +30,9 @@ class MatchForm extends Component
     public int $matchTypeId;
 
     /**
-     * View to render for each match type.
+     * String name to render view for each match type.
      */
-    public View $subViewToUse;
+    public string $subViewToUse;
 
     /**
      * Undocumented function
@@ -41,16 +41,17 @@ class MatchForm extends Component
     {
         $this->event = $event;
         $this->match = $match;
+        $this->subViewToUse = 'event-matches.types.singles';
     }
 
     /**
      * Run action hook when match type id is changed.
      */
-    public function updatedMatchTypeId(): View
+    public function updatedMatchTypeId(): string
     {
         $matchTypeSlug = MatchType::findOrFail($this->matchTypeId)->slug;
 
-        return $this->subViewToUse = view('matches.types.'.$matchTypeSlug);
+        return $this->subViewToUse = 'event-matches.types.'.$matchTypeSlug;
     }
 
     /**
@@ -58,7 +59,7 @@ class MatchForm extends Component
      */
     public function render(): View
     {
-        return view('livewire.matches.create', [
+        return view('livewire.event-matches.match-form', [
             'match' => $this->match,
             'matchTypes' => MatchType::pluck('name', 'id'),
             'referees' => Referee::query()->get()->pluck('full_name', 'id'),
