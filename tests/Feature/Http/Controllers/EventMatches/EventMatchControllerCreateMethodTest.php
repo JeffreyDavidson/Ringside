@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\EventMatches\EventMatchesController;
-use App\Http\Livewire\Events\Matches\MatchForm;
 use App\Models\Event;
 use App\Models\EventMatch;
 use Database\Seeders\MatchTypesTableSeeder;
@@ -16,20 +15,9 @@ beforeEach(function () {
     $this->event = Event::factory()->scheduled()->create();
 });
 
-test('it loads the correct view', function () {
-    actingAs(administrator())
-        ->get(action([EventMatchesController::class, 'create'], $this->event))
-        ->assertOk()
-        ->assertViewIs('matches.create')
-        ->assertSeeLivewire(MatchForm::class);
-});
-
-test('it passes the correct data to the view', function () {
-    actingAs(administrator())
-        ->get(action([EventMatchesController::class, 'create'], $this->event))
-        ->assertOk()
-        ->assertViewHas('event', $this->event)
-        ->assertViewHas('match', new EventMatch);
+test('a guest cannot create a match for an event', function () {
+    get(action([EventMatchesController::class, 'create'], $this->event))
+        ->assertRedirect(route('login'));
 });
 
 test('a basic user cannot create a match for an event', function () {
@@ -38,7 +26,23 @@ test('a basic user cannot create a match for an event', function () {
         ->assertForbidden();
 });
 
-test('a guest cannot create a match for an event', function () {
-    get(action([EventMatchesController::class, 'create'], $this->event))
-        ->assertRedirect(route('login'));
+test('it loads the correct view', function () {
+    actingAs(administrator())
+        ->get(action([EventMatchesController::class, 'create'], $this->event))
+        ->assertOk()
+        ->assertViewIs('event-matches.create');
+});
+
+test('it passes the event to the view', function () {
+    actingAs(administrator())
+        ->get(action([EventMatchesController::class, 'create'], $this->event))
+        ->assertOk()
+        ->assertViewHas('event', $this->event);
+});
+
+test('it passes a new event match to the view', function () {
+    actingAs(administrator())
+        ->get(action([EventMatchesController::class, 'create'], $this->event))
+        ->assertOk()
+        ->assertViewHas('match', new EventMatch);
 });

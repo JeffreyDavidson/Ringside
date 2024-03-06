@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Livewire\Events\Matches;
+namespace App\Http\Livewire\EventMatches;
 
 use App\Models\Event;
 use App\Models\EventMatch;
@@ -58,7 +58,7 @@ class MatchForm extends Component
      */
     public function render(): View
     {
-        return view('livewire.matches.create', [
+        return view('livewire.event-matches.match-form', [
             'match' => $this->match,
             'matchTypes' => MatchType::pluck('name', 'id'),
             'referees' => Referee::query()->get()->pluck('full_name', 'id'),
