@@ -20,7 +20,7 @@ test('it loads the correct view', function () {
     livewire(MatchForm::class, ['event' => $this->event, 'match' => new EventMatch()])
         ->assertSet('event', $this->event)
         ->assertSet('match', new EventMatch())
-        ->assertViewIs('livewire.matches.create');
+        ->assertViewIs('livewire.event-matches.create');
 });
 
 test('it passes the correct data to the view', function () {
