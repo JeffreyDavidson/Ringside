@@ -1,6 +1,6 @@
 <div class="shadow-sm card">
     <div class="card-header">
-        <h3 class="card-title">Create A New Match Form</h3>
+        <h3 class="card-title">Create Event Match Form</h3>
     </div>
     <div class="card-body">
         <form method="post" action="{{ route('events.matches.store', $event) }}">
