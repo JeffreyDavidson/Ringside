@@ -23,11 +23,14 @@ class MatchType extends Model
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'number_of_sides' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'number_of_sides' => 'integer',
+        ];
+    }
 }

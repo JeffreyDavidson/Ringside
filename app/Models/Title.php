@@ -31,15 +31,6 @@ class Title extends Model implements Activatable, Retirable
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'status' => TitleStatus::class,
-    ];
-
-    /**
      * The model's default values for attributes.
      *
      * @var array<string, string>
@@ -47,6 +38,18 @@ class Title extends Model implements Activatable, Retirable
     protected $attributes = [
         'status' => TitleStatus::Unactivated->value,
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => TitleStatus::class,
+        ];
+    }
 
     /**
      * Create a new Eloquent query builder for the model.

@@ -40,13 +40,16 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'role' => Role::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'role' => Role::class,
+        ];
+    }
 
     /**
      * Get the user's password.
