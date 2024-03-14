@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
+use App\Providers\AppServiceProvider;
 
 use function Pest\Laravel\assertAuthenticated;
 use function Pest\Laravel\assertGuest;
@@ -19,7 +19,7 @@ test('users can authenticate using the login screen', function () {
     $this->post('/login', [
         'email' => $user->email,
         'password' => 'secret',
-    ])->assertRedirect(RouteServiceProvider::HOME);
+    ])->assertRedirect(AppServiceProvider::HOME);
 
     assertAuthenticated();
 });

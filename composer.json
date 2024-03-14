@@ -8,37 +8,37 @@
     ],
     "license": "MIT",
     "require": {
-        "ankurk91/laravel-eloquent-relationships": "^2.0",
+        "ankurk91/laravel-eloquent-relationships": "^2.1",
         "fidum/laravel-eloquent-morph-to-one": "^2.1",
         "guzzlehttp/guzzle": "^7.2",
-        "laravel/framework": "^10.0",
-        "laravel/tinker": "^2.8",
-        "livewire/livewire": "^3.0",
-        "lorisleiva/laravel-actions": "^2.5",
+        "laravel/framework": "^11.0",
+        "laravel/tinker": "^2.9",
+        "livewire/livewire": "^3.3",
+        "lorisleiva/laravel-actions": "^2.8",
         "php": "^8.2",
-        "staudenmeir/laravel-merged-relations": "^1.6"
+        "staudenmeir/laravel-merged-relations": "^1.9"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.8",
+        "barryvdh/laravel-debugbar": "^3.10",
         "doctrine/dbal": "^3.5",
-        "fakerphp/faker": "^1.19",
+        "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.14",
-        "laravel/breeze": "^1.18",
-        "laravel/pint": "^1.0.0",
-        "laravel/sail": "^1.18",
-        "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^7.0",
-        "larastan/larastan": "^2.7",
+        "laravel/breeze": "^2.0",
+        "laravel/pint": "^1.13",
+        "laravel/sail": "^1.26",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.0",
+        "larastan/larastan": "^2.8",
         "nunomaduro/phpinsights": "^2.4",
-        "pestphp/pest": "^2.13",
+        "pestphp/pest": "^2.23",
         "pestphp/pest-plugin-faker": "^2.0",
-        "pestphp/pest-plugin-laravel": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.2",
         "pestphp/pest-plugin-livewire": "^2.0",
         "pestphp/pest-plugin-type-coverage": "^2.0",
-        "spatie/laravel-ignition": "^2.0",
-        "spatie/laravel-ray": "^1.32",
+        "spatie/laravel-ignition": "^2.4",
+        "spatie/laravel-ray": "^1.35",
         "spatie/pest-plugin-test-time": "^2.0",
-        "worksome/request-factories": "^3.1"
+        "worksome/request-factories": "^3.3"
     },
     "config": {
         "optimize-autoloader": true,
@@ -65,7 +65,7 @@
             "Tests\\": "tests/"
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
         "post-autoload-dump": [

@@ -41,15 +41,6 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'status' => ManagerStatus::class,
-    ];
-
-    /**
      * The model's default values for attributes.
      *
      * @var array<string, string>
@@ -57,6 +48,18 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     protected $attributes = [
         'status' => ManagerStatus::Unemployed->value,
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ManagerStatus::class,
+        ];
+    }
 
     /**
      * Create a new Eloquent query builder for the model.

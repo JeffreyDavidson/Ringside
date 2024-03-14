@@ -40,15 +40,18 @@ class TitleChampionship extends Model
     protected $table = 'title_championships';
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'won_at' => 'datetime',
-        'lost_at' => 'datetime',
-        'last_held_reign' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'won_at' => 'datetime',
+            'lost_at' => 'datetime',
+            'last_held_reign' => 'datetime',
+        ];
+    }
 
     /**
      * Retrieve the title of the championship.

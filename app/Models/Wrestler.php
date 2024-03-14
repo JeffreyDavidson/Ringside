@@ -50,16 +50,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'height' => HeightCast::class,
-        'status' => WrestlerStatus::class,
-    ];
-
-    /**
      * The model's default values for attributes.
      *
      * @var array<string, string>
@@ -67,6 +57,19 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     protected $attributes = [
         'status' => WrestlerStatus::Unemployed->value,
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'height' => HeightCast::class,
+            'status' => WrestlerStatus::class,
+        ];
+    }
 
     /**
      * Create a new Eloquent query builder for the model.
