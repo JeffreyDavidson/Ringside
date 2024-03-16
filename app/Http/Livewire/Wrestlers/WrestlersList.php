@@ -31,6 +31,16 @@ class WrestlersList extends Component
     ];
 
     /**
+     * @var array<int>
+     */
+    public array $selectedWrestlerIds = [];
+
+    /**
+     * @var array<int>
+     */
+    public array $wrestlerIdsOnPage = [];
+
+    /**
      * Display a listing of the resource.
      */
     public function render(): View
@@ -47,6 +57,8 @@ class WrestlersList extends Component
         $query = $this->applySorting($query);
 
         $wrestlers = $query->paginate();
+
+        $this->wrestlerIdsOnPage = $wrestlers->map(fn ($wrestler) => (string) $wrestler->id)->toArray();
 
         return view('livewire.wrestlers.wrestlers-list', [
             'wrestlers' => $wrestlers,
