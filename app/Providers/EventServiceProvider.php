@@ -6,14 +6,6 @@ namespace App\Providers;
 
 use App\Listeners\ManagerSubscriber;
 use App\Listeners\WrestlerSubscriber;
-use App\Models\Event;
-use App\Models\Referee;
-use App\Models\Stable;
-use App\Models\Title;
-use App\Observers\EventObserver;
-use App\Observers\RefereeObserver;
-use App\Observers\StableObserver;
-use App\Observers\TitleObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
