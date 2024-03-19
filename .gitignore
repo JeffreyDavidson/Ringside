@@ -18,5 +18,5 @@ storage/
 tests/coverage
 .DS_Store
 .idea/
-
+.phpunit.cache
 .php-cs-fixer.cache
