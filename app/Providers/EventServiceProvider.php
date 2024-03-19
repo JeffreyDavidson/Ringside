@@ -32,19 +32,6 @@ class EventServiceProvider extends ServiceProvider
     ];
 
     /**
-     * The model observers for your application.
-     *
-     * @var array<string, array<int, object|string>|object|string>
-     */
-    protected $observers = [
-        Event::class => [EventObserver::class],
-        Referee::class => [RefereeObserver::class],
-        Stable::class => [StableObserver::class],
-        // TagTeam::class => [TagTeamObserver::class],
-        Title::class => [TitleObserver::class],
-    ];
-
-    /**
      * The subscriber classes to register.
      *
      * @var array<int, class-string>
