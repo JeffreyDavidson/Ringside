@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -41,6 +41,16 @@ class AppServiceProvider extends ServiceProvider
             $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
+        });
+
+        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters) {
+            $values = array_pop($parameters);
+
+            if (count($parameters)) {
+                $values = implode(', ', $parameters).' or '.$values;
+            }
+
+            return str_replace(':values', $values, $message);
         });
 
         Relation::morphMap([
