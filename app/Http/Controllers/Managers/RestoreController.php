@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -19,7 +20,7 @@ class RestoreController extends Controller
     {
         $manager = Manager::onlyTrashed()->findOrFail($managerId);
 
-        $this->authorize('restore', $manager);
+        Gate::authorize('restore', $manager);
 
         try {
             RestoreAction::run($manager);

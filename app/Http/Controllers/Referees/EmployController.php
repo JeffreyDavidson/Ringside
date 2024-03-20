@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class EmployController extends Controller
 {
@@ -17,7 +18,7 @@ class EmployController extends Controller
      */
     public function __invoke(Referee $referee): RedirectResponse
     {
-        $this->authorize('employ', $referee);
+        Gate::authorize('employ', $referee);
 
         try {
             EmployAction::run($referee);

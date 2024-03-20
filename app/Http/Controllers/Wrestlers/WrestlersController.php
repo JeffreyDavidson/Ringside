@@ -14,6 +14,7 @@ use App\Http\Requests\Wrestlers\UpdateRequest;
 use App\Models\Wrestler;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class WrestlersController extends Controller
 {
@@ -22,7 +23,7 @@ class WrestlersController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', Wrestler::class);
+        Gate::authorize('viewList', Wrestler::class);
 
         return view('wrestlers.index');
     }
@@ -32,7 +33,7 @@ class WrestlersController extends Controller
      */
     public function create(Wrestler $wrestler): View
     {
-        $this->authorize('create', Wrestler::class);
+        Gate::authorize('create', Wrestler::class);
 
         return view('wrestlers.create', [
             'wrestler' => $wrestler,
@@ -54,7 +55,7 @@ class WrestlersController extends Controller
      */
     public function show(Wrestler $wrestler): View
     {
-        $this->authorize('view', $wrestler);
+        Gate::authorize('view', $wrestler);
 
         return view('wrestlers.show', [
             'wrestler' => $wrestler,
@@ -66,7 +67,7 @@ class WrestlersController extends Controller
      */
     public function edit(Wrestler $wrestler): View
     {
-        $this->authorize('update', $wrestler);
+        Gate::authorize('update', $wrestler);
 
         return view('wrestlers.edit', [
             'wrestler' => $wrestler,
@@ -88,7 +89,7 @@ class WrestlersController extends Controller
      */
     public function destroy(Wrestler $wrestler): RedirectResponse
     {
-        $this->authorize('delete', $wrestler);
+        Gate::authorize('delete', $wrestler);
 
         DeleteAction::run($wrestler);
 

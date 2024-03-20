@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ReleaseController extends Controller
 {
@@ -17,7 +18,7 @@ class ReleaseController extends Controller
      */
     public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
-        $this->authorize('release', $tagTeam);
+        Gate::authorize('release', $tagTeam);
 
         try {
             ReleaseAction::run($tagTeam);

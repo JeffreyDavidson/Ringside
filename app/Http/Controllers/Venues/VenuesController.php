@@ -14,6 +14,7 @@ use App\Http\Requests\Venues\UpdateRequest;
 use App\Models\Venue;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class VenuesController extends Controller
 {
@@ -22,7 +23,7 @@ class VenuesController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', Venue::class);
+        Gate::authorize('viewList', Venue::class);
 
         return view('venues.index');
     }
@@ -32,7 +33,7 @@ class VenuesController extends Controller
      */
     public function create(Venue $venue): View
     {
-        $this->authorize('create', Venue::class);
+        Gate::authorize('create', Venue::class);
 
         return view('venues.create', [
             'venue' => $venue,
@@ -54,7 +55,7 @@ class VenuesController extends Controller
      */
     public function show(Venue $venue): View
     {
-        $this->authorize('view', $venue);
+        Gate::authorize('view', $venue);
 
         return view('venues.show', [
             'venue' => $venue,
@@ -66,7 +67,7 @@ class VenuesController extends Controller
      */
     public function edit(Venue $venue): View
     {
-        $this->authorize('update', Venue::class);
+        Gate::authorize('update', Venue::class);
 
         return view('venues.edit', [
             'venue' => $venue,
@@ -88,7 +89,7 @@ class VenuesController extends Controller
      */
     public function destroy(Venue $venue): RedirectResponse
     {
-        $this->authorize('delete', $venue);
+        Gate::authorize('delete', $venue);
 
         DeleteAction::run($venue);
 

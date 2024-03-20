@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class EmployController extends Controller
 {
@@ -17,7 +18,7 @@ class EmployController extends Controller
      */
     public function __invoke(Wrestler $wrestler): RedirectResponse
     {
-        $this->authorize('employ', $wrestler);
+        Gate::authorize('employ', $wrestler);
 
         try {
             EmployAction::run($wrestler);

@@ -17,6 +17,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class StablesController extends Controller
 {
@@ -25,7 +26,7 @@ class StablesController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', Stable::class);
+        Gate::authorize('viewList', Stable::class);
 
         return view('stables.index');
     }
@@ -35,7 +36,7 @@ class StablesController extends Controller
      */
     public function create(Stable $stable): View
     {
-        $this->authorize('create', Stable::class);
+        Gate::authorize('create', Stable::class);
 
         return view('stables.create', [
             'stable' => $stable,
@@ -60,7 +61,7 @@ class StablesController extends Controller
      */
     public function show(Stable $stable): View
     {
-        $this->authorize('view', $stable);
+        Gate::authorize('view', $stable);
 
         return view('stables.show', [
             'stable' => $stable,
@@ -72,7 +73,7 @@ class StablesController extends Controller
      */
     public function edit(Stable $stable): View
     {
-        $this->authorize('update', $stable);
+        Gate::authorize('update', $stable);
 
         return view('stables.edit', [
             'stable' => $stable,
@@ -97,7 +98,7 @@ class StablesController extends Controller
      */
     public function destroy(Stable $stable): RedirectResponse
     {
-        $this->authorize('delete', Stable::class);
+        Gate::authorize('delete', Stable::class);
 
         DeleteAction::run($stable);
 

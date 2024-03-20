@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class SuspendController extends Controller
 {
@@ -17,7 +18,7 @@ class SuspendController extends Controller
      */
     public function __invoke(Wrestler $wrestler): RedirectResponse
     {
-        $this->authorize('suspend', $wrestler);
+        Gate::authorize('suspend', $wrestler);
 
         try {
             SuspendAction::run($wrestler);

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -19,7 +20,7 @@ class RestoreController extends Controller
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 
-        $this->authorize('restore', $event);
+        Gate::authorize('restore', $event);
 
         try {
             RestoreAction::run($event);

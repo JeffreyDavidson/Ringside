@@ -15,6 +15,7 @@ use App\Models\TagTeam;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class TagTeamsController extends Controller
 {
@@ -23,7 +24,7 @@ class TagTeamsController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', TagTeam::class);
+        Gate::authorize('viewList', TagTeam::class);
 
         return view('tag-teams.index');
     }
@@ -33,7 +34,7 @@ class TagTeamsController extends Controller
      */
     public function create(TagTeam $tagTeam): View
     {
-        $this->authorize('create', TagTeam::class);
+        Gate::authorize('create', TagTeam::class);
 
         return view('tag-teams.create', [
             'tagTeam' => $tagTeam,
@@ -56,7 +57,7 @@ class TagTeamsController extends Controller
      */
     public function show(TagTeam $tagTeam): View
     {
-        $this->authorize('view', $tagTeam);
+        Gate::authorize('view', $tagTeam);
 
         return view('tag-teams.show', [
             'tagTeam' => $tagTeam,
@@ -68,7 +69,7 @@ class TagTeamsController extends Controller
      */
     public function edit(TagTeam $tagTeam): View
     {
-        $this->authorize('update', $tagTeam);
+        Gate::authorize('update', $tagTeam);
 
         return view('tag-teams.edit', [
             'tagTeam' => $tagTeam,
@@ -91,7 +92,7 @@ class TagTeamsController extends Controller
      */
     public function destroy(TagTeam $tagTeam): RedirectResponse
     {
-        $this->authorize('delete', $tagTeam);
+        Gate::authorize('delete', $tagTeam);
 
         DeleteAction::run($tagTeam);
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -19,7 +20,7 @@ class RestoreController extends Controller
     {
         $tagTeam = TagTeam::onlyTrashed()->findOrFail($tagTeamId);
 
-        $this->authorize('restore', $tagTeam);
+        Gate::authorize('restore', $tagTeam);
 
         try {
             RestoreAction::run($tagTeam);

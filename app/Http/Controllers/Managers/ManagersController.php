@@ -14,6 +14,7 @@ use App\Http\Requests\Managers\UpdateRequest;
 use App\Models\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ManagersController extends Controller
 {
@@ -22,7 +23,7 @@ class ManagersController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', Manager::class);
+        Gate::authorize('viewList', Manager::class);
 
         return view('managers.index');
     }
@@ -32,7 +33,7 @@ class ManagersController extends Controller
      */
     public function create(Manager $manager): View
     {
-        $this->authorize('create', Manager::class);
+        Gate::authorize('create', Manager::class);
 
         return view('managers.create', [
             'manager' => $manager,
@@ -54,7 +55,7 @@ class ManagersController extends Controller
      */
     public function show(Manager $manager): View
     {
-        $this->authorize('view', $manager);
+        Gate::authorize('view', $manager);
 
         return view('managers.show', [
             'manager' => $manager,
@@ -66,7 +67,7 @@ class ManagersController extends Controller
      */
     public function edit(Manager $manager): View
     {
-        $this->authorize('update', $manager);
+        Gate::authorize('update', $manager);
 
         return view('managers.edit', [
             'manager' => $manager,
@@ -88,7 +89,7 @@ class ManagersController extends Controller
      */
     public function destroy(Manager $manager): RedirectResponse
     {
-        $this->authorize('delete', $manager);
+        Gate::authorize('delete', $manager);
 
         DeleteAction::run($manager);
 
