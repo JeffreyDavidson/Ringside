@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeRetiredException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RetireController extends Controller
 {
@@ -17,7 +18,7 @@ class RetireController extends Controller
      */
     public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
-        $this->authorize('retire', $tagTeam);
+        Gate::authorize('retire', $tagTeam);
 
         try {
             RetireAction::run($tagTeam);

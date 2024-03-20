@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeSuspendedException;
 use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class SuspendController extends Controller
 {
@@ -17,7 +18,7 @@ class SuspendController extends Controller
      */
     public function __invoke(Referee $referee): RedirectResponse
     {
-        $this->authorize('suspend', $referee);
+        Gate::authorize('suspend', $referee);
 
         try {
             SuspendAction::run($referee);

@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Models\EventMatch;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class EventMatchesController extends Controller
 {
@@ -20,7 +21,7 @@ class EventMatchesController extends Controller
      */
     public function create(Event $event, EventMatch $match): View
     {
-        $this->authorize('create', EventMatch::class);
+        Gate::authorize('create', EventMatch::class);
 
         return view('event-matches.create', [
             'event' => $event,

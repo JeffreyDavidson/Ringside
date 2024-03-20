@@ -14,19 +14,20 @@ use App\Http\Requests\Titles\UpdateRequest;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class TitlesController extends Controller
 {
     public function index(): View
     {
-        $this->authorize('viewList', Title::class);
+        Gate::authorize('viewList', Title::class);
 
         return view('titles.index');
     }
 
     public function create(Title $title): View
     {
-        $this->authorize('create', Title::class);
+        Gate::authorize('create', Title::class);
 
         return view('titles.create', [
             'title' => $title,
@@ -48,7 +49,7 @@ class TitlesController extends Controller
      */
     public function show(Title $title): View
     {
-        $this->authorize('view', Title::class);
+        Gate::authorize('view', Title::class);
 
         $title->load('championships');
 
@@ -57,7 +58,7 @@ class TitlesController extends Controller
 
     public function edit(Title $title): View
     {
-        $this->authorize('update', Title::class);
+        Gate::authorize('update', Title::class);
 
         return view('titles.edit', [
             'title' => $title,
@@ -76,7 +77,7 @@ class TitlesController extends Controller
      */
     public function destroy(Title $title): RedirectResponse
     {
-        $this->authorize('delete', $title);
+        Gate::authorize('delete', $title);
 
         DeleteAction::run($title);
 

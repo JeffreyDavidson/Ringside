@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeReleasedException;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ReleaseController extends Controller
 {
@@ -17,7 +18,7 @@ class ReleaseController extends Controller
      */
     public function __invoke(Manager $manager): RedirectResponse
     {
-        $this->authorize('release', $manager);
+        Gate::authorize('release', $manager);
 
         try {
             ReleaseAction::run($manager);

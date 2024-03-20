@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeActivatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ActivateController extends Controller
 {
@@ -17,7 +18,7 @@ class ActivateController extends Controller
      */
     public function __invoke(Stable $stable): RedirectResponse
     {
-        $this->authorize('activate', $stable);
+        Gate::authorize('activate', $stable);
 
         try {
             ActivateAction::run($stable);

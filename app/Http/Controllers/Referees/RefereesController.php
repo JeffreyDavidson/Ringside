@@ -14,6 +14,7 @@ use App\Http\Requests\Referees\UpdateRequest;
 use App\Models\Referee;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RefereesController extends Controller
 {
@@ -22,7 +23,7 @@ class RefereesController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', Referee::class);
+        Gate::authorize('viewList', Referee::class);
 
         return view('referees.index');
     }
@@ -32,7 +33,7 @@ class RefereesController extends Controller
      */
     public function create(Referee $referee): View
     {
-        $this->authorize('create', Referee::class);
+        Gate::authorize('create', Referee::class);
 
         return view('referees.create', [
             'referee' => $referee,
@@ -54,7 +55,7 @@ class RefereesController extends Controller
      */
     public function show(Referee $referee): View
     {
-        $this->authorize('view', $referee);
+        Gate::authorize('view', $referee);
 
         return view('referees.show', [
             'referee' => $referee,
@@ -66,7 +67,7 @@ class RefereesController extends Controller
      */
     public function edit(Referee $referee): View
     {
-        $this->authorize('update', $referee);
+        Gate::authorize('update', $referee);
 
         return view('referees.edit', [
             'referee' => $referee,
@@ -88,7 +89,7 @@ class RefereesController extends Controller
      */
     public function destroy(Referee $referee): RedirectResponse
     {
-        $this->authorize('delete', $referee);
+        Gate::authorize('delete', $referee);
 
         DeleteAction::run($referee);
 

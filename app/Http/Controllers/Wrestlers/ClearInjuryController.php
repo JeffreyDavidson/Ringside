@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeClearedFromInjuryException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ClearInjuryController extends Controller
 {
@@ -17,7 +18,7 @@ class ClearInjuryController extends Controller
      */
     public function __invoke(Wrestler $wrestler): RedirectResponse
     {
-        $this->authorize('clearFromInjury', $wrestler);
+        Gate::authorize('clearFromInjury', $wrestler);
 
         try {
             ClearInjuryAction::run($wrestler);

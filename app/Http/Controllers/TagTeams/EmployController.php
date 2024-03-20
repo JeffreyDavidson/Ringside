@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeEmployedException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class EmployController extends Controller
 {
@@ -17,7 +18,7 @@ class EmployController extends Controller
      */
     public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
-        $this->authorize('employ', $tagTeam);
+        Gate::authorize('employ', $tagTeam);
 
         try {
             EmployAction::run($tagTeam);

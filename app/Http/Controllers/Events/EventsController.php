@@ -15,6 +15,7 @@ use App\Models\Event;
 use App\Models\Venue;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class EventsController extends Controller
 {
@@ -23,7 +24,7 @@ class EventsController extends Controller
      */
     public function index(): View
     {
-        $this->authorize('viewList', Event::class);
+        Gate::authorize('viewList', Event::class);
 
         return view('events.index');
     }
@@ -33,7 +34,7 @@ class EventsController extends Controller
      */
     public function create(Event $event): View
     {
-        $this->authorize('create', Event::class);
+        Gate::authorize('create', Event::class);
 
         return view('events.create', [
             'event' => $event,
@@ -56,7 +57,7 @@ class EventsController extends Controller
      */
     public function show(Event $event): View
     {
-        $this->authorize('view', $event);
+        Gate::authorize('view', $event);
 
         return view('events.show', [
             'event' => $event->load([
@@ -74,7 +75,7 @@ class EventsController extends Controller
      */
     public function edit(Event $event): View
     {
-        $this->authorize('update', $event);
+        Gate::authorize('update', $event);
 
         return view('events.edit', [
             'event' => $event,
@@ -97,7 +98,7 @@ class EventsController extends Controller
      */
     public function destroy(Event $event): RedirectResponse
     {
-        $this->authorize('delete', $event);
+        Gate::authorize('delete', $event);
 
         DeleteAction::run($event);
 

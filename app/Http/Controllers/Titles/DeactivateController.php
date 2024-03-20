@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeDeactivatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class DeactivateController extends Controller
 {
@@ -17,7 +18,7 @@ class DeactivateController extends Controller
      */
     public function __invoke(Title $title): RedirectResponse
     {
-        $this->authorize('deactivate', $title);
+        Gate::authorize('deactivate', $title);
 
         try {
             DeactivateAction::run($title);

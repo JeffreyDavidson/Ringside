@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -19,7 +20,7 @@ class RestoreController extends Controller
     {
         $stable = Stable::onlyTrashed()->findOrFail($stableId);
 
-        $this->authorize('restore', $stable);
+        Gate::authorize('restore', $stable);
 
         try {
             RestoreAction::run($stable);
