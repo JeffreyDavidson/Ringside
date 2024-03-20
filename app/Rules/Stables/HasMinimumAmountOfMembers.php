@@ -35,7 +35,7 @@ class HasMinimumAmountOfMembers implements ValidationRule
 
             $tagTeamMembersCount = $tagTeamsCountFromRequest * 2;
 
-            if ($tagTeamMembersCount + $wrestlersCountFromRequest < 3) {
+            if ($tagTeamMembersCount + $wrestlersCountFromRequest < Stable::MIN_MEMBERS_COUNT) {
                 $fail("{$this->stable->name} is currently activated and the activation date cannot be changed.");
             }
         }
