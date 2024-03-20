@@ -25,6 +25,16 @@ class Injury extends Model
     ];
 
     /**
+     * Retrieve the injured model.
+     *
+     * @return MorphTo<Model, Injury>
+     */
+    public function injurable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -35,15 +45,5 @@ class Injury extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Retrieve the injured model.
-     *
-     * @return MorphTo<Model, Injury>
-     */
-    public function injurable(): MorphTo
-    {
-        return $this->morphTo();
     }
 }

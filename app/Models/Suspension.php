@@ -25,6 +25,16 @@ class Suspension extends Model
     ];
 
     /**
+     * Retrieve the suspended model.
+     *
+     * @return MorphTo<Model, Suspension>
+     */
+    public function suspendable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -35,15 +45,5 @@ class Suspension extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Retrieve the suspended model.
-     *
-     * @return MorphTo<Model, Suspension>
-     */
-    public function suspendable(): MorphTo
-    {
-        return $this->morphTo();
     }
 }

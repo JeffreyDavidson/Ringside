@@ -34,19 +34,6 @@ class Event extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'date' => 'datetime',
-            'status' => EventStatus::class,
-        ];
-    }
-
-    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return EventBuilder<Event>
@@ -106,5 +93,18 @@ class Event extends Model
     public function isUnscheduled(): bool
     {
         return $this->date === null;
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'date' => 'datetime',
+            'status' => EventStatus::class,
+        ];
     }
 }

@@ -26,19 +26,6 @@ class Employment extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'started_at' => 'datetime',
-            'ended_at' => 'datetime',
-        ];
-    }
-
-    /**
      * Get the employed model.
      *
      * @return MorphTo<Model, Employment>
@@ -62,5 +49,18 @@ class Employment extends Model
     public function startedAfter(Carbon $date): bool
     {
         return $this->started_at->gt($date);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+        ];
     }
 }

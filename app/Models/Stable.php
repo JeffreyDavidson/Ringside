@@ -41,18 +41,6 @@ class Stable extends Model implements Activatable, Retirable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => StableStatus::class,
-        ];
-    }
-
-    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return StableBuilder<Stable>
@@ -65,5 +53,17 @@ class Stable extends Model implements Activatable, Retirable
     public function getIdentifier(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => StableStatus::class,
+        ];
     }
 }

@@ -60,18 +60,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => TagTeamStatus::class,
-        ];
-    }
-
-    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return TagTeamBuilder<TagTeam>
@@ -100,5 +88,17 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function getIdentifier(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => TagTeamStatus::class,
+        ];
     }
 }

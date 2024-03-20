@@ -50,18 +50,6 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => ManagerStatus::class,
-        ];
-    }
-
-    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return ManagerBuilder<Manager>
@@ -109,5 +97,17 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
         return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ManagerStatus::class,
+        ];
     }
 }
