@@ -43,18 +43,6 @@ class Title extends Model implements Activatable, Retirable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => TitleStatus::class,
-        ];
-    }
-
-    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return TitleBuilder<Title>
@@ -67,5 +55,17 @@ class Title extends Model implements Activatable, Retirable
     public function getIdentifier(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => TitleStatus::class,
+        ];
     }
 }

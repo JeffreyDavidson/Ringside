@@ -49,18 +49,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => RefereeStatus::class,
-        ];
-    }
-
-    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return RefereeBuilder<Referee>
@@ -119,5 +107,17 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => RefereeStatus::class,
+        ];
     }
 }

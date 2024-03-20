@@ -40,18 +40,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'role' => Role::class,
-        ];
-    }
-
-    /**
      * Get the user's password.
      *
      * @return Attribute<string, never>
@@ -79,5 +67,17 @@ class User extends Authenticatable
     public function wrestler(): HasOne
     {
         return $this->hasOne(Wrestler::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'role' => Role::class,
+        ];
     }
 }
