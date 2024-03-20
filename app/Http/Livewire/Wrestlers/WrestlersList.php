@@ -58,7 +58,7 @@ class WrestlersList extends Component
 
         $wrestlers = $query->paginate();
 
-        $this->wrestlerIdsOnPage = $wrestlers->map(fn ($wrestler) => (string) $wrestler->id)->toArray();
+        $this->wrestlerIdsOnPage = $wrestlers->map(fn (Wrestler $wrestler) => (string) $wrestler->id)->toArray();
 
         return view('livewire.wrestlers.wrestlers-list', [
             'wrestlers' => $wrestlers,
