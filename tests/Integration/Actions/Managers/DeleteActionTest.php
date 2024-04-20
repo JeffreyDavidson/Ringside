@@ -7,7 +7,7 @@ use App\Models\Manager;
 use App\Repositories\ManagerRepository;
 
 beforeEach(function () {
-    $this->managerRepository = Mockery::mock(ManagerRepository::class);
+    $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
 test('it deletes a manager', function () {

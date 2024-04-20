@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Collection;
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->event = Event::factory()->scheduled()->create();
-    $this->eventMatchRepository = Mockery::mock(EventMatchRepository::class);
+    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
 });
 
 test('add a match to an event', function () {

@@ -9,6 +9,12 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Repositories\ManagerRepository;
 
+use function Spatie\PestPluginTestTime\testTime;
+
+beforeEach(function () {
+    testTime()->freeze();
+});
+
 test('creates a manager', function () {
     $data = new ManagerData('Hulk', 'Hogan', null);
 
@@ -155,7 +161,7 @@ test('remove a manager from its current tag teams', function () {
 
     expect($manager->fresh()->currentTagTeams)->toHaveCount(0);
     expect($manager->fresh()->previousTagTeams)->toHaveCount(2);
-    expect($manager->fresh()->previousTagTeams)->each(fn ($tagTeam) => $tagTeam->pivot->left_at->toEqual($datetime));
+    expect($manager->fresh()->previousTagTeams)->each(fn ($tagTeam) => $tagTeam->pivot->left_at->eq($datetime));
 });
 
 test('it can disassociate a manager from its current wrestlers', function () {
@@ -170,5 +176,5 @@ test('it can disassociate a manager from its current wrestlers', function () {
     expect($manager->fresh()->currentWrestlers)->toHaveCount(0);
 
     expect($manager->fresh()->previousWrestlers)->toHaveCount(2);
-    expect($manager->fresh()->previousWrestlers)->each(fn ($wrestler) => $wrestler->pivot->left_at->toEqual($datetime));
+    expect($manager->fresh()->previousWrestlers)->each(fn ($wrestler) => $wrestler->pivot->left_at->eq($datetime));
 });

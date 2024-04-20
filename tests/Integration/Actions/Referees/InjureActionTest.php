@@ -13,7 +13,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
+    $this->refereeRepository = $this->mock(RefereeRepository::class);
 });
 
 test('it injures a bookable referee at the current datetime by default', function () {

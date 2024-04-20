@@ -15,7 +15,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->tagTeamRepository = Mockery::mock(TagTeamRepository::class);
+    $this->tagTeamRepository = $this->mock(TagTeamRepository::class);
 });
 
 test('it unretires a retired tag team at the current datetime by default', function () {

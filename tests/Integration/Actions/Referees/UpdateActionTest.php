@@ -8,7 +8,7 @@ use App\Models\Referee;
 use App\Repositories\RefereeRepository;
 
 beforeEach(function () {
-    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
+    $this->refereeRepository = $this->mock(RefereeRepository::class);
 });
 
 test('it can update a referee', function () {

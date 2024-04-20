@@ -16,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->tagTeamRepository = Mockery::mock(TagTeamRepository::class);
+    $this->tagTeamRepository = $this->mock(TagTeamRepository::class);
 });
 
 test('it creates a tag team without tag team partners and employment', function () {

@@ -16,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
+    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
 test('it unretires a retired wrestler at the current datetime by default', function () {

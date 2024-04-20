@@ -7,6 +7,7 @@ use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
+use App\ValueObjects\Height;
 
 test('creates a wrestler without a signature move', function () {
     $data = new WrestlerData('Example Wrestler Name', 70, 220, 'Laraville, New York', null, null);
@@ -15,7 +16,7 @@ test('creates a wrestler without a signature move', function () {
 
     expect($wrestler)
         ->name->toEqual('Example Wrestler Name')
-        ->height->toEqual('70')
+        ->height->toBeInstanceOf(Height::class)
         ->weight->toEqual(220)
         ->hometown->toEqual('Laraville, New York')
         ->signature_move->toBeNull();
@@ -28,7 +29,7 @@ test('creates a wrestler with a signature move', function () {
 
     expect($wrestler)
         ->name->toEqual('Example Wrestler Name')
-        ->height->toEqual('70')
+        ->height->toBeInstanceOf(Height::class)
         ->weight->toEqual(220)
         ->hometown->toEqual('Laraville, New York')
         ->signature_move->toEqual('Powerbomb');
@@ -42,7 +43,7 @@ test('updates a wrestler with a signature move', function () {
 
     expect($wrestler)
         ->name->toEqual('Example Wrestler Name')
-        ->height->toEqual('70')
+        ->height->toBeInstanceOf(Height::class)
         ->weight->toEqual(220)
         ->hometown->toEqual('Laraville, New York')
         ->signature_move->toEqual('Powerbomb');

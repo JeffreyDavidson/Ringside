@@ -13,7 +13,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->tagTeamRepository = Mockery::mock(TagTeamRepository::class);
+    $this->tagTeamRepository = $this->mock(TagTeamRepository::class);
 });
 
 test('it releases a bookable tag team at the current datetime by default', function () {

@@ -13,7 +13,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->titleRepository = Mockery::mock(TitleRepository::class);
+    $this->titleRepository = $this->mock(TitleRepository::class);
 });
 
 test('it activates an activatable title at the current datetime by default', function ($factoryState) {
