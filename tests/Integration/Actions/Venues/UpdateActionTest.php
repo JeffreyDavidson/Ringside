@@ -8,7 +8,7 @@ use App\Models\Venue;
 use App\Repositories\VenueRepository;
 
 beforeEach(function () {
-    $this->venueRepository = Mockery::mock(VenueRepository::class);
+    $this->venueRepository = $this->mock(VenueRepository::class);
 });
 
 test('it updates a venue', function () {

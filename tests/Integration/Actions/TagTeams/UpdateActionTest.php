@@ -9,7 +9,7 @@ use App\Models\TagTeam;
 use App\Repositories\TagTeamRepository;
 
 beforeEach(function () {
-    $this->tagTeamRepository = Mockery::mock(TagTeamRepository::class);
+    $this->tagTeamRepository = $this->mock(TagTeamRepository::class);
 });
 
 test('it updates a tag team', function () {

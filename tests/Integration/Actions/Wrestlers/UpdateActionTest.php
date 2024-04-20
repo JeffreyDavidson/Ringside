@@ -8,7 +8,7 @@ use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
 
 beforeEach(function () {
-    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
+    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
 test('it updates a wrestler', function () {

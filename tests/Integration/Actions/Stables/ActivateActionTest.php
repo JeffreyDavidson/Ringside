@@ -13,7 +13,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->stableRepository = Mockery::mock(StableRepository::class);
+    $this->stableRepository = $this->mock(StableRepository::class);
 });
 
 test('it activates an unactivated stable and employs its unemployed members at the current datetime by default', function () {

@@ -14,7 +14,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->stableRepository = Mockery::mock(StableRepository::class);
+    $this->stableRepository = $this->mock(StableRepository::class);
 });
 
 test('it creates a stable', function () {

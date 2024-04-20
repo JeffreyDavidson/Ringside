@@ -12,7 +12,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
+    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
 test('it creates a wrestler', function () {

@@ -13,7 +13,7 @@ use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
-    $this->stableRepository = Mockery::mock(StableRepository::class);
+    $this->stableRepository = $this->mock(StableRepository::class);
 });
 
 test('wrestlers of stable are synced when stable is updated', function () {

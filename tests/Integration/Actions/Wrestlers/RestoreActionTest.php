@@ -7,7 +7,7 @@ use App\Models\Wrestler;
 use App\Repositories\WrestlerRepository;
 
 beforeEach(function () {
-    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
+    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
 test('it restores a deleted wrestler', function () {

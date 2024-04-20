@@ -10,7 +10,7 @@ use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = Mockery::mock(EventMatchRepository::class);
+    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
 });
 
 test('it adds wrestlers to a match', function () {
