@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[ObservedBy([StableObserver::class])]
 class Stable extends Model implements Activatable, Retirable
 {
     use Concerns\HasActivations;

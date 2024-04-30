@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[ObservedBy([RefereeObserver::class])]
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
 {
     use Concerns\HasEmployments;
