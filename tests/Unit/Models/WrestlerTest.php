@@ -14,6 +14,7 @@ use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\TagTeamMember;
 use App\Models\Wrestler;
+use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,9 +25,9 @@ test('a wrestler has a name', function () {
 });
 
 test('a wrestler has a height', function () {
-    $wrestler = Wrestler::factory()->create(['height' => 70]);
+    $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler)->height->toBe(70);
+    expect($wrestler)->height->toBeInstanceOf(Height::class);
 });
 
 test('a wrestler has a weight', function () {
