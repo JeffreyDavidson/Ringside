@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-slot name="toolbar">
+    <x-slot:toolbar>
         <x-toolbar>
             <x-page-heading>Create Manager</x-page-heading>
             <x-breadcrumbs.list>
@@ -13,13 +13,19 @@
     </x-slot>
 
     <x-card>
-        <x-slot name="header">
-            <x-card.header title="Create Manager Form" />
-        </x-slot>
+        <x-card.header>
+            <x-card.title class="m-0">
+                <x-card.heading>Create Manager Form</x-card.heading>
+            </x-card.title>
+        </x-card.header>
         <x-card.body>
-            <x-form :action="route('managers.store')">
+            <x-form :action="route('managers.store')" id="createManagerForm">
                 @include('managers.partials.form')
             </x-form>
         </x-card.body>
+        <x-card.footer>
+            <x-form.buttons.reset form="createManagerForm"/>
+            <x-form.buttons.submit form="createManagerForm"/>
+        </x-card.footer>
     </x-card>
 </x-layouts.app>

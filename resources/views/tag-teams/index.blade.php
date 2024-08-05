@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-slot name="toolbar">
+    <x-slot:toolbar>
         <x-toolbar>
             <x-page-heading>Tag Teams List</x-page-heading>
             <x-breadcrumbs.list>

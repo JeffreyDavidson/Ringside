@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-slot name="toolbar">
+    <x-slot:toolbar>
         <x-toolbar>
             <x-page-heading>Edit Tag Team</x-page-heading>
             <x-breadcrumbs.list>
@@ -15,14 +15,20 @@
     </x-slot>
 
     <x-card>
-        <x-slot name="header">
-            <x-card.header title="Edit Tag Team Form" />
-        </x-slot>
+        <x-card.header>
+            <x-card.title class="m-0">
+                <x-card.heading>Edit Tag Team Form</x-card.heading>
+            </x-card.title>
+        </x-card.header>
         <x-card.body>
-            <x-form :action="route('tag-teams.update', $tagTeam)">
+            <x-form :action="route('tag-teams.update', $tagTeam)" id="editTagTeamForm">
                 @method('PATCH')
                 @include('tag-teams.partials.form')
             </x-form>
         </x-card.body>
+        <x-card.footer>
+            <x-form.buttons.reset form="editTagTeamForm"/>
+            <x-form.buttons.submit form="editTagTeamForm"/>
+        </x-card.footer>
     </x-card>
 </x-layouts.app>
