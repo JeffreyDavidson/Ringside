@@ -4,7 +4,7 @@
         <span class="path2"></span>
     </i>
     <input type="text"
-           wire:model="filters.search"
+           wire:model.live="filters.search"
            class="form-control form-control-solid w-250px ps-13"
            placeholder="Search {{ $resource }}">
 </div>
