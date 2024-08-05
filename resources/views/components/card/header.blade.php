@@ -1,5 +1,3 @@
-<div class="card-header">
-    <h3 class="card-title">{{ $title }}</h3>
-
+<div {{ $attributes->merge(['class' => 'card-header border-0']) }}>
     {{ $slot }}
 </div>

@@ -1,3 +1,3 @@
-<tbody class="text-gray-600 fw-bold">
+<tbody class="text-gray-600 fw-semibold">
     {{ $slot }}
 </tbody>
