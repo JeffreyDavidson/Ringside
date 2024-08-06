@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('street_address');
             $table->string('city');
             $table->string('state');
-            $table->string('zip');
+            $table->string('zipcode');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -13,11 +13,11 @@
         </div>
 
         <div class="col-lg-4">
-            <x-form.inputs.text label="State:" name="state" placeholder="Florida" :value="old('state', $venue->state)"/>
+            <x-form.inputs.select label="State:" name="state" :options="$states" :selected="old('state', $venue->state)" />
         </div>
 
         <div class="col-lg-4">
-            <x-form.inputs.text label="Zip:" name="zip" placeholder="12345" :value="old('zip', $venue->zip)"/>
+            <x-form.inputs.text label="Zip Code:" name="zipcode" placeholder="12345" :value="old('zipcode', $venue->zipcode)"/>
         </div>
     </div>
 </div>

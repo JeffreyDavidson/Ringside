@@ -1,6 +1,6 @@
-@props(["text", "icon"])
+@props(["text", "icon", "active" => false])
 
-<a {{ $attributes->class(["menu-link"]) }}>
+<a {{ $attributes->class(["menu-link", "active" => $active]) }}>
     @isset($icon)
         <span class="menu-icon">
             {{ $icon }}

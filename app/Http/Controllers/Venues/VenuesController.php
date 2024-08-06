@@ -11,6 +11,7 @@ use App\Data\VenueData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Venues\StoreRequest;
 use App\Http\Requests\Venues\UpdateRequest;
+use App\Models\State;
 use App\Models\Venue;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,7 @@ class VenuesController extends Controller
 
         return view('venues.create', [
             'venue' => $venue,
+            'states' => State::pluck('name', 'name'),
         ]);
     }
 
@@ -71,6 +73,7 @@ class VenuesController extends Controller
 
         return view('venues.edit', [
             'venue' => $venue,
+            'states' => State::pluck('name', 'name'),
         ]);
     }
 
