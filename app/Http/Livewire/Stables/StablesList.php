@@ -33,6 +33,16 @@ class StablesList extends Component
     ];
 
     /**
+     * @var array<int>
+     */
+    public array $selectedStableIds = [];
+
+    /**
+     * @var array<int>
+     */
+    public array $stableIdsOnPage = [];
+
+    /**
      * Display a listing of the resource.
      */
     public function render(): View
@@ -49,6 +59,8 @@ class StablesList extends Component
         $query = $this->applySorting($query);
 
         $stables = $query->paginate();
+
+        $this->stableIdsOnPage = $stables->map(fn (Stable $stable) => (string) $stable->id)->toArray();
 
         return view('livewire.stables.stables-list', [
             'stables' => $stables,
