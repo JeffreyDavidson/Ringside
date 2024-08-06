@@ -47,7 +47,7 @@ class TitleChampionshipsList extends Component
 
         $titleChampionships = $query->paginate();
 
-        return view('livewire.titles.title-championships.title-championships-list', [
+        return view('livewire.titles.title-championships-list', [
             'titleChampionships' => $titleChampionships,
         ]);
     }
