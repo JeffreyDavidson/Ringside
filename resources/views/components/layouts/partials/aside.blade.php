@@ -28,7 +28,7 @@
             <div class="px-3 menu menu-column menu-rounded menu-sub-indention" id="#kt_app_sidebar_menu"
                  data-kt-menu="true" data-kt-menu-expand="false">
                 <x-menu.menu-item>
-                    <x-menu.menu-link text="Dashboard" :href="route('dashboard')">
+                    <x-menu.menu-link text="Dashboard" :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         <x-slot name="icon">
                             <i class="ki-duotone ki-element-11 fs-2">
                                 <span class="path1"></span>
@@ -45,7 +45,7 @@
                     </div>
                 </div>
                 <x-menu.menu-item>
-                    <x-menu.menu-link text="Wrestlers" :href="route('wrestlers.index')">
+                    <x-menu.menu-link text="Wrestlers" :href="route('wrestlers.index')" :active="request()->routeIs('wrestlers.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -60,7 +60,7 @@
                     </x-menu.menu-link>
                 </x-menu.menu-item>
                 <x-menu.menu-item>
-                    <x-menu.menu-link text="Tag Teams" :href="route('tag-teams.index')">
+                    <x-menu.menu-link text="Tag Teams" :href="route('tag-teams.index')" :active="request()->routeIs('tag-teams.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -79,7 +79,7 @@
                     </x-menu.menu-link>
                 </x-menu.menu-item>
                 <x-menu.menu-item>
-                    <x-menu.menu-link text="Referees" :href="route('referees.index')">
+                    <x-menu.menu-link text="Referees" :href="route('referees.index')" :active="request()->routeIs('referees.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -94,7 +94,7 @@
                     </x-menu.menu-link>
                 </x-menu.menu-item>
                 <x-menu.menu-item>
-                    <x-menu.menu-link text="Managers" :href="route('managers.index')">
+                    <x-menu.menu-link text="Managers" :href="route('managers.index')" :active="request()->routeIs('managers.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -110,7 +110,7 @@
                 </x-menu.menu-item>
 
                 <x-menu.menu-item>
-                    <x-menu.menu-link text="Stables" :href="route('stables.index')">
+                    <x-menu.menu-link text="Stables" :href="route('stables.index')" :active="request()->routeIs('stables.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -129,7 +129,7 @@
                     </x-menu.menu-link>
                 </x-menu.menu-item>
                 <x-menu.menu-item class="pt-5">
-                    <x-menu.menu-link text="Events" :href="route('events.index')">
+                    <x-menu.menu-link text="Events" :href="route('events.index')" :active="request()->routeIs('events.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -149,7 +149,7 @@
                     </x-menu.menu-link>
                 </x-menu.menu-item>
                 <x-menu.menu-item class="pt-5">
-                    <x-menu.menu-link text="Titles" :href="route('titles.index')">
+                    <x-menu.menu-link text="Titles" :href="route('titles.index')" :active="request()->routeIs('titles.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
