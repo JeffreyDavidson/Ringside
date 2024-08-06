@@ -36,8 +36,8 @@ class StoreRequest extends FormRequest
             'name' => ['required', 'string', 'min:3', 'unique:App\Models\Venue,name'],
             'street_address' => ['required', 'string', 'min:3'],
             'city' => ['required', 'string', 'min:3'],
-            'state' => ['required', 'string'],
-            'zip' => ['required', 'integer', 'digits:5'],
+            'state' => ['required', 'string', 'exists:App\Models\State,name'],
+            'zipcode' => ['required', 'integer', 'digits:5'],
         ];
     }
 
@@ -49,9 +49,8 @@ class StoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'venue name',
             'street_address' => 'street address',
-            'zip' => 'zip code',
+            'zipcode' => 'zip code',
         ];
     }
 }

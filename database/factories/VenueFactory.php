@@ -26,7 +26,7 @@ class VenueFactory extends Factory
             'street_address' => fake()->buildingNumber().' '.fake()->streetName(),
             'city' => fake()->city(),
             'state' => fake()->state(),
-            'zip' => str(fake()->postcode())->substr(0, 5)->value(),
+            'zipcode' => str(fake()->postcode())->substr(0, 5)->value(),
         ];
     }
 }

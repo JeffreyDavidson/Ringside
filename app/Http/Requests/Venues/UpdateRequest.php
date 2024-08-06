@@ -45,8 +45,8 @@ class UpdateRequest extends FormRequest
             'name' => ['required', 'string', 'min:3', Rule::unique('wrestlers')->ignore($venue->id)],
             'street_address' => ['required', 'string', 'min:3'],
             'city' => ['required', 'string', 'min:3'],
-            'state' => ['required', 'string'],
-            'zip' => ['required', 'integer', 'digits:5'],
+            'state' => ['required', 'string', 'exists:App\Models\State,name'],
+            'zipcode' => ['required', 'integer', 'digits:5'],
         ];
     }
 
@@ -58,9 +58,8 @@ class UpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'venue name',
             'street_address' => 'street address',
-            'zip' => 'zip code',
+            'zipcode' => 'zip code',
         ];
     }
 }

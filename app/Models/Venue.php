@@ -24,7 +24,7 @@ class Venue extends Model
         'street_address',
         'city',
         'state',
-        'zip',
+        'zipcode',
     ];
 
     /**

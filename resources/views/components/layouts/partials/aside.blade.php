@@ -164,7 +164,7 @@
                     </x-menu.menu-link>
                 </x-menu.menu-item>
                 <x-menu.menu-item class="pt-5">
-                    <x-menu.menu-link text="Venues" :href="route('venues.index')">
+                    <x-menu.menu-link text="Venues" :href="route('venues.index')" :active="request()->routeIs('venues.*')">
                         <x-slot name="icon">
                             <span class="svg-icon svg-icon-muted svg-icon-2">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"

@@ -8,14 +8,15 @@
     ],
     "license": "MIT",
     "require": {
+        "php": "^8.2",
         "ankurk91/laravel-eloquent-relationships": "^2.1",
+        "calebporzio/sushi": "^2.5",
         "fidum/laravel-eloquent-morph-to-one": "^2.1",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.3",
         "lorisleiva/laravel-actions": "^2.8",
-        "php": "^8.2",
         "staudenmeir/laravel-merged-relations": "^1.9"
     },
     "require-dev": {

@@ -17,7 +17,7 @@ readonly class VenueData
         public string $street_address,
         public string $city,
         public string $state,
-        public string $zip,
+        public string $zipcode,
     ) {
     }
 
@@ -31,7 +31,7 @@ readonly class VenueData
             $request->string('street_address')->value(),
             $request->string('city')->value(),
             $request->string('state')->value(),
-            $request->string('zip')->value()
+            $request->string('zipcode')->value()
         );
     }
 
@@ -45,7 +45,7 @@ readonly class VenueData
             $request->string('street_address')->value(),
             $request->string('city')->value(),
             $request->string('state')->value(),
-            $request->string('zip')->value()
+            $request->string('zipcode')->value()
         );
     }
 }
