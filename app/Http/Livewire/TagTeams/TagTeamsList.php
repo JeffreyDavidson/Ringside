@@ -31,6 +31,16 @@ class TagTeamsList extends Component
     ];
 
     /**
+     * @var array<int>
+     */
+    public array $selectedTagTeamIds = [];
+
+    /**
+     * @var array<int>
+     */
+    public array $tagTeamIdsOnPage = [];
+
+    /**
      * Display a listing of the resource.
      */
     public function render(): View
@@ -47,6 +57,8 @@ class TagTeamsList extends Component
         $query = $this->applySorting($query);
 
         $tagTeams = $query->paginate();
+
+        $this->tagTeamIdsOnPage = $tagTeams->map(fn (TagTeam $tagTeam) => (string) $tagTeam->id)->toArray();
 
         return view('livewire.tag-teams.tag-teams-list', [
             'tagTeams' => $tagTeams,

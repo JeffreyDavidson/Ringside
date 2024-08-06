@@ -33,6 +33,16 @@ class RefereesList extends Component
     ];
 
     /**
+     * @var array<int>
+     */
+    public array $selectedRefereeIds = [];
+
+    /**
+     * @var array<int>
+     */
+    public array $refereeIdsOnPage = [];
+
+    /**
      * Display a listing of the resource.
      */
     public function render(): View
@@ -50,6 +60,8 @@ class RefereesList extends Component
         $query = $this->applySorting($query);
 
         $referees = $query->paginate();
+
+        $this->refereeIdsOnPage = $referees->map(fn (Referee $referee) => (string) $referee->id)->toArray();
 
         return view('livewire.referees.referees-list', [
             'referees' => $referees,
