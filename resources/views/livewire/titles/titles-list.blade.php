@@ -19,6 +19,7 @@
                     <x-table.heading sortable multi-column wire:click="sortBy('name')" :direction="$sorts['name'] ?? null" class="min-w-125px sorting">Title Name</x-table.heading>
                     <x-table.heading sortable multi-column wire:click="sortBy('status')" :direction="$sorts['status'] ?? null" class="min-w-125px sorting">Status</x-table.heading>
                     <x-table.heading class="min-w-70px sorting_disabled">Current Champion</x-table.heading>
+                    <x-table.heading sortable multi-column wire:click="sortBy('start_date')" :direction="$sorts['start_date'] ?? null" class="min-w-125px sorting">Start Date</x-table.heading>
                     <x-table.heading class="text-end min-w-70px sorting_disabled">Actions</x-table.heading>
                 </x-table.head>
                 <x-table.body>
@@ -28,6 +29,7 @@
                             <x-table.cell><a class="text-gray-800 text-hover-primary" href="{{ route('titles.show', $title) }}">{{ $title->name }}</a></x-table.cell>
                             <x-table.cell><div class="badge badge-{{ $title->status->color() }}">{{ $title->status->label() }}</div></x-table.cell>
                             <x-table.cell>{{ $title->currentChampionship->champion->display_name ?? 'Vacant' }}</x-table.cell>
+                            <x-table.cell>{{ $title->activatedAt?->toDateString() ?? 'No Start Date Set' }}</x-table.cell>
                             <x-table.cell class="text-end">
                                 @include('livewire.titles.partials.action-cell')
                             </x-table.cell>

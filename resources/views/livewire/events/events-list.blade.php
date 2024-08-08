@@ -28,8 +28,8 @@
                             <x-table.cell><x-form.inputs.checkbox wire:model="selectedEventIds" value="{{ $event->id }}" /></x-table.cell>
                             <x-table.cell><a class="text-gray-800 text-hover-primary" href="{{ route('events.show', $event) }}">{{ $event->name }}</a></x-table.cell>
                             <x-table.cell><div class="badge badge-{{ $event->status->color() }}">{{ $event->status->label() }}</div></x-table.cell>
-                            <x-table.cell>{{ $event->date?->format('F m, Y') }}</x-table.cell>
-                            <x-table.cell>{{ $event->venue->name ?? "" }}</x-table.cell>
+                            <x-table.cell>{{ $event->date?->toDateString() ?? 'No Date Set' }}</x-table.cell>
+                            <x-table.cell>{{ $event->venue?->name ?? "No Venue Set" }}</x-table.cell>
                             <x-table.cell class="text-end">
                                 @include('livewire.events.partials.action-cell')
                             </x-table.cell>
