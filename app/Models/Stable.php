@@ -8,8 +8,6 @@ use App\Builders\StableBuilder;
 use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
-use App\Observers\StableObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

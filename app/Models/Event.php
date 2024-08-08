@@ -6,8 +6,6 @@ namespace App\Models;
 
 use App\Builders\EventBuilder;
 use App\Enums\EventStatus;
-use App\Observers\EventObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
