@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.3",
         "lorisleiva/laravel-actions": "^2.8",
+        "rappasoft/laravel-livewire-tables": "^3.4",
         "staudenmeir/laravel-merged-relations": "^1.9"
     },
     "require-dev": {

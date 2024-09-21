@@ -5,6 +5,8 @@ export default {
     content: [
         "./resources/views/*.blade.php",
         "./resources/js/*.js",
+        "./vendor/rappasoft/laravel-livewire-tables/resources/views/*.blade.php",
+        "./vendor/rappasoft/laravel-livewire-tables/resources/views/**/*.blade.php",
     ],
 
     theme: {
