@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
-use App\Http\Livewire\Titles\TitlesList;
+use App\Livewire\Titles\TitlesList;
 
 test('index returns a view', function () {
     $this->actingAs(administrator())

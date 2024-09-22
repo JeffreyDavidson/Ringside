@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Livewire\EventMatches\MatchForm;
+use App\Livewire\EventMatches\MatchForm;
 use App\Models\Event;
 
 use function Pest\Laravel\actingAs;

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Referees\RefereesController;
-use App\Http\Livewire\Referees\RefereesList;
+use App\Livewire\Referees\RefereesList;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
