@@ -13,8 +13,7 @@ readonly class TitleData
     public function __construct(
         public string $name,
         public ?Carbon $activation_date
-    ) {
-    }
+    ) {}
 
     public static function fromStoreRequest(StoreRequest $request): self
     {

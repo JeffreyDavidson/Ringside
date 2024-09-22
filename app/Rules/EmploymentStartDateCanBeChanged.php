@@ -12,9 +12,7 @@ use Illuminate\Support\Carbon;
 
 class EmploymentStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Employable $rosterMember)
-    {
-    }
+    public function __construct(protected Employable $rosterMember) {}
 
     /**
      * Determine if the validation rule passes.

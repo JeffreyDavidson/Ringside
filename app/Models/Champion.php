@@ -6,6 +6,4 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Champion extends Model
-{
-}
+class Champion extends Model {}

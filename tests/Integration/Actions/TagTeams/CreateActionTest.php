@@ -32,7 +32,7 @@ test('it creates a tag team without tag team partners and employment', function 
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new TagTeam());
+        ->andReturns(new TagTeam);
 
     $this->tagTeamRepository
         ->shouldNotReceive('addTagTeamPartner');
@@ -61,7 +61,7 @@ test('it employs a tag team and tag team partners and employment when start date
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns($tagTeam = new TagTeam());
+        ->andReturns($tagTeam = new TagTeam);
 
     $this->tagTeamRepository
         ->shouldReceive('addTagTeamPartner')

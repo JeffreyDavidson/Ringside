@@ -26,9 +26,9 @@ test('wrestlers of stable are synced when stable is updated', function () {
     $data = new StableData(
         'New Stable Name',
         null,
-        new Collection(),
+        new Collection,
         $newStableWrestlers,
-        new Collection()
+        new Collection
     );
 
     $this->stableRepository
@@ -57,8 +57,8 @@ test('tag teams of stable are synced when stable is updated', function () {
         'New Stable Name',
         null,
         $newStableTagTeams,
-        new Collection(),
-        new Collection()
+        new Collection,
+        new Collection
     );
 
     $this->stableRepository
@@ -87,8 +87,8 @@ test('managers of stable are synced when stable is updated', function () {
     $data = new StableData(
         'New Stable Name',
         null,
-        new Collection(),
-        new Collection(),
+        new Collection,
+        new Collection,
         $newStableManagers
     );
 

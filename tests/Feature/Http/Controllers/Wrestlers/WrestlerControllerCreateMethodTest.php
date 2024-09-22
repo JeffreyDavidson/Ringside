@@ -13,7 +13,7 @@ test('create returns a view', function () {
         ->get(action([WrestlersController::class, 'create']))
         ->assertOk()
         ->assertViewIs('wrestlers.create')
-        ->assertViewHas('wrestler', new Wrestler());
+        ->assertViewHas('wrestler', new Wrestler);
 });
 
 test('a basic user cannot view the form for creating a wrestler', function () {

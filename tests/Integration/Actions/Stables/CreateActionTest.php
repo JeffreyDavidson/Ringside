@@ -21,16 +21,16 @@ test('it creates a stable', function () {
     $data = new StableData(
         'Example Stable Name',
         null,
-        new Collection(),
-        new Collection(),
-        new Collection(),
+        new Collection,
+        new Collection,
+        new Collection,
     );
 
     $this->stableRepository
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns($stable = new Stable());
+        ->andReturns($stable = new Stable);
 
     AddMembersAction::shouldRun()
         ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);

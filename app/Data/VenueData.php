@@ -18,8 +18,7 @@ readonly class VenueData
         public string $city,
         public string $state,
         public string $zipcode,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a DTO from the store request.

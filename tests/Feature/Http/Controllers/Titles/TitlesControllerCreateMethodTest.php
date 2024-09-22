@@ -13,7 +13,7 @@ test('create returns a view', function () {
         ->get(action([TitlesController::class, 'create']))
         ->assertOk()
         ->assertViewIs('titles.create')
-        ->assertViewHas('title', new Title());
+        ->assertViewHas('title', new Title);
 });
 
 test('a basic user cannot view the form for creating a title', function () {

@@ -17,7 +17,7 @@ test('it creates an event', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Event());
+        ->andReturns(new App\Models\Event);
 
     CreateAction::run($data);
 });

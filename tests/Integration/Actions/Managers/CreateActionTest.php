@@ -22,7 +22,7 @@ test('it creates a manager', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Manager());
+        ->andReturns(new App\Models\Manager);
 
     $this->managerRepository
         ->shouldNotReceive('employ');

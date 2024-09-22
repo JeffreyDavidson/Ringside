@@ -29,7 +29,7 @@ test('it creates a wrestler', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new Wrestler());
+        ->andReturns(new Wrestler);
 
     $this->wrestlerRepository
         ->shouldNotReceive('employ');

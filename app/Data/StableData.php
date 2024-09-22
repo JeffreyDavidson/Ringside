@@ -27,8 +27,7 @@ readonly class StableData
         public Collection $tagTeams,
         public Collection $wrestlers,
         public Collection $managers,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a DTO from the store request.
