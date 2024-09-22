@@ -7,6 +7,8 @@ export default {
         "./resources/js/*.js",
         "./vendor/rappasoft/laravel-livewire-tables/resources/views/*.blade.php",
         "./vendor/rappasoft/laravel-livewire-tables/resources/views/**/*.blade.php",
+        "./app/Livewire/*.php",
+        "./app/Livewire/**/*.php",
     ],
 
     theme: {
