@@ -20,8 +20,7 @@ readonly class TagTeamData
         public ?Carbon $start_date,
         public ?Wrestler $wrestlerA,
         public ?Wrestler $wrestlerB,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a DTO from the store request.

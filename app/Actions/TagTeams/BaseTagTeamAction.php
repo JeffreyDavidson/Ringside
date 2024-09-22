@@ -15,6 +15,5 @@ abstract class BaseTagTeamAction
     public function __construct(
         protected TagTeamRepository $tagTeamRepository,
         protected WrestlerRepository $wrestlerRepository
-    ) {
-    }
+    ) {}
 }

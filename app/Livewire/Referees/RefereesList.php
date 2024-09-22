@@ -18,8 +18,6 @@ class RefereesList extends Component
 
     /**
      * Determines if the filters should be shown.
-     *
-     * @var bool
      */
     public bool $showFilters = false;
 

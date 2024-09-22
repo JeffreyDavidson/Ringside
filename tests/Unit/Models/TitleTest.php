@@ -50,5 +50,5 @@ test('a title uses soft deleted trait', function () {
 });
 
 test('a title has its own eloquent builder', function () {
-    expect(new Title())->query()->toBeInstanceOf(TitleBuilder::class);
+    expect(new Title)->query()->toBeInstanceOf(TitleBuilder::class);
 });

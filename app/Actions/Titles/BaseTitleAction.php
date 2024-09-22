@@ -11,7 +11,5 @@ abstract class BaseTitleAction
     /**
      * Create a new base title action instance.
      */
-    public function __construct(protected TitleRepository $titleRepository)
-    {
-    }
+    public function __construct(protected TitleRepository $titleRepository) {}
 }

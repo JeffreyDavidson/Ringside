@@ -29,8 +29,6 @@ trait CanJoinStables
 
     /**
      * Get the current stable the member belongs to.
-     *
-     * @return MorphToOne
      */
     public function currentStable(): MorphToOne
     {

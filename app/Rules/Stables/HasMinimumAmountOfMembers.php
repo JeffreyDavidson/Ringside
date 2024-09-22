@@ -21,8 +21,7 @@ class HasMinimumAmountOfMembers implements ValidationRule
         private Stable $stable,
         private readonly Collection $wrestlers,
         private readonly Collection $tagTeams
-    ) {
-    }
+    ) {}
 
     /**
      * Determine if the validation rule passes.

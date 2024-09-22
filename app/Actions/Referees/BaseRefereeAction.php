@@ -11,7 +11,5 @@ abstract class BaseRefereeAction
     /**
      * Create a new base referee action instance.
      */
-    public function __construct(protected RefereeRepository $refereeRepository)
-    {
-    }
+    public function __construct(protected RefereeRepository $refereeRepository) {}
 }

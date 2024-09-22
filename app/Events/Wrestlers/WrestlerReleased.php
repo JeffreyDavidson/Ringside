@@ -15,7 +15,5 @@ class WrestlerReleased
     /**
      * Create a new event instance.
      */
-    public function __construct(public Wrestler $wrestler, public Carbon $releaseDate)
-    {
-    }
+    public function __construct(public Wrestler $wrestler, public Carbon $releaseDate) {}
 }

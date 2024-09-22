@@ -15,7 +15,5 @@ class ManagerReleased
     /**
      * Create a new event instance.
      */
-    public function __construct(public Manager $manager, public Carbon $releaseDate)
-    {
-    }
+    public function __construct(public Manager $manager, public Carbon $releaseDate) {}
 }

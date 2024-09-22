@@ -11,7 +11,5 @@ abstract class BaseManagerAction
     /**
      * Create a new base manager action instance.
      */
-    public function __construct(protected ManagerRepository $managerRepository)
-    {
-    }
+    public function __construct(protected ManagerRepository $managerRepository) {}
 }

@@ -11,9 +11,7 @@ use Illuminate\Support\Carbon;
 
 class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
 {
-    public function __construct(protected Carbon $stableStartDate)
-    {
-    }
+    public function __construct(protected Carbon $stableStartDate) {}
 
     /**
      * Determine if the validation rule passes.

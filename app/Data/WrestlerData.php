@@ -21,8 +21,7 @@ class WrestlerData
         public string $hometown,
         public ?string $signature_move,
         public ?Carbon $start_date,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a DTO from the update request.

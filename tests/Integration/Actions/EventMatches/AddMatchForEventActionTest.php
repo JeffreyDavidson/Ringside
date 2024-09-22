@@ -35,7 +35,7 @@ test('add a match to an event', function () {
             'wrestlers' => collect([$wrestlerB]),
         ],
     ]);
-    $data = new EventMatchData($matchType, $referees, new Collection(), $competitors, null);
+    $data = new EventMatchData($matchType, $referees, new Collection, $competitors, null);
 
     $this->eventMatchRepository
         ->shouldReceive('createForEvent')

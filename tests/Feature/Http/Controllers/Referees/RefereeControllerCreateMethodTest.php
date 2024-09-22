@@ -13,7 +13,7 @@ test('create returns a view', function () {
         ->get(action([RefereesController::class, 'create']))
         ->assertOk()
         ->assertViewIs('referees.create')
-        ->assertViewHas('referee', new Referee());
+        ->assertViewHas('referee', new Referee);
 });
 
 test('a basic user cannot view the form for creating a referee', function () {

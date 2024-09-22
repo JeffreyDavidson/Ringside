@@ -28,8 +28,7 @@ readonly class EventMatchData
         public EloquentCollection $titles,
         public Collection $competitors,
         public ?string $preview
-    ) {
-    }
+    ) {}
 
     /**
      * Retrieve data from the store request.

@@ -19,8 +19,7 @@ readonly class EventData
         public ?Carbon $date,
         public ?Venue $venue,
         public ?string $preview
-    ) {
-    }
+    ) {}
 
     /**
      * Retrieve data from the store request.

@@ -18,7 +18,7 @@ test('it creates a venue', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new Venue());
+        ->andReturns(new Venue);
 
     CreateAction::run($data);
 });
