@@ -1,9 +1,16 @@
-<div id="kt_app_footer" class="app-footer">
-    <div
-        class="py-3 app-container container-fluid d-flex flex-column flex-md-row flex-center flex-md-stack">
-        <div class="order-2 text-dark order-md-1">
-            <span class="text-muted fw-semibold me-1">{{ date('Y') }}©</span>
-            <span class="text-gray-800">Jeffrey Davidson</span>
+<footer class="footer">
+    <!-- Container -->
+    <div class="container-fixed">
+        <div class="flex flex-col md:flex-row justify-center md:justify-between items-center gap-3 py-5">
+            <div class="flex order-2 md:order-1 gap-2 font-normal text-2sm">
+                <span class="text-gray-500">
+                    2024©
+                </span>
+                <a class="text-gray-600 hover:text-primary" href="https://keenthemes.com">
+                    Jeffrey Davidson
+                </a>
+            </div>
         </div>
     </div>
-</div>
+    <!-- End of Container -->
+</footer>

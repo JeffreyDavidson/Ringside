@@ -27,7 +27,7 @@ trait CanWinTitles
      */
     public function previousTitleChampionships(): MorphMany
     {
-        return $this->morphMany(TitleChampionship::class, 'champion')
+        return $this->morphMany(TitleChampionship::class, 'former_champion')
             ->whereNotNull('lost_at');
     }
 
@@ -38,7 +38,7 @@ trait CanWinTitles
      */
     public function currentChampionship(): MorphOne
     {
-        return $this->morphOne(TitleChampionship::class, 'champion')
+        return $this->morphOne(TitleChampionship::class, 'new_champion')
             ->whereNull('lost_at');
     }
 
@@ -49,7 +49,7 @@ trait CanWinTitles
      */
     public function currentChampionships(): MorphMany
     {
-        return $this->morphMany(TitleChampionship::class, 'champion')
+        return $this->morphMany(TitleChampionship::class, 'new_champion')
             ->whereNull('lost_at');
     }
 }
