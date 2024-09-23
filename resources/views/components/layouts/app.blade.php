@@ -1,67 +1,73 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html class="h-full" data-theme="true" data-theme-mode="light" lang="en"
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700">
-        @vite('resources/css/app.css')
-        @vite('resources/css/plugins.bundle.css')
-        @vite('resources/css/style.bundle.css')
-        @livewireStyles
-    </head>
-    <body id="kt_app_body" data-kt-app-layout="dark-sidebar" data-kt-app-header-fixed="true"
-          data-kt-app-sidebar-enabled="true" data-kt-app-sidebar-fixed="true" data-kt-app-sidebar-hoverable="true"
-          data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true"
-          data-kt-app-sidebar-push-footer="true" data-kt-app-toolbar-enabled="true" class="app-default"
-          data-new-gr-c-s-check-loaded="8.909.0" data-gr-ext-installed="" listener="true">
-        <!--begin::Theme mode setup on page load-->
-        <script>var defaultThemeMode = "light";
-            var themeMode;
-            if (document.documentElement) {
-                if (document.documentElement.hasAttribute("data-bs-theme-mode")) {
-                    themeMode = document.documentElement.getAttribute("data-bs-theme-mode");
-                } else {
-                    if (localStorage.getItem("data-bs-theme") !== null) {
-                        themeMode = localStorage.getItem("data-bs-theme");
-                    } else {
-                        themeMode = defaultThemeMode;
-                    }
-                }
-                if (themeMode === "system") {
-                    themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                }
-                document.documentElement.setAttribute("data-bs-theme", themeMode);
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
+    @vite('resources/vendors/keenicons/styles.bundle.css')
+    @vite('resources/css/app.css')
+    @livewireStyles
+</head>
+
+<body
+    class="antialiased flex h-full text-base text-gray-700 [--tw-page-bg:#fefefe] [--tw-page-bg-dark:var(--tw-coal-500)] demo1 sidebar-fixed header-fixed bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]">
+
+    <!-- Theme Mode -->
+    <script>
+        const defaultThemeMode = 'light'; // light|dark|system
+        let themeMode;
+
+        if (document.documentElement) {
+            if (localStorage.getItem('theme')) {
+                themeMode = localStorage.getItem('theme');
+            } else if (document.documentElement.hasAttribute('data-theme-mode')) {
+                themeMode = document.documentElement.getAttribute('data-theme-mode');
+            } else {
+                themeMode = defaultThemeMode;
             }
-        </script>
-        <!--end::Theme mode setup on page load-->
-        <div id="kt_app_root" class="d-flex flex-column flex-root app-root">
-            <div id="kt_app_page" class="app-page flex-column flex-column-fluid">
-                @include('partials.header')
-                <div id="kt_app_wrapper" class="app-wrapper flex-column flex-row-fluid">
-                    <x-layouts.partials.aside/>
-                    <div id="kt_app_main" class="app-main flex-column flex-row-fluid">
-                        <div class="d-flex flex-column flex-column-fluid">
-                            {{ $toolbar }}
-                            <div id="kt_app_content" class="app-content flex-column-fluid">
-                                <div id="kt_app_content_container" class="app-container container-fluid">
-                                    {{ $slot }}
-                                </div>
-                            </div>
-                        </div>
-                        <x-layouts.partials.footer/>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <script>var hostUrl = "assets/";</script>
-        <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
-        <script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
-        @vite('resources/js/app.js')
-        @livewireScripts
-    </body>
+            if (themeMode === 'system') {
+                themeMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            document.documentElement.classList.add(themeMode);
+        }
+    </script>
+    <!-- End of Theme Mode -->
+    <!-- Page -->
+    <!-- Main -->
+    <div class="flex grow">
+        <!-- Sidebar -->
+        <x-layouts.partials.sidebar />
+        <!-- End of Sidebar -->
+        <!-- Wrapper -->
+        <div class="wrapper flex grow flex-col">
+            <!-- Header -->
+            <x-layouts.partials.header />
+            <!-- End of Header -->
+            <!-- Content -->
+            <main class="grow content pt-5" id="content" role="content">
+                {{ $slot }}
+            </main>
+            <!-- End of Content -->
+            <!-- Footer -->
+            <x-layouts.partials.footer />
+            <!-- End of Footer -->
+        </div>
+        <!-- End of Wrapper -->
+    </div>
+    <!-- End of Main -->
+    <x-modal.search />
+    <!-- End of Page -->
+    @vite('resources/js/app.js')
+    @livewireScripts
+</body>
+
 </html>

@@ -1,51 +1,16 @@
 <x-layouts.app>
-    <x-slot:toolbar>
-        <x-toolbar>
-            <x-page-heading>Venue Details</x-page-heading>
-            <x-breadcrumbs.list>
-                <x-breadcrumbs.item :url="route('dashboard')" label="Home" />
-                <x-breadcrumbs.separator />
-                <x-breadcrumbs.item :url="route('venues.index')" label="Venues" />
-                <x-breadcrumbs.separator />
-                <x-breadcrumbs.item :label="$venue->name" />
-            </x-breadcrumbs.list>
-        </x-toolbar>
-    </x-slot>
-
-    <x-details-page>
-        <x-details-card>
-            <x-card>
-                <x-card.body>
-                    <x-card.detail-link
-                        collapsibleLink="kt_venue_view_details"
-                        resource="venue"
-                        :href="route('venues.edit', $venue)"
-                    />
-                    <x-separator />
-                    <x-card.detail-container id="kt_venue_view_details">
-                        <x-card.detail-row>
-                            <x-card.detail-property label="Name" />
-                            <x-card.detail-value>{{ $venue->name }}</x-card.detail-value>
-                        </x-card.detail-row>
-                        <x-card.detail-row>
-                            <x-card.detail-property label="Address" />
-                            <x-card.detail-value>
-                                {{ $venue->street_address }}
-                                @php
-                                    echo "<br />";
-                                @endphp
-                                {{ $venue->city }}, {{ $venue->state }} {{ $venue->zip }}
-                            </x-card.detail-value>
-                        </x-card.detail-row>
-                    </x-card.detail-container>
-                </x-card.body>
-            </x-card>
-        </x-details-card>
-
-        <x-details-data>
-            @if ($venue->previousEvents->isNotEmpty())
-                <livewire:venues.previous-events-list :venue="$venue" />
-            @endif
-        </x-details-data>
-    </x-details-page>
+    <x-container-fixed>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7.5">
+            <div class="col-span-1">
+                <div class="grid gap-5 lg:gap-7.5">
+                    <x-venues.show.general-info :$venue />
+                </div>
+            </div>
+            <div class="col-span-2">
+                <div class="flex flex-col gap-5 lg:gap-7.5">
+                    {{-- <livewire:venues.show.venue-events.page :$venue /> --}}
+                </div>
+            </div>
+        </div>
+    </x-container-fixed>
 </x-layouts.app>
