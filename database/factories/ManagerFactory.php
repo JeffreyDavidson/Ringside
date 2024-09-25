@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ManagerStatus;
-use App\Models\Employment;
 use App\Models\Injury;
+use App\Models\ManagerEmployment;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -34,13 +34,13 @@ class ManagerFactory extends Factory
     public function available(): static
     {
         return $this->state(fn () => ['status' => ManagerStatus::Available])
-            ->has(Employment::factory()->started(Carbon::yesterday()));
+            ->has(ManagerEmployment::factory()->started(Carbon::yesterday()), 'employments');
     }
 
     public function withFutureEmployment(): static
     {
         return $this->state(fn () => ['status' => ManagerStatus::FutureEmployment])
-            ->has(Employment::factory()->started(Carbon::tomorrow()));
+            ->has(ManagerEmployment::factory()->started(Carbon::tomorrow()), 'employments');
     }
 
     public function unemployed(): static
@@ -54,7 +54,7 @@ class ManagerFactory extends Factory
         $end = now()->subDays(3);
 
         return $this->state(fn () => ['status' => ManagerStatus::Retired])
-            ->has(Employment::factory()->started($start)->ended($end))
+            ->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments')
             ->has(Retirement::factory()->started($end));
     }
 
@@ -64,7 +64,7 @@ class ManagerFactory extends Factory
         $end = now()->subDays(3);
 
         return $this->state(fn () => ['status' => ManagerStatus::Released])
-            ->has(Employment::factory()->started($start)->ended($end));
+            ->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments');
     }
 
     public function suspended(): static
@@ -74,7 +74,7 @@ class ManagerFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => ManagerStatus::Suspended])
-            ->has(Employment::factory()->started($start))
+            ->has(ManagerEmployment::factory()->started($start), 'employments')
             ->has(Suspension::factory()->started($end));
     }
 
@@ -84,7 +84,7 @@ class ManagerFactory extends Factory
         $start = $now->copy()->subDays(2);
 
         return $this->state(fn () => ['status' => ManagerStatus::Injured])
-            ->has(Employment::factory()->started($start))
+            ->has(ManagerEmployment::factory()->started($start), 'employments')
             ->has(Injury::factory()->started($now));
     }
 }

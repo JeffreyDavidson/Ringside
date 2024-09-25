@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\RefereeStatus;
-use App\Models\Employment;
 use App\Models\Injury;
+use App\Models\RefereeEmployment;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -34,13 +34,13 @@ class RefereeFactory extends Factory
     public function bookable(): static
     {
         return $this->state(fn () => ['status' => RefereeStatus::Bookable])
-            ->has(Employment::factory()->started(Carbon::yesterday()));
+            ->has(RefereeEmployment::factory()->started(Carbon::yesterday()), 'employments');
     }
 
     public function withFutureEmployment(): static
     {
         return $this->state(fn () => ['status' => RefereeStatus::FutureEmployment])
-            ->has(Employment::factory()->started(Carbon::tomorrow()));
+            ->has(RefereeEmployment::factory()->started(Carbon::tomorrow()), 'employments');
     }
 
     public function unemployed(): static
@@ -55,7 +55,7 @@ class RefereeFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => RefereeStatus::Retired])
-            ->has(Employment::factory()->started($start)->ended($end))
+            ->has(RefereeEmployment::factory()->started($start)->ended($end), 'employments')
             ->has(Retirement::factory()->started($end));
     }
 
@@ -66,7 +66,7 @@ class RefereeFactory extends Factory
         $end = $now->copy()->subWeeks();
 
         return $this->state(fn () => ['status' => RefereeStatus::Released])
-            ->has(Employment::factory()->started($start)->ended($end));
+            ->has(RefereeEmployment::factory()->started($start)->ended($end), 'employments');
     }
 
     public function suspended(): static
@@ -76,7 +76,7 @@ class RefereeFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => RefereeStatus::Suspended])
-            ->has(Employment::factory()->started($start))
+            ->has(RefereeEmployment::factory()->started($start), 'employments')
             ->has(Suspension::factory()->started($end));
     }
 
@@ -86,7 +86,7 @@ class RefereeFactory extends Factory
         $start = $now->copy()->subDays(2);
 
         return $this->state(fn () => ['status' => RefereeStatus::Injured])
-            ->has(Employment::factory()->started($start))
+            ->has(RefereeEmployment::factory()->started($start), 'employments')
             ->has(Injury::factory()->started($now));
     }
 }

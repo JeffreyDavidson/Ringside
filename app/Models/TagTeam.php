@@ -14,15 +14,16 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable, Manageable, Retirable, Suspendable
 {
     use Concerns\CanJoinStables;
     use Concerns\CanWinTitles;
-    use Concerns\HasEmployments;
     use Concerns\HasManagers;
     use Concerns\HasMatches;
+    use Concerns\HasNewEmployments;
     use Concerns\HasRetirements;
     use Concerns\HasSuspensions;
     use Concerns\HasWrestlers;
@@ -64,6 +65,16 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function newEloquentBuilder($query): TagTeamBuilder // @pest-ignore-type
     {
         return new TagTeamBuilder($query);
+    }
+
+    /**
+     * Get all the employments of the model.
+     *
+     * @return HasMany<TagTeamEmployment>
+     */
+    public function employments(): HasMany
+    {
+        return $this->hasMany(TagTeamEmployment::class);
     }
 
     /**

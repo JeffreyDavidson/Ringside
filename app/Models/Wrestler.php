@@ -17,6 +17,7 @@ use App\Models\Contracts\Suspendable;
 use App\Models\Contracts\TagTeamMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
@@ -24,10 +25,10 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     use Concerns\CanJoinStables;
     use Concerns\CanJoinTagTeams;
     use Concerns\CanWinTitles;
-    use Concerns\HasEmployments;
     use Concerns\HasInjuries;
     use Concerns\HasManagers;
     use Concerns\HasMatches;
+    use Concerns\HasNewEmployments;
     use Concerns\HasRetirements;
     use Concerns\HasSuspensions;
     use Concerns\OwnedByUser;
@@ -87,5 +88,15 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
             'height' => HeightCast::class,
             'status' => WrestlerStatus::class,
         ];
+    }
+
+    /**
+     * Get all the employments of the model.
+     *
+     * @return HasMany<WrestlerEmployment>
+     */
+    public function employments(): HasMany
+    {
+        return $this->hasMany(WrestlerEmployment::class);
     }
 }

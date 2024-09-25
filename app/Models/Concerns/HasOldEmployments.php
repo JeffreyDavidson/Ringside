@@ -5,82 +5,21 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Employment;
+use App\Models\WrestlerEmployment;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
-trait HasEmployments
+trait HasOldEmployments
 {
     /**
      * Get all the employments of the model.
      *
-     * @return MorphMany<Employment>
+     * @return HasMany<WrestlerEmployment>
      */
-    public function employments(): MorphMany
+    public function employments(): HasMany
     {
-        return $this->morphMany(Employment::class, 'employable');
-    }
-
-    /**
-     * Get the first employment of the model.
-     *
-     * @return MorphOne<Employment>
-     */
-    public function firstEmployment(): MorphOne
-    {
-        return $this->morphOne(Employment::class, 'employable')
-            ->oldestOfMany('started_at');
-    }
-
-    /**
-     * Get the current employment of the model.
-     *
-     * @return MorphOne<Employment>
-     */
-    public function currentEmployment(): MorphOne
-    {
-        return $this->morphOne(Employment::class, 'employable')
-            ->where('started_at', '<=', now())
-            ->whereNull('ended_at')
-            ->latestOfMany();
-    }
-
-    /**
-     * Get the future employment of the model.
-     *
-     * @return MorphOne<Employment>
-     */
-    public function futureEmployment(): MorphOne
-    {
-        return $this->morphOne(Employment::class, 'employable')
-            ->where('started_at', '>', now())
-            ->whereNull('ended_at')
-            ->latestOfMany();
-    }
-
-    /**
-     * Get the previous employments of the model.
-     *
-     * @return MorphMany<Employment>
-     */
-    public function previousEmployments(): MorphMany
-    {
-        return $this->employments()
-            ->whereNotNull('ended_at');
-    }
-
-    /**
-     * Get the previous employment of the model.
-     *
-     * @return MorphOne<Employment>
-     */
-    public function previousEmployment(): MorphOne
-    {
-        return $this->morphOne(Employment::class, 'employable')
-            ->whereNotNull('ended_at')
-            ->latest('ended_at')
-            ->latestOfMany();
+        return $this->hasMany(WrestlerEmployment::class);
     }
 
     /**
