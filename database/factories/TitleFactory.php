@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\TitleStatus;
-use App\Models\Activation;
 use App\Models\Retirement;
+use App\Models\TitleActivation;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -34,7 +34,7 @@ class TitleFactory extends Factory
         $activationDate = Carbon::yesterday();
 
         return $this->state(fn () => ['status' => TitleStatus::Active])
-            ->has(Activation::factory()->started($activationDate));
+            ->has(TitleActivation::factory()->started($activationDate), 'activations');
     }
 
     public function inactive(): static
@@ -44,13 +44,13 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => TitleStatus::Inactive])
-            ->has(Activation::factory()->started($start)->ended($end));
+            ->has(TitleActivation::factory()->started($start)->ended($end), 'activations');
     }
 
     public function withFutureActivation(): static
     {
         return $this->state(fn () => ['status' => TitleStatus::FutureActivation])
-            ->has(Activation::factory()->started(Carbon::tomorrow()));
+            ->has(TitleActivation::factory()->started(Carbon::tomorrow()), 'activations');
     }
 
     public function retired(): static
@@ -60,7 +60,7 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => TitleStatus::Retired])
-            ->has(Activation::factory()->started($start)->ended($end))
+            ->has(TitleActivation::factory()->started($start)->ended($end), 'activations')
             ->has(Retirement::factory()->started($end));
     }
 
@@ -75,19 +75,5 @@ class TitleFactory extends Factory
             TitleChampionship::factory()->for($champion, 'champion'),
             'championships'
         );
-    }
-
-    public function nonActive(): static
-    {
-        return $this->state(function () {
-            return [
-                'status' => fake()->randomElement([
-                    TitleStatus::Inactive,
-                    TitleStatus::Retired,
-                    TitleStatus::FutureActivation,
-                    TitleStatus::Unactivated,
-                ]),
-            ];
-        });
     }
 }
