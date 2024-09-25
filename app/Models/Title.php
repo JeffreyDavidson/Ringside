@@ -10,12 +10,13 @@ use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Title extends Model implements Activatable, Retirable
 {
-    use Concerns\HasActivations;
     use Concerns\HasChampionships;
+    use Concerns\HasNewActivations;
     use Concerns\HasRetirements;
     use HasFactory;
     use SoftDeletes;
@@ -64,5 +65,15 @@ class Title extends Model implements Activatable, Retirable
         return [
             'status' => TitleStatus::class,
         ];
+    }
+
+    /**
+     * Get all the activations of the model.
+     *
+     * @return HasMany<TitleActivation>
+     */
+    public function activations(): HasMany
+    {
+        return $this->hasMany(TitleActivation::class);
     }
 }
