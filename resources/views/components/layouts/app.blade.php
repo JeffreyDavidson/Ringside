@@ -68,6 +68,7 @@
     <!-- End of Page -->
     @vite('resources/js/app.js')
     @livewireScripts
+    @livewire('wire-elements-modal')
 </body>
 
 </html>
