@@ -26,8 +26,8 @@ class TitlesTableSeeder extends Seeder
 
         $startDate = $dateToStart;
         $diffInYears = $startDate->diffInYears(now());
-        $minYears = (int) (ceil($diffInYears * .25));
-        $maxYears = (int) (floor($diffInYears * .75));
+        $minYears = intval(ceil($diffInYears * .25));
+        $maxYears = intval(floor($diffInYears * .75));
         $randomNumberOfYearsActivated = rand($minYears, $maxYears);
 
         /**

@@ -26,8 +26,8 @@ class StablesTableSeeder extends Seeder
 
         $startDate = $dateToStart;
         $diffInYears = $startDate->diffInYears(now());
-        $minYears = ceil($diffInYears * .25);
-        $maxYears = floor($diffInYears * .75);
+        $minYears = intval(ceil($diffInYears * .25));
+        $maxYears = intval(floor($diffInYears * .75));
         $randomNumberOfYearsEmployed = rand($minYears, $maxYears);
 
         /**
