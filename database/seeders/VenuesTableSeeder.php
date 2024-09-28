@@ -15,9 +15,11 @@ class VenuesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        Venue::factory()
-            ->count(100)
-            ->sequence(fn (Sequence $sequence) => ['name' => 'Venue '.$sequence->index])
-            ->create();
+        if (Venue::query()->count() === 0) {
+            Venue::factory()
+                ->count(100)
+                ->sequence(fn (Sequence $sequence) => ['name' => 'Venue '.$sequence->index])
+                ->create();
+        }
     }
 }
