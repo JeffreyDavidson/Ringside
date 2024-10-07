@@ -2,7 +2,7 @@
     class="header fixed top-0 z-10 left-0 right-0 flex items-stretch shrink-0 bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]"
     data-sticky="true" data-sticky-class="shadow-sm" data-sticky-name="header" id="header">
     <!-- Container -->
-    <div class="container-fixed flex justify-between items-stretch lg:gap-4" id="header_container">
+    <div class="container-fixed flex justify-end lg:gap-4" id="header_container">
         <!-- Mobile Logo -->
         <div class="flex gap-1 lg:hidden items-center -ml-1">
             <a class="shrink-0" href="html/demo1.html">
