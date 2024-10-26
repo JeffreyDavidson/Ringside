@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 function set_active($name, $active = 'kt-menu__item--active')
 {
     return Route::currentRouteNamed($name) ? $active : '';
