@@ -89,6 +89,15 @@
         ],
         "type-coverage": [
             "./vendor/bin/pest --type-coverage"
+        ],
+        "test": [
+            "sail artisan test"
+        ],
+        "test-coverage": [
+            "sail artisan test --coverage"
+        ],
+        "format": [
+            "vendor/bin/pint"
         ]
     }
 }
