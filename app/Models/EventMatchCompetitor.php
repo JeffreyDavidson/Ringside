@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Collections\EventMatchCompetitorsCollection;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+#[CollectedBy(EventMatchCompetitorsCollection::class)]
 class EventMatchCompetitor extends MorphPivot
 {
     /**
@@ -38,16 +40,5 @@ class EventMatchCompetitor extends MorphPivot
     public function competitor(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'competitor_type', 'competitor_id');
-    }
-
-    /**
-     * Create a new Eloquent Collection instance.
-     *
-     * @param  array<int, EventMatchCompetitor>  $models
-     * @return EventMatchCompetitorsCollection<array-key, Model>
-     */
-    public function newCollection(array $models = []): EventMatchCompetitorsCollection
-    {
-        return new EventMatchCompetitorsCollection($models);
     }
 }
