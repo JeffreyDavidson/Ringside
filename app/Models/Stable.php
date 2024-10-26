@@ -6,15 +6,13 @@ namespace App\Models;
 
 use App\Builders\StableBuilder;
 use App\Enums\StableStatus;
-use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Stable extends Model implements Activatable, Retirable
+class Stable extends Model implements Retirable
 {
-    use Concerns\HasActivations;
     use Concerns\HasMembers;
     use Concerns\HasRetirements;
     use Concerns\OwnedByUser;
