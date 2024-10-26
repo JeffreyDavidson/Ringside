@@ -23,7 +23,6 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.10",
-        "doctrine/dbal": "^3.5",
         "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.14",
         "larastan/larastan": "^2.8",
