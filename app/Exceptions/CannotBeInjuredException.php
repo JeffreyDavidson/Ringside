@@ -4,38 +4,37 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Injurable;
 use Exception;
 
 class CannotBeInjuredException extends Exception
 {
-    public static function unemployed(Injurable $model): self
+    public static function unemployed(): self
     {
-        return new self("`{$model->getIdentifier()}` is unemployed and cannot be injured.");
+        return new self('This model is unemployed and cannot be injured.');
     }
 
-    public static function released(Injurable $model): self
+    public static function released(): self
     {
-        return new self("`{$model->getIdentifier()}` is released and cannot be injured.");
+        return new self('This model is released and cannot be injured.');
     }
 
-    public static function retired(Injurable $model): self
+    public static function retired(): self
     {
-        return new self("`{$model->getIdentifier()}` is retired and cannot be injured.");
+        return new self('This model is retired and cannot be injured.');
     }
 
-    public static function hasFutureEmployment(Injurable $model): self
+    public static function hasFutureEmployment(): self
     {
-        return new self("`{$model->getIdentifier()}` has not been officially employed and cannot be injured.");
+        return new self('This model has not been officially employed and cannot be injured.');
     }
 
-    public static function injured(Injurable $model): self
+    public static function injured(): self
     {
-        return new self("`{$model->getIdentifier()}` is already currently injured.");
+        return new self('This model is already currently injured.');
     }
 
-    public static function suspended(Injurable $model): self
+    public static function suspended(): self
     {
-        return new self("`{$model->getIdentifier()}` is suspended and cannot be injured.");
+        return new self('This model is suspended and cannot be injured.');
     }
 }

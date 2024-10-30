@@ -39,7 +39,7 @@ class EmployAction extends BaseRefereeAction
     private function ensureCanBeEmployed(Referee $referee): void
     {
         if ($referee->isCurrentlyEmployed()) {
-            throw CannotBeEmployedException::employed($referee);
+            throw CannotBeEmployedException::employed();
         }
     }
 }

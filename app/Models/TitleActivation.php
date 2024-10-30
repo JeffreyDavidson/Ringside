@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read \Illuminate\Support\Carbon $started_at
+ */
 class TitleActivation extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleActivationFactory> */
@@ -40,7 +43,7 @@ class TitleActivation extends Model
     /**
      * Get the title from the activation record.
      *
-     * @return BelongsTo<Title>
+     * @return BelongsTo<Title, $this>
      */
     public function title(): BelongsTo
     {

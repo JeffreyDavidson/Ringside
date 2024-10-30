@@ -35,27 +35,27 @@ class SuspendAction extends BaseRefereeAction
     private function ensureCanBeSuspended(Referee $referee): void
     {
         if ($referee->isUnemployed()) {
-            throw CannotBeSuspendedException::unemployed($referee);
+            throw CannotBeSuspendedException::unemployed();
         }
 
         if ($referee->isReleased()) {
-            throw CannotBeSuspendedException::released($referee);
+            throw CannotBeSuspendedException::released();
         }
 
         if ($referee->isRetired()) {
-            throw CannotBeSuspendedException::retired($referee);
+            throw CannotBeSuspendedException::retired();
         }
 
         if ($referee->hasFutureEmployment()) {
-            throw CannotBeSuspendedException::hasFutureEmployment($referee);
+            throw CannotBeSuspendedException::hasFutureEmployment();
         }
 
         if ($referee->isSuspended()) {
-            throw CannotBeSuspendedException::suspended($referee);
+            throw CannotBeSuspendedException::suspended();
         }
 
         if ($referee->isInjured()) {
-            throw CannotBeSuspendedException::injured($referee);
+            throw CannotBeSuspendedException::injured();
         }
     }
 }

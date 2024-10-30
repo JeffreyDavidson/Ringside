@@ -63,15 +63,15 @@ class RetireAction extends BaseStableAction
     private function ensureCanBeRetired(Stable $stable): void
     {
         if ($stable->isUnactivated()) {
-            throw CannotBeRetiredException::unactivated($stable);
+            throw CannotBeRetiredException::unactivated();
         }
 
         if ($stable->hasFutureActivation()) {
-            throw CannotBeRetiredException::hasFutureActivation($stable);
+            throw CannotBeRetiredException::hasFutureActivation();
         }
 
         if ($stable->isRetired()) {
-            throw CannotBeRetiredException::retired($stable);
+            throw CannotBeRetiredException::retired();
         }
     }
 }

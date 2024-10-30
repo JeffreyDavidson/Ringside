@@ -48,15 +48,15 @@ class RetireAction extends BaseTagTeamAction
     private function ensureCanBeRetired(TagTeam $tagTeam): void
     {
         if ($tagTeam->isUnemployed()) {
-            throw CannotBeRetiredException::unemployed($tagTeam);
+            throw CannotBeRetiredException::unemployed();
         }
 
         if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment($tagTeam);
+            throw CannotBeRetiredException::hasFutureEmployment();
         }
 
         if ($tagTeam->isRetired()) {
-            throw CannotBeRetiredException::retired($tagTeam);
+            throw CannotBeRetiredException::retired();
         }
     }
 }

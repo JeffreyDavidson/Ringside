@@ -8,7 +8,9 @@ use App\Enums\TitleStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Builder<\App\Models\Title>
+ * @template TModelClass of \App\Models\Title
+ *
+ * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
  */
 class TitleBuilder extends Builder
 {

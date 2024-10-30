@@ -36,7 +36,7 @@ class UnretireAction extends BaseManagerAction
     private function ensureCanBeUnretired(Manager $manager): void
     {
         if (! $manager->isRetired()) {
-            throw CannotBeUnretiredException::notRetired($manager);
+            throw CannotBeUnretiredException::notRetired();
         }
     }
 }

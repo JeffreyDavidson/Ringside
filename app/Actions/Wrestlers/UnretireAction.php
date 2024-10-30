@@ -36,7 +36,7 @@ class UnretireAction extends BaseWrestlerAction
     private function ensureCanBeUnretired(Wrestler $wrestler): void
     {
         if (! $wrestler->isRetired()) {
-            throw CannotBeUnretiredException::notRetired($wrestler);
+            throw CannotBeUnretiredException::notRetired();
         }
     }
 }

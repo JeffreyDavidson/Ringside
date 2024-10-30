@@ -35,19 +35,19 @@ class DeactivateAction extends BaseTitleAction
     private function ensureCanBeDeactivated(Title $title): void
     {
         if ($title->isUnactivated()) {
-            throw CannotBeDeactivatedException::unactivated($title);
+            throw CannotBeDeactivatedException::unactivated();
         }
 
-        if ($title->isInactive()) {
-            throw CannotBeDeactivatedException::inactive($title);
+        if ($title->isDeactivated()) {
+            throw CannotBeDeactivatedException::deactivated();
         }
 
         if ($title->hasFutureActivation()) {
-            throw CannotBeDeactivatedException::hasFutureActivation($title);
+            throw CannotBeDeactivatedException::hasFutureActivation();
         }
 
         if ($title->isRetired()) {
-            throw CannotBeDeactivatedException::retired($title);
+            throw CannotBeDeactivatedException::retired();
         }
     }
 }

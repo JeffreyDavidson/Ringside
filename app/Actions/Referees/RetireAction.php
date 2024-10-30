@@ -47,15 +47,15 @@ class RetireAction extends BaseRefereeAction
     private function ensureCanBeRetired(Referee $referee): void
     {
         if ($referee->isUnemployed()) {
-            throw CannotBeRetiredException::unemployed($referee);
+            throw CannotBeRetiredException::unemployed();
         }
 
         if ($referee->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment($referee);
+            throw CannotBeRetiredException::hasFutureEmployment();
         }
 
         if ($referee->isRetired()) {
-            throw CannotBeRetiredException::retired($referee);
+            throw CannotBeRetiredException::retired();
         }
     }
 }

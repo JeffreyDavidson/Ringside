@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Activatable;
 use Exception;
 
 class CannotBeDeactivatedException extends Exception
 {
-    public static function unactivated(Activatable $model): self
+    public static function unactivated(): self
     {
-        return new self("`{$model->getIdentifier()}` is unemployed and cannot be released.");
+        return new self('This model is unemployed and cannot be released.');
     }
 
-    public static function inactive(Activatable $model): self
+    public static function deactivated(): self
     {
-        return new self("`{$model->getIdentifier()}` is already inactive.");
+        return new self('This model is already deactivated.');
     }
 
-    public static function retired(Activatable $model): self
+    public static function retired(): self
     {
-        return new self("`{$model->getIdentifier()}` is retired and cannot be released.");
+        return new self('This model is retired and cannot be released.');
     }
 
-    public static function hasFutureActivation(Activatable $model): self
+    public static function hasFutureActivation(): self
     {
-        return new self("`{$model->getIdentifier()}` has not been officially activated and cannot be deactivated.");
+        return new self('This model has not been officially activated and cannot be deactivated.');
     }
 }

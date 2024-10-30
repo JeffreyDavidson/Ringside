@@ -7,6 +7,8 @@ namespace App\Builders;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Builder<\App\Models\Stable>
+ * @template TModelClass of \App\Models\Stable
+ *
+ * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
  */
 class StableBuilder extends Builder {}

@@ -7,13 +7,20 @@ namespace App\Models;
 use App\Builders\EventBuilder;
 use App\Enums\EventStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property-read \Illuminate\Support\Carbon $date
+ */
 class Event extends Model
 {
+    /** @use HasBuilder<EventBuilder<static>> */
+    use HasBuilder;
+
     /** @use HasFactory<\Database\Factories\EventFactory> */
     use HasFactory;
 
@@ -32,6 +39,8 @@ class Event extends Model
         'status',
     ];
 
+    protected static string $builder = EventBuilder::class;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -43,16 +52,6 @@ class Event extends Model
             'date' => 'datetime',
             'status' => EventStatus::class,
         ];
-    }
-
-    /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return EventBuilder<Event>
-     */
-    public function newEloquentBuilder($query): EventBuilder // @pest-ignore-type
-    {
-        return new EventBuilder($query);
     }
 
     /**

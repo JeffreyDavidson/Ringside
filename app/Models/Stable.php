@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Stable extends Model implements Activatable, Retirable
 {
@@ -40,6 +41,8 @@ class Stable extends Model implements Activatable, Retirable
         'status',
     ];
 
+    protected static string $builder = StableBuilder::class;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -53,17 +56,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return StableBuilder<Stable>
-     */
-    public function newEloquentBuilder($query): StableBuilder // @pest-ignore-type
-    {
-        return new StableBuilder($query);
-    }
-
-    /**
-     * @return HasMany<StableActivation, $this>
+     * @return HasMany<StableActivation>
      */
     public function activations(): HasMany
     {
@@ -71,7 +64,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableActivation, $this>
+     * @return HasOne<StableActivation>
      */
     public function currentActivation(): HasOne
     {
@@ -81,7 +74,18 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<StableActivation, $this>
+     * @return HasOne<StableActivation>
+     */
+    public function futureActivation(): HasOne
+    {
+        return $this->activations()
+            ->whereNull('ended_at')
+            ->where('started_at', '>', now())
+            ->one();
+    }
+
+    /**
+     * @return HasMany<StableActivation>
      */
     public function previousActivations(): HasMany
     {
@@ -90,7 +94,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableActivation, $this>
+     * @return HasOne<StableActivation>
      */
     public function previousActivation(): HasOne
     {
@@ -99,18 +103,46 @@ class Stable extends Model implements Activatable, Retirable
             ->one();
     }
 
-    public function isActivated(): bool
-    {
-        return $this->currentActivation()->exists();
-    }
-
     public function hasActivations(): bool
     {
         return $this->activations()->count() > 0;
     }
 
+    public function isCurrentlyActivated(): bool
+    {
+        return $this->currentActivation()->exists();
+    }
+
+    public function hasFutureActivation(): bool
+    {
+        return $this->futureActivation()->exists();
+    }
+
+    public function isNotInActivation(): bool
+    {
+        return $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+    }
+
+    public function isUnactivated(): bool
+    {
+        return $this->activations()->count() === 0;
+    }
+
+    public function isDeactivated(): bool
+    {
+        return $this->previousActivation()->exists()
+            && $this->futureActivation()->doesntExist()
+            && $this->currentActivation()->doesntExist()
+            && $this->currentRetirement()->doesntExist();
+    }
+
+    public function activatedOn(Carbon $activationDate): bool
+    {
+        return $this->currentActivation?->started_at->eq($activationDate);
+    }
+
     /**
-     * @return HasMany<StableRetirement, $this>
+     * @return HasMany<StableRetirement>
      */
     public function retirements(): HasMany
     {
@@ -118,7 +150,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableRetirement, $this>
+     * @return HasOne<StableRetirement>
      */
     public function currentRetirement(): HasOne
     {
@@ -128,7 +160,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<StableRetirement, $this>
+     * @return HasMany<StableRetirement>
      */
     public function previousRetirements(): HasMany
     {
@@ -137,13 +169,13 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableRetirement, $this>
+     * @return HasOne<StableRetirement>
      */
     public function previousRetirement(): HasOne
     {
         return $this->previousRetirements()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isRetired(): bool

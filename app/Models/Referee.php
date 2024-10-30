@@ -12,15 +12,22 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
 {
+    /** @use HasBuilder<RefereeBuilder<static>> */
+    use HasBuilder;
+
+    /** @use HasFactory<\Database\Factories\RefereeFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**
@@ -43,6 +50,8 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         'status' => RefereeStatus::Unemployed->value,
     ];
 
+    protected static string $builder = RefereeBuilder::class;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -56,16 +65,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return RefereeBuilder<Referee>
-     */
-    public function newEloquentBuilder($query): RefereeBuilder // @pest-ignore-type
-    {
-        return new RefereeBuilder($query);
-    }
-
-    /**
      * Get all the employments of the model.
      *
      * @return HasMany<RefereeEmployment>
@@ -76,7 +75,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeRetirement, $this>
+     * @return HasOne<RefereeRetirement>
      */
     public function currentEmployment(): HasOne
     {
@@ -86,7 +85,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment, $this>
+     * @return HasOne<RefereeEmployment>
      */
     public function futureEmployment(): HasOne
     {
@@ -97,7 +96,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeEmployment, $this>
+     * @return HasMany<RefereeEmployment>
      */
     public function previousEmployments(): HasMany
     {
@@ -106,13 +105,23 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment, $this>
+     * @return HasOne<RefereeEmployment>
      */
     public function previousEmployment(): HasOne
     {
         return $this->previousEmployments()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
+    }
+
+    public function hasEmployments(): bool
+    {
+        return $this->employments()->count() > 0;
+    }
+
+    public function isCurrentlyEmployed(): bool
+    {
+        return $this->currentEmployment()->exists();
     }
 
     public function hasFutureEmployment(): bool
@@ -136,6 +145,16 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
             && $this->futureEmployment()->doesntExist()
             && $this->currentEmployment()->doesntExist()
             && $this->currentRetirement()->doesntExist();
+    }
+
+    public function employedOn(Carbon $employmentDate): bool
+    {
+        return $this->currentEmployment?->started_at->eq($employmentDate);
+    }
+
+    public function employedBefore(Carbon $employmentDate): bool
+    {
+        return $this->currentEmployment?->started_at->lte($employmentDate);
     }
 
     /**
@@ -173,7 +192,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeInjury, $this>
+     * @return HasMany<RefereeInjury>
      */
     public function injuries(): HasMany
     {
@@ -181,7 +200,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeInjury, $this>
+     * @return HasOne<RefereeInjury>
      */
     public function currentInjury(): HasOne
     {
@@ -191,7 +210,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeInjury, $this>
+     * @return HasMany<RefereeInjury>
      */
     public function previousInjuries(): HasMany
     {
@@ -200,13 +219,13 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeInjury, $this>
+     * @return HasOne<RefereeInjury>
      */
     public function previousInjury(): HasOne
     {
         return $this->previousInjuries()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isInjured(): bool
@@ -220,7 +239,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeSuspension, $this>
+     * @return HasMany<RefereeSuspension>
      */
     public function suspensions(): HasMany
     {
@@ -228,7 +247,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeSuspension, $this>
+     * @return HasOne<RefereeSuspension>
      */
     public function currentSuspension(): HasOne
     {
@@ -238,7 +257,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeSuspension, $this>
+     * @return HasMany<RefereeSuspension>
      */
     public function previousSuspensions(): HasMany
     {
@@ -247,13 +266,13 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeSuspension, $this>
+     * @return HasOne<RefereeSuspension>
      */
     public function previousSuspension(): HasOne
     {
         return $this->suspensions()
-            ->latestOfMany('ended_at')
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isSuspended(): bool
@@ -267,7 +286,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeRetirement, $this>
+     * @return HasMany<RefereeRetirement>
      */
     public function retirements(): HasMany
     {
@@ -275,7 +294,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeRetirement, $this>
+     * @return HasOne<RefereeRetirement>
      */
     public function currentRetirement(): HasOne
     {
@@ -285,7 +304,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeRetirement, $this>
+     * @return HasMany<RefereeRetirement>
      */
     public function previousRetirements(): HasMany
     {
@@ -294,13 +313,13 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeRetirement, $this>
+     * @return HasOne<RefereeRetirement>
      */
     public function previousRetirement(): HasOne
     {
         return $this->previousRetirements()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isRetired(): bool

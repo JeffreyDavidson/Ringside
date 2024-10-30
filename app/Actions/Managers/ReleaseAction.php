@@ -46,19 +46,19 @@ class ReleaseAction extends BaseManagerAction
     private function ensureCanBeReleased(Manager $manager): void
     {
         if ($manager->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed($manager);
+            throw CannotBeReleasedException::unemployed();
         }
 
         if ($manager->isReleased()) {
-            throw CannotBeReleasedException::released($manager);
+            throw CannotBeReleasedException::released();
         }
 
         if ($manager->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment($manager);
+            throw CannotBeReleasedException::hasFutureEmployment();
         }
 
         if ($manager->isRetired()) {
-            throw CannotBeReleasedException::retired($manager);
+            throw CannotBeReleasedException::retired();
         }
     }
 }

@@ -38,27 +38,27 @@ class SuspendAction extends BaseWrestlerAction
     private function ensureCanBeSuspended(Wrestler $wrestler): void
     {
         if ($wrestler->isUnemployed()) {
-            throw CannotBeSuspendedException::unemployed($wrestler);
+            throw CannotBeSuspendedException::unemployed();
         }
 
         if ($wrestler->isReleased()) {
-            throw CannotBeSuspendedException::released($wrestler);
+            throw CannotBeSuspendedException::released();
         }
 
         if ($wrestler->isRetired()) {
-            throw CannotBeSuspendedException::retired($wrestler);
+            throw CannotBeSuspendedException::retired();
         }
 
         if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeSuspendedException::hasFutureEmployment($wrestler);
+            throw CannotBeSuspendedException::hasFutureEmployment();
         }
 
         if ($wrestler->isSuspended()) {
-            throw CannotBeSuspendedException::suspended($wrestler);
+            throw CannotBeSuspendedException::suspended();
         }
 
         if ($wrestler->isInjured()) {
-            throw CannotBeSuspendedException::injured($wrestler);
+            throw CannotBeSuspendedException::injured();
         }
     }
 }

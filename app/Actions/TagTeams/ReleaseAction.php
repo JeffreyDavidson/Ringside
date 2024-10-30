@@ -44,19 +44,19 @@ class ReleaseAction extends BaseTagTeamAction
     private function ensureCanBeReleased(TagTeam $tagTeam): void
     {
         if ($tagTeam->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed($tagTeam);
+            throw CannotBeReleasedException::unemployed();
         }
 
         if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment($tagTeam);
+            throw CannotBeReleasedException::hasFutureEmployment();
         }
 
         if ($tagTeam->isRetired()) {
-            throw CannotBeReleasedException::retired($tagTeam);
+            throw CannotBeReleasedException::retired();
         }
 
         if ($tagTeam->isReleased()) {
-            throw CannotBeReleasedException::released($tagTeam);
+            throw CannotBeReleasedException::released();
         }
     }
 }

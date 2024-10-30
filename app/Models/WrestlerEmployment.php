@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read \Illuminate\Support\Carbon $started_at
+ */
 class WrestlerEmployment extends Model
 {
     /** @use HasFactory<\Database\Factories\WrestlerEmploymentFactory> */
@@ -40,7 +43,7 @@ class WrestlerEmployment extends Model
     /**
      * Get the employed model.
      *
-     * @return MorphTo<Model, Employment>
+     * @return BelongsTo<Wrestler, $this>
      */
     public function wrestler(): BelongsTo
     {
