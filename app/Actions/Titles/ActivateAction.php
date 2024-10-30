@@ -39,7 +39,7 @@ class ActivateAction extends BaseTitleAction
     private function ensureCanBeActivated(Title $title): void
     {
         if ($title->isCurrentlyActivated()) {
-            throw CannotBeActivatedException::activated($title);
+            throw CannotBeActivatedException::activated();
         }
     }
 }

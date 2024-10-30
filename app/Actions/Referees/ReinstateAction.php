@@ -35,27 +35,27 @@ class ReinstateAction extends BaseRefereeAction
     private function ensureCanBeReinstated(Referee $referee): void
     {
         if ($referee->isUnemployed()) {
-            throw CannotBeReinstatedException::unemployed($referee);
+            throw CannotBeReinstatedException::unemployed();
         }
 
         if ($referee->isReleased()) {
-            throw CannotBeReinstatedException::released($referee);
+            throw CannotBeReinstatedException::released();
         }
 
         if ($referee->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment($referee);
+            throw CannotBeReinstatedException::hasFutureEmployment();
         }
 
         if ($referee->isInjured()) {
-            throw CannotBeReinstatedException::injured($referee);
+            throw CannotBeReinstatedException::injured();
         }
 
         if ($referee->isRetired()) {
-            throw CannotBeReinstatedException::retired($referee);
+            throw CannotBeReinstatedException::retired();
         }
 
         if ($referee->isBookable()) {
-            throw CannotBeReinstatedException::bookable($referee);
+            throw CannotBeReinstatedException::bookable();
         }
     }
 }

@@ -13,11 +13,16 @@ use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property \App\Enums\TagTeamStatus $status
+ */
 class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable, Manageable, Retirable, Suspendable
 {
     use Concerns\CanJoinStables;
@@ -26,6 +31,9 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     use Concerns\HasMatches;
     use Concerns\HasWrestlers;
     use Concerns\OwnedByUser;
+
+    /** @use HasBuilder<TagTeamBuilder<static>> */
+    use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\TagTeamFactory> */
     use HasFactory;
@@ -58,6 +66,8 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
         'status' => TagTeamStatus::Unemployed->value,
     ];
 
+    protected static string $builder = TagTeamBuilder::class;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -71,16 +81,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return TagTeamBuilder<TagTeam>
-     */
-    public function newEloquentBuilder($query): TagTeamBuilder // @pest-ignore-type
-    {
-        return new TagTeamBuilder($query);
-    }
-
-    /**
      * Get all the employments of the model.
      *
      * @return HasMany<TagTeamEmployment>
@@ -91,7 +91,17 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamEmployment, $this>
+     * @return HasOne<TagTeamEmployment>
+     */
+    public function currentEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasOne<TagTeamEmployment>
      */
     public function futureEmployment(): HasOne
     {
@@ -102,7 +112,69 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamRetirement, $this>
+     * @return HasMany<TagTeamEmployment>
+     */
+    public function previousEmployments(): HasMany
+    {
+        return $this->employments()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<TagTeamEmployment>
+     */
+    public function previousEmployment(): HasOne
+    {
+        return $this->previousEmployments()
+            ->one()
+            ->ofMany('ended_at', 'max');
+    }
+
+    public function hasEmployments(): bool
+    {
+        return $this->employments()->count() > 0;
+    }
+
+    public function isCurrentlyEmployed(): bool
+    {
+        return $this->currentEmployment()->exists();
+    }
+
+    public function hasFutureEmployment(): bool
+    {
+        return $this->futureEmployment()->exists();
+    }
+
+    public function isNotInEmployment(): bool
+    {
+        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
+    }
+
+    public function isUnemployed(): bool
+    {
+        return $this->employments()->count() === 0;
+    }
+
+    public function isReleased(): bool
+    {
+        return $this->previousEmployment()->exists()
+            && $this->futureEmployment()->doesntExist()
+            && $this->currentEmployment()->doesntExist()
+            && $this->currentRetirement()->doesntExist();
+    }
+
+    public function employedOn(Carbon $employmentDate): bool
+    {
+        return $this->currentEmployment?->started_at->eq($employmentDate);
+    }
+
+    public function employedBefore(Carbon $employmentDate): bool
+    {
+        return $this->currentEmployment?->started_at->lte($employmentDate);
+    }
+
+    /**
+     * @return HasMany<TagTeamRetirement>
      */
     public function retirements(): HasMany
     {
@@ -110,7 +182,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamRetirement, $this>
+     * @return HasOne<TagTeamRetirement>
      */
     public function currentRetirement(): HasOne
     {
@@ -120,7 +192,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamRetirement, $this>
+     * @return HasMany<TagTeamRetirement>
      */
     public function previousRetirements(): HasMany
     {
@@ -129,13 +201,13 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamRetirement, $this>
+     * @return HasOne<TagTeamRetirement>
      */
     public function previousRetirement(): HasOne
     {
         return $this->previousRetirements()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isRetired(): bool
@@ -149,7 +221,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamSuspension, $this>
+     * @return HasMany<TagTeamSuspension>
      */
     public function suspensions(): HasMany
     {
@@ -157,7 +229,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamSuspension, $this>
+     * @return HasOne<TagTeamSuspension>
      */
     public function currentSuspension(): HasOne
     {
@@ -167,7 +239,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamSuspension, $this>
+     * @return HasMany<TagTeamSuspension>
      */
     public function previousSuspensions(): HasMany
     {
@@ -176,13 +248,13 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamSuspension, $this>
+     * @return HasOne<TagTeamSuspension>
      */
     public function previousSuspension(): HasOne
     {
         return $this->suspensions()
-            ->latestOfMany('ended_at')
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isSuspended(): bool

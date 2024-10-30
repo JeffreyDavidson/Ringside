@@ -46,19 +46,19 @@ class ReleaseAction extends BaseWrestlerAction
     private function ensureCanBeReleased(Wrestler $wrestler): void
     {
         if ($wrestler->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed($wrestler);
+            throw CannotBeReleasedException::unemployed();
         }
 
         if ($wrestler->isReleased()) {
-            throw CannotBeReleasedException::released($wrestler);
+            throw CannotBeReleasedException::released();
         }
 
         if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment($wrestler);
+            throw CannotBeReleasedException::hasFutureEmployment();
         }
 
         if ($wrestler->isRetired()) {
-            throw CannotBeReleasedException::retired($wrestler);
+            throw CannotBeReleasedException::retired();
         }
     }
 }

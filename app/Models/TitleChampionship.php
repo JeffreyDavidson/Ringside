@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
 
+/**
+ * @property-read \Illuminate\Support\Carbon $won_at
+ */
 class TitleChampionship extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */

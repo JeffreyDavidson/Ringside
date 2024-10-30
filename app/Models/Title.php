@@ -9,14 +9,19 @@ use App\Enums\TitleStatus;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Title extends Model implements Activatable, Retirable
 {
     use Concerns\HasChampionships;
+
+    /** @use HasBuilder<TitleBuilder<static>> */
+    use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\TitleFactory> */
     use HasFactory;
@@ -42,6 +47,8 @@ class Title extends Model implements Activatable, Retirable
         'status' => TitleStatus::Unactivated->value,
     ];
 
+    protected static string $builder = TitleBuilder::class;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -55,17 +62,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return TitleBuilder<Title>
-     */
-    public function newEloquentBuilder($query): TitleBuilder // @pest-ignore-type
-    {
-        return new TitleBuilder($query);
-    }
-
-    /**
-     * @return HasMany<TitleActivation, $this>
+     * @return HasMany<TitleActivation>
      */
     public function activations(): HasMany
     {
@@ -73,7 +70,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleActivation, $this>
+     * @return HasOne<TitleActivation>
      */
     public function currentActivation(): HasOne
     {
@@ -83,7 +80,18 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<TitleActivation, $this>
+     * @return HasOne<TitleActivation>
+     */
+    public function futureActivation(): HasOne
+    {
+        return $this->activations()
+            ->whereNull('ended_at')
+            ->where('started_at', '>', now())
+            ->one();
+    }
+
+    /**
+     * @return HasMany<TitleActivation>
      */
     public function previousActivations(): HasMany
     {
@@ -92,18 +100,13 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleActivation, $this>
+     * @return HasOne<TitleActivation>
      */
     public function previousActivation(): HasOne
     {
         return $this->previousActivations()
-            ->latest('ended_at')
-            ->one();
-    }
-
-    public function isActivated(): bool
-    {
-        return $this->currentActivation()->exists();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function hasActivations(): bool
@@ -111,8 +114,41 @@ class Title extends Model implements Activatable, Retirable
         return $this->activations()->count() > 0;
     }
 
+    public function isCurrentlyActivated(): bool
+    {
+        return $this->currentActivation()->exists();
+    }
+
+    public function hasFutureActivation(): bool
+    {
+        return $this->futureActivation()->exists();
+    }
+
+    public function isNotInActivation(): bool
+    {
+        return $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+    }
+
+    public function isUnactivated(): bool
+    {
+        return $this->activations()->count() === 0;
+    }
+
+    public function isDeactivated(): bool
+    {
+        return $this->previousActivation()->exists()
+            && $this->futureActivation()->doesntExist()
+            && $this->currentActivation()->doesntExist()
+            && $this->currentRetirement()->doesntExist();
+    }
+
+    public function activatedOn(Carbon $activationDate): bool
+    {
+        return $this->currentActivation?->started_at->eq($activationDate);
+    }
+
     /**
-     * @return HasMany<TitleRetirement, $this>
+     * @return HasMany<TitleRetirement>
      */
     public function retirements(): HasMany
     {
@@ -120,7 +156,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleRetirement, $this>
+     * @return HasOne<TitleRetirement>
      */
     public function currentRetirement(): HasOne
     {
@@ -130,7 +166,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<TitleRetirement, $this>
+     * @return HasMany<TitleRetirement>
      */
     public function previousRetirements(): HasMany
     {
@@ -139,13 +175,13 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleRetirement, $this>
+     * @return HasOne<TitleRetirement>
      */
     public function previousRetirement(): HasOne
     {
         return $this->previousRetirements()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isRetired(): bool

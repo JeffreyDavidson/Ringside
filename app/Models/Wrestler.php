@@ -15,12 +15,13 @@ use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Contracts\TagTeamMember;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
@@ -30,6 +31,9 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     use Concerns\HasManagers;
     use Concerns\HasMatches;
     use Concerns\OwnedByUser;
+
+    /** @use HasBuilder<WrestlerBuilder<static>> */
+    use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\WrestlerFactory> */
     use HasFactory;
@@ -60,6 +64,8 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
         'status' => WrestlerStatus::Unemployed->value,
     ];
 
+    protected static string $builder = WrestlerBuilder::class;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -74,16 +80,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return WrestlerBuilder<Wrestler>
-     */
-    public function newEloquentBuilder($query): WrestlerBuilder // @pest-ignore-type
-    {
-        return new WrestlerBuilder($query);
-    }
-
-    /**
      * Get all the employments of the model.
      *
      * @return HasMany<WrestlerEmployment>
@@ -94,7 +90,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment, $this>
+     * @return HasOne<WrestlerEmployment>
      */
     public function currentEmployment(): HasOne
     {
@@ -104,7 +100,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<ManagerEmployment, $this>
+     * @return HasOne<ManagerEmployment>
      */
     public function futureEmployment(): HasOne
     {
@@ -115,7 +111,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerEmployment, $this>
+     * @return HasMany<WrestlerEmployment>
      */
     public function previousEmployments(): HasMany
     {
@@ -124,23 +120,23 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment, $this>
+     * @return HasOne<WrestlerEmployment>
      */
     public function previousEmployment(): HasOne
     {
         return $this->previousEmployments()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
-    public function latestCurrentEmployment(): HasOne
+    public function hasEmployments(): bool
     {
-        return $this->employments()->one()->ofMany([
-            'started_at' => 'max',
-        ], function (Builder $query) {
-            $query->whereNull('ended_at')
-                ->orWhere('ended_at', '>=', now());
-        });
+        return $this->employments()->count() > 0;
+    }
+
+    public function isCurrentlyEmployed(): bool
+    {
+        return $this->currentEmployment()->exists();
     }
 
     public function hasFutureEmployment(): bool
@@ -166,8 +162,18 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
             && $this->currentRetirement()->doesntExist();
     }
 
+    public function employedOn(Carbon $employmentDate): bool
+    {
+        return $this->currentEmployment?->started_at->eq($employmentDate);
+    }
+
+    public function employedBefore(Carbon $employmentDate): bool
+    {
+        return $this->currentEmployment?->started_at->lte($employmentDate);
+    }
+
     /**
-     * @return HasMany<WrestlerRetirement, $this>
+     * @return HasMany<WrestlerRetirement>
      */
     public function retirements(): HasMany
     {
@@ -175,7 +181,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerRetirement, $this>
+     * @return HasOne<WrestlerRetirement>
      */
     public function currentRetirement(): HasOne
     {
@@ -185,7 +191,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerRetirement, $this>
+     * @return HasMany<WrestlerRetirement>
      */
     public function previousRetirements(): HasMany
     {
@@ -194,13 +200,13 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerRetirement, $this>
+     * @return HasOne<WrestlerRetirement>
      */
     public function previousRetirement(): HasOne
     {
         return $this->previousRetirements()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isRetired(): bool
@@ -214,7 +220,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerInjury, $this>
+     * @return HasMany<WrestlerInjury>
      */
     public function injuries(): HasMany
     {
@@ -222,7 +228,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerInjury, $this>
+     * @return HasOne<WrestlerInjury>
      */
     public function currentInjury(): HasOne
     {
@@ -232,7 +238,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerInjury, $this>
+     * @return HasMany<WrestlerInjury>
      */
     public function previousInjuries(): HasMany
     {
@@ -241,13 +247,13 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerInjury, $this>
+     * @return HasOne<WrestlerInjury>
      */
     public function previousInjury(): HasOne
     {
         return $this->previousInjuries()
-            ->latestOfMany()
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isInjured(): bool
@@ -261,7 +267,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerSuspension, $this>
+     * @return HasMany<WrestlerSuspension>
      */
     public function suspensions(): HasMany
     {
@@ -269,7 +275,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerSuspension, $this>
+     * @return HasOne<WrestlerSuspension>
      */
     public function currentSuspension(): HasOne
     {
@@ -279,7 +285,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerSuspension, $this>
+     * @return HasMany<WrestlerSuspension>
      */
     public function previousSuspensions(): HasMany
     {
@@ -288,13 +294,13 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerSuspension, $this>
+     * @return HasOne<WrestlerSuspension>
      */
     public function previousSuspension(): HasOne
     {
         return $this->suspensions()
-            ->latestOfMany('ended_at')
-            ->one();
+            ->one()
+            ->ofMany('ended_at', 'max');
     }
 
     public function isSuspended(): bool

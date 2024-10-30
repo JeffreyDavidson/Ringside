@@ -39,15 +39,15 @@ class RetireAction extends BaseTitleAction
     private function ensureCanBeRetired(Title $title): void
     {
         if ($title->isUnactivated()) {
-            throw CannotBeRetiredException::unemployed($title);
+            throw CannotBeRetiredException::unemployed();
         }
 
         if ($title->hasFutureActivation()) {
-            throw CannotBeRetiredException::hasFutureEmployment($title);
+            throw CannotBeRetiredException::hasFutureEmployment();
         }
 
         if ($title->isRetired()) {
-            throw CannotBeRetiredException::retired($title);
+            throw CannotBeRetiredException::retired();
         }
     }
 }

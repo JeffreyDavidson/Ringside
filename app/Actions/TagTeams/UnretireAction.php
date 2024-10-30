@@ -42,7 +42,7 @@ class UnretireAction extends BaseTagTeamAction
     private function ensureCanBeUnretired(TagTeam $tagTeam): void
     {
         if (! $tagTeam->isRetired()) {
-            throw CannotBeUnretiredException::notRetired($tagTeam);
+            throw CannotBeUnretiredException::notRetired();
         }
     }
 }

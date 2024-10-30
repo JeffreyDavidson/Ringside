@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Employable;
 use Exception;
 
 class CannotBeReleasedException extends Exception
 {
-    public static function unemployed(Employable $model): self
+    public static function unemployed(): self
     {
-        return new self("`{$model->getIdentifier()}` is unemployed and cannot be released.");
+        return new self('This model is unemployed and cannot be released.');
     }
 
-    public static function released(Employable $model): self
+    public static function released(): self
     {
-        return new self("`{$model->getIdentifier()}` is already released.");
+        return new self('This model is already released.');
     }
 
-    public static function retired(Employable $model): self
+    public static function retired(): self
     {
-        return new self("`{$model->getIdentifier()}` is retired and cannot be released.");
+        return new self('This model is retired and cannot be released.');
     }
 
-    public static function hasFutureEmployment(Employable $model): self
+    public static function hasFutureEmployment(): self
     {
-        return new self("`{$model->getIdentifier()}` has not been officially employed and cannot be released.");
+        return new self('This model has not been officially employed and cannot be released.');
     }
 }
