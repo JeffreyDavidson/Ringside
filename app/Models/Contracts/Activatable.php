@@ -17,7 +17,7 @@ interface Activatable
 
     public function previousActivation(): HasOne;
 
-    public function isActive(): bool;
+    public function isActivated(): bool;
 
     public function hasActivations(): bool;
 }

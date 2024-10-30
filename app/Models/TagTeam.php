@@ -35,7 +35,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * The number of the wrestlers allowed on a tag team.
      */
-    public const NUMBER_OF_WRESTLERS_ON_TEAM = 2;
+    public const int NUMBER_OF_WRESTLERS_ON_TEAM = 2;
 
     /**
      * The attributes that are mass assignable.
@@ -88,6 +88,17 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function employments(): HasMany
     {
         return $this->hasMany(TagTeamEmployment::class);
+    }
+
+    /**
+     * @return HasOne<TagTeamEmployment, $this>
+     */
+    public function futureEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->where('started_at', '>', now())
+            ->one();
     }
 
     /**

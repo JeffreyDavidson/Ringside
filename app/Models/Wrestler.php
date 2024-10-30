@@ -93,6 +93,27 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
         return $this->hasMany(WrestlerEmployment::class);
     }
 
+    /**
+     * @return HasOne<WrestlerRetirement, $this>
+     */
+    public function currentEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasOne<WrestlerEmployment, $this>
+     */
+    public function futureEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->where('started_at', '>', now())
+            ->one();
+    }
+
     public function latestCurrentEmployment(): HasOne
     {
         return $this->employments()->one()->ofMany([
