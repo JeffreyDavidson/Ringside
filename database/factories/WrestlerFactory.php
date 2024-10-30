@@ -9,6 +9,7 @@ use App\Models\Retirement;
 use App\Models\TagTeam;
 use App\Models\WrestlerEmployment;
 use App\Models\WrestlerInjury;
+use App\Models\WrestlerRetirement;
 use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -73,7 +74,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn () => ['status' => WrestlerStatus::Retired])
             ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
-            ->has(Retirement::factory()->started($end));
+            ->has(WrestlerRetirement::factory()->started($end));
     }
 
     /**

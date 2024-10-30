@@ -8,10 +8,12 @@ use App\Enums\StableStatus;
 use App\Models\Activation;
 use App\Models\Employment;
 use App\Models\Manager;
-use App\Models\Retirement;
 use App\Models\Stable;
+use App\Models\StableRetirement;
 use App\Models\TagTeam;
+use App\Models\TagTeamRetirement;
 use App\Models\Wrestler;
+use App\Models\WrestlerRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -101,9 +103,9 @@ class StableFactory extends Factory
 
         return $this->state(fn () => ['status' => StableStatus::Retired])
             ->has(Activation::factory()->started($start)->ended($end))
-            ->has(Retirement::factory()->started($end))
-            ->hasAttached(Wrestler::factory()->has(Employment::factory()->started($start)->ended($end))->has(Retirement::factory()->started($end)), ['joined_at' => $start])
-            ->hasAttached(TagTeam::factory()->has(Employment::factory()->started($start)->ended($end))->has(Retirement::factory()->started($end)), ['joined_at' => $start])
+            ->has(StableRetirement::factory()->started($end))
+            ->hasAttached(Wrestler::factory()->has(Employment::factory()->started($start)->ended($end))->has(WrestlerRetirement::factory()->started($end)), ['joined_at' => $start])
+            ->hasAttached(TagTeam::factory()->has(Employment::factory()->started($start)->ended($end))->has(TagTeamRetirement::factory()->started($end)), ['joined_at' => $start])
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
                     $wrestler->save();

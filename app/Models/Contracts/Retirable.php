@@ -4,47 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Models\Retirement;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-interface Retirable extends Identifiable
+interface Retirable
 {
-    /**
-     * Get the retirements of the model.
-     *
-     * @return MorphMany<Retirement>
-     */
-    public function retirements(): MorphMany;
+    public function retirements(): HasMany;
 
-    /**
-     * Get the current retirement of the model.
-     *
-     * @return MorphOne<Retirement>
-     */
-    public function currentRetirement(): MorphOne;
+    public function currentRetirement(): HasOne;
 
-    /**
-     * Get the previous retirements of the model.
-     *
-     * @return MorphMany<Retirement>
-     */
-    public function previousRetirements(): MorphMany;
+    public function previousRetirements(): HasMany;
 
-    /**
-     * Get the previous retirement of the model.
-     *
-     * @return MorphOne<Retirement>
-     */
-    public function previousRetirement(): MorphOne;
+    public function previousRetirement(): HasOne;
 
-    /**
-     * Determine if the model is retired.
-     */
     public function isRetired(): bool;
 
-    /**
-     * Check to see if the model has been retired.
-     */
     public function hasRetirements(): bool;
 }

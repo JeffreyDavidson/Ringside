@@ -7,7 +7,7 @@ namespace Database\Factories;
 use App\Enums\ManagerStatus;
 use App\Models\ManagerEmployment;
 use App\Models\ManagerInjury;
-use App\Models\Retirement;
+use App\Models\ManagerRetirement;
 use App\Models\Suspension;
 use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -56,7 +56,7 @@ class ManagerFactory extends Factory
 
         return $this->state(fn () => ['status' => ManagerStatus::Retired])
             ->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments')
-            ->has(Retirement::factory()->started($end));
+            ->has(ManagerRetirement::factory()->started($end));
     }
 
     public function released(): static

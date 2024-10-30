@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Employment;
 use App\Models\Referee;
+use App\Models\RefereeRetirement;
 use App\Models\Retirement;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -63,7 +64,7 @@ class RefereesTableSeeder extends Seeder
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
             $employment = Employment::factory()->started($start)->ended($end);
-            $retirement = Retirement::factory()->started($end);
+            $retirement = RefereeRetirement::factory()->started($end);
             Referee::factory()
                 ->retired($employment, $retirement)
                 ->create(['first_name' => 'Referee', 'last_name' => $eNum]);

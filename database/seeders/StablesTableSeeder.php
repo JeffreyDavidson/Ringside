@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\Activation;
 use App\Models\Retirement;
 use App\Models\Stable;
+use App\Models\StableRetirement;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -63,7 +64,7 @@ class StablesTableSeeder extends Seeder
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
             $activation = Activation::factory()->started($start)->ended($end);
-            $retirement = Retirement::factory()->started($end);
+            $retirement = StableRetirement::factory()->started($end);
             Stable::factory()
                 ->retired($activation, $retirement)
                 ->create(['name' => 'Stable '.$eNum]);
