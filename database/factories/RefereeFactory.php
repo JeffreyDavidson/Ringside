@@ -7,7 +7,7 @@ namespace Database\Factories;
 use App\Enums\RefereeStatus;
 use App\Models\RefereeEmployment;
 use App\Models\RefereeInjury;
-use App\Models\Retirement;
+use App\Models\RefereeRetirement;
 use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -56,7 +56,7 @@ class RefereeFactory extends Factory
 
         return $this->state(fn () => ['status' => RefereeStatus::Retired])
             ->has(RefereeEmployment::factory()->started($start)->ended($end), 'employments')
-            ->has(Retirement::factory()->started($end));
+            ->has(RefereeRetirement::factory()->started($end));
     }
 
     public function released(): static

@@ -6,10 +6,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Retirement extends Model
+class WrestlerRetirement extends Model
 {
+    /** @use HasFactory<\Database\Factories\WrestlerRetirementFactory> */
     use HasFactory;
 
     /**
@@ -18,21 +19,10 @@ class Retirement extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'retiree_id',
-        'retiree_type',
+        'wrestler_id',
         'started_at',
         'ended_at',
     ];
-
-    /**
-     * Retrieve the retired model.
-     *
-     * @return MorphTo<Model, Retirement>
-     */
-    public function retiree(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
     /**
      * Get the attributes that should be cast.
@@ -45,5 +35,13 @@ class Retirement extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Wrestler, $this>
+     */
+    public function wrestler(): BelongsTo
+    {
+        return $this->belongsTo(Wrestler::class);
     }
 }

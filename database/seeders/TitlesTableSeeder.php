@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\Activation;
 use App\Models\Retirement;
 use App\Models\Title;
+use App\Models\TitleRetirement;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -80,7 +81,7 @@ class TitlesTableSeeder extends Seeder
             $end = $start->copy()->addYears($randomNumberOfYearsActivated)->addMonth(rand(1, 11));
 
             $activation = Activation::factory()->started($start)->ended($end);
-            $retirement = Retirement::factory()->started($end);
+            $retirement = TitleRetirement::factory()->started($end);
             Title::factory()
                 ->retired($activation, $retirement)
                 ->create(['name' => 'Title '.$eNum.' Title']);

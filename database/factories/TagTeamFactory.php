@@ -9,8 +9,10 @@ use App\Enums\WrestlerStatus;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use App\Models\TagTeamEmployment;
+use App\Models\TagTeamRetirement;
 use App\Models\Wrestler;
 use App\Models\WrestlerEmployment;
+use App\Models\WrestlerRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -96,12 +98,12 @@ class TagTeamFactory extends Factory
         $retirementStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
             ->has(WrestlerEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
-            ->has(Retirement::factory()->started($retirementStartDate))
+            ->has(WrestlerRetirement::factory()->started($retirementStartDate))
             ->create();
 
         return $this->state(fn () => ['status' => TagTeamStatus::Retired])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
-            ->has(Retirement::factory()->started($retirementStartDate))
+            ->has(TagTeamRetirement::factory()->started($retirementStartDate))
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 

@@ -8,6 +8,7 @@ use App\Enums\TitleStatus;
 use App\Models\Retirement;
 use App\Models\TitleActivation;
 use App\Models\TitleChampionship;
+use App\Models\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -61,7 +62,7 @@ class TitleFactory extends Factory
 
         return $this->state(fn () => ['status' => TitleStatus::Retired])
             ->has(TitleActivation::factory()->started($start)->ended($end), 'activations')
-            ->has(Retirement::factory()->started($end));
+            ->has(TitleRetirement::factory()->started($end));
     }
 
     public function unactivated(): static
