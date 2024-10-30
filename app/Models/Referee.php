@@ -20,9 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
 {
-    use Concerns\HasInjuries;
-    use Concerns\HasNewEmployments;
-    use Concerns\HasRetirements;
     use HasFactory;
     use SoftDeletes;
 
@@ -45,6 +42,18 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     protected $attributes = [
         'status' => RefereeStatus::Unemployed->value,
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => RefereeStatus::class,
+        ];
+    }
 
     /**
      * Create a new Eloquent query builder for the model.
@@ -76,11 +85,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         }
 
         return true;
-    }
-
-    public function getIdentifier(): string
-    {
-        return "{$this->first_name} {$this->last_name}";
     }
 
     /**
@@ -200,6 +204,53 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
+     * @return HasMany<RefereeRetirement, $this>
+     */
+    public function retirements(): HasMany
+    {
+        return $this->hasMany(RefereeRetirement::class);
+    }
+
+    /**
+     * @return HasOne<RefereeRetirement, $this>
+     */
+    public function currentRetirement(): HasOne
+    {
+        return $this->retirements()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<RefereeRetirement, $this>
+     */
+    public function previousRetirements(): HasMany
+    {
+        return $this->retirements()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<RefereeRetirement, $this>
+     */
+    public function previousRetirement(): HasOne
+    {
+        return $this->previousRetirements()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isRetired(): bool
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    public function hasRetirements(): bool
+    {
+        return $this->retirements()->count() > 0;
+    }
+
+    /**
      * Get the manager's full name.
      *
      * @return Attribute<string, never>
@@ -209,17 +260,5 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => RefereeStatus::class,
-        ];
     }
 }

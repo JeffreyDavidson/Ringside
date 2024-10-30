@@ -24,11 +24,12 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     use Concerns\CanWinTitles;
     use Concerns\HasManagers;
     use Concerns\HasMatches;
-    use Concerns\HasNewEmployments;
-    use Concerns\HasRetirements;
     use Concerns\HasWrestlers;
     use Concerns\OwnedByUser;
+
+    /** @use HasFactory<\Database\Factories\TagTeamFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**
@@ -58,6 +59,18 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     ];
 
     /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => TagTeamStatus::class,
+        ];
+    }
+
+    /**
      * Create a new Eloquent query builder for the model.
      *
      * @return TagTeamBuilder<TagTeam>
@@ -75,6 +88,53 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function employments(): HasMany
     {
         return $this->hasMany(TagTeamEmployment::class);
+    }
+
+    /**
+     * @return HasMany<TagTeamRetirement, $this>
+     */
+    public function retirements(): HasMany
+    {
+        return $this->hasMany(TagTeamRetirement::class);
+    }
+
+    /**
+     * @return HasOne<TagTeamRetirement, $this>
+     */
+    public function currentRetirement(): HasOne
+    {
+        return $this->retirements()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<TagTeamRetirement, $this>
+     */
+    public function previousRetirements(): HasMany
+    {
+        return $this->retirements()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<TagTeamRetirement, $this>
+     */
+    public function previousRetirement(): HasOne
+    {
+        return $this->previousRetirements()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isRetired(): bool
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    public function hasRetirements(): bool
+    {
+        return $this->retirements()->count() > 0;
     }
 
     /**
@@ -138,22 +198,5 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function isUnbookable(): bool
     {
         return ! $this->currentWrestlers->every(fn (Wrestler $wrestler) => $wrestler->isBookable());
-    }
-
-    public function getIdentifier(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => TagTeamStatus::class,
-        ];
     }
 }

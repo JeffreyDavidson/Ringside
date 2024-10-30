@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 
 class Activation extends Model
 {
+    /** @use HasFactory<\Database\Factories\ActivationFactory> */
     use HasFactory;
 
     /**
@@ -24,6 +25,19 @@ class Activation extends Model
         'started_at',
         'ended_at',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+        ];
+    }
 
     /**
      * Get the activated model.
@@ -41,18 +55,5 @@ class Activation extends Model
     public function startedBefore(Carbon $date): bool
     {
         return $this->started_at->lt($date);
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'started_at' => 'datetime',
-            'ended_at' => 'datetime',
-        ];
     }
 }

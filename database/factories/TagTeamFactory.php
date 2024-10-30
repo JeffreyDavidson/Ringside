@@ -6,10 +6,9 @@ namespace Database\Factories;
 
 use App\Enums\TagTeamStatus;
 use App\Enums\WrestlerStatus;
-use App\Models\Retirement;
-use App\Models\Suspension;
 use App\Models\TagTeamEmployment;
 use App\Models\TagTeamRetirement;
+use App\Models\TagTeamSuspension;
 use App\Models\Wrestler;
 use App\Models\WrestlerEmployment;
 use App\Models\WrestlerRetirement;
@@ -82,12 +81,12 @@ class TagTeamFactory extends Factory
         $wrestlers = Wrestler::factory()->count(2)
             ->state(fn () => ['status' => WrestlerStatus::Suspended])
             ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
-            ->has(Suspension::factory()->started($suspensionStartDate))
+            ->has(TagTeamSuspension::factory()->started($suspensionStartDate))
             ->create();
 
         return $this->state(fn () => ['status' => TagTeamStatus::Suspended])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
-            ->has(Suspension::factory()->started($suspensionStartDate))
+            ->has(TagTeamSuspension::factory()->started($suspensionStartDate))
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 

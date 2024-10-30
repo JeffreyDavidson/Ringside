@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MatchDecision extends Model
 {
+    /** @use HasFactory<\Database\Factories\MatchDecisionFactory> */
     use HasFactory;
 
     /**

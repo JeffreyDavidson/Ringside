@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MatchType extends Model
 {
+    /** @use HasFactory<\Database\Factories\MatchTypeFactory> */
     use HasFactory;
 
     /**

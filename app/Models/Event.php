@@ -14,7 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
+    /** @use HasFactory<\Database\Factories\EventFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**
@@ -29,6 +31,19 @@ class Event extends Model
         'preview',
         'status',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'date' => 'datetime',
+            'status' => EventStatus::class,
+        ];
+    }
 
     /**
      * Create a new Eloquent query builder for the model.
@@ -90,18 +105,5 @@ class Event extends Model
     public function isUnscheduled(): bool
     {
         return $this->date === null;
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'date' => 'datetime',
-            'status' => EventStatus::class,
-        ];
     }
 }
