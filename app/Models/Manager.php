@@ -79,6 +79,45 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
+     * @return HasOne<ManagerInjury, $this>
+     */
+    public function currentInjury(): HasOne
+    {
+        return $this->injuries()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<ManagerInjury, $this>
+     */
+    public function previousInjuries(): HasMany
+    {
+        return $this->injuries()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<ManagerInjury, $this>
+     */
+    public function previousInjury(): HasOne
+    {
+        return $this->previousInjuries()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isInjured(): bool
+    {
+        return $this->currentInjury()->exists();
+    }
+
+    public function hasInjuries(): bool
+    {
+        return $this->injuries()->count() > 0;
+    }
+
+    /**
      * @return HasMany<ManagerSuspension, $this>
      */
     public function suspensions(): HasMany
