@@ -8,7 +8,7 @@ use App\Enums\RefereeStatus;
 use App\Models\RefereeEmployment;
 use App\Models\RefereeInjury;
 use App\Models\Retirement;
-use App\Models\Suspension;
+use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -77,7 +77,7 @@ class RefereeFactory extends Factory
 
         return $this->state(fn () => ['status' => RefereeStatus::Suspended])
             ->has(RefereeEmployment::factory()->started($start), 'employments')
-            ->has(Suspension::factory()->started($end));
+            ->has(WrestlerSuspension::factory()->started($end));
     }
 
     public function injured(): static

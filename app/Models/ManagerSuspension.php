@@ -6,10 +6,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Suspension extends Model
+class ManagerSuspension extends Model
 {
+    /** @use HasFactory<\Database\Factories\ManagerSuspensionFactory> */
     use HasFactory;
 
     /**
@@ -18,21 +19,10 @@ class Suspension extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'suspendable_id',
-        'suspendable_type',
+        'manager_id',
         'started_at',
         'ended_at',
     ];
-
-    /**
-     * Retrieve the suspended model.
-     *
-     * @return MorphTo<Model, Suspension>
-     */
-    public function suspendable(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
     /**
      * Get the attributes that should be cast.
@@ -45,5 +35,13 @@ class Suspension extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Manager, $this>
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(Manager::class);
     }
 }

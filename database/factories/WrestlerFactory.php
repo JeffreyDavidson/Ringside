@@ -6,10 +6,10 @@ namespace Database\Factories;
 
 use App\Enums\WrestlerStatus;
 use App\Models\Retirement;
-use App\Models\Suspension;
 use App\Models\TagTeam;
 use App\Models\WrestlerEmployment;
 use App\Models\WrestlerInjury;
+use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -100,7 +100,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn () => ['status' => WrestlerStatus::Suspended])
             ->has(WrestlerEmployment::factory()->started($start), 'employments')
-            ->has(Suspension::factory()->started($end));
+            ->has(WrestlerSuspension::factory()->started($end));
     }
 
     /**

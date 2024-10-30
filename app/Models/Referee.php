@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
@@ -22,7 +23,6 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     use Concerns\HasInjuries;
     use Concerns\HasNewEmployments;
     use Concerns\HasRetirements;
-    use Concerns\HasSuspensions;
     use HasFactory;
     use SoftDeletes;
 
@@ -111,6 +111,53 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     public function injuries(): HasMany
     {
         return $this->hasMany(RefereeInjury::class);
+    }
+
+    /**
+     * @return HasMany<RefereeSuspension, $this>
+     */
+    public function suspensions(): HasMany
+    {
+        return $this->hasMany(RefereeSuspension::class);
+    }
+
+    /**
+     * @return HasOne<RefereeSuspension, $this>
+     */
+    public function currentSuspension(): HasOne
+    {
+        return $this->suspensions()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<RefereeSuspension, $this>
+     */
+    public function previousSuspensions(): HasMany
+    {
+        return $this->suspensions()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<RefereeSuspension, $this>
+     */
+    public function previousSuspension(): HasOne
+    {
+        return $this->suspensions()
+            ->latestOfMany('ended_at')
+            ->one();
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->currentSuspension()->exists();
+    }
+
+    public function hasSuspensions(): bool
+    {
+        return $this->suspensions()->count() > 0;
     }
 
     /**
