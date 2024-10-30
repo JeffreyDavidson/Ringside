@@ -9,6 +9,7 @@ use App\Models\ManagerEmployment;
 use App\Models\ManagerInjury;
 use App\Models\Retirement;
 use App\Models\Suspension;
+use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -75,7 +76,7 @@ class ManagerFactory extends Factory
 
         return $this->state(fn () => ['status' => ManagerStatus::Suspended])
             ->has(ManagerEmployment::factory()->started($start), 'employments')
-            ->has(Suspension::factory()->started($end));
+            ->has(WrestlerSuspension::factory()->started($end));
     }
 
     public function injured(): static

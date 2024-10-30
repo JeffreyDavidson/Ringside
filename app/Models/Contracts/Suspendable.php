@@ -4,47 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Models\Suspension;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-interface Suspendable extends Identifiable
+interface Suspendable
 {
-    /**
-     * Get the suspensions of the model.
-     *
-     * @return MorphMany<Suspension>
-     */
-    public function suspensions(): MorphMany;
+    public function suspensions(): HasMany;
 
-    /**
-     * Get the current suspension of the model.
-     *
-     * @return MorphOne<Suspension>
-     */
-    public function currentSuspension(): MorphOne;
+    public function currentSuspension(): HasOne;
 
-    /**
-     * Get the previous suspensions of the model.
-     *
-     * @return MorphMany<Suspension>
-     */
-    public function previousSuspensions(): MorphMany;
+    public function previousSuspensions(): HasMany;
 
-    /**
-     * Get the previous suspension of the model.
-     *
-     * @return MorphOne<Suspension>
-     */
-    public function previousSuspension(): MorphOne;
+    public function previousSuspension(): HasOne;
 
-    /**
-     * Determine if the model is suspended.
-     */
     public function isSuspended(): bool;
 
-    /**
-     * Check to see if the model has been suspended.
-     */
     public function hasSuspensions(): bool;
 }

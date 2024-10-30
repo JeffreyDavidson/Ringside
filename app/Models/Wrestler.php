@@ -18,6 +18,7 @@ use App\Models\Contracts\TagTeamMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
@@ -30,7 +31,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     use Concerns\HasMatches;
     use Concerns\HasNewEmployments;
     use Concerns\HasRetirements;
-    use Concerns\HasSuspensions;
     use Concerns\OwnedByUser;
     use HasFactory;
     use SoftDeletes;
@@ -106,5 +106,52 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     public function injuries(): HasMany
     {
         return $this->hasMany(WrestlerInjury::class);
+    }
+
+    /**
+     * @return HasMany<WrestlerSuspension, $this>
+     */
+    public function suspensions(): HasMany
+    {
+        return $this->hasMany(WrestlerSuspension::class);
+    }
+
+    /**
+     * @return HasOne<WrestlerSuspension, $this>
+     */
+    public function currentSuspension(): HasOne
+    {
+        return $this->suspensions()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<WrestlerSuspension, $this>
+     */
+    public function previousSuspensions(): HasMany
+    {
+        return $this->suspensions()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<WrestlerSuspension, $this>
+     */
+    public function previousSuspension(): HasOne
+    {
+        return $this->suspensions()
+            ->latestOfMany('ended_at')
+            ->one();
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->currentSuspension()->exists();
+    }
+
+    public function hasSuspensions(): bool
+    {
+        return $this->suspensions()->count() > 0;
     }
 }

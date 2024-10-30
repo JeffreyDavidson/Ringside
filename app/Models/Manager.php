@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Manager extends Model implements CanBeAStableMember, Employable, Injurable, Retirable, Suspendable
@@ -23,7 +24,6 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     use Concerns\HasInjuries;
     use Concerns\HasNewEmployments;
     use Concerns\HasRetirements;
-    use Concerns\HasSuspensions;
     use Concerns\Manageables;
     use Concerns\OwnedByUser;
     use HasFactory;
@@ -76,6 +76,53 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     public function injuries(): HasMany
     {
         return $this->hasMany(ManagerInjury::class);
+    }
+
+    /**
+     * @return HasMany<ManagerSuspension, $this>
+     */
+    public function suspensions(): HasMany
+    {
+        return $this->hasMany(ManagerSuspension::class);
+    }
+
+    /**
+     * @return HasOne<ManagerSuspension, $this>
+     */
+    public function currentSuspension(): HasOne
+    {
+        return $this->suspensions()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<ManagerSuspension, $this>
+     */
+    public function previousSuspensions(): HasMany
+    {
+        return $this->suspensions()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<ManagerSuspension, $this>
+     */
+    public function previousSuspension(): HasOne
+    {
+        return $this->suspensions()
+            ->latestOfMany('ended_at')
+            ->one();
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->currentSuspension()->exists();
+    }
+
+    public function hasSuspensions(): bool
+    {
+        return $this->suspensions()->count() > 0;
     }
 
     /**
