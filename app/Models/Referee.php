@@ -106,6 +106,14 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
+     * @return HasMany<RefereeInjury, $this>
+     */
+    public function injuries(): HasMany
+    {
+        return $this->hasMany(RefereeInjury::class);
+    }
+
+    /**
      * Get the manager's full name.
      *
      * @return Attribute<string, never>

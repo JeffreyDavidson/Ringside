@@ -5,46 +5,32 @@ declare(strict_types=1);
 namespace App\Models\Contracts;
 
 use App\Models\Injury;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 interface Injurable extends Identifiable
 {
     /**
-     * Get the injuries of the model.
-     *
-     * @return MorphMany<Injury>
+     * @return HasMany<Injury, $this>
      */
-    public function injuries(): MorphMany;
+    public function injuries(): HasMany;
 
     /**
-     * Get the current injury of the model.
-     *
-     * @return MorphOne<Injury>
+     * @return HashOne<Injury, $this>
      */
-    public function currentInjury(): MorphOne;
+    public function currentInjury(): HasOne;
 
     /**
-     * Get the previous injuries of the model.
-     *
-     * @return MorphMany<Injury>
+     * @return HasMany<Injury, $this>
      */
-    public function previousInjuries(): MorphMany;
+    public function previousInjuries(): HasMany;
 
     /**
-     * Get the previous injury of the model.
-     *
-     * @return MorphOne<Injury>
+     * @return HasOne<Injury>
      */
-    public function previousInjury(): MorphOne;
+    public function previousInjury(): HasOne;
 
-    /**
-     * Check to see if the model is injured.
-     */
     public function isInjured(): bool;
 
-    /**
-     * Check to see if the model has been injured.
-     */
     public function hasInjuries(): bool;
 }

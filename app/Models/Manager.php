@@ -71,6 +71,14 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
+     * @return HasMany<ManagerInjury, $this>
+     */
+    public function injuries(): HasMany
+    {
+        return $this->hasMany(ManagerInjury::class);
+    }
+
+    /**
      * Determine if the manager is available to manager manageables.
      */
     public function isAvailable(): bool

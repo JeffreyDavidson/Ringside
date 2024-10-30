@@ -99,4 +99,12 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     {
         return $this->hasMany(WrestlerEmployment::class);
     }
+
+    /**
+     * @return HasMany<WrestlerInjury, $this>
+     */
+    public function injuries(): HasMany
+    {
+        return $this->hasMany(WrestlerInjury::class);
+    }
 }
