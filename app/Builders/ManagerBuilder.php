@@ -14,11 +14,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class ManagerBuilder extends Builder
 {
-    use Concerns\HasEmployments;
-    use Concerns\HasInjuries;
-    use Concerns\HasRetirements;
-    use Concerns\HasSuspensions;
-
     /**
      * Scope a query to include available managers.
      */

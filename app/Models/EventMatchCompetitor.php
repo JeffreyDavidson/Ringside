@@ -14,11 +14,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class EventMatchCompetitor extends MorphPivot
 {
     /**
-     * The table associated with the model.
-     */
-    protected string $table = 'event_match_competitors';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

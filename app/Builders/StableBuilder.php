@@ -7,12 +7,6 @@ namespace App\Builders;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \App\Models\Stable
- *
- * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<\App\Models\Stable>
  */
-class StableBuilder extends Builder
-{
-    use Concerns\HasActivations;
-    use Concerns\HasRetirements;
-}
+class StableBuilder extends Builder {}

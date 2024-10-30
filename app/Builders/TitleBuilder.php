@@ -8,15 +8,10 @@ use App\Enums\TitleStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \App\Models\Title
- *
- * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<\App\Models\Title>
  */
 class TitleBuilder extends Builder
 {
-    use Concerns\HasActivations;
-    use Concerns\HasRetirements;
-
     /**
      * Scope a query to include competable titles.
      */

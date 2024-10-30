@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * This is used by Laravel authentication to redirect users after login.
      */
-    public const HOME = '/dashboard';
+    public const string HOME = '/dashboard';
 
     /**
      * Register any application services.
