@@ -94,7 +94,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerRetirement, $this>
+     * @return HasOne<WrestlerEmployment, $this>
      */
     public function currentEmployment(): HasOne
     {
@@ -104,13 +104,32 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment, $this>
+     * @return HasOne<ManagerEmployment, $this>
      */
     public function futureEmployment(): HasOne
     {
         return $this->employments()
             ->whereNull('ended_at')
             ->where('started_at', '>', now())
+            ->one();
+    }
+
+    /**
+     * @return HasMany<WrestlerEmployment, $this>
+     */
+    public function previousEmployments(): HasMany
+    {
+        return $this->employments()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<WrestlerEmployment, $this>
+     */
+    public function previousEmployment(): HasOne
+    {
+        return $this->previousEmployments()
+            ->latestOfMany()
             ->one();
     }
 
@@ -124,29 +143,27 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
         });
     }
 
-    public function getLatestCurrentEmploymentStartDate()
+    public function hasFutureEmployment(): bool
     {
-        return ! is_null($this->latestCurrentEmployment) ? $this->latestCurrentEmployment->started_at->format('Y-m-d') : 'N/A';
+        return $this->futureEmployment()->exists();
     }
 
-    public function latestEmployment()
+    public function isNotInEmployment(): bool
     {
-        return $this->employments()->one()->ofMany('started_at', 'max');
+        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
     }
 
-    public function getLatestEmploymentStartDate()
+    public function isUnemployed(): bool
     {
-        return ! is_null($this->latestEmployment) ? $this->latestEmployment->started_at->format('Y-m-d') : 'N/A';
+        return $this->employments()->count() === 0;
     }
 
-    public function earliestEmployment()
+    public function isReleased(): bool
     {
-        return $this->employments()->one()->ofMany('started_at', 'min');
-    }
-
-    public function getEarliestEmploymentStartDate()
-    {
-        return ! is_null($this->earliestEmployment) ? $this->earliestEmployment->started_at->format('Y-m-d') : 'N/A';
+        return $this->previousEmployment()->exists()
+            && $this->futureEmployment()->doesntExist()
+            && $this->currentEmployment()->doesntExist()
+            && $this->currentRetirement()->doesntExist();
     }
 
     /**

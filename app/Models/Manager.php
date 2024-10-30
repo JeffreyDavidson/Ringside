@@ -80,6 +80,64 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
+     * @return HasOne<ManagerRetirement, $this>
+     */
+    public function currentEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasOne<ManagerEmployment, $this>
+     */
+    public function futureEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->where('started_at', '>', now())
+            ->one();
+    }
+
+    /**
+     * @return HasMany<ManagerEmployment, $this>
+     */
+    public function previousEmployments(): HasMany
+    {
+        return $this->employments()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<ManagerEmployment, $this>
+     */
+    public function previousEmployment(): HasOne
+    {
+        return $this->previousEmployments()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isNotInEmployment(): bool
+    {
+        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
+    }
+
+    public function isUnemployed(): bool
+    {
+        return $this->employments()->count() === 0;
+    }
+
+    public function isReleased(): bool
+    {
+        return $this->previousEmployment()->exists()
+            && $this->futureEmployment()->doesntExist()
+            && $this->currentEmployment()->doesntExist()
+            && $this->currentRetirement()->doesntExist();
+    }
+
+    /**
      * @return HasMany<ManagerInjury, $this>
      */
     public function injuries(): HasMany
