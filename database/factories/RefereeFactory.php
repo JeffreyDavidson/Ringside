@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\RefereeStatus;
-use App\Models\Injury;
 use App\Models\RefereeEmployment;
+use App\Models\RefereeInjury;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -87,6 +87,6 @@ class RefereeFactory extends Factory
 
         return $this->state(fn () => ['status' => RefereeStatus::Injured])
             ->has(RefereeEmployment::factory()->started($start), 'employments')
-            ->has(Injury::factory()->started($now));
+            ->has(RefereeInjury::factory()->started($now));
     }
 }

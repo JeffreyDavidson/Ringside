@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ManagerStatus;
-use App\Models\Injury;
 use App\Models\ManagerEmployment;
+use App\Models\ManagerInjury;
 use App\Models\Retirement;
 use App\Models\Suspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -85,6 +85,6 @@ class ManagerFactory extends Factory
 
         return $this->state(fn () => ['status' => ManagerStatus::Injured])
             ->has(ManagerEmployment::factory()->started($start), 'employments')
-            ->has(Injury::factory()->started($now));
+            ->has(ManagerInjury::factory()->started($now));
     }
 }
