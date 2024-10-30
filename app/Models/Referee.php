@@ -76,6 +76,69 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
+     * @return HasOne<RefereeRetirement, $this>
+     */
+    public function currentEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasOne<RefereeEmployment, $this>
+     */
+    public function futureEmployment(): HasOne
+    {
+        return $this->employments()
+            ->whereNull('ended_at')
+            ->where('started_at', '>', now())
+            ->one();
+    }
+
+    /**
+     * @return HasMany<RefereeEmployment, $this>
+     */
+    public function previousEmployments(): HasMany
+    {
+        return $this->employments()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<RefereeEmployment, $this>
+     */
+    public function previousEmployment(): HasOne
+    {
+        return $this->previousEmployments()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function hasFutureEmployment(): bool
+    {
+        return $this->futureEmployment()->exists();
+    }
+
+    public function isNotInEmployment(): bool
+    {
+        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
+    }
+
+    public function isUnemployed(): bool
+    {
+        return $this->employments()->count() === 0;
+    }
+
+    public function isReleased(): bool
+    {
+        return $this->previousEmployment()->exists()
+            && $this->futureEmployment()->doesntExist()
+            && $this->currentEmployment()->doesntExist()
+            && $this->currentRetirement()->doesntExist();
+    }
+
+    /**
      * Check to see if the model is bookable.
      */
     public function isBookable(): bool
