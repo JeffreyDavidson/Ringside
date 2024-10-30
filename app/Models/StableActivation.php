@@ -6,12 +6,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Activation extends Model
+class StableActivation extends Model
 {
-    /** @use HasFactory<\Database\Factories\ActivationFactory> */
+    /** @use HasFactory<\Database\Factories\StableActivationFactory> */
     use HasFactory;
 
     /**
@@ -20,8 +19,7 @@ class Activation extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'activatable_id',
-        'activatable_type',
+        'stable_id',
         'started_at',
         'ended_at',
     ];
@@ -40,20 +38,10 @@ class Activation extends Model
     }
 
     /**
-     * Get the activated model.
-     *
-     * @return MorphTo<Model, Activation>
+     * @return BelongsTo<Stable, $this>
      */
-    public function activatable(): MorphTo
+    public function stable(): BelongsTo
     {
-        return $this->morphTo();
-    }
-
-    /**
-     * Determine an activation started before a given date.
-     */
-    public function startedBefore(Carbon $date): bool
-    {
-        return $this->started_at->lt($date);
+        return $this->belongsTo(Stable::class);
     }
 }
