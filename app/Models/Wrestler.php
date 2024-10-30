@@ -109,6 +109,45 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
+     * @return HasOne<WrestlerInjury, $this>
+     */
+    public function currentInjury(): HasOne
+    {
+        return $this->injuries()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<WrestlerInjury, $this>
+     */
+    public function previousInjuries(): HasMany
+    {
+        return $this->injuries()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<WrestlerInjury, $this>
+     */
+    public function previousInjury(): HasOne
+    {
+        return $this->previousInjuries()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isInjured(): bool
+    {
+        return $this->currentInjury()->exists();
+    }
+
+    public function hasInjuries(): bool
+    {
+        return $this->injuries()->count() > 0;
+    }
+
+    /**
      * @return HasMany<WrestlerSuspension, $this>
      */
     public function suspensions(): HasMany
