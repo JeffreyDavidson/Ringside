@@ -21,9 +21,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Manager extends Model implements CanBeAStableMember, Employable, Injurable, Retirable, Suspendable
 {
     use Concerns\CanJoinStables;
-    use Concerns\HasInjuries;
-    use Concerns\HasNewEmployments;
-    use Concerns\HasRetirements;
     use Concerns\Manageables;
     use Concerns\OwnedByUser;
     use HasFactory;
@@ -49,6 +46,18 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     protected $attributes = [
         'status' => ManagerStatus::Unemployed->value,
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ManagerStatus::class,
+        ];
+    }
 
     /**
      * Create a new Eloquent query builder for the model.
@@ -165,6 +174,53 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
+     * @return HasMany<ManagerRetirement, $this>
+     */
+    public function retirements(): HasMany
+    {
+        return $this->hasMany(ManagerRetirement::class);
+    }
+
+    /**
+     * @return HasOne<ManagerRetirement, $this>
+     */
+    public function currentRetirement(): HasOne
+    {
+        return $this->retirements()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<ManagerRetirement, $this>
+     */
+    public function previousRetirements(): HasMany
+    {
+        return $this->retirements()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<ManagerRetirement, $this>
+     */
+    public function previousRetirement(): HasOne
+    {
+        return $this->previousRetirements()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isRetired(): bool
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    public function hasRetirements(): bool
+    {
+        return $this->retirements()->count() > 0;
+    }
+
+    /**
      * Determine if the manager is available to manager manageables.
      */
     public function isAvailable(): bool
@@ -185,14 +241,6 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
-     * Get the identifier of the manager.
-     */
-    public function getIdentifier(): string
-    {
-        return "{$this->first_name} {$this->last_name}";
-    }
-
-    /**
      * Get the manager's full name.
      *
      * @return Attribute<string, never>
@@ -202,17 +250,5 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
         return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => ManagerStatus::class,
-        ];
     }
 }

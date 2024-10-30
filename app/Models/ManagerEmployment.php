@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ManagerEmployment extends Model
 {
+    /** @use HasFactory<\Database\Factories\ManagerEmploymentFactory> */
     use HasFactory;
 
     /**
@@ -24,16 +25,6 @@ class ManagerEmployment extends Model
     ];
 
     /**
-     * Get the employed model.
-     *
-     * @return MorphTo<Model, Employment>
-     */
-    public function manager(): BelongsTo
-    {
-        return $this->belongsTo(Manager::class);
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -44,5 +35,13 @@ class ManagerEmployment extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Manager, $this>
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(Manager::class);
     }
 }

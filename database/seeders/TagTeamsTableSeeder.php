@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Employment;
-use App\Models\Retirement;
 use App\Models\TagTeam;
+use App\Models\TagTeamEmployment;
 use App\Models\TagTeamRetirement;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -41,7 +41,7 @@ class TagTeamsTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $employment = Employment::factory()->started($start);
+            $employment = TagTeamEmployment::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $employment = $employment->ended($end);
@@ -63,7 +63,7 @@ class TagTeamsTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $employment = Employment::factory()->started($start)->ended($end);
+            $employment = TagTeamEmployment::factory()->started($start)->ended($end);
             $retirement = TagTeamRetirement::factory()->started($end);
             TagTeam::factory()
                 ->retired($employment, $retirement)
@@ -84,7 +84,7 @@ class TagTeamsTableSeeder extends Seeder
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
-                $employment = Employment::factory()->started($start);
+                $employment = TagTeamEmployment::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $employment = $employment->ended($end);
@@ -108,7 +108,7 @@ class TagTeamsTableSeeder extends Seeder
         for ($j = 1; $j <= 3; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $employment = Employment::factory()->started($start);
+            $employment = TagTeamEmployment::factory()->started($start);
 
             TagTeam::factory()
                 ->withFutureEmployment($employment)

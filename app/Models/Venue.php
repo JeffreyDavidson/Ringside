@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Venue extends Model
 {
+    /** @use HasFactory<\Database\Factories\VenueFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**

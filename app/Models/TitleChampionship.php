@@ -14,9 +14,18 @@ use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
 
 class TitleChampionship extends Model
 {
+    /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
     use HasFactory;
+
     use HasMergedRelationships;
     use HasMorphToOne;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'title_championships';
 
     /**
      * The attributes that are mass assignable.
@@ -33,11 +42,18 @@ class TitleChampionship extends Model
     ];
 
     /**
-     * The table associated with the model.
+     * Get the attributes that should be cast.
      *
-     * @var string
+     * @return array<string, string>
      */
-    protected $table = 'title_championships';
+    protected function casts(): array
+    {
+        return [
+            'won_at' => 'datetime',
+            'lost_at' => 'datetime',
+            'last_held_reign' => 'datetime',
+        ];
+    }
 
     /**
      * Retrieve the title of the championship.
@@ -85,19 +101,5 @@ class TitleChampionship extends Model
         $datetime = $this->lost_at ?? now();
 
         return $this->won_at->diffInDays($datetime);
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'won_at' => 'datetime',
-            'lost_at' => 'datetime',
-            'last_held_reign' => 'datetime',
-        ];
     }
 }

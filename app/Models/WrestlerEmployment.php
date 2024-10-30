@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WrestlerEmployment extends Model
 {
+    /** @use HasFactory<\Database\Factories\WrestlerEmploymentFactory> */
     use HasFactory;
 
     /**
@@ -24,16 +25,6 @@ class WrestlerEmployment extends Model
     ];
 
     /**
-     * Get the employed model.
-     *
-     * @return MorphTo<Model, Employment>
-     */
-    public function wrestler(): BelongsTo
-    {
-        return $this->belongsTo(Wrestler::class);
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -44,5 +35,15 @@ class WrestlerEmployment extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the employed model.
+     *
+     * @return MorphTo<Model, Employment>
+     */
+    public function wrestler(): BelongsTo
+    {
+        return $this->belongsTo(Wrestler::class);
     }
 }

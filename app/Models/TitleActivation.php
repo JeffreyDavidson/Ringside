@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TitleActivation extends Model
 {
+    /** @use HasFactory<\Database\Factories\TitleActivationFactory> */
     use HasFactory;
 
     /**

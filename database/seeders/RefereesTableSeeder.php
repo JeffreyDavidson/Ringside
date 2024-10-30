@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Employment;
 use App\Models\Referee;
+use App\Models\RefereeEmployment;
 use App\Models\RefereeRetirement;
-use App\Models\Retirement;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -41,7 +40,7 @@ class RefereesTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $employment = Employment::factory()->started($start);
+            $employment = RefereeEmployment::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $employment = $employment->ended($end);
@@ -63,7 +62,7 @@ class RefereesTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $employment = Employment::factory()->started($start)->ended($end);
+            $employment = RefereeEmployment::factory()->started($start)->ended($end);
             $retirement = RefereeRetirement::factory()->started($end);
             Referee::factory()
                 ->retired($employment, $retirement)
@@ -84,7 +83,7 @@ class RefereesTableSeeder extends Seeder
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
-                $employment = Employment::factory()->started($start);
+                $employment = RefereeEmployment::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $employment = $employment->ended($end);
@@ -108,7 +107,7 @@ class RefereesTableSeeder extends Seeder
         for ($j = 1; $j <= 5; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $employment = Employment::factory()->started($start);
+            $employment = RefereeEmployment::factory()->started($start);
 
             Referee::factory()
                 ->withFutureEmployment($employment)

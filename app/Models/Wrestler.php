@@ -15,6 +15,7 @@ use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Contracts\TagTeamMember;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,13 +27,13 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     use Concerns\CanJoinStables;
     use Concerns\CanJoinTagTeams;
     use Concerns\CanWinTitles;
-    use Concerns\HasInjuries;
     use Concerns\HasManagers;
     use Concerns\HasMatches;
-    use Concerns\HasNewEmployments;
-    use Concerns\HasRetirements;
     use Concerns\OwnedByUser;
+
+    /** @use HasFactory<\Database\Factories\WrestlerFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     /**
@@ -60,24 +61,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     ];
 
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @return WrestlerBuilder<Wrestler>
-     */
-    public function newEloquentBuilder($query): WrestlerBuilder // @pest-ignore-type
-    {
-        return new WrestlerBuilder($query);
-    }
-
-    /**
-     * Get the display name of the wrestler.
-     */
-    public function getIdentifier(): string
-    {
-        return $this->name;
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -91,6 +74,16 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @return WrestlerBuilder<Wrestler>
+     */
+    public function newEloquentBuilder($query): WrestlerBuilder // @pest-ignore-type
+    {
+        return new WrestlerBuilder($query);
+    }
+
+    /**
      * Get all the employments of the model.
      *
      * @return HasMany<WrestlerEmployment>
@@ -98,6 +91,88 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     public function employments(): HasMany
     {
         return $this->hasMany(WrestlerEmployment::class);
+    }
+
+    public function latestCurrentEmployment(): HasOne
+    {
+        return $this->employments()->one()->ofMany([
+            'started_at' => 'max',
+        ], function (Builder $query) {
+            $query->whereNull('ended_at')
+                ->orWhere('ended_at', '>=', now());
+        });
+    }
+
+    public function getLatestCurrentEmploymentStartDate()
+    {
+        return ! is_null($this->latestCurrentEmployment) ? $this->latestCurrentEmployment->started_at->format('Y-m-d') : 'N/A';
+    }
+
+    public function latestEmployment()
+    {
+        return $this->employments()->one()->ofMany('started_at', 'max');
+    }
+
+    public function getLatestEmploymentStartDate()
+    {
+        return ! is_null($this->latestEmployment) ? $this->latestEmployment->started_at->format('Y-m-d') : 'N/A';
+    }
+
+    public function earliestEmployment()
+    {
+        return $this->employments()->one()->ofMany('started_at', 'min');
+    }
+
+    public function getEarliestEmploymentStartDate()
+    {
+        return ! is_null($this->earliestEmployment) ? $this->earliestEmployment->started_at->format('Y-m-d') : 'N/A';
+    }
+
+    /**
+     * @return HasMany<WrestlerRetirement, $this>
+     */
+    public function retirements(): HasMany
+    {
+        return $this->hasMany(WrestlerRetirement::class);
+    }
+
+    /**
+     * @return HasOne<WrestlerRetirement, $this>
+     */
+    public function currentRetirement(): HasOne
+    {
+        return $this->retirements()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<WrestlerRetirement, $this>
+     */
+    public function previousRetirements(): HasMany
+    {
+        return $this->retirements()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<WrestlerRetirement, $this>
+     */
+    public function previousRetirement(): HasOne
+    {
+        return $this->previousRetirements()
+            ->latestOfMany()
+            ->one();
+    }
+
+    public function isRetired(): bool
+    {
+        return $this->currentRetirement()->exists();
+    }
+
+    public function hasRetirements(): bool
+    {
+        return $this->retirements()->count() > 0;
     }
 
     /**

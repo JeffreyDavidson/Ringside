@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Employment;
-use App\Models\Retirement;
 use App\Models\Wrestler;
+use App\Models\WrestlerEmployment;
+use App\Models\WrestlerRetirement;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -40,7 +40,7 @@ class WrestlersTableSeeder extends Seeder
             $start = $startDate;
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonths(rand(1, 11));
 
-            $employment = Employment::factory()->started($start);
+            $employment = WrestlerEmployment::factory()->started($start);
 
             if ($end->lessThan($now)) {
                 $employment = $employment->ended($end);
@@ -62,8 +62,8 @@ class WrestlersTableSeeder extends Seeder
             $start = $startDate->copy();
             $end = $start->copy()->addYears($randomNumberOfYearsEmployed)->addMonth(rand(1, 11));
 
-            $employment = Employment::factory()->started($start)->ended($end);
-            $retirement = Retirement::factory()->started($end);
+            $employment = WrestlerEmployment::factory()->started($start)->ended($end);
+            $retirement = WrestlerRetirement::factory()->started($end);
             Wrestler::factory()
                 ->retired($employment, $retirement)
                 ->create(['name' => 'Wrestler '.$eNum]);
@@ -83,7 +83,7 @@ class WrestlersTableSeeder extends Seeder
                 $start = $startDate->copy()->addDays(rand(1, 25));
                 $end = $start->copy()->addMonth(rand(1, 11));
 
-                $employment = Employment::factory()->started($start);
+                $employment = WrestlerEmployment::factory()->started($start);
 
                 if ($end->lessThan($now)) {
                     $employment = $employment->ended($end);
@@ -107,7 +107,7 @@ class WrestlersTableSeeder extends Seeder
         for ($j = 1; $j <= 5; $j++) {
             $start = $now->copy()->addMonths(3);
 
-            $employment = Employment::factory()->started($start);
+            $employment = WrestlerEmployment::factory()->started($start);
 
             Wrestler::factory()
                 ->withFutureEmployment($employment)

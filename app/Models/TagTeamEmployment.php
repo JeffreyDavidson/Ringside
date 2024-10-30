@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TagTeamEmployment extends Model
 {
+    /** @use HasFactory<\Database\Factories\TagTeamEmploymentFactory> */
     use HasFactory;
 
     /**
@@ -24,16 +25,6 @@ class TagTeamEmployment extends Model
     ];
 
     /**
-     * Get the employed model.
-     *
-     * @return MorphTo<Model, Employment>
-     */
-    public function tagTeam(): BelongsTo
-    {
-        return $this->belongsTo(TagTeam::class);
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -44,5 +35,15 @@ class TagTeamEmployment extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the employed model.
+     *
+     * @return MorphTo<Model, Employment>
+     */
+    public function tagTeam(): BelongsTo
+    {
+        return $this->belongsTo(TagTeam::class);
     }
 }

@@ -8,8 +8,5 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 interface Employable
 {
-    /**
-     * Get all the employments of the model.
-     */
     public function employments(): HasMany;
 }
