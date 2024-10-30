@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Stable extends Model implements Retirable
+class Stable extends Model implements Activatable, Retirable
 {
     use Concerns\HasMembers;
     use Concerns\OwnedByUser;
@@ -59,6 +59,53 @@ class Stable extends Model implements Retirable
     public function newEloquentBuilder($query): StableBuilder // @pest-ignore-type
     {
         return new StableBuilder($query);
+    }
+
+    /**
+     * @return HasMany<StableActivation, $this>
+     */
+    public function activations(): HasMany
+    {
+        return $this->hasMany(StableActivation::class);
+    }
+
+    /**
+     * @return HasOne<StableActivation, $this>
+     */
+    public function currentActivation(): HasOne
+    {
+        return $this->activations()
+            ->whereNull('ended_at')
+            ->one();
+    }
+
+    /**
+     * @return HasMany<StableActivation, $this>
+     */
+    public function previousActivations(): HasMany
+    {
+        return $this->activations()
+            ->whereNotNull('ended_at');
+    }
+
+    /**
+     * @return HasOne<StableActivation, $this>
+     */
+    public function previousActivation(): HasOne
+    {
+        return $this->previousActivations()
+            ->latest('ended_at')
+            ->one();
+    }
+
+    public function isActivated(): bool
+    {
+        return $this->currentActivation()->exists();
+    }
+
+    public function hasActivations(): bool
+    {
+        return $this->activations()->count() > 0;
     }
 
     /**
