@@ -79,10 +79,6 @@ class Event extends Model
      */
     public function isScheduled(): bool
     {
-        if (is_null($this->date)) {
-            return false;
-        }
-
         return $this->date->isFuture();
     }
 
@@ -91,10 +87,6 @@ class Event extends Model
      */
     public function isPast(): bool
     {
-        if (is_null($this->date)) {
-            return false;
-        }
-
         return $this->date->isPast();
     }
 
