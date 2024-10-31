@@ -21,7 +21,7 @@ class EventDateCanBeChanged implements ValidationRule
             $fail('The validation error message.');
         }
 
-        if ($this->event->date?->isPast()) {
+        if ($this->event->date->isPast()) {
             $fail('The validation error message.');
         }
     }
