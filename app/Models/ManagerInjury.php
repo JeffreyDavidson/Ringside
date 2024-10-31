@@ -38,7 +38,7 @@ class ManagerInjury extends Model
     }
 
     /**
-     * @return BelongsTo<Manager, $this>
+     * @return BelongsTo<Manager, ManagerInjury>
      */
     public function manager(): BelongsTo
     {

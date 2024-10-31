@@ -159,17 +159,10 @@ class WrestlerRepository
     /**
      * Undocumented function.
      *
-     * @return Collection<int, Wrestler>
+     * @return Collection<int, covariant Wrestler>
      */
     public static function getAvailableWrestlersForNewTagTeam(): Collection
     {
-        // Each wrestler must be either:
-        // have a currentEmployment (scope called employed)
-        // AND have a status of bookable and not belong to another employed tag team where the tag team is bookable
-        // OR the tag team has a future employment
-        // or have a future employment (scope called futureEmployment)
-        // or has not been employed (scope called unemployed)
-
         return Wrestler::query()
             ->where(function (WrestlerBuilder $query) {
                 $query->unemployed();
@@ -186,20 +179,10 @@ class WrestlerRepository
     }
 
     /**
-     * Undocumented function.
-     *
-     * @return Collection<int, Wrestler>
+     * @return Collection<int, covariant Wrestler>
      */
     public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
     {
-        // Each wrestler must be either:
-        // have a currentEmployment (scope called employed)
-        // AND have a status of bookable and not belong to another employed tag team where the tag team is bookable
-        // OR the tag team has a future employment
-        // or have a future employment (scope called futureEmployment)
-        // or has not been employed (scope called unemployed)
-        // or is currently on the tag team
-
         return Wrestler::query()
             ->where(function (WrestlerBuilder $query) {
                 $query->unemployed();

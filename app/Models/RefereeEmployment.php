@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read \Illuminate\Support\Carbon $started_at
+ */
 class RefereeEmployment extends Model
 {
     /** @use HasFactory<\Database\Factories\RefereeEmploymentFactory> */
@@ -38,7 +41,7 @@ class RefereeEmployment extends Model
     }
 
     /**
-     * @return BelongsTo<Referee, $this>
+     * @return BelongsTo<Referee, RefereeEmployment>
      */
     public function referee(): BelongsTo
     {

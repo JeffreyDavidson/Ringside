@@ -44,7 +44,7 @@ class TagTeamEmployment extends Model
     /**
      * Get the employed model.
      *
-     * @return BelongsTo<TagTeam, $this>
+     * @return BelongsTo<TagTeam, TagTeamEmployment>
      */
     public function tagTeam(): BelongsTo
     {

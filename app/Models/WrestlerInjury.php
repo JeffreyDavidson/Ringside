@@ -38,7 +38,7 @@ class WrestlerInjury extends Model
     }
 
     /**
-     * @return BelongsTo<Wrestler, $this>
+     * @return BelongsTo<Wrestler, WrestlerInjury>
      */
     public function wrestler(): BelongsTo
     {

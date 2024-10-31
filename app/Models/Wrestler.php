@@ -100,7 +100,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<ManagerEmployment>
+     * @return HasOne<WrestlerEmployment>
      */
     public function futureEmployment(): HasOne
     {
