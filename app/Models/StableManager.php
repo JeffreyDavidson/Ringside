@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class Managable extends MorphPivot
+class StableManager extends Pivot
 {
     /**
      * The attributes that should be cast to native types.

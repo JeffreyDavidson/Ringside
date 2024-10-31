@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 interface Manageables
 {
-    public function wrestlers(): MorphToMany;
+    public function wrestlers(): BelongsToMany;
 
-    public function currentWrestlers(): MorphToMany;
+    public function currentWrestlers(): BelongsToMany;
 
-    public function previousWrestlers(): MorphToMany;
+    public function previousWrestlers(): BelongsToMany;
 
-    public function tagTeams(): MorphToMany;
+    public function tagTeams(): BelongsToMany;
 
-    public function currentTagTeams(): MorphToMany;
+    public function currentTagTeams(): BelongsToMany;
 
-    public function previousTagTeams(): MorphToMany;
+    public function previousTagTeams(): BelongsToMany;
 }
