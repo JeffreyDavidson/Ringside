@@ -8,32 +8,28 @@ use App\Models\Manager;
 use App\Models\StableMember;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
-use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait HasMembers
 {
-    use HasMergedRelationships;
-
     /**
      * Get the wrestlers belonging to the stable.
      *
-     * @return MorphToMany<Wrestler>
+     * @return BelongsToMany<Wrestler>
      */
-    public function wrestlers(): MorphToMany
+    public function wrestlers(): BelongsToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'member', 'stable_members')
-            ->using(StableMember::class)
-            ->withPivot(['joined_at', 'left_at']);
+        return $this->belongsToMany(Wrestler::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->using(StableMember::class);
     }
 
     /**
      * Get all current wrestlers that are members of the stable.
      *
-     * @return MorphToMany<Wrestler>
+     * @return BelongsToMany<Wrestler>
      */
-    public function currentWrestlers(): MorphToMany
+    public function currentWrestlers(): BelongsToMany
     {
         return $this->wrestlers()
             ->wherePivotNull('left_at');
@@ -42,9 +38,9 @@ trait HasMembers
     /**
      * Get all previous wrestlers that were members of the stable.
      *
-     * @return MorphToMany<Wrestler>
+     * @return BelongsToMany<Wrestler>
      */
-    public function previousWrestlers(): MorphToMany
+    public function previousWrestlers(): BelongsToMany
     {
         return $this->wrestlers()
             ->wherePivotNotNull('left_at');
@@ -53,21 +49,21 @@ trait HasMembers
     /**
      * Get the tag teams belonging to the stable.
      *
-     * @return MorphToMany<TagTeam>
+     * @return BelongsToMany<TagTeam>
      */
-    public function tagTeams(): MorphToMany
+    public function tagTeams(): BelongsToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'member', 'stable_members')
-            ->using(StableMember::class)
-            ->withPivot(['joined_at', 'left_at']);
+        return $this->belongsToMany(TagTeam::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->using(StableMember::class);
     }
 
     /**
      * Get all current tag teams that are members of the stable.
      *
-     * @return MorphToMany<TagTeam>
+     * @return BelongsToMany<TagTeam>
      */
-    public function currentTagTeams(): MorphToMany
+    public function currentTagTeams(): BelongsToMany
     {
         return $this->tagTeams()
             ->wherePivotNull('left_at');
@@ -76,9 +72,9 @@ trait HasMembers
     /**
      * Get all previous tag teams that were members of the stable.
      *
-     * @return MorphToMany<TagTeam>
+     * @return BelongsToMany<TagTeam>
      */
-    public function previousTagTeams(): MorphToMany
+    public function previousTagTeams(): BelongsToMany
     {
         return $this->tagTeams()
             ->wherePivotNotNull('left_at');
@@ -87,21 +83,21 @@ trait HasMembers
     /**
      * Get the managers belonging to the stable.
      *
-     * @return MorphToMany<Manager>
+     * @return BelongsToMany<Manager>
      */
-    public function managers(): MorphToMany
+    public function managers(): BelongsToMany
     {
-        return $this->morphedByMany(Manager::class, 'member', 'stable_members')
-            ->using(StableMember::class)
-            ->withPivot(['joined_at', 'left_at']);
+        return $this->belongsToMany(Manager::class)
+            ->withPivot(['hired_at', 'left_at'])
+            ->using(StableMember::class);
     }
 
     /**
      * Get all current managers that are members of the stable.
      *
-     * @return MorphToMany<Manager>
+     * @return BelongsToMany<Manager>
      */
-    public function currentManagers(): MorphToMany
+    public function currentManagers(): BelongsToMany
     {
         return $this->managers()
             ->wherePivotNull('left_at');
@@ -110,35 +106,11 @@ trait HasMembers
     /**
      * Get all previous managers that were members of the stable.
      *
-     * @return MorphToMany<Manager>
+     * @return BelongsToMany<Manager>
      */
-    public function previousManagers(): MorphToMany
+    public function previousManagers(): BelongsToMany
     {
         return $this->managers()
             ->wherePivotNotNull('left_at');
-    }
-
-    /**
-     * Get the members belonging to the stable.
-     */
-    public function allMembers(): MergedRelation
-    {
-        return $this->mergedRelation('all_stable_members');
-    }
-
-    /**
-     * Get all current members of the stable.
-     */
-    public function currentMembers(): MergedRelation
-    {
-        return $this->mergedRelation('current_stable_members');
-    }
-
-    /**
-     * Get all previous members of the stable.
-     */
-    public function previousMembers(): MergedRelation
-    {
-        return $this->mergedRelation('previous_stable_members');
     }
 }
