@@ -38,7 +38,7 @@ class RefereeSuspension extends Model
     }
 
     /**
-     * @return BelongsTo<Referee, $this>
+     * @return BelongsTo<Referee, RefereeSuspension>
      */
     public function referee(): BelongsTo
     {

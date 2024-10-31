@@ -75,7 +75,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeRetirement>
+     * @return HasOne<RefereeEmployment>
      */
     public function currentEmployment(): HasOne
     {

@@ -38,7 +38,7 @@ class TagTeamRetirement extends Model
     }
 
     /**
-     * @return BelongsTo<TagTeam, $this>
+     * @return BelongsTo<TagTeam, TagTeamRetirement>
      */
     public function tagTeam(): BelongsTo
     {

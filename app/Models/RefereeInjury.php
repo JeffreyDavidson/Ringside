@@ -38,7 +38,7 @@ class RefereeInjury extends Model
     }
 
     /**
-     * @return BelongsTo<Referee, $this>
+     * @return BelongsTo<Referee, RefereeInjury>
      */
     public function referee(): BelongsTo
     {

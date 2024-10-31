@@ -103,6 +103,6 @@ class TitleChampionship extends Model
     {
         $datetime = $this->lost_at ?? now();
 
-        return $this->won_at->diffInDays($datetime);
+        return intval($this->won_at->diffInDays($datetime));
     }
 }
