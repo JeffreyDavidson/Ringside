@@ -13,6 +13,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -27,6 +28,9 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     use Concerns\CanJoinStables;
     use Concerns\Manageables;
     use Concerns\OwnedByUser;
+
+    /** @use HasBuilder<ManagerBuilder<static>> */
+    use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\ManagerFactory> */
     use HasFactory;

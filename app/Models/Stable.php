@@ -9,6 +9,7 @@ use App\Enums\StableStatus;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -19,6 +20,9 @@ class Stable extends Model implements Activatable, Retirable
 {
     use Concerns\HasMembers;
     use Concerns\OwnedByUser;
+
+    /** @use HasBuilder<StableBuilder<static>> */
+    use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\StableFactory> */
     use HasFactory;
