@@ -11,6 +11,7 @@ class State extends Model
 {
     use Sushi;
 
+    /** @var array<int, array<string, string>> */
     public array $rows = [
         ['name' => 'Alabama', 'code' => 'AL'],
         ['name' => 'Alaska', 'code' => 'AK'],
