@@ -164,12 +164,12 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
 
     public function employedOn(Carbon $employmentDate): bool
     {
-        return $this->currentEmployment?->started_at->eq($employmentDate);
+        return $this->currentEmployment ? $this->currentEmployment->started_at->eq($employmentDate) : false;
     }
 
     public function employedBefore(Carbon $employmentDate): bool
     {
-        return $this->currentEmployment?->started_at->lte($employmentDate);
+        return $this->currentEmployment ? $this->currentEmployment->started_at->lte($employmentDate) : false;
     }
 
     /**

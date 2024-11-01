@@ -142,7 +142,7 @@ class Stable extends Model implements Activatable, Retirable
 
     public function activatedOn(Carbon $activationDate): bool
     {
-        return $this->currentActivation?->started_at->eq($activationDate);
+        return $this->currentActivation ? $this->currentActivation->started_at->eq($activationDate) : false;
     }
 
     /**
