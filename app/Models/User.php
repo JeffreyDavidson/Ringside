@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property Role $role
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -58,7 +61,7 @@ class User extends Authenticatable
      */
     public function isAdministrator(): bool
     {
-        return $this->role === Role::Administrator->value;
+        return $this->role === Role::Administrator;
     }
 
     /**

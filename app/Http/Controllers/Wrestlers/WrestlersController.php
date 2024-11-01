@@ -18,9 +18,6 @@ use Illuminate\Support\Facades\Gate;
 
 class WrestlersController extends Controller
 {
-    /**
-     * View a list of employed wrestlers.
-     */
     public function index(): View
     {
         Gate::authorize('viewList', Wrestler::class);
@@ -28,9 +25,6 @@ class WrestlersController extends Controller
         return view('wrestlers.index');
     }
 
-    /**
-     * Show the form for creating a new wrestler.
-     */
     public function create(Wrestler $wrestler): View
     {
         Gate::authorize('create', Wrestler::class);
@@ -40,9 +34,6 @@ class WrestlersController extends Controller
         ]);
     }
 
-    /**
-     * Create a new wrestler.
-     */
     public function store(StoreRequest $request): RedirectResponse
     {
         CreateAction::run(WrestlerData::fromStoreRequest($request));
@@ -50,9 +41,6 @@ class WrestlersController extends Controller
         return to_route('wrestlers.index');
     }
 
-    /**
-     * Show the profile of a wrestler.
-     */
     public function show(Wrestler $wrestler): View
     {
         Gate::authorize('view', $wrestler);
@@ -62,9 +50,6 @@ class WrestlersController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing a wrestler.
-     */
     public function edit(Wrestler $wrestler): View
     {
         Gate::authorize('update', $wrestler);
@@ -74,9 +59,6 @@ class WrestlersController extends Controller
         ]);
     }
 
-    /**
-     * Update a given wrestler.
-     */
     public function update(UpdateRequest $request, Wrestler $wrestler): RedirectResponse
     {
         UpdateAction::run($wrestler, WrestlerData::fromUpdateRequest($request));
@@ -84,9 +66,6 @@ class WrestlersController extends Controller
         return to_route('wrestlers.index');
     }
 
-    /**
-     * Delete a wrestler.
-     */
     public function destroy(Wrestler $wrestler): RedirectResponse
     {
         Gate::authorize('delete', $wrestler);
