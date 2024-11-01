@@ -11,7 +11,7 @@ use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class WrestlersList extends Component
+class WrestlersTable extends Component
 {
     use WithPagination;
     use WithSorting;
