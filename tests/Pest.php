@@ -24,6 +24,10 @@ uses(TestCase::class, RefreshDatabase::class)
 
 uses(ValidatesRequests::class)->in('Feature/Http/Requests');
 
+pest()
+    ->in('Feature')
+    ->beforeEach(fn () => $this->withoutVite());
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

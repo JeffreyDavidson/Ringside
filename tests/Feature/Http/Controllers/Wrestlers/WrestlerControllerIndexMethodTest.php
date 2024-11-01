@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Livewire\Wrestlers\WrestlersList;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -11,7 +12,8 @@ test('index returns a view', function () {
     actingAs(administrator())
         ->get(action([WrestlersController::class, 'index']))
         ->assertOk()
-        ->assertViewIs('wrestlers.index');
+        ->assertViewIs('wrestlers.index')
+        ->assertSeeLivewire(WrestlersList::class);
 });
 
 test('a basic user cannot view wrestlers index page', function () {
