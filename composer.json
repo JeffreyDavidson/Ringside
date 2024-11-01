@@ -89,7 +89,7 @@
             "./vendor/bin/phpstan analyze --memory-limit=2G app"
         ],
         "type-coverage": [
-            "./vendor/bin/pest --type-coverage"
+            "sail artisan test --type-coverage"
         ],
         "test": [
             "sail artisan test"
