@@ -57,7 +57,7 @@ class WrestlersTable extends DataTableComponent
 
         return [
             SelectFilter::make('Status', 'status')
-                ->options($statuses)
+                ->options(['' => 'All'] + $statuses)
                 ->filter(function (Builder $builder, string $value) {
                     $builder->where('status', $value);
                 }),
