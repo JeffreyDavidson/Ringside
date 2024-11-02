@@ -6,6 +6,8 @@ trait BaseTableTrait
 {
     use HasActionColumn;
 
+    protected array $actionLinksToDisplay = ['view' => true, 'edit' => true, 'delete' => true];
+
     protected bool $showActionColumn = true;
 
     public function configuringBaseTableTrait()
