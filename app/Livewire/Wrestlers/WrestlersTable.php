@@ -5,63 +5,62 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers;
 
 use App\Builders\WrestlerBuilder;
-use App\Livewire\Datatable\WithSorting;
+use App\Enums\WrestlerStatus;
+use App\Livewire\Concerns\BaseTableTrait;
 use App\Models\Wrestler;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
-use Livewire\WithPagination;
+use Illuminate\Database\Eloquent\Builder;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class WrestlersTable extends Component
+class WrestlersTable extends DataTableComponent
 {
-    use WithPagination;
-    use WithSorting;
+    use BaseTableTrait;
 
-    /**
-     * Determines if the filters should be shown.
-     */
-    public bool $showFilters = false;
+    protected string $databaseTableName = "wrestlers";
+    protected string $routeBasePath = 'wrestlers';
+    protected array $actionLinksToDisplay = ['view' => true, 'edit' => true, 'delete' => true];
 
-    /**
-     * Shows list of accepted filters and direction to be displayed.
-     *
-     * @var array<string, string>
-     */
-    public array $filters = [
-        'search' => '',
-    ];
-
-    /**
-     * @var array<int>
-     */
-    public array $selectedWrestlerIds = [];
-
-    /**
-     * @var array<int>
-     */
-    public array $wrestlerIdsOnPage = [];
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
+    public function builder(): WrestlerBuilder
     {
-        $query = Wrestler::query()
-            ->when(
-                $this->filters['search'],
-                function (WrestlerBuilder $query, string $search) {
-                    $query->where('name', 'like', '%'.$search.'%');
-                }
-            )
-            ->orderBy('name');
+        return Wrestler::query()
+            ->with('currentEmployment')
+            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+        ;
+    }
 
-        $query = $this->applySorting($query);
+    public function configure(): void
+    {
+    }
 
-        $wrestlers = $query->paginate();
+    public function columns(): array
+    {
+        return [
+            Column::make('ID', 'id')
+                ->sortable(),
+            Column::make(__('wrestlers.name'), 'name')
+                ->sortable()
+                ->searchable(),
+            Column::make(__('wrestlers.status'), 'status')
+                ->view('components.tables.columns.status-column'),
+            Column::make(__('wrestlers.height'), 'height'),
+            Column::make(__('wrestlers.weight'), 'weight'),
+            Column::make(__('wrestlers.hometown'), 'hometown'),
+            Column::make(__('employments.start_date'), 'currentEmployment.started_at')
+                ->label(fn ($row, Column $column) => $row->currentEmployment?->started_at->format('Y-m-d') ?? 'TBD'),
+        ];
+    }
 
-        $this->wrestlerIdsOnPage = $wrestlers->map(fn (Wrestler $wrestler) => (string) $wrestler->id)->toArray();
+    public function filters(): array
+    {
+        $statuses = collect(WrestlerStatus::cases())->pluck('name', 'value')->toArray();
 
-        return view('livewire.wrestlers.wrestlers-list', [
-            'wrestlers' => $wrestlers,
-        ]);
+        return [
+            SelectFilter::make('Status', 'status')
+                ->options($statuses)
+                ->filter(function (Builder $builder, string $value) {
+                    $builder->where('status', $value);
+                }),
+        ];
     }
 }
