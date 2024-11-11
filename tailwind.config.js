@@ -1,4 +1,5 @@
 import forms from '@tailwindcss/forms';
+const defaultTheme = import('tailwindcss/defaultTheme.js')
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -14,7 +15,39 @@ export default {
     ],
 
     theme: {
-        extend: {},
+        extend: {
+            colors: {
+                gray: {
+                    100: '#F9F9F9',
+                    200: '#F1F1F4',
+                    300: '#DBDFE9',
+                    400: '#C4CADA',
+                    500: '#99A1B7',
+                    600: '#78829D',
+                    700: '#4B5675',
+                    800: '#252F4A',
+                    900: '#071437',
+                },
+            },
+            fontSize: {
+                '2sm': [
+					'0.8125rem',								// 13px
+					{
+						lineHeight: '1.125rem' 		// 18px
+					}
+				],
+            },
+            spacing: {
+                '2.25': '.563rem',
+                '7.5': '1.875rem',
+            },
+            lineHeight: {
+                '4.25': '1.125rem'
+            },
+            fontFamily: {
+                sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+        },
     },
 
     plugins: [forms],

@@ -17,7 +17,7 @@ class WrestlersTable extends DataTableComponent
 {
     use BaseTableTrait;
 
-    protected string $databaseTableName = "wrestlers";
+    protected string $databaseTableName = 'wrestlers';
 
     protected string $routeBasePath = 'wrestlers';
 
@@ -26,12 +26,10 @@ class WrestlersTable extends DataTableComponent
         return Wrestler::query()
             ->with('currentEmployment')
             ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
-        ;
+
     }
 
-    public function configure(): void
-    {
-    }
+    public function configure(): void {}
 
     public function columns(): array
     {

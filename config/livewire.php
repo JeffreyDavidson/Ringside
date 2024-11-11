@@ -113,7 +113,7 @@ return [
     |
     */
 
-    'inject_assets' => true,
+    'inject_assets' => false,
 
     /*
     |---------------------------------------------------------------------------
@@ -155,5 +155,5 @@ return [
     |
     */
 
-    'pagination_theme' => 'bootstrap',
+    'pagination_theme' => 'tailwind',
 ];
