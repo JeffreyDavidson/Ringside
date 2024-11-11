@@ -11,6 +11,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -59,6 +60,8 @@ class AppServiceProvider extends ServiceProvider
             'referee' => \App\Models\Referee::class,
             'stable' => \App\Models\Stable::class,
         ]);
+
+        Vite::macro('image', fn (string $asset) => Vite::asset("resources/images/{$asset}"));
 
         $this->bootRoute();
     }

@@ -1,20 +1,17 @@
 <x-layouts.app>
     <!-- Container -->
-    <div class="container-fixed" id="content_container">
-    </div>
+    <x-container-fixed/>
     <!-- End of Container -->
     <!-- Container -->
-    <div class="container-fixed">
+    <x-container-fixed>
         <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
-            <div class="flex flex-col justify-center gap-2">
-                <h1 class="text-xl font-medium leading-none text-gray-900">
-                    Dashboard
-                </h1>
-                <div class="flex items-center gap-2 text-sm font-normal text-gray-700">
-                    Central Hub
+            <x-page.header>
+                <div class="flex flex-col justify-center gap-2">
+                    <x-page.heading>Dashboard</x-page.heading>
+                    <x-page.description>Central Hub</x-page.description>
                 </div>
-            </div>
+            </x-page.header>
         </div>
-    </div>
+    </x-container-fixed>
     <!-- End of Container -->
 </x-layouts.app>
