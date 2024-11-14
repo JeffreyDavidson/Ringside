@@ -1,3 +1,3 @@
-<div {{ $attributes->merge(['class' => 'card-title']) }}>
+<h3 {{ $attributes->class(['text-base leading-6 font-semibold text-gray-900']) }}>
     {{ $slot }}
-</div>
+</h3>
