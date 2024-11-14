@@ -1,22 +1,32 @@
-name: Lint
-run-name: ${{ github.actor }} is check the project for lint
-on: [push]
+name: Fix PHP code style issues
+
+on:
+  push:
+    branches:
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+      - '!master'
+    paths:
+      - '**.php'
+
+permissions:
+  contents: write
+
 jobs:
-  Lint:
+  php-code-styling:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Setup PHP
-        id: setup-php
-        uses: shivammathur/setup-php@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          php-version: '8.3'
-          tools: laravel/pint
-      - name: Check PHP syntax
-        uses: fxpw/PHP-Lint-php8.3@master
+          ref: ${{ github.head_ref }}
+
+      - name: Fix PHP code style issues
+        uses: aglipanci/laravel-pint-action@latest
+
+      - name: Commit styling changes
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          path: .
-          options: --exclude=*.log
-      - name: Check code style
-        run: pint --test
+          commit_message: Fix styling
