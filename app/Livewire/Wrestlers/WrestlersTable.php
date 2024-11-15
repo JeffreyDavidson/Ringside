@@ -11,6 +11,7 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class WrestlersTable extends DataTableComponent
@@ -31,6 +32,7 @@ class WrestlersTable extends DataTableComponent
 
     public function configure(): void {}
 
+    /** @return array<Column> */
     public function columns(): array
     {
         return [
@@ -49,6 +51,7 @@ class WrestlersTable extends DataTableComponent
         ];
     }
 
+    /** @return array<Filter> */
     public function filters(): array
     {
         $statuses = collect(WrestlerStatus::cases())->pluck('name', 'value')->toArray();
