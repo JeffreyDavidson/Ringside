@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class TagTeamPartner extends Pivot
 {
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'tag_teams_wrestlers';
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
