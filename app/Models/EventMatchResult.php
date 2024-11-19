@@ -11,6 +11,13 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class EventMatchResult extends Model
 {
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'events_matches_results';
+
+    /**
      * Get the winner of the event match.
      *
      * @return MorphTo<Model, EventMatchResult>
