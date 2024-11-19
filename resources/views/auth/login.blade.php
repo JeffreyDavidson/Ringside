@@ -1,50 +1,29 @@
 <x-layouts.auth>
-    <!--begin::Wrapper-->
-    <x-auth-validation-errors :errors="$errors" />
-    <div class="p-10 mx-auto rounded shadow-sm w-lg-500px bg-body p-lg-15">
-        <!--begin::Form-->
-        <form class="form w-100 fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate" id="kt_sign_in_form" action="{{ route('login') }}" method="post">
-            @csrf
-            <!--begin::Heading-->
-            <div class="mb-10 text-center">
-                <!--begin::Title-->
-                <h1 class="mb-3 text-dark">Sign In to Ringside</h1>
-                <!--end::Title-->
-            </div>
-            <!--begin::Heading-->
-            <!--begin::Input group-->
-            <div class="mb-10 fv-row fv-plugins-icon-container">
-                <!--begin::Label-->
-                <label class="form-label fs-6 fw-bolder text-dark">Email</label>
-                <!--end::Label-->
-                <!--begin::Input-->
-                <input class="form-control form-control-lg form-control-solid" type="text" name="email" autocomplete="off">
-                <!--end::Input-->
-            <div class="fv-plugins-message-container invalid-feedback"></div></div>
-            <!--end::Input group-->
-            <!--begin::Input group-->
-            <div class="mb-10 fv-row fv-plugins-icon-container">
-                <!--begin::Wrapper-->
-                <div class="mb-2 d-flex flex-stack">
-                    <!--begin::Label-->
-                    <label class="mb-0 form-label fw-bolder text-dark fs-6">Password</label>
-                    <!--end::Label-->
-                </div>
-                <!--end::Wrapper-->
-                <!--begin::Input-->
-                <input class="form-control form-control-lg form-control-solid" type="password" name="password" autocomplete="off">
-                <!--end::Input-->
-            <div class="fv-plugins-message-container invalid-feedback"></div></div>
-            <!--end::Input group-->
-            <!--begin::Actions-->
-            <div class="text-center">
-                <!--begin::Submit button-->
-                <button type="submit" id="kt_sign_in_submit" class="mb-5 btn btn-lg btn-primary w-100">Continue</button>
-                <!--end::Submit button-->
-            </div>
-            <!--end::Actions-->
-        <div></div></form>
-        <!--end::Form-->
-    </div>
-    <!--end::Wrapper-->
+    <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('login') }}">
+        @csrf
+        <div class="text-center mb-2.5">
+            <h3 class="text-lg font-medium text-gray-900 leading-none mb-2.5">
+                Sign in
+            </h3>
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="flex w-full text-2sm font-normal text-gray-900">Email</label>
+            <input class="block w-full appearance-none shadow-none outline-none font-medium text-2sm leading-4 bg-[#fcfcfc] rounded-md h-10 ps-3 pe-3 border border-solid border-gray-300 text-gray-700" placeholder="email@email.com" type="text" value="{{ old('email') }}" name="email">
+            @error('email')
+                <span class="font-medium text-xs leading-4 text-red-500">
+                    {{ $message }}
+                </span>
+            @enderror
+        </div>
+        <div class="flex flex-col gap-1">
+            <label class="flex w-full text-2sm font-normal text-gray-900">Password</label>
+            <input name="password" placeholder="Enter Password" type="password" value="" class="block w-full appearance-none shadow-none outline-none font-medium text-2sm leading-4 bg-[#fcfcfc] rounded-md h-10 ps-3 pe-3 border border-solid border-gray-300 text-gray-700" value="{{ old('password') }}">
+            @error('password')
+                <span class="font-medium text-xs leading-4 text-red-500">
+                    {{ $message }}
+                </span>
+            @enderror
+        </div>
+        <button class="flex items-center cursor-pointer leading-4 rounded-md h-10 ps-px pe-px gap-1.5 border border-solid border-transparent font-medium text-2sm outline-none text-white bg-[#1b84ff] justify-center grow hover:bg-[#056ee9] hover:shadow-[0_4px_12px_0px_rgba(40,132,239,0.35)]">Sign In</button>
+    </form>
 </x-layouts.auth>
