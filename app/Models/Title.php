@@ -109,6 +109,16 @@ class Title extends Model implements Activatable, Retirable
             ->ofMany('ended_at', 'max');
     }
 
+    /**
+     * @return HasOne<TitleActivation>
+     */
+    public function firstActivation(): HasOne
+    {
+        return $this->activations()
+            ->one()
+            ->ofMany('started_at', 'min');
+    }
+
     public function hasActivations(): bool
     {
         return $this->activations()->count() > 0;

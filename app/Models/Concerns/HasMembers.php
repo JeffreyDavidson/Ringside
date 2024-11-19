@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Manager;
-use App\Models\StableMember;
+use App\Models\StableManager;
+use App\Models\StableTagTeam;
+use App\Models\StableWrestler;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,9 +21,9 @@ trait HasMembers
      */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class)
+        return $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class);
+            ->using(StableWrestler::class);
     }
 
     /**
@@ -53,9 +55,9 @@ trait HasMembers
      */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class)
+        return $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class);
+            ->using(StableTagTeam::class);
     }
 
     /**
@@ -87,9 +89,9 @@ trait HasMembers
      */
     public function managers(): BelongsToMany
     {
-        return $this->belongsToMany(Manager::class)
+        return $this->belongsToMany(Manager::class, 'stables_managers')
             ->withPivot(['hired_at', 'left_at'])
-            ->using(StableMember::class);
+            ->using(StableManager::class);
     }
 
     /**

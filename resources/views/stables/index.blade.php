@@ -1,5 +1,5 @@
 <x-layouts.app>
     <x-container-fixed>
-        <livewire:stables.stables-list />
+        <livewire:stables.stables-table />
     </x-container-fixed>
 </x-layouts.app>

@@ -7,26 +7,39 @@ namespace App\Livewire\Wrestlers;
 use App\Builders\WrestlerBuilder;
 use App\Enums\WrestlerStatus;
 use App\Livewire\Concerns\BaseTableTrait;
+use App\Livewire\Concerns\Columns\HasFirstEmploymentDateColumn;
+use App\Livewire\Concerns\Columns\HasStatusColumn;
+use App\Livewire\Concerns\Filters\HasFirstEmploymentDateFilter;
+use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class WrestlersTable extends DataTableComponent
 {
-    use BaseTableTrait;
+    use BaseTableTrait, HasFirstEmploymentDateColumn, HasFirstEmploymentDateFilter, HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'wrestlers';
 
     protected string $routeBasePath = 'wrestlers';
 
+    protected string $resourceName = 'wrestlers';
+
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
             ->with('currentEmployment')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->when(
+                $this->getAppliedFilterWithValue('Status'),
+                fn ($query, $status) => $query->where('status', $status)
+            )
+            ->when(
+                $this->getAppliedFilterWithValue('Employment'),
+                fn ($query, $dateRange) => $query
+                    ->whereDate('wrestler_employments.started_at', '>=', $dateRange['minDate'])
+                    ->whereDate('wrestler_employments.ended_at', '<=', $dateRange['maxDate'])
+            );
 
     }
 
@@ -36,18 +49,14 @@ class WrestlersTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('ID', 'id')
-                ->sortable(),
             Column::make(__('wrestlers.name'), 'name')
                 ->sortable()
                 ->searchable(),
-            Column::make(__('wrestlers.status'), 'status')
-                ->view('components.tables.columns.status-column'),
+            $this->getDefaultStatusColumn(),
             Column::make(__('wrestlers.height'), 'height'),
             Column::make(__('wrestlers.weight'), 'weight'),
             Column::make(__('wrestlers.hometown'), 'hometown'),
-            Column::make(__('employments.start_date'), 'currentEmployment.started_at')
-                ->label(fn ($row, Column $column) => $row->currentEmployment?->started_at->format('Y-m-d') ?? 'TBD'),
+            $this->getDefaultFirstEmploymentDateColumn(),
         ];
     }
 
@@ -57,11 +66,8 @@ class WrestlersTable extends DataTableComponent
         $statuses = collect(WrestlerStatus::cases())->pluck('name', 'value')->toArray();
 
         return [
-            SelectFilter::make('Status', 'status')
-                ->options(['' => 'All'] + $statuses)
-                ->filter(function (Builder $builder, string $value) {
-                    $builder->where('status', $value);
-                }),
+            $this->getDefaultStatusFilter($statuses),
+            $this->getDefaultFirstEmploymentDateFilter(),
         ];
     }
 }

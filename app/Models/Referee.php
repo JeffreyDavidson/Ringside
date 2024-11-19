@@ -10,7 +10,6 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -112,6 +111,16 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         return $this->previousEmployments()
             ->one()
             ->ofMany('ended_at', 'max');
+    }
+
+    /**
+     * @return HasOne<RefereeEmployment>
+     */
+    public function firstEmployment(): HasOne
+    {
+        return $this->employments()
+            ->one()
+            ->ofMany('started_at', 'min');
     }
 
     public function hasEmployments(): bool
@@ -330,17 +339,5 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     public function hasRetirements(): bool
     {
         return $this->retirements()->count() > 0;
-    }
-
-    /**
-     * Get the manager's full name.
-     *
-     * @return Attribute<string, never>
-     */
-    protected function fullName(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => "{$this->first_name} {$this->last_name}",
-        );
     }
 }

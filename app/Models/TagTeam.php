@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Ankurk91\Eloquent\HasBelongsToOne;
+use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Builders\TagTeamBuilder;
 use App\Enums\TagTeamStatus;
 use App\Models\Contracts\Bookable;
@@ -15,6 +17,7 @@ use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,12 +28,11 @@ use Illuminate\Support\Carbon;
  */
 class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable, Manageable, Retirable, Suspendable
 {
-    use Concerns\CanJoinStables;
     use Concerns\CanWinTitles;
-    use Concerns\HasManagers;
     use Concerns\HasMatches;
     use Concerns\HasWrestlers;
     use Concerns\OwnedByUser;
+    use HasBelongsToOne;
 
     /** @use HasBuilder<TagTeamBuilder<static>> */
     use HasBuilder;
@@ -128,6 +130,16 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
         return $this->previousEmployments()
             ->one()
             ->ofMany('ended_at', 'max');
+    }
+
+    /**
+     * @return HasOne<TagTeamEmployment>
+     */
+    public function firstEmployment(): HasOne
+    {
+        return $this->employments()
+            ->one()
+            ->ofMany('started_at', 'min');
     }
 
     public function hasEmployments(): bool
@@ -265,6 +277,75 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function hasSuspensions(): bool
     {
         return $this->suspensions()->count() > 0;
+    }
+
+    /**
+     * Get all the managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
+     */
+    public function managers(): BelongsToMany
+    {
+        return $this->belongsToMany(Manager::class, 'tag_teams_managers')
+            ->using(TagTeamManager::class)
+            ->withPivot('hired_at', 'left_at');
+    }
+
+    /**
+     * Get all the current managers the model has.
+     *
+     * @return BelongsToMany<Manager>
+     */
+    public function currentManagers(): BelongsToMany
+    {
+        return $this->managers()
+            ->wherePivotNull('left_at');
+    }
+
+    /**
+     * Get all the previous managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
+     */
+    public function previousManagers(): BelongsToMany
+    {
+        return $this->managers()
+            ->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * Get the stables the model has been belonged to.
+     *
+     * @return BelongsToMany<Stable>
+     */
+    public function stables(): BelongsToMany
+    {
+        return $this->belongsToMany(Stable::class, 'stables_tag_teams')
+            ->withPivot(['joined_at', 'left_at']);
+    }
+
+    /**
+     * Get the current stable the member belongs to.
+     *
+     * @return BelongsToOne<Stable>
+     */
+    public function currentStable(): BelongsToOne
+    {
+        return $this->belongsToOne(Stable::class, 'stables_tag_teams')
+            ->withPivot(['joined_at', 'left_at'])
+            ->wherePivotNull('left_at');
+    }
+
+    /**
+     * Get the previous stables the member has belonged to.
+     *
+     * @return BelongsToMany<Stable>
+     */
+    public function previousStables(): BelongsToMany
+    {
+        return $this->stables()
+            ->wherePivot('joined_at', '<', now())
+            ->wherePivotNotNull('left_at');
     }
 
     /**

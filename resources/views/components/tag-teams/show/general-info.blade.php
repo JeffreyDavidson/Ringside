@@ -13,24 +13,6 @@
         @endforelse
     </x-card.general-info.links>
 
-    @if ($tagTeam->currentStable)
-        <x-card.general-info.links label="Current Stable">
-            <x-route-link :route="route('stables.show', $tagTeam->currentStable)" label="{{ $tagTeam->currentStable->name }}" />
-        </x-card.general-info.links>
-    @endif
-
-    @if ($tagTeam->currentChampionships->isNotEmpty())
-        <x-card.general-info.links label="Current Title Championship(s)">
-            @foreach ($tagTeam->currentChampionships as $currentChampionship)
-                <x-route-link :route="route('titles.show', $currentChampionship->title)" label="{{ $currentChampionship->title->name }}" />
-
-                @if (!$loop->last)
-                    @php echo "<br>" @endphp
-                @endif
-            @endforeach
-        </x-card.general-info.links>
-    @endif
-
     @if ($tagTeam->currentManagers->isNotEmpty())
         <x-card.general-info.links label="Current Manager(s)">
             @foreach ($tagTeam->currentManagers as $manager)
@@ -42,6 +24,24 @@
             @endforeach
         </x-card.general-info.links>
     @endif
+
+    @if ($tagTeam->currentStable)
+        <x-card.general-info.links label="Current Stable">
+            <x-route-link :route="route('stables.show', $tagTeam->currentStable)" label="{{ $tagTeam->currentStable->name }}" />
+        </x-card.general-info.links>
+    @endif
+
+    {{-- @if ($tagTeam->currentChampionships->isNotEmpty())
+        <x-card.general-info.links label="Current Title Championship(s)">
+            @foreach ($tagTeam->currentChampionships as $currentChampionship)
+                <x-route-link :route="route('titles.show', $currentChampionship->title)" label="{{ $currentChampionship->title->name }}" />
+
+                @if (!$loop->last)
+                    @php echo "<br>" @endphp
+                @endif
+            @endforeach
+        </x-card.general-info.links>
+    @endif --}}
 
     @if ($tagTeam->signature_move)
         <x-card.general-info.stat label="Signature Move" :value="$tagTeam->signature_move" />

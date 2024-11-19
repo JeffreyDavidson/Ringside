@@ -8,7 +8,7 @@
             </div>
             <div class="col-span-2">
                 <div class="flex flex-col gap-5 lg:gap-7.5">
-                    {{-- <livewire:venues.show.venue-events.page :$venue /> --}}
+                    <livewire:venues.previous-events-table :venueId="$venue->id" />
                 </div>
             </div>
         </div>

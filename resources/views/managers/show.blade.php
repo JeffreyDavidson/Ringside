@@ -8,9 +8,9 @@
             </div>
             <div class="col-span-2">
                 <div class="flex flex-col gap-5 lg:gap-7.5">
-                    {{-- <livewire:managers.show.manager-wrestlers.page :$manager />
-                    <livewire:managers.show.manager-tag-teams.page :$manager />
-                    <livewire:managers.show.manager-stables.page :$manager /> --}}
+                    <livewire:managers.previous-wrestlers-table :managerId="$manager->id" />
+                    <livewire:managers.previous-tag-teams-table :managerId="$manager->id" />
+                    <livewire:managers.previous-stables-table :managerId="$manager->id" />
                 </div>
             </div>
         </div>

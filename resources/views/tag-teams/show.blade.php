@@ -5,15 +5,14 @@
                 <div class="grid gap-5 lg:gap-7.5">
                     <x-tag-teams.show.general-info :$tagTeam />
                 </div>
-
-                <div class="col-span-2">
-                    <div class="flex flex-col gap-5 lg:gap-7.5">
-                        {{-- <livewire:tag-teams.show.previous-title-championships-list :tagTeam="$tagTeam" />
-                        <livewire:tag-teams.show.previous-matches-list :tagTeam="$tagTeam" />
-                        <livewire:tag-teams.show.previous-wrestlers-list :tagTeam="$tagTeam" />
-                        <livewire:tag-teams.show.previous-managers-list :tagTeam="$tagTeam" />
-                        <livewire:tag-teams.show.previous-stables-list :tagTeam="$tagTeam" /> --}}
-                    </div>
+            </div>
+            <div class="col-span-2">
+                <div class="flex flex-col gap-5 lg:gap-7.5">
+                    {{-- <livewire:tag-teams.previous-title-championships-table :tagTeam="$tagTeam" /> --}}
+                    {{-- <livewire:tag-teams.previous-matches-table :tagTeam="$tagTeam" /> --}}
+                    <livewire:tag-teams.previous-wrestlers-table :tagTeamId="$tagTeam->id" />
+                    <livewire:tag-teams.previous-managers-table :tagTeamId="$tagTeam->id" />
+                    <livewire:tag-teams.previous-stables-table :tagTeamId="$tagTeam->id" />
                 </div>
             </div>
         </div>
