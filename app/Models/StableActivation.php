@@ -17,6 +17,13 @@ class StableActivation extends Model
     use HasFactory;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'stables_activations';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

@@ -11,7 +11,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('stable_activations', function (Blueprint $table) {
+        Schema::create('stables_activations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Stable::class);
             $table->datetime('started_at');
@@ -25,6 +25,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('stable_activations');
+        Schema::dropIfExists('stables_activations');
     }
 };
