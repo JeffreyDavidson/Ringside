@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Ankurk91\Eloquent\HasBelongsToOne;
+use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Builders\ManagerBuilder;
 use App\Enums\ManagerStatus;
 use App\Models\Contracts\CanBeAStableMember;
@@ -11,10 +13,10 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,9 +27,9 @@ use Illuminate\Support\Carbon;
  */
 class Manager extends Model implements CanBeAStableMember, Employable, Injurable, Retirable, Suspendable
 {
-    use Concerns\CanJoinStables;
     use Concerns\Manageables;
     use Concerns\OwnedByUser;
+    use HasBelongsToOne;
 
     /** @use HasBuilder<ManagerBuilder<static>> */
     use HasBuilder;
@@ -120,6 +122,16 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
         return $this->previousEmployments()
             ->one()
             ->ofMany('ended_at', 'max');
+    }
+
+    /**
+     * @return HasOne<ManagerEmployment>
+     */
+    public function firstEmployment(): HasOne
+    {
+        return $this->employments()
+            ->one()
+            ->ofMany('started_at', 'min');
     }
 
     public function hasEmployments(): bool
@@ -327,14 +339,44 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     }
 
     /**
-     * Get the manager's full name.
+     * Get the stables the model has been belonged to.
      *
-     * @return Attribute<string, never>
+     * @return BelongsToMany<Stable>
      */
-    protected function fullName(): Attribute
+    public function stables(): BelongsToMany
     {
-        return Attribute::make(
-            get: fn () => "{$this->first_name} {$this->last_name}",
-        );
+        return $this->belongsToMany(Stable::class, 'stables_managers')
+            ->withPivot(['joined_at', 'left_at']);
+    }
+
+    /**
+     * Get the current stable the member belongs to.
+     *
+     * @return BelongsToOne<Stable>
+     */
+    public function currentStable(): BelongsToOne
+    {
+        return $this->belongsToOne(Stable::class, 'stables_managers')
+            ->wherePivotNull('left_at');
+    }
+
+    /**
+     * Get the previous stables the member has belonged to.
+     *
+     * @return BelongsToMany<Stable>
+     */
+    public function previousStables(): BelongsToMany
+    {
+        return $this->stables()
+            ->wherePivot('joined_at', '<', now())
+            ->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * Determine if the model is currently a member of a stable.
+     */
+    public function isNotCurrentlyInStable(Stable $stable): bool
+    {
+        return ! $this->currentStable || $this->currentStable->isNot($stable);
     }
 }

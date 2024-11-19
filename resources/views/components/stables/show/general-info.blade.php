@@ -32,5 +32,5 @@
             @endforeach
         </x-card.general-info.links>
     @endif
-    <x-card.general-info.stat label="Start Date" :value="$stable->startedAt?->toDateString() ?? 'No Start Date Set'" />
+    <x-card.general-info.stat label="Start Date" :value="$stable->firstActivation?->started_at->toDateString() ?? 'No Start Date Set'" />
 </x-card.general-info>

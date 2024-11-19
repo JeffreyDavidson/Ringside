@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->string('first_name');
             $table->string('last_name');
+            $table->string('full_name')->virtualAs("CONCAT(first_name,' ',last_name)");
             $table->string('status');
             $table->timestamps();
             $table->softDeletes();

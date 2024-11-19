@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 #[CollectedBy(EventMatchCompetitorsCollection::class)]
 class EventMatchCompetitor extends MorphPivot
 {
+    protected $table = 'event_match_competitors';
+
     /**
      * The table associated with the model.
      *

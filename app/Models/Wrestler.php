@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Ankurk91\Eloquent\HasBelongsToOne;
+use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Builders\WrestlerBuilder;
 use App\Casts\HeightCast;
 use App\Enums\WrestlerStatus;
@@ -18,6 +20,7 @@ use App\Models\Contracts\TagTeamMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,12 +28,11 @@ use Illuminate\Support\Carbon;
 
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
-    use Concerns\CanJoinStables;
     use Concerns\CanJoinTagTeams;
     use Concerns\CanWinTitles;
-    use Concerns\HasManagers;
     use Concerns\HasMatches;
     use Concerns\OwnedByUser;
+    use HasBelongsToOne;
 
     /** @use HasBuilder<WrestlerBuilder<static>> */
     use HasBuilder;
@@ -127,6 +129,16 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
         return $this->previousEmployments()
             ->one()
             ->ofMany('ended_at', 'max');
+    }
+
+    /**
+     * @return HasOne<WrestlerEmployment>
+     */
+    public function firstEmployment(): HasOne
+    {
+        return $this->employments()
+            ->one()
+            ->ofMany('started_at', 'min');
     }
 
     public function hasEmployments(): bool
@@ -311,5 +323,82 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     public function hasSuspensions(): bool
     {
         return $this->suspensions()->count() > 0;
+    }
+
+    /**
+     * Get all the managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
+     */
+    public function managers(): BelongsToMany
+    {
+        return $this->belongsToMany(Manager::class, 'wrestlers_managers')
+            ->using(WrestlerManager::class)
+            ->withPivot('hired_at', 'left_at');
+    }
+
+    /**
+     * Get all the current managers the model has.
+     *
+     * @return BelongsToMany<Manager>
+     */
+    public function currentManagers(): BelongsToMany
+    {
+        return $this->managers()
+            ->wherePivotNull('left_at');
+    }
+
+    /**
+     * Get all the previous managers the model has had.
+     *
+     * @return BelongsToMany<Manager>
+     */
+    public function previousManagers(): BelongsToMany
+    {
+        return $this->managers()
+            ->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * Get the stables the model has been belonged to.
+     *
+     * @return BelongsToMany<Stable>
+     */
+    public function stables(): BelongsToMany
+    {
+        return $this->belongsToMany(Stable::class, 'stables_wrestlers')
+            ->withPivot(['joined_at', 'left_at']);
+    }
+
+    /**
+     * Get the current stable the member belongs to.
+     *
+     * @return BelongsToOne<Stable>
+     */
+    public function currentStable(): BelongsToOne
+    {
+        return $this->belongsToOne(Stable::class, 'stables_wrestlers')
+            ->withPivot(['joined_at', 'left_at'])
+            ->wherePivotNull('left_at');
+    }
+
+    /**
+     * Get the previous stables the member has belonged to.
+     *
+     * @return BelongsToMany<Stable>
+     */
+    public function previousStables(): BelongsToMany
+    {
+        return $this->stables()
+            ->wherePivot('joined_at', '<', now())
+            ->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * Determine if the model is currently a member of a stable.
+     */
+    public function isNotCurrentlyInStable(Stable $stable): bool
+    {
+        return ! $this->currentStable || $this->currentStable->isNot($stable);
     }
 }

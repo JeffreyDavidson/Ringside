@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use Fidum\EloquentMorphToOne\MorphToOne;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Ankurk91\Eloquent\Relations\BelongsToOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 interface CanBeAStableMember
 {
-    public function stables(): MorphToMany;
+    public function stables(): BelongsToMany;
 
-    public function currentStable(): MorphToOne;
+    public function currentStable(): BelongsToOne;
 
-    public function previousStables(): MorphToMany;
+    public function previousStables(): BelongsToMany;
 }

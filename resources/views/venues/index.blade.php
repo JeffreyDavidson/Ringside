@@ -1,5 +1,5 @@
 <x-layouts.app>
     <x-container-fixed>
-        <livewire:venues.venues-list />
+        <livewire:venues.venues-table />
     </x-container-fixed>
 </x-layouts.app>

@@ -26,5 +26,5 @@
             <x-route-link :route="route('stables.show', $manager->currentStable)" label="{{ $manager->currentStable->name }}" />
         </x-card.general-info.links>
     @endif
-    <x-card.general-info.stat label="Start Date" :value="$manager->startedAt?->toDateString() ?? 'No Start Date Set'" />
+    <x-card.general-info.stat label="Start Date" :value="$manager->firstEmployment?->started_at->toDateString() ?? 'No Start Date Set'" />
 </x-card.general-info>

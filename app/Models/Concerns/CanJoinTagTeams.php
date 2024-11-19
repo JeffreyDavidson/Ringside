@@ -24,7 +24,7 @@ trait CanJoinTagTeams
      */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, 'tag_team_wrestler')
+        return $this->belongsToMany(TagTeam::class, 'tag_teams_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
             ->using(TagTeamPartner::class);
     }
@@ -56,7 +56,7 @@ trait CanJoinTagTeams
      */
     public function currentTagTeam(): BelongsToOne
     {
-        return $this->belongsToOne(TagTeam::class)
+        return $this->belongsToOne(TagTeam::class, 'tag_teams_wrestlers')
             ->wherePivotNull('left_at')
             ->withPivot(['joined_at', 'left_at']);
     }
