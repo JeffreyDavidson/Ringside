@@ -1,10 +1,13 @@
 import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
+import aspectRadio from '@tailwindcss/aspect-ratio';
 const defaultTheme = import('tailwindcss/defaultTheme.js')
 
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
         "./resources/views/*.blade.php",
+        "./resources/views/**/*.blade.php",
         "./resources/js/*.js",
         "./vendor/rappasoft/laravel-livewire-tables/resources/views/*.blade.php",
         "./vendor/rappasoft/laravel-livewire-tables/resources/views/**/*.blade.php",
@@ -50,5 +53,5 @@ export default {
         },
     },
 
-    plugins: [forms],
+    plugins: [forms, typography, aspectRadio],
 };
