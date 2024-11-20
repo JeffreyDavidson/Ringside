@@ -12,6 +12,9 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
     @vite('resources/js/app.js')
     @livewireStyles
+
+    @stack('scripts')
+    @stack('styles')
 </head>
 
 <body
@@ -33,7 +36,9 @@
             </main>
             <!-- End of Content -->
             <!-- Footer -->
-            <x-layouts.partials.footer />
+            @persist('page-footer')
+                <x-layouts.partials.footer />
+            @endpersist
             <!-- End of Footer -->
         </div>
         <!-- End of Wrapper -->
