@@ -1,47 +1,13 @@
-<x-menu>
-    <x-menu.menu-item-dropdown>
-        <x-menu.menu-toggle class="inline-flex items-center cursor-pointer leading-4 rounded-md border border-solid border-transparent outline-none h-8 ps-3 pe-3 font-medium text-xs justify-center shrink-0 p-0 gap-0 w-8 bg-transparent text-gray-700"/>
-        <x-menu.menu-dropdown isDefault class="py-2.5 w-full max-w-[175px] hidden">
-            @if ($links['view'] ?? true)
-                <x-menu.menu-item>
-                    <x-menu.menu-link href="{{ route($path . '.show', $rowId) }}">
-                        <x-menu.menu-dropdown-icon icon="ki-search-list"/>
-                        <x-menu.menu-dropdown-title>View</x-menu.menu-dropdown-title>
-                    </x-menu.menu-link>
-                </x-menu.menu-item>
-            @endif
+<div x-data="{ open: false }">
 
-            <x-menu.menu-item-separator/>
-
-            @if ($links['edit'] ?? true)
-                <x-menu.menu-item>
-                    <x-menu.menu-link href="{{ route($path . '.edit', $rowId) }}">
-                        <x-menu.menu-dropdown-icon icon="ki-pencil"/>
-                        <x-menu.menu-dropdown-title>Edit</x-menu.menu-dropdown-title>
-                    </x-menu.menu-link>
-                </x-menu.menu-item>
-            @endif
-
-            <x-menu.menu-item-separator/>
-
-            @if ($links['delete'] ?? true)
-                <x-menu.menu-item>
-                    <x-menu.menu-link href="{{ route($path . '.destroy', $rowId) }}">
-                        <x-menu.menu-dropdown-icon icon="ki-trash"/>
-                        <x-menu.menu-dropdown-title>Remove</x-menu.menu-dropdown-title>
-                    </x-menu.menu-link>
-                    {{-- <form action="{{ route($path . '.destroy', $rowId) }}" class="d-inline" method="POST" x-data
-                        @submit.prevent="if (confirm('Are you sure you want to delete this user?')) $el.submit()">
-                        @method('DELETE')
-                        @csrf
-
-                        <button type="submit" class="btn btn-link">
-                            <i class="fa-solid fa-trash"></i>
-                            Remove
-                        </button>
-                    </form> --}}
-                </x-menu.menu-item>
-            @endif
-        </x-menu.menu-dropdown>
-    </x-menu.menu-item-dropdown>
-</x-menu>
+    <button x-ref="button" @click="open = ! open" class="flex items-center grow cursor-pointer hover:bg-gray-200 hover:border-transparent hover:shadow-none hover:text-gray-800">
+        <i class="ki-filled ki-dots-vertical text-lg"></i>
+    </button>
+    <div x-show="open" x-anchor.bottom-start="$refs.button" class="px-2 bg-white z-50	">
+        <ul>
+            <li><a x-on:click="open = false;" href="{{ route($path . '.show', $rowId) }}">View</a></li>
+            <li><button x-on:click="open = false;" wire:click="$dispatch('openModal', { component: 'wrestlers.wrestler-modal', arguments: { wrestlerId: {{ $rowId }} }})">Edit</button>            </li>
+            <li><a x-on:click="open = false;" wire:click="delete({{ $rowId}})" wire:confirm>Remove</a></li>
+        </ul>
+    </div>
+</div>
