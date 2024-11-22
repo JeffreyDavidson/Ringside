@@ -1,11 +1,12 @@
+
 <label class="form-label" for="{{ $name }}">{{ $label }}</label>
 
 <input
     type="text"
-    class="form-control"
-    name="{{ $name }}"
-    :placeholder="$label ?? Enter {{ $label }} : null"
-    value="{{ $value ?? null }}"
+    {{ $attributes->merge([
+        'class' => 'form-control',
+        'placeholder' => 'Enter '.($label ?? 'Value'),
+    ]) }}
 >
 
 @error($name)
