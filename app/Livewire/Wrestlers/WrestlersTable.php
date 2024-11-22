@@ -14,7 +14,6 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Wrestler;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Action;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
@@ -41,15 +40,6 @@ class WrestlersTable extends DataTableComponent
     }
 
     public function configure(): void {}
-
-    public function actions(): array
-    {
-        return [
-            Action::make('Create')
-                ->setWireAction('wire:click')
-                ->setWireActionDispatchParams("'openModal', { component: 'wrestlers.wrestler-modal' }"),
-        ];
-    }
 
     /** @return array<Column> */
     public function columns(): array
