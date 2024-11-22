@@ -39,7 +39,6 @@ class TitlesTable extends DataTableComponent
     {
         return [
             Column::make(__('titles.name'), 'name')
-                ->sortable()
                 ->searchable(),
             $this->getDefaultStatusColumn(),
             // Column::make(__('titles.current_champion'), 'champion_name'),

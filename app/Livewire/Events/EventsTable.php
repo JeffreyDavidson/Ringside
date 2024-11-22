@@ -42,7 +42,6 @@ class EventsTable extends DataTableComponent
     {
         return [
             Column::make(__('events.name'), 'name')
-                ->sortable()
                 ->searchable(),
             $this->getDefaultStatusColumn(),
             DateColumn::make(__('events.date'), 'date')

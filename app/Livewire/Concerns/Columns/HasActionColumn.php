@@ -11,6 +11,7 @@ trait HasActionColumn
     protected function getDefaultActionColumn(): Column
     {
         return Column::make(__('core.actions'))
+            ->setColumnLabelStatusDisabled()
             ->label(
                 fn ($row, Column $column) => view('components.tables.columns.action-column')->with(
                     [
