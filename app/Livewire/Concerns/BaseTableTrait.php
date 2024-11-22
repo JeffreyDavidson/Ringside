@@ -28,6 +28,10 @@ trait BaseTableTrait
             ->setLoadingPlaceholderEnabled()
             ->setFiltersStatus(false);
 
+        $this->setConfigurableAreas([
+            'before-wrapper' => 'components.'.$this->routeBasePath.'.index.table-pre',
+        ]);
+
         $this->setupTableStructure();
     }
 

@@ -7,6 +7,10 @@
 @php($isBootstrap5 = $this->isBootstrap5)
 
 <div {{ $this->getTopLevelAttributes() }}>
+    @includeWhen(
+        $this->hasConfigurableAreaFor('before-wrapper'),
+        $this->getConfigurableAreaFor('before-wrapper'),
+        $this->getParametersForConfigurableArea('before-wrapper'))
     <x-card inGrid>
         <x-livewire-tables::wrapper :component="$this" :tableName="$tableName" :$primaryKey :$isTailwind :$isBootstrap
             :$isBootstrap4 :$isBootstrap5>
