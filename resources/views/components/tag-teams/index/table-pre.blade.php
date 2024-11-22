@@ -22,10 +22,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2.5">
-            <button
-                class="inline-flex items-center cursor-pointer leading-4 rounded-md border border-solid border-transparent outline-none h-8 ps-3 pe-3 font-medium text-xs gap-[.275rem] text-white bg-[#1b84ff]">
-                Add Tag Team
-            </button>
+            <x-buttons.primary size="sm">Add Tag Team</x-buttons.primary>
         </div>
     </div>
 </x-container-fixed>
