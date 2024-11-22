@@ -1,5 +1,8 @@
-<div class="table-responsive">
-    <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable">
-        {{ $slot }}
-    </table>
-</div>
+@aware(['inGrid' => false])
+
+<table {{ $attributes->class([
+    'border border-solid border-gray-200' => !$inGrid,
+    'b-0' => $inGrid,
+])->class(['table']) }}>
+    {{ $slot }}
+</table>

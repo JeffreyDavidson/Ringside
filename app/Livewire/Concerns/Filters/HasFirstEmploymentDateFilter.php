@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Filters;
 
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
 
 trait HasFirstEmploymentDateFilter
@@ -19,6 +20,11 @@ trait HasFirstEmploymentDateFilter
                 'placeholder' => 'Enter Date Range',
                 'locale' => 'en',
             ])
-            ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']);
+            ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
+            ->filter(function (Builder $query, string $dateRange) {
+                $query
+                    ->whereDate('wrestler_employments.started_at', '>=', $dateRange['minDate'])
+                    ->whereDate('wrestler_employments.ended_at', '<=', $dateRange['maxDate']);
+            });
     }
 }

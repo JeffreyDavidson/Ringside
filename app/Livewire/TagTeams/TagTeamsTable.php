@@ -42,7 +42,6 @@ class TagTeamsTable extends DataTableComponent
     {
         return [
             Column::make(__('tag-teams.name'), 'name')
-                ->sortable()
                 ->searchable(),
             $this->getDefaultStatusColumn(),
             $this->getDefaultFirstEmploymentDateColumn(),

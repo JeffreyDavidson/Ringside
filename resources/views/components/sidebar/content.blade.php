@@ -1,7 +1,7 @@
 <div class="sidebar-content flex grow shrink-0 py-5 pr-2" id="sidebar_content">
     <div class="scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3">
         <!-- Sidebar Menu -->
-        <x-menu>
+        <x-menu class="flex flex-col grow gap-0.5">
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-home" />
@@ -9,12 +9,30 @@
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
             <x-sidebar.menu-heading>User</x-sidebar.menu-heading>
-            <x-sidebar.menu-item>
-                <x-sidebar.menu-label>
+            <x-sidebar.menu-item
+                x-data="{
+                    open: false,
+                    toggle() {
+                        if (this.open) {
+                            return this.close()
+                        }
+
+                        this.$refs.button.focus()
+
+                        this.open = true
+                    },
+                    close(focusAfter) {
+                        if (! this.open) return
+
+                        this.open = false
+
+                        focusAfter && focusAfter.focus()
+                    }}">
+                <x-sidebar.menu-label hasSub isOpen=open>
                     <x-sidebar.menu-icon icon="ki-people" />
                     <x-sidebar.menu-title :href="route('dashboard')">Roster</x-sidebar.menu-title>
                 </x-sidebar.menu-label>
-                <x-slot:subMenu>
+                <x-slot:subMenu isOpen>
                     <x-sidebar.menu-link :href="route('wrestlers.index')">Wrestlers</x-sidebar.menu-link>
                     <x-sidebar.menu-link :href="route('tag-teams.index')">Tag Teams</x-sidebar.menu-link>
                     <x-sidebar.menu-link :href="route('referees.index')">Referees</x-sidebar.menu-link>

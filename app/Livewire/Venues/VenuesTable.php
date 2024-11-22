@@ -32,7 +32,6 @@ class VenuesTable extends DataTableComponent
     {
         return [
             Column::make(__('venues.name'), 'name')
-                ->sortable()
                 ->searchable(),
             Column::make(__('venues.address'), 'street_address'),
             Column::make(__('venues.city'), 'city'),

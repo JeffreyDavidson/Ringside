@@ -39,7 +39,6 @@ class StablesTable extends DataTableComponent
     {
         return [
             Column::make(__('stables.name'), 'name')
-                ->sortable()
                 ->searchable(),
             $this->getDefaultStatusColumn(),
             $this->getDefaultFirstActivationDateColumn(),
