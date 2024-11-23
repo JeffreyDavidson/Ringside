@@ -22,6 +22,6 @@
         <!-- Topbar -->
         <x-topbar />
         <!-- End of Topbar -->
-    </x-container-fixed>
+    </x-container-fluid>
     <!-- End of Container -->
 </header>

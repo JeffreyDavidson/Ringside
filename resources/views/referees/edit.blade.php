@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-container-fixed>
+    <x-container-fluid>
         <x-card>
             <x-card.header>
                 <x-card.title class="m-0">
@@ -17,5 +17,5 @@
                 <x-form.buttons.submit form="editRefereeForm" />
             </x-card.footer>
         </x-card>
-    </x-container-fixed>
+    </x-container-fluid>
 </x-layouts.app>
