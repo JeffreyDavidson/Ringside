@@ -1,5 +1,3 @@
 <x-layouts.app>
-    <x-container-fixed>
-        <livewire:managers.managers-table />
-    </x-container-fixed>
+    <livewire:managers.managers-table />
 </x-layouts.app>
