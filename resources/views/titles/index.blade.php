@@ -1,5 +1,3 @@
 <x-layouts.app>
-    <x-container-fixed>
-        <livewire:titles.titles-table />
-    </x-container-fixed>
+    <livewire:titles.titles-table />
 </x-layouts.app>
