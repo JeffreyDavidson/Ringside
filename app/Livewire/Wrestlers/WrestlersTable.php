@@ -46,7 +46,7 @@ class WrestlersTable extends DataTableComponent
     {
         return [
             Column::make(__('wrestlers.name'), 'name')
-                ->sortable()->searchable(),
+                ->searchable(),
             $this->getDefaultStatusColumn(),
             Column::make(__('wrestlers.height'), 'height'),
             Column::make(__('wrestlers.weight'), 'weight'),
