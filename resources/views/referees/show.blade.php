@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-container-fixed>
+    <x-container-fluid>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7.5">
             <div class="col-span-1">
                 <div class="grid gap-5 lg:gap-7.5">
@@ -12,5 +12,5 @@
                 </div>
             </div>
         </div>
-    </x-container-fixed>
+    </x-container-fluid>
 </x-layouts.app>

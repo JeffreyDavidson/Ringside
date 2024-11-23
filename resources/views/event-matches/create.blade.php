@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-container-fixed>
+    <x-container-fluid>
         <livewire:event-matches.match-form :event="$event" />
-    </x-container-fixed>
+    </x-container-fluid>
 </x-layouts.app>
