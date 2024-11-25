@@ -31,6 +31,13 @@ export default {
                     800: '#252F4A',
                     900: '#071437',
                 },
+                primary: {
+                    DEFAULT: '#1B84FF',
+                    active: '#056EE9',
+                },
+            },
+            boxShadows: {
+                primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
             },
             fontSize: {
                 '2sm': [

@@ -24,6 +24,6 @@
                 </span>
             @enderror
         </div>
-        <button class="flex items-center cursor-pointer leading-4 rounded-md h-10 ps-px pe-px gap-1.5 border border-solid border-transparent font-medium text-2sm outline-none text-white bg-[#1b84ff] justify-center grow hover:bg-[#056ee9] hover:shadow-[0_4px_12px_0px_rgba(40,132,239,0.35)]">Sign In</button>
+        <button class="flex items-center cursor-pointer leading-4 rounded-md h-10 ps-px pe-px gap-1.5 border border-solid border-transparent font-medium text-2sm outline-none text-white bg-primary justify-center grow hover:bg-primary-active hover:shadow-[0_4px_12px_0px_rgba(40,132,239,0.35)]">Sign In</button>
     </form>
 </x-layouts.auth>
