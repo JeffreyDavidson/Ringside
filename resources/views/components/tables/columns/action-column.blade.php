@@ -11,7 +11,7 @@
                     <a class="group flex items-center grow cursor-pointer m-0 p-2.5 ms-2.5 me-2.5 rounded-md hover:bg-gray-100"
                         x-on:click="open = false;" href="{{ route($path . '.show', $rowId) }}">
                         <span class="flex items-center shrink-0 me-2.5">
-                            <i class="ki-filled ki-search-list text-gray-500 text-lg group-hover:text-[#1b84ff]"></i>
+                            <i class="ki-filled ki-search-list text-gray-500 text-lg group-hover:text-primary"></i>
                         </span>
                         <span class="flex items-center grow font-medium text-2sm text-gray-800">View</span>
                     </a>
@@ -23,7 +23,7 @@
                         x-on:click="open = false;"
                         wire:click="$dispatch('openModal', { component: 'wrestlers.wrestler-modal', arguments: { wrestlerId: {{ $rowId }} }})">
                         <span class="flex items-center shrink-0 me-2.5">
-                            <i class="ki-filled ki-pencil text-gray-500 text-lg group-hover:text-[#1b84ff]"></i>
+                            <i class="ki-filled ki-pencil text-gray-500 text-lg group-hover:text-primary"></i>
                         </span>
                         <span class="flex items-center grow font-medium text-2sm text-gray-800">Edit</span>
                     </button>
@@ -33,7 +33,7 @@
                     <a class="group flex items-center grow cursor-pointer m-0 p-2.5 ms-2.5 me-2.5 rounded-md hover:bg-gray-100"
                         x-on:click="open = false;" wire:click="delete({{ $rowId }})" wire:confirm>
                         <span class="flex items-center shrink-0 me-2.5">
-                            <i class="ki-filled ki-trash text-gray-500 text-lg group-hover:text-[#1b84ff]"></i>
+                            <i class="ki-filled ki-trash text-gray-500 text-lg group-hover:text-primary"></i>
                         </span>
                         <span class="flex items-center grow font-medium text-2sm text-gray-800">Remove</span>
                     </a>
