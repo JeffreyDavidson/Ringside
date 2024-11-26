@@ -17,48 +17,57 @@
         <x-card inGrid>
             <x-livewire-tables::wrapper :component="$this" :tableName="$tableName" :$primaryKey :$isTailwind :$isBootstrap
                 :$isBootstrap4 :$isBootstrap5>
-                <x-card.title class="font-medium text-sm">@lang('Showing') {{ $this->perPage }} @lang('of')
-                    {{ $this->getRows->total() }} {{ $this->resourceName }}</x-card.title>
-                <div class="flex flex-wrap gap-2 lg:gap-5">
-                    @if ($this->hasActions && !$this->showActionsInToolbar)
-                        <x-livewire-tables::includes.actions />
+                <x-card.header class="flex-wrap gap-2">
+                    @if ($this->debugIsEnabled())
+                        @include('livewire-tables::includes.debug')
+                    @endif
+                    @if ($this->offlineIndicatorIsEnabled())
+                        @include('livewire-tables::includes.offline')
                     @endif
 
-                    @if ($this->searchIsEnabled() && $this->searchVisibilityIsEnabled())
-                        <x-livewire-tables::tools.toolbar.items.search-field />
-                    @endif
-                    @if ($this->hasConfigurableAreaFor('before-tools'))
-                        @include(
-                            $this->getConfigurableAreaFor('before-tools'),
-                            $this->getParametersForConfigurableArea('before-tools'))
-                    @endif
+                    <x-card.title class="font-medium text-sm">@lang('Showing') {{ $this->perPage }} @lang('of')
+                        {{ $this->getRows->total() }} {{ $this->resourceName }}</x-card.title>
 
-                    @if ($this->shouldShowTools)
-                        <x-livewire-tables::tools>
-                            @if ($this->showSortPillsSection)
-                                <x-livewire-tables::tools.sorting-pills />
-                            @endif
-                            @if ($this->showFilterPillsSection)
-                                <x-livewire-tables::tools.filter-pills />
-                            @endif
+                    <div class="flex flex-wrap gap-2 lg:gap-5">
+                        @if ($this->hasActions && !$this->showActionsInToolbar)
+                            <x-livewire-tables::includes.actions />
+                        @endif
 
-                            @includeWhen(
-                                $this->hasConfigurableAreaFor('before-toolbar'),
-                                $this->getConfigurableAreaFor('before-toolbar'),
-                                $this->getParametersForConfigurableArea('before-toolbar'))
+                        @if ($this->searchIsEnabled() && $this->searchVisibilityIsEnabled())
+                            <x-livewire-tables::tools.toolbar.items.search-field />
+                        @endif
+                        @if ($this->hasConfigurableAreaFor('before-tools'))
+                            @include(
+                                $this->getConfigurableAreaFor('before-tools'),
+                                $this->getParametersForConfigurableArea('before-tools'))
+                        @endif
 
-                            @if ($this->shouldShowToolBar)
-                                <x-livewire-tables::tools.toolbar />
-                            @endif
-                            @includeWhen(
-                                $this->hasConfigurableAreaFor('after-toolbar'),
-                                $this->getConfigurableAreaFor('after-toolbar'),
-                                $this->getParametersForConfigurableArea('after-toolbar'))
+                        @if ($this->shouldShowTools)
+                            <x-livewire-tables::tools>
+                                @if ($this->showSortPillsSection)
+                                    <x-livewire-tables::tools.sorting-pills />
+                                @endif
+                                @if ($this->showFilterPillsSection)
+                                    <x-livewire-tables::tools.filter-pills />
+                                @endif
 
-                        </x-livewire-tables::tools>
-                    @endif
+                                @includeWhen(
+                                    $this->hasConfigurableAreaFor('before-toolbar'),
+                                    $this->getConfigurableAreaFor('before-toolbar'),
+                                    $this->getParametersForConfigurableArea('before-toolbar'))
 
-                </div>
+                                @if ($this->shouldShowToolBar)
+                                    <x-livewire-tables::tools.toolbar />
+                                @endif
+                                @includeWhen(
+                                    $this->hasConfigurableAreaFor('after-toolbar'),
+                                    $this->getConfigurableAreaFor('after-toolbar'),
+                                    $this->getParametersForConfigurableArea('after-toolbar'))
+
+                            </x-livewire-tables::tools>
+                        @endif
+                    </div>
+                </x-card.header>
 
                 <x-card.body>
                     <x-livewire-tables::table>
