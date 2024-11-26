@@ -1,3 +1,3 @@
-<x-menu.menu-item>
+<x-menu.menu-item class="group">
     {{ $slot }}
 </x-menu.menu-item>
