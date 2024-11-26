@@ -3,6 +3,8 @@
         <x-tables.meta-data enum="\App\Enums\ManagerStatus"/>
     </div>
     <div class="flex items-center gap-2.5">
-        <x-buttons.primary size="sm">Add Manager</x-buttons.primary>
+        @can('create', \App\Models\Manager::class)
+            <x-buttons.primary size="sm">Add Manager</x-buttons.primary>
+        @endcan
     </div>
 </div>

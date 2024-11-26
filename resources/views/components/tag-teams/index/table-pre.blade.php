@@ -3,6 +3,8 @@
         <x-tables.meta-data enum="\App\Enums\TagTeamStatus"/>
     </div>
     <div class="flex items-center gap-2.5">
-        <x-buttons.primary size="sm">Add Tag Team</x-buttons.primary>
+        @can('create', \App\Models\TagTeam::class)
+            <x-buttons.primary size="sm">Add Tag Team</x-buttons.primary>
+        @endcan
     </div>
 </div>
