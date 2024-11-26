@@ -3,6 +3,8 @@
         <x-tables.meta-data/>
     </div>
     <div class="flex items-center gap-2.5">
-        <x-buttons.primary size="sm">Add Venue</x-buttons.primary>
+        @can('create', \App\Models\Venue::class)
+            <x-buttons.primary size="sm">Add Venue</x-buttons.primary>
+        @endcan
     </div>
 </div>

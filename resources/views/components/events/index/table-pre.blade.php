@@ -3,6 +3,8 @@
         <x-tables.meta-data enum="\App\Enums\EventStatus"/>
     </div>
     <div class="flex items-center gap-2.5">
-        <x-buttons.primary size="sm">Add Event</x-buttons.primary>
+        @can('create', \App\Models\Event::class)
+            <x-buttons.primary size="sm">Add Event</x-buttons.primary>
+        @endcan
     </div>
 </div>

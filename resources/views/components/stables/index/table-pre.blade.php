@@ -3,6 +3,8 @@
         <x-tables.meta-data enum="\App\Enums\StableStatus"/>
     </div>
     <div class="flex items-center gap-2.5">
-        <x-buttons.primary size="sm">Add Stable</x-buttons.primary>
+        @can('create', \App\Models\Stable::class)
+            <x-buttons.primary size="sm">Add Stable</x-buttons.primary>
+        @endcan
     </div>
 </div>

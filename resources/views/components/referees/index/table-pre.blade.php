@@ -3,6 +3,8 @@
         <x-tables.meta-data enum="\App\Enums\RefereeStatus"/>
     </div>
     <div class="flex items-center gap-2.5">
-        <x-buttons.primary size="sm">Add Referee</x-buttons.primary>
+        @can('create', \App\Models\Referee::class)
+            <x-buttons.primary size="sm">Add Referee</x-buttons.primary>
+        @endcan
     </div>
 </div>
