@@ -33,3 +33,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__.'/web/venues.php');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::group([], __DIR__.'/web/users.php');
+});

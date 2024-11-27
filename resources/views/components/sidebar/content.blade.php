@@ -58,6 +58,13 @@
                     <x-sidebar.menu-title :href="route('events.index')">Events</x-sidebar.menu-title>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
+            <x-sidebar.menu-heading>User Management</x-sidebar.menu-heading>
+            <x-sidebar.menu-item>
+                <x-sidebar.menu-label>
+                    <x-sidebar.menu-icon icon="ki-users" />
+                    <x-sidebar.menu-title :href="route('users.index')">Users</x-sidebar.menu-title>
+                </x-sidebar.menu-label>
+            </x-sidebar.menu-item>
         </x-menu>
         <!-- End of Sidebar Menu -->
     </div>
