@@ -35,6 +35,10 @@ export default {
                     DEFAULT: '#1B84FF',
                     active: '#056EE9',
                 },
+                light: {
+                    DEFAULT: '#ffffff',
+                    active: '#FCFCFC',
+                },
             },
             boxShadows: {
                 primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
