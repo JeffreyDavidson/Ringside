@@ -55,7 +55,7 @@ trait BaseTableTrait
                 'default' => false,
                 'default-styling' => false,
                 'default-colors' => false,
-                'class' => 'grow bg-transparent border border-transparent text-inherit appearance-none outline-none opacity-100 active:shadow-none active:text-gray-700 focus:border-primary text-xs',
+                'class' => 'grow border border-solid border-gray-300 bg-light-active rounded-md leading-none w-full h-8 text-xs font-medium ps-5 pe-5 bg-light-active text-gray-600 focus:border-primary focus:text-gray-700 hover:border-gray-400 placeholder:text-gray-600',
             ])
             ->setTableWrapperAttributes([
                 'default' => false,
