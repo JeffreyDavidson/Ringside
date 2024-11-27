@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\UserBuilder;
 use App\Enums\Role;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,6 +19,9 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable
 {
+    /** @use HasBuilder<UserBuilder<static>> */
+    use HasBuilder;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
 
@@ -43,6 +49,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    protected static string $builder = UserBuilder::class;
 
     /**
      * Get the user's password.
@@ -83,6 +91,7 @@ class User extends Authenticatable
     {
         return [
             'role' => Role::class,
+            'status' => UserStatus::class,
         ];
     }
 }

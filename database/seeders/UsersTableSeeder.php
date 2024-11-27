@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\Role;
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -24,6 +25,7 @@ class UsersTableSeeder extends Seeder
                 $user->email = $role->value.($i ? '2' : '').'@example.com';
                 $user->password = 'password';
                 $user->role = $role->value;
+                $user->status = UserStatus::Active;
                 $user->save();
                 $user->refresh();
                 $userData[] = [
