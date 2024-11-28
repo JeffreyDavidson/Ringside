@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\WrestlerStatus;
-use App\Models\Retirement;
 use App\Models\TagTeam;
 use App\Models\WrestlerEmployment;
 use App\Models\WrestlerInjury;
@@ -74,7 +73,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn () => ['status' => WrestlerStatus::Retired])
             ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
-            ->has(WrestlerRetirement::factory()->started($end));
+            ->has(WrestlerRetirement::factory()->started($end), 'retirements');
     }
 
     /**
@@ -101,7 +100,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn () => ['status' => WrestlerStatus::Suspended])
             ->has(WrestlerEmployment::factory()->started($start), 'employments')
-            ->has(WrestlerSuspension::factory()->started($end));
+            ->has(WrestlerSuspension::factory()->started($end), 'suspensions');
     }
 
     /**
@@ -114,7 +113,7 @@ class WrestlerFactory extends Factory
 
         return $this->state(fn () => ['status' => WrestlerStatus::Injured])
             ->has(WrestlerEmployment::factory()->started($start), 'employments')
-            ->has(WrestlerInjury::factory()->started($now));
+            ->has(WrestlerInjury::factory()->started($now), 'injuries');
     }
 
     /**
