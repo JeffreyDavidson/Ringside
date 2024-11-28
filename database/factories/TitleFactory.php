@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\TitleStatus;
-use App\Models\Retirement;
 use App\Models\TitleActivation;
 use App\Models\TitleChampionship;
 use App\Models\TitleRetirement;
@@ -62,7 +61,7 @@ class TitleFactory extends Factory
 
         return $this->state(fn () => ['status' => TitleStatus::Retired])
             ->has(TitleActivation::factory()->started($start)->ended($end), 'activations')
-            ->has(TitleRetirement::factory()->started($end));
+            ->has(TitleRetirement::factory()->started($end), 'retirements');
     }
 
     public function unactivated(): static
