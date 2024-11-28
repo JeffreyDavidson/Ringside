@@ -8,8 +8,7 @@ use App\Enums\ManagerStatus;
 use App\Models\ManagerEmployment;
 use App\Models\ManagerInjury;
 use App\Models\ManagerRetirement;
-use App\Models\Suspension;
-use App\Models\WrestlerSuspension;
+use App\Models\ManagerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -56,7 +55,7 @@ class ManagerFactory extends Factory
 
         return $this->state(fn () => ['status' => ManagerStatus::Retired])
             ->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments')
-            ->has(ManagerRetirement::factory()->started($end));
+            ->has(ManagerRetirement::factory()->started($end), 'retirements');
     }
 
     public function released(): static
@@ -76,7 +75,7 @@ class ManagerFactory extends Factory
 
         return $this->state(fn () => ['status' => ManagerStatus::Suspended])
             ->has(ManagerEmployment::factory()->started($start), 'employments')
-            ->has(WrestlerSuspension::factory()->started($end));
+            ->has(ManagerSuspension::factory()->started($end), 'suspensions');
     }
 
     public function injured(): static
@@ -86,6 +85,6 @@ class ManagerFactory extends Factory
 
         return $this->state(fn () => ['status' => ManagerStatus::Injured])
             ->has(ManagerEmployment::factory()->started($start), 'employments')
-            ->has(ManagerInjury::factory()->started($now));
+            ->has(ManagerInjury::factory()->started($now), 'injuries');
     }
 }
