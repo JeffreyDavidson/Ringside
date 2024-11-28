@@ -25,8 +25,13 @@
                         @include('livewire-tables::includes.offline')
                     @endif
 
-                    <x-card.title class="font-medium text-sm">@lang('Showing') {{ $this->perPage }} @lang('of')
-                        {{ $this->getRows->total() }} {{ $this->resourceName }}</x-card.title>
+                    <x-card.title class="font-medium text-sm">
+                        @lang('Showing')
+                        {{ $this->getRows->total() < $this->perPage ? $this->getRows->total() : $this->perPage }}
+                        @lang('of')
+                        {{ $this->getRows->total() }}
+                        {{ $this->resourceName }}
+                    </x-card.title>
 
                     <div class="flex flex-wrap gap-2 lg:gap-5">
                         @if ($this->hasActions && !$this->showActionsInToolbar)
