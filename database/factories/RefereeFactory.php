@@ -8,7 +8,7 @@ use App\Enums\RefereeStatus;
 use App\Models\RefereeEmployment;
 use App\Models\RefereeInjury;
 use App\Models\RefereeRetirement;
-use App\Models\WrestlerSuspension;
+use App\Models\RefereeSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -56,7 +56,7 @@ class RefereeFactory extends Factory
 
         return $this->state(fn () => ['status' => RefereeStatus::Retired])
             ->has(RefereeEmployment::factory()->started($start)->ended($end), 'employments')
-            ->has(RefereeRetirement::factory()->started($end));
+            ->has(RefereeRetirement::factory()->started($end), 'retirements');
     }
 
     public function released(): static
@@ -77,7 +77,7 @@ class RefereeFactory extends Factory
 
         return $this->state(fn () => ['status' => RefereeStatus::Suspended])
             ->has(RefereeEmployment::factory()->started($start), 'employments')
-            ->has(WrestlerSuspension::factory()->started($end));
+            ->has(RefereeSuspension::factory()->started($end), 'suspensions');
     }
 
     public function injured(): static
@@ -87,6 +87,6 @@ class RefereeFactory extends Factory
 
         return $this->state(fn () => ['status' => RefereeStatus::Injured])
             ->has(RefereeEmployment::factory()->started($start), 'employments')
-            ->has(RefereeInjury::factory()->started($now));
+            ->has(RefereeInjury::factory()->started($now), 'injuries');
     }
 }
