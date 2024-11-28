@@ -12,6 +12,7 @@ use App\Models\TagTeamSuspension;
 use App\Models\Wrestler;
 use App\Models\WrestlerEmployment;
 use App\Models\WrestlerRetirement;
+use App\Models\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -81,12 +82,12 @@ class TagTeamFactory extends Factory
         $wrestlers = Wrestler::factory()->count(2)
             ->state(fn () => ['status' => WrestlerStatus::Suspended])
             ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
-            ->has(TagTeamSuspension::factory()->started($suspensionStartDate))
+            ->has(WrestlerSuspension::factory()->started($suspensionStartDate), 'suspensions')
             ->create();
 
         return $this->state(fn () => ['status' => TagTeamStatus::Suspended])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
-            ->has(TagTeamSuspension::factory()->started($suspensionStartDate))
+            ->has(TagTeamSuspension::factory()->started($suspensionStartDate), 'suspensions')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
@@ -97,12 +98,12 @@ class TagTeamFactory extends Factory
         $retirementStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
             ->has(WrestlerEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
-            ->has(WrestlerRetirement::factory()->started($retirementStartDate))
+            ->has(WrestlerRetirement::factory()->started($retirementStartDate), 'retirements')
             ->create();
 
         return $this->state(fn () => ['status' => TagTeamStatus::Retired])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
-            ->has(TagTeamRetirement::factory()->started($retirementStartDate))
+            ->has(TagTeamRetirement::factory()->started($retirementStartDate), 'retirements')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
