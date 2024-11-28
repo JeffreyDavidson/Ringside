@@ -20,7 +20,8 @@ trait HasWrestlers
     {
         return $this->belongsToMany(Wrestler::class, 'tag_teams_wrestlers')
             ->withPivot('joined_at', 'left_at')
-            ->using(TagTeamPartner::class);
+            ->using(TagTeamPartner::class)
+            ->withTimestamps();
     }
 
     /**

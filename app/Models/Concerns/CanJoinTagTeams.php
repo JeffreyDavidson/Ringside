@@ -26,7 +26,8 @@ trait CanJoinTagTeams
     {
         return $this->belongsToMany(TagTeam::class, 'tag_teams_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(TagTeamPartner::class);
+            ->using(TagTeamPartner::class)
+            ->withTimestamps();
     }
 
     /**
@@ -48,7 +49,8 @@ trait CanJoinTagTeams
         return $this->belongsToOne(TagTeam::class)
             ->wherePivotNotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
-            ->orderByPivot('joined_at', 'desc');
+            ->orderByPivot('joined_at', 'desc')
+            ->withTimestamps();
     }
 
     /**
@@ -58,7 +60,8 @@ trait CanJoinTagTeams
     {
         return $this->belongsToOne(TagTeam::class, 'tag_teams_wrestlers')
             ->wherePivotNull('left_at')
-            ->withPivot(['joined_at', 'left_at']);
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
     }
 
     /**
