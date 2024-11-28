@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c70dea56aa678bccd1e75c2dd0be085b",
+    "content-hash": "087c27fd3d3dec78a9ade948024725e8",
     "packages": [
         {
             "name": "ankurk91/laravel-eloquent-relationships",
@@ -11548,6 +11548,59 @@
             "time": "2024-10-01T15:41:12+00:00"
         },
         {
+            "name": "wire-elements/wire-spy",
+            "version": "v0.0.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wire-elements/wire-spy.git",
+                "reference": "a53ae56255da5d498d58f45d5fedc4abb547de09"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wire-elements/wire-spy/zipball/a53ae56255da5d498d58f45d5fedc4abb547de09",
+                "reference": "a53ae56255da5d498d58f45d5fedc4abb547de09",
+                "shasum": ""
+            },
+            "require": {
+                "livewire/livewire": "^v3.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "WireElements\\WireSpy\\WireSpyServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "WireElements\\WireSpy\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Philo Hermans",
+                    "email": "me@philo.dev"
+                }
+            ],
+            "description": "Devtools for Livewire",
+            "support": {
+                "issues": "https://github.com/wire-elements/wire-spy/issues",
+                "source": "https://github.com/wire-elements/wire-spy/tree/v0.0.9"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/PhiloNL",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-10-15T14:56:26+00:00"
+        },
+        {
             "name": "worksome/request-factories",
             "version": "v3.3.0",
             "source": {
@@ -11839,6 +11892,6 @@
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
