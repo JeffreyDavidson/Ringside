@@ -1,3 +1,3 @@
-<div {{ $attributes->merge(['class' => 'hidden rounded-xl flex-col lg:flex-row gap-0 w-full lg:max-w-[1240px]']) }}>
+<x-menu.menu-dropdown class="py-2.5 w-full max-w-[220px]" :isDefault=true>
     {{ $slot }}
-</div>
+</x-menu.menu-dropdown>

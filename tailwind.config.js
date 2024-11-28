@@ -62,6 +62,18 @@ export default {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
             },
         },
+        custom: ({ theme }) => ({
+			components: {
+				common: {
+                    borders: {
+						dropdown: '1px solid var(--tw-gray-200)',
+					},
+                    boxShadows: {
+                        dropdown: '0px 7px 18px 0px rgba(0, 0, 0, 0.09)',
+					},
+                },
+            },
+        }),
     },
 
     plugins: [forms, typography, aspectRadio],
