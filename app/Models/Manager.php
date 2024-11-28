@@ -346,7 +346,8 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     public function stables(): BelongsToMany
     {
         return $this->belongsToMany(Stable::class, 'stables_managers')
-            ->withPivot(['joined_at', 'left_at']);
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
     }
 
     /**
@@ -357,7 +358,8 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     public function currentStable(): BelongsToOne
     {
         return $this->belongsToOne(Stable::class, 'stables_managers')
-            ->wherePivotNull('left_at');
+            ->wherePivotNull('left_at')
+            ->withTimestamps();
     }
 
     /**
