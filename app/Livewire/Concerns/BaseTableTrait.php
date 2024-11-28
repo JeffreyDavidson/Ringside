@@ -20,7 +20,6 @@ trait BaseTableTrait
     {
         $this->setPrimaryKey('id')
             ->setColumnSelectDisabled()
-            ->setSearchPlaceholder('Search '.$this->resourceName)
             ->setPaginationEnabled()
             ->addAdditionalSelects([$this->databaseTableName.'.id as id'])
             ->setPerPageAccepted([5, 10, 25, 50, 100])
@@ -31,6 +30,8 @@ trait BaseTableTrait
         $this->setConfigurableAreas([
             'before-wrapper' => 'components.'.$this->routeBasePath.'.index.table-pre',
         ]);
+
+        $this->setSearchAttributes();
 
         $this->setupTableStructure();
     }
@@ -43,7 +44,7 @@ trait BaseTableTrait
         ] : [];
     }
 
-    public function setupTableStructure()
+    private function setupTableStructure()
     {
         return $this->setPerPageFieldAttributes([
             'default' => false,
@@ -51,12 +52,6 @@ trait BaseTableTrait
             'default-colors' => false,
             'class' => 'flex appearance-none shadow-none outline-none bg-no-repeat bg-[right_.675rem_center] bg-[#fcfcfc] rounded-md border border-solid border-gray-300 font-medium text-xs h-8 ps-2.5 pe-2.5 bg-[length:14px_10px] w-16',
         ])
-            ->setSearchFieldAttributes([
-                'default' => false,
-                'default-styling' => false,
-                'default-colors' => false,
-                'class' => 'grow border border-solid border-gray-300 bg-light-active rounded-md leading-none w-full h-8 text-xs font-medium ps-5 pe-5 bg-light-active text-gray-600 focus:border-primary focus:text-gray-700 hover:border-gray-400 placeholder:text-gray-600',
-            ])
             ->setTableWrapperAttributes([
                 'default' => false,
                 'default-styling' => false,
@@ -145,6 +140,22 @@ trait BaseTableTrait
                 'default-styling' => false,
                 'default-colors' => false,
                 'class' => 'inline-flex items-center gap-1',
+            ]);
+    }
+
+    private function setSearchAttributes()
+    {
+        $this->setSearchPlaceholder('Search '.$this->resourceName)
+            ->setSearchIconAttributes([
+                'class' => 'h-4 w-4 text-gray-600',
+                'style' => '',
+            ])
+            ->setSearchIcon('heroicon-m-magnifying-glass')
+            ->setSearchFieldAttributes([
+                'default' => false,
+                'default-styling' => false,
+                'default-colors' => false,
+                'class' => 'grow border border-solid border-gray-300 bg-light-active rounded-md leading-none w-full h-8 text-xs font-medium ps-5 pe-5 bg-light-active text-gray-600 focus:border-primary focus:text-gray-700 hover:border-gray-400 placeholder:text-gray-600',
             ]);
     }
 }
