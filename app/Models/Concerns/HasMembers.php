@@ -23,7 +23,8 @@ trait HasMembers
     {
         return $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableWrestler::class);
+            ->using(StableWrestler::class)
+            ->withTimestamps();
     }
 
     /**
@@ -57,7 +58,8 @@ trait HasMembers
     {
         return $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableTagTeam::class);
+            ->using(StableTagTeam::class)
+            ->withTimestamps();
     }
 
     /**
@@ -91,7 +93,8 @@ trait HasMembers
     {
         return $this->belongsToMany(Manager::class, 'stables_managers')
             ->withPivot(['hired_at', 'left_at'])
-            ->using(StableManager::class);
+            ->using(StableManager::class)
+            ->withTimestamps();
     }
 
     /**

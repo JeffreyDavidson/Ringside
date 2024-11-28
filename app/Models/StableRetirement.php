@@ -14,6 +14,13 @@ class StableRetirement extends Model
     use HasFactory;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'stables_retirements';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
