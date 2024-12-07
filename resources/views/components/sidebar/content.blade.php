@@ -23,33 +23,33 @@
                 </x-sidebar.menu-label>
                 <x-sidebar.menu-accordian x-show="open">
                     <x-sidebar.accordian-link href="{{ route('wrestlers.index') }}"
-                        :isCurrent="request()->routeIs('wrestlers.index')">Wrestlers</x-sidebar.accordian-link>
-                    <x-sidebar.accordian-link href="{{ route('tag-teams.index') }}" :isCurrent="request()->routeIs('tag-teams.index')">
+                        :isCurrent="request()->routeIs('wrestlers.*')">Wrestlers</x-sidebar.accordian-link>
+                    <x-sidebar.accordian-link href="{{ route('tag-teams.index') }}" :isCurrent="request()->routeIs('tag-teams.*')">
                         Tag Teams</x-sidebar.accordian-link>
                     <x-sidebar.accordian-link href="{{ route('managers.index') }}"
-                        :isCurrent="request()->routeIs('managers.index')">Managers</x-sidebar.accordian-link>
+                        :isCurrent="request()->routeIs('managers.*')">Managers</x-sidebar.accordian-link>
                     <x-sidebar.accordian-link href="{{ route('referees.index') }}"
-                        :isCurrent="request()->routeIs('referees.index')">Referees</x-sidebar.accordian-link>
+                        :isCurrent="request()->routeIs('referees.*')">Referees</x-sidebar.accordian-link>
                     <x-sidebar.accordian-link href="{{ route('stables.index') }}"
-                        :isCurrent="request()->routeIs('stables.index')">Stables</x-sidebar.accordian-link>
+                        :isCurrent="request()->routeIs('stables.*')">Stables</x-sidebar.accordian-link>
                 </x-sidebar.menu-accordian>
             </div>
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-cup" />
-                    <x-sidebar.menu-link :href="route('titles.index')" :isCurrent="request()->routeIs('titles.index')">Titles</x-sidebar.menu-link>
+                    <x-sidebar.menu-link :href="route('titles.index')" :isCurrent="request()->routeIs('titles.*')">Titles</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-home-3" />
-                    <x-sidebar.menu-link :href="route('venues.index')" :isCurrent="request()->routeIs('venues.index')">Venues</x-sidebar.menu-link>
+                    <x-sidebar.menu-link :href="route('venues.index')" :isCurrent="request()->routeIs('venues.*')">Venues</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-calendar" />
-                    <x-sidebar.menu-link :href="route('events.index')" :isCurrent="request()->routeIs('events.index')">Events</x-sidebar.menu-link>
+                    <x-sidebar.menu-link :href="route('events.index')" :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
         </x-menu>
