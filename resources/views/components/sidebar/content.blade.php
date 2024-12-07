@@ -5,64 +5,51 @@
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-home" />
-                    <x-sidebar.menu-title :href="route('dashboard')">Dashboard</x-sidebar.menu-title>
+                    <x-sidebar.menu-link href="{{ route('dashboard') }}"
+                        :isCurrent="request()->routeIs('dashboard')">Dashboard</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
             <x-sidebar.menu-heading>User</x-sidebar.menu-heading>
-            <x-sidebar.menu-item
-                x-data="{
-                    open: false,
-                    toggle() {
-                        if (this.open) {
-                            return this.close()
-                        }
-
-                        this.$refs.button.focus()
-
-                        this.open = true
-                    },
-                    close(focusAfter) {
-                        if (! this.open) return
-
-                        this.open = false
-
-                        focusAfter && focusAfter.focus()
-                    }}">
-                <x-sidebar.menu-label hasSub isOpen=open>
+            <div x-data="{
+                open: @json(request()->is('roster/*')),
+                toggle() {
+                    this.open = !this.open
+                }
+            }">
+                <x-sidebar.menu-label @click="toggle">
                     <x-sidebar.menu-icon icon="ki-people" />
-                    <x-sidebar.menu-title :href="route('dashboard')">Roster</x-sidebar.menu-title>
+                    <x-sidebar.menu-title>Roster</x-sidebar.menu-title>
+                    <x-sidebar.menu-accordian-icons />
                 </x-sidebar.menu-label>
-                <x-slot:subMenu isOpen>
-                    <x-sidebar.menu-link :href="route('wrestlers.index')">Wrestlers</x-sidebar.menu-link>
-                    <x-sidebar.menu-link :href="route('tag-teams.index')">Tag Teams</x-sidebar.menu-link>
-                    <x-sidebar.menu-link :href="route('referees.index')">Referees</x-sidebar.menu-link>
-                    <x-sidebar.menu-link :href="route('managers.index')">Managers</x-sidebar.menu-link>
-                    <x-sidebar.menu-link :href="route('stables.index')">Stables</x-sidebar.menu-link>
-                </x-slot:subMenu>
-            </x-sidebar.menu-item>
+                <x-sidebar.menu-accordian x-show="open">
+                    <x-sidebar.accordian-link href="{{ route('wrestlers.index') }}"
+                        :isCurrent="request()->routeIs('wrestlers.index')">Wrestlers</x-sidebar.accordian-link>
+                    <x-sidebar.accordian-link href="{{ route('tag-teams.index') }}" :isCurrent="request()->routeIs('tag-teams.index')">
+                        Tag Teams</x-sidebar.accordian-link>
+                    <x-sidebar.accordian-link href="{{ route('managers.index') }}"
+                        :isCurrent="request()->routeIs('managers.index')">Managers</x-sidebar.accordian-link>
+                    <x-sidebar.accordian-link href="{{ route('referees.index') }}"
+                        :isCurrent="request()->routeIs('referees.index')">Referees</x-sidebar.accordian-link>
+                    <x-sidebar.accordian-link href="{{ route('stables.index') }}"
+                        :isCurrent="request()->routeIs('stables.index')">Stables</x-sidebar.accordian-link>
+                </x-sidebar.menu-accordian>
+            </div>
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-cup" />
-                    <x-sidebar.menu-title :href="route('titles.index')">Titles</x-sidebar.menu-title>
+                    <x-sidebar.menu-link :href="route('titles.index')" :isCurrent="request()->routeIs('titles.index')">Titles</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-home-3" />
-                    <x-sidebar.menu-title :href="route('venues.index')">Venues</x-sidebar.menu-title>
+                    <x-sidebar.menu-link :href="route('venues.index')" :isCurrent="request()->routeIs('venues.index')">Venues</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
             <x-sidebar.menu-item>
                 <x-sidebar.menu-label>
                     <x-sidebar.menu-icon icon="ki-calendar" />
-                    <x-sidebar.menu-title :href="route('events.index')">Events</x-sidebar.menu-title>
-                </x-sidebar.menu-label>
-            </x-sidebar.menu-item>
-            <x-sidebar.menu-heading>User Management</x-sidebar.menu-heading>
-            <x-sidebar.menu-item>
-                <x-sidebar.menu-label>
-                    <x-sidebar.menu-icon icon="ki-users" />
-                    <x-sidebar.menu-title :href="route('users.index')">Users</x-sidebar.menu-title>
+                    <x-sidebar.menu-link :href="route('events.index')" :isCurrent="request()->routeIs('events.index')">Events</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
         </x-menu>

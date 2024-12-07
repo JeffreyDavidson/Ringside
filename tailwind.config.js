@@ -35,6 +35,9 @@ export default {
                     DEFAULT: '#1B84FF',
                     active: '#056EE9',
                 },
+                secondary: {
+                    active: '#f9f9f9',
+                },
                 light: {
                     DEFAULT: '#ffffff',
                     active: '#FCFCFC',
@@ -44,10 +47,16 @@ export default {
                 primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
             },
             fontSize: {
-                '2sm': [
-					'0.8125rem',								// 13px
+                '2xs': [
+					'0.6875rem',
 					{
-						lineHeight: '1.125rem' 		// 18px
+						lineHeight: '.75rem'
+					}
+				],
+                '2sm': [
+					'0.8125rem',
+					{
+						lineHeight: '1.125rem'
 					}
 				],
             },

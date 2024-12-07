@@ -1,3 +1,3 @@
-<x-menu.menu-item class="group">
+<div class="flex flex-col p-0 m-0 group" {{ $attributes }}>
     {{ $slot }}
-</x-menu.menu-item>
+</div>
