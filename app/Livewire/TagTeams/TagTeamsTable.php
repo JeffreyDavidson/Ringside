@@ -14,6 +14,7 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\TagTeam;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class TagTeamsTable extends DataTableComponent
 {
@@ -38,6 +39,11 @@ class TagTeamsTable extends DataTableComponent
         $this->addExtraWithSum('currentWrestlers', 'weight');
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
     public function columns(): array
     {
         return [
@@ -48,6 +54,11 @@ class TagTeamsTable extends DataTableComponent
         ];
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Filter>
+     */
     public function filters(): array
     {
         $statuses = collect(TagTeamStatus::cases())->pluck('name', 'value')->toArray();

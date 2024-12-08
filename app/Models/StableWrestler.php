@@ -25,7 +25,7 @@ class StableWrestler extends Pivot
     }
 
     /**
-     * @return BelongsTo<Stable, StableWrestler>
+     * @return BelongsTo<Stable, $this>
      */
     public function stable(): BelongsTo
     {
@@ -33,7 +33,7 @@ class StableWrestler extends Pivot
     }
 
     /**
-     * @return BelongsTo<Wrestler, StableWrestler>
+     * @return BelongsTo<Wrestler, $this>
      */
     public function wrestler(): BelongsTo
     {

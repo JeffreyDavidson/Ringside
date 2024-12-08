@@ -32,7 +32,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'first_name',
@@ -66,7 +66,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     /**
      * Get all the employments of the model.
      *
-     * @return HasMany<RefereeEmployment>
+     * @return HasMany<RefereeEmployment, $this>
      */
     public function employments(): HasMany
     {
@@ -74,7 +74,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment>
+     * @return HasOne<RefereeEmployment, $this>
      */
     public function currentEmployment(): HasOne
     {
@@ -84,7 +84,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment>
+     * @return HasOne<RefereeEmployment, $this>
      */
     public function futureEmployment(): HasOne
     {
@@ -95,7 +95,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeEmployment>
+     * @return HasMany<RefereeEmployment, $this>
      */
     public function previousEmployments(): HasMany
     {
@@ -104,7 +104,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment>
+     * @return HasOne<RefereeEmployment, $this>
      */
     public function previousEmployment(): HasOne
     {
@@ -114,7 +114,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment>
+     * @return HasOne<RefereeEmployment, $this>
      */
     public function firstEmployment(): HasOne
     {
@@ -181,7 +181,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     /**
      * Retrieve the event matches participated by the model.
      *
-     * @return BelongsToMany<EventMatch>
+     * @return BelongsToMany<EventMatch, $this>
      */
     public function matches(): BelongsToMany
     {
@@ -191,7 +191,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     /**
      * Retrieve the event matches participated by the model.
      *
-     * @return BelongsToMany<EventMatch>
+     * @return BelongsToMany<EventMatch, $this>
      */
     public function previousMatches(): BelongsToMany
     {
@@ -201,7 +201,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeInjury>
+     * @return HasMany<RefereeInjury, $this>
      */
     public function injuries(): HasMany
     {
@@ -209,7 +209,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeInjury>
+     * @return HasOne<RefereeInjury, $this>
      */
     public function currentInjury(): HasOne
     {
@@ -219,7 +219,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeInjury>
+     * @return HasMany<RefereeInjury, $this>
      */
     public function previousInjuries(): HasMany
     {
@@ -228,7 +228,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeInjury>
+     * @return HasOne<RefereeInjury, $this>
      */
     public function previousInjury(): HasOne
     {
@@ -248,7 +248,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeSuspension>
+     * @return HasMany<RefereeSuspension, $this>
      */
     public function suspensions(): HasMany
     {
@@ -256,7 +256,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeSuspension>
+     * @return HasOne<RefereeSuspension, $this>
      */
     public function currentSuspension(): HasOne
     {
@@ -266,7 +266,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeSuspension>
+     * @return HasMany<RefereeSuspension, $this>
      */
     public function previousSuspensions(): HasMany
     {
@@ -275,7 +275,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeSuspension>
+     * @return HasOne<RefereeSuspension, $this>
      */
     public function previousSuspension(): HasOne
     {
@@ -295,7 +295,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeRetirement>
+     * @return HasMany<RefereeRetirement, $this>
      */
     public function retirements(): HasMany
     {
@@ -303,7 +303,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeRetirement>
+     * @return HasOne<RefereeRetirement, $this>
      */
     public function currentRetirement(): HasOne
     {
@@ -313,7 +313,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasMany<RefereeRetirement>
+     * @return HasMany<RefereeRetirement, $this>
      */
     public function previousRetirements(): HasMany
     {
@@ -322,7 +322,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeRetirement>
+     * @return HasOne<RefereeRetirement, $this>
      */
     public function previousRetirement(): HasOne
     {

@@ -13,7 +13,7 @@ trait CanWinTitles
     /**
      * Retrieve the titles won by the model.
      *
-     * @return MorphMany<TitleChampionship>
+     * @return MorphMany<TitleChampionship, $this>
      */
     public function titleChampionships(): MorphMany
     {
@@ -23,7 +23,7 @@ trait CanWinTitles
     /**
      * Retrieve the titles won by the model.
      *
-     * @return MorphMany<TitleChampionship>
+     * @return MorphMany<TitleChampionship, $this>
      */
     public function previousTitleChampionships(): MorphMany
     {
@@ -34,7 +34,7 @@ trait CanWinTitles
     /**
      * Retrieve the current championship held by the model.
      *
-     * @return MorphOne<TitleChampionship>
+     * @return MorphOne<TitleChampionship, $this>
      */
     public function currentChampionship(): MorphOne
     {
@@ -45,7 +45,7 @@ trait CanWinTitles
     /**
      * Retrieve the current championships held by the model.
      *
-     * @return MorphMany<TitleChampionship>
+     * @return MorphMany<TitleChampionship, $this>
      */
     public function currentChampionships(): MorphMany
     {

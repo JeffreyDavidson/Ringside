@@ -12,6 +12,7 @@ use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasFirstEmploymentDateFilter;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Wrestler;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -33,7 +34,7 @@ class WrestlersTable extends DataTableComponent
             ->with('currentEmployment')
             ->when(
                 $this->getAppliedFilterWithValue('Employment'),
-                fn ($query, $dateRange) => $query
+                fn (Builder $query, array $dateRange) => $query
                     ->whereDate('wrestler_employments.started_at', '>=', $dateRange['minDate'])
                     ->whereDate('wrestler_employments.ended_at', '<=', $dateRange['maxDate'])
             );
@@ -41,7 +42,9 @@ class WrestlersTable extends DataTableComponent
 
     public function configure(): void {}
 
-    /** @return array<Column> */
+    /**
+     * @return array<int, Column>
+     **/
     public function columns(): array
     {
         return [
@@ -55,7 +58,9 @@ class WrestlersTable extends DataTableComponent
         ];
     }
 
-    /** @return array<Filter> */
+    /**
+     * @return array<int, Filter>
+     **/
     public function filters(): array
     {
         $statuses = collect(WrestlerStatus::cases())->pluck('name', 'value')->toArray();
@@ -66,7 +71,7 @@ class WrestlersTable extends DataTableComponent
         ];
     }
 
-    public function delete(Wrestler $wrestler)
+    public function delete(Wrestler $wrestler): void
     {
         $canDelete = Gate::inspect('delete', $wrestler);
 

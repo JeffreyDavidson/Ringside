@@ -44,9 +44,9 @@ trait BaseTableTrait
         ] : [];
     }
 
-    private function setupTableStructure()
+    private function setupTableStructure(): void
     {
-        return $this->setPerPageFieldAttributes([
+        $this->setPerPageFieldAttributes([
             'default' => false,
             'default-styling' => false,
             'default-colors' => false,
@@ -143,7 +143,7 @@ trait BaseTableTrait
             ]);
     }
 
-    private function setSearchAttributes()
+    private function setSearchAttributes(): void
     {
         $this->setSearchPlaceholder('Search '.$this->resourceName)
             ->setSearchIconAttributes([

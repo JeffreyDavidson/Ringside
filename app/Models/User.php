@@ -30,7 +30,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'first_name',
@@ -44,7 +44,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for arrays.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password', 'remember_token',
@@ -55,7 +55,7 @@ class User extends Authenticatable
     /**
      * Get the user's password.
      *
-     * @return Attribute<string, never>
+     * @return Attribute<mixed, mixed>
      */
     public function password(): Attribute
     {
@@ -75,7 +75,7 @@ class User extends Authenticatable
     /**
      * Get the user's wrestler.
      *
-     * @return HasOne<Wrestler>
+     * @return HasOne<Wrestler, $this>
      */
     public function wrestler(): HasOne
     {

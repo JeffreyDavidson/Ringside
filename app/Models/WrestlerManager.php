@@ -22,7 +22,7 @@ class WrestlerManager extends Pivot
     ];
 
     /**
-     * @return BelongsTo<Manager, WrestlerManager>
+     * @return BelongsTo<Manager, $this>
      */
     public function manager(): BelongsTo
     {
@@ -30,7 +30,7 @@ class WrestlerManager extends Pivot
     }
 
     /**
-     * @return BelongsTo<Wrestler, WrestlerManager>
+     * @return BelongsTo<Wrestler, $this>
      */
     public function wrestler(): BelongsTo
     {

@@ -30,7 +30,7 @@ class EventMatch extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'event_id',
@@ -41,7 +41,7 @@ class EventMatch extends Model
     /**
      * Get the event the match belongs to.
      *
-     * @return BelongsTo<Event, EventMatch>
+     * @return BelongsTo<Event, $this>
      */
     public function event(): BelongsTo
     {
@@ -51,7 +51,7 @@ class EventMatch extends Model
     /**
      * Get the match type of the match.
      *
-     * @return BelongsTo<MatchType, EventMatch>
+     * @return BelongsTo<MatchType, $this>
      */
     public function matchType(): BelongsTo
     {
@@ -61,7 +61,7 @@ class EventMatch extends Model
     /**
      * Get the referees assigned to the match.
      *
-     * @return BelongsToMany<Referee>
+     * @return BelongsToMany<Referee, $this>
      */
     public function referees(): BelongsToMany
     {
@@ -71,7 +71,7 @@ class EventMatch extends Model
     /**
      * Get the titles being competed for in the match.
      *
-     * @return BelongsToMany<Title>
+     * @return BelongsToMany<Title, $this>
      */
     public function titles(): BelongsToMany
     {
@@ -81,7 +81,7 @@ class EventMatch extends Model
     /**
      * Get all the event match competitors for the match.
      *
-     * @return HasMany<EventMatchCompetitor>
+     * @return HasMany<EventMatchCompetitor, $this>
      */
     public function competitors(): HasMany
     {
@@ -91,7 +91,7 @@ class EventMatch extends Model
     /**
      * Get the wrestlers involved in the match.
      *
-     * @return MorphToMany<Wrestler>
+     * @return MorphToMany<Wrestler, $this>
      */
     public function wrestlers(): MorphToMany
     {
@@ -103,7 +103,7 @@ class EventMatch extends Model
     /**
      * Get the tag teams involved in the match.
      *
-     * @return MorphToMany<TagTeam>
+     * @return MorphToMany<TagTeam, $this>
      */
     public function tagTeams(): MorphToMany
     {
@@ -115,7 +115,7 @@ class EventMatch extends Model
     /**
      * Get the tag teams involved in the match.
      *
-     * @return HasOne<EventMatchResult>
+     * @return HasOne<EventMatchResult, $this>
      */
     public function result(): HasOne
     {

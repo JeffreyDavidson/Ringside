@@ -8,6 +8,7 @@ use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\Event;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
@@ -36,6 +37,11 @@ class PreviousEventsTable extends DataTableComponent
 
     public function configure(): void {}
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
     public function columns(): array
     {
         return [

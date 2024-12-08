@@ -20,7 +20,7 @@ class EventMatchResult extends Model
     /**
      * Get the winner of the event match.
      *
-     * @return MorphTo<Model, EventMatchResult>
+     * @return MorphTo<Model, $this>
      */
     public function winner(): MorphTo
     {
@@ -30,7 +30,7 @@ class EventMatchResult extends Model
     /**
      * Get the decision of the end of the event match.
      *
-     * @return BelongsTo<MatchDecision, EventMatchResult>
+     * @return BelongsTo<MatchDecision, $this>
      */
     public function decision(): BelongsTo
     {

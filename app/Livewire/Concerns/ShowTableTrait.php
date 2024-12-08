@@ -6,7 +6,7 @@ namespace App\Livewire\Concerns;
 
 trait ShowTableTrait
 {
-    public function configuringShowTableTrait()
+    public function configuringShowTableTrait(): void
     {
         $this->setPrimaryKey('id')
             ->setColumnSelectDisabled()

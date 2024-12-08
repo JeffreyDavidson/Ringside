@@ -26,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property Stable $currentStable
+ */
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
     use Concerns\CanJoinTagTeams;
@@ -45,7 +48,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -84,7 +87,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get all the employments of the model.
      *
-     * @return HasMany<WrestlerEmployment>
+     * @return HasMany<WrestlerEmployment, $this>
      */
     public function employments(): HasMany
     {
@@ -92,7 +95,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment>
+     * @return HasOne<WrestlerEmployment, $this>
      */
     public function currentEmployment(): HasOne
     {
@@ -102,7 +105,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment>
+     * @return HasOne<WrestlerEmployment, $this>
      */
     public function futureEmployment(): HasOne
     {
@@ -113,7 +116,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerEmployment>
+     * @return HasMany<WrestlerEmployment, $this>
      */
     public function previousEmployments(): HasMany
     {
@@ -122,7 +125,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment>
+     * @return HasOne<WrestlerEmployment, $this>
      */
     public function previousEmployment(): HasOne
     {
@@ -132,7 +135,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerEmployment>
+     * @return HasOne<WrestlerEmployment, $this>
      */
     public function firstEmployment(): HasOne
     {
@@ -185,7 +188,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerRetirement>
+     * @return HasMany<WrestlerRetirement, $this>
      */
     public function retirements(): HasMany
     {
@@ -193,7 +196,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerRetirement>
+     * @return HasOne<WrestlerRetirement, $this>
      */
     public function currentRetirement(): HasOne
     {
@@ -203,7 +206,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerRetirement>
+     * @return HasMany<WrestlerRetirement, $this>
      */
     public function previousRetirements(): HasMany
     {
@@ -212,7 +215,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerRetirement>
+     * @return HasOne<WrestlerRetirement, $this>
      */
     public function previousRetirement(): HasOne
     {
@@ -232,7 +235,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerInjury>
+     * @return HasMany<WrestlerInjury, $this>
      */
     public function injuries(): HasMany
     {
@@ -240,7 +243,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerInjury>
+     * @return HasOne<WrestlerInjury, $this>
      */
     public function currentInjury(): HasOne
     {
@@ -250,7 +253,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerInjury>
+     * @return HasMany<WrestlerInjury, $this>
      */
     public function previousInjuries(): HasMany
     {
@@ -259,7 +262,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerInjury>
+     * @return HasOne<WrestlerInjury, $this>
      */
     public function previousInjury(): HasOne
     {
@@ -279,7 +282,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerSuspension>
+     * @return HasMany<WrestlerSuspension, $this>
      */
     public function suspensions(): HasMany
     {
@@ -287,7 +290,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerSuspension>
+     * @return HasOne<WrestlerSuspension, $this>
      */
     public function currentSuspension(): HasOne
     {
@@ -297,7 +300,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasMany<WrestlerSuspension>
+     * @return HasMany<WrestlerSuspension, $this>
      */
     public function previousSuspensions(): HasMany
     {
@@ -306,7 +309,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     }
 
     /**
-     * @return HasOne<WrestlerSuspension>
+     * @return HasOne<WrestlerSuspension, $this>
      */
     public function previousSuspension(): HasOne
     {
@@ -328,7 +331,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get all the managers the model has had.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function managers(): BelongsToMany
     {
@@ -340,7 +343,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get all the current managers the model has.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function currentManagers(): BelongsToMany
     {
@@ -351,7 +354,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get all the previous managers the model has had.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function previousManagers(): BelongsToMany
     {
@@ -362,7 +365,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get the stables the model has been belonged to.
      *
-     * @return BelongsToMany<Stable>
+     * @return BelongsToMany<Stable, $this>
      */
     public function stables(): BelongsToMany
     {
@@ -372,8 +375,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
 
     /**
      * Get the current stable the member belongs to.
-     *
-     * @return BelongsToOne<Stable>
      */
     public function currentStable(): BelongsToOne
     {
@@ -385,7 +386,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get the previous stables the member has belonged to.
      *
-     * @return BelongsToMany<Stable>
+     * @return BelongsToMany<Stable, $this>
      */
     public function previousStables(): BelongsToMany
     {
@@ -399,6 +400,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
      */
     public function isNotCurrentlyInStable(Stable $stable): bool
     {
-        return ! $this->currentStable || $this->currentStable->isNot($stable);
+        return $this->currentStable->isNot($stable);
     }
 }

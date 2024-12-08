@@ -8,9 +8,9 @@ use App\Enums\ManagerStatus;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \App\Models\Manager
+ * @template TModel of \App\Models\Manager
  *
- * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<TModel>
  */
 class ManagerBuilder extends Builder
 {

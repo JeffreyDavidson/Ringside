@@ -25,7 +25,7 @@ class StableTagTeam extends Pivot
     }
 
     /**
-     * @return BelongsTo<Stable, StableTagTeam>
+     * @return BelongsTo<Stable, $this>
      */
     public function stable(): BelongsTo
     {
@@ -33,7 +33,7 @@ class StableTagTeam extends Pivot
     }
 
     /**
-     * @return BelongsTo<TagTeam, StableTagTeam>
+     * @return BelongsTo<TagTeam, $this>
      */
     public function tagTeam(): BelongsTo
     {

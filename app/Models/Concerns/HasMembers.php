@@ -17,7 +17,7 @@ trait HasMembers
     /**
      * Get the wrestlers belonging to the stable.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function wrestlers(): BelongsToMany
     {
@@ -30,7 +30,7 @@ trait HasMembers
     /**
      * Get all current wrestlers that are members of the stable.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function currentWrestlers(): BelongsToMany
     {
@@ -41,7 +41,7 @@ trait HasMembers
     /**
      * Get all previous wrestlers that were members of the stable.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function previousWrestlers(): BelongsToMany
     {
@@ -52,7 +52,7 @@ trait HasMembers
     /**
      * Get the tag teams belonging to the stable.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function tagTeams(): BelongsToMany
     {
@@ -65,7 +65,7 @@ trait HasMembers
     /**
      * Get all current tag teams that are members of the stable.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function currentTagTeams(): BelongsToMany
     {
@@ -76,7 +76,7 @@ trait HasMembers
     /**
      * Get all previous tag teams that were members of the stable.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function previousTagTeams(): BelongsToMany
     {
@@ -87,7 +87,7 @@ trait HasMembers
     /**
      * Get the managers belonging to the stable.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function managers(): BelongsToMany
     {
@@ -100,7 +100,7 @@ trait HasMembers
     /**
      * Get all current managers that are members of the stable.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function currentManagers(): BelongsToMany
     {
@@ -111,7 +111,7 @@ trait HasMembers
     /**
      * Get all previous managers that were members of the stable.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function previousManagers(): BelongsToMany
     {

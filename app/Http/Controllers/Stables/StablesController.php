@@ -42,7 +42,7 @@ class StablesController extends Controller
             'stable' => $stable,
             'wrestlers' => Wrestler::query()->pluck('name', 'id'),
             'tagTeams' => TagTeam::query()->pluck('name', 'id'),
-            'managers' => Manager::query()->get()->pluck('full_name', 'id'),
+            'managers' => Manager::query()->pluck('full_name', 'id'),
         ]);
     }
 
@@ -79,7 +79,7 @@ class StablesController extends Controller
             'stable' => $stable,
             'wrestlers' => Wrestler::query()->pluck('name', 'id'),
             'tagTeams' => TagTeam::query()->pluck('name', 'id'),
-            'managers' => Manager::query()->get()->pluck('full_name', 'id'),
+            'managers' => Manager::query()->pluck('full_name', 'id'),
         ]);
     }
 

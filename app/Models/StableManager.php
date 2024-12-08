@@ -22,7 +22,7 @@ class StableManager extends Pivot
     ];
 
     /**
-     * @return BelongsTo<Manager, StableManager>
+     * @return BelongsTo<Manager, $this>
      */
     public function manager(): BelongsTo
     {
@@ -30,7 +30,7 @@ class StableManager extends Pivot
     }
 
     /**
-     * @return BelongsTo<Stable, StableManager>
+     * @return BelongsTo<Stable, $this>
      */
     public function stable(): BelongsTo
     {

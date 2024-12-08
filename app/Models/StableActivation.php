@@ -26,7 +26,7 @@ class StableActivation extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'stable_id',
@@ -48,7 +48,7 @@ class StableActivation extends Model
     }
 
     /**
-     * @return BelongsTo<Stable, StableActivation>
+     * @return BelongsTo<Stable, $this>
      */
     public function stable(): BelongsTo
     {

@@ -31,7 +31,7 @@ class Title extends Model implements Activatable, Retirable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -62,7 +62,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<TitleActivation>
+     * @return HasMany<TitleActivation, $this>
      */
     public function activations(): HasMany
     {
@@ -70,7 +70,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleActivation>
+     * @return HasOne<TitleActivation, $this>
      */
     public function currentActivation(): HasOne
     {
@@ -80,7 +80,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleActivation>
+     * @return HasOne<TitleActivation, $this>
      */
     public function futureActivation(): HasOne
     {
@@ -91,7 +91,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<TitleActivation>
+     * @return HasMany<TitleActivation, $this>
      */
     public function previousActivations(): HasMany
     {
@@ -100,7 +100,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleActivation>
+     * @return HasOne<TitleActivation, $this>
      */
     public function previousActivation(): HasOne
     {
@@ -110,7 +110,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleActivation>
+     * @return HasOne<TitleActivation, $this>
      */
     public function firstActivation(): HasOne
     {
@@ -158,7 +158,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<TitleRetirement>
+     * @return HasMany<TitleRetirement, $this>
      */
     public function retirements(): HasMany
     {
@@ -166,7 +166,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleRetirement>
+     * @return HasOne<TitleRetirement, $this>
      */
     public function currentRetirement(): HasOne
     {
@@ -176,7 +176,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<TitleRetirement>
+     * @return HasMany<TitleRetirement, $this>
      */
     public function previousRetirements(): HasMany
     {
@@ -185,7 +185,7 @@ class Title extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<TitleRetirement>
+     * @return HasOne<TitleRetirement, $this>
      */
     public function previousRetirement(): HasOne
     {
