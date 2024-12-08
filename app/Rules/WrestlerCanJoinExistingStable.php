@@ -37,7 +37,7 @@ class WrestlerCanJoinExistingStable implements ValidationRule
             $fail("{$wrestler->name} cannot have an employment start date after stable's start date.");
         }
 
-        if ($this->tagTeamIds !== 0) {
+        if ($this->tagTeamIds->isNotEmpty()) {
             collect($this->tagTeamIds)->map(function (mixed $id) use ($wrestler, $fail) {
                 if ($id === $wrestler->currentTagTeam?->id) {
                     $fail('A wrestler in a tag team already belongs to a current stable.');

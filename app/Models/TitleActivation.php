@@ -26,7 +26,7 @@ class TitleActivation extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'title_id',
@@ -50,7 +50,7 @@ class TitleActivation extends Model
     /**
      * Get the title from the activation record.
      *
-     * @return BelongsTo<Title, TitleActivation>
+     * @return BelongsTo<Title, $this>
      */
     public function title(): BelongsTo
     {

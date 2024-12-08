@@ -26,7 +26,7 @@ class ManagerEmployment extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'manager_id',
@@ -48,7 +48,7 @@ class ManagerEmployment extends Model
     }
 
     /**
-     * @return BelongsTo<Manager, ManagerEmployment>
+     * @return BelongsTo<Manager, $this>
      */
     public function manager(): BelongsTo
     {

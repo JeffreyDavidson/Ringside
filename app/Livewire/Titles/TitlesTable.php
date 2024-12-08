@@ -14,6 +14,7 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Title;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class TitlesTable extends DataTableComponent
 {
@@ -35,6 +36,11 @@ class TitlesTable extends DataTableComponent
 
     public function configure(): void {}
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
     public function columns(): array
     {
         return [
@@ -46,6 +52,11 @@ class TitlesTable extends DataTableComponent
         ];
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Filter>
+     */
     public function filters(): array
     {
         $statuses = collect(TitleStatus::cases())->pluck('name', 'value')->toArray();

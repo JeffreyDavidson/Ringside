@@ -26,7 +26,7 @@ class RefereeEmployment extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'referee_id',
@@ -48,7 +48,7 @@ class RefereeEmployment extends Model
     }
 
     /**
-     * @return BelongsTo<Referee, RefereeEmployment>
+     * @return BelongsTo<Referee, $this>
      */
     public function referee(): BelongsTo
     {

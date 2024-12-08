@@ -27,7 +27,7 @@ class TagTeamEmployment extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'tag_team_id',
@@ -51,7 +51,7 @@ class TagTeamEmployment extends Model
     /**
      * Get the employed model.
      *
-     * @return BelongsTo<TagTeam, TagTeamEmployment>
+     * @return BelongsTo<TagTeam, $this>
      */
     public function tagTeam(): BelongsTo
     {

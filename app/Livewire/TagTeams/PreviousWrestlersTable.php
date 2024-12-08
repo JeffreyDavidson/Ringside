@@ -40,6 +40,11 @@ class PreviousWrestlersTable extends DataTableComponent
         ]);
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
     public function columns(): array
     {
         return [

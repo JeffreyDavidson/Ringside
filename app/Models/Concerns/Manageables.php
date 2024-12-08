@@ -13,7 +13,7 @@ trait Manageables
     /**
      * Get all the wrestlers that have been managed by model.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function wrestlers(): BelongsToMany
     {
@@ -25,7 +25,7 @@ trait Manageables
     /**
      * Get the current wrestlers that is managed by model.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function currentWrestlers(): BelongsToMany
     {
@@ -36,7 +36,7 @@ trait Manageables
     /**
      * Get all previous wrestlers that have been managed by model.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function previousWrestlers(): BelongsToMany
     {
@@ -47,7 +47,7 @@ trait Manageables
     /**
      * Get all the tag teams that have been managed by model.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function tagTeams(): BelongsToMany
     {
@@ -59,7 +59,7 @@ trait Manageables
     /**
      * Get all previous tag teams that have been managed by model.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function currentTagTeams(): BelongsToMany
     {
@@ -70,7 +70,7 @@ trait Manageables
     /**
      * Get all previous tag teams that have been managed by model.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function previousTagTeams(): BelongsToMany
     {

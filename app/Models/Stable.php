@@ -37,7 +37,7 @@ class Stable extends Model implements Activatable, Retirable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -60,7 +60,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<StableActivation>
+     * @return HasMany<StableActivation, $this>
      */
     public function activations(): HasMany
     {
@@ -68,7 +68,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableActivation>
+     * @return HasOne<StableActivation, $this>
      */
     public function currentActivation(): HasOne
     {
@@ -78,7 +78,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableActivation>
+     * @return HasOne<StableActivation, $this>
      */
     public function futureActivation(): HasOne
     {
@@ -89,7 +89,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<StableActivation>
+     * @return HasMany<StableActivation, $this>
      */
     public function previousActivations(): HasMany
     {
@@ -98,7 +98,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableActivation>
+     * @return HasOne<StableActivation, $this>
      */
     public function previousActivation(): HasOne
     {
@@ -108,7 +108,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableActivation>
+     * @return HasOne<StableActivation, $this>
      */
     public function firstActivation(): HasOne
     {
@@ -156,7 +156,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<StableRetirement>
+     * @return HasMany<StableRetirement, $this>
      */
     public function retirements(): HasMany
     {
@@ -164,7 +164,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableRetirement>
+     * @return HasOne<StableRetirement, $this>
      */
     public function currentRetirement(): HasOne
     {
@@ -174,7 +174,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasMany<StableRetirement>
+     * @return HasMany<StableRetirement, $this>
      */
     public function previousRetirements(): HasMany
     {
@@ -183,7 +183,7 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
-     * @return HasOne<StableRetirement>
+     * @return HasOne<StableRetirement, $this>
      */
     public function previousRetirement(): HasOne
     {

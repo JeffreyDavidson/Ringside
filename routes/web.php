@@ -8,8 +8,6 @@ require __DIR__.'/auth.php';
 
 Route::redirect('/', 'login');
 
-Route::view('testing', 'wrestlers.index', ['wrestlers' => App\Models\Wrestler::all()]);
-
 Route::middleware(['middleware' => 'auth'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 });

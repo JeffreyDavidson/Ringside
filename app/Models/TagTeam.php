@@ -50,7 +50,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -85,7 +85,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * Get all the employments of the model.
      *
-     * @return HasMany<TagTeamEmployment>
+     * @return HasMany<TagTeamEmployment, $this>
      */
     public function employments(): HasMany
     {
@@ -93,7 +93,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamEmployment>
+     * @return HasOne<TagTeamEmployment, $this>
      */
     public function currentEmployment(): HasOne
     {
@@ -103,7 +103,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamEmployment>
+     * @return HasOne<TagTeamEmployment, $this>
      */
     public function futureEmployment(): HasOne
     {
@@ -114,7 +114,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamEmployment>
+     * @return HasMany<TagTeamEmployment, $this>
      */
     public function previousEmployments(): HasMany
     {
@@ -123,7 +123,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamEmployment>
+     * @return HasOne<TagTeamEmployment, $this>
      */
     public function previousEmployment(): HasOne
     {
@@ -133,7 +133,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamEmployment>
+     * @return HasOne<TagTeamEmployment, $this>
      */
     public function firstEmployment(): HasOne
     {
@@ -186,7 +186,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamRetirement>
+     * @return HasMany<TagTeamRetirement, $this>
      */
     public function retirements(): HasMany
     {
@@ -194,7 +194,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamRetirement>
+     * @return HasOne<TagTeamRetirement, $this>
      */
     public function currentRetirement(): HasOne
     {
@@ -204,7 +204,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamRetirement>
+     * @return HasMany<TagTeamRetirement, $this>
      */
     public function previousRetirements(): HasMany
     {
@@ -213,7 +213,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamRetirement>
+     * @return HasOne<TagTeamRetirement, $this>
      */
     public function previousRetirement(): HasOne
     {
@@ -233,7 +233,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamSuspension>
+     * @return HasMany<TagTeamSuspension, $this>
      */
     public function suspensions(): HasMany
     {
@@ -241,7 +241,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamSuspension>
+     * @return HasOne<TagTeamSuspension, $this>
      */
     public function currentSuspension(): HasOne
     {
@@ -251,7 +251,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasMany<TagTeamSuspension>
+     * @return HasMany<TagTeamSuspension, $this>
      */
     public function previousSuspensions(): HasMany
     {
@@ -260,7 +260,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     }
 
     /**
-     * @return HasOne<TagTeamSuspension>
+     * @return HasOne<TagTeamSuspension, $this>
      */
     public function previousSuspension(): HasOne
     {
@@ -282,7 +282,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * Get all the managers the model has had.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function managers(): BelongsToMany
     {
@@ -294,7 +294,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * Get all the current managers the model has.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function currentManagers(): BelongsToMany
     {
@@ -305,7 +305,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * Get all the previous managers the model has had.
      *
-     * @return BelongsToMany<Manager>
+     * @return BelongsToMany<Manager, $this>
      */
     public function previousManagers(): BelongsToMany
     {
@@ -316,7 +316,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * Get the stables the model has been belonged to.
      *
-     * @return BelongsToMany<Stable>
+     * @return BelongsToMany<Stable, $this>
      */
     public function stables(): BelongsToMany
     {
@@ -326,8 +326,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
 
     /**
      * Get the current stable the member belongs to.
-     *
-     * @return BelongsToOne<Stable>
      */
     public function currentStable(): BelongsToOne
     {
@@ -339,7 +337,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     /**
      * Get the previous stables the member has belonged to.
      *
-     * @return BelongsToMany<Stable>
+     * @return BelongsToMany<Stable, $this>
      */
     public function previousStables(): BelongsToMany
     {

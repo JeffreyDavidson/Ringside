@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 #[CollectedBy(EventMatchCompetitorsCollection::class)]
 class EventMatchCompetitor extends MorphPivot
 {
-    protected $table = 'event_match_competitors';
-
     /**
      * The table associated with the model.
      *
@@ -25,7 +23,7 @@ class EventMatchCompetitor extends MorphPivot
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'event_match_id',
@@ -37,7 +35,7 @@ class EventMatchCompetitor extends MorphPivot
     /**
      * Retrieve the previous champion of the title championship.
      *
-     * @return MorphTo<Model, EventMatchCompetitor>
+     * @return MorphTo<Model, $this>
      */
     public function competitor(): MorphTo
     {

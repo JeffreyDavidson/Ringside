@@ -12,7 +12,7 @@ trait HasMatches
     /**
      * Retrieve the event matches participated by the model.
      *
-     * @return MorphToMany<EventMatch>
+     * @return MorphToMany<EventMatch, $this>
      */
     public function matches(): MorphToMany
     {
@@ -22,7 +22,7 @@ trait HasMatches
     /**
      * Retrieve the event matches participated by the model.
      *
-     * @return MorphToMany<EventMatch>
+     * @return MorphToMany<EventMatch, $this>
      */
     public function previousMatches(): MorphToMany
     {

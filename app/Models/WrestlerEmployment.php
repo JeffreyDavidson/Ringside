@@ -26,7 +26,7 @@ class WrestlerEmployment extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'wrestler_id',
@@ -50,7 +50,7 @@ class WrestlerEmployment extends Model
     /**
      * Get the employed model.
      *
-     * @return BelongsTo<Wrestler, WrestlerEmployment>
+     * @return BelongsTo<Wrestler, $this>
      */
     public function wrestler(): BelongsTo
     {

@@ -14,6 +14,7 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Stable;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class StablesTable extends DataTableComponent
 {
@@ -35,6 +36,11 @@ class StablesTable extends DataTableComponent
 
     public function configure(): void {}
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
     public function columns(): array
     {
         return [
@@ -45,6 +51,11 @@ class StablesTable extends DataTableComponent
         ];
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Filter>
+     */
     public function filters(): array
     {
         $statuses = collect(StableStatus::cases())->pluck('name', 'value')->toArray();

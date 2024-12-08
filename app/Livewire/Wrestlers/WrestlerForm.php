@@ -6,6 +6,7 @@ namespace App\Livewire\Wrestlers;
 
 use App\Models\Wrestler;
 use App\ValueObjects\Height;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -14,21 +15,21 @@ class WrestlerForm extends Form
     public ?Wrestler $wrestler;
 
     #[Validate('required|min:5')]
-    public $name = '';
+    public string $name = '';
 
-    public $hometown = '';
+    public string $hometown = '';
 
-    public $signature_move = '';
+    public ?string $signature_move = '';
 
-    public $start_date = '';
+    public Carbon|string|null $start_date = '';
 
-    public $height_feet;
+    public int $height_feet;
 
-    public $height_inches;
+    public int $height_inches;
 
-    public $weight;
+    public int $weight;
 
-    public function setWrestler(Wrestler $wrestler)
+    public function setWrestler(Wrestler $wrestler): void
     {
         $this->wrestler = $wrestler;
 
@@ -36,7 +37,7 @@ class WrestlerForm extends Form
 
         $this->hometown = $wrestler->hometown;
         $this->signature_move = $wrestler->signature_move;
-        $this->start_date = $wrestler->start_date;
+        $this->start_date = $wrestler->currentEmployment?->started_at;
         $this->weight = $wrestler->weight;
         $height = $wrestler->height;
 
@@ -45,7 +46,6 @@ class WrestlerForm extends Form
 
         $this->height_feet = $feet;
         $this->height_inches = $inches;
-
     }
 
     public function update(): bool
@@ -71,7 +71,6 @@ class WrestlerForm extends Form
                 'height' => $height->toInches(),
                 'weight' => $this->weight,
             ]);
-
         }
 
         return true;

@@ -10,7 +10,10 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 trait HasStatusFilter
 {
-    protected function getDefaultStatusFilter($statuses): Filter
+    /**
+     * @param  array<int, mixed>  $statuses
+     **/
+    protected function getDefaultStatusFilter(array $statuses): Filter
     {
         return SelectFilter::make('Status', 'status')
             ->options(['' => 'All'] + $statuses)

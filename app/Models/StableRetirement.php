@@ -23,7 +23,7 @@ class StableRetirement extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'stable_id',
@@ -45,7 +45,7 @@ class StableRetirement extends Model
     }
 
     /**
-     * @return BelongsTo<Stable, StableRetirement>
+     * @return BelongsTo<Stable, $this>
      */
     public function stable(): BelongsTo
     {

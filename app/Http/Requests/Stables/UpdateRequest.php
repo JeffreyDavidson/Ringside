@@ -63,13 +63,11 @@ class UpdateRequest extends FormRequest
                 'integer',
                 Rule::when(
                     (bool) $this->input('start_date'),
-                    function () use ($stable) {
-                        new HasMinimumAmountOfMembers(
-                            $stable,
-                            $this->collect('wrestlers'),
-                            $this->collect('tag_teams')
-                        );
-                    }
+                    new HasMinimumAmountOfMembers(
+                        $stable,
+                        $this->collect('wrestlers'),
+                        $this->collect('tag_teams')
+                    )
                 ),
             ],
             'wrestlers' => ['array'],

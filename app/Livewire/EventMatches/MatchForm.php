@@ -61,9 +61,9 @@ class MatchForm extends Component
     {
         return view('livewire.event-matches.match-form', [
             'match' => $this->match,
-            'matchTypes' => MatchType::pluck('name', 'id'),
-            'referees' => Referee::query()->get()->pluck('full_name', 'id'),
-            'titles' => Title::pluck('name', 'id'),
+            'matchTypes' => MatchType::query()->pluck('name', 'id'),
+            'referees' => Referee::query()->pluck('full_name', 'id'),
+            'titles' => Title::query()->pluck('name', 'id'),
         ]);
     }
 }

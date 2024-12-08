@@ -22,7 +22,7 @@ class TagTeamManager extends Pivot
     ];
 
     /**
-     * @return BelongsTo<Manager, TagTeamManager>
+     * @return BelongsTo<Manager, $this>
      */
     public function manager(): BelongsTo
     {
@@ -30,7 +30,7 @@ class TagTeamManager extends Pivot
     }
 
     /**
-     * @return BelongsTo<TagTeam, TagTeamManager>
+     * @return BelongsTo<TagTeam, $this>
      */
     public function tagTeam(): BelongsTo
     {

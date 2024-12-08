@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
+use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
@@ -38,6 +39,11 @@ class EventsTable extends DataTableComponent
 
     public function configure(): void {}
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
     public function columns(): array
     {
         return [
@@ -50,6 +56,11 @@ class EventsTable extends DataTableComponent
         ];
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Filter>
+     */
     public function filters(): array
     {
         $statuses = collect(EventStatus::cases())->pluck('name', 'value')->toArray();

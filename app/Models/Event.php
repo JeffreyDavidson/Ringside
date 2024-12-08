@@ -29,7 +29,7 @@ class Event extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -57,7 +57,7 @@ class Event extends Model
     /**
      * Retrieve the venue of the event.
      *
-     * @return BelongsTo<Venue, Event>
+     * @return BelongsTo<Venue, $this>
      */
     public function venue(): BelongsTo
     {
@@ -67,7 +67,7 @@ class Event extends Model
     /**
      * Retrieve the matches for the event.
      *
-     * @return HasMany<EventMatch>
+     * @return HasMany<EventMatch, $this>
      */
     public function matches(): HasMany
     {

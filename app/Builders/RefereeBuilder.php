@@ -7,9 +7,9 @@ namespace App\Builders;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModelClass of \App\Models\Referee
+ * @template TModel of \App\Models\Referee
  *
- * @extends \Illuminate\Database\Eloquent\Builder<TModelClass>
+ * @extends \Illuminate\Database\Eloquent\Builder<TModel>
  */
 class RefereeBuilder extends Builder
 {

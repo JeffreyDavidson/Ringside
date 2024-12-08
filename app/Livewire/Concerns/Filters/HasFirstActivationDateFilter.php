@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Filters;
 
+use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
 
 trait HasFirstActivationDateFilter
 {
-    protected function getDefaultFirstActivationmDateFilter(): DateRangeFilter
+    protected function getDefaultFirstActivationmDateFilter(): Filter
     {
         return DateRangeFilter::make('Activation Date')
             ->config([

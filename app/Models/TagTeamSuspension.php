@@ -23,7 +23,7 @@ class TagTeamSuspension extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'tag_team_id',
@@ -45,7 +45,7 @@ class TagTeamSuspension extends Model
     }
 
     /**
-     * @return BelongsTo<TagTeam, TagTeamSuspension>
+     * @return BelongsTo<TagTeam, $this>
      */
     public function tagTeam(): BelongsTo
     {

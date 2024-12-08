@@ -23,7 +23,7 @@ class WrestlerSuspension extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'wrestler_id',
@@ -45,7 +45,7 @@ class WrestlerSuspension extends Model
     }
 
     /**
-     * @return BelongsTo<Wrestler, WrestlerSuspension>
+     * @return BelongsTo<Wrestler, $this>
      */
     public function wrestler(): BelongsTo
     {
