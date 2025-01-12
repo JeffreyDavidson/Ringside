@@ -10,7 +10,7 @@ trait HasFirstActivationDateColumn
 {
     protected function getDefaultFirstActivationDateColumn(): Column
     {
-        return Column::make(__('activations.start_date'), 'start_date')
+        return Column::make(__('activations.started_at'), 'start_date')
             ->label(fn ($row, Column $column) => $row->firstActivation?->started_at->format('Y-m-d') ?? 'TBD');
     }
 }

@@ -26,6 +26,6 @@ test('a basic user cannot view the form for editing a venue', function () {
 });
 
 test('a guest cannot view the form for creating a venue', function () {
-    get(action([VenuesController::class, 'edit'], $this->venue))
-        ->assertRedirect(route('login'));
-});
+get(action([VenuesController::class, 'edit'], $this->venue))
+->assertRedirect(route('login'));
+    });

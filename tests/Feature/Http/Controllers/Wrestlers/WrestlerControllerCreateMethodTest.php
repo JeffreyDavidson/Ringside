@@ -23,6 +23,6 @@ test('a basic user cannot view the form for creating a wrestler', function () {
 });
 
 test('a guest cannot view the form for creating a wrestler', function () {
-    get(action([WrestlersController::class, 'create']))
-        ->assertRedirect(route('login'));
-});
+get(action([WrestlersController::class, 'create']))
+->assertRedirect(route('login'));
+    });

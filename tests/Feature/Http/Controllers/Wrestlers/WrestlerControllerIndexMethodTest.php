@@ -24,6 +24,6 @@ test('a basic user cannot view wrestlers index page', function () {
 });
 
 test('a guest cannot view wrestlers index page', function () {
-    get(action([WrestlersController::class, 'index']))
-        ->assertRedirect(route('login'));
-});
+get(action([WrestlersController::class, 'index']))
+->assertRedirect(route('login'));
+    });

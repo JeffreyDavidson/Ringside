@@ -8,9 +8,9 @@
             </div>
             <div class="col-span-2">
                 <div class="flex flex-col gap-5 lg:gap-7.5">
-                    <livewire:stables.previous-wrestlers-table :stableId="$stable->id" />
-                    <livewire:stables.previous-tag-teams-table :stableId="$stable->id" />
-                    <livewire:stables.previous-managers-table :stableId="$stable->id" />
+                    <livewire:stables.tables.previous-wrestlers-table :stableId="$stable->id" />
+                    <livewire:stables.tables.previous-tag-teams-table :stableId="$stable->id" />
+                    <livewire:stables.tables.previous-managers-table :stableId="$stable->id" />
                 </div>
             </div>
         </div>

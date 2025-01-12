@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'start_date' => 'Activation Date',
+    'started_at' => 'Activation Date',
 ];

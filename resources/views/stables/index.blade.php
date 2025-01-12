@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:stables.stables-table />
+    <livewire:stables.tables.stables-table />
 </x-layouts.app>

@@ -27,6 +27,6 @@ test('a basic user cannot view the form for editing a title', function () {
 });
 
 test('a guest cannot view the form for editing a title', function () {
-    get(action([TitlesController::class, 'edit'], $this->title))
-        ->assertRedirect(route('login'));
-});
+get(action([TitlesController::class, 'edit'], $this->title))
+->assertRedirect(route('login'));
+    });

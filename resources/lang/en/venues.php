@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'name' => 'Venue Name',
-    'address' => 'Address',
+    'name' => 'Name',
+    'street_address' => 'Street Address',
     'city' => 'City',
     'state' => 'State',
-    'zipcode' => 'Postal Code',
+    'zipcode' => 'Zip Code',
 ];

@@ -16,6 +16,12 @@ export default {
         "./vendor/wire-elements/modal/resources/views/*.blade.php",
         "./storage/framework/views/*.php",
     ],
+    safelist: [
+        {
+          pattern: /max-w-(sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl)/,
+          variants: ['sm', 'md', 'lg', 'xl', '2xl']
+        }
+    ],
 
     theme: {
         extend: {
@@ -34,17 +40,53 @@ export default {
                 primary: {
                     DEFAULT: '#1B84FF',
                     active: '#056EE9',
+                    light: '#EFF6FF',
+                    clarity: 'rgba(27, 132, 255, 0.20)',
+                    inverse: '#ffffff'
                 },
                 secondary: {
+                    DEFAULT: '#F9F9F9',
                     active: '#f9f9f9',
+                    light: '#F9F9F9',
+                    clarity: 'rgba(249, 249, 249, 0.20)',
+                    inverse: '#4B5675'
                 },
                 light: {
                     DEFAULT: '#ffffff',
                     active: '#FCFCFC',
+                    light: '#ffffff',
+                    clarity: 'rgba(255, 255, 255, 0.20)',
+                    inverse: '#4B5675'
+                },
+                danger: {
+                    DEFAULT: '#F8285A',
+                    active: '#D81A48',
+                    light: '#FFEEF3',
+                    clarity: 'rgba(248, 40, 90, 0.20)',
+                    inverse: '#ffffff'
+                },
+                warning: {
+                    DEFAULT: '#F6B100',
+                    active: '#DFA000',
+                    light: '#FFF8DD',
+                    clarity: 'rgba(246, 177, 0, 0.20)',
+                    inverse: '#ffffff'
+                },
+                info: {
+                    default: '#7239EA',
+                    active: '#5014D0',
+                    light: '#F8F5FF',
+                    clarity: 'rgba(114, 57, 234, 0.20)',
+                    inverse: '#ffffff'
                 },
             },
             boxShadows: {
+                default: '0px 4px 12px 0px rgba(0, 0, 0, 0.09)',
+                light: '0px 3px 4px 0px rgba(0, 0, 0, 0.03)',
                 primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
+                danger: '0px 4px 12px 0px rgba(241, 65, 108, 0.35)',
+                info: '0px 4px 12px 0px rgba(114, 57, 234, 0.35)',
+                warning: '0px 4px 12px 0px rgba(246, 192, 0, 0.35)',
             },
             fontSize: {
                 '2xs': [
@@ -61,6 +103,7 @@ export default {
 				],
             },
             spacing: {
+                '1.25': '.275rem',
                 '2.25': '.563rem',
                 '7.5': '1.875rem',
             },
@@ -79,6 +122,7 @@ export default {
 					},
                     boxShadows: {
                         dropdown: '0px 7px 18px 0px rgba(0, 0, 0, 0.09)',
+                        modal: '0px 10px 14px 0px rgba(15, 42, 81, 0.03)',
 					},
                 },
             },

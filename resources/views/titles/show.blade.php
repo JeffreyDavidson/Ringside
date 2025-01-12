@@ -6,7 +6,7 @@
             </div>
             <div class="col-span-2">
                 <div class="flex flex-col gap-5 lg:gap-7.5">
-                    {{-- <livewire:titles.show.title-championships.page :$title /> --}}
+                    {{-- <livewire:titles.tables.title-championships.page :$title /> --}}
                 </div>
             </div>
         </div>

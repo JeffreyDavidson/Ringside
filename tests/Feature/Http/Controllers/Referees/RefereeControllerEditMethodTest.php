@@ -27,6 +27,6 @@ test('a basic user cannot view the form for editing a referee', function () {
 });
 
 test('a guest cannot view the form for editing a referee', function () {
-    get(action([RefereesController::class, 'edit'], $this->referee))
-        ->assertRedirect(route('login'));
-});
+get(action([RefereesController::class, 'edit'], $this->referee))
+->assertRedirect(route('login'));
+    });

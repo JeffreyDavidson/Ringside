@@ -6,5 +6,5 @@ use App\Http\Controllers\Venues\RestoreController;
 use App\Http\Controllers\Venues\VenuesController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('venues', VenuesController::class);
+Route::resource('venues', VenuesController::class)->only(['index', 'show']);
 Route::patch('venues/{venue}/restore', RestoreController::class)->name('venues.restore');

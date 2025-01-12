@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:referees.referees-table />
+    <livewire:referees.tables.referees-table />
 </x-layouts.app>

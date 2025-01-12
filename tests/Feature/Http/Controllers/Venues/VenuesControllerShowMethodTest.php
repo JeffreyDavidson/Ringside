@@ -27,6 +27,6 @@ test('a basic user cannot view a venue', function () {
 });
 
 test('a guest cannot view a venue', function () {
-    get(action([VenuesController::class, 'show'], $this->venue))
-        ->assertRedirect(route('login'));
-});
+get(action([VenuesController::class, 'show'], $this->venue))
+->assertRedirect(route('login'));
+    });
