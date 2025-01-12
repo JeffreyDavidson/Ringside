@@ -8,7 +8,7 @@
             </div>
             <div class="col-span-2">
                 <div class="flex flex-col gap-5 lg:gap-7.5">
-                    {{-- <livewire:referees.previous-matches-table :referee="$referee" /> --}}
+                    {{-- <livewire:referees.tables.previous-matches-table :referee="$referee" /> --}}
                 </div>
             </div>
         </div>

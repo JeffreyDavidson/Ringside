@@ -22,6 +22,6 @@ test('a basic user cannot view venues index page', function () {
 });
 
 test('a guest cannot view venues index page', function () {
-    get(action([VenuesController::class, 'index']))
-        ->assertRedirect(route('login'));
-});
+get(action([VenuesController::class, 'index']))
+->assertRedirect(route('login'));
+    });

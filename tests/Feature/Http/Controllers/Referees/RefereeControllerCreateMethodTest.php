@@ -23,6 +23,6 @@ test('a basic user cannot view the form for creating a referee', function () {
 });
 
 test('a guest cannot view the form for creating a referee', function () {
-    get(action([RefereesController::class, 'create']))
-        ->assertRedirect(route('login'));
-});
+get(action([RefereesController::class, 'create']))
+->assertRedirect(route('login'));
+    });

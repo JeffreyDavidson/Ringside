@@ -10,7 +10,7 @@ trait HasFirstEmploymentDateColumn
 {
     protected function getDefaultFirstEmploymentDateColumn(): Column
     {
-        return Column::make(__('employments.start_date'), 'start_date')
+        return Column::make(__('employments.started_at'), 'start_date')
             ->label(fn ($row, Column $column) => $row->firstEmployment?->started_at->format('Y-m-d') ?? 'TBD');
     }
 }

@@ -8,4 +8,6 @@ return [
     'hometown' => 'Hometown',
     'date_hired' => 'Date Hired',
     'date_left' => 'Date Left',
+    'feet' => 'Feet',
+    'inches' => 'Inches',
 ];

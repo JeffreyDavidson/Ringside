@@ -4,7 +4,7 @@
     </div>
     <div class="flex items-center gap-2.5">
         @can('create', \App\Models\Wrestler::class)
-            <x-buttons.primary size="sm">Add Wrestler</x-buttons.primary>
+            <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'wrestlers.modals.form-modal' })">Add Wrestler</x-buttons.primary>
         @endcan
     </div>
 </div>

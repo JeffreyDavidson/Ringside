@@ -14,7 +14,7 @@ use App\Http\Controllers\Managers\SuspendController;
 use App\Http\Controllers\Managers\UnretireController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('managers', ManagersController::class);
+Route::resource('managers', ManagersController::class)->only(['index', 'show']);
 Route::patch('managers/{manager}/restore', RestoreController::class)->name('managers.restore');
 Route::patch('managers/{manager}/retire', RetireController::class)->name('managers.retire');
 Route::patch('managers/{manager}/unretire', UnretireController::class)->name('managers.unretire');

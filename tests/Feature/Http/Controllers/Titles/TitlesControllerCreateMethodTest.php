@@ -23,6 +23,6 @@ test('a basic user cannot view the form for creating a title', function () {
 });
 
 test('a guest cannot view the form for creating a title', function () {
-    get(action([TitlesController::class, 'create']))
-        ->assertRedirect(route('login'));
-});
+get(action([TitlesController::class, 'create']))
+->assertRedirect(route('login'));
+    });

@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:wrestlers.wrestlers-table />
+    <livewire:wrestlers.tables.wrestlers-table />
 </x-layouts.app>

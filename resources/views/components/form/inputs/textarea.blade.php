@@ -1,19 +1,13 @@
-@props([
-    'placeholder',
-    'name',
-    'label',
-    'value'
-])
+@props(['placeholder', 'name', 'label', 'value'])
 
-<label class="form-label" for="{{ $name }}">{{ $label }}:</label>
+<div class="flex flex-center gap-1">
+    <label class="text-gray-900 font-semibold text-2sm" for="{{ $name }}">{{ $label }}:</label>
+</div>
 
 <textarea
-    class="form-control"
-    name="{{ $name }}"
-    :placeholder="$label ?? Enter {{ $label }} : null"
-    style="height: 100px"
->
-@isset($value){{ $value }}@endisset
+    class="block w-full appearance-none shadow-none outline-none font-medium text-2sm bg-light-active rounded-md py-[.55rem] px-3 border border-solid border-gray-300 text-gray-700 h-[100px] hover:border-gray-400 focus:border-primary focus:shadow-form-input-focus-box-shadow focus:text-gray-700"
+    {{ $attributes->whereStartsWith('wire:model') }}>
+    name="{{ $name }}" :placeholder="$label ?? Enter {!! $label !!}: null">
 </textarea>
 
 @error($name)

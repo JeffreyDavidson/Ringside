@@ -37,6 +37,6 @@ test('a basic user cannot view another users manager profile', function () {
 });
 
 test('a guest cannot view a manager profile', function () {
-    get(action([ManagersController::class, 'show'], $this->manager))
-        ->assertRedirect(route('login'));
-});
+get(action([ManagersController::class, 'show'], $this->manager))
+->assertRedirect(route('login'));
+    });

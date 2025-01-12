@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:events.events-table />
+    <livewire:events.tables.events-table />
 </x-layouts.app>

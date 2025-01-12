@@ -14,7 +14,7 @@ use App\Http\Controllers\Referees\SuspendController;
 use App\Http\Controllers\Referees\UnretireController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('referees', RefereesController::class);
+Route::resource('referees', RefereesController::class)->only(['index', 'show']);
 Route::patch('referees/{referee}/restore', RestoreController::class)->name('referees.restore');
 Route::patch('referees/{referee}/retire', RetireController::class)->name('referees.retire');
 Route::patch('referees/{referee}/release', ReleaseController::class)->name('referees.release');

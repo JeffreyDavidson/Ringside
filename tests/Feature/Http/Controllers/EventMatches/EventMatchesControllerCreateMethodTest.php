@@ -16,9 +16,9 @@ beforeEach(function () {
 });
 
 test('a guest cannot create a match for an event', function () {
-    get(action([EventMatchesController::class, 'create'], $this->event))
-        ->assertRedirect(route('login'));
-});
+get(action([EventMatchesController::class, 'create'], $this->event))
+->assertRedirect(route('login'));
+    });
 
 test('a basic user cannot create a match for an event', function () {
     actingAs(basicUser())

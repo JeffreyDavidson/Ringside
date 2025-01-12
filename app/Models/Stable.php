@@ -60,6 +60,15 @@ class Stable extends Model implements Activatable, Retirable
     }
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => StableStatus::Unactivated,
+    ];
+
+    /**
      * @return HasMany<StableActivation, $this>
      */
     public function activations(): HasMany

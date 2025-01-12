@@ -8,8 +8,7 @@
 
     <title>{{ config('app.name', 'Ringside') }}</title>
 
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
     @vite('resources/js/app.js')
     @livewireStyles
 
@@ -17,8 +16,7 @@
     @stack('styles')
 </head>
 
-<body
-    class="antialiased flex h-full text-base text-gray-700 bg-[#fefefe]">
+<body class="antialiased flex h-full text-base text-gray-700 bg-[#fefefe]">
     <!-- Page -->
     <!-- Main -->
     <div class="flex grow">

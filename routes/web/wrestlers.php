@@ -14,7 +14,7 @@ use App\Http\Controllers\Wrestlers\UnretireController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('wrestlers', WrestlersController::class);
+Route::resource('wrestlers', WrestlersController::class)->only(['index', 'show']);
 Route::patch('wrestlers/{wrestler}/restore', RestoreController::class)->name('wrestlers.restore');
 Route::patch('wrestlers/{wrestler}/employ', EmployController::class)->name('wrestlers.employ');
 Route::patch('wrestlers/{wrestler}/release', ReleaseController::class)->name('wrestlers.release');

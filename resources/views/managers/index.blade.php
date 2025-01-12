@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:managers.managers-table />
+    <livewire:managers.tables.managers-table />
 </x-layouts.app>

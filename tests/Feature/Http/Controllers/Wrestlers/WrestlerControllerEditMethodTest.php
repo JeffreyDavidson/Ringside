@@ -27,6 +27,6 @@ test('a basic user cannot view the form for editing a wrestler', function () {
 });
 
 test('a guest cannot view the form for editing a wrestler', function () {
-    get(action([WrestlersController::class, 'edit'], $this->wrestler))
-        ->assertRedirect(route('login'));
-});
+get(action([WrestlersController::class, 'edit'], $this->wrestler))
+->assertRedirect(route('login'));
+    });

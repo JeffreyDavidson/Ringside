@@ -21,7 +21,7 @@
                     <button
                         class="group flex items-center grow cursor-pointer m-0 p-2.5 ms-2.5 me-2.5 rounded-md hover:bg-gray-100"
                         x-on:click="open = false;"
-                        wire:click="$dispatch('openModal', { component: 'wrestlers.wrestler-modal', arguments: { wrestlerId: {{ $rowId }} }})">
+                        wire:click="$dispatch('openModal', { component: '{{ $this->resourceName }}.modals.form-modal', arguments: { 'modelId': '{{ $rowId }}' }})">
                         <span class="flex items-center shrink-0 me-2.5">
                             <i class="ki-filled ki-pencil text-gray-500 text-lg group-hover:text-primary"></i>
                         </span>

@@ -23,6 +23,6 @@ test('a basic user cannot view the form for creating a manager', function () {
 });
 
 test('a guest cannot view the form for creating a manager', function () {
-    get(action([ManagersController::class, 'create']))
-        ->assertRedirect(route('login'));
-});
+get(action([ManagersController::class, 'create']))
+->assertRedirect(route('login'));
+    });

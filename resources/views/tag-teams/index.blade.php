@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:tag-teams.tag-teams-table />
+    <livewire:tag-teams.tables.tag-teams-table />
 </x-layouts.app>
