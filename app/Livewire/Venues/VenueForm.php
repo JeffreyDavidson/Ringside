@@ -21,13 +21,13 @@ class VenueForm extends LivewireBaseForm
     public string $street_address = '';
 
     #[Validate('required|string|max:255', as: 'venues.city')]
-    public string $city;
+    public string $city = '';
 
     #[Validate('required|string|max:255', as: 'venues.state')]
-    public string $state;
+    public string $state = '';
 
     #[Validate('required|integer|digits:5', as: 'venues.zipcode')]
-    public int $zipcode;
+    public int|string $zipcode = '';
 
     public function store(): bool
     {

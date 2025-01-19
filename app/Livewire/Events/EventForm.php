@@ -6,7 +6,6 @@ namespace App\Livewire\Events;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Event;
-use App\Models\Venue;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Validate;
 
@@ -27,13 +26,6 @@ class EventForm extends LivewireBaseForm
 
     #[Validate('required|string', as: 'events.preview')]
     public string $preview;
-
-    public array $venues = [];
-
-    public function loadExtraData(): void
-    {
-        $this->venues = Venue::query()->pluck('name', 'id')->toArray();
-    }
 
     public function store(): bool
     {

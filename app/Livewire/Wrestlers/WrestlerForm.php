@@ -23,13 +23,13 @@ class WrestlerForm extends LivewireBaseForm
     public string $hometown = '';
 
     #[Validate('required|integer|max:7', as: 'wrestlers.feet')]
-    public int $height_feet;
+    public int|string $height_feet = '';
 
     #[Validate('required|integer|max:11', as: 'wrestlers.inches')]
-    public int $height_inches;
+    public int|string $height_inches = '';
 
     #[Validate('required|integer', as: 'wrestlers.weight')]
-    public int $weight;
+    public int|string $weight = '';
 
     #[Validate('nullable|string|max:255|unique:wrestlers,signature_move', as: 'wrestlers.signature_move')]
     public ?string $signature_move = '';

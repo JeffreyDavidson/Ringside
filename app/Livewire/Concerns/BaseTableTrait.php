@@ -25,7 +25,7 @@ trait BaseTableTrait
             ->setPerPageAccepted([5, 10, 25, 50, 100])
             ->setLoadingPlaceholderContent('Loading')
             ->setLoadingPlaceholderEnabled()
-            ->setFiltersStatus(false);
+            ->setFiltersStatus(true);
 
         $this->setConfigurableAreas([
             'before-wrapper' => 'components.'.$this->routeBasePath.'.index.table-pre',

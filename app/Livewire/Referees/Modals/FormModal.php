@@ -7,6 +7,7 @@ namespace App\Livewire\Referees\Modals;
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Referees\RefereeForm;
 use App\Models\Referee;
+use Illuminate\Support\Carbon;
 
 class FormModal extends BaseModal
 {
@@ -19,4 +20,13 @@ class FormModal extends BaseModal
     protected string $modelTitleField = 'full_name';
 
     public RefereeForm $modelForm;
+
+    public function fillDummyFields()
+    {
+        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
+
+        $this->modelForm->first_name = fake()->firstName();
+        $this->modelForm->last_name = fake()->lastName();
+        $this->modelForm->start_date = $datetime ? Carbon::instance($datetime)->toDateString() : null;
+    }
 }

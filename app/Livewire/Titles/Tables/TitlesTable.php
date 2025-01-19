@@ -9,15 +9,15 @@ use App\Enums\TitleStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasFirstActivationDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasFirstActivationDateFilter;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Title;
+use App\View\Filters\FirstActivationFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class TitlesTable extends BaseTableWithActions
 {
-    use HasFirstActivationDateColumn, HasFirstActivationDateFilter, HasStatusColumn, HasStatusFilter;
+    use HasFirstActivationDateColumn, HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'titles';
 
@@ -62,7 +62,7 @@ class TitlesTable extends BaseTableWithActions
 
         return [
             $this->getDefaultStatusFilter($statuses),
-            $this->getDefaultFirstActivationmDateFilter(),
+            FirstActivationFilter::make('Activation Date')->setFields('activations', 'titles_activations.started_at', 'titles_activations.ended_at'),
         ];
     }
 

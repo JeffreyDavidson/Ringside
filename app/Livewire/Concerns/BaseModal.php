@@ -38,7 +38,11 @@ class BaseModal extends ModalComponent
 
     public function clear(): void
     {
-        $this->modelForm->reset();
+        if (isset($this->model) && ! is_null($this->model)) {
+            $this->modelForm->setModel($this->model);
+        } else {
+            $this->modelForm->reset();
+        }
     }
 
     public function save(): void

@@ -9,15 +9,15 @@ use App\Enums\RefereeStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasFirstEmploymentDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasFirstEmploymentDateFilter;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Referee;
+use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class RefereesTable extends BaseTableWithActions
 {
-    use HasFirstEmploymentDateColumn, HasFirstEmploymentDateFilter, HasStatusColumn, HasStatusFilter;
+    use HasFirstEmploymentDateColumn, HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'referees';
 
@@ -61,7 +61,7 @@ class RefereesTable extends BaseTableWithActions
 
         return [
             $this->getDefaultStatusFilter($statuses),
-            $this->getDefaultFirstEmploymentDateFilter(),
+            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'referees_employments.started_at', 'referees_employments.ended_at'),
         ];
     }
 
