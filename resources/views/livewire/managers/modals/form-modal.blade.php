@@ -1,11 +1,11 @@
 <x-modal>
     <div class="flex flex-col gap-4">
         <div class="flex items-center gap-1">
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 grow">
                 <x-form.inputs.text label="{{ __('managers.first_name') }}" name="modelForm.first_name" placeholder="John"
                     wire:model="modelForm.first_name" />
             </div>
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 grow">
                 <x-form.inputs.text label="{{ __('managers.last_name') }}" name="modelForm.last_name" placeholder="Smith"
                     wire:model="modelForm.last_name" />
             </div>

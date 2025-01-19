@@ -9,15 +9,15 @@ use App\Enums\StableStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasFirstActivationDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasFirstActivationDateFilter;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Stable;
+use App\View\Filters\FirstActivationFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class StablesTable extends BaseTableWithActions
 {
-    use HasFirstActivationDateColumn, HasFirstActivationDateFilter, HasStatusColumn, HasStatusFilter;
+    use HasFirstActivationDateColumn, HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'stables';
 
@@ -61,7 +61,7 @@ class StablesTable extends BaseTableWithActions
 
         return [
             $this->getDefaultStatusFilter($statuses),
-            $this->getDefaultFirstActivationmDateFilter(),
+            FirstActivationFilter::make('Activation Date')->setFields('activations', 'stables_activations.started_at', 'stables_activations.ended_at'),
         ];
     }
 
