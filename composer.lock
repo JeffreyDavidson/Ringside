@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "615f9700c7da12a6612386baa8bbf953",
+    "content-hash": "0c484a1d984d4f43475153a69cbb48f8",
     "packages": [
         {
             "name": "ankurk91/laravel-eloquent-relationships",
@@ -10863,6 +10863,45 @@
                 }
             ],
             "time": "2024-03-03T12:36:25+00:00"
+        },
+        {
+            "name": "tomasvotruba/phpstan-bodyscan",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TomasVotruba/phpstan-bodyscan.git",
+                "reference": "927930561178955dfad3a89d88ef65f3eaa4b26f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TomasVotruba/phpstan-bodyscan/zipball/927930561178955dfad3a89d88ef65f3eaa4b26f",
+                "reference": "927930561178955dfad3a89d88ef65f3eaa4b26f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "bin": [
+                "bin/phpstan-bodyscan",
+                "bin/phpstan-bodyscan.php"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Get error count for each PHPStan level",
+            "support": {
+                "issues": "https://github.com/TomasVotruba/phpstan-bodyscan/issues",
+                "source": "https://github.com/TomasVotruba/phpstan-bodyscan/tree/0.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/tomasvotruba",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-05-20T02:31:45+00:00"
         },
         {
             "name": "tomasvotruba/unused-public",
