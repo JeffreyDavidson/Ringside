@@ -22,559 +22,559 @@ parameters:
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/EventsTable.php
+			path: app/Livewire/Events/Tables/EventsTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Events\\EventsTable\:\:builder\(\) return type with generic class App\\Builders\\EventBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Events\\Tables\\EventsTable\:\:builder\(\) return type with generic class App\\Builders\\EventBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Events/EventsTable.php
+			path: app/Livewire/Events/Tables/EventsTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Events\\EventsTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Events\\Tables\\EventsTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Events/EventsTable.php
+			path: app/Livewire/Events/Tables/EventsTable.php
 
 		-
 			message: '#^Binary operation "\." between mixed and '' by '' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$competitor on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$competitors on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$decision on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$full_name on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$name on mixed\.$#'
 			identifier: property.nonObject
 			count: 4
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$referees on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$result on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$titles on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$winner on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Events\\MatchesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Events\\Tables\\MatchesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Events/MatchesTable.php
+			path: app/Livewire/Events/Tables/MatchesTable.php
 
 		-
 			message: '#^Cannot access property \$firstEmployment on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
 			message: '#^Cannot access property \$started_at on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
 			message: '#^Cannot call method format\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Managers\\ManagersTable\:\:builder\(\) return type with generic class App\\Builders\\ManagerBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Managers\\Tables\\ManagersTable\:\:builder\(\) return type with generic class App\\Builders\\ManagerBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Managers\\ManagersTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Managers\\Tables\\ManagersTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
 			message: '#^Parameter \#3 \$value of method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:whereDate\(\) expects DateTimeInterface\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/Livewire/Managers/ManagersTable.php
+			path: app/Livewire/Managers/Tables/ManagersTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Managers\\PreviousStablesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Managers\\Tables\\PreviousStablesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Managers/PreviousStablesTable.php
+			path: app/Livewire/Managers/Tables/PreviousStablesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Managers\\PreviousTagTeamsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Managers\\Tables\\PreviousTagTeamsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Managers/PreviousTagTeamsTable.php
+			path: app/Livewire/Managers/Tables/PreviousTagTeamsTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Managers\\PreviousWrestlersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Managers\\Tables\\PreviousWrestlersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Managers/PreviousWrestlersTable.php
+			path: app/Livewire/Managers/Tables/PreviousWrestlersTable.php
 
 		-
 			message: '#^Binary operation "\." between mixed and '' by '' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 3
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$competitor on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$competitors on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$decision on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$event on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$name on mixed\.$#'
 			identifier: property.nonObject
 			count: 5
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$result on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$titles on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$winner on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot call method whereIn\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Referees\\PreviousMatchesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Referees\\Tables\\PreviousMatchesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Referees/PreviousMatchesTable.php
+			path: app/Livewire/Referees/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$firstEmployment on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
 			message: '#^Cannot access property \$started_at on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
 			message: '#^Cannot call method format\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Referees\\RefereesTable\:\:builder\(\) return type with generic class App\\Builders\\RefereeBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Referees\\Tables\\RefereesTable\:\:builder\(\) return type with generic class App\\Builders\\RefereeBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Referees\\RefereesTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Referees\\Tables\\RefereesTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
 			message: '#^Parameter \#3 \$value of method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:whereDate\(\) expects DateTimeInterface\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/Livewire/Referees/RefereesTable.php
+			path: app/Livewire/Referees/Tables/RefereesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Stables\\PreviousManagersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Stables\\Tables\\PreviousManagersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Stables/PreviousManagersTable.php
+			path: app/Livewire/Stables/Tables/PreviousManagersTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Stables\\PreviousTagTeamsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Stables\\Tables\\PreviousTagTeamsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Stables/PreviousTagTeamsTable.php
+			path: app/Livewire/Stables/Tables/PreviousTagTeamsTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Stables\\PreviousWrestlersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Stables\\Tables\\PreviousWrestlersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Stables/PreviousWrestlersTable.php
+			path: app/Livewire/Stables/Tables/PreviousWrestlersTable.php
 
 		-
 			message: '#^Cannot access property \$firstActivation on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Stables/StablesTable.php
+			path: app/Livewire/Stables/Tables/StablesTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Stables/StablesTable.php
+			path: app/Livewire/Stables/Tables/StablesTable.php
 
 		-
 			message: '#^Cannot access property \$started_at on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Stables/StablesTable.php
+			path: app/Livewire/Stables/Tables/StablesTable.php
 
 		-
 			message: '#^Cannot call method format\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Stables/StablesTable.php
+			path: app/Livewire/Stables/Tables/StablesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Stables\\StablesTable\:\:builder\(\) return type with generic class App\\Builders\\StableBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Stables\\Tables\\StablesTable\:\:builder\(\) return type with generic class App\\Builders\\StableBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Stables/StablesTable.php
+			path: app/Livewire/Stables/Tables/StablesTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Stables\\StablesTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Stables\\Tables\\StablesTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Stables/StablesTable.php
+			path: app/Livewire/Stables/Tables/StablesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\TagTeams\\PreviousManagersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\TagTeams\\Tables\\PreviousManagersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/TagTeams/PreviousManagersTable.php
+			path: app/Livewire/TagTeams/Tables/PreviousManagersTable.php
 
 		-
-			message: '#^Method App\\Livewire\\TagTeams\\PreviousStablesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\TagTeams\\Tables\\PreviousStablesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/TagTeams/PreviousStablesTable.php
+			path: app/Livewire/TagTeams/Tables/PreviousStablesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\TagTeams\\PreviousWrestlersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\TagTeams\\Tables\\PreviousWrestlersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/TagTeams/PreviousWrestlersTable.php
+			path: app/Livewire/TagTeams/Tables/PreviousWrestlersTable.php
 
 		-
 			message: '#^Cannot access property \$firstEmployment on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
 			message: '#^Cannot access property \$started_at on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
 			message: '#^Cannot call method format\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
-			message: '#^Method App\\Livewire\\TagTeams\\TagTeamsTable\:\:builder\(\) return type with generic class App\\Builders\\TagTeamBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\TagTeams\\Tables\\TagTeamsTable\:\:builder\(\) return type with generic class App\\Builders\\TagTeamBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\TagTeams\\TagTeamsTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\TagTeams\\Tables\\TagTeamsTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
 			message: '#^Parameter \#3 \$value of method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:whereDate\(\) expects DateTimeInterface\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/Livewire/TagTeams/TagTeamsTable.php
+			path: app/Livewire/TagTeams/Tables/TagTeamsTable.php
 
 		-
 			message: '#^Cannot access property \$firstActivation on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Titles/TitlesTable.php
+			path: app/Livewire/Titles/Tables/TitlesTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Titles/TitlesTable.php
+			path: app/Livewire/Titles/Tables/TitlesTable.php
 
 		-
 			message: '#^Cannot access property \$started_at on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Titles/TitlesTable.php
+			path: app/Livewire/Titles/Tables/TitlesTable.php
 
 		-
 			message: '#^Cannot call method format\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Titles/TitlesTable.php
+			path: app/Livewire/Titles/Tables/TitlesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Titles\\TitlesTable\:\:builder\(\) return type with generic class App\\Builders\\TitleBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Titles\\Tables\\TitlesTable\:\:builder\(\) return type with generic class App\\Builders\\TitleBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Titles/TitlesTable.php
+			path: app/Livewire/Titles/Tables/TitlesTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Titles\\TitlesTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Titles\\Tables\\TitlesTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Titles/TitlesTable.php
+			path: app/Livewire/Titles/Tables/TitlesTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Users/UsersTable.php
+			path: app/Livewire/Users/Tables/UsersTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Users\\UsersTable\:\:builder\(\) return type with generic class App\\Builders\\UserBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Users\\Tables\\UsersTable\:\:builder\(\) return type with generic class App\\Builders\\UserBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Users/UsersTable.php
+			path: app/Livewire/Users/Tables/UsersTable.php
 
 		-
 			message: '#^Cannot access property \$name on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Venues/PreviousEventsTable.php
+			path: app/Livewire/Venues/Tables/PreviousEventsTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Venues\\PreviousEventsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Venues\\Tables\\PreviousEventsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Venues/PreviousEventsTable.php
+			path: app/Livewire/Venues/Tables/PreviousEventsTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Venues/VenuesTable.php
+			path: app/Livewire/Venues/Tables/VenuesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Venues\\VenuesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Venues\\Tables\\VenuesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Venues/VenuesTable.php
+			path: app/Livewire/Venues/Tables/VenuesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Wrestlers\\PreviousManagersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Wrestlers\\Tables\\PreviousManagersTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousManagersTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousManagersTable.php
 
 		-
 			message: '#^Binary operation "\." between mixed and '' by '' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 3
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$competitor on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$competitors on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$decision on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$name on mixed\.$#'
 			identifier: property.nonObject
 			count: 5
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$result on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$titles on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot access property \$winner on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
 			message: '#^Cannot call method whereMorphedTo\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Wrestlers\\PreviousMatchesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Wrestlers\\Tables\\PreviousMatchesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousMatchesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousMatchesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Wrestlers\\PreviousStablesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Wrestlers\\Tables\\PreviousStablesTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousStablesTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousStablesTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Wrestlers\\PreviousTagTeamsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Wrestlers\\Tables\\PreviousTagTeamsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousTagTeamsTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousTagTeamsTable.php
 
 		-
 			message: '#^Cannot call method whereMorphedTo\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousTitleChampionshipsTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionshipsTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Wrestlers\\PreviousTitleChampionshipsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Wrestlers\\Tables\\PreviousTitleChampionshipsTable\:\:builder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Wrestlers/PreviousTitleChampionshipsTable.php
+			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionshipsTable.php
 
 		-
 			message: '#^Binary operation "%%" between mixed and 12 results in an error\.$#'
@@ -595,64 +595,64 @@ parameters:
 			path: app/Livewire/Wrestlers/WrestlerForm.php
 
 		-
-			message: '#^Parameter \#1 \$wrestler of method App\\Livewire\\Wrestlers\\WrestlerForm\:\:setWrestler\(\) expects App\\Models\\Wrestler, App\\Models\\Wrestler\|null given\.$#'
+			message: '#^Parameter \#1 \$wrestler of method App\\Livewire\\Wrestlers\\Modals\\FormModal\:\:setWrestler\(\) expects App\\Models\\Wrestler, App\\Models\\Wrestler\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlerModal.php
+			path: app/Livewire/Wrestlers/Modals/FormModal.php
 
 		-
 			message: '#^Cannot access property \$firstEmployment on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Cannot access property \$id on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Cannot access property \$started_at on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Cannot call method format\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
-			message: '#^Method App\\Livewire\\Wrestlers\\WrestlersTable\:\:builder\(\) return type with generic class App\\Builders\\WrestlerBuilder does not specify its types\: TModel$#'
+			message: '#^Method App\\Livewire\\Wrestlers\\Tables\\WrestlersTable\:\:builder\(\) return type with generic class App\\Builders\\WrestlerBuilder does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
-			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Wrestlers\\WrestlersTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
+			message: '#^Parameter \#1 \$statuses of method App\\Livewire\\Wrestlers\\Tables\\WrestlersTable\:\:getDefaultStatusFilter\(\) expects array\<int, mixed\>, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Parameter \#2 \$callback of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestler\>\:\:when\(\) expects \(callable\(App\\Builders\\WrestlerBuilder\<App\\Models\\Wrestler\>, mixed\)\: App\\Builders\\WrestlerBuilder\<App\\Models\\Wrestler\>\)\|null, Closure\(Illuminate\\Database\\Eloquent\\Builder, array\)\: App\\Builders\\WrestlerBuilder\<App\\Models\\Wrestler\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Parameter \#3 \$value of method App\\Builders\\WrestlerBuilder\<App\\Models\\Wrestler\>\:\:whereDate\(\) expects DateTimeInterface\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Parameter \#3 \$value of method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:whereDate\(\) expects DateTimeInterface\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: app/Livewire/Wrestlers/WrestlersTable.php
+			path: app/Livewire/Wrestlers/Tables/WrestlersTable.php
 
 		-
 			message: '#^Method App\\Models\\TitleChampionship\:\:allTitleChampions\(\) return type with generic class Staudenmeir\\LaravelMergedRelations\\Eloquent\\Relations\\MergedRelation does not specify its types\: TRelatedModel, TDeclaringModel$#'
