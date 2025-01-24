@@ -1,6 +1,10 @@
 includes:
     - phpstan-baseline.neon
 parameters:
+    unused_public:
+        methods: true
+        properties: true
+        constants: true
     excludePaths:
         - app/Models/Contracts
     paths:
