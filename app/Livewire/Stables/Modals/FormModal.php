@@ -7,11 +7,18 @@ namespace App\Livewire\Stables\Modals;
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Stables\StableForm;
 use App\Models\Stable;
+use App\Traits\Data\PresentsManagersList;
+use App\Traits\Data\PresentsTagTeamsList;
+use App\Traits\Data\PresentsWrestlersList;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class FormModal extends BaseModal
 {
+    use PresentsManagersList;
+    use PresentsTagTeamsList;
+    use PresentsWrestlersList;
+
     protected string $modelType = Stable::class;
 
     protected string $modalLanguagePath = 'stables';

@@ -7,7 +7,7 @@ namespace App\Livewire\TagTeams;
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\TagTeam;
 use Illuminate\Support\Carbon;
-use Livewire\Attributes\Validate;
+use Illuminate\Validation\Rule;
 
 class TagTeamForm extends LivewireBaseForm
 {
@@ -15,18 +15,62 @@ class TagTeamForm extends LivewireBaseForm
 
     public ?TagTeam $formModel;
 
-    #[Validate('required|string|min:5|max:255|unique:tag_teams,name', as: 'tag-teams.name')]
     public string $name = '';
 
-    #[Validate('nullable|string|max:255', as: 'tag-teams.signature_move')]
     public ?string $signature_move = '';
 
-    #[Validate('nullable|date', as: 'employments.started_at')]
     public Carbon|string|null $start_date = '';
+
+    public int $wrestlerA;
+
+    public int $wrestlerB;
+
+    protected function rules()
+    {
+        return [
+            'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')],
+            'signature_move' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['nullable', 'string', 'date'],
+            'wrestlerA' => [
+                'nullable',
+                'bail',
+                'integer',
+                'different:wrestlerB',
+                'required_with:start_date',
+                'required_with:wrestlerB',
+                'required_with:signature_move',
+                Rule::exists('wrestlers', 'id'),
+            ],
+            'wrestlerB' => [
+                'nullable',
+                'bail',
+                'integer',
+                'different:wrestlerA',
+                'required_with:start_date',
+                'required_with:wrestlerA',
+                'required_with:signature_move',
+                Rule::exists('wrestlers', 'id'),
+            ],
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        return [
+            'signature_move' => 'signature move',
+            'start_date' => 'start date',
+            'wrestlerA' => 'tag team partner A',
+            'wrestlerB' => 'tag team partner B',
+        ];
+    }
 
     public function loadExtraData(): void
     {
+        $currentWrestlers = $this->formModel->currentWrestlers;
+
         $this->start_date = $this->formModel->firstEmployment?->started_at->toDateString();
+        $this->wrestlerA = $currentWrestlers->first();
+        $this->wrestlerB = $currentWrestlers->last();
     }
 
     public function store(): bool

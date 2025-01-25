@@ -3,13 +3,14 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Events\EventsController;
+use App\Livewire\Events\Tables\EventsTable;
 
 test('index returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([EventsController::class, 'index']))
         ->assertOk()
         ->assertViewIs('events.index')
-        ->assertSeeLivewire('events.events-list');
+        ->assertSeeLivewire(EventsTable::class);
 });
 
 test('a basic user cannot view events index page', function () {

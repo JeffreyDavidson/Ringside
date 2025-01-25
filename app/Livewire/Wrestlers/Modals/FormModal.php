@@ -26,7 +26,7 @@ class FormModal extends BaseModal
 
         $this->modelForm->name = Str::title(fake()->words(2, true));
         $this->modelForm->hometown = fake()->city().', '.fake()->state();
-        $this->modelForm->height_feet = fake()->numberBetween(5, 8);
+        $this->modelForm->height_feet = fake()->numberBetween(5, 7);
         $this->modelForm->height_inches = fake()->numberBetween(0, 11);
         $this->modelForm->weight = fake()->numberBetween(180, 400);
         $this->modelForm->signature_move = Str::title(fake()->optional(0.8)->words(3, true));

@@ -6,8 +6,9 @@ namespace App\Livewire\Events;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Event;
+use App\Rules\EventDateCanBeChanged;
 use Illuminate\Support\Carbon;
-use Livewire\Attributes\Validate;
+use Illuminate\Validation\Rule;
 
 class EventForm extends LivewireBaseForm
 {
@@ -15,17 +16,33 @@ class EventForm extends LivewireBaseForm
 
     public ?Event $formModel;
 
-    #[Validate('required|string|min:5|max:255', as: 'events.name')]
     public string $name = '';
 
-    #[Validate('required|date', as: 'events.date')]
-    public Carbon|string $date = '';
+    public Carbon|string|null $date = '';
 
-    #[Validate('required|integer|exists:venue,id', as: 'events.venue')]
     public int $venue;
 
-    #[Validate('required|string', as: 'events.preview')]
     public string $preview;
+
+    protected function rules()
+    {
+        return [
+            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel ?? '')],
+            'date' => ['nullable', 'date', new EventDateCanBeChanged($this->formModal ?? new $this->formModelType)],
+            'venue' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
+            'preview' => ['required', 'string'],
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        return [
+            'height_feet' => 'feet',
+            'height_inches' => 'inches',
+            'signature_move' => 'signature move',
+            'start_date' => 'start date',
+        ];
+    }
 
     public function store(): bool
     {
