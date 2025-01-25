@@ -1,20 +1,23 @@
-<div class="mb-10">
-    <x-form.inputs.select label="Match Type:" id="match_type_id" name="match_type_id" :options="$matchTypes" :selected="old('match_type_id')"
-        wire:model="matchTypeId" />
-</div>
+<x-form-modal>
+    <x-form-modal.input>
+        <x-form.inputs.select label="{{ __('event-matches.match_type') }}" wire:model="matchTypeId" :options="$matchTypes"
+            :selected="old('match_type_id')" />
+    </x-form-modal.input>
 
-<div class="mb-10">
-    <x-form.inputs.select label="Referees:" id="referees" name="referees" :options="$referees" :selected="old('referees')" />
-</div>
+    <x-form-modal.input>
+        <x-form.inputs.select label="{{ __('event-matches.referees') }}" id="referees" name="referees" :options="$referees"
+            :selected="old('referees')" />
+    </x-form-modal.input>
 
-<div class="mb-10">
-    <x-form.inputs.select label="Titles:" id="titles" name="titles" :options="$titles" :selected="old('titles')" />
-</div>
+    <x-form-modal.input>
+        <x-form.inputs.select label="{{ __('event-matches.titles') }}" :options="$titles" :selected="old('titles')" />
+    </x-form-modal.input>
 
-<div class="mb-10">
-    @include($subViewToUse)
-</div>
+    <x-form-modal.input>
+        @include($subViewToUse)
+    </x-form-modal.input>
 
-<div class="mb-10">
-    <x-form.inputs.textarea name="preview" label="Preview" :value="old('preview')" />
-</div>
+    <x-form-modal.input>
+        <x-form.inputs.textarea label="{{ __('event-matches.preview') }}" :value="old('preview')" />
+    </x-form-modal.input>
+</x-form-modal>

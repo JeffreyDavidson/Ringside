@@ -3,13 +3,14 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Stables\StablesController;
+use App\Livewire\Stables\Tables\StablesTable;
 
 test('index returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([StablesController::class, 'index']))
         ->assertOk()
         ->assertViewIs('stables.index')
-        ->assertSeeLivewire('stables.stables-list');
+        ->assertSeeLivewire(StablesTable::class);
 });
 
 test('a basic user cannot view stables index page', function () {

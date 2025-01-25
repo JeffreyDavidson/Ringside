@@ -1,8 +1,11 @@
-@props(['name', 'label', 'options' => [], 'selected' => ''])
+@props([
+    'name' => $attributes->whereStartsWith('wire:model')->first() ?? '',
+    'label' => 'Value',
+    'options' => [],
+    'selected' => '',
+])
 
-<div class="flex flex-center gap-1">
-    <label class="text-gray-900 font-semibold text-2sm" for="{{ $name }}">{{ $label }}:</label>
-</div>
+<x-form.form-label :$name :$label />
 
 <select
     class="font-medium text-2sm leading-none bg-light-active rounded-md h-10 ps-3 pe-3 border border-solid border-gray-300 text-gray-700 focus:border-primary"

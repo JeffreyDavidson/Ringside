@@ -6,8 +6,9 @@ namespace App\Livewire\Titles;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Title;
+use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
-use Livewire\Attributes\Validate;
+use Illuminate\Validation\Rule;
 
 class TitleForm extends LivewireBaseForm
 {
@@ -15,11 +16,24 @@ class TitleForm extends LivewireBaseForm
 
     public ?Title $formModel;
 
-    #[Validate('required|string|max:255|ends_with:Title,Titles', as: 'titles.name')]
     public string $name = '';
 
-    #[Validate('nullable|date', as: 'activations.started_at')]
     public Carbon|string|null $start_date = '';
+
+    protected function rules()
+    {
+        return [
+            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel ?? '')],
+            'start_date' => ['nullable', 'date', new ActivationStartDateCanBeChanged($this->formModel ?? '')],
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        return [
+            'start_date' => 'start date',
+        ];
+    }
 
     public function loadExtraData(): void
     {

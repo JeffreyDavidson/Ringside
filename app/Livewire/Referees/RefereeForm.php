@@ -6,8 +6,8 @@ namespace App\Livewire\Referees;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Referee;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
-use Livewire\Attributes\Validate;
 
 class RefereeForm extends LivewireBaseForm
 {
@@ -15,14 +15,27 @@ class RefereeForm extends LivewireBaseForm
 
     public Referee $formModel;
 
-    #[Validate('required|string|max:255', as: 'referees.first_name')]
     public string $first_name = '';
 
-    #[Validate('required|string|max:255', as: 'referees.last_name')]
     public string $last_name = '';
 
-    #[Validate('nullable|date', as: 'employments.started_at')]
     public Carbon|string|null $start_date = '';
+
+    protected function rules()
+    {
+        return [
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel ?? '')],
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        return [
+            'start_date' => 'start date',
+        ];
+    }
 
     public function loadExtraData(): void
     {

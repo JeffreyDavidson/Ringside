@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Wrestlers\WrestlersController;
-use App\Livewire\Wrestlers\WrestlersTable;
+use App\Livewire\Wrestlers\Tables\WrestlersTable;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

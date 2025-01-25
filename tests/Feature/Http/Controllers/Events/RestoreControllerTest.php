@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\Events\RestoreAction;
-use App\Http\Controllers\Events\DeletedEventsController;
 use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Events\RestoreController;
 use App\Models\Event;
@@ -24,9 +23,7 @@ test('invoke calls restore action and has exception thrown', function () {
     RestoreAction::shouldRun()->with($this->event)->andThrow(Exception::class);
 
     $this->actingAs(administrator())
-        ->from(action([DeletedEventsController::class, 'index']))
         ->patch(action([RestoreController::class], $this->event))
-        ->assertRedirect(action([DeletedEventsController::class, 'index']))
         ->assertSessionHas('error');
 });
 

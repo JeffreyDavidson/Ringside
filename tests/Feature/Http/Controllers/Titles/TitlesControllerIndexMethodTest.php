@@ -3,14 +3,14 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
-use App\Livewire\Titles\TitlesList;
+use App\Livewire\Titles\Tables\TitlesTable;
 
 test('index returns a view', function () {
     $this->actingAs(administrator())
         ->get(action([TitlesController::class, 'index']))
         ->assertOk()
         ->assertViewIs('titles.index')
-        ->assertSeeLivewire(TitlesList::class);
+        ->assertSeeLivewire(TitlesTable::class);
 });
 
 test('a basic user cannot view titles index page', function () {
