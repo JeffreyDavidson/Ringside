@@ -23,6 +23,6 @@ test('a basic user cannot view referees index page', function () {
 });
 
 test('a guest cannot view referees index page', function () {
-get(action([RefereesController::class, 'index']))
-->assertRedirect(route('login'));
-    });
+    get(action([RefereesController::class, 'index']))
+        ->assertRedirect(route('login'));
+});

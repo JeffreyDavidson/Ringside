@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
@@ -11,7 +12,7 @@ Route::redirect('/', 'login');
 Route::view('/test', 'test');
 
 Route::middleware(['middleware' => 'auth'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 });
 
 Route::middleware(['auth'])->prefix('roster')->group(function () {

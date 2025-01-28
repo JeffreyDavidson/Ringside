@@ -29,6 +29,6 @@ test('a basic user cannot view a title', function () {
 });
 
 test('a guest cannot view a title', function () {
-get(action([TitlesController::class, 'show'], $this->title))
-->assertRedirect(route('login'));
-    });
+    get(action([TitlesController::class, 'show'], $this->title))
+        ->assertRedirect(route('login'));
+});

@@ -26,6 +26,6 @@ test('a basic user cannot view a referee profile', function () {
 });
 
 test('a guest cannot view a referee profile', function () {
-get(action([RefereesController::class, 'show'], $this->referee))
-->assertRedirect(route('login'));
-    });
+    get(action([RefereesController::class, 'show'], $this->referee))
+        ->assertRedirect(route('login'));
+});

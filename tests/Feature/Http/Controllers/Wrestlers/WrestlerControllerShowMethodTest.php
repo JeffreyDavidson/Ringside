@@ -41,6 +41,6 @@ test('a basic user cannot view another users wrestler profile', function () {
 });
 
 test('a guest cannot view a wrestler profile', function () {
-get(action([WrestlersController::class, 'show'], $this->wrestler))
-->assertRedirect(route('login'));
-    });
+    get(action([WrestlersController::class, 'show'], $this->wrestler))
+        ->assertRedirect(route('login'));
+});
