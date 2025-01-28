@@ -18,6 +18,6 @@ test('basic users can view the dashboard', function () {
 });
 
 test('a guest cannot view the dashboard', function () {
-get(route('dashboard'))
-->assertRedirect(route('login'));
-    });
+    get(route('dashboard'))
+        ->assertRedirect(route('login'));
+});
