@@ -18,7 +18,6 @@
         "livewire/livewire": "^3.3",
         "lorisleiva/laravel-actions": "^2.8",
         "rappasoft/laravel-livewire-tables": "dev-development",
-        "staudenmeir/laravel-merged-relations": "^1.9",
         "wire-elements/modal": "^2.0"
     },
     "require-dev": {
@@ -39,10 +38,7 @@
         "povils/phpmnd": "^3.4",
         "spatie/laravel-ignition": "^2.4",
         "spatie/pest-plugin-test-time": "^2.0",
-        "tomasvotruba/phpstan-bodyscan": "^0.2.0",
-        "tomasvotruba/unused-public": "^2.0",
-        "wire-elements/wire-spy": "^0.0.9",
-        "worksome/request-factories": "^3.3"
+        "wire-elements/wire-spy": "^0.0.9"
     },
     "config": {
         "optimize-autoloader": true,
