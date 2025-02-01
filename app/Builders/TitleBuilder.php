@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\TitleStatus;
+use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of \App\Models\Title
+ * @template TModel of Title
  *
- * @extends \Illuminate\Database\Eloquent\Builder<TModel>
+ * @extends Builder<TModel>
  */
 class TitleBuilder extends Builder
 {

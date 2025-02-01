@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Models\Title;
 use App\Models\TitleChampionship;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,10 +36,13 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
         $this->wrestler = $wrestler;
     }
 
+    /**
+     * @return Builder<TitleChampionship>
+     */
     public function builder(): Builder
     {
         return TitleChampionship::query()
-            ->withWhereHas('wrestlers', function ($query) {
+            ->withWhereHas('wrestlers', function (Builder $query) {
                 $query->whereIn('wrestler_id', [$this->wrestler->id]);
             });
     }
@@ -54,15 +58,18 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
         ]);
     }
 
+    /**
+     * @return array<int, Column>
+     **/
     public function columns(): array
     {
         return [
             LinkColumn::make(__('titles.name'))
-                ->title(fn ($row) => $row->name)
-                ->location(fn ($row) => route('titles.show', $row)),
+                ->title(fn (Title $row) => $row->name)
+                ->location(fn (Title $row) => route('titles.show', $row)),
             LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn ($row) => $row->previousChampion->name)
-                ->location(fn ($row) => route('wrestlers.show', $row)),
+                ->title(fn (TitleChampionship $row) => $row->previousChampion->name)
+                ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
             Column::make(__('championships.dates_held'), 'dates_held'),
             CountColumn::make(__('championships.days_held'))
                 ->setDataSource('days_held'),

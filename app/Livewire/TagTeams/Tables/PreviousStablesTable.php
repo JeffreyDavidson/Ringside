@@ -21,6 +21,9 @@ class PreviousStablesTable extends DataTableComponent
 
     public ?int $tagTeamId;
 
+    /**
+     * @return Builder<StableTagTeam>
+     */
     public function builder(): Builder
     {
         if (! isset($this->tagTeamId)) {

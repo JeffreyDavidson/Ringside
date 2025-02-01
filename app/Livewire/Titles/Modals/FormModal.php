@@ -20,11 +20,12 @@ class FormModal extends BaseModal
 
     public TitleForm $modelForm;
 
-    public function fillDummyFields()
+    public function fillDummyFields(): void
     {
+        /** @var Carbon|null $datetime */
         $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
 
-        $this->modelForm->name = Str::of(fake()->words(2, true))->title()->append(' Title')->value();
-        $this->modelForm->start_date = $datetime ? Carbon::instance($datetime)->toDateString() : null;
+        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->append(' Title')->value();
+        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
     }
 }

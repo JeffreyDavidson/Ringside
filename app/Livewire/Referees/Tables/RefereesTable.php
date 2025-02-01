@@ -25,6 +25,9 @@ class RefereesTable extends BaseTableWithActions
 
     protected string $resourceName = 'referees';
 
+    /**
+     * @return RefereeBuilder<Referee>
+     */
     public function builder(): RefereeBuilder
     {
         return Referee::query()
@@ -57,6 +60,7 @@ class RefereesTable extends BaseTableWithActions
      */
     public function filters(): array
     {
+        /** @var array<string, string> $statuses */
         $statuses = collect(RefereeStatus::cases())->pluck('name', 'value')->toArray();
 
         return [

@@ -24,6 +24,9 @@ class PreviousStablesTable extends DataTableComponent
      */
     public ?int $managerId;
 
+    /**
+     * @return Builder<StableManager>
+     */
     public function builder(): Builder
     {
         if (! isset($this->managerId)) {

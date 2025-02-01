@@ -24,6 +24,9 @@ class PreviousTagTeamsTable extends DataTableComponent
      */
     public ?int $managerId;
 
+    /**
+     * @return Builder<TagTeamManager>
+     */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {

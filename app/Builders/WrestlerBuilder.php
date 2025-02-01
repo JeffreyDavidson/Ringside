@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\WrestlerStatus;
+use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of \App\Models\Wrestler
+ * @template TModel of Wrestler
  *
- * @extends \Illuminate\Database\Eloquent\Builder<TModel>
+ * @extends Builder<TModel>
  */
 class WrestlerBuilder extends Builder
 {

@@ -9,9 +9,12 @@ use Livewire\Attributes\Computed;
 
 trait PresentsWrestlersList
 {
+    /**
+     * @return array<int|string,string|null>
+     */
     #[Computed(cache: true, key: 'wrestlers-list', seconds: 180)]
     public function getWrestlers(): array
     {
-        return Wrestler::all()->pluck('name', 'id')->toArray();
+        return Wrestler::select('id', 'name')->pluck('name', 'id')->toArray();
     }
 }

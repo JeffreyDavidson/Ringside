@@ -24,6 +24,9 @@ class PreviousStablesTable extends DataTableComponent
      */
     public ?int $wrestlerId;
 
+    /**
+     * @return Builder<StableWrestler>
+     */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {

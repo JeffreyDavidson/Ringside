@@ -9,9 +9,12 @@ use Livewire\Attributes\Computed;
 
 trait PresentsTagTeamsList
 {
+    /**
+     * @return array<int|string,string|null>
+     */
     #[Computed(cache: true, key: 'tag-teams-list', seconds: 180)]
     public function getTagTeams(): array
     {
-        return TagTeam::all()->pluck('name', 'id')->toArray();
+        return TagTeam::select('id', 'name')->pluck('name', 'id')->toArray();
     }
 }

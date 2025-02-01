@@ -7,11 +7,14 @@ namespace App\Traits\Data;
 use App\Models\Venue;
 use Livewire\Attributes\Computed;
 
-trait PresentsVenueList
+trait PresentsVenuesList
 {
+    /**
+     * @return array<int|string,string|null>
+     */
     #[Computed(cache: true, key: 'venues-list', seconds: 180)]
     public function getVenues(): array
     {
-        return Venue::all()->pluck('name', 'id')->toArray();
+        return Venue::select('id', 'name')->pluck('name', 'id')->toArray();
     }
 }

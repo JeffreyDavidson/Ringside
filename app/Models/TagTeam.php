@@ -24,7 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @property \App\Enums\TagTeamStatus $status
+ * @property TagTeamStatus $status
+ * @property TagTeamEmployment $firstEmployment
  */
 class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable, Manageable, Retirable, Suspendable
 {

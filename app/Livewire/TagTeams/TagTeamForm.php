@@ -8,6 +8,8 @@ use App\Livewire\Base\LivewireBaseForm;
 use App\Models\TagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 
 class TagTeamForm extends LivewireBaseForm
 {
@@ -25,7 +27,10 @@ class TagTeamForm extends LivewireBaseForm
 
     public int $wrestlerB;
 
-    protected function rules()
+    /**
+     * @return array<string, list<Unique|Exists|string>>
+     */
+    protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')],
@@ -54,7 +59,10 @@ class TagTeamForm extends LivewireBaseForm
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'signature_move' => 'signature move',

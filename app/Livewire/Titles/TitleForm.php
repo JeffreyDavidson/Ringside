@@ -9,6 +9,7 @@ use App\Models\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class TitleForm extends LivewireBaseForm
 {
@@ -20,7 +21,10 @@ class TitleForm extends LivewireBaseForm
 
     public Carbon|string|null $start_date = '';
 
-    protected function rules()
+    /**
+     * @return array<string, list<Unique|ActivationStartDateCanBeChanged|string>>
+     */
+    protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel ?? '')],
@@ -28,7 +32,10 @@ class TitleForm extends LivewireBaseForm
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'start_date' => 'start date',

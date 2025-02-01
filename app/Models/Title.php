@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property TitleActivation $firstActivation
+ */
 class Title extends Model implements Activatable, Retirable
 {
     use Concerns\HasChampionships;

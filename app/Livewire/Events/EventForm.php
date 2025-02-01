@@ -9,12 +9,14 @@ use App\Models\Event;
 use App\Rules\EventDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 
 class EventForm extends LivewireBaseForm
 {
     protected string $formModelType = Event::class;
 
-    public ?Event $formModel;
+    public Event $formModel;
 
     public string $name = '';
 
@@ -24,7 +26,10 @@ class EventForm extends LivewireBaseForm
 
     public string $preview;
 
-    protected function rules()
+    /**
+     * @return array<string, list<Unique|Exists|EventDateCanBeChanged|string>>
+     */
+    protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel ?? '')],
@@ -34,7 +39,10 @@ class EventForm extends LivewireBaseForm
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'height_feet' => 'feet',
