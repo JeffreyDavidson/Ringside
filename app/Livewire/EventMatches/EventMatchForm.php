@@ -4,66 +4,70 @@ declare(strict_types=1);
 
 namespace App\Livewire\EventMatches;
 
-use App\Models\Event;
+use App\Livewire\Base\LivewireBaseForm;
 use App\Models\EventMatch;
-use App\Models\MatchType;
-use App\Models\Referee;
-use App\Models\Title;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
-class EventMatchForm extends Component
+class EventMatchForm extends LivewireBaseForm
 {
-    /**
-     * Event that match will be attached to.
-     */
-    public Event $event;
+    protected string $formModelType = EventMatch::class;
 
-    /**
-     * Match for the event.
-     */
-    public EventMatch $match;
+    public ?EventMatch $formModel;
 
-    /**
-     * Match type to target for subview.
-     */
     public int $matchTypeId;
 
     /**
-     * String name to render view for each match type.
+     * @var array<int, int>
      */
-    public string $subViewToUse;
+    public array $titles = [];
 
     /**
-     * Undocumented function
+     * @var array<int, int>
      */
-    public function mount(Event $event, EventMatch $match): void
+    public array $referees = [];
+
+    /**
+     * @var array<int, int>
+     */
+    public array $competitors = [];
+
+    public string $preview = '';
+
+    /**
+     * @return array<string, list<Exists|string>>
+     */
+    protected function rules(): array
     {
-        $this->event = $event;
-        $this->match = $match;
-        $this->subViewToUse = 'event-matches.types.singles';
+        return [
+            'matchTypeId' => ['required', 'integer', Rule::exists('match_types')],
+            'referees' => ['required', 'array'],
+            'titles' => ['required', 'array'],
+            'competitors' => ['required', 'array'],
+        ];
     }
 
     /**
-     * Run action hook when match type id is changed.
+     * @return array<string, string>
      */
-    public function updatedMatchTypeId(): string
+    protected function validationAttributes(): array
     {
-        $matchTypeSlug = MatchType::findOrFail($this->matchTypeId)->slug;
-
-        return $this->subViewToUse = 'event-matches.types.'.$matchTypeSlug;
+        return [
+            'matchTypeId' => 'match type',
+        ];
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
+    public function loadExtraData(): void
     {
-        return view('livewire.event-matches.match-form', [
-            'match' => $this->match,
-            'matchTypes' => MatchType::query()->pluck('name', 'id'),
-            'referees' => Referee::query()->pluck('full_name', 'id'),
-            'titles' => Title::query()->pluck('name', 'id'),
-        ]);
+        $this->matchTypeId = $this->formModel?->matchType->id;
+        $this->referees = $this->formModel?->referees->pluck('id')->all();
+        $this->titles = $this->formModel?->titles->pluck('id')->all();
+    }
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        return true;
     }
 }

@@ -10,6 +10,7 @@ use App\Rules\EmploymentStartDateCanBeChanged;
 use App\ValueObjects\Height;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class WrestlerForm extends LivewireBaseForm
 {
@@ -31,7 +32,10 @@ class WrestlerForm extends LivewireBaseForm
 
     public Carbon|string|null $start_date = '';
 
-    protected function rules()
+    /**
+     * @return array<string, list<EmploymentStartDateCanBeChanged|Unique|string>>
+     */
+    protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->formModel ?? '')],
@@ -44,7 +48,10 @@ class WrestlerForm extends LivewireBaseForm
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'height_feet' => 'feet',
@@ -56,9 +63,10 @@ class WrestlerForm extends LivewireBaseForm
 
     public function loadExtraData(): void
     {
-        $this->start_date = $this->formModel->firstEmployment?->started_at->toDateString();
+        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
 
-        $height = $this->formModel->height;
+        /** @var Height $height */
+        $height = $this->formModel?->height;
 
         $feet = (int) floor($height->toInches() / 12);
         $inches = $height->toInches() % 12;

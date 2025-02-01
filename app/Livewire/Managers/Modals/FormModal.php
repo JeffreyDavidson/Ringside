@@ -21,12 +21,13 @@ class FormModal extends BaseModal
 
     public ManagerForm $modelForm;
 
-    public function fillDummyFields()
+    public function fillDummyFields(): void
     {
+        /** @var Carbon|null $datetime */
         $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
 
         $this->modelForm->first_name = fake()->firstName();
         $this->modelForm->last_name = fake()->lastName();
-        $this->modelForm->start_date = $datetime ? Carbon::instance($datetime)->toDateString() : null;
+        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
     }
 }

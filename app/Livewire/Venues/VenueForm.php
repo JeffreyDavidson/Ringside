@@ -7,6 +7,8 @@ namespace App\Livewire\Venues;
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Venue;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 
 class VenueForm extends LivewireBaseForm
 {
@@ -24,7 +26,12 @@ class VenueForm extends LivewireBaseForm
 
     public int|string $zipcode = '';
 
-    protected function rules()
+    /**
+     * Undocumented function
+     *
+     * @return array<string, list<Unique|Exists|string>>
+     */
+    protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel ?? '')],
@@ -35,7 +42,10 @@ class VenueForm extends LivewireBaseForm
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'street_address' => 'street address',

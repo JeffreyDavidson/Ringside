@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Models\Stable;
-use Illuminate\Contracts\View\View;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
@@ -26,6 +25,9 @@ class PreviousWrestlersTable extends DataTableComponent
 
     public function configure(): void {}
 
+    /**
+     * @return array<int, Column>
+     **/
     public function columns(): array
     {
         return [
@@ -33,20 +35,5 @@ class PreviousWrestlersTable extends DataTableComponent
             Column::make(__('stables.date_joined'), 'date_joined'),
             Column::make(__('stables.date_left'), 'date_left'),
         ];
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function render(): View
-    {
-        $query = $this->stable
-            ->previousWrestlers();
-
-        $previousWrestlers = $query->paginate();
-
-        return view('livewire.stables.previous-wrestlers.previous-wrestlers-list', [
-            'previousWrestlers' => $previousWrestlers,
-        ]);
     }
 }

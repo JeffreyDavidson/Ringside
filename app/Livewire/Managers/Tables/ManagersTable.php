@@ -25,6 +25,9 @@ class ManagersTable extends BaseTableWithActions
 
     protected string $resourceName = 'managers';
 
+    /**
+     * @return ManagerBuilder<Manager>
+     */
     public function builder(): ManagerBuilder
     {
         return Manager::query()
@@ -57,6 +60,7 @@ class ManagersTable extends BaseTableWithActions
      */
     public function filters(): array
     {
+        /** @var array<string, string> $statuses */
         $statuses = collect(ManagerStatus::cases())->pluck('name', 'value')->toArray();
 
         return [

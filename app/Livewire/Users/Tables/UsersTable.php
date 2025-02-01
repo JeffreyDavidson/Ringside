@@ -22,6 +22,9 @@ class UsersTable extends DataTableComponent
 
     protected string $resourceName = 'users';
 
+    /**
+     * @return UserBuilder<User>
+     */
     public function builder(): UserBuilder
     {
         return User::query()

@@ -17,6 +17,9 @@ class VenuesTable extends BaseTableWithActions
 
     protected string $resourceName = 'venues';
 
+    /**
+     * @return Builder<Venue>
+     */
     public function builder(): Builder
     {
         return Venue::query()

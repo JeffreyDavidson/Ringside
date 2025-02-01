@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
-use Staudenmeir\LaravelMergedRelations\Eloquent\Relations\MergedRelation;
 
 /**
  * @property-read \Illuminate\Support\Carbon $won_at
@@ -20,7 +18,6 @@ class TitleChampionship extends Model
     /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
     use HasFactory;
 
-    use HasMergedRelationships;
     use HasMorphToOne;
 
     /**
@@ -66,14 +63,6 @@ class TitleChampionship extends Model
     public function title(): BelongsTo
     {
         return $this->belongsTo(Title::class);
-    }
-
-    /**
-     * Retrieve all title champions for championships.
-     */
-    public function allTitleChampions(): MergedRelation
-    {
-        return $this->mergedRelation('all_title_champions');
     }
 
     /**

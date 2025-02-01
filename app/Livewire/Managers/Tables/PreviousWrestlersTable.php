@@ -21,6 +21,9 @@ class PreviousWrestlersTable extends DataTableComponent
 
     public ?int $managerId;
 
+    /**
+     * @return Builder<WrestlerManager>
+     */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {

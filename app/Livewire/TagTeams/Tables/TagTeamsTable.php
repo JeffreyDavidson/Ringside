@@ -25,6 +25,9 @@ class TagTeamsTable extends BaseTableWithActions
 
     protected string $resourceName = 'tag teams';
 
+    /**
+     * @return TagTeamBuilder<TagTeam>
+     */
     public function builder(): TagTeamBuilder
     {
         return TagTeam::query()
@@ -60,6 +63,7 @@ class TagTeamsTable extends BaseTableWithActions
      */
     public function filters(): array
     {
+        /** @var array<string, string> $statuses */
         $statuses = collect(TagTeamStatus::cases())->pluck('name', 'value')->toArray();
 
         return [

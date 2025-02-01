@@ -1,7 +1,13 @@
-includes:
-    - phpstan-baseline.neon
-    excludePaths:
-        - app/Models/Contracts
+parameters:
     paths:
-        - app/
+        - app
     level: 10
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        -
+            message: '#should return array\<int\|string, string\|null\> but returns array\<mixed\>.#'
+            paths:
+                - app/Traits/Data/PresentsManagersList.php
+                - app/Traits/Data/PresentsTagTeamsList.php
+                - app/Traits/Data/PresentsVenuesList.php
+                - app/Traits/Data/PresentsWrestlersList.php

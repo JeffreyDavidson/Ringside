@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
+use App\Models\Referee;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of \App\Models\Referee
+ * @template TModel of Referee
  *
- * @extends \Illuminate\Database\Eloquent\Builder<TModel>
+ * @extends Builder<TModel>
  */
 class RefereeBuilder extends Builder
 {

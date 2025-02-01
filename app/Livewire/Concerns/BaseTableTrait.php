@@ -16,6 +16,12 @@ trait BaseTableTrait
 
     protected bool $showActionColumn = true;
 
+    protected string $databaseTableName = '';
+
+    protected string $routeBasePath = '';
+
+    protected string $resourceName = '';
+
     public function configuringBaseTableTrait(): void
     {
         $this->setPrimaryKey('id')

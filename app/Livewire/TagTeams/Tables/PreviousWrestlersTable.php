@@ -21,6 +21,9 @@ class PreviousWrestlersTable extends DataTableComponent
 
     public ?int $tagTeamId;
 
+    /**
+     * @return Builder<TagTeamPartner>
+     */
     public function builder(): Builder
     {
         if (! isset($this->tagTeamId)) {

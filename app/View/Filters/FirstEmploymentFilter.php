@@ -38,8 +38,9 @@ class FirstEmploymentFilter extends DateRangeFilter
             'locale' => 'en',
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
+            /** @param array{minDate: Carbon, maxDate: Carbon}  $dateRange */
             ->filter(function (Builder $query, array $dateRange) {
-                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange) {
+                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange) {
                     $query
                         ->where(function (Builder $query) use ($dateRange) {
                             $query->whereBetween($this->filterStartField, [Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(), Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay()]);

@@ -8,13 +8,13 @@ use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Events\EventForm;
 use App\Models\Event;
 use App\Models\Venue;
-use App\Traits\Data\PresentsVenueList;
+use App\Traits\Data\PresentsVenuesList;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class FormModal extends BaseModal
 {
-    use PresentsVenueList;
+    use PresentsVenuesList;
 
     protected string $modelType = Event::class;
 
@@ -24,13 +24,17 @@ class FormModal extends BaseModal
 
     public EventForm $modelForm;
 
-    public function fillDummyFields()
+    public function fillDummyFields(): void
     {
+        /** @var Carbon|null $datetime */
         $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
 
-        $this->modelForm->name = Str::of(fake()->words(2, true))->title()->value();
-        $this->modelForm->date = $datetime ? Carbon::instance($datetime)->toDateString() : null;
-        $this->modelForm->venue = Venue::query()->inRandomOrder()->first()->id;
-        $this->modelForm->preview = fake()->paragraphs(4, true);
+        /** @var Venue $venue */
+        $venue = Venue::query()->inRandomOrder()->first();
+
+        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->modelForm->date = $datetime?->format('Y-m-d H:i:s');
+        $this->modelForm->venue = $venue->id;
+        $this->modelForm->preview = Str::of(fake()->text())->value();
     }
 }

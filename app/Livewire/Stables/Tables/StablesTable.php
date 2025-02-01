@@ -25,6 +25,9 @@ class StablesTable extends BaseTableWithActions
 
     protected string $resourceName = 'stables';
 
+    /**
+     * @return StableBuilder<Stable>
+     */
     public function builder(): StableBuilder
     {
         return Stable::query()
@@ -57,6 +60,7 @@ class StablesTable extends BaseTableWithActions
      */
     public function filters(): array
     {
+        /** @var array<string, string> $statuses */
         $statuses = collect(StableStatus::cases())->pluck('name', 'value')->toArray();
 
         return [

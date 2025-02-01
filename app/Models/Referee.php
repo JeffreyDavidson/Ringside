@@ -19,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property RefereeEmployment $firstEmployment
+ */
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
 {
     /** @use HasBuilder<RefereeBuilder<static>> */

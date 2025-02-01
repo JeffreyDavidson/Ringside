@@ -11,14 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
 class EventMatch extends Model
 {
     /** @use HasFactory<\Database\Factories\EventMatchFactory> */
     use HasFactory;
-
-    use HasMergedRelationships;
 
     /**
      * The table associated with the model.

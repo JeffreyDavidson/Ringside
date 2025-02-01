@@ -21,7 +21,10 @@ class ManagerForm extends LivewireBaseForm
 
     public Carbon|string|null $start_date = '';
 
-    protected function rules()
+    /**
+     * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
+     */
+    protected function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'max:255'],
@@ -30,7 +33,10 @@ class ManagerForm extends LivewireBaseForm
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'start_date' => 'start date',

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\EventStatus;
+use App\Models\Event;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of \App\Models\Event
+ * @template TModel of Event
  *
- * @extends \Illuminate\Database\Eloquent\Builder<TModel>
+ * @extends Builder<TModel>
  */
 class EventBuilder extends Builder
 {

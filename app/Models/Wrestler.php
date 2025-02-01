@@ -28,6 +28,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property Stable $currentStable
+ * @property WrestlerEmployment $firstEmployment
  */
 class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable, Injurable, Manageable, Retirable, Suspendable, TagTeamMember
 {
