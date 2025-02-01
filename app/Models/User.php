@@ -39,6 +39,16 @@ class User extends Authenticatable
         'email_verified_at',
         'password',
         'role',
+        'status',
+    ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => UserStatus::Unverified,
     ];
 
     /**
