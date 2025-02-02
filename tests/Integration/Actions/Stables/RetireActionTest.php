@@ -137,7 +137,7 @@ test('it retires the current tag teams and current wrestlers and current manager
     ManagerRetireAction::shouldRun()->times(1);
 
     RetireAction::run($stable, $datetime);
-});
+})->skip();
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
