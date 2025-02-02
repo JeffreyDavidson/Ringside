@@ -55,6 +55,15 @@ class Event extends Model
     }
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => EventStatus::Unscheduled->value,
+    ];
+
+    /**
      * Retrieve the venue of the event.
      *
      * @return BelongsTo<Venue, $this>

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Data\WrestlerData;
-use App\Models\Employment;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
+use App\Models\WrestlerEmployment;
 use App\Repositories\WrestlerRepository;
 use App\ValueObjects\Height;
 
@@ -80,7 +80,7 @@ test('employ a wrestler', function () {
 test('updates employment of a wrestler', function () {
     $datetime = now();
     $wrestler = Wrestler::factory()
-        ->has(Employment::factory()->started($datetime->copy()->addDays(2)))
+        ->has(WrestlerEmployment::factory()->started($datetime->copy()->addDays(2)), 'employments')
         ->create();
 
     expect($wrestler->fresh())->employments->toHaveCount(1);

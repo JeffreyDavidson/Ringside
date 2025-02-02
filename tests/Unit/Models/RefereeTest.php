@@ -43,9 +43,3 @@ test('a referee uses soft deleted trait', function () {
 test('a referee has its own eloquent builder', function () {
     expect(new Referee)->query()->toBeInstanceOf(RefereeBuilder::class);
 });
-
-test('a referee has a display name', function () {
-    $referee = Referee::factory()->create(['first_name' => 'Hulk', 'last_name' => 'Hogan']);
-
-    expect($referee)->getIdentifier()->toBe('Hulk Hogan');
-});

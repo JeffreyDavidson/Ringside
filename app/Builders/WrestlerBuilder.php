@@ -45,4 +45,44 @@ class WrestlerBuilder extends Builder
 
         return $this;
     }
+
+    /**
+     * Scope a query to include bookable wrestlers.
+     */
+    public function injured(): static
+    {
+        $this->where('status', WrestlerStatus::Injured);
+
+        return $this;
+    }
+
+    /**
+     * Scope a query to include bookable wrestlers.
+     */
+    public function retired(): static
+    {
+        $this->where('status', WrestlerStatus::Retired);
+
+        return $this;
+    }
+
+    /**
+     * Scope a query to include bookable wrestlers.
+     */
+    public function released(): static
+    {
+        $this->where('status', WrestlerStatus::Released);
+
+        return $this;
+    }
+
+    /**
+     * Scope a query to include bookable wrestlers.
+     */
+    public function suspended(): static
+    {
+        $this->where('status', WrestlerStatus::Suspended);
+
+        return $this;
+    }
 }

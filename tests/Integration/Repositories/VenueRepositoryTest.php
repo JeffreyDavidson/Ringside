@@ -16,7 +16,7 @@ test('creates an venue', function () {
         ->street_address->toEqual('123 Main Street')
         ->city->toEqual('Laraville')
         ->state->toEqual('New York')
-        ->zip->toEqual('12345');
+        ->zipcode->toEqual('12345');
 });
 
 test('updates an venue', function () {
@@ -30,7 +30,7 @@ test('updates an venue', function () {
         ->street_address->toEqual('123 Main Street')
         ->city->toEqual('Laraville')
         ->state->toEqual('New York')
-        ->zip->toEqual('12345');
+        ->zipcode->toEqual('12345');
 });
 
 test('it can delete an venue', function () {
