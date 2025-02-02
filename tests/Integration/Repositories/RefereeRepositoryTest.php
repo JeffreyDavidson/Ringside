@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Data\RefereeData;
-use App\Models\Employment;
 use App\Models\Referee;
+use App\Models\RefereeEmployment;
 use App\Repositories\RefereeRepository;
 
 test('creates a referee', function () {
@@ -59,7 +59,7 @@ test('employ a referee', function () {
 test('updates employment of a referee', function () {
     $datetime = now();
     $referee = Referee::factory()
-        ->has(Employment::factory()->started($datetime->copy()->addDays(2)))
+        ->has(RefereeEmployment::factory()->started($datetime->copy()->addDays(2)), 'employments')
         ->create();
 
     expect($referee->fresh())->employments->toHaveCount(1);

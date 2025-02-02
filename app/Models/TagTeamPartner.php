@@ -7,6 +7,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+/**
+ * @property Carbon $left_at
+ */
 class TagTeamPartner extends Pivot
 {
     /**

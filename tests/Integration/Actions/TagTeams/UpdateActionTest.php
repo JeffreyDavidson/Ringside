@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeamData;
-use App\Models\Employment;
 use App\Models\TagTeam;
+use App\Models\TagTeamEmployment;
 use App\Repositories\TagTeamRepository;
 
 beforeEach(function () {
@@ -62,7 +62,7 @@ test('it employs an unemployed tag team', function () {
 test('it employs a tag team with a future employment date', function () {
     $datetime = now()->addDays(2);
     $tagTeam = TagTeam::factory()
-        ->has(Employment::factory()->started(now()->addMonth()))
+        ->has(TagTeamEmployment::factory()->started(now()->addMonth()), 'employments')
         ->create();
     $data = new TagTeamData(
         'New Example Tag Team',

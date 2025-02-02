@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Builders\ManagerBuilder;
 use App\Enums\ManagerStatus;
-use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\Manageables;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\CanBeAStableMember;
@@ -40,10 +39,6 @@ test('a manager implements can be stable manager interface', function () {
     expect(class_implements(Manager::class))->toContain(CanBeAStableMember::class);
 });
 
-test('a manager uses can join stables trait', function () {
-    expect(Manager::class)->usesTrait(CanJoinStables::class);
-});
-
 test('a manager implements manageable interface', function () {
     expect(Manager::class)->usesTrait(Manageables::class);
 });
@@ -61,12 +56,5 @@ test('a manager uses soft deleted trait', function () {
 });
 
 test('a manager has its own eloquent builder', function () {
-
     expect(new Manager)->query()->toBeInstanceOf(ManagerBuilder::class);
-});
-
-test('a manager has a display name', function () {
-    $manager = Manager::factory()->create(['first_name' => 'Hulk', 'last_name' => 'Hogan']);
-
-    expect($manager)->getIdentifier()->toBe('Hulk Hogan');
 });

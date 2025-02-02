@@ -62,7 +62,7 @@ class EventMatch extends Model
      */
     public function referees(): BelongsToMany
     {
-        return $this->belongsToMany(Referee::class);
+        return $this->belongsToMany(Referee::class, 'events_matches_referees');
     }
 
     /**
@@ -72,7 +72,7 @@ class EventMatch extends Model
      */
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class);
+        return $this->belongsToMany(Title::class, 'events_matches_titles');
     }
 
     /**
@@ -92,7 +92,7 @@ class EventMatch extends Model
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'event_match_competitors')
+        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
     }
@@ -104,7 +104,7 @@ class EventMatch extends Model
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'event_match_competitors')
+        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
     }

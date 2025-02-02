@@ -116,7 +116,7 @@ test('it retires the current tag teams and current wrestlers and current manager
     $stable = Stable::factory()
         ->hasAttached($tagTeams, ['joined_at' => now()])
         ->hasAttached($wrestlers, ['joined_at' => now()])
-        ->hasAttached($managers, ['joined_at' => now()])
+        ->hasAttached($managers, ['hired_at' => now()])
         ->active()
         ->create();
 

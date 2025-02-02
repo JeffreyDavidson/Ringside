@@ -4,26 +4,43 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Models\Stable;
+use App\Livewire\Concerns\ShowTableTrait;
+use App\Models\StableWrestler;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PreviousWrestlersTable extends DataTableComponent
 {
-    /**
-     * Stable to use for component.
-     */
-    public Stable $stable;
+    use ShowTableTrait;
+
+    protected string $databaseTableName = 'stables_wrestlers';
+
+    protected string $resourceName = 'wrestlers';
+
+    public ?int $stableId;
 
     /**
-     * Set the Stable to be used for this component.
+     * @return Builder<StableWrestler>
      */
-    public function mount(Stable $stable): void
+    public function builder(): Builder
     {
-        $this->stable = $stable;
+        if (! isset($this->stableId)) {
+            throw new \Exception("You didn't specify a stable");
+        }
+
+        return StableWrestler::query()
+            ->where('stable_id', $this->stableId)
+            ->whereNotNull('left_at')
+            ->orderByDesc('joined_at');
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        $this->addAdditionalSelects([
+            'stables_wrestlers.wrestler_id as wrestler_id',
+        ]);
+    }
 
     /**
      * @return array<int, Column>

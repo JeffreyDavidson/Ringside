@@ -24,4 +24,44 @@ class TitleBuilder extends Builder
 
         return $this;
     }
+
+    /**
+     * Scope a query to include active titles.
+     */
+    public function active(): static
+    {
+        $this->where('status', TitleStatus::Active);
+
+        return $this;
+    }
+
+    /**
+     * Scope a query to include retired wrestlers.
+     */
+    public function retired(): static
+    {
+        $this->where('status', TitleStatus::Retired);
+
+        return $this;
+    }
+
+    /**
+     * Scope a query to include future activated titles.
+     */
+    public function withFutureActivation(): static
+    {
+        $this->where('status', TitleStatus::FutureActivation);
+
+        return $this;
+    }
+
+    /**
+     * Scope a query to include inactive titles.
+     */
+    public function inactive(): static
+    {
+        $this->where('status', TitleStatus::Inactive);
+
+        return $this;
+    }
 }

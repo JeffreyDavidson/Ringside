@@ -16,11 +16,11 @@ trait BaseTableTrait
 
     protected bool $showActionColumn = true;
 
-    protected string $databaseTableName = '';
+    // protected string $databaseTableName = '';
 
-    protected string $routeBasePath = '';
+    // protected string $routeBasePath = '';
 
-    protected string $resourceName = '';
+    // protected string $resourceName = '';
 
     public function configuringBaseTableTrait(): void
     {

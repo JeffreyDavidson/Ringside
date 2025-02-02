@@ -46,7 +46,7 @@ trait CanJoinTagTeams
      */
     public function previousTagTeam(): BelongsToOne
     {
-        return $this->belongsToOne(TagTeam::class)
+        return $this->belongsToOne(TagTeam::class, 'tag_teams_wrestlers')
             ->wherePivotNotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
             ->orderByPivot('joined_at', 'desc')

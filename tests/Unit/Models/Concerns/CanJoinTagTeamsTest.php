@@ -8,9 +8,11 @@ use App\Models\Wrestler;
 test('a wrestler belongs to many tag teams', function () {
     $wrestler = Wrestler::factory()->create();
 
-    [$tagTeamA, $tagTeamB] = TagTeam::factory(2)
+    [$tagTeamA, $tagTeamB] = TagTeam::factory()
         ->bookable()
-        ->sequence(['name' => 'Tag Team A'], ['name' => 'Tag Team B'])
+        ->forEachSequence(
+            ['name' => 'Tag Team A'],
+            ['name' => 'Tag Team B'])
         ->create();
 
     $wrestler->tagTeams()->attach($tagTeamA, ['joined_at' => now()]);

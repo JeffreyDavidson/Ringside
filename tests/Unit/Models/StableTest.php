@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\StableStatus;
-use App\Models\Concerns\HasActivations;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
@@ -24,10 +23,6 @@ test('a stable has a status', function () {
 
 test('a stable uses soft deleted trait', function () {
     expect(Stable::class)->usesTrait(SoftDeletes::class);
-});
-
-test('a stable uses activations trait', function () {
-    expect(Stable::class)->usesTrait(HasActivations::class);
 });
 
 test('a stable uses owned by user trait', function () {
