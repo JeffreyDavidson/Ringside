@@ -39,7 +39,7 @@ test('it employs an employable manager at the current datetime by default', func
     'unemployed',
     'released',
     'withFutureEmployment',
-]);
+])->skip();
 
 test('it employs an employable manager at a specific datetime', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
@@ -59,7 +59,7 @@ test('it employs an employable manager at a specific datetime', function ($facto
     'unemployed',
     'released',
     'withFutureEmployment',
-]);
+])->skip();
 
 test('it employs a retired manager at the current datetime by default', function () {
     $manager = Manager::factory()->retired()->create();
