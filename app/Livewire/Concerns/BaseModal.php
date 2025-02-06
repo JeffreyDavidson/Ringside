@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
+use App\Livewire\Base\LivewireBaseForm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -15,9 +16,17 @@ class BaseModal extends ModalComponent
 
     protected string $modelTitleField = 'name';
 
+    /** @var class-string */
+    protected string $modelType;
+
+    protected LivewireBaseForm $modelForm;
+
+    /** @var non-falsy-string */
+    protected string $modalFormPath;
+
     public function mount(?int $modelId = null): void
     {
-        if (isset($modelId) && ! is_null($modelId)) {
+        if (isset($modelId)) {
             try {
                 $this->model = $this->modelType::findOrFail($modelId);
                 $this->modelForm->setModel($this->model);
@@ -56,6 +65,9 @@ class BaseModal extends ModalComponent
 
     public function render(): View
     {
-        return view('livewire.'.$this->modalFormPath);
+        /** @var non-falsy-string $view */
+        $view = 'livewire.'.$this->modalFormPath;
+
+        return view($view);
     }
 }

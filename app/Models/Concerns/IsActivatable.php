@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $started_at
+ *
+ * @mixin \Eloquent
+ */
 trait IsActivatable
 {
     public function currentActivation(): HasOne
