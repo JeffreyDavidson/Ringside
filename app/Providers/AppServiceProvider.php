@@ -42,7 +42,10 @@ class AppServiceProvider extends ServiceProvider
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
 
+
+        /** @param array<string> $parameters */
         Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters) {
+            /** @var string $values */
             $values = array_pop($parameters);
 
             if (count($parameters)) {
