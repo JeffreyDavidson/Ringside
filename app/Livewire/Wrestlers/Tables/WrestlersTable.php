@@ -12,7 +12,6 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Wrestler;
 use App\View\Columns\FirstEmploymentDateColumn;
 use App\View\Filters\FirstEmploymentFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
