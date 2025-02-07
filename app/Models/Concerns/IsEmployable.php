@@ -99,4 +99,9 @@ trait IsEmployable
                 ->where('started_at', '>', now());
         });
     }
+
+    public function getFormattedFirstEmployment(): string
+    {
+        return $this->hasEmployments() ? ($this->firstEmployment()->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
+    }
 }
