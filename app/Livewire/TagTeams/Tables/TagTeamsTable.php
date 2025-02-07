@@ -32,8 +32,7 @@ class TagTeamsTable extends BaseTableWithActions
     {
         return TagTeam::query()
             ->with('currentEmployment')
-            ->oldest('name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('name');
     }
 
     public function configure(): void

@@ -32,8 +32,7 @@ class StablesTable extends BaseTableWithActions
     {
         return Stable::query()
             ->with('currentActivation')
-            ->oldest('name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('name');
     }
 
     public function configure(): void {}

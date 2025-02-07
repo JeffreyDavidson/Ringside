@@ -32,14 +32,7 @@ class WrestlersTable extends BaseTableWithActions
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
-            ->with('currentEmployment')
-            ->when(
-                $this->getAppliedFilterWithValue('Employment'),
-                /** @param array{minDate: string, maxDate: string}  $dateRange */
-                fn (Builder $query, array $dateRange) => $query
-                    ->whereDate('wrestler_employments.started_at', '>=', $dateRange['minDate'])
-                    ->whereDate('wrestler_employments.ended_at', '<=', $dateRange['maxDate'])
-            );
+            ->with('currentEmployment');
     }
 
     public function configure(): void {}

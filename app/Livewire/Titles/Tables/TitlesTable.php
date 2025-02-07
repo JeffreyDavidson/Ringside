@@ -32,8 +32,7 @@ class TitlesTable extends BaseTableWithActions
     {
         return Title::query()
             ->with(['currentActivation'])
-            ->oldest('name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('name');
     }
 
     public function configure(): void {}

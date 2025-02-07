@@ -32,8 +32,7 @@ class RefereesTable extends BaseTableWithActions
     {
         return Referee::query()
             ->with('firstEmployment')
-            ->oldest('last_name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('last_name');
     }
 
     public function configure(): void {}
