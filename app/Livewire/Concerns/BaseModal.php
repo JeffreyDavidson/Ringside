@@ -14,8 +14,6 @@ class BaseModal extends ModalComponent
 {
     public ?Model $model;
 
-    protected string $modelTitleField = 'name';
-
     /** @var class-string */
     protected string $modelType;
 
@@ -39,7 +37,7 @@ class BaseModal extends ModalComponent
     public function getModalTitle(): string
     {
         if (isset($this->modelForm) && isset($this->modelForm->formModel)) {
-            return 'Edit '.($this->modelForm->formModel->{$this->modelTitleField} ?? 'Unknown');
+            return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
         }
 
         return 'Add '.class_basename($this->modelType);
@@ -69,5 +67,10 @@ class BaseModal extends ModalComponent
         $view = 'livewire.'.$this->modalFormPath;
 
         return view($view);
+    }
+
+    public function generateTitleField()
+    {
+        return property_exists($this, 'titleField') ? $this->titleField : 'name';
     }
 }

@@ -43,7 +43,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters) {
-            /** @var array<> $values */
             $values = array_pop($parameters);
 
             if (count($parameters)) {
