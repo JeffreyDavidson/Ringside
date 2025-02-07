@@ -88,8 +88,8 @@ trait IsActivatable
         return $this->currentActivation ? $this->currentActivation->started_at->eq($activationDate) : false;
     }
 
-    public function getFormattedFirstEmployment(): string
+    public function getFormattedFirstActivation(): string
     {
-        return $this->hasEmployments() ? ($this->firstEmployment()->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
+        return $this->hasActivations() ? ($this->firstActivation()->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
     }
 }
