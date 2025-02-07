@@ -7,17 +7,17 @@ namespace App\Livewire\Titles\Tables;
 use App\Builders\TitleBuilder;
 use App\Enums\ActivationStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasFirstActivationDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Title;
+use App\View\Columns\FirstActivationDateColumn;
 use App\View\Filters\FirstActivationFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class TitlesTable extends BaseTableWithActions
 {
-    use HasFirstActivationDateColumn, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'titles';
 
@@ -50,7 +50,7 @@ class TitlesTable extends BaseTableWithActions
                 ->searchable(),
             $this->getDefaultStatusColumn(),
             // Column::make(__('titles.current_champion'), 'champion_name'),
-            $this->getDefaultFirstActivationDateColumn(),
+            FirstActivationDateColumn::make(__('activations.started_at')),
         ];
     }
 

@@ -7,7 +7,7 @@ namespace App\Livewire\TagTeams\Tables;
 use App\Builders\TagTeamBuilder;
 use App\Enums\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasFirstEmploymentDateColumn;
+use App\Livewire\Concerns\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\TagTeam;
@@ -17,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class TagTeamsTable extends BaseTableWithActions
 {
-    use HasFirstEmploymentDateColumn, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'tag_teams';
 
@@ -52,7 +52,7 @@ class TagTeamsTable extends BaseTableWithActions
             Column::make(__('tag-teams.name'), 'name')
                 ->searchable(),
             $this->getDefaultStatusColumn(),
-            $this->getDefaultFirstEmploymentDateColumn(),
+            FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
 

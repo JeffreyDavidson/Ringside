@@ -7,7 +7,7 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Builders\WrestlerBuilder;
 use App\Enums\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasFirstEmploymentDateColumn;
+use App\Livewire\Concerns\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Wrestler;
@@ -18,7 +18,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class WrestlersTable extends BaseTableWithActions
 {
-    use HasFirstEmploymentDateColumn, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'wrestlers';
 
@@ -56,7 +56,7 @@ class WrestlersTable extends BaseTableWithActions
             Column::make(__('wrestlers.height'), 'height'),
             Column::make(__('wrestlers.weight'), 'weight'),
             Column::make(__('wrestlers.hometown'), 'hometown'),
-            $this->getDefaultFirstEmploymentDateColumn(),
+            FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
 
