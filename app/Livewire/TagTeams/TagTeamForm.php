@@ -76,7 +76,7 @@ class TagTeamForm extends LivewireBaseForm
     {
         $currentWrestlers = $this->formModel->currentWrestlers;
 
-        $this->start_date = $this->formModel->firstEmployment->started_at->toDateString();
+        $this->start_date = $this->formModel->firstEmployment?->started_at->toDateString();
         $this->wrestlerA = $currentWrestlers->first();
         $this->wrestlerB = $currentWrestlers->last();
     }

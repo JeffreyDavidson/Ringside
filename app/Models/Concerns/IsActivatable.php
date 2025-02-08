@@ -90,6 +90,6 @@ trait IsActivatable
 
     public function getFormattedFirstActivation(): string
     {
-        return $this->hasActivations() ? ($this->firstActivation()->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
+        return $this->hasActivations() ? ($this->firstActivation?->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
     }
 }

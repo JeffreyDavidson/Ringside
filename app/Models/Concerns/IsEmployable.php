@@ -102,6 +102,6 @@ trait IsEmployable
 
     public function getFormattedFirstEmployment(): string
     {
-        return $this->hasEmployments() ? ($this->firstEmployment()->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
+        return $this->hasEmployments() ? ($this->firstEmployment?->started_at->format('Y-m-d') ?? 'TBD') : 'TBD';
     }
 }
