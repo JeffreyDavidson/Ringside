@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Ankurk91\Eloquent\HasMorphToOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,8 +34,6 @@ class TitleChampionship extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
     use HasFactory;
-
-    use HasMorphToOne;
 
     /**
      * The table associated with the model.
