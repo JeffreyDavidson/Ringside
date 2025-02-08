@@ -20,8 +20,8 @@ use Illuminate\Support\Carbon;
  * @property string $former_champion_type
  * @property \Illuminate\Support\Carbon $won_at
  * @property \Illuminate\Support\Carbon|null $lost_at
- * @property-read \Illuminate\Database\Eloquent\Model $currentChampion
- * @property-read \Illuminate\Database\Eloquent\Model $previousChampion
+ * @property-read \Illuminate\Database\Eloquent\Relations\MorphTo<\App\Models\Wrestler|\App\MOdels\TagTeam> $currentChampion
+ * @property-read \Illuminate\Database\Eloquent\Relations\MorphTo<\App\Models\Wrestler|\App\MOdels\TagTeam> $previousChampion
  * @property-read \App\Models\EventMatch|null $eventMatch
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \App\Models\Title|null $title
