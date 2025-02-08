@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Collections\EventMatchCompetitorsCollection;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $side_number
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model $competitor
+ * @property-read \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model, \App\Models\Wrestler|\App\Models\TagTeam> $competitor
  *
  * @method static EventMatchCompetitorsCollection<int, static> all($columns = ['*'])
  * @method static EventMatchCompetitorsCollection<int, static> get($columns = ['*'])
@@ -52,7 +53,7 @@ class EventMatchCompetitor extends MorphPivot
     /**
      * Retrieve the previous champion of the title championship.
      *
-     * @return MorphTo<\App\Models\Wrestler|\App\Models\TagTeam, $this>
+     * @return MorphTo<Model, $this>
      */
     public function competitor(): MorphTo
     {
