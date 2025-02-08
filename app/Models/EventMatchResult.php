@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\MatchDecision|null $decision
  * @property-read \Illuminate\Database\Eloquent\Model $winner
+ * @property-read \App\Models\EventMatch $eventMatch
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newQuery()

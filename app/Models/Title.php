@@ -13,21 +13,20 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property TitleActivation $firstActivation
  * @property int $id
  * @property string $name
- * @property ActivationStatus $status
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
+ * @property \App\Enums\ActivationStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleActivation> $activations
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $championships
  * @property-read \App\Models\TitleActivation|null $currentActivation
  * @property-read \App\Models\TitleChampionship|null $currentChampionship
  * @property-read \App\Models\TitleRetirement|null $currentRetirement
+ * @property-read \App\Models\TitleActivation|null $firstActivation
  * @property-read \App\Models\TitleActivation|null $futureActivation
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \App\Models\TitleActivation|null $previousActivation

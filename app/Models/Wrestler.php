@@ -24,11 +24,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property Stable $currentStable
- * @property WrestlerEmployment $firstEmployment
  * @property int $id
  * @property int|null $user_id
  * @property string $name
@@ -36,10 +33,10 @@ use Illuminate\Support\Carbon;
  * @property int $weight
  * @property string $hometown
  * @property string|null $signature_move
- * @property EmploymentStatus $status
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
+ * @property \App\Enums\EmploymentStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\TitleChampionship|null $currentChampionship
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $currentChampionships
  * @property-read \App\Models\WrestlerEmployment|null $currentEmployment
@@ -47,8 +44,10 @@ use Illuminate\Support\Carbon;
  * @property-read \App\Models\TagTeamPartner|\App\Models\WrestlerManager|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $currentManagers
  * @property-read \App\Models\WrestlerRetirement|null $currentRetirement
+ * @property-read \App\Models\Stable|null $currentStable
  * @property-read \App\Models\WrestlerSuspension|null $currentSuspension
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerEmployment> $employments
+ * @property-read \App\Models\WrestlerEmployment|null $firstEmployment
  * @property-read \App\Models\WrestlerEmployment|null $futureEmployment
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerInjury> $injuries

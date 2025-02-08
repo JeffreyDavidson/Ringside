@@ -13,9 +13,10 @@ use Illuminate\Support\Carbon;
  * @property-read \Illuminate\Support\Carbon $started_at
  * @property int $id
  * @property int $tag_team_id
- * @property Carbon|null $ended_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \App\Models\TagTeam|null $tagTeam
  *

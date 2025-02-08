@@ -19,27 +19,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property \App\Enums\EmploymentStatus $status
- * @property Stable $currentStable
- * @property ManagerEmployment $firstEmployment
  * @property int $id
  * @property int|null $user_id
  * @property string $first_name
  * @property string $last_name
  * @property string|null $full_name
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
+ * @property \App\Enums\EmploymentStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\ManagerEmployment|null $currentEmployment
  * @property-read \App\Models\ManagerInjury|null $currentInjury
  * @property-read \App\Models\ManagerRetirement|null $currentRetirement
  * @property-read \App\Models\ManagerSuspension|null $currentSuspension
+ * @property-read \App\Models\Stable|null $currentStable
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $currentTagTeams
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $currentWrestlers
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ManagerEmployment> $employments
+ * @property-read \App\Models\ManagerEmployment|null $firstEmployment
  * @property-read \App\Models\ManagerEmployment|null $futureEmployment
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ManagerInjury> $injuries

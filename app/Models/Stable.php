@@ -13,17 +13,15 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property StableActivation $firstActivation
  * @property int $id
  * @property int|null $user_id
  * @property string $name
- * @property ActivationStatus $status
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
+ * @property \App\Enums\ActivationStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StableActivation> $activations
  * @property-read \App\Models\StableActivation|null $currentActivation
  * @property-read \App\Models\StableWrestler|\App\Models\StableTagTeam|\App\Models\StableManager|null $pivot
@@ -31,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property-read \App\Models\StableRetirement|null $currentRetirement
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $currentTagTeams
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $currentWrestlers
+ * @property-read \App\Models\StableActivation|null $firstActivation
  * @property-read \App\Models\StableActivation|null $futureActivation
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers

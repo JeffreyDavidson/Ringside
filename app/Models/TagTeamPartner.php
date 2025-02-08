@@ -6,16 +6,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Support\Carbon;
 
 /**
- * @property Carbon $left_at
  * @property int $id
  * @property int $tag_team_id
  * @property int $wrestler_id
- * @property Carbon|null $joined_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon $joined_at
+ * @property \Illuminate\Support\Carbon|null $left_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\TagTeam|null $tagTeam
  * @property-read \App\Models\Wrestler|null $wrestler
  *

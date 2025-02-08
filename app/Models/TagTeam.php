@@ -21,18 +21,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property EmploymentStatus $status
- * @property TagTeamEmployment $firstEmployment
  * @property int $id
  * @property int|null $user_id
  * @property string $name
  * @property string|null $signature_move
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
+ * @property \App\Enums\EmploymentStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read mixed $combined_weight
  * @property-read \App\Models\TitleChampionship|null $currentChampionship
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $currentChampionships
@@ -40,9 +38,11 @@ use Illuminate\Support\Carbon;
  * @property-read \App\Models\TagTeamPartner|\App\Models\TagTeamManager|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $currentManagers
  * @property-read \App\Models\TagTeamRetirement|null $currentRetirement
+ * @property-read \App\Models\Stable|null $currentStable
  * @property-read \App\Models\TagTeamSuspension|null $currentSuspension
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $currentWrestlers
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeamEmployment> $employments
+ * @property-read \App\Models\TagTeamEmployment|null $firstEmployment
  * @property-read \App\Models\TagTeamEmployment|null $futureEmployment
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers

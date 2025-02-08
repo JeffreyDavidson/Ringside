@@ -16,23 +16,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property RefereeEmployment $firstEmployment
  * @property int $id
  * @property string $first_name
  * @property string $last_name
  * @property string|null $full_name
- * @property EmploymentStatus $status
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property Carbon|null $deleted_at
+ * @property \App\Enums\EmploymentStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\RefereeEmployment|null $currentEmployment
  * @property-read \App\Models\RefereeInjury|null $currentInjury
  * @property-read \App\Models\RefereeRetirement|null $currentRetirement
  * @property-read \App\Models\RefereeSuspension|null $currentSuspension
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeEmployment> $employments
+ * @property-read \App\Models\RefereeEmployment|null $firstEmployment
  * @property-read \App\Models\RefereeEmployment|null $futureEmployment
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeInjury> $injuries
