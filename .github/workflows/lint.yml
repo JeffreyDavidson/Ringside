@@ -28,9 +28,6 @@ jobs:
         with:
           pintVersion: 1.18.3
 
-      - name: Install Dependencies
-        run: composer update --prefer-stable --no-interaction --no-progress --ansi
-
       - name: Fix styling
         run: composer format
 
