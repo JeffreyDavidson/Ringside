@@ -20,5 +20,14 @@ abstract class LivewireBaseForm extends Form
         }
     }
 
+    public function generateModelEditName(string $fieldName): string
+    {
+        if (isset($this->formModel)) {
+            return $this->formModel->{$fieldName} ?? 'Unknown';
+        }
+
+        return 'Unknown';
+    }
+
     public function loadExtraData(): void {}
 }

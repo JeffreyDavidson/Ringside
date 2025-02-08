@@ -13,7 +13,7 @@ class RefereeForm extends LivewireBaseForm
 {
     protected string $formModelType = Referee::class;
 
-    public Referee $formModel;
+    public ?Referee $formModel;
 
     public string $first_name = '';
 
@@ -45,7 +45,7 @@ class RefereeForm extends LivewireBaseForm
 
     public function loadExtraData(): void
     {
-        $this->start_date = $this->formModel->firstEmployment?->started_at->toDateString();
+        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
     }
 
     public function store(): bool

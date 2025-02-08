@@ -29,6 +29,7 @@ class FormModal extends BaseModal
 
     protected string $modalLanguagePath = 'event-matches';
 
+    /** @var view-string|null */
     protected string $modalFormPath = 'event-matches.modals.form-modal';
 
     /**
