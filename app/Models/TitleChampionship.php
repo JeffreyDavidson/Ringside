@@ -14,11 +14,14 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $title_id
  * @property int $event_match_id
- * @property int $champion_id
- * @property string $champion_type
+ * @property int $new_champion_id
+ * @property string $newchampion_type
+ * @property int $former_champion_id
+ * @property string $formerchampion_type
  * @property \Illuminate\Support\Carbon $won_at
  * @property \Illuminate\Support\Carbon|null $lost_at
  * @property-read \Illuminate\Database\Eloquent\Model $currentChampion
+ * @property-read \Illuminate\Database\Eloquent\Model $previousChampion
  * @property-read \App\Models\EventMatch|null $eventMatch
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \App\Models\Title|null $title
@@ -91,6 +94,16 @@ class TitleChampionship extends Model
     }
 
     /**
+     * Retrieve the current champion of the title championship.
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function previousChampion(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'previous_champion_type', 'previous_champion_id');
+    }
+
+    /**
      * Retrieve the event match where the title championship switched hands.
      *
      * @return BelongsTo<EventMatch, $this>
@@ -110,4 +123,6 @@ class TitleChampionship extends Model
 
         return intval($this->won_at->diffInDays($datetime));
     }
+
+    public function wrestlers(): void {}
 }
