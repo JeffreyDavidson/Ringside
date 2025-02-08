@@ -9,7 +9,6 @@ use App\Models\Title;
 use App\Models\TitleChampionship;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
@@ -42,21 +41,16 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
     public function builder(): Builder
     {
         return TitleChampionship::query()
-            ->withWhereHas('wrestlers', function (Builder $query) {
-                $query->whereIn('wrestler_id', [$this->wrestler->id]);
-            });
+            ->whereHasMorph(
+                'new_champion',
+                [Wrestler::class],
+                function (Builder $query) {
+                    $query->whereIn('wrestler_id', [$this->wrestler->id]);
+                }
+            );
     }
 
-    public function configure(): void
-    {
-        $this->addAdditionalSelects([
-            'title_championships.won_at',
-            'title_championships.lost_at',
-            'pivot.hired_at as hired_at',
-            'pivot.left_at as left_at',
-            DB::raw('DATEDIFF(COALESCE(lost_at, NOW()), won_at) AS days_held_count'),
-        ]);
-    }
+    public function configure(): void {}
 
     /**
      * @return array<int, Column>
