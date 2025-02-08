@@ -12,6 +12,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
+/**
+ * @property int $id
+ * @property int $event_id
+ * @property int $match_type_id
+ * @property string|null $preview
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Collections\EventMatchCompetitorsCollection<int, \App\Models\EventMatchCompetitor> $competitors
+ * @property-read \App\Models\Event|null $event
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \App\Models\MatchType|null $matchType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee> $referees
+ * @property-read \App\Models\EventMatchResult|null $result
+ * @property-read \App\Models\EventMatchCompetitor|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title> $titles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
+ *
+ * @method static \Database\Factories\EventMatchFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
+ *
+ * @mixin \Eloquent
+ */
 class EventMatch extends Model
 {
     /** @use HasFactory<\Database\Factories\EventMatchFactory> */

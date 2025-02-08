@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-use App\Enums\StableStatus;
+use App\Enums\ActivationStatus;
 use App\Models\Stable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,7 +20,7 @@ class StableBuilder extends Builder
      */
     public function unactivated(): static
     {
-        $this->where('status', StableStatus::Unactivated);
+        $this->where('status', ActivationStatus::Unactivated);
 
         return $this;
     }
@@ -30,7 +30,7 @@ class StableBuilder extends Builder
      */
     public function active(): static
     {
-        $this->where('status', StableStatus::Active);
+        $this->where('status', ActivationStatus::Active);
 
         return $this;
     }
@@ -40,7 +40,7 @@ class StableBuilder extends Builder
      */
     public function retired(): static
     {
-        $this->where('status', StableStatus::Retired);
+        $this->where('status', ActivationStatus::Retired);
 
         return $this;
     }
@@ -50,7 +50,7 @@ class StableBuilder extends Builder
      */
     public function inactive(): static
     {
-        $this->where('status', StableStatus::Inactive);
+        $this->where('status', ActivationStatus::Inactive);
 
         return $this;
     }
@@ -60,7 +60,7 @@ class StableBuilder extends Builder
      */
     public function withFutureActivation(): static
     {
-        $this->where('status', StableStatus::FutureActivation);
+        $this->where('status', ActivationStatus::FutureActivation);
 
         return $this;
     }

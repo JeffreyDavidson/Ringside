@@ -1,5 +1,6 @@
 <?php
 
+use Ankurk91\Eloquent\Relations\BelongsToOne;
 use Staudenmeir\EloquentHasManyDeep\HasOneDeep;
 
 return [
@@ -290,7 +291,7 @@ return [
     |
     */
     'additional_relation_types' => [
-        'hasOneDeep' => HasOneDeep::class,
+        'belongsToOne' => BelongsToOne::class,
     ],
 
     /*

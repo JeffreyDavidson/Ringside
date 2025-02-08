@@ -23,7 +23,7 @@ class StableForm extends LivewireBaseForm
 
     public function loadExtraData(): void
     {
-        $this->start_date = $this->formModel->firstActivation?->started_at->toDateString();
+        $this->start_date = $this->formModel?->firstActivation?->started_at->toDateString();
     }
 
     public function store(): bool

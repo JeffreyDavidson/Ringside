@@ -6,6 +6,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember query()
+ *
+ * @mixin \Eloquent
+ */
 class StableMember extends MorphPivot
 {
     /**

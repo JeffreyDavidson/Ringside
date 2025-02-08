@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-use App\Enums\TitleStatus;
+use App\Enums\ActivationStatus;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,7 +20,7 @@ class TitleBuilder extends Builder
      */
     public function competable(): static
     {
-        $this->where('status', TitleStatus::Active);
+        $this->where('status', ActivationStatus::Active);
 
         return $this;
     }
@@ -30,7 +30,7 @@ class TitleBuilder extends Builder
      */
     public function active(): static
     {
-        $this->where('status', TitleStatus::Active);
+        $this->where('status', ActivationStatus::Active);
 
         return $this;
     }
@@ -40,7 +40,7 @@ class TitleBuilder extends Builder
      */
     public function retired(): static
     {
-        $this->where('status', TitleStatus::Retired);
+        $this->where('status', ActivationStatus::Retired);
 
         return $this;
     }
@@ -50,7 +50,7 @@ class TitleBuilder extends Builder
      */
     public function withFutureActivation(): static
     {
-        $this->where('status', TitleStatus::FutureActivation);
+        $this->where('status', ActivationStatus::FutureActivation);
 
         return $this;
     }
@@ -60,7 +60,7 @@ class TitleBuilder extends Builder
      */
     public function inactive(): static
     {
-        $this->where('status', TitleStatus::Inactive);
+        $this->where('status', ActivationStatus::Inactive);
 
         return $this;
     }

@@ -22,11 +22,11 @@ class WrestlerForm extends LivewireBaseForm
 
     public string $hometown = '';
 
-    public int|string $height_feet = '';
+    public int $height_feet;
 
-    public int|string $height_inches = '';
+    public int $height_inches;
 
-    public int|string $weight = '';
+    public int $weight;
 
     public ?string $signature_move = '';
 
