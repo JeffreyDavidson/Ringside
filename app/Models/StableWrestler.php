@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -15,8 +14,6 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property \Illuminate\Support\Carbon|null $left_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Stable|null $stable
- * @property-read \App\Models\Wrestler|null $wrestler
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StableWrestler newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StableWrestler newQuery()
@@ -39,21 +36,5 @@ class StableWrestler extends Pivot
             'joined_at' => 'datetime',
             'left_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Stable, $this>
-     */
-    public function stable(): BelongsTo
-    {
-        return $this->belongsTo(Stable::class);
-    }
-
-    /**
-     * @return BelongsTo<Wrestler, $this>
-     */
-    public function wrestler(): BelongsTo
-    {
-        return $this->belongsTo(Wrestler::class);
     }
 }
