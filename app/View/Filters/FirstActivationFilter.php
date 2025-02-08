@@ -38,6 +38,7 @@ class FirstActivationFilter extends DateRangeFilter
             'locale' => 'en',
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
+            /** @param array{minDate: string, maxDate: string}  $dateRange */
             ->filter(function (Builder $query, array $dateRange) {
                 $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange) {
                     $query

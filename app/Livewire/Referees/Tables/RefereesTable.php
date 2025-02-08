@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Tables;
 
 use App\Builders\RefereeBuilder;
-use App\Enums\RefereeStatus;
+use App\Enums\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasFirstEmploymentDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Referee;
+use App\View\Columns\FirstEmploymentDateColumn;
 use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class RefereesTable extends BaseTableWithActions
 {
-    use HasFirstEmploymentDateColumn, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'referees';
 
@@ -32,8 +32,7 @@ class RefereesTable extends BaseTableWithActions
     {
         return Referee::query()
             ->with('firstEmployment')
-            ->oldest('last_name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('last_name');
     }
 
     public function configure(): void {}
@@ -49,7 +48,7 @@ class RefereesTable extends BaseTableWithActions
             Column::make(__('referees.name'), 'full_name')
                 ->searchable(),
             $this->getDefaultStatusColumn(),
-            $this->getDefaultFirstEmploymentDateColumn(),
+            FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
 
@@ -61,7 +60,7 @@ class RefereesTable extends BaseTableWithActions
     public function filters(): array
     {
         /** @var array<string, string> $statuses */
-        $statuses = collect(RefereeStatus::cases())->pluck('name', 'value')->toArray();
+        $statuses = collect(EmploymentStatus::cases())->pluck('name', 'value')->toArray();
 
         return [
             $this->getDefaultStatusFilter($statuses),

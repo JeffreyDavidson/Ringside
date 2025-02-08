@@ -15,6 +15,30 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read \Illuminate\Support\Carbon $date
+ * @property int $id
+ * @property string $name
+ * @property int|null $venue_id
+ * @property string|null $preview
+ * @property \App\Enums\EventStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $matches
+ * @property-read \App\Models\Venue|null $venue
+ *
+ * @method static \Database\Factories\EventFactory factory($count = null, $state = [])
+ * @method static EventBuilder<static>|Event newModelQuery()
+ * @method static EventBuilder<static>|Event newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Event onlyTrashed()
+ * @method static EventBuilder<static>|Event past()
+ * @method static EventBuilder<static>|Event query()
+ * @method static EventBuilder<static>|Event scheduled()
+ * @method static EventBuilder<static>|Event unscheduled()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Event withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Event withoutTrashed()
+ *
+ * @mixin \Eloquent
  */
 class Event extends Model
 {

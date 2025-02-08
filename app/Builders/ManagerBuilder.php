@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-use App\Enums\ManagerStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\Manager;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,7 +20,7 @@ class ManagerBuilder extends Builder
      */
     public function available(): static
     {
-        $this->where('status', ManagerStatus::Available);
+        $this->where('status', EmploymentStatus::Available);
 
         return $this;
     }
@@ -30,7 +30,7 @@ class ManagerBuilder extends Builder
      */
     public function released(): static
     {
-        $this->where('status', ManagerStatus::Released);
+        $this->where('status', EmploymentStatus::Released);
 
         return $this;
     }
@@ -40,7 +40,7 @@ class ManagerBuilder extends Builder
      */
     public function injured(): static
     {
-        $this->where('status', ManagerStatus::Injured);
+        $this->where('status', EmploymentStatus::Injured);
 
         return $this;
     }
@@ -50,7 +50,7 @@ class ManagerBuilder extends Builder
      */
     public function unemployed(): static
     {
-        $this->where('status', ManagerStatus::Unemployed);
+        $this->where('status', EmploymentStatus::Unemployed);
 
         return $this;
     }
@@ -60,7 +60,7 @@ class ManagerBuilder extends Builder
      */
     public function retired(): static
     {
-        $this->where('status', ManagerStatus::Retired);
+        $this->where('status', EmploymentStatus::Retired);
 
         return $this;
     }
@@ -70,7 +70,7 @@ class ManagerBuilder extends Builder
      */
     public function suspended(): static
     {
-        $this->where('status', ManagerStatus::Suspended);
+        $this->where('status', EmploymentStatus::Suspended);
 
         return $this;
     }
@@ -80,7 +80,7 @@ class ManagerBuilder extends Builder
      */
     public function futureEmployed(): static
     {
-        $this->where('status', ManagerStatus::FutureEmployment);
+        $this->where('status', EmploymentStatus::FutureEmployment);
 
         return $this;
     }

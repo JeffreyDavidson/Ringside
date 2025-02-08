@@ -9,7 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read \Illuminate\Support\Carbon $started_at
+ * @property int $id
+ * @property int $title_id
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \App\Models\Title|null $title
+ *
+ * @method static \Database\Factories\TitleActivationFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleActivation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleActivation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleActivation query()
+ *
+ * @mixin \Eloquent
  */
 class TitleActivation extends Model
 {

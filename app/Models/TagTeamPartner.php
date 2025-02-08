@@ -8,7 +8,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @property Carbon $left_at
+ * @property int $id
+ * @property int $tag_team_id
+ * @property int $wrestler_id
+ * @property \Illuminate\Support\Carbon $joined_at
+ * @property \Illuminate\Support\Carbon|null $left_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\TagTeam|null $tagTeam
+ * @property-read \App\Models\Wrestler|null $wrestler
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner query()
+ *
+ * @mixin \Eloquent
  */
 class TagTeamPartner extends Pivot
 {

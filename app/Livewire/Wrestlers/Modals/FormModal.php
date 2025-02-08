@@ -25,8 +25,15 @@ class FormModal extends BaseModal
         /** @var Carbon|null $datetime */
         $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
 
+        /**
+         * @var string $state
+         *
+         * @phpstan-ignore-next-line
+         */
+        $state = fake('en_US')->state();
+
         $this->modelForm->name = Str::of(fake()->sentence(2))->title()->value();
-        $this->modelForm->hometown = fake()->city().', '.fake()->state();
+        $this->modelForm->hometown = fake()->city().', '.$state;
         $this->modelForm->height_feet = fake()->numberBetween(5, 7);
         $this->modelForm->height_inches = fake()->numberBetween(0, 11);
         $this->modelForm->weight = fake()->numberBetween(180, 400);

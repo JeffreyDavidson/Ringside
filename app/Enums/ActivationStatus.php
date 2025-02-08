@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum TitleStatus: string
+enum ActivationStatus: string
 {
     case Active = 'active';
     case Inactive = 'inactive';

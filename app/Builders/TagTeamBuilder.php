@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-use App\Enums\TagTeamStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,7 +20,7 @@ class TagTeamBuilder extends Builder
      */
     public function bookable(): static
     {
-        $this->where('status', TagTeamStatus::Bookable);
+        $this->where('status', EmploymentStatus::Bookable);
 
         return $this;
     }
@@ -30,7 +30,7 @@ class TagTeamBuilder extends Builder
      */
     public function unbookable(): static
     {
-        $this->where('status', TagTeamStatus::Unbookable);
+        $this->where('status', EmploymentStatus::Unbookable);
 
         return $this;
     }
@@ -40,7 +40,7 @@ class TagTeamBuilder extends Builder
      */
     public function retired(): static
     {
-        $this->where('status', TagTeamStatus::Retired);
+        $this->where('status', EmploymentStatus::Retired);
 
         return $this;
     }
@@ -50,7 +50,7 @@ class TagTeamBuilder extends Builder
      */
     public function unemployed(): static
     {
-        $this->where('status', TagTeamStatus::Unemployed);
+        $this->where('status', EmploymentStatus::Unemployed);
 
         return $this;
     }
@@ -60,7 +60,7 @@ class TagTeamBuilder extends Builder
      */
     public function suspended(): static
     {
-        $this->where('status', TagTeamStatus::Suspended);
+        $this->where('status', EmploymentStatus::Suspended);
 
         return $this;
     }
@@ -70,7 +70,7 @@ class TagTeamBuilder extends Builder
      */
     public function released(): static
     {
-        $this->where('status', TagTeamStatus::Released);
+        $this->where('status', EmploymentStatus::Released);
 
         return $this;
     }
@@ -80,7 +80,7 @@ class TagTeamBuilder extends Builder
      */
     public function futureEmployed(): static
     {
-        $this->where('status', TagTeamStatus::FutureEmployment);
+        $this->where('status', EmploymentStatus::FutureEmployment);
 
         return $this;
     }

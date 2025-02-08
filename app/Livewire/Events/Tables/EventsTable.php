@@ -34,9 +34,7 @@ class EventsTable extends BaseTableWithActions
     public function builder(): EventBuilder
     {
         return Event::query()
-            ->oldest('name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status))
-            ->when($this->getAppliedFilterWithValue('Venue'), fn ($query, $venue) => $query->where('venue', $venue));
+            ->oldest('name');
     }
 
     public function configure(): void {}

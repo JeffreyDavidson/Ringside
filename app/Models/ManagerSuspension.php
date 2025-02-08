@@ -8,6 +8,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $manager_id
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \App\Models\Manager|null $manager
+ *
+ * @method static \Database\Factories\ManagerSuspensionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagerSuspension newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagerSuspension newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ManagerSuspension query()
+ *
+ * @mixin \Eloquent
+ */
 class ManagerSuspension extends Model
 {
     /** @use HasFactory<\Database\Factories\ManagerSuspensionFactory> */

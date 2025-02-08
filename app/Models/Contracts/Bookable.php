@@ -9,6 +9,4 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 interface Bookable
 {
     public function matches(): MorphToMany;
-
-    public function isBookable(): bool;
 }

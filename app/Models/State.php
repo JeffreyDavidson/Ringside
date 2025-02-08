@@ -7,6 +7,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Sushi\Sushi;
 
+/**
+ * @property int $id
+ * @property string|null $name
+ * @property string|null $code
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|State newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|State newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|State query()
+ *
+ * @mixin \Eloquent
+ */
 class State extends Model
 {
     use Sushi;

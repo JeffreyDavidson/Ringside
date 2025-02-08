@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Builders\RefereeBuilder;
-use App\Enums\RefereeStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
@@ -15,15 +15,63 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 /**
- * @property RefereeEmployment $firstEmployment
+ * @property int $id
+ * @property string $first_name
+ * @property string $last_name
+ * @property string|null $full_name
+ * @property \App\Enums\EmploymentStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\RefereeEmployment|null $currentEmployment
+ * @property-read \App\Models\RefereeInjury|null $currentInjury
+ * @property-read \App\Models\RefereeRetirement|null $currentRetirement
+ * @property-read \App\Models\RefereeSuspension|null $currentSuspension
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeEmployment> $employments
+ * @property-read \App\Models\RefereeEmployment|null $firstEmployment
+ * @property-read \App\Models\RefereeEmployment|null $futureEmployment
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeInjury> $injuries
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $matches
+ * @property-read \App\Models\RefereeEmployment|null $previousEmployment
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeEmployment> $previousEmployments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeInjury> $previousInjuries
+ * @property-read \App\Models\RefereeInjury|null $previousInjury
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $previousMatches
+ * @property-read \App\Models\RefereeRetirement|null $previousRetirement
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeRetirement> $previousRetirements
+ * @property-read \App\Models\RefereeSuspension|null $previousSuspension
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeSuspension> $previousSuspensions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeRetirement> $retirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeSuspension> $suspensions
+ *
+ * @method static RefereeBuilder<static>|Referee bookable()
+ * @method static \Database\Factories\RefereeFactory factory($count = null, $state = [])
+ * @method static RefereeBuilder<static>|Referee futureEmployed()
+ * @method static RefereeBuilder<static>|Referee injured()
+ * @method static RefereeBuilder<static>|Referee newModelQuery()
+ * @method static RefereeBuilder<static>|Referee newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee onlyTrashed()
+ * @method static RefereeBuilder<static>|Referee query()
+ * @method static RefereeBuilder<static>|Referee released()
+ * @method static RefereeBuilder<static>|Referee retired()
+ * @method static RefereeBuilder<static>|Referee suspended()
+ * @method static RefereeBuilder<static>|Referee unemployed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee withoutTrashed()
+ *
+ * @mixin \Eloquent
  */
 class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
 {
+    use Concerns\IsEmployable;
+    use Concerns\IsInjurable;
+    use Concerns\IsRetirable;
+    use Concerns\IsSuspendable;
+
     /** @use HasBuilder<RefereeBuilder<static>> */
     use HasBuilder;
 
@@ -49,7 +97,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => RefereeStatus::Unemployed->value,
+        'status' => EmploymentStatus::Unemployed->value,
     ];
 
     protected static string $builder = RefereeBuilder::class;
@@ -62,7 +110,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     protected function casts(): array
     {
         return [
-            'status' => RefereeStatus::class,
+            'status' => EmploymentStatus::class,
         ];
     }
 
@@ -77,108 +125,27 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * @return HasOne<RefereeEmployment, $this>
+     * @return HasMany<RefereeInjury, $this>
      */
-    public function currentEmployment(): HasOne
+    public function injuries(): HasMany
     {
-        return $this->employments()
-            ->whereNull('ended_at')
-            ->one();
+        return $this->hasMany(RefereeInjury::class);
     }
 
     /**
-     * @return HasOne<RefereeEmployment, $this>
+     * @return HasMany<RefereeSuspension, $this>
      */
-    public function futureEmployment(): HasOne
+    public function suspensions(): HasMany
     {
-        return $this->employments()
-            ->whereNull('ended_at')
-            ->where('started_at', '>', now())
-            ->one();
+        return $this->hasMany(RefereeSuspension::class);
     }
 
     /**
-     * @return HasMany<RefereeEmployment, $this>
+     * @return HasMany<RefereeRetirement, $this>
      */
-    public function previousEmployments(): HasMany
+    public function retirements(): HasMany
     {
-        return $this->employments()
-            ->whereNotNull('ended_at');
-    }
-
-    /**
-     * @return HasOne<RefereeEmployment, $this>
-     */
-    public function previousEmployment(): HasOne
-    {
-        return $this->previousEmployments()
-            ->one()
-            ->ofMany('ended_at', 'max');
-    }
-
-    /**
-     * @return HasOne<RefereeEmployment, $this>
-     */
-    public function firstEmployment(): HasOne
-    {
-        return $this->employments()
-            ->one()
-            ->ofMany('started_at', 'min');
-    }
-
-    public function hasEmployments(): bool
-    {
-        return $this->employments()->count() > 0;
-    }
-
-    public function isCurrentlyEmployed(): bool
-    {
-        return $this->currentEmployment()->exists();
-    }
-
-    public function hasFutureEmployment(): bool
-    {
-        return $this->futureEmployment()->exists();
-    }
-
-    public function isNotInEmployment(): bool
-    {
-        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
-    }
-
-    public function isUnemployed(): bool
-    {
-        return $this->employments()->count() === 0;
-    }
-
-    public function isReleased(): bool
-    {
-        return $this->previousEmployment()->exists()
-            && $this->futureEmployment()->doesntExist()
-            && $this->currentEmployment()->doesntExist()
-            && $this->currentRetirement()->doesntExist();
-    }
-
-    public function employedOn(Carbon $employmentDate): bool
-    {
-        return $this->currentEmployment ? $this->currentEmployment->started_at->eq($employmentDate) : false;
-    }
-
-    public function employedBefore(Carbon $employmentDate): bool
-    {
-        return $this->currentEmployment ? $this->currentEmployment->started_at->lte($employmentDate) : false;
-    }
-
-    /**
-     * Check to see if the model is bookable.
-     */
-    public function isBookable(): bool
-    {
-        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        return true;
+        return $this->hasMany(RefereeRetirement::class);
     }
 
     /**
@@ -192,155 +159,14 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     }
 
     /**
-     * Retrieve the event matches participated by the model.
-     *
-     * @return BelongsToMany<EventMatch, $this>
+     * Check to see if the model is bookable.
      */
-    public function previousMatches(): BelongsToMany
+    public function isBookable(): bool
     {
-        return $this->matches()
-            ->join('events', 'event_matches.event_id', '=', 'events.id')
-            ->where('events.date', '<', today());
-    }
+        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment()) {
+            return false;
+        }
 
-    /**
-     * @return HasMany<RefereeInjury, $this>
-     */
-    public function injuries(): HasMany
-    {
-        return $this->hasMany(RefereeInjury::class);
-    }
-
-    /**
-     * @return HasOne<RefereeInjury, $this>
-     */
-    public function currentInjury(): HasOne
-    {
-        return $this->injuries()
-            ->whereNull('ended_at')
-            ->one();
-    }
-
-    /**
-     * @return HasMany<RefereeInjury, $this>
-     */
-    public function previousInjuries(): HasMany
-    {
-        return $this->injuries()
-            ->whereNotNull('ended_at');
-    }
-
-    /**
-     * @return HasOne<RefereeInjury, $this>
-     */
-    public function previousInjury(): HasOne
-    {
-        return $this->previousInjuries()
-            ->one()
-            ->ofMany('ended_at', 'max');
-    }
-
-    public function isInjured(): bool
-    {
-        return $this->currentInjury()->exists();
-    }
-
-    public function hasInjuries(): bool
-    {
-        return $this->injuries()->count() > 0;
-    }
-
-    /**
-     * @return HasMany<RefereeSuspension, $this>
-     */
-    public function suspensions(): HasMany
-    {
-        return $this->hasMany(RefereeSuspension::class);
-    }
-
-    /**
-     * @return HasOne<RefereeSuspension, $this>
-     */
-    public function currentSuspension(): HasOne
-    {
-        return $this->suspensions()
-            ->whereNull('ended_at')
-            ->one();
-    }
-
-    /**
-     * @return HasMany<RefereeSuspension, $this>
-     */
-    public function previousSuspensions(): HasMany
-    {
-        return $this->suspensions()
-            ->whereNotNull('ended_at');
-    }
-
-    /**
-     * @return HasOne<RefereeSuspension, $this>
-     */
-    public function previousSuspension(): HasOne
-    {
-        return $this->suspensions()
-            ->one()
-            ->ofMany('ended_at', 'max');
-    }
-
-    public function isSuspended(): bool
-    {
-        return $this->currentSuspension()->exists();
-    }
-
-    public function hasSuspensions(): bool
-    {
-        return $this->suspensions()->count() > 0;
-    }
-
-    /**
-     * @return HasMany<RefereeRetirement, $this>
-     */
-    public function retirements(): HasMany
-    {
-        return $this->hasMany(RefereeRetirement::class);
-    }
-
-    /**
-     * @return HasOne<RefereeRetirement, $this>
-     */
-    public function currentRetirement(): HasOne
-    {
-        return $this->retirements()
-            ->whereNull('ended_at')
-            ->one();
-    }
-
-    /**
-     * @return HasMany<RefereeRetirement, $this>
-     */
-    public function previousRetirements(): HasMany
-    {
-        return $this->retirements()
-            ->whereNotNull('ended_at');
-    }
-
-    /**
-     * @return HasOne<RefereeRetirement, $this>
-     */
-    public function previousRetirement(): HasOne
-    {
-        return $this->previousRetirements()
-            ->one()
-            ->ofMany('ended_at', 'max');
-    }
-
-    public function isRetired(): bool
-    {
-        return $this->currentRetirement()->exists();
-    }
-
-    public function hasRetirements(): bool
-    {
-        return $this->retirements()->count() > 0;
+        return true;
     }
 }

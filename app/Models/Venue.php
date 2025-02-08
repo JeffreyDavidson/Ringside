@@ -9,6 +9,30 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $street_address
+ * @property string $city
+ * @property string $state
+ * @property string $zipcode
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $events
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Event> $previousEvents
+ *
+ * @method static \Database\Factories\VenueFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
 class Venue extends Model
 {
     /** @use HasFactory<\Database\Factories\VenueFactory> */

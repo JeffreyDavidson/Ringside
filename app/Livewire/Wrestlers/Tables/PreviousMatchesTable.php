@@ -67,7 +67,7 @@ class PreviousMatchesTable extends DataTableComponent
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
                 ->outputFormat(fn ($index, EventMatchCompetitor $value) => '<a href="'.route('wrestlers.show', $value->competitor->id).'">'.$value->competitor->name.'</a>')
                 ->separator('<br />'),
-            ArrayColumn::make(__('event-matches.title'))
+            ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn ($value, EventMatch $row) => ($row->titles))
                 ->outputFormat(fn ($index, Title $value) => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
                 ->separator('<br />'),

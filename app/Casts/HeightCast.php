@@ -15,6 +15,7 @@ class HeightCast implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): Height
     {
+        /** @var int $value */
         $feet = (int) floor($value / 12);
         $inches = $value % 12;
 

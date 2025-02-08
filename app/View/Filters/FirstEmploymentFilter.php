@@ -38,7 +38,6 @@ class FirstEmploymentFilter extends DateRangeFilter
             'locale' => 'en',
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
-            /** @param array{minDate: Carbon, maxDate: Carbon}  $dateRange */
             ->filter(function (Builder $query, array $dateRange) {
                 $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange) {
                     $query

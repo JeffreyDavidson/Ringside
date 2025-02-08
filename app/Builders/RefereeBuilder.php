@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-use App\Enums\RefereeStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\Referee;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,7 +20,7 @@ class RefereeBuilder extends Builder
      */
     public function bookable(): static
     {
-        $this->where('status', RefereeStatus::Bookable);
+        $this->where('status', EmploymentStatus::Bookable);
 
         return $this;
     }
@@ -30,7 +30,7 @@ class RefereeBuilder extends Builder
      */
     public function injured(): static
     {
-        $this->where('status', RefereeStatus::Injured);
+        $this->where('status', EmploymentStatus::Injured);
 
         return $this;
     }
@@ -40,7 +40,7 @@ class RefereeBuilder extends Builder
      */
     public function unemployed(): static
     {
-        $this->where('status', RefereeStatus::Unemployed);
+        $this->where('status', EmploymentStatus::Unemployed);
 
         return $this;
     }
@@ -50,7 +50,7 @@ class RefereeBuilder extends Builder
      */
     public function retired(): static
     {
-        $this->where('status', RefereeStatus::Retired);
+        $this->where('status', EmploymentStatus::Retired);
 
         return $this;
     }
@@ -60,7 +60,7 @@ class RefereeBuilder extends Builder
      */
     public function released(): static
     {
-        $this->where('status', RefereeStatus::Released);
+        $this->where('status', EmploymentStatus::Released);
 
         return $this;
     }
@@ -70,7 +70,7 @@ class RefereeBuilder extends Builder
      */
     public function suspended(): static
     {
-        $this->where('status', RefereeStatus::Suspended);
+        $this->where('status', EmploymentStatus::Suspended);
 
         return $this;
     }
@@ -80,7 +80,7 @@ class RefereeBuilder extends Builder
      */
     public function futureEmployed(): static
     {
-        $this->where('status', RefereeStatus::FutureEmployment);
+        $this->where('status', EmploymentStatus::FutureEmployment);
 
         return $this;
     }

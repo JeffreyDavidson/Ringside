@@ -6,7 +6,7 @@ namespace App\Repositories;
 
 use App\Builders\WrestlerBuilder;
 use App\Data\WrestlerData;
-use App\Enums\WrestlerStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
@@ -172,7 +172,7 @@ class WrestlerRepository
             })
             ->orWhere(function (WrestlerBuilder $query) {
                 $query->employed()
-                    ->where('status', WrestlerStatus::Bookable)
+                    ->where('status', EmploymentStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
             })
             ->get();
@@ -192,7 +192,7 @@ class WrestlerRepository
             })
             ->orWhere(function (WrestlerBuilder $query) {
                 $query->employed()
-                    ->where('status', WrestlerStatus::Bookable)
+                    ->where('status', EmploymentStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
             })
             ->orWhere(function (WrestlerBuilder $query) use ($tagTeam) {
