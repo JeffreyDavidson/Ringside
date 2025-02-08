@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int $title_id
  * @property int $event_match_id
  * @property int $new_champion_id
- * @property string $newchampion_type
+ * @property string $new_champion_type
  * @property int $former_champion_id
  * @property string $formerchampion_type
  * @property \Illuminate\Support\Carbon $won_at
