@@ -112,15 +112,7 @@ class Event extends Model
      */
     public function isScheduled(): bool
     {
-        return $this->date->isFuture();
-    }
-
-    /**
-     * Checks to see if the event has already taken place.
-     */
-    public function isPast(): bool
-    {
-        return $this->date->isPast();
+        return $this->date !== null;
     }
 
     /**
@@ -129,5 +121,21 @@ class Event extends Model
     public function isUnscheduled(): bool
     {
         return $this->date === null;
+    }
+
+    /**
+     * Checks to see if the event is scheduled for a future date.
+     */
+    public function hasFutureDate(): bool
+    {
+        return $this->isScheduled() && $this->date?->isFuture();
+    }
+
+    /**
+     * Checks to see if the event has already taken place.
+     */
+    public function hasPastDate(): bool
+    {
+        return $this->isScheduled() && $this->date?->isPast();
     }
 }
