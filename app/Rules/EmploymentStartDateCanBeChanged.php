@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
-use App\Models\Contracts\Employable;
+use App\Models\Manager;
+use App\Models\Referee;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -12,7 +15,7 @@ use Illuminate\Support\Carbon;
 
 class EmploymentStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Employable $rosterMember) {}
+    public function __construct(protected Wrestler|Referee|TagTeam|Manager $rosterMember) {}
 
     /**
      * Determine if the validation rule passes.
