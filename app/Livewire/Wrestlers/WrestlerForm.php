@@ -44,7 +44,7 @@ class WrestlerForm extends LivewireBaseForm
             'height_inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
             'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->formModel ?? '')],
-            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel ?? '')],
+            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
         ];
     }
 

@@ -62,7 +62,7 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
                 ->title(fn (Title $row) => $row->name)
                 ->location(fn (Title $row) => route('titles.show', $row)),
             LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn (TitleChampionship $row) => $row->previousChampion->name)
+                ->title(fn (TitleChampionship $row) => $row->previousChampion->name ?? '')
                 ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
             Column::make(__('championships.dates_held'), 'dates_held'),
             CountColumn::make(__('championships.days_held'))

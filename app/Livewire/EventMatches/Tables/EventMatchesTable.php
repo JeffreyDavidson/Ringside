@@ -51,17 +51,17 @@ class EventMatchesTable extends BaseTableWithActions
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
                 ->outputFormat(fn ($index, EventMatchCompetitor $value) => $value->competitor->name)
                 ->separator(' vs '),
-            ArrayColumn::make(__('event-matches.referee'))
+            ArrayColumn::make(__('event-matches.referees'))
                 ->data(fn ($value, EventMatch $row) => ($row->referees))
                 ->outputFormat(fn ($index, Referee $value) => $value->full_name)
                 ->separator(', '),
-            ArrayColumn::make(__('event-matches.title'))
+            ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn ($value, EventMatch $row) => ($row->titles))
                 ->outputFormat(fn ($index, Title $value) => $value->name)
                 ->separator(', '),
             Column::make(__('event-matches.result'))
                 ->label(
-                    fn (EventMatch $row, Column $column) => $row->result->winner->name.' by '.$row->result->decision->name
+                    fn (EventMatch $row, Column $column) => $row->result?->winner->name.' by '.$row->result?->decision->name
                 ),
         ];
     }

@@ -45,7 +45,7 @@ class PreviousMatchesTable extends DataTableComponent
     {
         return EventMatch::query()
             ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
-            ->whereHas('referees', function ($query) {
+            ->whereHas('referees', function (Builder $query) {
                 $query->whereIn('referee_id', [$this->referee->id]);
             });
     }
@@ -63,7 +63,7 @@ class PreviousMatchesTable extends DataTableComponent
             LinkColumn::make(__('event-matches.event'))
                 ->title(fn (EventMatch $row) => $row->event->name)
                 ->location(fn (Event $row) => route('events.show', $row)),
-            DateColumn::make(__('event-matches.date'), 'event.date')
+            DateColumn::make(__('events.date'), 'event.date')
                 ->outputFormat('Y-m-d H:i'),
             ArrayColumn::make(__('event-matches.competitors'))
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
@@ -74,7 +74,7 @@ class PreviousMatchesTable extends DataTableComponent
                 ->outputFormat(fn ($index, Title $value) => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
                 ->separator('<br />'),
             Column::make(__('event-matches.result'))
-                ->label(fn (EventMatch $row) => $row->result->winner->name.' by '.$row->result->decision->name),
+                ->label(fn (EventMatch $row) => $row->result?->winner->name.' by '.$row->result?->decision->name),
         ];
     }
 }
