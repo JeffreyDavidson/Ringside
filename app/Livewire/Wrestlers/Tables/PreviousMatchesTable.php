@@ -38,7 +38,7 @@ class PreviousMatchesTable extends DataTableComponent
 
         return EventMatch::query()
             ->with(['event'])
-            ->whereHas('competitors', function ($query) {
+            ->withWhereHas('competitors', function (Builder $query) {
                 $query->whereMorphedTo('competitor', $this->wrestler);
             });
     }
