@@ -227,4 +227,12 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     {
         return ! $this->currentWrestlers->every(fn (Wrestler $wrestler) => $wrestler->isBookable());
     }
+
+    /**
+     * Retrieve the name label of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
+    }
 }

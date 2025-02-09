@@ -228,4 +228,12 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     {
         return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
     }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
+    }
 }

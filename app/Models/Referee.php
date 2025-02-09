@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property string $first_name
  * @property string $last_name
- * @property string|null $full_name
+ * @property string $full_name
  * @property \App\Enums\EmploymentStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -168,5 +168,13 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         }
 
         return true;
+    }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->full_name;
     }
 }
