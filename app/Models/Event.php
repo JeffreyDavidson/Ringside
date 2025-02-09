@@ -14,9 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property-read \Illuminate\Support\Carbon $date
  * @property int $id
  * @property string $name
+ * @property \Illuminate\Support\Carbon|null $date
  * @property int|null $venue_id
  * @property string|null $preview
  * @property \App\Enums\EventStatus $status
