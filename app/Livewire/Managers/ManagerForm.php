@@ -29,7 +29,7 @@ class ManagerForm extends LivewireBaseForm
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel ?? '')],
+            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
         ];
     }
 

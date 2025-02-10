@@ -38,7 +38,7 @@ class WrestlerForm extends LivewireBaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->formModel ?? '')],
+            'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->formModel)],
             'hometown' => ['required', 'string', 'max:255'],
             'height_feet' => ['required', 'integer', 'max:7'],
             'height_inches' => ['required', 'integer', 'max:11'],
