@@ -6,6 +6,7 @@ namespace App\Livewire\TagTeams;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\TagTeam;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
@@ -35,7 +36,7 @@ class TagTeamForm extends LivewireBaseForm
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')],
             'signature_move' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['nullable', 'string', 'date'],
+            'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
             'wrestlerA' => [
                 'nullable',
                 'bail',
