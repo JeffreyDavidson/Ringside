@@ -60,20 +60,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
  *
- * @method static ManagerBuilder<static>|Manager available()
  * @method static \Database\Factories\ManagerFactory factory($count = null, $state = [])
- * @method static ManagerBuilder<static>|Manager futureEmployed()
- * @method static ManagerBuilder<static>|Manager injured()
- * @method static ManagerBuilder<static>|Manager newModelQuery()
- * @method static ManagerBuilder<static>|Manager newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager onlyTrashed()
- * @method static ManagerBuilder<static>|Manager query()
- * @method static ManagerBuilder<static>|Manager released()
- * @method static ManagerBuilder<static>|Manager retired()
- * @method static ManagerBuilder<static>|Manager suspended()
- * @method static ManagerBuilder<static>|Manager unemployed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager withoutTrashed()
+ * @method static \App\Builders\ManagerBuilder newModelQuery()
+ * @method static \App\Builders\ManagerBuilder newQuery()
+ * @method static \App\Builders\ManagerBuilder query()
+ * @method static \App\Builders\ManagerBuilder available()
+ * @method static \App\Builders\ManagerBuilder futureEmployed()
+ * @method static \App\Builders\ManagerBuilder injured()
+ * @method static \App\Builders\ManagerBuilder released()
+ * @method static \App\Builders\ManagerBuilder retired()
+ * @method static \App\Builders\ManagerBuilder suspended()
+ * @method static \App\Builders\ManagerBuilder unemployed()
+ * @method static \App\Builders\ManagerBuilder onlyTrashed()
+ * @method static \App\Builders\ManagerBuilder withTrashed()
+ * @method static \App\Builders\ManagerBuilder withoutTrashed()
  *
  * @mixin \Eloquent
  */
@@ -88,7 +88,7 @@ class Manager extends Model implements CanBeAStableMember, Employable, Injurable
     use Concerns\OwnedByUser;
     use HasBelongsToOne;
 
-    /** @use HasBuilder<ManagerBuilder<static>> */
+    /** @use HasBuilder<ManagerBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\ManagerFactory> */

@@ -18,7 +18,7 @@ use Illuminate\Notifications\Notifiable;
  * @property int $id
  * @property string $first_name
  * @property string $last_name
- * @property string|null $full_name
+ * @property string $full_name
  * @property string $email
  * @property string|null $email_verified_at
  * @property string $password
@@ -32,15 +32,15 @@ use Illuminate\Notifications\Notifiable;
  * @property-read \App\Models\Wrestler|null $wrestler
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
- * @method static UserBuilder<static>|User newModelQuery()
- * @method static UserBuilder<static>|User newQuery()
- * @method static UserBuilder<static>|User query()
+ * @method static \App\Builders\UserBuilder newModelQuery()
+ * @method static \App\Builders\UserBuilder newQuery()
+ * @method static \App\Builders\UserBuilder query()
  *
  * @mixin \Eloquent
  */
 class User extends Authenticatable
 {
-    /** @use HasBuilder<UserBuilder<static>> */
+    /** @use HasBuilder<UserBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
