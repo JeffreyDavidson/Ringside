@@ -29,7 +29,7 @@ class TagTeamForm extends LivewireBaseForm
     public ?int $wrestlerB;
 
     /**
-     * @return array<string, list<Unique|Exists|string>>
+     * @return array<string, list<Unique|Exists|EmploymentStartDateCanBeChanged|string>>
      */
     protected function rules(): array
     {
