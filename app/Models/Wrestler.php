@@ -88,6 +88,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \App\Builders\WrestlerBuilder onlyTrashed()
  * @method static \App\Builders\WrestlerBuilder withTrashed()
  * @method static \App\Builders\WrestlerBuilder withoutTrashed()
+ * @method string getNameLabel()
  *
  * @mixin \Eloquent
  */

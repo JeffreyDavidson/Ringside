@@ -7,6 +7,9 @@ namespace App\Models\Concerns;
 use App\Models\Stable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @phpstan-require-implements \App\Models\Contracts\CanBeAStableMember
+ */
 trait CanJoinStables
 {
     /**
