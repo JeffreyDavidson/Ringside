@@ -60,8 +60,8 @@ class PreviousMatchesTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            LinkColumn::make(__('event-matches.event'))
-                ->title(fn (EventMatch $row) => $row->event->name)
+            LinkColumn::make(__('events.name'), 'event.name')
+                ->title(fn (Event $row) => $row->name)
                 ->location(fn (Event $row) => route('events.show', $row)),
             DateColumn::make(__('events.date'), 'event.date')
                 ->outputFormat('Y-m-d H:i'),
