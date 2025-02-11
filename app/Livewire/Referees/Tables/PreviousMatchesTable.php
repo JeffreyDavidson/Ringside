@@ -31,14 +31,6 @@ class PreviousMatchesTable extends DataTableComponent
     public Referee $referee;
 
     /**
-     * Set the Referee to be used for this component.
-     */
-    public function mount(Referee $referee): void
-    {
-        $this->referee = $referee;
-    }
-
-    /**
      * @return Builder<EventMatch>
      */
     public function builder(): Builder

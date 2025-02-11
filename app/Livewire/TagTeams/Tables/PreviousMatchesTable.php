@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\Event;
 use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\TagTeam;
 use App\Models\Title;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
@@ -17,20 +19,39 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class PreviousMatchesTable extends DataTableComponent
 {
+    use ShowTableTrait;
+
+    protected string $databaseTableName = 'event_matches';
+
+    protected string $resourceName = 'matches';
+
     /**
      * Tag Team to use for component.
      */
-    public TagTeam $tagTeam;
+    public ?TagTeam $tagTeam;
 
     /**
-     * Set the Tag Team to be used for this component.
+     * @return Builder<EventMatch>
      */
-    public function mount(TagTeam $tagTeam): void
+    public function builder(): Builder
     {
-        $this->tagTeam = $tagTeam;
+        if (! isset($this->tagTeam)) {
+            throw new \Exception("You didn't specify a tag team");
+        }
+
+        return EventMatch::query()
+            ->with(['event'])
+            ->withWhereHas('competitors', function (Builder $query) {
+                $query->whereMorphedTo('competitor', $this->tagTeam);
+            });
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        $this->addAdditionalSelects([
+            'event_matches.event_id as event_id',
+        ]);
+    }
 
     /**
      * Undocumented function
