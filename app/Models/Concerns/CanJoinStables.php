@@ -29,6 +29,6 @@ trait CanJoinStables
      */
     public function isNotCurrentlyInStable(Stable $stable): bool
     {
-        return $this->currentStable()->isNot($stable);
+        return $this->currentStable()->getParent()->isNot($stable);
     }
 }
