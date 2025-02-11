@@ -39,22 +39,23 @@ class FirstEmploymentFilter extends DateRangeFilter
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
             ->filter(function (Builder $query, array $dateRange) {
+                /** @var array{minDate: string, maxDate: string}  $dateRange */
                 $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange) {
                     $query
                         ->where(function (Builder $query) use ($dateRange) {
                             $query->whereBetween(
                                 $this->filterStartField,
                                 [
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(),
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
                                 ]);
                         })
                         ->orWhere(function (Builder $query) use ($dateRange) {
                             $query->whereBetween(
                                 $this->filterEndField,
                                 [
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(),
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
                                 ]);
                         });
                 });
