@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\ManagerBuilder;
-use App\Enums\ManagerStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\Concerns\Manageables;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\CanBeAStableMember;
@@ -26,13 +26,13 @@ test('a manager has a last name', function () {
 test('a manager has a status', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager)->status->toBeInstanceOf(ManagerStatus::class);
+    expect($manager)->status->toBeInstanceOf(EmploymentStatus::class);
 });
 
 test('a manager is unemployed by default', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->status->value)->toBe(ManagerStatus::Unemployed->value);
+    expect($manager->status->value)->toBe(EmploymentStatus::Unemployed->value);
 });
 
 test('a manager implements can be stable manager interface', function () {
