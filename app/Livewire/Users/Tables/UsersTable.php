@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\Users\Tables;
 
 use App\Builders\UserBuilder;
-use App\Livewire\Concerns\BaseTableTrait;
+use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\User;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class UsersTable extends DataTableComponent
+class UsersTable extends BaseTableWithActions
 {
-    use BaseTableTrait, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'users';
 
@@ -28,10 +27,7 @@ class UsersTable extends DataTableComponent
             ->oldest('last_name');
     }
 
-    public function configure(): void
-    {
-        $this->showActionColumn = false;
-    }
+    public function configure(): void {}
 
     /** @return array<Column> */
     public function columns(): array
