@@ -17,4 +17,13 @@ class UsersController extends Controller
 
         return view('users.index');
     }
+
+    public function show(User $user): View
+    {
+        Gate::authorize('view', $user);
+
+        return view('users.show', [
+            'user' => $user,
+        ]);
+    }
 }
