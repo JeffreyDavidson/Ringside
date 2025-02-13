@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\RefereeBuilder;
-use App\Enums\RefereeStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\Referee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,13 +23,13 @@ test('a referee has a last name', function () {
 test('a referee has a status', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee)->status->toBeInstanceOf(RefereeStatus::class);
+    expect($referee)->status->toBeInstanceOf(EmploymentStatus::class);
 });
 
 test('a referee is unemployed by default', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->status->value)->toBe(RefereeStatus::Unemployed->value);
+    expect($referee->status->value)->toBe(EmploymentStatus::Unemployed->value);
 });
 
 test('a referee uses has factory trait', function () {

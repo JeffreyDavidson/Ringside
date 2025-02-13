@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Builders;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of User
- *
- * @extends Builder<TModel>
+ * @extends Builder<\App\Models\User>
  */
 class UserBuilder extends Builder {}

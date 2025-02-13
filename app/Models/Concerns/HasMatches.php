@@ -7,6 +7,9 @@ namespace App\Models\Concerns;
 use App\Models\EventMatch;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
+/**
+ * @phpstan-require-implements \App\Models\Contracts\Bookable
+ */
 trait HasMatches
 {
     /**

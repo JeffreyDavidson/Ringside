@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\WrestlerBuilder;
-use App\Enums\WrestlerStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\HasMatches;
 use App\Models\Concerns\OwnedByUser;
@@ -49,13 +49,13 @@ test('a wrestler can have a signature move', function () {
 test('a wrestler has a status', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler)->status->toBeInstanceOf(WrestlerStatus::class);
+    expect($wrestler)->status->toBeInstanceOf(EmploymentStatus::class);
 });
 
 test('a wrestler is unemployed by default', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->status->value)->toBe(WrestlerStatus::Unemployed->value);
+    expect($wrestler->status->value)->toBe(EmploymentStatus::Unemployed->value);
 });
 
 test('a wrestler implements bookable interface', function () {

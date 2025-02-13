@@ -35,18 +35,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleRetirement> $previousRetirements
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleRetirement> $retirements
  *
- * @method static TitleBuilder<static>|Title active()
- * @method static TitleBuilder<static>|Title competable()
  * @method static \Database\Factories\TitleFactory factory($count = null, $state = [])
- * @method static TitleBuilder<static>|Title inactive()
- * @method static TitleBuilder<static>|Title newModelQuery()
- * @method static TitleBuilder<static>|Title newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Title onlyTrashed()
- * @method static TitleBuilder<static>|Title query()
- * @method static TitleBuilder<static>|Title retired()
- * @method static TitleBuilder<static>|Title withFutureActivation()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Title withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Title withoutTrashed()
+ * @method static \App\Builders\TitleBuilder newModelQuery()
+ * @method static \App\Builders\TitleBuilder newQuery()
+ * @method static \App\Builders\TitleBuilder query()
+ * @method static \App\Builders\TitleBuilder active()
+ * @method static \App\Builders\TitleBuilder competable()
+ * @method static \App\Builders\TitleBuilder inactive()
+ * @method static \App\Builders\TitleBuilder retired()
+ * @method static \App\Builders\TitleBuilder withFutureActivation()
+ * @method static \App\Builders\TitleBuilder onlyTrashed()
+ * @method static \App\Builders\TitleBuilder withTrashed()
+ * @method static \App\Builders\TitleBuilder withoutTrashed()
  *
  * @mixin \Eloquent
  */
@@ -56,7 +56,7 @@ class Title extends Model implements Activatable, Retirable
     use Concerns\IsActivatable;
     use Concerns\IsRetirable;
 
-    /** @use HasBuilder<TitleBuilder<static>> */
+    /** @use HasBuilder<TitleBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\TitleFactory> */

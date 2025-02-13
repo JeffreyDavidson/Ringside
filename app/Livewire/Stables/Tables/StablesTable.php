@@ -25,9 +25,6 @@ class StablesTable extends BaseTableWithActions
 
     protected string $resourceName = 'stables';
 
-    /**
-     * @return StableBuilder<Stable>
-     */
     public function builder(): StableBuilder
     {
         return Stable::query()

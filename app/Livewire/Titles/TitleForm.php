@@ -28,7 +28,7 @@ class TitleForm extends LivewireBaseForm
     {
         return [
             'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel ?? '')],
-            'start_date' => ['nullable', 'date', new ActivationStartDateCanBeChanged($this->formModel ?? '')],
+            'start_date' => ['nullable', 'date', new ActivationStartDateCanBeChanged($this->formModel)],
         ];
     }
 

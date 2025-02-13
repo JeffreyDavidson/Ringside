@@ -65,20 +65,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
  *
- * @method static TagTeamBuilder<static>|TagTeam bookable()
  * @method static \Database\Factories\TagTeamFactory factory($count = null, $state = [])
- * @method static TagTeamBuilder<static>|TagTeam futureEmployed()
- * @method static TagTeamBuilder<static>|TagTeam newModelQuery()
- * @method static TagTeamBuilder<static>|TagTeam newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeam onlyTrashed()
- * @method static TagTeamBuilder<static>|TagTeam query()
- * @method static TagTeamBuilder<static>|TagTeam released()
- * @method static TagTeamBuilder<static>|TagTeam retired()
- * @method static TagTeamBuilder<static>|TagTeam suspended()
- * @method static TagTeamBuilder<static>|TagTeam unbookable()
- * @method static TagTeamBuilder<static>|TagTeam unemployed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeam withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeam withoutTrashed()
+ * @method static \App\Builders\TagTeamBuilder newModelQuery()
+ * @method static \App\Builders\TagTeamBuilder newQuery()
+ * @method static \App\Builders\TagTeamBuilder query()
+ * @method static \App\Builders\TagTeamBuilder bookable()
+ * @method static \App\Builders\TagTeamBuilder unbookable()
+ * @method static \App\Builders\TagTeamBuilder retired()
+ * @method static \App\Builders\TagTeamBuilder unemployed()
+ * @method static \App\Builders\TagTeamBuilder suspended()
+ * @method static \App\Builders\TagTeamBuilder released()
+ * @method static \App\Builders\TagTeamBuilder futureEmployed()
+ * @method static \App\Builders\TagTeamBuilder onlyTrashed()
+ * @method static \App\Builders\TagTeamBuilder withTrashed()
+ * @method static \App\Builders\TagTeamBuilder withoutTrashed()
  *
  * @mixin \Eloquent
  */
@@ -95,7 +95,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     use Concerns\OwnedByUser;
     use HasBelongsToOne;
 
-    /** @use HasBuilder<TagTeamBuilder<static>> */
+    /** @use HasBuilder<TagTeamBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\TagTeamFactory> */
@@ -226,5 +226,13 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, Employable,
     public function isUnbookable(): bool
     {
         return ! $this->currentWrestlers->every(fn (Wrestler $wrestler) => $wrestler->isBookable());
+    }
+
+    /**
+     * Retrieve the name label of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
     }
 }

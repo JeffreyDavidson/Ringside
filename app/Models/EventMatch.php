@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Collections\EventMatchCompetitorsCollection<int, \App\Models\EventMatchCompetitor> $competitors
- * @property-read \App\Models\Event|null $event
+ * @property-read \App\Models\Event $event
  * @property-read \App\Models\TFactory|null $use_factory
  * @property-read \App\Models\MatchType|null $matchType
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee> $referees

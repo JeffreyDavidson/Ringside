@@ -18,17 +18,17 @@ class EventMatchForm extends LivewireBaseForm
     public ?int $matchTypeId;
 
     /**
-     * @var array<int, string>
+     * @var array<int, int>
      */
     public array $titles = [];
 
     /**
-     * @var array<int, string>
+     * @var array<int, int>
      */
     public array $referees = [];
 
     /**
-     * @var array<int, string>
+     * @var array<int, int>
      */
     public array $competitors = [];
 
@@ -59,9 +59,15 @@ class EventMatchForm extends LivewireBaseForm
 
     public function loadExtraData(): void
     {
+        /** @var array<int, int> $referees */
+        $referees = $this->formModel?->referees->pluck('id')->toArray();
+
+        /** @var array<int, int> $titles */
+        $titles = $this->formModel?->titles->pluck('id')->toArray();
+
         $this->matchTypeId = $this->formModel?->matchType->id;
-        $this->referees = $this->formModel?->referees->pluck('id', 'name')->all();
-        $this->titles = $this->formModel?->titles->pluck('id', 'name')->all();
+        $this->referees = $referees;
+        $this->titles = $titles;
     }
 
     public function store(): bool

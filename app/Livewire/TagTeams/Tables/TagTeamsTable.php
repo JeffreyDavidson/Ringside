@@ -25,9 +25,6 @@ class TagTeamsTable extends BaseTableWithActions
 
     protected string $resourceName = 'tag teams';
 
-    /**
-     * @return TagTeamBuilder<TagTeam>
-     */
     public function builder(): TagTeamBuilder
     {
         return TagTeam::query()

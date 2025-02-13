@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\TagTeamStatus;
-use App\Enums\WrestlerStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\TagTeamEmployment;
 use App\Models\TagTeamRetirement;
 use App\Models\TagTeamSuspension;
@@ -32,7 +31,7 @@ class TagTeamFactory extends Factory
         return [
             'name' => Str::title(fake()->words(2, true)),
             'signature_move' => null,
-            'status' => TagTeamStatus::Unemployed,
+            'status' => EmploymentStatus::Unemployed,
         ];
     }
 
@@ -45,7 +44,7 @@ class TagTeamFactory extends Factory
             ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::Bookable])
+        return $this->state(fn () => ['status' => EmploymentStatus::Bookable])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
@@ -56,7 +55,7 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $wrestlers = Wrestler::factory()->bookable()->count(1);
 
-        return $this->state(fn () => ['status' => TagTeamStatus::Unbookable])
+        return $this->state(fn () => ['status' => EmploymentStatus::Unbookable])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
             ->hasAttached(Wrestler::factory()->injured(), ['joined_at' => $employmentStartDate])
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
@@ -69,7 +68,7 @@ class TagTeamFactory extends Factory
             ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::FutureEmployment])
+        return $this->state(fn () => ['status' => EmploymentStatus::FutureEmployment])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
             ->withCurrentWrestlers($wrestlers, Carbon::now());
     }
@@ -80,12 +79,12 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $suspensionStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
-            ->state(fn () => ['status' => WrestlerStatus::Suspended])
+            ->state(fn () => ['status' => EmploymentStatus::Suspended])
             ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
             ->has(WrestlerSuspension::factory()->started($suspensionStartDate), 'suspensions')
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::Suspended])
+        return $this->state(fn () => ['status' => EmploymentStatus::Suspended])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
             ->has(TagTeamSuspension::factory()->started($suspensionStartDate), 'suspensions')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
@@ -101,7 +100,7 @@ class TagTeamFactory extends Factory
             ->has(WrestlerRetirement::factory()->started($retirementStartDate), 'retirements')
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::Retired])
+        return $this->state(fn () => ['status' => EmploymentStatus::Retired])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
             ->has(TagTeamRetirement::factory()->started($retirementStartDate), 'retirements')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
@@ -109,7 +108,7 @@ class TagTeamFactory extends Factory
 
     public function unemployed(): static
     {
-        return $this->state(fn () => ['status' => TagTeamStatus::Unemployed]);
+        return $this->state(fn () => ['status' => EmploymentStatus::Unemployed]);
     }
 
     public function released(): static
@@ -121,7 +120,7 @@ class TagTeamFactory extends Factory
             ->has(WrestlerEmployment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
             ->create();
 
-        return $this->state(fn () => ['status' => TagTeamStatus::Released])
+        return $this->state(fn () => ['status' => EmploymentStatus::Released])
             ->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }

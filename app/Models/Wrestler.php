@@ -73,21 +73,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $titleChampionships
  * @property-read \App\Models\User|null $user
  *
- * @method static WrestlerBuilder<static>|Wrestler bookable()
- * @method static WrestlerBuilder<static>|Wrestler employed()
  * @method static \Database\Factories\WrestlerFactory factory($count = null, $state = [])
- * @method static WrestlerBuilder<static>|Wrestler futureEmployed()
- * @method static WrestlerBuilder<static>|Wrestler injured()
- * @method static WrestlerBuilder<static>|Wrestler newModelQuery()
- * @method static WrestlerBuilder<static>|Wrestler newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Wrestler onlyTrashed()
- * @method static WrestlerBuilder<static>|Wrestler query()
- * @method static WrestlerBuilder<static>|Wrestler released()
- * @method static WrestlerBuilder<static>|Wrestler retired()
- * @method static WrestlerBuilder<static>|Wrestler suspended()
- * @method static WrestlerBuilder<static>|Wrestler unemployed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Wrestler withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Wrestler withoutTrashed()
+ * @method static \App\Builders\WrestlerBuilder newModelQuery()
+ * @method static \App\Builders\WrestlerBuilder newQuery()
+ * @method static \App\Builders\WrestlerBuilder query()
+ * @method static \App\Builders\WrestlerBuilder unemployed()
+ * @method static \App\Builders\WrestlerBuilder futureEmployed()
+ * @method static \App\Builders\WrestlerBuilder employed()
+ * @method static \App\Builders\WrestlerBuilder bookable()
+ * @method static \App\Builders\WrestlerBuilder injured()
+ * @method static \App\Builders\WrestlerBuilder retired()
+ * @method static \App\Builders\WrestlerBuilder released()
+ * @method static \App\Builders\WrestlerBuilder suspended()
+ * @method static \App\Builders\WrestlerBuilder onlyTrashed()
+ * @method static \App\Builders\WrestlerBuilder withTrashed()
+ * @method static \App\Builders\WrestlerBuilder withoutTrashed()
+ * @method string getNameLabel()
  *
  * @mixin \Eloquent
  */
@@ -105,7 +106,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     use Concerns\OwnedByUser;
     use HasBelongsToOne;
 
-    /** @use HasBuilder<WrestlerBuilder<static>> */
+    /** @use HasBuilder<WrestlerBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\WrestlerFactory> */
@@ -227,5 +228,13 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     public function matches(): MorphToMany
     {
         return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
+    }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
     }
 }

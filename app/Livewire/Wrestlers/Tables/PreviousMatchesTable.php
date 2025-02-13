@@ -38,7 +38,7 @@ class PreviousMatchesTable extends DataTableComponent
 
         return EventMatch::query()
             ->with(['event'])
-            ->whereHas('competitors', function ($query) {
+            ->withWhereHas('competitors', function (Builder $query) {
                 $query->whereMorphedTo('competitor', $this->wrestler);
             });
     }
@@ -72,7 +72,7 @@ class PreviousMatchesTable extends DataTableComponent
                 ->outputFormat(fn ($index, Title $value) => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
                 ->separator('<br />'),
             Column::make(__('event-matches.result'))
-                ->label(fn (EventMatch $row) => $row->result->winner->name.' by '.$row->result->decision->name),
+                ->label(fn (EventMatch $row) => $row->result?->winner->name.' by '.$row->result?->decision->name),
         ];
     }
 }

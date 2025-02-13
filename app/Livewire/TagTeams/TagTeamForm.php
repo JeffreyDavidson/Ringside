@@ -6,6 +6,7 @@ namespace App\Livewire\TagTeams;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\TagTeam;
+use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
@@ -23,19 +24,19 @@ class TagTeamForm extends LivewireBaseForm
 
     public Carbon|string|null $start_date = '';
 
-    public int $wrestlerA;
+    public ?int $wrestlerA;
 
-    public int $wrestlerB;
+    public ?int $wrestlerB;
 
     /**
-     * @return array<string, list<Unique|Exists|string>>
+     * @return array<string, list<Unique|Exists|EmploymentStartDateCanBeChanged|string>>
      */
     protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')],
             'signature_move' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['nullable', 'string', 'date'],
+            'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
             'wrestlerA' => [
                 'nullable',
                 'bail',
@@ -74,11 +75,11 @@ class TagTeamForm extends LivewireBaseForm
 
     public function loadExtraData(): void
     {
-        $currentWrestlers = $this->formModel->currentWrestlers;
+        $currentWrestlers = $this->formModel?->currentWrestlers;
 
-        $this->start_date = $this->formModel->firstEmployment?->started_at->toDateString();
-        $this->wrestlerA = $currentWrestlers->first();
-        $this->wrestlerB = $currentWrestlers->last();
+        $this->start_date = $this->formModel?->hasEmployments() ? $this->formModel->firstEmployment?->started_at->toDateString() : '';
+        $this->wrestlerA = ! is_null($currentWrestlers) && $currentWrestlers->isNotEmpty() ? $currentWrestlers->first()->id : null;
+        $this->wrestlerB = ! is_null($currentWrestlers) && $currentWrestlers->isNotEmpty() ? $currentWrestlers->last()->id : null;
     }
 
     public function store(): bool

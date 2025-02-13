@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Columns;
 
-use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 trait HasActionColumn
@@ -14,7 +13,7 @@ trait HasActionColumn
         return Column::make(__('core.actions'))
             ->setColumnLabelStatusDisabled()
             ->label(
-                fn (Model $row, Column $column) => view('components.tables.columns.action-column')->with(
+                fn ($row, Column $column) => view('components.tables.columns.action-column')->with(
                     [
                         'rowId' => $row->id,
                         'path' => $this->routeBasePath,

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\StableStatus;
+use App\Enums\ActivationStatus;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
@@ -18,7 +18,7 @@ test('a stable has a name', function () {
 test('a stable has a status', function () {
     $stable = Stable::factory()->create();
 
-    expect($stable)->status->toBeInstanceOf(StableStatus::class);
+    expect($stable)->status->toBeInstanceOf(ActivationStatus::class);
 });
 
 test('a stable uses soft deleted trait', function () {

@@ -43,6 +43,11 @@ class BaseModal extends ModalComponent
         return 'Add '.class_basename($this->modelType);
     }
 
+    public function generateTitleField()
+    {
+        return property_exists($this, 'titleField') ? $this->titleField : 'name';
+    }
+
     public function clear(): void
     {
         if (isset($this->model) && ! is_null($this->model)) {
@@ -67,10 +72,5 @@ class BaseModal extends ModalComponent
         $view = 'livewire.'.$this->modalFormPath;
 
         return view($view);
-    }
-
-    public function generateTitleField()
-    {
-        return property_exists($this, 'titleField') ? $this->titleField : 'name';
     }
 }
