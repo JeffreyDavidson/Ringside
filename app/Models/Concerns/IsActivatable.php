@@ -9,9 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
- * @property Carbon $started_at
- *
- * @mixin \Eloquent
+ * @phpstan-require-implements \App\Models\Contracts\Activatable
  */
 trait IsActivatable
 {

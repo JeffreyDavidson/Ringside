@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\ActivationStatus;
-use App\Models\Stable;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of Stable
- *
- * @extends Builder<TModel>
+ * @extends Builder<\App\Models\Stable>
  */
 class StableBuilder extends Builder
 {
