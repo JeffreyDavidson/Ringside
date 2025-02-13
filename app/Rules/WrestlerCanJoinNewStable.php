@@ -24,7 +24,7 @@ class WrestlerCanJoinNewStable implements ValidationRule
         /** @var Wrestler $wrestler */
         $wrestler = Wrestler::with(['currentStable'])->find($value);
 
-        if ($wrestler->currentStable()->exists()) {
+        if ($wrestler->currentStable()->getParent()->exists()) {
             $fail('This wrestler is already a member of a stable.');
         }
 

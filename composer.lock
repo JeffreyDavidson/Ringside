@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "52cfcdaf2cd18346aaaee381e17e1af5",
+    "content-hash": "87422ada67b95ccf270ef321b79f44a0",
     "packages": [
         {
             "name": "ankurk91/laravel-eloquent-relationships",
@@ -11269,12 +11269,12 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

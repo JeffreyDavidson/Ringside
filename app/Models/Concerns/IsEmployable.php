@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
+/**
+ * @phpstan-require-implements \App\Models\Contracts\Employable
+ */
 trait IsEmployable
 {
     public function currentEmployment(): HasOne

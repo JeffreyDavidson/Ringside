@@ -7,6 +7,9 @@ namespace App\Models\Concerns;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @phpstan-require-implements \App\Models\Contracts\Injurable
+ */
 trait IsInjurable
 {
     public function currentInjury(): HasOne

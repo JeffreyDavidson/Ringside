@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property string $first_name
  * @property string $last_name
- * @property string|null $full_name
+ * @property string $full_name
  * @property \App\Enums\EmploymentStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -48,20 +48,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeRetirement> $retirements
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeSuspension> $suspensions
  *
- * @method static RefereeBuilder<static>|Referee bookable()
  * @method static \Database\Factories\RefereeFactory factory($count = null, $state = [])
- * @method static RefereeBuilder<static>|Referee futureEmployed()
- * @method static RefereeBuilder<static>|Referee injured()
- * @method static RefereeBuilder<static>|Referee newModelQuery()
- * @method static RefereeBuilder<static>|Referee newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee onlyTrashed()
- * @method static RefereeBuilder<static>|Referee query()
- * @method static RefereeBuilder<static>|Referee released()
- * @method static RefereeBuilder<static>|Referee retired()
- * @method static RefereeBuilder<static>|Referee suspended()
- * @method static RefereeBuilder<static>|Referee unemployed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee withoutTrashed()
+ * @method static \App\Builders\RefereeBuilder newModelQuery()
+ * @method static \App\Builders\RefereeBuilder newQuery()
+ * @method static \App\Builders\RefereeBuilder query()
+ * @method static \App\Builders\RefereeBuilder bookable()
+ * @method static \App\Builders\RefereeBuilder injured()
+ * @method static \App\Builders\RefereeBuilder unemployed()
+ * @method static \App\Builders\RefereeBuilder retired()
+ * @method static \App\Builders\RefereeBuilder released()
+ * @method static \App\Builders\RefereeBuilder suspended()
+ * @method static \App\Builders\RefereeBuilder futureEmployed()
+ * @method static \App\Builders\RefereeBuilder onlyTrashed()
+ * @method static \App\Builders\RefereeBuilder withTrashed()
+ * @method static \App\Builders\RefereeBuilder withoutTrashed()
  *
  * @mixin \Eloquent
  */
@@ -72,7 +72,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
     use Concerns\IsRetirable;
     use Concerns\IsSuspendable;
 
-    /** @use HasBuilder<RefereeBuilder<static>> */
+    /** @use HasBuilder<RefereeBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\RefereeFactory> */
@@ -168,5 +168,13 @@ class Referee extends Model implements Employable, Injurable, Retirable, Suspend
         }
 
         return true;
+    }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->full_name;
     }
 }

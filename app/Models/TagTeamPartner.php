@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\TagTeam|null $tagTeam
- * @property-read \App\Models\Wrestler|null $wrestler
+ * @property-read \App\Models\Wrestler|null $partner
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner newQuery()
@@ -57,7 +57,7 @@ class TagTeamPartner extends Pivot
     /**
      * @return BelongsTo<Wrestler, $this>
      */
-    public function wrestler(): BelongsTo
+    public function partner(): BelongsTo
     {
         return $this->belongsTo(Wrestler::class);
     }

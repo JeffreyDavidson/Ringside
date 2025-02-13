@@ -45,18 +45,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\User|null $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
  *
- * @method static StableBuilder<static>|Stable active()
  * @method static \Database\Factories\StableFactory factory($count = null, $state = [])
- * @method static StableBuilder<static>|Stable inactive()
- * @method static StableBuilder<static>|Stable newModelQuery()
- * @method static StableBuilder<static>|Stable newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable onlyTrashed()
- * @method static StableBuilder<static>|Stable query()
- * @method static StableBuilder<static>|Stable retired()
- * @method static StableBuilder<static>|Stable unactivated()
- * @method static StableBuilder<static>|Stable withFutureActivation()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withoutTrashed()
+ * @method static \App\Builders\StableBuilder newModelQuery()
+ * @method static \App\Builders\StableBuilder newQuery()
+ * @method static \App\Builders\StableBuilder query()
+ * @method static \App\Builders\StableBuilder unactivated()
+ * @method static \App\Builders\StableBuilder active()
+ * @method static \App\Builders\StableBuilder retired()
+ * @method static \App\Builders\StableBuilder inactive()
+ * @method static \App\Builders\StableBuilder withFutureActivation()
+ * @method static \App\Builders\StableBuilder onlyTrashed()
+ * @method static \App\Builders\StableBuilder withTrashed()
+ * @method static \App\Builders\StableBuilder withoutTrashed()
  *
  * @mixin \Eloquent
  */
@@ -67,7 +67,7 @@ class Stable extends Model implements Activatable, Retirable
     use Concerns\IsRetirable;
     use Concerns\OwnedByUser;
 
-    /** @use HasBuilder<StableBuilder<static>> */
+    /** @use HasBuilder<StableBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\StableFactory> */

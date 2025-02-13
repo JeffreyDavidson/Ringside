@@ -25,9 +25,6 @@ class WrestlersTable extends BaseTableWithActions
 
     protected string $resourceName = 'wrestlers';
 
-    /**
-     * @return WrestlerBuilder<Wrestler>
-     */
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\StableStatus;
+use App\Enums\ActivationStatus;
 use App\Models\Manager;
 use App\Models\ManagerEmployment;
 use App\Models\ManagerRetirement;
@@ -34,13 +34,13 @@ class StableFactory extends Factory
     {
         return [
             'name' => str(fake()->words(2, true))->title()->value(),
-            'status' => StableStatus::Unactivated,
+            'status' => ActivationStatus::Unactivated,
         ];
     }
 
     public function withFutureActivation(): static
     {
-        return $this->state(fn () => ['status' => StableStatus::FutureActivation])
+        return $this->state(fn () => ['status' => ActivationStatus::FutureActivation])
             ->has(StableActivation::factory()->started(Carbon::tomorrow()), 'activations')
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
@@ -58,14 +58,14 @@ class StableFactory extends Factory
 
     public function unactivated(): static
     {
-        return $this->state(fn () => ['status' => StableStatus::Unactivated]);
+        return $this->state(fn () => ['status' => ActivationStatus::Unactivated]);
     }
 
     public function active(): static
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->state(fn () => ['status' => StableStatus::Active])
+        return $this->state(fn () => ['status' => ActivationStatus::Active])
             ->has(StableActivation::factory()->started($activationDate), 'activations')
             ->hasAttached(
                 Wrestler::factory()->has(WrestlerEmployment::factory()->started($activationDate), 'employments'),
@@ -99,7 +99,7 @@ class StableFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => StableStatus::Inactive])
+        return $this->state(fn () => ['status' => ActivationStatus::Inactive])
             ->has(StableActivation::factory()->started($start)->ended($end), 'activations')
             ->hasAttached(
                 Wrestler::factory()->has(WrestlerEmployment::factory()->started($start), 'employments'),
@@ -133,7 +133,7 @@ class StableFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => StableStatus::Retired])
+        return $this->state(fn () => ['status' => ActivationStatus::Retired])
             ->has(StableActivation::factory()->started($start)->ended($end), 'activations')
             ->has(StableRetirement::factory()->started($end), 'retirements')
             ->hasAttached(

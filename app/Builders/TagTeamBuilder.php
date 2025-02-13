@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\EmploymentStatus;
-use App\Models\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of TagTeam
- *
- * @extends Builder<TModel>
+ * @extends Builder<\App\Models\TagTeam>
  */
 class TagTeamBuilder extends Builder
 {
