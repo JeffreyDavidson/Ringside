@@ -15,4 +15,13 @@ class UserPolicy
     {
         return $user->isAdministrator();
     }
+
+    public function view(User $user, User $requestedUser): bool
+    {
+        if ($user->is($requestedUser)) {
+            return true;
+        }
+
+        return $user->isAdministrator();
+    }
 }
