@@ -156,7 +156,7 @@ trait BaseTableTrait
                 'default' => false,
                 'default-styling' => false,
                 'default-colors' => false,
-                'class' => 'm-0 p-0 grow bg-transparent border-transparent text-xs outline-none font-size-inerit font-weight-inherit focus:border-transparent focus:ring-0 placeholder:text-gray-500'
+                'class' => 'm-0 p-0 grow bg-transparent border-transparent text-xs outline-none focus:border-transparent focus:ring-0 placeholder:text-gray-500 focus:placeholder-gray-600'
             ]);
     }
 }
