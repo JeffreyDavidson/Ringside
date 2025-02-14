@@ -77,7 +77,6 @@ trait BaseTableTrait
                 'class' => '',
             ])
             ->setThAttributes(function (Column $column) {
-                // dump($column->getTitle('Actions'));
                 if ($column->getTitle() == __('core.actions')) {
                     return [
                         'default' => false,
@@ -152,16 +151,12 @@ trait BaseTableTrait
     private function setSearchAttributes(): void
     {
         $this->setSearchPlaceholder('Search '.$this->resourceName)
-            ->setSearchIconAttributes([
-                'class' => 'h-4 w-4 text-gray-600',
-                'style' => '',
-            ])
-            ->setSearchIcon('heroicon-m-magnifying-glass')
+            ->setSearchIcon('ki-filled ki-magnifier')
             ->setSearchFieldAttributes([
                 'default' => false,
                 'default-styling' => false,
                 'default-colors' => false,
-                'class' => 'grow border border-solid border-gray-300 bg-light-active rounded-md leading-none w-full h-8 text-xs font-medium ps-5 pe-5 bg-light-active text-gray-600 focus:border-primary focus:text-gray-700 hover:border-gray-400 placeholder:text-gray-600',
+                'class' => 'm-0 p-0 grow bg-transparent border-transparent text-xs outline-none font-size-inerit font-weight-inherit focus:border-transparent focus:ring-0 placeholder:text-gray-500'
             ]);
     }
 }
