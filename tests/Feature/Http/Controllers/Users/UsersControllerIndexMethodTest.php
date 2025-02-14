@@ -24,6 +24,6 @@ test('a basic user cannot view Users index page', function () {
 });
 
 test('a guest cannot view users index page', function () {
-get(action([UsersController::class, 'index']))
-->assertRedirect(route('login'));
-    });
+    get(action([UsersController::class, 'index']))
+        ->assertRedirect(route('login'));
+});
