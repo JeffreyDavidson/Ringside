@@ -22,6 +22,6 @@
                 (($this->getSearchFieldAttributes()['default'] ?? true) ||
                     ($this->getSearchFieldAttributes()['default-colors'] ?? true)),
             'block w-full' => !$this->hasSearchIcon,
-            'pl-10 pr-4' => $this->hasSearchIcon,
+            '' => $this->hasSearchIcon,
             'form-control' => $isBootstrap && $this->getSearchFieldAttributes()['default'] ?? true,
         ])->except(['default', 'default-styling', 'default-colors']) }} />
