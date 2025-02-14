@@ -1,4 +1,4 @@
-tables.<x-layouts.app>
+<x-layouts.app>
     <x-container-fluid>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7.5">
             <div class="col-span-1">
