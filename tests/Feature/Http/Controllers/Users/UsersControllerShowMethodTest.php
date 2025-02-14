@@ -35,6 +35,6 @@ test('a basic user cannot view another users user profile', function () {
 });
 
 test('a guest cannot view a user profile', function () {
-get(action([UsersController::class, 'show'], $this->user))
-->assertRedirect(route('login'));
-    });
+    get(action([UsersController::class, 'show'], $this->user))
+        ->assertRedirect(route('login'));
+});

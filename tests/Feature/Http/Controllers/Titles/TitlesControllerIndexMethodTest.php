@@ -5,8 +5,11 @@ declare(strict_types=1);
 use App\Http\Controllers\Titles\TitlesController;
 use App\Livewire\Titles\Tables\TitlesTable;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
 test('index returns a view', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->get(action([TitlesController::class, 'index']))
         ->assertOk()
         ->assertViewIs('titles.index')
@@ -14,12 +17,12 @@ test('index returns a view', function () {
 });
 
 test('a basic user cannot view titles index page', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->get(action([TitlesController::class, 'index']))
         ->assertForbidden();
 });
 
 test('a guest cannot view titles index page', function () {
-    $this->get(action([TitlesController::class, 'index']))
+    get(action([TitlesController::class, 'index']))
         ->assertRedirect(route('login'));
 });
