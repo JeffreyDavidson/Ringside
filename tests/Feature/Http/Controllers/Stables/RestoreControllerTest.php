@@ -8,7 +8,7 @@ use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use function Pest\Laravel\patch;
 
 beforeEach(function () {
     $this->stable = Stable::factory()->trashed()->create();
