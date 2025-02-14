@@ -7,12 +7,15 @@ use App\Http\Controllers\TagTeams\SuspendController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->bookable()->create();
 });
 
 test('invoke calls suspend action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([SuspendController::class], $this->tagTeam))
         ->assertRedirect(action([TagTeamsController::class, 'index']));
 
@@ -20,12 +23,12 @@ test('invoke calls suspend action and redirects', function () {
 });
 
 test('a basic user cannot retire a bookable tag team', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([SuspendController::class], $this->tagTeam))
         ->assertForbidden();
 });
 
 test('a guest cannot suspend a bookable tag team', function () {
-    $this->patch(action([SuspendController::class], $this->tagTeam))
+    patch(action([SuspendController::class], $this->tagTeam))
         ->assertRedirect(route('login'));
 });
