@@ -36,6 +36,7 @@
         "pestphp/pest-plugin-livewire": "^3.0",
         "phpstan/extension-installer": "^1.4",
         "povils/phpmnd": "^3.4",
+        "rector/rector": "^2.0",
         "spatie/laravel-ignition": "^2.4",
         "spatie/pest-plugin-test-time": "^2.0",
         "wire-elements/wire-spy": "^0.0.9"
