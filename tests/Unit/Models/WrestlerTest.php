@@ -3,10 +3,8 @@
 declare(strict_types=1);
 
 use App\Builders\WrestlerBuilder;
-use App\Enums\WrestlerStatus;
-use App\Models\Concerns\CanJoinStables;
+use App\Enums\EmploymentStatus;
 use App\Models\Concerns\CanJoinTagTeams;
-use App\Models\Concerns\HasManagers;
 use App\Models\Concerns\HasMatches;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Bookable;
@@ -51,13 +49,13 @@ test('a wrestler can have a signature move', function () {
 test('a wrestler has a status', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler)->status->toBeInstanceOf(WrestlerStatus::class);
+    expect($wrestler)->status->toBeInstanceOf(EmploymentStatus::class);
 });
 
 test('a wrestler is unemployed by default', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->status->value)->toBe(WrestlerStatus::Unemployed->value);
+    expect($wrestler->status->value)->toBe(EmploymentStatus::Unemployed->value);
 });
 
 test('a wrestler implements bookable interface', function () {
@@ -76,16 +74,8 @@ test('a wrestler implements tag team member interface', function () {
     expect(class_implements(Wrestler::class))->toContain(TagTeamMember::class);
 });
 
-test('a wrestler uses can join stables trait', function () {
-    expect(Wrestler::class)->usesTrait(CanJoinStables::class);
-});
-
 test('a wrestler uses can join tag teams trait', function () {
     expect(Wrestler::class)->usesTrait(CanJoinTagTeams::class);
-});
-
-test('a wrestler uses has managers trait', function () {
-    expect(Wrestler::class)->usesTrait(HasManagers::class);
 });
 
 test('a wrestler uses can have matches trait', function () {
@@ -106,10 +96,4 @@ test('a wrestler uses soft deleted trait', function () {
 
 test('a wrestler has its own eloquent builder', function () {
     expect(new Wrestler)->query()->toBeInstanceOf(WrestlerBuilder::class);
-});
-
-test('a wrestler has a display name', function () {
-    $wrestler = Wrestler::factory()->create(['name' => 'Hulk Hogan']);
-
-    expect($wrestler)->getIdentifier()->toBe('Hulk Hogan');
 });

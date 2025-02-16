@@ -11,14 +11,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
+/**
+ * @property int $id
+ * @property int $event_id
+ * @property int $match_type_id
+ * @property string|null $preview
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Collections\EventMatchCompetitorsCollection<int, \App\Models\EventMatchCompetitor> $competitors
+ * @property-read \App\Models\Event $event
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \App\Models\MatchType|null $matchType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee> $referees
+ * @property-read \App\Models\EventMatchResult|null $result
+ * @property-read \App\Models\EventMatchCompetitor|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title> $titles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
+ *
+ * @method static \Database\Factories\EventMatchFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
+ *
+ * @mixin \Eloquent
+ */
 class EventMatch extends Model
 {
     /** @use HasFactory<\Database\Factories\EventMatchFactory> */
     use HasFactory;
-
-    use HasMergedRelationships;
 
     /**
      * The table associated with the model.
@@ -65,7 +87,7 @@ class EventMatch extends Model
      */
     public function referees(): BelongsToMany
     {
-        return $this->belongsToMany(Referee::class);
+        return $this->belongsToMany(Referee::class, 'events_matches_referees');
     }
 
     /**
@@ -75,7 +97,7 @@ class EventMatch extends Model
      */
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class);
+        return $this->belongsToMany(Title::class, 'events_matches_titles');
     }
 
     /**
@@ -95,7 +117,7 @@ class EventMatch extends Model
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'event_match_competitors')
+        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
     }
@@ -107,7 +129,7 @@ class EventMatch extends Model
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'event_match_competitors')
+        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
     }

@@ -9,7 +9,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read \Illuminate\Support\Carbon $started_at
+ * @property int $id
+ * @property int $referee_id
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \App\Models\Referee|null $referee
+ *
+ * @method static \Database\Factories\RefereeEmploymentFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|RefereeEmployment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|RefereeEmployment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|RefereeEmployment query()
+ *
+ * @mixin \Eloquent
  */
 class RefereeEmployment extends Model
 {

@@ -14,11 +14,35 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property-read \Illuminate\Support\Carbon $date
+ * @property int $id
+ * @property string $name
+ * @property \Illuminate\Support\Carbon|null $date
+ * @property int|null $venue_id
+ * @property string|null $preview
+ * @property \App\Enums\EventStatus $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $matches
+ * @property-read \App\Models\Venue|null $venue
+ *
+ * @method static \Database\Factories\EventFactory factory($count = null, $state = [])
+ * @method static \App\Builders\EventBuilder newModelQuery()
+ * @method static \App\Builders\EventBuilder newQuery()
+ * @method static \App\Builders\EventBuilder query()
+ * @method static \App\Builders\EventBuilder past()
+ * @method static \App\Builders\EventBuilder scheduled()
+ * @method static \App\Builders\EventBuilder unscheduled()
+ * @method static \App\Builders\EventBuilder onlyTrashed()
+ * @method static \App\Builders\EventBuilder withTrashed()
+ * @method static \App\Builders\EventBuilder withoutTrashed()
+ *
+ * @mixin \Eloquent
  */
 class Event extends Model
 {
-    /** @use HasBuilder<EventBuilder<static>> */
+    /** @use HasBuilder<EventBuilder> */
     use HasBuilder;
 
     /** @use HasFactory<\Database\Factories\EventFactory> */
@@ -55,6 +79,15 @@ class Event extends Model
     }
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => EventStatus::Unscheduled->value,
+    ];
+
+    /**
      * Retrieve the venue of the event.
      *
      * @return BelongsTo<Venue, $this>
@@ -79,15 +112,7 @@ class Event extends Model
      */
     public function isScheduled(): bool
     {
-        return $this->date->isFuture();
-    }
-
-    /**
-     * Checks to see if the event has already taken place.
-     */
-    public function isPast(): bool
-    {
-        return $this->date->isPast();
+        return $this->date !== null;
     }
 
     /**
@@ -96,5 +121,21 @@ class Event extends Model
     public function isUnscheduled(): bool
     {
         return $this->date === null;
+    }
+
+    /**
+     * Checks to see if the event is scheduled for a future date.
+     */
+    public function hasFutureDate(): bool
+    {
+        return $this->isScheduled() && $this->date?->isFuture();
+    }
+
+    /**
+     * Checks to see if the event has already taken place.
+     */
+    public function hasPastDate(): bool
+    {
+        return $this->isScheduled() && $this->date?->isPast();
     }
 }

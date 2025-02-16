@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Builders\ManagerBuilder;
-use App\Enums\ManagerStatus;
+use App\Enums\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasFirstEmploymentDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Manager;
+use App\View\Columns\FirstEmploymentDateColumn;
 use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class ManagersTable extends BaseTableWithActions
 {
-    use HasFirstEmploymentDateColumn, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'managers';
 
@@ -25,12 +25,14 @@ class ManagersTable extends BaseTableWithActions
 
     protected string $resourceName = 'managers';
 
+    /**
+     * @return ManagerBuilder<Manager>
+     */
     public function builder(): ManagerBuilder
     {
         return Manager::query()
             ->with('firstEmployment')
-            ->oldest('last_name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('last_name');
     }
 
     public function configure(): void {}
@@ -46,7 +48,7 @@ class ManagersTable extends BaseTableWithActions
             Column::make(__('managers.name'), 'full_name')
                 ->searchable(),
             $this->getDefaultStatusColumn(),
-            $this->getDefaultFirstEmploymentDateColumn(),
+            FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
 
@@ -57,7 +59,8 @@ class ManagersTable extends BaseTableWithActions
      */
     public function filters(): array
     {
-        $statuses = collect(ManagerStatus::cases())->pluck('name', 'value')->toArray();
+        /** @var array<string, string> $statuses */
+        $statuses = collect(EmploymentStatus::cases())->pluck('name', 'value')->toArray();
 
         return [
             $this->getDefaultStatusFilter($statuses),

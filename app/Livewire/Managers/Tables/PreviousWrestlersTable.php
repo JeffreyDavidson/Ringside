@@ -21,9 +21,12 @@ class PreviousWrestlersTable extends DataTableComponent
 
     public ?int $managerId;
 
+    /**
+     * @return Builder<WrestlerManager>
+     */
     public function builder(): Builder
     {
-        if (! isset($this->wrestlerId)) {
+        if (! isset($this->managerId)) {
             throw new \Exception("You didn't specify a manager");
         }
 

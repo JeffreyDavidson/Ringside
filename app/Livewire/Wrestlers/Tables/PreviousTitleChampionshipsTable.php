@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Models\Title;
 use App\Models\TitleChampionship;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
@@ -35,34 +35,35 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
         $this->wrestler = $wrestler;
     }
 
+    /**
+     * @return Builder<TitleChampionship>
+     */
     public function builder(): Builder
     {
         return TitleChampionship::query()
-            ->withWhereHas('wrestlers', function ($query) {
-                $query->whereIn('wrestler_id', [$this->wrestler->id]);
-            });
+            ->whereHasMorph(
+                'new_champion',
+                [Wrestler::class],
+                function (Builder $query) {
+                    $query->whereIn('wrestler_id', [$this->wrestler->id]);
+                }
+            );
     }
 
-    public function configure(): void
-    {
-        $this->addAdditionalSelects([
-            'title_championships.won_at',
-            'title_championships.lost_at',
-            'pivot.hired_at as hired_at',
-            'pivot.left_at as left_at',
-            DB::raw('DATEDIFF(COALESCE(lost_at, NOW()), won_at) AS days_held_count'),
-        ]);
-    }
+    public function configure(): void {}
 
+    /**
+     * @return array<int, Column>
+     **/
     public function columns(): array
     {
         return [
             LinkColumn::make(__('titles.name'))
-                ->title(fn ($row) => $row->name)
-                ->location(fn ($row) => route('titles.show', $row)),
+                ->title(fn (Title $row) => $row->name)
+                ->location(fn (Title $row) => route('titles.show', $row)),
             LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn ($row) => $row->previousChampion->name)
-                ->location(fn ($row) => route('wrestlers.show', $row)),
+                ->title(fn (TitleChampionship $row) => $row->previousChampion->name ?? '')
+                ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
             Column::make(__('championships.dates_held'), 'dates_held'),
             CountColumn::make(__('championships.days_held'))
                 ->setDataSource('days_held'),

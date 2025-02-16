@@ -25,8 +25,6 @@ class TitlesController extends Controller
     {
         Gate::authorize('view', Title::class);
 
-        $title->load('championships');
-
         return view('titles.show', compact('title'));
     }
 }

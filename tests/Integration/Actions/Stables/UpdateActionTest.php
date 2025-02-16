@@ -80,7 +80,7 @@ test('tag teams of stable are synced when stable is updated', function () {
 test('managers of stable are synced when stable is updated', function () {
     $formerStableManagers = Manager::factory()->count(2)->create();
     $stable = Stable::factory()
-        ->hasAttached($formerStableManagers, ['joined_at' => now()->toDateTimeString()])
+        ->hasAttached($formerStableManagers, ['hired_at' => now()->toDateTimeString()])
         ->create();
     $newStableManagers = Manager::factory()->count(2)->create();
 

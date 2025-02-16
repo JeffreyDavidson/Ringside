@@ -21,16 +21,22 @@ class ManagerForm extends LivewireBaseForm
 
     public Carbon|string|null $start_date = '';
 
-    protected function rules()
+    /**
+     * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
+     */
+    protected function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel ?? '')],
+            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
         ];
     }
 
-    protected function validationAttributes()
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
     {
         return [
             'start_date' => 'start date',
@@ -39,7 +45,7 @@ class ManagerForm extends LivewireBaseForm
 
     public function loadExtraData(): void
     {
-        $this->start_date = $this->formModel->firstEmployment?->started_at->toDateString();
+        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
     }
 
     public function store(): bool

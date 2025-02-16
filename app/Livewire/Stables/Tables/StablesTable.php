@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Builders\StableBuilder;
-use App\Enums\StableStatus;
+use App\Enums\ActivationStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasFirstActivationDateColumn;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Stable;
+use App\View\Columns\FirstActivationDateColumn;
 use App\View\Filters\FirstActivationFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
 class StablesTable extends BaseTableWithActions
 {
-    use HasFirstActivationDateColumn, HasStatusColumn, HasStatusFilter;
+    use HasStatusColumn, HasStatusFilter;
 
     protected string $databaseTableName = 'stables';
 
@@ -29,8 +29,7 @@ class StablesTable extends BaseTableWithActions
     {
         return Stable::query()
             ->with('currentActivation')
-            ->oldest('name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status));
+            ->oldest('name');
     }
 
     public function configure(): void {}
@@ -46,7 +45,7 @@ class StablesTable extends BaseTableWithActions
             Column::make(__('stables.name'), 'name')
                 ->searchable(),
             $this->getDefaultStatusColumn(),
-            $this->getDefaultFirstActivationDateColumn(),
+            FirstActivationDateColumn::make(__('activations.started_at')),
         ];
     }
 
@@ -57,7 +56,8 @@ class StablesTable extends BaseTableWithActions
      */
     public function filters(): array
     {
-        $statuses = collect(StableStatus::cases())->pluck('name', 'value')->toArray();
+        /** @var array<string, string> $statuses */
+        $statuses = collect(ActivationStatus::cases())->pluck('name', 'value')->toArray();
 
         return [
             $this->getDefaultStatusFilter($statuses),

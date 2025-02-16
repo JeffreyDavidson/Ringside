@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
-use App\Livewire\Titles\TitleChampionshipsList;
 use App\Models\Title;
 
 use function Pest\Laravel\actingAs;
@@ -18,8 +17,7 @@ test('show returns a view', function () {
         ->get(action([TitlesController::class, 'show'], $this->title))
         ->assertOk()
         ->assertViewIs('titles.show')
-        ->assertViewHas('title', $this->title)
-        ->assertSeeLivewire(TitleChampionshipsList::class);
+        ->assertViewHas('title', $this->title);
 });
 
 test('a basic user cannot view a title', function () {

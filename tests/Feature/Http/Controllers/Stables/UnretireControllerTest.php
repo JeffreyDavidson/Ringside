@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 test('invoke calls unretire action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([UnretireController::class], $this->stable))
         ->assertRedirect(action([StablesController::class, 'index']));
 
@@ -20,12 +20,12 @@ test('invoke calls unretire action and redirects', function () {
 });
 
 test('a basic user cannot unretire a stable', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([UnretireController::class], $this->stable))
         ->assertForbidden();
 });
 
 test('a guest cannot unretire a stable', function () {
-    $this->patch(action([UnretireController::class], $this->stable))
+    patch(action([UnretireController::class], $this->stable))
         ->assertRedirect(route('login'));
 });

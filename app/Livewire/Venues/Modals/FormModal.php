@@ -19,12 +19,19 @@ class FormModal extends BaseModal
 
     public VenueForm $modelForm;
 
-    public function fillDummyFields()
+    public function fillDummyFields(): void
     {
-        $this->modelForm->name = Str::of(fake()->words(2, true))->title()->append(' Arena')->value();
+        /**
+         * @var string $state
+         *
+         * @phpstan-ignore-next-line
+         */
+        $state = fake('en_US')->state();
+
+        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->append(' Arena')->value();
         $this->modelForm->street_address = fake()->streetAddress();
         $this->modelForm->city = fake()->city();
-        $this->modelForm->state = fake()->state();
+        $this->modelForm->state = $state;
         $this->modelForm->zipcode = (int) Str::of(fake()->postcode())->limit(5)->value();
     }
 }

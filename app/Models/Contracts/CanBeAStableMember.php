@@ -12,6 +12,4 @@ interface CanBeAStableMember
     public function stables(): BelongsToMany;
 
     public function currentStable(): BelongsToOne;
-
-    public function previousStables(): BelongsToMany;
 }

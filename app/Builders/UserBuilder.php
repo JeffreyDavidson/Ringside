@@ -7,8 +7,6 @@ namespace App\Builders;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of \App\Models\User
- *
- * @extends \Illuminate\Database\Eloquent\Builder<TModel>
+ * @extends Builder<\App\Models\User>
  */
 class UserBuilder extends Builder {}

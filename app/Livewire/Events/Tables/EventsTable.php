@@ -28,12 +28,13 @@ class EventsTable extends BaseTableWithActions
 
     protected string $resourceName = 'events';
 
+    /**
+     * @return EventBuilder<Event>
+     */
     public function builder(): EventBuilder
     {
         return Event::query()
-            ->oldest('name')
-            ->when($this->getAppliedFilterWithValue('Status'), fn ($query, $status) => $query->where('status', $status))
-            ->when($this->getAppliedFilterWithValue('Venue'), fn ($query, $venue) => $query->where('venue', $venue));
+            ->oldest('name');
     }
 
     public function configure(): void {}
@@ -62,7 +63,10 @@ class EventsTable extends BaseTableWithActions
      */
     public function filters(): array
     {
+        /** @var array<string, string> $statuses */
         $statuses = collect(EventStatus::cases())->pluck('name', 'value')->toArray();
+
+        /** @var array<int, Venue> $venues */
         $venues = Venue::query()->orderBy('name')->pluck('name', 'id')->toArray();
 
         return [

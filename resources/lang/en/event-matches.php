@@ -1,9 +1,11 @@
 <?php
 
 return [
+    'event' => 'Event',
     'match_type' => 'Match Type',
-    'referee' => 'Referee(s)',
+    'referees' => 'Referee',
     'competitors' => 'Competitors',
-    'title' => 'Title(s)',
+    'titles' => 'Titles',
+    'preview' => 'Preview',
     'result' => 'Result',
 ];
