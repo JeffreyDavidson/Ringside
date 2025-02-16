@@ -37,7 +37,7 @@ class FormModal extends BaseModal
      */
     public string $subViewToUse;
 
-    public EventMatchForm $modelForm;
+    protected EventMatchForm $modelForm;
 
     public function fillDummyFields(): void
     {

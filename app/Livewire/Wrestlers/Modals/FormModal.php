@@ -18,7 +18,7 @@ class FormModal extends BaseModal
 
     protected string $modalFormPath = 'wrestlers.modals.form-modal';
 
-    public WrestlerForm $modelForm;
+    protected WrestlerForm $modelForm;
 
     public function fillDummyFields(): void
     {
