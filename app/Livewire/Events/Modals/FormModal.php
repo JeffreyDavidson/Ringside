@@ -22,7 +22,7 @@ class FormModal extends BaseModal
 
     protected string $modalFormPath = 'events.modals.form-modal';
 
-    public EventForm $modelForm;
+    protected EventForm $modelForm;
 
     public function fillDummyFields(): void
     {
