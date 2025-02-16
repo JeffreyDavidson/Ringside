@@ -23,7 +23,7 @@ class FormModal extends BaseModal
 
     protected string $modalFormPath = 'tag-teams.modals.form-modal';
 
-    public TagTeamForm $modelForm;
+    protected TagTeamForm $modelForm;
 
     public function fillDummyFields(): void
     {
