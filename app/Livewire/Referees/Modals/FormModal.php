@@ -19,7 +19,7 @@ class FormModal extends BaseModal
 
     protected string $modelTitleField = 'full_name';
 
-    public RefereeForm $modelForm;
+    protected RefereeForm $modelForm;
 
     public function fillDummyFields(): void
     {

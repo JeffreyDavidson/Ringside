@@ -17,7 +17,7 @@ class FormModal extends BaseModal
 
     protected string $modalFormPath = 'venues.modals.form-modal';
 
-    public VenueForm $modelForm;
+    protected VenueForm $modelForm;
 
     public function fillDummyFields(): void
     {
