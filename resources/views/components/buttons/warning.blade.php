@@ -1,16 +1,20 @@
 @props([
-    'size' => null,
-    'outline' => false,
+    'size' => 'default',
+    'variant' => 'default',
     'withIcon' => false,
     'iconOnly' => false,
-    'clear' => false,
-    'disabled' => false,
 ])
 
 <x-button
     {{ $attributes->merge()->class([
-            'text-white bg-warning hover:bg-warning-active hover:shadow-warning active:bg-warning-active active:shadow-warning-box-shadow focusr:bg-warning-active focus:shadow-warning-box-shadow',
-        ]) }}
-    :$size :$outline :$withIcon :$iconOnly :$clear :$disabled>
+        'bg-warning-light' => $variant === 'outline',
+        'bg-warning' => $variant === 'default',
+        'border border-solid border-warning-clarity' => $variant !== 'clear',
+        'text-white hover:bg-warning-active hover:shadow hover:shadow-warning active:bg-warning-active active:shadow active:shadow-warning focus:bg-warning-active focus:shadow focus:shadow-warning' =>
+            $variant === 'default',
+        'text-warning hover:bg-warning hover:shadow-none hover:text-warning-inverse hover:border-warning active:text-warning-inverse active:bg-warning active:border-warning active:shadow-none focus:text-warning-inverse focus:bg-warning focus:border-warning focus:shadow-none' =>
+            $variant !== 'default',
+    ]) }}
+    :$size>
     {{ $slot }}
 </x-button>
