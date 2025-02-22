@@ -38,3 +38,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__.'/web/users.php');
 });
+
+Route::prefix('docs')->group(function () {
+    Route::view('buttons', 'docs.buttons')->name('docs.buttons');
+});

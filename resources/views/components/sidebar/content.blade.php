@@ -52,6 +52,13 @@
                     <x-sidebar.menu-link :href="route('events.index')" :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
                 </x-sidebar.menu-label>
             </x-sidebar.menu-item>
+            <x-sidebar.menu-heading>Docs</x-sidebar.menu-heading>
+            <x-sidebar.menu-item>
+                <x-sidebar.menu-label>
+                    <x-sidebar.menu-icon icon="ki-cup" />
+                    <x-sidebar.menu-link :href="route('docs.buttons')" :isCurrent="request()->routeIs('docs.buttons')">Buttons</x-sidebar.menu-link>
+                </x-sidebar.menu-label>
+            </x-sidebar.menu-item>
         </x-menu>
         <!-- End of Sidebar Menu -->
     </div>
