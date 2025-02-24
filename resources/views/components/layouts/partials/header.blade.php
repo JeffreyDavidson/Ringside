@@ -19,9 +19,9 @@
             </div>
         </div>
         <!-- End of Mobile Logo -->
-        <!-- Mega Menu -->
-        {{-- <x-mega-menu/> --}}
-        <!-- End of Mega Menu -->
+        <!-- Breadcrumbs -->
+        <x-breadcrumbs class="hidden lg:flex" />
+        <!-- End of Breadcrumbs -->
         <!-- Topbar -->
         <x-topbar />
         <!-- End of Topbar -->

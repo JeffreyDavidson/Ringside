@@ -30,6 +30,11 @@
             <!-- End of Header -->
             <!-- Content -->
             <main class="grow pt-5">
+                <!-- Container -->
+                <x-container-fixed>
+                    <x-breadcrumbs class="flex lg:hidden" />
+                </x-container-fixed>
+                <!-- End of Container -->
                 {{ $slot }}
             </main>
             <!-- End of Content -->
