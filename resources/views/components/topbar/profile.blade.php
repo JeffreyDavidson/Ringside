@@ -59,7 +59,7 @@
                         class="flex items-center gap-1.5 rounded-md border border-gray-300 text-gray-600 p-1.5 text-2xs font-medium shrink-0">
                         English
                         <img alt="" class="inline-block size-3.5 rounded-full"
-                            src="{{ asset('assets/media/flags/united-states.svg') }}">
+                            src="{{ Vite::image('flags/united-states.svg') }}">
                     </div>
                 </div>
             </div>
