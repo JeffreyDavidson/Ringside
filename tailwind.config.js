@@ -128,6 +128,12 @@ export default {
 				dark: 'var(--tw-dark-box-shadow)',
 			},
             fontSize: {
+                '3xs': [
+					'0.625rem', // 10px
+					{
+						lineHeight: '0.75rem', // 12px
+					},
+				],
                 '2xs': [
 					'0.6875rem',
 					{
