@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->string('password');
             $table->string('role', 15);
             $table->string('status');
+            $table->string('avatar_path')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

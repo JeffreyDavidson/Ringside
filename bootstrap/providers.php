@@ -2,6 +2,5 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\EventServiceProvider::class,
-    App\Providers\ValidationServiceProvider::class,
+    App\Providers\NavigationServiceProvider::class,
 ];

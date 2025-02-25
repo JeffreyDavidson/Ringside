@@ -7,13 +7,13 @@
 @php($isBootstrap5 = $this->isBootstrap5)
 
 <div {{ $this->getTopLevelAttributes() }}>
-    <x-container-fluid>
+    <x-container-fixed>
         @includeWhen(
             $this->hasConfigurableAreaFor('before-wrapper'),
             $this->getConfigurableAreaFor('before-wrapper'),
             $this->getParametersForConfigurableArea('before-wrapper'))
-    </x-container-fluid>
-    <x-container-fluid>
+    </x-container-fixed>
+    <x-container-fixed>
         <x-card inGrid>
             <x-livewire-tables::wrapper :component="$this" :tableName="$tableName" :$primaryKey :$isTailwind :$isBootstrap
                 :$isBootstrap4 :$isBootstrap5>
@@ -171,5 +171,5 @@
                 @includeIf($customView)
             </x-livewire-tables::wrapper>
         </x-card>
-    </x-container-fluid>
+    </x-container-fixed>
 </div>

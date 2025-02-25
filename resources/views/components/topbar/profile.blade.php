@@ -1,69 +1,56 @@
-<div class="flex">
-    <div class="flex flex-col m-0 p-0">
-        <div class="inline-flex items-center cursor-pointer leading-none h-10 ps-4 pe-4 border border-solid border-transparent font-medium text-2xs outline-none grow rounded-full">
-            <img class="size-9 rounded-full border-2 border-success shrink-0"
-                src="{{ Vite::image('avatars/blank.png') }}">
-            </img>
+<!-- Profile -->
+<!-- Popover -->
+<div x-popover class="relative">
+    <!-- Menu Toggle -->
+    <button x-ref="button" type="button" x-popover:button
+        class="relative inline-flex items-center cursor-pointer leading-none h-10 ps-4 pe-4 border border-solid border-transparent font-medium text-2xs outline-none grow rounded-full">
+        <img class="size-9 rounded-full border-2 border-success shrink-0"
+            src="{{ Vite::image('avatars/' . Auth::user()->getAvatar()) }}">
+        </img>
+    </button>
+    <!-- Menu Dropdown -->
+    <div x-popover:panel x-transition.origin.top.right x-cloak
+        class="absolute right-0 origin-top-left p-0 m-0 flex flex-col border border-solid border-gray-300 shadow-[0_7px_18px_0px_rgba(0,0,0,0.09)] bg-white rounded-xl w-screen max-w-[250px] py-2.5">
+        <div class="flex items-center justify-between px-5 py-1.5 gap-1.5">
+            <div class="flex items-center gap-2">
+                <img alt="" class="size-9 rounded-full border-2 border-success"
+                    src="{{ Vite::image('avatars/' . Auth::user()->getAvatar()) }}">
+                <div class="flex flex-col gap-1.5">
+                    <span class="text-sm text-gray-800 font-semibold leading-none">
+                        {{ Auth::user()->full_name }}
+                    </span>
+                    <span class="text-xs text-gray-600 font-medium leading-none">
+                        {{ Auth::user()->email }}
+                    </span>
+                </div>
+                </img>
+            </div>
         </div>
-        <div class="menu-dropdown m-0 py-2.5 border-gray-300 w-screen max-w-[250px] hidden border border-solid bg-white">
-            <div class="flex items-center justify-between px-5 py-1.5 gap-1.5">
-                <div class="flex items-center gap-2">
-                    <img alt="" class="size-9 rounded-full border-2 border-success"
-                        src="{{ Vite::image('avatars/blank.png') }}">
-                    <div class="flex flex-col gap-1.5">
-                        <span class="text-sm text-gray-800 font-semibold leading-none">
-                            Cody Fisher
-                        </span>
-                        <span class="text-xs text-gray-600 font-medium leading-none">
-                            c.fisher@gmail.com
-                        </span>
-                    </div>
-                    </img>
+        <div class="border-b border-dropdown my-2.5"></div>
+        <div class="flex flex-col p-0 m-0">
+            <div class="group flex items-center grow ms-2.5 me-2.5 p-2.5 rounded-md cursor-pointer hover:bg-gray-100">
+                <span class="flex items-center shrink-0 me-2.5">
+                    <i class="ki-filled ki-icon text-lg text-gray-500 group-hover:text-primary"></i>
+                </span>
+                <span class="flex items-center grow leading-4.25 font-medium text-2sm font-gray-800">
+                    Language
+                </span>
+                <div
+                    class="flex items-center gap-1.5 rounded-md border border-gray-300 text-gray-600 p-1.5 text-2xs font-medium shrink-0">
+                    English
+                    <img alt="" class="inline-block size-3.5 rounded-full"
+                        src="{{ Vite::image('flags/united-states.svg') }}">
                 </div>
             </div>
-            <div class="menu-separator"></div>
-            <div class="flex flex-col">
-                <div class="menu-item">
-                    <div class="menu-link">
-                        <span class="menu-icon">
-                            <i class="ki-filled ki-icon"></i>
-                        </span>
-                        <span class="menu-title">
-                            Language
-                        </span>
-                        <div
-                            class="flex items-center gap-1.5 rounded-md border border-gray-300 text-gray-600 p-1.5 text-2xs font-medium shrink-0">
-                            English
-                            <img alt="" class="inline-block size-3.5 rounded-full"
-                                src="{{ Vite::image('flags/united-states.svg') }}" />
-                        </div>
-                    </div>
-                    <div class="menu-dropdown menu-default light:border-gray-300 w-full max-w-[170px]">
-                        <div class="menu-item active">
-                            <a class="menu-link h-10" href="#">
-                                <span class="menu-icon">
-                                    <img alt="" class="inline-block size-4 rounded-full"
-                                        src="{{ Vite::image('flags/united-states.svg') }}" />
-                                </span>
-                                <span class="menu-title">
-                                    English
-                                </span>
-                                <span class="menu-badge">
-                                    <i class="ki-solid ki-check-circle text-success text-base"></i>
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="menu-separator"></div>
-            <div class="flex flex-col">
-                <div class="menu-item px-4 py-1.5">
-                    <a class="btn btn-sm btn-light justify-center"
-                        href="html/demo1/authentication/classic/sign-in.html">
-                        Log out
-                    </a>
-                </div>
+        </div>
+        <div class="border-b border-dropdown my-2.5"></div>
+        <div class="flex flex-col">
+            <!-- Menu Item -->
+            <div class="flex flex-col m-0 px-4 py-1.5">
+                <form action="{{ route('logout') }}" method="post">
+                    @csrf
+                    <x-buttons.light size="sm" class="justify-center w-full">Log out</x-buttons.light>
+                </form>
             </div>
         </div>
     </div>
