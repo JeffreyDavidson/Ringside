@@ -26,6 +26,7 @@ class UsersTableSeeder extends Seeder
                 $user->password = 'password';
                 $user->role = $role->value;
                 $user->status = UserStatus::Active;
+                $user->avatar_path = '300-3.png';
                 $user->save();
                 $user->refresh();
                 $userData[] = [

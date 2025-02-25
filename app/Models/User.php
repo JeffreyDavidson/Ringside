@@ -23,6 +23,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string|null $email_verified_at
  * @property string $password
  * @property \App\Enums\UserStatus $status
+ * @property string|null $avatar_path
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -61,6 +62,7 @@ class User extends Authenticatable
         'password',
         'role',
         'status',
+        'avavar_path',
     ];
 
     /**
