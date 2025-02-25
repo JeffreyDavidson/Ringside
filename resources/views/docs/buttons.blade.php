@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <x-container-fluid>
+    <x-container-fixed>
         <h2 class="flex leading-none text-gray-900 font-semibold text-xl mb-4">Default</h2>
         <div class="mb-12 lg:mb-16">
             <!-- Tabs -->
@@ -1142,5 +1142,5 @@
                 </div>
             </div>
         </div>
-    </x-container-fluid>
+        </x-container-fluid>
 </x-layouts.app>

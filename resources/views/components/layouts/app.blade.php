@@ -16,7 +16,7 @@
     @stack('styles')
 </head>
 
-<body class="antialiased flex h-full text-base text-gray-700 bg-[#fefefe]">
+<body class="antialiased flex h-full text-base text-gray-700 layout1 bg-[--page-bg]">
     <!-- Page -->
     <!-- Main -->
     <div class="flex grow">
@@ -24,12 +24,17 @@
         <x-sidebar />
         <!-- End of Sidebar -->
         <!-- Wrapper -->
-        <div class="lg:pt-[70px] lg:ps-[280px] flex grow flex-col">
+        <div class="pt-[--header-height] flex grow flex-col lg:pt-[--header-height] lg:ps-[--sidebar-width]">
             <!-- Header -->
             <x-layouts.partials.header />
             <!-- End of Header -->
             <!-- Content -->
             <main class="grow pt-5">
+                <!-- Container -->
+                <x-container-fixed>
+                    <x-breadcrumbs class="flex lg:hidden" />
+                </x-container-fixed>
+                <!-- End of Container -->
                 {{ $slot }}
             </main>
             <!-- End of Content -->
