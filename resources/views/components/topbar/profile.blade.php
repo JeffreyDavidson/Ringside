@@ -10,7 +10,7 @@
     </button>
     <!-- Menu Dropdown -->
     <div x-popover:panel x-transition.origin.top.right x-cloak
-        class="absolute top-0 origin-top-left p-0 m-0 flex flex-col border border-solid border-gray-300 shadow-[0_7px_18px_0px_rgba(0,0,0,0.09)] bg-white rounded-xl w-screen max-w-[250px] py-2.5">
+        class="absolute right-0 origin-top-left p-0 m-0 flex flex-col border border-solid border-gray-300 shadow-[0_7px_18px_0px_rgba(0,0,0,0.09)] bg-white rounded-xl w-screen max-w-[250px] py-2.5">
         <div class="flex items-center justify-between px-5 py-1.5 gap-1.5">
             <div class="flex items-center gap-2">
                 <img alt="" class="size-9 rounded-full border-2 border-success"
