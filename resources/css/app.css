@@ -9,6 +9,7 @@
 	--sidebar-width: theme('custom.layouts.layout1.sidebar.width.desktop');
 	--sidebar-default-width: theme('custom.layouts.layout1.sidebar.width.desktop');
 	--header-height: theme('custom.layouts.layout1.header.height.desktop');
+    --sidebar-collapsed-width: theme('custom.layouts.layout1.sidebar.width.desktopCollapse');
 }
 
 @media (max-width: theme('screens.lg')) {
