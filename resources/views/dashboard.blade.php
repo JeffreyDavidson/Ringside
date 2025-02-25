@@ -1,6 +1,6 @@
 <x-layouts.app>
     <!-- Container -->
-    <x-container-fluid>
+    <x-container-fixed>
         <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
             <x-page.header>
                 <div class="flex flex-col justify-center gap-2">
@@ -9,6 +9,6 @@
                 </div>
             </x-page.header>
         </div>
-    </x-container-fluid>
+    </x-container-fixed>
     <!-- End of Container -->
 </x-layouts.app>
