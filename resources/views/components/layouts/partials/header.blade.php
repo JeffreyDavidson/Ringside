@@ -1,4 +1,4 @@
-<header x-data="{ atTop: false }" @scroll.window="atTop = window.pageYOffset > 70 ? false : true"
+<header x-data="{ atTop: true }" @scroll.window="atTop = window.pageYOffset > 1 ? false : true"
     class="h-[--header-height] lg:h-[--header-height] fixed top-0 z-10 start-0 end-0 flex items-stretch shrink-0 bg-[--page-bg] lg:start-[280px]"
     :class="(atTop === false) ? 'shadow-sm' : ''">
     <!-- Container -->
