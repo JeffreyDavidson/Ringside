@@ -125,4 +125,9 @@ class User extends Authenticatable
             'status' => UserStatus::class,
         ];
     }
+
+    public function getAvatar()
+    {
+        return $this->avatar_path ?? 'blank.png';
+    }
 }
