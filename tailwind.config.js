@@ -17,6 +17,12 @@ export default {
         "./storage/framework/views/*.php",
     ],
     safelist: [
+        'layout1',
+        'hidden',
+        'ki-filled',
+		'ki-outline',
+		'ki-duotone',
+		'ki-solid',
         {
           pattern: /max-w-(sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl)/,
           variants: ['sm', 'md', 'lg', 'xl', '2xl']
@@ -146,6 +152,12 @@ export default {
 						lineHeight: '1.125rem'
 					}
 				],
+                md: [
+					'0.9375rem', // 15px
+					{
+						lineHeight: '1.375rem', // 22px
+					},
+				],
             },
             spacing: {
                 '1.25': '.275rem',
@@ -158,6 +170,13 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
             },
+            screens: {
+				sm: '640px',
+				md: '768px',
+				lg: '1024px',
+				xl: '1280px',
+				'2xl': '1536px',
+			},
         },
         custom: ({ theme }) => ({
 			components: {
@@ -171,6 +190,23 @@ export default {
 					},
                 },
             },
+            layouts: {
+				layout1: {
+                    sidebar: {
+						width: {
+							desktop: '280px',
+							desktopCollapse: '80px',
+							mobile: '280px',
+						},
+					},
+					header: {
+						height: {
+							desktop: '70px',
+							mobile: '60px',
+						},
+					},
+				},
+			},
         }),
     },
 
