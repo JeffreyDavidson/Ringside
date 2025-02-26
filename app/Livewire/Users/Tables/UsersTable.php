@@ -50,16 +50,15 @@ class UsersTable extends BaseTableWithActions
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
                 ->label(fn ($row, Column $column) => !is_null($row) ? $row->getFormattedPhoneNumber() : ''),
-            Column::make(__('users.latestLogin'), 'latestAuthentication.login_at')
-                ->format(fn($value) => !is_null($value) ? Carbon::parse($value)->diffForHumans() : '-'),
             Column::make(__('users.location'), 'latestAuthentication.location')
                 ->label(
                     fn ($row, Column $column) => $row->latestAuthentication?->location['country'] ? view('components.tables.columns.country')->with([
                         'country' => $row->latestAuthentication?->location['country']
                     ]) : '-'
                 )->html()
-                // ->label(fn ($row, Column $column) => $row->latestAuthentication?->location['country'] ?? '-')
                 ->searchable(),
+            Column::make(__('users.activity'), 'latestAuthentication.login_at')
+                ->format(fn($value) => !is_null($value) ? Carbon::parse($value)->diffForHumans() : '-'),
         ];
     }
 }
