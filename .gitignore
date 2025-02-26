@@ -6,6 +6,7 @@
 /public/assets/
 /public/build
 /storage/*.key
+/storage/pail
 /vendor
 /report
 .env
@@ -22,3 +23,4 @@ tests/coverage
 .php-cs-fixer.cache
 package-lock.json
 yarn.lock
+/.nova
