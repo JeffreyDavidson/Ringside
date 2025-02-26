@@ -36,6 +36,8 @@ class UsersTable extends BaseTableWithActions
             Column::make(__('users.name'), 'full_name')
                 ->searchable(),
             $this->getDefaultStatusColumn(),
+            Column::make(__('users.phone'), 'phone_number')
+                ->label(fn ($row, Column $column) => !is_null($row) ? $row->getFormattedPhoneNumber() : ''),
             Column::make(__('users.email'), 'email')
                 ->searchable(),
         ];

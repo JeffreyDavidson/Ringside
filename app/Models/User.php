@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -24,6 +25,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $password
  * @property \App\Enums\UserStatus $status
  * @property string|null $avatar_path
+ * @property string|null $phone_number
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -63,6 +65,7 @@ class User extends Authenticatable
         'role',
         'status',
         'avavar_path',
+        'phone_number',
     ];
 
     /**
@@ -131,5 +134,15 @@ class User extends Authenticatable
     public function getAvatar()
     {
         return $this->avatar_path ?? 'blank.png';
+    }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getFormattedPhoneNumber(): string
+    {
+        return Str::of($this->phone_number)->replaceMatches('/\d/', function (array $matches) {
+            return "({$matches[0].$matches[1].$matches[3]})";
+        })->value();
     }
 }
