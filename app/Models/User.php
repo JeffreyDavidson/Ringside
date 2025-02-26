@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
 use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 
 /**
@@ -144,7 +143,6 @@ class User extends Authenticatable
      */
     public function getFormattedPhoneNumber(): string
     {
-        // $result =  Str::of($this->phone_number)->matchAll('~([0-9]{3})([0-9]{3})([0-9]{4})~');
-        return Str::of($this->phone_number)->value();
+        return sprintf('(%s) %s-%s', substr($this->phone_number, 0, 3), substr($this->phone_number, 3, 3), substr($this->phone_number, 6, 4));
     }
 }
