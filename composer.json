@@ -40,7 +40,8 @@
         "rector/rector": "^2.0",
         "spatie/laravel-ignition": "^2.4",
         "spatie/pest-plugin-test-time": "^2.0",
-        "wire-elements/wire-spy": "^0.0.9"
+        "wire-elements/wire-spy": "^0.0.9",
+        "laravel/pail": "^1.2.2"
     },
     "config": {
         "optimize-autoloader": true,
@@ -98,6 +99,10 @@
         ],
         "format": [
             "vendor/bin/pint"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
         ]
     }
 }
