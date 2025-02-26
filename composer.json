@@ -9,13 +9,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "ankurk91/laravel-eloquent-relationships": "^2.1",
+        "ankurk91/laravel-eloquent-relationships": "^2.2",
         "calebporzio/sushi": "^2.5",
-        "guzzlehttp/guzzle": "^7.2",
         "jenssegers/agent": "^2.6",
-        "laravel/framework": "^11.0",
-        "laravel/tinker": "^2.9",
-        "livewire/livewire": "^3.3",
+        "laravel/framework": "^12.0",
+        "laravel/tinker": "^2.10.1",
+        "livewire/livewire": "^3.5",
         "lorisleiva/laravel-actions": "^2.8",
         "rappasoft/laravel-authentication-log": "^4.0",
         "rappasoft/laravel-livewire-tables": "^3.6",
@@ -24,26 +23,27 @@
         "wire-elements/modal": "^2.0"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.10",
+        "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.14",
-        "larastan/larastan": "^3.0.4",
-        "laravel/breeze": "^2.0",
+        "larastan/larastan": "^3.1",
+        "laravel/breeze": "^2.3",
         "laravel/pint": "^1.13",
-        "laravel/sail": "^1.26",
+        "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.0",
+        "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-faker": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.1",
         "pestphp/pest-plugin-livewire": "^3.0",
         "phpstan/extension-installer": "^1.4",
         "povils/phpmnd": "^3.4",
         "rector/rector": "^2.0",
-        "spatie/laravel-ignition": "^2.4",
+        "spatie/laravel-ignition": "^2.9",
         "spatie/pest-plugin-test-time": "^2.0",
-        "wire-elements/wire-spy": "^0.0.9"
+        "wire-elements/wire-spy": "^0.0.9",
+        "laravel/pail": "^1.2.2"
     },
     "config": {
         "optimize-autoloader": true,
@@ -71,7 +71,7 @@
             "Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
         "post-autoload-dump": [
@@ -101,6 +101,10 @@
         ],
         "format": [
             "vendor/bin/pint"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
         ]
     }
 }

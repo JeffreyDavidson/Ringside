@@ -37,7 +37,7 @@ class VenueForm extends LivewireBaseForm
             'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel ?? '')],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', 'max:255', Rule::exists('App\Models\State', 'name')],
+            'state' => ['required', 'string', 'max:255', Rule::exists(\App\Models\State::class, 'name')],
             'zipcode' => ['required', 'integer', 'digits:5'],
         ];
     }
