@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 
 /**
  * @property int $id
@@ -43,6 +44,8 @@ use Illuminate\Support\Str;
  */
 class User extends Authenticatable
 {
+    use AuthenticationLoggable;
+
     /** @use HasBuilder<UserBuilder> */
     use HasBuilder;
 
@@ -137,12 +140,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Retrieve the readable name of the model.
+     * Retrieve the readable phone number of the model.
      */
     public function getFormattedPhoneNumber(): string
     {
-        return Str::of($this->phone_number)->replaceMatches('/\d/', function (array $matches) {
-            return "({$matches[0].$matches[1].$matches[3]})";
-        })->value();
+        // $result =  Str::of($this->phone_number)->matchAll('~([0-9]{3})([0-9]{3})([0-9]{4})~');
+        return Str::of($this->phone_number)->value();
     }
 }

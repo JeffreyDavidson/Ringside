@@ -1,4 +1,5 @@
-<div x-data="{ expanded: true }" :class="expanded ? 'w-[--sidebar-default-width]' : 'w-[--sidebar-collapsed-width] lg:hover:w-[--sidebar-default-width]'"
+<div x-data="{ expanded: true }"
+    :class="expanded ? 'w-[--sidebar-default-width]' : 'w-[--sidebar-collapsed-width] lg:hover:w-[--sidebar-default-width]'"
     class="w-[--sidebar-width] bg-light border-e border-e-gray-200 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0 h-full">
     <div class="h-[--header-height] hidden items-center relative justify-between px-3 shrink-0 lg:flex lg:px-6">
         <a href="{{ route('dashboard') }}">
@@ -26,7 +27,8 @@
                     </x-sidebar.menu-label>
                 </x-sidebar.menu-item>
                 <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
-                    'hidden relative before:content-['...'] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">User</x-sidebar.menu-heading>
+                    'hidden relative before:content-['...
+                    '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">User</x-sidebar.menu-heading>
                 <div x-data="{
                     open: @json(request()->is('roster/*')),
                     toggle() {
@@ -70,6 +72,13 @@
                         <x-sidebar.menu-icon icon="ki-calendar" />
                         <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('events.index')"
                             :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
+                    </x-sidebar.menu-label>
+                </x-sidebar.menu-item>
+                <x-sidebar.menu-item>
+                    <x-sidebar.menu-label>
+                        <x-sidebar.menu-icon icon="ki-user" />
+                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('users.index')"
+                            :isCurrent="request()->routeIs('users.*')">Users</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
                 </x-sidebar.menu-item>
                 <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :

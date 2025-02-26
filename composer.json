@@ -12,12 +12,15 @@
         "ankurk91/laravel-eloquent-relationships": "^2.1",
         "calebporzio/sushi": "^2.5",
         "guzzlehttp/guzzle": "^7.2",
+        "jenssegers/agent": "^2.6",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.3",
         "lorisleiva/laravel-actions": "^2.8",
+        "rappasoft/laravel-authentication-log": "^4.0",
         "rappasoft/laravel-livewire-tables": "^3.6",
         "spatie/laravel-navigation": "^1.3",
+        "torann/geoip": "^3.0",
         "wire-elements/modal": "^2.0"
     },
     "require-dev": {
