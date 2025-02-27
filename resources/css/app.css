@@ -6,7 +6,6 @@
 .layout1 {
     --sidebar-transition-duration: 0.3s;
 	--sidebar-transition-timing: ease;
-	--sidebar-width: theme('custom.layouts.layout1.sidebar.width.desktop');
 	--sidebar-default-width: theme('custom.layouts.layout1.sidebar.width.desktop');
 	--header-height: theme('custom.layouts.layout1.header.height.desktop');
     --sidebar-collapsed-width: theme('custom.layouts.layout1.sidebar.width.desktopCollapse');
