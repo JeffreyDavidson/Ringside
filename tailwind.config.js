@@ -17,6 +17,12 @@ export default {
         "./storage/framework/views/*.php",
     ],
     safelist: [
+        'layout1',
+        'hidden',
+        'ki-filled',
+		'ki-outline',
+		'ki-duotone',
+		'ki-solid',
         {
           pattern: /max-w-(sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl)/,
           variants: ['sm', 'md', 'lg', 'xl', '2xl']
@@ -25,6 +31,18 @@ export default {
 
     theme: {
         extend: {
+            base: {
+                boxShadow: {
+                    default: '0px 4px 12px 0px rgba(0, 0, 0, 0.09)',
+                    light: '0px 3px 4px 0px rgba(0, 0, 0, 0.03)',
+                    primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
+                    success: '0px 4px 12px 0px rgba(53, 189, 100, 0.35)',
+                    danger: '0px 4px 12px 0px rgba(241, 65, 108, 0.35)',
+                    info: '0px 4px 12px 0px rgba(114, 57, 234, 0.35)',
+                    warning: '0px 4px 12px 0px rgba(246, 192, 0, 0.35)',
+                    dark: '0px 4px 12px 0px rgba(37, 47, 74, 0.35)',
+                },
+            },
             colors: {
                 gray: {
                     100: '#F9F9F9',
@@ -37,56 +55,72 @@ export default {
                     800: '#252F4A',
                     900: '#071437',
                 },
-                primary: {
+                'success': {
+                    DEFAULT: '#17C653',
+                    active: '#04B440',
+                    light: '#EAFFF1',
+                    clarity: 'rgba(23, 198, 83, 0.20)',
+                    inverse: '#ffffff',
+                },
+                'primary': {
                     DEFAULT: '#1B84FF',
                     active: '#056EE9',
                     light: '#EFF6FF',
                     clarity: 'rgba(27, 132, 255, 0.20)',
                     inverse: '#ffffff'
                 },
-                secondary: {
+                'secondary': {
                     DEFAULT: '#F9F9F9',
                     active: '#f9f9f9',
                     light: '#F9F9F9',
                     clarity: 'rgba(249, 249, 249, 0.20)',
                     inverse: '#4B5675'
                 },
-                light: {
+                'light': {
                     DEFAULT: '#ffffff',
                     active: '#FCFCFC',
                     light: '#ffffff',
                     clarity: 'rgba(255, 255, 255, 0.20)',
                     inverse: '#4B5675'
                 },
-                danger: {
+                'danger': {
                     DEFAULT: '#F8285A',
                     active: '#D81A48',
                     light: '#FFEEF3',
                     clarity: 'rgba(248, 40, 90, 0.20)',
                     inverse: '#ffffff'
                 },
-                warning: {
+                'warning': {
                     DEFAULT: '#F6B100',
                     active: '#DFA000',
                     light: '#FFF8DD',
                     clarity: 'rgba(246, 177, 0, 0.20)',
                     inverse: '#ffffff'
                 },
-                info: {
+                'info': {
                     DEFAULT: '#7239EA',
                     active: '#5014D0',
                     light: '#F8F5FF',
                     clarity: 'rgba(114, 57, 234, 0.20)',
                     inverse: '#ffffff'
                 },
-                boxShadows: {
-                    default: '0px 4px 12px 0px rgba(0, 0, 0, 0.09)',
-                    light: '0px 3px 4px 0px rgba(0, 0, 0, 0.03)',
-                    primary: '0px 4px 12px 0px rgba(40, 132, 239, 0.35)',
-                    danger: '0px 4px 12px 0px rgba(241, 65, 108, 0.35)',
-                    info: '0px 4px 12px 0px rgba(114, 57, 234, 0.35)',
-                    warning: '0px 4px 12px 0px rgba(246, 192, 0, 0.35)',
+                'dark': {
+                    DEFAULT: '#1E2129',
+                    active: '#111318',
+                    light: '#F9F9F9',
+                    clarity: 'rgba(30, 33, 41, 0.20)',
+                    inverse: '#ffffff',
                 },
+                coal: {
+					100: '#15171C',
+					200: '#13141A',
+					300: '#111217',
+					400: '#0F1014',
+					500: '#0D0E12',
+					600: '#0B0C10',
+					black: '#000000',
+					clarity: 'rgba(24, 25, 31, 0.50)',
+				},
             },
             boxShadow: {
 				card: 'var(--tw-card-box-shadow)',
@@ -100,6 +134,12 @@ export default {
 				dark: 'var(--tw-dark-box-shadow)',
 			},
             fontSize: {
+                '3xs': [
+					'0.625rem', // 10px
+					{
+						lineHeight: '0.75rem', // 12px
+					},
+				],
                 '2xs': [
 					'0.6875rem',
 					{
@@ -112,6 +152,12 @@ export default {
 						lineHeight: '1.125rem'
 					}
 				],
+                md: [
+					'0.9375rem', // 15px
+					{
+						lineHeight: '1.375rem', // 22px
+					},
+				],
             },
             spacing: {
                 '1.25': '.275rem',
@@ -123,6 +169,16 @@ export default {
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            screens: {
+				sm: '640px',
+				md: '768px',
+				lg: '1024px',
+				xl: '1280px',
+				'2xl': '1536px',
+			},
+            transitionProperty: {
+                'width': 'width'
             },
         },
         custom: ({ theme }) => ({
@@ -137,6 +193,23 @@ export default {
 					},
                 },
             },
+            layouts: {
+				layout1: {
+                    sidebar: {
+						width: {
+							desktop: '280px',
+							desktopCollapse: '80px',
+							mobile: '280px',
+						},
+					},
+					header: {
+						height: {
+							desktop: '70px',
+							mobile: '60px',
+						},
+					},
+				},
+			},
         }),
     },
 
