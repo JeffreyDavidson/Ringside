@@ -33,10 +33,7 @@ class UserForm extends LivewireBaseForm
         ];
     }
 
-    public function loadExtraData(): void
-    {
-
-    }
+    public function loadExtraData(): void {}
 
     public function store(): bool
     {

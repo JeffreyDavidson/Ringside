@@ -39,26 +39,26 @@ class UsersTable extends BaseTableWithActions
             Column::make(__('users.name'), 'full_name')
                 ->label(
                     fn ($row, Column $column) => view('components.tables.columns.full-name')->with([
-                        'model' => $row
+                        'model' => $row,
                     ])
                 )->html()
                 ->searchable(),
             Column::make(__('users.role'), 'role')
-                ->format(fn($value) => $value->name),
+                ->format(fn ($value) => $value->name),
             $this->getDefaultStatusColumn(),
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn ($row, Column $column) => !is_null($row) ? $row->getFormattedPhoneNumber() : ''),
+                ->label(fn ($row, Column $column) => ! is_null($row) ? $row->getFormattedPhoneNumber() : ''),
             Column::make(__('users.location'), 'latestAuthentication.location')
                 ->label(
                     fn ($row, Column $column) => $row->latestAuthentication?->location['country'] ? view('components.tables.columns.country')->with([
-                        'country' => $row->latestAuthentication?->location['country']
+                        'country' => $row->latestAuthentication?->location['country'],
                     ]) : '-'
                 )->html()
                 ->searchable(),
             Column::make(__('users.activity'), 'latestAuthentication.login_at')
-                ->format(fn($value) => !is_null($value) ? Carbon::parse($value)->diffForHumans() : '-'),
+                ->format(fn ($value) => ! is_null($value) ? Carbon::parse($value)->diffForHumans() : '-'),
         ];
     }
 }
