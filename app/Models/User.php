@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 
 /**
  * @property int $id
@@ -24,6 +25,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $password
  * @property \App\Enums\UserStatus $status
  * @property string|null $avatar_path
+ * @property string|null $phone_number
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -41,6 +43,8 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable
 {
+    use AuthenticationLoggable;
+
     /** @use HasBuilder<UserBuilder> */
     use HasBuilder;
 
@@ -63,6 +67,7 @@ class User extends Authenticatable
         'role',
         'status',
         'avavar_path',
+        'phone_number',
     ];
 
     /**
@@ -131,5 +136,13 @@ class User extends Authenticatable
     public function getAvatar()
     {
         return $this->avatar_path ?? 'blank.png';
+    }
+
+    /**
+     * Retrieve the readable phone number of the model.
+     */
+    public function getFormattedPhoneNumber(): string
+    {
+        return sprintf('(%s) %s-%s', substr($this->phone_number, 0, 3), substr($this->phone_number, 3, 3), substr($this->phone_number, 6, 4));
     }
 }

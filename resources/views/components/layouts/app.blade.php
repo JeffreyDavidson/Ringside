@@ -24,7 +24,7 @@
         <x-sidebar />
         <!-- End of Sidebar -->
         <!-- Wrapper -->
-        <div class="pt-[--header-height] flex grow flex-col lg:pt-[--header-height] lg:ps-[--sidebar-width]">
+        <div class="pt-[--header-height] flex grow flex-col lg:pt-[--header-height] lg:ps-[--sidebar-default-width]">
             <!-- Header -->
             <x-layouts.partials.header />
             <!-- End of Header -->

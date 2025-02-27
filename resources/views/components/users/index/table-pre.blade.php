@@ -2,5 +2,10 @@
     <div class="flex flex-col justify-center gap-2">
         <x-tables.meta-data enum="\App\Enums\UserStatus" />
     </div>
-    <div class="flex items-center gap-2.5"></div>
+    <div class="flex items-center gap-2.5">
+        @can('create', \App\Models\User::class)
+            <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'users.modals.form-modal' })">Add
+                User</x-buttons.primary>
+        @endcan
+    </div>
 </div>
