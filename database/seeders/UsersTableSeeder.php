@@ -7,7 +7,10 @@ namespace Database\Seeders;
 use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 class UsersTableSeeder extends Seeder
 {
@@ -16,27 +19,28 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $userData = [];
-        collect(Role::cases())->each(function ($role, $key) use (&$userData): void {
-            for ($i = 0; $i <= 1; $i++) {
-                $user = new User;
-                $user->first_name = ($i ? 'Second ' : '').ucwords($role->value);
-                $user->last_name = 'User';
-                $user->email = $role->value.($i ? '2' : '').'@example.com';
-                $user->password = 'password';
-                $user->role = $role->value;
-                $user->status = UserStatus::Active;
-                $user->avatar_path = '300-3.png';
-                $user->save();
-                $user->refresh();
-                $userData[] = [
-                    'role' => $role->value,
-                    'name' => $user->first_name.' '.$user->last_name,
-                    'email' => $user->email,
-                    'password' => 'password',
-                ];
-            }
-        });
-        $this->command->table(['Role', 'Name', 'Email', 'Password'], $userData);
+        User::factory()->administrator()->count(2)->sequence(fn (Sequence $sequence) =>
+            [
+                'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1). ' ')->title() : '').ucwords(Role::Administrator->value),
+                'last_name' => 'User',
+                'email' => Role::Administrator->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',
+                'password' => 'password',
+                'status' => UserStatus::Active,
+                'avatar_path' => '300-3.png',
+                'phone_number' => fake()->unique()->numberBetween(0000000000, 9999999999),
+            ]
+        )->create();
+
+        User::factory()->basicUser()->count(300)->sequence(fn (Sequence $sequence) =>
+            [
+                'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1). ' ')->title() : '').ucwords(Role::Basic->value),
+                'last_name' => 'User',
+                'email' => Role::Basic->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',
+                'password' => 'password',
+                'status' => UserStatus::Active,
+                'avatar_path' => '300-3.png',
+                'phone_number' => fake()->unique()->numberBetween(0000000000, 9999999999),
+            ]
+        )->create();
     }
 }
