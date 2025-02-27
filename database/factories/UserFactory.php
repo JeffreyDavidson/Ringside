@@ -28,6 +28,8 @@ class UserFactory extends Factory
             'password' => 'secret',
             'remember_token' => Str::random(10),
             'role' => Role::Basic,
+            'avatar_path' => '300-3.png',
+            'phone_number' => fake()->unique()->phoneNumber(),
         ];
     }
 

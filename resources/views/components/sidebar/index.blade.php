@@ -1,9 +1,10 @@
-<div x-data="{ expanded: true }" :class="expanded ? 'w-[--sidebar-default-width]' : 'w-[--sidebar-collapsed-width] lg:hover:w-[--sidebar-default-width]'"
-    class="w-[--sidebar-width] bg-light border-e border-e-gray-200 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0 h-full">
+<div x-data="{ expanded: true }"
+    :class="expanded ? 'w-[--sidebar-default-width]' : 'w-[--sidebar-collapsed-width] lg:hover:w-[--sidebar-default-width]'"
+    class="bg-light border-e border-e-gray-200 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0 h-full">
     <div class="h-[--header-height] hidden items-center relative justify-between px-3 shrink-0 lg:flex lg:px-6">
         <a href="{{ route('dashboard') }}">
-            <img class="min-h-[22px] max-w-none" src="{{ Vite::image('app/default-logo.svg') }}"
-                :class="expanded ? 'lg:block' : 'hidden'" />
+            <img class="min-h-[22px] max-w-none" :class="expanded ? 'lg:block' : 'hidden'"
+                src="{{ Vite::image('app/default-logo.svg') }}" />
             <img class="min-h-[22px] max-w-none" src="{{ Vite::image('app/mini-logo.svg') }}"
                 :class="expanded ? 'hidden' : 'lg:block'" />
         </a>
@@ -26,7 +27,8 @@
                     </x-sidebar.menu-label>
                 </x-sidebar.menu-item>
                 <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
-                    'hidden relative before:content-['...'] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">User</x-sidebar.menu-heading>
+                    'hidden relative before:content-['...
+                    '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">User</x-sidebar.menu-heading>
                 <div x-data="{
                     open: @json(request()->is('roster/*')),
                     toggle() {
@@ -39,16 +41,17 @@
                         <x-sidebar.menu-accordian-icons ::class="expanded ? '' : 'hidden'" />
                     </x-sidebar.menu-label>
                     <x-sidebar.menu-accordian x-show="open">
-                        <x-sidebar.accordian-link href="{{ route('wrestlers.index') }}"
-                            :isCurrent="request()->routeIs('wrestlers.*')">Wrestlers</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('tag-teams.index') }}" :isCurrent="request()->routeIs('tag-teams.*')">
+                        <x-sidebar.accordian-link href="{{ route('wrestlers.index') }}" :isCurrent="request()->routeIs('wrestlers.*')"
+                            x-show="open || expanded">Wrestlers</x-sidebar.accordian-link>
+                        <x-sidebar.accordian-link href="{{ route('tag-teams.index') }}" :isCurrent="request()->routeIs('tag-teams.*')"
+                            x-show="open">
                             Tag Teams</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('managers.index') }}"
-                            :isCurrent="request()->routeIs('managers.*')">Managers</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('referees.index') }}"
-                            :isCurrent="request()->routeIs('referees.*')">Referees</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('stables.index') }}"
-                            :isCurrent="request()->routeIs('stables.*')">Stables</x-sidebar.accordian-link>
+                        <x-sidebar.accordian-link href="{{ route('managers.index') }}" :isCurrent="request()->routeIs('managers.*')"
+                            x-show="open">Managers</x-sidebar.accordian-link>
+                        <x-sidebar.accordian-link href="{{ route('referees.index') }}" :isCurrent="request()->routeIs('referees.*')"
+                            x-show="open">Referees</x-sidebar.accordian-link>
+                        <x-sidebar.accordian-link href="{{ route('stables.index') }}" :isCurrent="request()->routeIs('stables.*')"
+                            x-show="open">Stables</x-sidebar.accordian-link>
                     </x-sidebar.menu-accordian>
                 </div>
                 <x-sidebar.menu-item>
@@ -70,6 +73,13 @@
                         <x-sidebar.menu-icon icon="ki-calendar" />
                         <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('events.index')"
                             :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
+                    </x-sidebar.menu-label>
+                </x-sidebar.menu-item>
+                <x-sidebar.menu-item>
+                    <x-sidebar.menu-label>
+                        <x-sidebar.menu-icon icon="ki-user" />
+                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('users.index')"
+                            :isCurrent="request()->routeIs('users.*')">Users</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
                 </x-sidebar.menu-item>
                 <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :

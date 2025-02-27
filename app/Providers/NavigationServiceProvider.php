@@ -24,7 +24,8 @@ class NavigationServiceProvider extends ServiceProvider
                 )
                 ->add('Titles Table', route('titles.index'))
                 ->add('Events Table', route('events.index'))
-                ->add('Venues Table', route('venues.index'));
+                ->add('Venues Table', route('venues.index'))
+                ->add('Users Table', route('users.index'));
         });
     }
 }
