@@ -85,13 +85,13 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Run Feature Tests
-        run: php ./vendor/bin/paratest --testsuite "Feature" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage
 
       - name: Run Integration Tests
-        run: php ./vendor/bin/paratest --testsuite "Integration" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage
 
       - name: Run Unit Tests
-        run: php ./vendor/bin/paratest --testsuite "Unit" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage
 
   test-laravel11:
     runs-on: ${{ matrix.os }}
@@ -171,13 +171,13 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Run Feature Tests
-        run: php ./vendor/bin/paratest --testsuite "Feature" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage
 
       - name: Run Integration Tests
-        run: php ./vendor/bin/paratest --testsuite "Integration" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage
 
       - name: Run Unit Tests
-        run: php ./vendor/bin/paratest --testsuite "Unit" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage
 
   test-laravel12:
     runs-on: ${{ matrix.os }}
@@ -257,10 +257,10 @@ jobs:
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Run Feature Tests
-        run: php ./vendor/bin/paratest --testsuite "Feature" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage
 
       - name: Run Integration Tests
-        run: php ./vendor/bin/paratest --testsuite "Integration" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage
 
       - name: Run Unit Tests
-        run: php ./vendor/bin/paratest --testsuite "Unit" --no-coverage
+        run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage
