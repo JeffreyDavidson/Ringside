@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3a96d0839c7d8ab02ee918650b0ad427",
+    "content-hash": "2b616df195baa5d16927e4e05dbddb05",
     "packages": [
         {
             "name": "ankurk91/laravel-eloquent-relationships",
@@ -211,16 +211,16 @@
         },
         {
             "name": "brick/math",
-            "version": "0.12.2",
+            "version": "0.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/math.git",
-                "reference": "901eddb1e45a8e0f689302e40af871c181ecbe40"
+                "reference": "866551da34e9a618e64a819ee1e01c20d8a588ba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/math/zipball/901eddb1e45a8e0f689302e40af871c181ecbe40",
-                "reference": "901eddb1e45a8e0f689302e40af871c181ecbe40",
+                "url": "https://api.github.com/repos/brick/math/zipball/866551da34e9a618e64a819ee1e01c20d8a588ba",
+                "reference": "866551da34e9a618e64a819ee1e01c20d8a588ba",
                 "shasum": ""
             },
             "require": {
@@ -259,7 +259,7 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/math/issues",
-                "source": "https://github.com/brick/math/tree/0.12.2"
+                "source": "https://github.com/brick/math/tree/0.12.3"
             },
             "funding": [
                 {
@@ -267,7 +267,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-26T10:21:45+00:00"
+            "time": "2025-02-28T13:11:00+00:00"
         },
         {
             "name": "calebporzio/sushi",
@@ -4000,99 +4000,17 @@
             "time": "2024-04-27T21:32:50+00:00"
         },
         {
-            "name": "rappasoft/laravel-authentication-log",
-            "version": "dev-l12-compatibility",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel-shift/laravel-authentication-log.git",
-                "reference": "6bca835acdc18f46be8096fe766d9b3a52e58e27"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel-shift/laravel-authentication-log/zipball/6bca835acdc18f46be8096fe766d9b3a52e58e27",
-                "reference": "6bca835acdc18f46be8096fe766d9b3a52e58e27",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/contracts": "^10.0|^11.0|^12.0",
-                "php": "^8.1",
-                "spatie/laravel-package-tools": "^1.4.3"
-            },
-            "require-dev": {
-                "nunomaduro/collision": "^6.0",
-                "orchestra/testbench": "^7.0|^10.0",
-                "pestphp/pest": "^1.21|^3.7",
-                "pestphp/pest-plugin-laravel": "^1.2|^3.1",
-                "spatie/laravel-ray": "^1.29",
-                "vimeo/psalm": "^4.20|^6.6"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Rappasoft\\LaravelAuthenticationLog\\LaravelAuthenticationLogServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Rappasoft\\LaravelAuthenticationLog\\": "src",
-                    "Rappasoft\\LaravelAuthenticationLog\\Database\\Factories\\": "database/factories"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Rappasoft\\LaravelAuthenticationLog\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "./vendor/bin/pest --no-coverage"
-                ],
-                "test-coverage": [
-                    "vendor/bin/phpunit --coverage-html coverage"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Anthony Rappa",
-                    "email": "rappa819@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Log user authentication details and send new device notifications.",
-            "homepage": "https://github.com/rappasoft/laravel-authentication-log",
-            "keywords": [
-                "laravel",
-                "laravel-authentication-log",
-                "rappasoft"
-            ],
-            "support": {
-                "source": "https://github.com/laravel-shift/laravel-authentication-log/tree/l12-compatibility"
-            },
-            "funding": [
-                {
-                    "type": "github",
-                    "url": "https://github.com/rappasoft"
-                }
-            ],
-            "time": "2025-02-16T18:26:20+00:00"
-        },
-        {
             "name": "rappasoft/laravel-livewire-tables",
-            "version": "dev-l12-compatibility",
+            "version": "v3.7.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/JeffreyDavidson/laravel-livewire-tables.git",
-                "reference": "430a6fd797d617854dfd58a3805ac25237dff02b"
+                "url": "https://github.com/rappasoft/laravel-livewire-tables.git",
+                "reference": "0036a9aa00bc70cdaf119a2ab274952575251493"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JeffreyDavidson/laravel-livewire-tables/zipball/430a6fd797d617854dfd58a3805ac25237dff02b",
-                "reference": "430a6fd797d617854dfd58a3805ac25237dff02b",
+                "url": "https://api.github.com/repos/rappasoft/laravel-livewire-tables/zipball/0036a9aa00bc70cdaf119a2ab274952575251493",
+                "reference": "0036a9aa00bc70cdaf119a2ab274952575251493",
                 "shasum": ""
             },
             "require": {
@@ -4100,17 +4018,17 @@
                 "illuminate/contracts": "^10.0|^11.0|^12.0",
                 "illuminate/support": "^10.0|^11.0|^12.0",
                 "livewire/livewire": "^3.0|dev-main",
-                "php": "^8.1|^8.2|^8.3"
+                "php": "^8.1|^8.2|^8.3|^8.4"
             },
             "require-dev": {
-                "brianium/paratest": "^5.0|^6.0|^7.0|^8.0",
+                "brianium/paratest": "^5.0|^6.0|^7.0|^8.0|^9.0",
                 "ext-sqlite3": "*",
                 "larastan/larastan": "^2.6|^3.0",
                 "laravel/pint": "^1.10",
                 "monolog/monolog": "*",
-                "nunomaduro/collision": "^6.0|^7.0|^8.0",
+                "nunomaduro/collision": "^6.0|^7.0|^8.0|^9.0",
                 "orchestra/testbench": "^7.0|^8.0|^9.0|^10.0",
-                "phpunit/phpunit": "^9.0|^10.0|^11.0"
+                "phpunit/phpunit": "^9.0|^10.0|^11.0|^12.0"
             },
             "type": "library",
             "extra": {
@@ -4125,25 +4043,7 @@
                     "Rappasoft\\LaravelLivewireTables\\": "src"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Rappasoft\\LaravelLivewireTables\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "psalm": [
-                    "vendor/bin/psalm"
-                ],
-                "test": [
-                    "vendor/bin/phpunit --colors=always"
-                ],
-                "test-coverage": [
-                    "vendor/bin/phpunit --coverage-html coverage"
-                ],
-                "format": [
-                    "vendor/bin/pint"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -4169,15 +4069,16 @@
                 "tables"
             ],
             "support": {
-                "source": "https://github.com/JeffreyDavidson/laravel-livewire-tables/tree/l12-compatibility"
+                "issues": "https://github.com/rappasoft/laravel-livewire-tables/issues",
+                "source": "https://github.com/rappasoft/laravel-livewire-tables/tree/v3.7.0"
             },
             "funding": [
                 {
-                    "type": "github",
-                    "url": "https://github.com/rappasoft"
+                    "url": "https://github.com/rappasoft",
+                    "type": "github"
                 }
             ],
-            "time": "2025-02-27T13:58:43+00:00"
+            "time": "2025-02-28T01:30:50+00:00"
         },
         {
             "name": "spatie/laravel-navigation",
@@ -12008,9 +11909,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "lorisleiva/laravel-actions": 20,
-        "lorisleiva/lody": 20,
-        "rappasoft/laravel-authentication-log": 20,
-        "rappasoft/laravel-livewire-tables": 20
+        "lorisleiva/lody": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
