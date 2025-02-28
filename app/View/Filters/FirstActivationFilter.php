@@ -7,10 +7,10 @@ namespace App\View\Filters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HandlesDates;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
 use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HandlesDates;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HasConfig;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HasOptions;
 
 class FirstActivationFilter extends DateRangeFilter
 {
@@ -38,26 +38,14 @@ class FirstActivationFilter extends DateRangeFilter
             'locale' => 'en',
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
-            /** @param array{minDate: string, maxDate: string}  $dateRange */
             ->filter(function (Builder $query, array $dateRange) {
-                /** @var array{minDate: string, maxDate: string}  $dateRange */
-                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange) {
+                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange) {
                     $query
                         ->where(function (Builder $query) use ($dateRange) {
-                            $query->whereBetween(
-                                $this->filterStartField,
-                                [
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today(),
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today(),
-                                ]);
+                            $query->whereBetween($this->filterStartField, [Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(), Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay()]);
                         })
                         ->orWhere(function (Builder $query) use ($dateRange) {
-                            $query->whereBetween(
-                                $this->filterEndField,
-                                [
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today(),
-                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today(),
-                                ]);
+                            $query->whereBetween($this->filterEndField, [Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(), Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay()]);
                         });
                 });
             });

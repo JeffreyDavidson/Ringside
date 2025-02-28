@@ -9,8 +9,6 @@ use Livewire\Form;
 
 abstract class LivewireBaseForm extends Form
 {
-    protected $formModel;
-
     public function setModel(Model $formModel): void
     {
         if (property_exists($this, 'formModel')) {
@@ -24,7 +22,7 @@ abstract class LivewireBaseForm extends Form
 
     public function generateModelEditName(string $fieldName): string
     {
-        if (isset($this->formModel) && property_exists($this->formModel, $fieldName)) {
+        if (property_exists($this, 'formModel') && isset($this->formModel) && property_exists($this->formModel, $fieldName)) {
             return strval($this->formModel->{$fieldName} ?? 'Unknown');
         }
 

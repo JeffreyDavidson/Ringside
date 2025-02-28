@@ -7,10 +7,10 @@ namespace App\View\Filters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HandlesDates;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
 use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HandlesDates;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HasConfig;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HasOptions;
 
 class FirstEmploymentFilter extends DateRangeFilter
 {

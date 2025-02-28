@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 
 /**
  * @property int $id
@@ -43,8 +42,6 @@ use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
  */
 class User extends Authenticatable
 {
-    use AuthenticationLoggable;
-
     /** @use HasBuilder<UserBuilder> */
     use HasBuilder;
 
