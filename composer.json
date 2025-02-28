@@ -17,8 +17,7 @@
         "livewire/livewire": "^3.5",
         "lorisleiva/laravel-actions": "dev-l12-compatibility",
         "lorisleiva/lody": "dev-l12-compatibility as 0.5",
-        "rappasoft/laravel-authentication-log": "dev-l12-compatibility",
-        "rappasoft/laravel-livewire-tables": "dev-l12-compatibility",
+        "rappasoft/laravel-livewire-tables": "^3.7.0",
         "spatie/laravel-navigation": "^1.3",
         "torann/geoip": "^3.0",
         "wire-elements/modal": "^2.0"
@@ -111,19 +110,11 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/JeffreyDavidson/laravel-livewire-tables.git"
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/laravel-shift/lody.git"
         },
         {
             "type": "vcs",
             "url": "https://github.com/laravel-shift/laravel-actions.git"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/laravel-shift/laravel-authentication-log.git"
         }
     ]
 }
