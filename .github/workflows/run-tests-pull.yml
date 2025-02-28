@@ -14,8 +14,8 @@ jobs:
       max-parallel: 3
       matrix:
         os: [ubuntu-latest]
-        php: [8.3]
-        laravel: [10.*]
+        php: [8.4]
+        laravel: [12]
         stability: [prefer-dist]
 
     name: PULL PHP-${{ matrix.php }} - Laravel-10
