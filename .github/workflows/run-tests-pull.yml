@@ -84,11 +84,14 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Run Unit Tests
-        run: php ./vendor/bin/paratest --testsuite "Laravel Livewire Tables Unit Test Suite" --no-coverage
+      - name: Run Feature Tests
+        run: php ./vendor/bin/paratest --testsuite "Feature" --no-coverage
 
-      - name: Run Visuals Tests
-        run: php ./vendor/bin/phpunit --testsuite "Laravel Livewire Tables Visuals Test Suite" --no-coverage
+      - name: Run Integration Tests
+        run: php ./vendor/bin/paratest --testsuite "Integration" --no-coverage
+
+      - name: Run Unit Tests
+        run: php ./vendor/bin/paratest --testsuite "Unit" --no-coverage
 
   test-laravel11:
     runs-on: ${{ matrix.os }}
@@ -167,11 +170,14 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Run Unit Tests
-        run: php ./vendor/bin/paratest --testsuite "Laravel Livewire Tables Unit Test Suite" --no-coverage
+      - name: Run Feature Tests
+        run: php ./vendor/bin/paratest --testsuite "Feature" --no-coverage
 
-      - name: Run Visuals Tests
-        run: php ./vendor/bin/phpunit --testsuite "Laravel Livewire Tables Visuals Test Suite" --no-coverage
+      - name: Run Integration Tests
+        run: php ./vendor/bin/paratest --testsuite "Integration" --no-coverage
+
+      - name: Run Unit Tests
+        run: php ./vendor/bin/paratest --testsuite "Unit" --no-coverage
 
   test-laravel12:
     runs-on: ${{ matrix.os }}
@@ -250,8 +256,11 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
-      - name: Run Unit Tests
-        run: php ./vendor/bin/paratest --testsuite "Laravel Livewire Tables Unit Test Suite" --no-coverage
+      - name: Run Feature Tests
+        run: php ./vendor/bin/paratest --testsuite "Feature" --no-coverage
 
-      - name: Run Visuals Tests
-        run: php ./vendor/bin/phpunit --testsuite "Laravel Livewire Tables Visuals Test Suite" --no-coverage
+      - name: Run Integration Tests
+        run: php ./vendor/bin/paratest --testsuite "Integration" --no-coverage
+
+      - name: Run Unit Tests
+        run: php ./vendor/bin/paratest --testsuite "Unit" --no-coverage
