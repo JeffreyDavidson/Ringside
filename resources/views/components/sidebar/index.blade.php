@@ -75,13 +75,25 @@
                             :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
                 </x-sidebar.menu-item>
-                <x-sidebar.menu-item>
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-user" />
-                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('users.index')"
-                            :isCurrent="request()->routeIs('users.*')">Users</x-sidebar.menu-link>
+                <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
+                    'hidden relative before:content-['...
+                    '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">System</x-sidebar.menu-heading>
+                <div x-data="{
+                    open: @json(request()->is('user-management/*')),
+                    toggle() {
+                        this.open = !this.open
+                    }
+                }">
+                    <x-sidebar.menu-label @click="toggle">
+                        <x-sidebar.menu-icon icon="ki-people" />
+                        <x-sidebar.menu-title ::class="expanded ? 'lg:block' : 'hidden'">User Management</x-sidebar.menu-title>
+                        <x-sidebar.menu-accordian-icons ::class="expanded ? '' : 'hidden'" />
                     </x-sidebar.menu-label>
-                </x-sidebar.menu-item>
+                    <x-sidebar.menu-accordian x-show="open">
+                        <x-sidebar.accordian-link href="{{ route('users.index') }}" :isCurrent="request()->routeIs('users.*')"
+                            x-show="open || expanded">Users</x-sidebar.accordian-link>
+                    </x-sidebar.menu-accordian>
+                </div>
                 <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
                     'hidden relative before:content-['...
                     '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">Docs</x-sidebar.menu-heading>
