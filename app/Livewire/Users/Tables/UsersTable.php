@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Users\Tables;
 
 use App\Builders\UserBuilder;
+use App\Enums\Role;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
@@ -26,7 +27,6 @@ class UsersTable extends BaseTableWithActions
     {
         return User::query()
             ->select('full_name', 'phone_number', 'email', 'status', 'avatar_path')
-            ->with('latestAuthentication')
             ->oldest('last_name');
     }
 
@@ -44,21 +44,12 @@ class UsersTable extends BaseTableWithActions
                 )->html()
                 ->searchable(),
             Column::make(__('users.role'), 'role')
-                ->format(fn ($value) => $value->name),
+                ->format(fn (Role $value) => $value->name),
             $this->getDefaultStatusColumn(),
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn ($row, Column $column) => ! is_null($row) ? $row->getFormattedPhoneNumber() : ''),
-            Column::make(__('users.location'), 'latestAuthentication.location')
-                ->label(
-                    fn ($row, Column $column) => $row->latestAuthentication?->location['country'] ? view('components.tables.columns.country')->with([
-                        'country' => $row->latestAuthentication?->location['country'],
-                    ]) : '-'
-                )->html()
-                ->searchable(),
-            Column::make(__('users.activity'), 'latestAuthentication.login_at')
-                ->format(fn ($value) => ! is_null($value) ? Carbon::parse($value)->diffForHumans() : '-'),
+                ->label(fn (User $row, Column $column) => $row->getFormattedPhoneNumber()),
         ];
     }
 }

@@ -13,26 +13,6 @@ class UserForm extends LivewireBaseForm
 
     public ?User $formModel;
 
-    /**
-     * @return array<string, list<>>
-     */
-    protected function rules(): array
-    {
-        return [
-
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function validationAttributes(): array
-    {
-        return [
-
-        ];
-    }
-
     public function loadExtraData(): void {}
 
     public function store(): bool

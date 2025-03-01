@@ -16,8 +16,8 @@ class FirstActivationFilter extends DateRangeFilter
 {
     use HandlesDates,
         HasConfig,
-        HasOptions;
-    use HasWireables;
+        HasOptions,
+        HasWireables;
 
     public string $filterRelationshipName = '';
 
