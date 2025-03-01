@@ -1,7 +1,9 @@
 parameters:
     paths:
         - app
+        - database
     level: 10
+    tmpDir: build/phpstan
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         -

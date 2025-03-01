@@ -16,7 +16,7 @@ class EventForm extends LivewireBaseForm
 {
     protected string $formModelType = Event::class;
 
-    public Event $formModel;
+    public ?Event $formModel;
 
     public string $name = '';
 
@@ -33,7 +33,7 @@ class EventForm extends LivewireBaseForm
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel ?? '')],
-            'date' => ['nullable', 'date', new EventDateCanBeChanged($this->formModal ?? new $this->formModelType)],
+            'date' => ['nullable', 'date', new EventDateCanBeChanged($this->formModel)],
             'venue' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['required', 'string'],
         ];

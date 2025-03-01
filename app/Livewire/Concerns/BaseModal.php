@@ -17,8 +17,6 @@ class BaseModal extends ModalComponent
     /** @var class-string */
     protected string $modelType;
 
-    protected LivewireBaseForm $modelForm;
-
     /** @var non-falsy-string */
     protected string $modalFormPath;
 

@@ -18,8 +18,5 @@ class FormModal extends BaseModal
 
     protected UserForm $modelForm;
 
-    public function fillDummyFields(): void
-    {
-
-    }
+    public function fillDummyFields(): void {}
 }

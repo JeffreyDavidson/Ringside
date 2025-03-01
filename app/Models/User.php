@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
 
 /**
  * @property int $id
@@ -43,8 +42,6 @@ use Rappasoft\LaravelAuthenticationLog\Traits\AuthenticationLoggable;
  */
 class User extends Authenticatable
 {
-    use AuthenticationLoggable;
-
     /** @use HasBuilder<UserBuilder> */
     use HasBuilder;
 
@@ -133,7 +130,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function getAvatar()
+    public function getAvatar(): string
     {
         return $this->avatar_path ?? 'blank.png';
     }
@@ -143,6 +140,6 @@ class User extends Authenticatable
      */
     public function getFormattedPhoneNumber(): string
     {
-        return sprintf('(%s) %s-%s', substr($this->phone_number, 0, 3), substr($this->phone_number, 3, 3), substr($this->phone_number, 6, 4));
+        return $this->phone_number ? sprintf('(%s) %s-%s', substr($this->phone_number, 0, 3), substr($this->phone_number, 3, 3), substr($this->phone_number, 6, 4)) : '';
     }
 }

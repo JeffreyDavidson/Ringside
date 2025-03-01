@@ -7,17 +7,17 @@ namespace App\View\Filters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HandlesDates;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
+use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
 use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HandlesDates;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HasConfig;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Filters\HasOptions;
 
 class FirstEmploymentFilter extends DateRangeFilter
 {
     use HandlesDates,
         HasConfig,
-        HasOptions;
-    use HasWireables;
+        HasOptions,
+        HasWireables;
 
     public string $filterRelationshipName = '';
 
@@ -39,7 +39,6 @@ class FirstEmploymentFilter extends DateRangeFilter
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
             ->filter(function (Builder $query, array $dateRange) {
-                /** @var array{minDate: string, maxDate: string}  $dateRange */
                 $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange) {
                     $query
                         ->where(function (Builder $query) use ($dateRange) {
