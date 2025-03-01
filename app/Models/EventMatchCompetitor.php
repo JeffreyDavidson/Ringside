@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use \Exception;
 use App\Collections\EventMatchCompetitorsCollection;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $side_number
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Wrestler|\App\Models\TagTeam $competitor
+ * @property-read \Illuminate\Database\Eloquent\Relations\MorphTo<\App\Models\Wrestler|\App\Models\TagTeam> $competitor
  *
  * @method static EventMatchCompetitorsCollection<int, static> all($columns = ['*'])
  * @method static EventMatchCompetitorsCollection<int, static> get($columns = ['*'])
@@ -50,12 +51,27 @@ class EventMatchCompetitor extends MorphPivot
     ];
 
     /**
-     * Retrieve the competitor for the event match.
+     * Retrieve the previous champion of the title championship.
      *
-     * @return MorphTo<\App\Models\Wrestler|\App\Models\TagTeam, $this>
+     * @return MorphTo<\Illuminate\Database\Eloquent\Model, $this>
      */
     public function competitor(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'competitor_type', 'competitor_id');
+    }
+
+    public function getCompetitor(): Wrestler|TagTeam
+    {
+        $competitor = $this->competitor;
+
+        if (!is_object($competitor)) {
+            throw new Exception('No popularized object');
+        }
+
+        return match ($competitor::class) {
+            Wrestler::class,
+            TagTeam::class => $competitor,
+            default => throw new Exception('Unexpected relation: ' . $competitor::class),
+        };
     }
 }

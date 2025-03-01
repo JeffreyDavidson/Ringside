@@ -22,8 +22,8 @@ abstract class LivewireBaseForm extends Form
 
     public function generateModelEditName(string $fieldName): string
     {
-        if (isset($this->formModel)) {
-            return $this->formModel->{$fieldName} ?? 'Unknown';
+        if (property_exists($this, 'formModel') && isset($this->formModel) && property_exists($this->formModel, $fieldName)) {
+            return strval($this->formModel->{$fieldName} ?? 'Unknown');
         }
 
         return 'Unknown';

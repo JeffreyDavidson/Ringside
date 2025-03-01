@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.1|^8.2|^8.3|^8.4",
         "ankurk91/laravel-eloquent-relationships": "^2.2",
         "calebporzio/sushi": "^2.5",
         "jenssegers/agent": "^2.6",
@@ -29,6 +29,7 @@
         "filp/whoops": "^2.14",
         "larastan/larastan": "^3.1",
         "laravel/breeze": "^2.3",
+        "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
@@ -42,8 +43,7 @@
         "rector/rector": "^2.0",
         "spatie/laravel-ignition": "^2.9",
         "spatie/pest-plugin-test-time": "^2.0",
-        "wire-elements/wire-spy": "^0.0.9",
-        "laravel/pail": "^1.2.2"
+        "wire-elements/wire-spy": "^0.0.9"
     },
     "config": {
         "optimize-autoloader": true,
