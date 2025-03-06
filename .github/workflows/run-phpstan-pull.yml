@@ -47,7 +47,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: ${{ env.extensions }}
           coverage: pcov
-          tools: phpunit:11.4
+          tools: phpunit:12.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
