@@ -1,4 +1,4 @@
-name: Fix PHP code style issues
+name: Lint
 
 on:
   push:
@@ -10,28 +10,26 @@ on:
     paths:
       - '**.php'
 
-permissions:
-  contents: write
-
 jobs:
   php-code-styling:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3', '8.4']
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
 
-      - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@latest
+      - name: Setup PHP
+        id: setup-php
+        uses: shivammathur/setup-php@v2
         with:
-          pintVersion: 1.18.3
+          php-version: ${{ matrix.php-version }}
+          tools: laravel/pint, overtrue/phplint
 
-      - name: Fix styling
-        run: composer format
+      - name: Check PHP syntax
+        run: phplint --exclude=*.log .
 
-      - name: Commit styling changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Fix styling
+      - name: Check code style
+        run: pint --test
