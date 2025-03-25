@@ -12,7 +12,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->managerRepository = Mockery::mock(ManagerRepository::class);
+    $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
 test('it creates a manager', function () {
@@ -22,7 +22,7 @@ test('it creates a manager', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Manager());
+        ->andReturns(new App\Models\Manager);
 
     $this->managerRepository
         ->shouldNotReceive('employ');

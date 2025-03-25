@@ -35,7 +35,7 @@ class ClearInjuryAction extends BaseRefereeAction
     private function ensureCanBeClearedFromInjury(Referee $referee): void
     {
         if (! $referee->isInjured()) {
-            throw CannotBeClearedFromInjuryException::notInjured($referee);
+            throw CannotBeClearedFromInjuryException::notInjured();
         }
     }
 }

@@ -7,12 +7,15 @@ use App\Http\Controllers\Venues\RestoreController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Models\Venue;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     $this->venue = Venue::factory()->trashed()->create();
 });
 
 test('invoke calls restore action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([RestoreController::class], $this->venue))
         ->assertRedirect(action([VenuesController::class, 'index']));
 
@@ -20,12 +23,12 @@ test('invoke calls restore action and redirects', function () {
 });
 
 test('a basic user cannot restore a venue', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([RestoreController::class], $this->venue))
         ->assertForbidden();
 });
 
 test('a guest cannot restore a venue', function () {
-    $this->patch(action([RestoreController::class], $this->venue))
+    patch(action([RestoreController::class], $this->venue))
         ->assertRedirect(route('login'));
 });

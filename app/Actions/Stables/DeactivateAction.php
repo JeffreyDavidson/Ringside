@@ -36,19 +36,19 @@ class DeactivateAction extends BaseStableAction
     private function ensureCanBeDeactivated(Stable $stable): void
     {
         if ($stable->isUnactivated()) {
-            throw CannotBeDeactivatedException::unactivated($stable);
+            throw CannotBeDeactivatedException::unactivated();
         }
 
         if ($stable->isDeactivated()) {
-            throw CannotBeDeactivatedException::inactive($stable);
+            throw CannotBeDeactivatedException::deactivated();
         }
 
         if ($stable->hasFutureActivation()) {
-            throw CannotBeDeactivatedException::hasFutureActivation($stable);
+            throw CannotBeDeactivatedException::hasFutureActivation();
         }
 
         if ($stable->isRetired()) {
-            throw CannotBeDeactivatedException::retired($stable);
+            throw CannotBeDeactivatedException::retired();
         }
     }
 }

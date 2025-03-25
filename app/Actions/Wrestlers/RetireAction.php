@@ -50,15 +50,15 @@ class RetireAction extends BaseWrestlerAction
     private function ensureCanBeRetired(Wrestler $wrestler): void
     {
         if ($wrestler->isUnemployed()) {
-            throw CannotBeRetiredException::unemployed($wrestler);
+            throw CannotBeRetiredException::unemployed();
         }
 
         if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment($wrestler);
+            throw CannotBeRetiredException::hasFutureEmployment();
         }
 
         if ($wrestler->isRetired()) {
-            throw CannotBeRetiredException::retired($wrestler);
+            throw CannotBeRetiredException::retired();
         }
     }
 }

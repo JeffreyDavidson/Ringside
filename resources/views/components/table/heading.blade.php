@@ -1,5 +1,0 @@
-<th
-    {{ $attributes }}
->
-    {{ $slot }}
-</th>

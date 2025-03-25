@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Venues\VenuesController;
+use App\Livewire\Venues\Tables\VenuesTable;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -12,7 +13,7 @@ test('index returns a view', function () {
         ->get(action([VenuesController::class, 'index']))
         ->assertOk()
         ->assertViewIs('venues.index')
-        ->assertSeeLivewire('venues.venues-list');
+        ->assertSeeLivewire(VenuesTable::class);
 });
 
 test('a basic user cannot view venues index page', function () {

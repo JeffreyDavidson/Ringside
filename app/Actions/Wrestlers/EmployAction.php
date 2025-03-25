@@ -39,7 +39,7 @@ class EmployAction extends BaseWrestlerAction
     private function ensureCanBeEmployed(Wrestler $wrestler): void
     {
         if ($wrestler->isCurrentlyEmployed()) {
-            throw CannotBeEmployedException::employed($wrestler);
+            throw CannotBeEmployedException::employed();
         }
     }
 }

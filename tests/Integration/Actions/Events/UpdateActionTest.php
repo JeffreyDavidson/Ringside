@@ -8,7 +8,7 @@ use App\Models\Event;
 use App\Repositories\EventRepository;
 
 beforeEach(function () {
-    $this->eventRepository = Mockery::mock(EventRepository::class);
+    $this->eventRepository = $this->mock(EventRepository::class);
 });
 
 test('it updates a event', function () {

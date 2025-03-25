@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -19,7 +20,7 @@ class RestoreController extends Controller
     {
         $title = Title::onlyTrashed()->findOrFail($titleId);
 
-        $this->authorize('restore', $title);
+        Gate::authorize('restore', $title);
 
         try {
             RestoreAction::run($title);

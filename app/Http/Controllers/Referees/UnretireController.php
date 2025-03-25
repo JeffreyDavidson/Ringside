@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class UnretireController extends Controller
 {
@@ -17,7 +18,7 @@ class UnretireController extends Controller
      */
     public function __invoke(Referee $referee): RedirectResponse
     {
-        $this->authorize('unretire', $referee);
+        Gate::authorize('unretire', $referee);
 
         try {
             UnretireAction::run($referee);

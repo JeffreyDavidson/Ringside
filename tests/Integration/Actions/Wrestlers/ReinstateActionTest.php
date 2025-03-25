@@ -17,7 +17,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
+    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
 test('it reinstates a suspended wrestler at the current datetime by default', function () {

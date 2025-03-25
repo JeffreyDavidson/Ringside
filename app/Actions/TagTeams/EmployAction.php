@@ -39,7 +39,7 @@ class EmployAction extends BaseTagTeamAction
     private function ensureCanBeEmployed(TagTeam $tagTeam): void
     {
         if ($tagTeam->isCurrentlyEmployed()) {
-            throw CannotBeEmployedException::employed($tagTeam);
+            throw CannotBeEmployedException::employed();
         }
     }
 }

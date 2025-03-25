@@ -38,27 +38,27 @@ class ReinstateAction extends BaseWrestlerAction
     private function ensureCanBeReinstated(Wrestler $wrestler): void
     {
         if ($wrestler->isUnemployed()) {
-            throw CannotBeReinstatedException::unemployed($wrestler);
+            throw CannotBeReinstatedException::unemployed();
         }
 
         if ($wrestler->isReleased()) {
-            throw CannotBeReinstatedException::released($wrestler);
+            throw CannotBeReinstatedException::released();
         }
 
         if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment($wrestler);
+            throw CannotBeReinstatedException::hasFutureEmployment();
         }
 
         if ($wrestler->isInjured()) {
-            throw CannotBeReinstatedException::injured($wrestler);
+            throw CannotBeReinstatedException::injured();
         }
 
         if ($wrestler->isRetired()) {
-            throw CannotBeReinstatedException::retired($wrestler);
+            throw CannotBeReinstatedException::retired();
         }
 
         if ($wrestler->isBookable()) {
-            throw CannotBeReinstatedException::bookable($wrestler);
+            throw CannotBeReinstatedException::bookable();
         }
     }
 }

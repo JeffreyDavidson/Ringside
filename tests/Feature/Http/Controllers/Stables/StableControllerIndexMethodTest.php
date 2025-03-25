@@ -3,22 +3,26 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Stables\StablesController;
+use App\Livewire\Stables\Tables\StablesTable;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 test('index returns a view', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->get(action([StablesController::class, 'index']))
         ->assertOk()
         ->assertViewIs('stables.index')
-        ->assertSeeLivewire('stables.stables-list');
+        ->assertSeeLivewire(StablesTable::class);
 });
 
 test('a basic user cannot view stables index page', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->get(action([StablesController::class, 'index']))
         ->assertForbidden();
 });
 
 test('a guest cannot view stables index page', function () {
-    $this->get(action([StablesController::class, 'index']))
+    get(action([StablesController::class, 'index']))
         ->assertRedirect(route('login'));
 });

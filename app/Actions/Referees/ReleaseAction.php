@@ -43,19 +43,19 @@ class ReleaseAction extends BaseRefereeAction
     private function ensureCanBeReleased(Referee $referee): void
     {
         if ($referee->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed($referee);
+            throw CannotBeReleasedException::unemployed();
         }
 
         if ($referee->isReleased()) {
-            throw CannotBeReleasedException::released($referee);
+            throw CannotBeReleasedException::released();
         }
 
         if ($referee->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment($referee);
+            throw CannotBeReleasedException::hasFutureEmployment();
         }
 
         if ($referee->isRetired()) {
-            throw CannotBeReleasedException::retired($referee);
+            throw CannotBeReleasedException::retired();
         }
     }
 }

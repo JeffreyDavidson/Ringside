@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Event;
 beforeEach(function () {
     Event::fake();
 
-    $this->managerRepository = Mockery::mock(ManagerRepository::class);
+    $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
 test('it can remove current wrestlers from a manager', function () {

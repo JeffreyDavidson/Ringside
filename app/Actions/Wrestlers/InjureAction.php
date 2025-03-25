@@ -38,27 +38,27 @@ class InjureAction extends BaseWrestlerAction
     private function ensureCanBeInjured(Wrestler $wrestler): void
     {
         if ($wrestler->isUnemployed()) {
-            throw CannotBeInjuredException::unemployed($wrestler);
+            throw CannotBeInjuredException::unemployed();
         }
 
         if ($wrestler->isReleased()) {
-            throw CannotBeInjuredException::released($wrestler);
+            throw CannotBeInjuredException::released();
         }
 
         if ($wrestler->isRetired()) {
-            throw CannotBeInjuredException::retired($wrestler);
+            throw CannotBeInjuredException::retired();
         }
 
         if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeInjuredException::hasFutureEmployment($wrestler);
+            throw CannotBeInjuredException::hasFutureEmployment();
         }
 
         if ($wrestler->isInjured()) {
-            throw CannotBeInjuredException::injured($wrestler);
+            throw CannotBeInjuredException::injured();
         }
 
         if ($wrestler->isSuspended()) {
-            throw CannotBeInjuredException::suspended($wrestler);
+            throw CannotBeInjuredException::suspended();
         }
     }
 }

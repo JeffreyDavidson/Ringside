@@ -10,7 +10,7 @@ use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Titles\UnretireController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('titles', TitlesController::class);
+Route::resource('titles', TitlesController::class)->only(['index', 'show']);
 Route::patch('titles/{title}/activate', ActivateController::class)->name('titles.activate');
 Route::patch('titles/{title}/deactivate', DeactivateController::class)->name('titles.deactivate');
 Route::patch('titles/{title}/restore', RestoreController::class)->name('titles.restore');

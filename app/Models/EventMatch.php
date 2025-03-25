@@ -11,17 +11,48 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Staudenmeir\LaravelMergedRelations\Eloquent\HasMergedRelationships;
 
+/**
+ * @property int $id
+ * @property int $event_id
+ * @property int $match_type_id
+ * @property string|null $preview
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Collections\EventMatchCompetitorsCollection<int, \App\Models\EventMatchCompetitor> $competitors
+ * @property-read \App\Models\Event $event
+ * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read \App\Models\MatchType|null $matchType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee> $referees
+ * @property-read \App\Models\EventMatchResult|null $result
+ * @property-read \App\Models\EventMatchCompetitor|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title> $titles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
+ *
+ * @method static \Database\Factories\EventMatchFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
+ *
+ * @mixin \Eloquent
+ */
 class EventMatch extends Model
 {
+    /** @use HasFactory<\Database\Factories\EventMatchFactory> */
     use HasFactory;
-    use HasMergedRelationships;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'events_matches';
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'event_id',
@@ -32,7 +63,7 @@ class EventMatch extends Model
     /**
      * Get the event the match belongs to.
      *
-     * @return BelongsTo<Event, EventMatch>
+     * @return BelongsTo<Event, $this>
      */
     public function event(): BelongsTo
     {
@@ -42,7 +73,7 @@ class EventMatch extends Model
     /**
      * Get the match type of the match.
      *
-     * @return BelongsTo<MatchType, EventMatch>
+     * @return BelongsTo<MatchType, $this>
      */
     public function matchType(): BelongsTo
     {
@@ -52,27 +83,27 @@ class EventMatch extends Model
     /**
      * Get the referees assigned to the match.
      *
-     * @return BelongsToMany<Referee>
+     * @return BelongsToMany<Referee, $this>
      */
     public function referees(): BelongsToMany
     {
-        return $this->belongsToMany(Referee::class);
+        return $this->belongsToMany(Referee::class, 'events_matches_referees');
     }
 
     /**
      * Get the titles being competed for in the match.
      *
-     * @return BelongsToMany<Title>
+     * @return BelongsToMany<Title, $this>
      */
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class);
+        return $this->belongsToMany(Title::class, 'events_matches_titles');
     }
 
     /**
      * Get all the event match competitors for the match.
      *
-     * @return HasMany<EventMatchCompetitor>
+     * @return HasMany<EventMatchCompetitor, $this>
      */
     public function competitors(): HasMany
     {
@@ -82,11 +113,11 @@ class EventMatch extends Model
     /**
      * Get the wrestlers involved in the match.
      *
-     * @return MorphToMany<Wrestler>
+     * @return MorphToMany<Wrestler, $this>
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'event_match_competitors')
+        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
     }
@@ -94,11 +125,11 @@ class EventMatch extends Model
     /**
      * Get the tag teams involved in the match.
      *
-     * @return MorphToMany<TagTeam>
+     * @return MorphToMany<TagTeam, $this>
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'event_match_competitors')
+        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors')
             ->using(EventMatchCompetitor::class)
             ->withPivot('side_number');
     }
@@ -106,7 +137,7 @@ class EventMatch extends Model
     /**
      * Get the tag teams involved in the match.
      *
-     * @return HasOne<EventMatchResult>
+     * @return HasOne<EventMatchResult, $this>
      */
     public function result(): HasOne
     {

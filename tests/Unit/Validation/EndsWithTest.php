@@ -13,7 +13,7 @@ test('it formats ends with message correctly', function ($arguments, $message) {
 
     expect($validator->errors()->first('name'))->toEqual($message);
 })->with([
-    'one argument' => [['foo'], 'The name must end with one of the following: foo.'],
-    'two arguments' => [['foo', 'bar'], 'The name must end with one of the following: foo or bar.'],
-    'more than 2 arguments' => [['foo', 'bar', 'baz'], 'The name must end with one of the following: foo, bar or baz.'],
+    'one argument' => [['foo'], 'The name field must end with one of the following: foo.'],
+    'two arguments' => [['foo', 'bar'], 'The name field must end with one of the following: foo or bar.'],
+    'more than 2 arguments' => [['foo', 'bar', 'baz'], 'The name field must end with one of the following: foo, bar or baz.'],
 ]);

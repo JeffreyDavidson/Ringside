@@ -19,7 +19,7 @@ class VenueRepository
             'street_address' => $venueData->street_address,
             'city' => $venueData->city,
             'state' => $venueData->state,
-            'zip' => $venueData->zip,
+            'zipcode' => $venueData->zipcode,
         ]);
     }
 
@@ -35,7 +35,7 @@ class VenueRepository
             'street_address' => $venueData->street_address,
             'city' => $venueData->city,
             'state' => $venueData->state,
-            'zip' => $venueData->zip,
+            'zipcode' => $venueData->zipcode,
         ]);
 
         return $venue;

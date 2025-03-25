@@ -6,9 +6,7 @@ namespace App\ValueObjects;
 
 class Height
 {
-    public function __construct(public int $feet, public int $inches)
-    {
-    }
+    public function __construct(public int $feet, public int $inches) {}
 
     public function __toString(): string
     {

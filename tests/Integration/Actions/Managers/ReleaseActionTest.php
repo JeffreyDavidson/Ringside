@@ -17,7 +17,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->managerRepository = Mockery::mock(ManagerRepository::class);
+    $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
 test('it releases an available manager at the current datetime by default', function () {
@@ -32,13 +32,13 @@ test('it releases an available manager at the current datetime by default', func
 
     $this->managerRepository
         ->shouldReceive('release')
-        ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
                 ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
+        ->once()
         ->andReturn($manager);
 
     ReleaseAction::run($manager);

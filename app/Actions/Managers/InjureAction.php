@@ -35,27 +35,27 @@ class InjureAction extends BaseManagerAction
     private function ensureCanBeInjured(Manager $manager): void
     {
         if ($manager->isUnemployed()) {
-            throw CannotBeInjuredException::unemployed($manager);
+            throw CannotBeInjuredException::unemployed();
         }
 
         if ($manager->isReleased()) {
-            throw CannotBeInjuredException::released($manager);
+            throw CannotBeInjuredException::released();
         }
 
         if ($manager->isRetired()) {
-            throw CannotBeInjuredException::retired($manager);
+            throw CannotBeInjuredException::retired();
         }
 
         if ($manager->hasFutureEmployment()) {
-            throw CannotBeInjuredException::hasFutureEmployment($manager);
+            throw CannotBeInjuredException::hasFutureEmployment();
         }
 
         if ($manager->isInjured()) {
-            throw CannotBeInjuredException::injured($manager);
+            throw CannotBeInjuredException::injured();
         }
 
         if ($manager->isSuspended()) {
-            throw CannotBeInjuredException::suspended($manager);
+            throw CannotBeInjuredException::suspended();
         }
     }
 }

@@ -11,9 +11,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class WrestlerCanJoinExistingTagTeam implements ValidationRule
 {
-    public function __construct(protected TagTeam $tagTeam)
-    {
-    }
+    public function __construct(protected TagTeam $tagTeam) {}
 
     /**
      * Determine if the validation rule passes.

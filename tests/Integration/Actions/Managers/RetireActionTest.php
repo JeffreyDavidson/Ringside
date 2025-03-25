@@ -17,7 +17,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->managerRepository = Mockery::mock(ManagerRepository::class);
+    $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
 test('it retires a available manager at the current datetime by default', function () {

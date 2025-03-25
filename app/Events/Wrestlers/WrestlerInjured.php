@@ -15,7 +15,5 @@ class WrestlerInjured
     /**
      * Create a new event instance.
      */
-    public function __construct(public Wrestler $wrestler, public Carbon $injureDate)
-    {
-    }
+    public function __construct(public Wrestler $wrestler, public Carbon $injureDate) {}
 }

@@ -12,7 +12,7 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\TagTeams\UnretireController;
 use Illuminate\Support\Facades\Route;
 
-Route::resource('tag-teams', TagTeamsController::class);
+Route::resource('tag-teams', TagTeamsController::class)->only(['index', 'show']);
 Route::patch('tag-teams/{tag_team}/restore', RestoreController::class)->name('tag-teams.restore');
 Route::patch('tag-teams/{tag_team}/suspend', SuspendController::class)->name('tag-teams.suspend');
 Route::patch('tag-teams/{tag_team}/reinstate', ReinstateController::class)->name('tag-teams.reinstate');

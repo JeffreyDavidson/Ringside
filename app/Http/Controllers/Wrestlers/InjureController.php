@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeInjuredException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class InjureController extends Controller
 {
@@ -17,7 +18,7 @@ class InjureController extends Controller
      */
     public function __invoke(Wrestler $wrestler): RedirectResponse
     {
-        $this->authorize('injure', $wrestler);
+        Gate::authorize('injure', $wrestler);
 
         try {
             InjureAction::run($wrestler);

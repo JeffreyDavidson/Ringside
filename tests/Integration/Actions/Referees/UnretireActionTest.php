@@ -16,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
+    $this->refereeRepository = $this->mock(RefereeRepository::class);
 });
 
 test('it unretires a retired referee at the current datetime by default', function () {

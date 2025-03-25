@@ -13,7 +13,7 @@ use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
-    $this->stableRepository = Mockery::mock(StableRepository::class);
+    $this->stableRepository = $this->mock(StableRepository::class);
 });
 
 test('wrestlers of stable are synced when stable is updated', function () {
@@ -26,9 +26,9 @@ test('wrestlers of stable are synced when stable is updated', function () {
     $data = new StableData(
         'New Stable Name',
         null,
-        new Collection(),
+        new Collection,
         $newStableWrestlers,
-        new Collection()
+        new Collection
     );
 
     $this->stableRepository
@@ -57,8 +57,8 @@ test('tag teams of stable are synced when stable is updated', function () {
         'New Stable Name',
         null,
         $newStableTagTeams,
-        new Collection(),
-        new Collection()
+        new Collection,
+        new Collection
     );
 
     $this->stableRepository
@@ -80,15 +80,15 @@ test('tag teams of stable are synced when stable is updated', function () {
 test('managers of stable are synced when stable is updated', function () {
     $formerStableManagers = Manager::factory()->count(2)->create();
     $stable = Stable::factory()
-        ->hasAttached($formerStableManagers, ['joined_at' => now()->toDateTimeString()])
+        ->hasAttached($formerStableManagers, ['hired_at' => now()->toDateTimeString()])
         ->create();
     $newStableManagers = Manager::factory()->count(2)->create();
 
     $data = new StableData(
         'New Stable Name',
         null,
-        new Collection(),
-        new Collection(),
+        new Collection,
+        new Collection,
         $newStableManagers
     );
 

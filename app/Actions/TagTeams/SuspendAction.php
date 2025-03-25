@@ -40,23 +40,23 @@ class SuspendAction extends BaseTagTeamAction
     private function ensureCanBeSuspended(TagTeam $tagTeam): void
     {
         if ($tagTeam->isUnemployed()) {
-            throw CannotBeSuspendedException::unemployed($tagTeam);
+            throw CannotBeSuspendedException::unemployed();
         }
 
         if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeSuspendedException::hasFutureEmployment($tagTeam);
+            throw CannotBeSuspendedException::hasFutureEmployment();
         }
 
         if ($tagTeam->isSuspended()) {
-            throw CannotBeSuspendedException::suspended($tagTeam);
+            throw CannotBeSuspendedException::suspended();
         }
 
         if ($tagTeam->isReleased()) {
-            throw CannotBeSuspendedException::released($tagTeam);
+            throw CannotBeSuspendedException::released();
         }
 
         if ($tagTeam->isRetired()) {
-            throw CannotBeSuspendedException::retired($tagTeam);
+            throw CannotBeSuspendedException::retired();
         }
     }
 }

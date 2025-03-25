@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ReinstateController extends Controller
 {
@@ -17,7 +18,7 @@ class ReinstateController extends Controller
      */
     public function __invoke(Wrestler $wrestler): RedirectResponse
     {
-        $this->authorize('reinstate', $wrestler);
+        Gate::authorize('reinstate', $wrestler);
 
         try {
             ReinstateAction::run($wrestler);

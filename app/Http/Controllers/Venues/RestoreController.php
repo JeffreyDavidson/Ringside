@@ -8,6 +8,7 @@ use App\Actions\Venues\RestoreAction;
 use App\Http\Controllers\Controller;
 use App\Models\Venue;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -18,7 +19,7 @@ class RestoreController extends Controller
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 
-        $this->authorize('restore', $venue);
+        Gate::authorize('restore', $venue);
 
         RestoreAction::run($venue);
 

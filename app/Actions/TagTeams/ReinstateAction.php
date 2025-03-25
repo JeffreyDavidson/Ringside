@@ -40,23 +40,23 @@ class ReinstateAction extends BaseTagTeamAction
     private function ensureCanBeReinstated(TagTeam $tagTeam): void
     {
         if ($tagTeam->isUnemployed()) {
-            throw CannotBeReinstatedException::unemployed($tagTeam);
+            throw CannotBeReinstatedException::unemployed();
         }
 
         if ($tagTeam->isReleased()) {
-            throw CannotBeReinstatedException::released($tagTeam);
+            throw CannotBeReinstatedException::released();
         }
 
         if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment($tagTeam);
+            throw CannotBeReinstatedException::hasFutureEmployment();
         }
 
         if ($tagTeam->isRetired()) {
-            throw CannotBeReinstatedException::retired($tagTeam);
+            throw CannotBeReinstatedException::retired();
         }
 
         if ($tagTeam->isBookable()) {
-            throw CannotBeReinstatedException::bookable($tagTeam);
+            throw CannotBeReinstatedException::bookable();
         }
     }
 }

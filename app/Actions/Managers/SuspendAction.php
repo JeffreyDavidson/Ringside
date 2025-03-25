@@ -35,27 +35,27 @@ class SuspendAction extends BaseManagerAction
     private function ensureCanBeSuspended(Manager $manager): void
     {
         if ($manager->isUnemployed()) {
-            throw CannotBeSuspendedException::unemployed($manager);
+            throw CannotBeSuspendedException::unemployed();
         }
 
         if ($manager->isReleased()) {
-            throw CannotBeSuspendedException::released($manager);
+            throw CannotBeSuspendedException::released();
         }
 
         if ($manager->isRetired()) {
-            throw CannotBeSuspendedException::retired($manager);
+            throw CannotBeSuspendedException::retired();
         }
 
         if ($manager->hasFutureEmployment()) {
-            throw CannotBeSuspendedException::hasFutureEmployment($manager);
+            throw CannotBeSuspendedException::hasFutureEmployment();
         }
 
         if ($manager->isSuspended()) {
-            throw CannotBeSuspendedException::suspended($manager);
+            throw CannotBeSuspendedException::suspended();
         }
 
         if ($manager->isInjured()) {
-            throw CannotBeSuspendedException::injured($manager);
+            throw CannotBeSuspendedException::injured();
         }
     }
 }

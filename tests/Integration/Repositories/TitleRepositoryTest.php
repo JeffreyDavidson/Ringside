@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Data\TitleData;
-use App\Models\Activation;
 use App\Models\Title;
+use App\Models\TitleActivation;
 use App\Repositories\TitleRepository;
 
 test('it creates a title', function () {
@@ -57,7 +57,7 @@ test('it activates a title', function () {
 test('it updates an activation of a title', function () {
     $datetime = now();
     $title = Title::factory()
-        ->has(Activation::factory()->started($datetime->copy()->addDays(2)))
+        ->has(TitleActivation::factory()->started($datetime->copy()->addDays(2)), 'activations')
         ->create();
 
     expect($title->fresh())->activations->toHaveCount(1);

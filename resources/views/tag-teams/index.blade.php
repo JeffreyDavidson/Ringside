@@ -1,14 +1,3 @@
 <x-layouts.app>
-    <x-slot name="toolbar">
-        <x-toolbar>
-            <x-page-heading>Tag Teams List</x-page-heading>
-            <x-breadcrumbs.list>
-                <x-breadcrumbs.item label="Home" :url="route('dashboard')" />
-                <x-breadcrumbs.separator />
-                <x-breadcrumbs.item label="Tag Teams" />
-            </x-breadcrumbs.list>
-        </x-toolbar>
-    </x-slot>
-
-    <livewire:tag-teams.tag-teams-list />
+    <livewire:tag-teams.tables.tag-teams-table />
 </x-layouts.app>

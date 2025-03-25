@@ -7,12 +7,15 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\TagTeams\UnretireController;
 use App\Models\TagTeam;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->retired()->create();
 });
 
 test('invoke calls unretire action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([UnretireController::class], $this->tagTeam))
         ->assertRedirect(action([TagTeamsController::class, 'index']));
 
@@ -20,12 +23,12 @@ test('invoke calls unretire action and redirects', function () {
 });
 
 test('a basic user cannot unretire a tag team', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([UnretireController::class], $this->tagTeam))
         ->assertForbidden();
 });
 
 test('a guest cannot unretire a tag team', function () {
-    $this->patch(action([UnretireController::class], $this->tagTeam))
+    patch(action([UnretireController::class], $this->tagTeam))
         ->assertRedirect(route('login'));
 });

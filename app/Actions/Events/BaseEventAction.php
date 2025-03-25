@@ -11,7 +11,5 @@ abstract class BaseEventAction
     /**
      * Create a new base event action instance.
      */
-    public function __construct(protected EventRepository $eventRepository)
-    {
-    }
+    public function __construct(protected EventRepository $eventRepository) {}
 }

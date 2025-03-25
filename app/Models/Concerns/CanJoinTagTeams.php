@@ -20,19 +20,20 @@ trait CanJoinTagTeams
     /**
      * Get the tag teams the model has been belonged to.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, 'tag_team_wrestler')
+        return $this->belongsToMany(TagTeam::class, 'tag_teams_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(TagTeamPartner::class);
+            ->using(TagTeamPartner::class)
+            ->withTimestamps();
     }
 
     /**
      * Get the previous tag teams the member has belonged to.
      *
-     * @return BelongsToMany<TagTeam>
+     * @return BelongsToMany<TagTeam, $this>
      */
     public function previousTagTeams(): BelongsToMany
     {
@@ -45,10 +46,11 @@ trait CanJoinTagTeams
      */
     public function previousTagTeam(): BelongsToOne
     {
-        return $this->belongsToOne(TagTeam::class)
+        return $this->belongsToOne(TagTeam::class, 'tag_teams_wrestlers')
             ->wherePivotNotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
-            ->orderByPivot('joined_at', 'desc');
+            ->orderByPivot('joined_at', 'desc')
+            ->withTimestamps();
     }
 
     /**
@@ -56,9 +58,10 @@ trait CanJoinTagTeams
      */
     public function currentTagTeam(): BelongsToOne
     {
-        return $this->belongsToOne(TagTeam::class)
+        return $this->belongsToOne(TagTeam::class, 'tag_teams_wrestlers')
             ->wherePivotNull('left_at')
-            ->withPivot(['joined_at', 'left_at']);
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
     }
 
     /**

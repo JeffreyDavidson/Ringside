@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\TagTeamStatus;
+use App\Enums\EmploymentStatus;
 use App\Models\TagTeam;
 
 test('a tag team has a name', function () {
@@ -20,5 +20,5 @@ test('a tag team can have a signature move', function () {
 test('a tag team has a status', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam)->status->toBeInstanceOf(TagTeamStatus::class);
+    expect($tagTeam)->status->toBeInstanceOf(EmploymentStatus::class);
 });

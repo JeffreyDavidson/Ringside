@@ -17,7 +17,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->wrestlerRepository = Mockery::mock(WrestlerRepository::class);
+    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
 test('it clears an injury of an injured wrestler at the current datetime by default', function () {

@@ -6,8 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Collection;
-use Tests\CreatesApplication;
-use Tests\ValidatesRequests;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,10 +18,12 @@ use Tests\ValidatesRequests;
 |
 */
 
-uses(TestCase::class, CreatesApplication::class, RefreshDatabase::class)
+uses(TestCase::class, RefreshDatabase::class)
     ->in('Feature', 'Integration', 'Unit');
 
-uses(ValidatesRequests::class)->in('Feature/Http/Requests');
+pest()
+    ->in('Feature')
+    ->beforeEach(fn () => $this->withoutVite());
 
 /*
 |--------------------------------------------------------------------------

@@ -35,27 +35,27 @@ class ReinstateAction extends BaseManagerAction
     private function ensureCanBeReinstated(Manager $manager): void
     {
         if ($manager->isUnemployed()) {
-            throw CannotBeReinstatedException::unemployed($manager);
+            throw CannotBeReinstatedException::unemployed();
         }
 
         if ($manager->isReleased()) {
-            throw CannotBeReinstatedException::released($manager);
+            throw CannotBeReinstatedException::released();
         }
 
         if ($manager->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment($manager);
+            throw CannotBeReinstatedException::hasFutureEmployment();
         }
 
         if ($manager->isInjured()) {
-            throw CannotBeReinstatedException::injured($manager);
+            throw CannotBeReinstatedException::injured();
         }
 
         if ($manager->isRetired()) {
-            throw CannotBeReinstatedException::retired($manager);
+            throw CannotBeReinstatedException::retired();
         }
 
         if ($manager->isAvailable()) {
-            throw CannotBeReinstatedException::available($manager);
+            throw CannotBeReinstatedException::available();
         }
     }
 }

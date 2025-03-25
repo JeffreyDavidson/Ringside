@@ -4,43 +4,42 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Suspendable;
 use Exception;
 
 class CannotBeReinstatedException extends Exception
 {
-    public static function unemployed(Suspendable $model): self
+    public static function unemployed(): self
     {
-        return new self("`{$model->getIdentifier()}` is unemployed and cannot be reinstated.");
+        return new self('This model is unemployed and cannot be reinstated.');
     }
 
-    public static function released(Suspendable $model): self
+    public static function released(): self
     {
-        return new self("`{$model->getIdentifier()}` is released and cannot be reinstated.");
+        return new self('This model is released and cannot be reinstated.');
     }
 
-    public static function retired(Suspendable $model): self
+    public static function retired(): self
     {
-        return new self("`{$model->getIdentifier()}` is retired and cannot be reinstated.");
+        return new self('This model is retired and cannot be reinstated.');
     }
 
-    public static function hasFutureEmployment(Suspendable $model): self
+    public static function hasFutureEmployment(): self
     {
-        return new self("`{$model->getIdentifier()}` has not been officially employed and cannot be reinstated.");
+        return new self('This model has not been officially employed and cannot be reinstated.');
     }
 
-    public static function bookable(Suspendable $model): self
+    public static function bookable(): self
     {
-        return new self("`{$model->getIdentifier()}` is bookable and cannot be reinstated.");
+        return new self('This model is bookable and cannot be reinstated.');
     }
 
-    public static function injured(Suspendable $model): self
+    public static function injured(): self
     {
-        return new self("`{$model->getIdentifier()}` is injured and cannot be reinstated.");
+        return new self('This model is injured and cannot be reinstated.');
     }
 
-    public static function available(Suspendable $model): self
+    public static function available(): self
     {
-        return new self("`{$model->getIdentifier()}` is available and cannot be reinstated.");
+        return new self('This model is available and cannot be reinstated.');
     }
 }

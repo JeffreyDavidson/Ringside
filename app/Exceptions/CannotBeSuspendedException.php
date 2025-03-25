@@ -4,38 +4,37 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Suspendable;
 use Exception;
 
 class CannotBeSuspendedException extends Exception
 {
-    public static function unemployed(Suspendable $model): self
+    public static function unemployed(): self
     {
-        return new self("`{$model->getIdentifier()}` is unemployed and cannot be suspended.");
+        return new self('This model is unemployed and cannot be suspended.');
     }
 
-    public static function hasFutureEmployment(Suspendable $model): self
+    public static function hasFutureEmployment(): self
     {
-        return new self("`{$model->getIdentifier()}` has not been officially employed and cannot be suspended.");
+        return new self('This model has not been officially employed and cannot be suspended.');
     }
 
-    public static function retired(Suspendable $model): self
+    public static function retired(): self
     {
-        return new self("`{$model->getIdentifier()}` is retired and cannot be suspended.");
+        return new self('This model is retired and cannot be suspended.');
     }
 
-    public static function released(Suspendable $model): self
+    public static function released(): self
     {
-        return new self("`{$model->getIdentifier()}` is released and cannot be suspended.");
+        return new self('This model is released and cannot be suspended.');
     }
 
-    public static function suspended(Suspendable $model): self
+    public static function suspended(): self
     {
-        return new self("`{$model->getIdentifier()}` is already suspended.");
+        return new self('This model is already suspended.');
     }
 
-    public static function injured(Suspendable $model): self
+    public static function injured(): self
     {
-        return new self("`{$model->getIdentifier()}` is injured and cannot be suspended.");
+        return new self('This model is injured and cannot be suspended.');
     }
 }

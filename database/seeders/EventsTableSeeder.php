@@ -15,6 +15,6 @@ class EventsTableSeeder extends Seeder
     public function run(): void
     {
         Event::factory()->scheduled()->count(5)->create();
-        Event::factory()->past()->create();
+        Event::factory()->past()->count(100)->create();
     }
 }

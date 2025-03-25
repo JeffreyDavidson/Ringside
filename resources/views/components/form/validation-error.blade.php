@@ -1,3 +1,3 @@
-<div class="fv-plugins-message-container invalid-feedback">
-    <div data-field="name" data-validator="notEmpty">{{ $message }}</div>
-</div>
+<span class="font-medium leading-4 text-xs text-red-400 peer-invalid:visible">
+    {{ $message }}
+</span>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class RestoreController extends Controller
 {
@@ -19,7 +20,7 @@ class RestoreController extends Controller
     {
         $referee = Referee::onlyTrashed()->findOrFail($refereeId);
 
-        $this->authorize('restore', Referee::class);
+        Gate::authorize('restore', Referee::class);
 
         try {
             RestoreAction::run($referee);

@@ -12,7 +12,7 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 
-    $this->titleRepository = Mockery::mock(TitleRepository::class);
+    $this->titleRepository = $this->mock(TitleRepository::class);
 });
 
 test('it creates a title', function () {
@@ -22,7 +22,7 @@ test('it creates a title', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Title());
+        ->andReturns(new App\Models\Title);
 
     $this->titleRepository
         ->shouldNotReceive('activate');
