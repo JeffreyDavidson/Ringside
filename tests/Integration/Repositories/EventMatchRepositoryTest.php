@@ -24,7 +24,7 @@ test('creates an event match', function () {
     $data = new EventMatchData(
         $matchType,
         $referees,
-        new Collection(),
+        new Collection,
         collect(),
         null
     );
@@ -43,7 +43,7 @@ test('creates an event match with a preview', function () {
     $data = new EventMatchData(
         $matchType,
         $referees,
-        new Collection(),
+        new Collection,
         collect(),
         'This is an general preview.'
     );

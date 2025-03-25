@@ -15,7 +15,5 @@ class ManagerRetired
     /**
      * Create a new event instance.
      */
-    public function __construct(public Manager $manager, public Carbon $retirementDate)
-    {
-    }
+    public function __construct(public Manager $manager, public Carbon $retirementDate) {}
 }

@@ -6,12 +6,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember query()
+ *
+ * @mixin \Eloquent
+ */
 class StableMember extends MorphPivot
 {
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'stable_id',
@@ -22,12 +29,15 @@ class StableMember extends MorphPivot
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'joined_at' => 'datetime',
-        'left_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'joined_at' => 'datetime',
+            'left_at' => 'datetime',
+        ];
+    }
 }

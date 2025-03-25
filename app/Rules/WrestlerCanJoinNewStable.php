@@ -14,9 +14,7 @@ class WrestlerCanJoinNewStable implements ValidationRule
     /**
      * @param  Collection<int, int>  $tagTeamIds
      */
-    public function __construct(protected Collection $tagTeamIds)
-    {
-    }
+    public function __construct(protected Collection $tagTeamIds) {}
 
     /**
      * Determine if the validation rule passes.
@@ -26,7 +24,7 @@ class WrestlerCanJoinNewStable implements ValidationRule
         /** @var Wrestler $wrestler */
         $wrestler = Wrestler::with(['currentStable'])->find($value);
 
-        if (! is_null($wrestler->currentStable) && $wrestler->currentStable->exists()) {
+        if ($wrestler->currentStable()->getParent()->exists()) {
             $fail('This wrestler is already a member of a stable.');
         }
 

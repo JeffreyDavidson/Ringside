@@ -2,9 +2,7 @@
     "preset": "laravel",
     "rules": {
         "explicit_string_variable": true,
-        "declare_strict_types": true,
-        "no_superfluous_phpdoc_tags": false,
-        "nullable_type_declaration_for_default_null_value": true
+        "declare_strict_types": true
     },
     "exclude": [
         "database",

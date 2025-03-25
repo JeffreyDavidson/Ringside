@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeReinstatedException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ReinstateController extends Controller
 {
@@ -17,7 +18,7 @@ class ReinstateController extends Controller
      */
     public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
-        $this->authorize('reinstate', $tagTeam);
+        Gate::authorize('reinstate', $tagTeam);
 
         try {
             ReinstateAction::run($tagTeam);

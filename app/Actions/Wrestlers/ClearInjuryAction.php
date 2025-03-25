@@ -38,7 +38,7 @@ class ClearInjuryAction extends BaseWrestlerAction
     private function ensureCanBeClearedFromInjury(Wrestler $wrestler): void
     {
         if (! $wrestler->isInjured()) {
-            throw CannotBeClearedFromInjuryException::notInjured($wrestler);
+            throw CannotBeClearedFromInjuryException::notInjured();
         }
     }
 }

@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
 Route::redirect('/', 'login');
 
+Route::view('/test', 'test');
+
 Route::middleware(['middleware' => 'auth'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 });
 
 Route::middleware(['auth'])->prefix('roster')->group(function () {
@@ -30,4 +33,12 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::group([], __DIR__.'/web/venues.php');
+});
+
+Route::middleware(['auth'])->prefix('user-management')->group(function () {
+    Route::group([], __DIR__.'/web/users.php');
+});
+
+Route::prefix('docs')->group(function () {
+    Route::view('buttons', 'docs.buttons')->name('docs.buttons');
 });

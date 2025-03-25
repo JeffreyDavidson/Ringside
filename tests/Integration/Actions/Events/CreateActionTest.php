@@ -7,7 +7,7 @@ use App\Data\EventData;
 use App\Repositories\EventRepository;
 
 beforeEach(function () {
-    $this->eventRepository = Mockery::mock(EventRepository::class);
+    $this->eventRepository = $this->mock(EventRepository::class);
 });
 
 test('it creates an event', function () {
@@ -17,7 +17,7 @@ test('it creates an event', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Event());
+        ->andReturns(new App\Models\Event);
 
     CreateAction::run($data);
 });

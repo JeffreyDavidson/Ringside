@@ -9,6 +9,7 @@ use App\Exceptions\CannotBeUnretiredException;
 use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 
 class UnretireController extends Controller
 {
@@ -17,7 +18,7 @@ class UnretireController extends Controller
      */
     public function __invoke(TagTeam $tagTeam): RedirectResponse
     {
-        $this->authorize('unretire', $tagTeam);
+        Gate::authorize('unretire', $tagTeam);
 
         try {
             UnretireAction::run($tagTeam);

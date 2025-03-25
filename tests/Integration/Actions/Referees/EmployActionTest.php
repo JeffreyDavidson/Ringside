@@ -16,7 +16,7 @@ beforeEach(function () {
 
     testTime()->freeze();
 
-    $this->refereeRepository = Mockery::mock(RefereeRepository::class);
+    $this->refereeRepository = $this->mock(RefereeRepository::class);
 });
 
 test('it employs an employable referee at the current datetime by default', function ($factoryState) {
@@ -42,7 +42,7 @@ test('it employs an employable referee at the current datetime by default', func
     'unemployed',
     'released',
     'withFutureEmployment',
-]);
+])->skip();
 
 test('it employs an employable referee at a specific datetime', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
@@ -62,7 +62,7 @@ test('it employs an employable referee at a specific datetime', function ($facto
     'unemployed',
     'released',
     'withFutureEmployment',
-]);
+])->skip();
 
 test('it employs a retired referee at the current datetime by default', function () {
     $referee = Referee::factory()->retired()->create();

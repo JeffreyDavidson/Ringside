@@ -36,7 +36,7 @@ class UnretireAction extends BaseStableAction
     private function ensureCanBeUnretired(Stable $stable): void
     {
         if (! $stable->isRetired()) {
-            throw CannotBeUnretiredException::notRetired($stable);
+            throw CannotBeUnretiredException::notRetired();
         }
     }
 }

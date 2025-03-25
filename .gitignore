@@ -6,6 +6,7 @@
 /public/assets/
 /public/build
 /storage/*.key
+/storage/pail
 /vendor
 /report
 .env
@@ -18,5 +19,9 @@ storage/
 tests/coverage
 .DS_Store
 .idea/
-
+.phpunit.cache
 .php-cs-fixer.cache
+package-lock.json
+yarn.lock
+/.nova
+build

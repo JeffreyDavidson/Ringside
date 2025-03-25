@@ -14,19 +14,20 @@ trait HasWrestlers
     /**
      * Get the wrestlers that have been tag team partners of the tag team.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class, 'tag_team_wrestler')
+        return $this->belongsToMany(Wrestler::class, 'tag_teams_wrestlers')
             ->withPivot('joined_at', 'left_at')
-            ->using(TagTeamPartner::class);
+            ->using(TagTeamPartner::class)
+            ->withTimestamps();
     }
 
     /**
      * Get current wrestlers of the tag team.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function currentWrestlers(): BelongsToMany
     {
@@ -37,7 +38,7 @@ trait HasWrestlers
     /**
      * Get previous tag team partners of the tag team.
      *
-     * @return BelongsToMany<Wrestler>
+     * @return BelongsToMany<Wrestler, $this>
      */
     public function previousWrestlers(): BelongsToMany
     {
@@ -48,7 +49,7 @@ trait HasWrestlers
     /**
      * Get the combined weight of both tag team partners in a tag team.
      *
-     * @return Attribute<string, never>
+     * @return Attribute<mixed, mixed>
      */
     public function combinedWeight(): Attribute
     {

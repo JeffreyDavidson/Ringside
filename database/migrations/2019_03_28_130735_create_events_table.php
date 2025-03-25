@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
+use App\Models\Venue;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->datetime('date')->nullable();
-            $table->foreignId('venue_id')->nullable()->constrained();
+            $table->foreignIdFor(Venue::class)->nullable();
             $table->text('preview')->nullable();
             $table->string('status');
             $table->timestamps();

@@ -19,6 +19,5 @@ abstract class BaseStableAction
         protected TagTeamRepository $tagTeamRepository,
         protected WrestlerRepository $wrestlerRepository,
         protected ManagerRepository $managerRepository
-    ) {
-    }
+    ) {}
 }

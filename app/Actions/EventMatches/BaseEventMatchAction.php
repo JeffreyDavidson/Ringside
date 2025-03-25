@@ -11,7 +11,5 @@ abstract class BaseEventMatchAction
     /**
      * Create a new base event match action instance.
      */
-    public function __construct(protected EventMatchRepository $eventMatchRepository)
-    {
-    }
+    public function __construct(protected EventMatchRepository $eventMatchRepository) {}
 }

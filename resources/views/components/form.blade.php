@@ -1,4 +1,4 @@
-<form method="post" action="{{ $action }}">
+<form method="post" {{ $attributes }}>
     @csrf
 
     {{ $slot }}

@@ -8,7 +8,7 @@ use App\Models\Venue;
 use App\Repositories\VenueRepository;
 
 beforeEach(function () {
-    $this->venueRepository = Mockery::mock(VenueRepository::class);
+    $this->venueRepository = $this->mock(VenueRepository::class);
 });
 
 test('it creates a venue', function () {
@@ -18,7 +18,7 @@ test('it creates a venue', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new Venue());
+        ->andReturns(new Venue);
 
     CreateAction::run($data);
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
+use App\Models\Stable;
 use App\Models\Title;
 use Closure;
 use DateTimeInterface;
@@ -12,9 +13,7 @@ use Illuminate\Support\Carbon;
 
 class ActivationStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Title $title)
-    {
-    }
+    public function __construct(protected Title|Stable $model) {}
 
     /**
      * Determine if the validation rule passes.
@@ -27,8 +26,8 @@ class ActivationStartDateCanBeChanged implements ValidationRule
             return;
         }
 
-        if ($this->title->isCurrentlyActivated() && ! $this->title->activatedOn(Carbon::parse($value))) {
-            $fail("{$this->title->name} is currently activated and the activation date cannot be changed.");
+        if ($this->model->isCurrentlyActivated() && ! $this->model->activatedOn(Carbon::parse($value))) {
+            $fail("{$this->model->name} is currently activated and the activation date cannot be changed.");
         }
     }
 }

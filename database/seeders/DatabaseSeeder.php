@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,27 +13,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $dateToStart = Carbon::now()->subYears(5);
-
         $this->call(MatchTypesTableSeeder::class);
         $this->call(MatchDecisionsTableSeeder::class);
         $this->call(VenuesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
-        $this->call(TitlesTableSeeder::class, false, $dateToStart->copy());
-        $this->call(WrestlersTableSeeder::class, false, $dateToStart->copy());
-        $this->call(TagTeamsTableSeeder::class, false, $dateToStart->copy());
-        $this->call(ManagersTableSeeder::class, false, $dateToStart->copy());
-        $this->call(RefereesTableSeeder::class, false, $dateToStart->copy());
-        $this->call(StablesTableSeeder::class, false, $dateToStart->copy());
+        $this->call(TitlesTableSeeder::class);
+        $this->call(WrestlersTableSeeder::class);
+        $this->call(TagTeamsTableSeeder::class);
+        $this->call(ManagersTableSeeder::class);
+        $this->call(RefereesTableSeeder::class);
+        $this->call(StablesTableSeeder::class);
         $this->call(EventsTableSeeder::class);
-    }
-
-    public function call($class, $silent = false, $parameters = null): void
-    {
-        $this->resolve($class)->run($extra);
-
-        if (isset($this->command)) {
-            $this->command->getOutput()->writeln("<info>Seeded:</info> {$class}");
-        }
     }
 }

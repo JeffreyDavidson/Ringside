@@ -35,7 +35,7 @@ class ClearInjuryAction extends BaseManagerAction
     private function ensureCanBeClearedFromInjury(Manager $manager): void
     {
         if (! $manager->isInjured()) {
-            throw CannotBeClearedFromInjuryException::notInjured($manager);
+            throw CannotBeClearedFromInjuryException::notInjured();
         }
     }
 }

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Activatable;
 use Exception;
 
 class CannotBeActivatedException extends Exception
 {
-    public static function activated(Activatable $model): self
+    public static function activated(): self
     {
-        return new self("`{$model->getIdentifier()}` is already activated.");
+        return new self('This model is already activated.');
     }
 }

@@ -8,6 +8,9 @@ use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
 use App\Models\Wrestler;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     [$wrestlerA, $wrestlerB] = Wrestler::factory()->unemployed()->count(2)->create();
     $this->tagTeam = TagTeam::factory()
@@ -18,7 +21,7 @@ beforeEach(function () {
 });
 
 test('invoke calls employ action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([EmployController::class], $this->tagTeam))
         ->assertRedirect(action([TagTeamsController::class, 'index']));
 
@@ -26,12 +29,12 @@ test('invoke calls employ action and redirects', function () {
 });
 
 test('a basic user cannot employ a tag team', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([EmployController::class], $this->tagTeam))
         ->assertForbidden();
 });
 
 test('a guest cannot employ a tag team', function () {
-    $this->patch(action([EmployController::class], $this->tagTeam))
+    patch(action([EmployController::class], $this->tagTeam))
         ->assertRedirect(route('login'));
 });

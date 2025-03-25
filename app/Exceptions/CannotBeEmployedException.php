@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\Contracts\Employable;
 use Exception;
 
 class CannotBeEmployedException extends Exception
 {
-    public static function employed(Employable $model): self
+    public static function employed(): self
     {
-        return new self("`{$model->getIdentifier()}` is already employed.");
+        return new self('This model is already employed.');
     }
 }

@@ -11,7 +11,5 @@ abstract class BaseWrestlerAction
     /**
      * Create a new base wrestler action instance.
      */
-    public function __construct(protected WrestlerRepository $wrestlerRepository)
-    {
-    }
+    public function __construct(protected WrestlerRepository $wrestlerRepository) {}
 }

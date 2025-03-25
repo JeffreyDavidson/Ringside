@@ -39,7 +39,7 @@ class EmployAction extends BaseManagerAction
     private function ensureCanBeEmployed(Manager $manager): void
     {
         if ($manager->isCurrentlyEmployed()) {
-            throw CannotBeEmployedException::employed($manager);
+            throw CannotBeEmployedException::employed();
         }
     }
 }

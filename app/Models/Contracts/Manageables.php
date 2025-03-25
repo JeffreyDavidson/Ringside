@@ -4,51 +4,19 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Models\TagTeam;
-use App\Models\Wrestler;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 interface Manageables
 {
-    /**
-     * Get all the wrestlers that have been managed by model.
-     *
-     * @return MorphToMany<Wrestler>
-     */
-    public function wrestlers(): MorphToMany;
+    public function wrestlers(): BelongsToMany;
 
-    /**
-     * Get the current wrestlers that is managed by model.
-     *
-     * @return MorphToMany<Wrestler>
-     */
-    public function currentWrestlers(): MorphToMany;
+    public function currentWrestlers(): BelongsToMany;
 
-    /**
-     * Get all previous wrestlers that have been managed by model.
-     *
-     * @return MorphToMany<Wrestler>
-     */
-    public function previousWrestlers(): MorphToMany;
+    public function previousWrestlers(): BelongsToMany;
 
-    /**
-     * Get all the tag teams that have been managed by model.
-     *
-     * @return MorphToMany<TagTeam>
-     */
-    public function tagTeams(): MorphToMany;
+    public function tagTeams(): BelongsToMany;
 
-    /**
-     * Get the current tag teams that is managed by model.
-     *
-     * @return MorphToMany<TagTeam>
-     */
-    public function currentTagTeams(): MorphToMany;
+    public function currentTagTeams(): BelongsToMany;
 
-    /**
-     * Get all previous tag teams that have been managed by model.
-     *
-     * @return MorphToMany<TagTeam>
-     */
-    public function previousTagTeams(): MorphToMany;
+    public function previousTagTeams(): BelongsToMany;
 }

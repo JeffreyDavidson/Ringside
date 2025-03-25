@@ -7,7 +7,7 @@ use App\Models\Stable;
 use App\Repositories\StableRepository;
 
 beforeEach(function () {
-    $this->stableRepository = Mockery::mock(StableRepository::class);
+    $this->stableRepository = $this->mock(StableRepository::class);
 });
 
 test('it deletes a stable', function () {

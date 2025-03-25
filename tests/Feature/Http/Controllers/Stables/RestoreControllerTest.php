@@ -7,12 +7,15 @@ use App\Http\Controllers\Stables\RestoreController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Models\Stable;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     $this->stable = Stable::factory()->trashed()->create();
 });
 
 test('invoke calls restore action and redirects', function () {
-    $this->actingAs(administrator())
+    actingAs(administrator())
         ->patch(action([RestoreController::class], $this->stable))
         ->assertRedirect(action([StablesController::class, 'index']));
 
@@ -20,12 +23,12 @@ test('invoke calls restore action and redirects', function () {
 });
 
 test('a basic user cannot restore a stable', function () {
-    $this->actingAs(basicUser())
+    actingAs(basicUser())
         ->patch(action([RestoreController::class], $this->stable))
         ->assertForbidden();
 });
 
 test('a guest cannot restore a stable', function () {
-    $this->patch(action([RestoreController::class], $this->stable))
+    patch(action([RestoreController::class], $this->stable))
         ->assertRedirect(route('login'));
 });

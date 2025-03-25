@@ -7,22 +7,15 @@ namespace App\Models\Concerns;
 use App\Models\EventMatch;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
+/**
+ * @phpstan-require-implements \App\Models\Contracts\Bookable
+ */
 trait HasMatches
 {
     /**
      * Retrieve the event matches participated by the model.
      *
-     * @return MorphToMany<EventMatch>
-     */
-    public function matches(): MorphToMany
-    {
-        return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
-    }
-
-    /**
-     * Retrieve the event matches participated by the model.
-     *
-     * @return MorphToMany<EventMatch>
+     * @return MorphToMany<EventMatch, $this>
      */
     public function previousMatches(): MorphToMany
     {

@@ -11,7 +11,5 @@ abstract class BaseVenueAction
     /**
      * Create a new base venue action instance.
      */
-    public function __construct(protected VenueRepository $venueRepository)
-    {
-    }
+    public function __construct(protected VenueRepository $venueRepository) {}
 }

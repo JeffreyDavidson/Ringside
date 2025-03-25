@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 test('creates an event', function () {
     $data = new EventData('Example Event Name', null, null, null);
 
-    (new EventRepository())->create($data);
+    (new EventRepository)->create($data);
 
     expect(Event::latest()->first())
         ->name->toEqual('Example Event Name')
@@ -23,7 +23,7 @@ test('creates an event', function () {
 test('it creates an event with with a date', function () {
     $data = new EventData('Example Event Name', $date = Carbon::tomorrow(), null, null);
 
-    (new EventRepository())->create($data);
+    (new EventRepository)->create($data);
 
     expect(Event::latest()->first())
         ->name->toBe('Example Event Name')
@@ -36,7 +36,7 @@ test('it creates an event with with a date and venue', function () {
     $venue = Venue::factory()->create();
     $data = new EventData('Example Event Name', $date = Carbon::tomorrow(), $venue, null);
 
-    (new EventRepository())->create($data);
+    (new EventRepository)->create($data);
 
     expect(Event::latest()->first())
         ->name->toBe('Example Event Name')
@@ -51,7 +51,7 @@ test('it creates an event with with a date and venue and preview', function () {
     $preview = fake()->paragraph();
     $data = new EventData('Example Event Name', $date, $venue, $preview);
 
-    (new EventRepository())->create($data);
+    (new EventRepository)->create($data);
 
     expect(Event::latest()->first())
         ->name->toBe('Example Event Name')
@@ -63,7 +63,7 @@ test('it creates an event with with a date and venue and preview', function () {
 test('it can delete an event', function () {
     $event = Event::factory()->create();
 
-    (new EventRepository())->delete($event);
+    (new EventRepository)->delete($event);
 
     expect($event->fresh())
         ->deleted_at->not->toBeNull();
@@ -72,7 +72,7 @@ test('it can delete an event', function () {
 test('it can restore a trashed event', function () {
     $event = Event::factory()->trashed()->create();
 
-    (new EventRepository())->restore($event);
+    (new EventRepository)->restore($event);
 
     expect($event->fresh())
         ->deleted_at->toBeNull();

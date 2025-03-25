@@ -12,9 +12,7 @@ use Illuminate\Support\Carbon;
 
 class ActivationStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(private Stable $stable)
-    {
-    }
+    public function __construct(private Stable $stable) {}
 
     /**
      * Determine if the validation rule passes.

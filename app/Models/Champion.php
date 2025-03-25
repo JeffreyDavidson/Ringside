@@ -6,6 +6,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Champion extends Model
-{
-}
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Champion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Champion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Champion query()
+ *
+ * @mixin \Eloquent
+ */
+class Champion extends Model {}

@@ -50,15 +50,15 @@ class RetireAction extends BaseManagerAction
     private function ensureCanBeRetired(Manager $manager): void
     {
         if ($manager->isUnemployed()) {
-            throw CannotBeRetiredException::unemployed($manager);
+            throw CannotBeRetiredException::unemployed();
         }
 
         if ($manager->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment($manager);
+            throw CannotBeRetiredException::hasFutureEmployment();
         }
 
         if ($manager->isRetired()) {
-            throw CannotBeRetiredException::retired($manager);
+            throw CannotBeRetiredException::retired();
         }
     }
 }
