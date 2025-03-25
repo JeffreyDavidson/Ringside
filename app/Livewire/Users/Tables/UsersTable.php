@@ -10,7 +10,6 @@ use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class UsersTable extends BaseTableWithActions
