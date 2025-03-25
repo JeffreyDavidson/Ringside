@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use \Exception;
 use App\Collections\EventMatchCompetitorsCollection;
+use Exception;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -64,14 +64,14 @@ class EventMatchCompetitor extends MorphPivot
     {
         $competitor = $this->competitor;
 
-        if (!is_object($competitor)) {
+        if (! is_object($competitor)) {
             throw new Exception('No popularized object');
         }
 
         return match ($competitor::class) {
             Wrestler::class,
             TagTeam::class => $competitor,
-            default => throw new Exception('Unexpected relation: ' . $competitor::class),
+            default => throw new Exception('Unexpected relation: '.$competitor::class),
         };
     }
 }
