@@ -7,6 +7,9 @@ use App\Http\Controllers\TagTeams\RestoreController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Models\TagTeam;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->trashed()->create();
 });

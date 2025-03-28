@@ -7,6 +7,9 @@ use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\Stables\UnretireController;
 use App\Models\Stable;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
 beforeEach(function () {
     $this->stable = Stable::factory()->retired()->create();
 });
