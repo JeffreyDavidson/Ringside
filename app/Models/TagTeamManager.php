@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -36,5 +37,15 @@ class TagTeamManager extends Pivot
             'hired_at' => 'datetime',
             'left_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Retrieve the tag team from the model.
+     *
+     * @return BelongsTo<TagTeam, $this>
+     */
+    public function tagTeam(): BelongsTo
+    {
+        return $this->belongsTo(TagTeam::class);
     }
 }
