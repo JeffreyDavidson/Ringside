@@ -57,7 +57,7 @@ class TagTeamPartner extends Pivot
     /**
      * @return BelongsTo<Wrestler, $this>
      */
-    public function partner(): BelongsTo
+    public function wrestler(): BelongsTo
     {
         return $this->belongsTo(Wrestler::class);
     }
