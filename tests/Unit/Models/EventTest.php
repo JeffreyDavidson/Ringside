@@ -40,5 +40,5 @@ test('an event without a date is unscheduled', function () {
 test('an event with a date in the past has past', function () {
     $event = Event::factory()->create(['date' => Carbon::now()->subDay()->toDateTimeString()]);
 
-    expect($event->isPast())->toBeTrue();
+    expect($event->hasPastDate())->toBeTrue();
 });
