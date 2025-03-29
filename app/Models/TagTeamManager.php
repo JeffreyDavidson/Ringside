@@ -48,4 +48,14 @@ class TagTeamManager extends Pivot
     {
         return $this->belongsTo(TagTeam::class);
     }
+
+    /**
+     * Retrieve the manager from the model.
+     *
+     * @return BelongsTo<Manager, $this>
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(Manager::class);
+    }
 }

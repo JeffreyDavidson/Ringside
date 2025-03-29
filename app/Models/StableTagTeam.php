@@ -48,4 +48,14 @@ class StableTagTeam extends Pivot
     {
         return $this->belongsTo(TagTeam::class);
     }
+
+    /**
+     * Retrieve the tag team from the model.
+     *
+     * @return BelongsTo<Stable, $this>
+     */
+    public function stable(): BelongsTo
+    {
+        return $this->belongsTo(Stable::class);
+    }
 }
