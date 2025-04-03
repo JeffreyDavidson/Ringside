@@ -65,7 +65,7 @@ class EventMatchForm extends LivewireBaseForm
         /** @var array<int, int> $titles */
         $titles = $this->formModel?->titles->pluck('id')->toArray();
 
-        $this->matchTypeId = $this->formModel?->matchType->id;
+        $this->matchTypeId = $this->formModel?->matchType?->id;
         $this->referees = $referees;
         $this->titles = $titles;
     }
