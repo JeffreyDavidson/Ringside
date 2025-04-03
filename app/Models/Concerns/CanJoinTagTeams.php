@@ -20,7 +20,7 @@ trait CanJoinTagTeams
     /**
      * Get the tag teams the model has been belonged to.
      *
-     * @return BelongsToMany<TagTeam, $this>
+     * @return BelongsToMany<TagTeam, $this, TagTeamPartner>
      */
     public function tagTeams(): BelongsToMany
     {
@@ -33,7 +33,7 @@ trait CanJoinTagTeams
     /**
      * Get the previous tag teams the member has belonged to.
      *
-     * @return BelongsToMany<TagTeam, $this>
+     * @return BelongsToMany<TagTeam, $this, TagTeamPartner>
      */
     public function previousTagTeams(): BelongsToMany
     {

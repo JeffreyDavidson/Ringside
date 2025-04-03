@@ -190,7 +190,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get all the managers the model has had.
      *
-     * @return BelongsToMany<Manager, $this>
+     * @return BelongsToMany<Manager, $this, WrestlerManager>
      */
     public function managers(): BelongsToMany
     {
