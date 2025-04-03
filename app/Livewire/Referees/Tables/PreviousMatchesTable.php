@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\Event;
 use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\Referee;
 use App\Models\Title;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
@@ -53,8 +53,8 @@ class PreviousMatchesTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('events.name'), 'event.name')
-                ->title(fn (Event $row) => $row->name)
-                ->location(fn (Event $row) => route('events.show', $row)),
+                ->title(fn (Model $row) => $row->name)
+                ->location(fn (Model $row) => route('events.show', $row)),
             DateColumn::make(__('events.date'), 'event.date')
                 ->outputFormat('Y-m-d H:i'),
             ArrayColumn::make(__('event-matches.competitors'))
