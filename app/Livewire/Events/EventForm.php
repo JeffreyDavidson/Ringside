@@ -13,11 +13,12 @@ use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;
 
+/**
+ * @extends LivewireBaseForm<EventForm, ?Event>
+ */
 class EventForm extends LivewireBaseForm
 {
-    protected string $formModelType = Event::class;
-
-    public ?Event $formModel;
+    public $formModel;
 
     #[Validate]
     public string $name = '';

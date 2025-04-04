@@ -9,11 +9,12 @@ use App\Models\EventMatch;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 
+/**
+ * @extends LivewireBaseForm<EventMatchForm, ?EventMatch>
+ */
 class EventMatchForm extends LivewireBaseForm
 {
-    protected string $formModelType = EventMatch::class;
-
-    public ?EventMatch $formModel;
+    public $formModel;
 
     public ?int $matchTypeId;
 

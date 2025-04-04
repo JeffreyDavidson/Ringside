@@ -10,11 +10,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 
+/**
+ * @extends LivewireBaseForm<VenueForm, ?Venue>
+ */
 class VenueForm extends LivewireBaseForm
 {
-    protected string $formModelType = Venue::class;
-
-    public ?Venue $formModel;
+    public $formModel;
 
     public string $name = '';
 

@@ -12,11 +12,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;
 
+/**
+ * @extends LivewireBaseForm<TitleForm, ?Title>
+ */
 class TitleForm extends LivewireBaseForm
 {
-    protected string $formModelType = Title::class;
-
-    public ?Title $formModel;
+    public $formModel;
 
     #[Validate]
     public string $name = '';
