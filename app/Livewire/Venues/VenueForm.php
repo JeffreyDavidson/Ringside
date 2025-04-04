@@ -35,7 +35,7 @@ class VenueForm extends LivewireBaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel ?? '')],
+            'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel)],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'state' => ['required', 'string', 'max:255', Rule::exists(\App\Models\State::class, 'name')],
