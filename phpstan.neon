@@ -9,6 +9,8 @@ parameters:
         -
             message: '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id#'
         -
+            message: '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name#'
+        -
             identifier: missingType.generics
         -
             identifier: missingType.iterableValue
