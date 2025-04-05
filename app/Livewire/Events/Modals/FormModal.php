@@ -12,17 +12,20 @@ use App\Traits\Data\PresentsVenuesList;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<EventForm, Event>
+ */
 class FormModal extends BaseModal
 {
     use PresentsVenuesList;
-
-    protected string $modelType = Event::class;
 
     protected string $modalLanguagePath = 'events';
 
     protected string $modalFormPath = 'events.modals.form-modal';
 
-    protected EventForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

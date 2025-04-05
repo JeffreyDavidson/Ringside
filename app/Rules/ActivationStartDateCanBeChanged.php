@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 
 class ActivationStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Title|Stable $model) {}
+    public function __construct(protected Title|Stable|null $model) {}
 
     /**
      * Determine if the validation rule passes.
@@ -22,12 +22,10 @@ class ActivationStartDateCanBeChanged implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! $value) {
-            return;
-        }
-
-        if ($this->model->isCurrentlyActivated() && ! $this->model->activatedOn(Carbon::parse($value))) {
-            $fail("{$this->model->name} is currently activated and the activation date cannot be changed.");
+        if ($this->model) {
+            if ($this->model->isCurrentlyActivated() && ! $this->model->activatedOn(Carbon::parse($value))) {
+                $fail('activations.validation.activation_active')->translate(['name' => $this->model->getNameLabel()]);
+            }
         }
     }
 }

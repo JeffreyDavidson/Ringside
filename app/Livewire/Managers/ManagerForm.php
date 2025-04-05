@@ -9,11 +9,12 @@ use App\Models\Manager;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends LivewireBaseForm<ManagerForm, ?Manager>
+ */
 class ManagerForm extends LivewireBaseForm
 {
-    protected string $formModelType = Manager::class;
-
-    public ?Manager $formModel;
+    public $formModel;
 
     public string $first_name = '';
 

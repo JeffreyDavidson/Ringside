@@ -12,11 +12,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 
+/**
+ * @extends LivewireBaseForm<TagTeamForm, ?TagTeam>
+ */
 class TagTeamForm extends LivewireBaseForm
 {
-    protected string $formModelType = TagTeam::class;
-
-    public ?TagTeam $formModel;
+    public $formModel;
 
     public string $name = '';
 

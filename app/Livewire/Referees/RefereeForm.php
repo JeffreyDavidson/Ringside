@@ -8,17 +8,22 @@ use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
+use Livewire\Attributes\Validate;
 
+/**
+ * @extends LivewireBaseForm<RefereeForm, ?Referee>
+ */
 class RefereeForm extends LivewireBaseForm
 {
-    protected string $formModelType = Referee::class;
+    public $formModel;
 
-    public ?Referee $formModel;
-
+    #[Validate]
     public string $first_name = '';
 
+    #[Validate]
     public string $last_name = '';
 
+    #[Validate]
     public Carbon|string|null $start_date = '';
 
     /**

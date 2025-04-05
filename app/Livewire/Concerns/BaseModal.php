@@ -4,20 +4,35 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
+use App\Livewire\Base\LivewireBaseForm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use LivewireUI\Modal\ModalComponent;
 
-class BaseModal extends ModalComponent
+/**
+ * @template TModelForm of LivewireBaseForm
+ * @template TModelType of Model
+ */
+abstract class BaseModal extends ModalComponent
 {
-    public ?Model $model;
+    protected ?Model $model;
 
-    /** @var class-string */
-    protected string $modelType;
+    /**
+     * @var TModelForm
+     */
+    protected $modelForm;
 
-    /** @var non-falsy-string */
+    /**
+     * @var TModelType
+     */
+    protected $modelType;
+
     protected string $modalFormPath;
+
+    protected string $modelTitleField;
+
+    protected string $titleField;
 
     public function mount(?int $modelId = null): void
     {
@@ -33,21 +48,16 @@ class BaseModal extends ModalComponent
 
     public function getModalTitle(): string
     {
-        if (isset($this->modelForm) && isset($this->modelForm->formModel)) {
+        if (isset($this->model)) {
             return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
         }
 
         return 'Add '.class_basename($this->modelType);
     }
 
-    public function generateTitleField()
-    {
-        return property_exists($this, 'titleField') ? $this->titleField : 'name';
-    }
-
     public function clear(): void
     {
-        if (isset($this->model) && ! is_null($this->model)) {
+        if (! is_null($this->model)) {
             $this->modelForm->setModel($this->model);
         } else {
             $this->modelForm->reset();
@@ -63,10 +73,16 @@ class BaseModal extends ModalComponent
         }
     }
 
+    /**
+     * Get the view / contents that represent the component.
+     */
     public function render(): View
     {
-        /** @var non-falsy-string $view */
         $view = 'livewire.'.$this->modalFormPath;
+
+        if (! view()->exists($view)) {
+            $view = 'blank';
+        }
 
         return view($view);
     }

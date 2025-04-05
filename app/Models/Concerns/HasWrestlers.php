@@ -14,7 +14,7 @@ trait HasWrestlers
     /**
      * Get the wrestlers that have been tag team partners of the tag team.
      *
-     * @return BelongsToMany<Wrestler, $this>
+     * @return BelongsToMany<Wrestler, $this, TagTeamPartner>
      */
     public function wrestlers(): BelongsToMany
     {
@@ -27,7 +27,7 @@ trait HasWrestlers
     /**
      * Get current wrestlers of the tag team.
      *
-     * @return BelongsToMany<Wrestler, $this>
+     * @return BelongsToMany<Wrestler, $this, TagTeamPartner>
      */
     public function currentWrestlers(): BelongsToMany
     {
@@ -38,7 +38,7 @@ trait HasWrestlers
     /**
      * Get previous tag team partners of the tag team.
      *
-     * @return BelongsToMany<Wrestler, $this>
+     * @return BelongsToMany<Wrestler, $this, TagTeamPartner>
      */
     public function previousWrestlers(): BelongsToMany
     {

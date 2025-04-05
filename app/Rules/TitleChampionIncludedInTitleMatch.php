@@ -39,7 +39,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $competitors = collect((array) $value);
+        $competitors = collect([$value]);
 
         $wrestlerIds = $competitors->groupBy('wrestlers')->flatten();
         $tagTeamIds = $competitors->groupBy('tag_teams')->flatten();
@@ -47,7 +47,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
         $wrestlers = Wrestler::query()->whereIn('id', $wrestlerIds)->get();
         $tagTeams = TagTeam::query()->whereIn('id', $tagTeamIds)->get();
 
-        /** @var Collection<int, Wrestler|TagTeam>  $competitors */
+        /** @var Collection<int, Wrestler|TagTeam|null>  $competitors */
         $competitors = collect();
         $competitors->merge($wrestlers)->merge($tagTeams);
 

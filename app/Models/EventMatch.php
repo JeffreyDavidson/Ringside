@@ -113,7 +113,7 @@ class EventMatch extends Model
     /**
      * Get the wrestlers involved in the match.
      *
-     * @return MorphToMany<Wrestler, $this>
+     * @return MorphToMany<Wrestler, $this, EventMatchCompetitor>
      */
     public function wrestlers(): MorphToMany
     {
@@ -125,7 +125,7 @@ class EventMatch extends Model
     /**
      * Get the tag teams involved in the match.
      *
-     * @return MorphToMany<TagTeam, $this>
+     * @return MorphToMany<TagTeam, $this, EventMatchCompetitor>
      */
     public function tagTeams(): MorphToMany
     {

@@ -10,11 +10,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 
+/**
+ * @extends LivewireBaseForm<VenueForm, ?Venue>
+ */
 class VenueForm extends LivewireBaseForm
 {
-    protected string $formModelType = Venue::class;
-
-    public ?Venue $formModel;
+    public $formModel;
 
     public string $name = '';
 
@@ -34,7 +35,7 @@ class VenueForm extends LivewireBaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel ?? '')],
+            'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel)],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'state' => ['required', 'string', 'max:255', Rule::exists(\App\Models\State::class, 'name')],

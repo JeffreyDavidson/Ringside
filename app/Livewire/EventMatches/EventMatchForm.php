@@ -9,11 +9,12 @@ use App\Models\EventMatch;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 
+/**
+ * @extends LivewireBaseForm<EventMatchForm, ?EventMatch>
+ */
 class EventMatchForm extends LivewireBaseForm
 {
-    protected string $formModelType = EventMatch::class;
-
-    public ?EventMatch $formModel;
+    public $formModel;
 
     public ?int $matchTypeId;
 
@@ -65,7 +66,7 @@ class EventMatchForm extends LivewireBaseForm
         /** @var array<int, int> $titles */
         $titles = $this->formModel?->titles->pluck('id')->toArray();
 
-        $this->matchTypeId = $this->formModel?->matchType->id;
+        $this->matchTypeId = $this->formModel?->matchType?->id;
         $this->referees = $referees;
         $this->titles = $titles;
     }

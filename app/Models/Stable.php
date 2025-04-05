@@ -129,4 +129,12 @@ class Stable extends Model implements Activatable, Retirable
     {
         return $this->hasMany(StableRetirement::class);
     }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
+    }
 }
