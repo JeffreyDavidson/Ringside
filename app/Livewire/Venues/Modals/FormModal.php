@@ -9,15 +9,18 @@ use App\Livewire\Venues\VenueForm;
 use App\Models\Venue;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<VenueForm, Venue>
+ */
 class FormModal extends BaseModal
 {
-    protected string $modelType = Venue::class;
-
     protected string $modalLanguagePath = 'venues';
 
     protected string $modalFormPath = 'venues.modals.form-modal';
 
-    protected VenueForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

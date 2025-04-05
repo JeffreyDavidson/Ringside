@@ -9,11 +9,12 @@ use App\Models\Stable;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Validate;
 
+/**
+ * @extends LivewireBaseForm<StableForm, ?Stable>
+ */
 class StableForm extends LivewireBaseForm
 {
-    protected string $formModelType = Stable::class;
-
-    public ?Stable $formModel;
+    public $formModel;
 
     #[Validate('required|string|min:5|max:255', as: 'stables.name')]
     public string $name = '';

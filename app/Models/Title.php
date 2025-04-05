@@ -112,4 +112,12 @@ class Title extends Model implements Activatable, Retirable
     {
         return $this->hasMany(TitleRetirement::class);
     }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
+    }
 }

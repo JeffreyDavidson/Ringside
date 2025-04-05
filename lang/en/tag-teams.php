@@ -7,4 +7,5 @@ return [
     'signature_move' => 'Signature Move',
     'date_joined' => 'Date Joined',
     'date_left' => 'Date Left',
+    'partner' => 'Partner',
 ];

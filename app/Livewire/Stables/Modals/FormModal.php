@@ -13,19 +13,22 @@ use App\Traits\Data\PresentsWrestlersList;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<StableForm, Stable>
+ */
 class FormModal extends BaseModal
 {
     use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
-    protected string $modelType = Stable::class;
-
     protected string $modalLanguagePath = 'stables';
 
     protected string $modalFormPath = 'stables.modals.form-modal';
 
-    protected StableForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {
