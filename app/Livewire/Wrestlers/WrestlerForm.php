@@ -12,11 +12,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
+/**
+ * @extends LivewireBaseForm<WrestlerForm, ?Wrestler>
+ */
 class WrestlerForm extends LivewireBaseForm
 {
-    protected string $formModelType = Wrestler::class;
-
-    public ?Wrestler $formModel;
+    public $formModel;
 
     public string $name = '';
 
