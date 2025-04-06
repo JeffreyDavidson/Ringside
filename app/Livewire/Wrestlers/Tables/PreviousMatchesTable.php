@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
-use App\Livewire\Base\Tables\BaseMatchesTable;
+use App\Enums\EventStatus;
+use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\EventMatch;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousMatchesTable extends BaseMatchesTable
+class PreviousMatchesTable extends BasePreviousMatchesTable
 {
     /**
      * Wrestler to use for component.
@@ -28,9 +29,12 @@ class PreviousMatchesTable extends BaseMatchesTable
         $wrestler = Wrestler::find($this->wrestlerId);
 
         return EventMatch::query()
-            ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
+            ->with(['titles', 'competitors', 'result.winner', 'result.decision'])
             ->withWhereHas('competitors', function ($query) use ($wrestler) {
                 $query->whereMorphedTo('competitor', $wrestler);
+            })
+            ->withWhereHas('event', function ($query) {
+                $query->where('status', EventStatus::Past);
             });
     }
 }

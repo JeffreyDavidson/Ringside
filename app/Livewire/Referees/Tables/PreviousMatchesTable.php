@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Tables;
 
-use App\Livewire\Base\Tables\BaseMatchesTable;
+use App\Enums\EventStatus;
+use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\EventMatch;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousMatchesTable extends BaseMatchesTable
+class PreviousMatchesTable extends BasePreviousMatchesTable
 {
     /**
      * Referee to use for component.
@@ -25,9 +26,12 @@ class PreviousMatchesTable extends BaseMatchesTable
         }
 
         return EventMatch::query()
-            ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
+            ->with(['titles', 'competitors', 'result.winner', 'result.decision'])
             ->whereHas('referees', function (Builder $query) {
                 $query->whereIn('referee_id', [$this->refereeId]);
+            })
+            ->withWhereHas('event', function ($query) {
+                $query->where('status', EventStatus::Past);
             });
     }
 }

@@ -16,7 +16,7 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class BaseMatchesTable extends DataTableComponent
+class BasePreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
@@ -67,10 +67,14 @@ class BaseMatchesTable extends DataTableComponent
                 ->emptyValue('N/A'),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row) {
-                    $winner = $row->result?->getWinner();
-                    $type = str($winner->getMorphClass())->kebab()->plural();
+                    if ($row->result) {
+                        $winner = $row->result?->getWinner();
+                        $type = str($winner->getMorphClass())->kebab()->plural();
 
-                    return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->decision->name;
+                        return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->decision->name;
+                    }
+
+                    return 'N/A';
                 }),
         ];
     }
