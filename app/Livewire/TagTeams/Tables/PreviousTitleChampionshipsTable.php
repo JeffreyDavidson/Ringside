@@ -4,21 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\TagTeam;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class PreviousTitleChampionshipsTable extends DataTableComponent
+class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
-    use ShowTableTrait;
-
-    protected string $databaseTableName = 'tittle_championships';
-
-    protected string $resourceName = 'title championships';
-
     /**
      * Tag Team to use for component.
      */
@@ -41,22 +33,5 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
                     $query->whereIn('id', [$this->tagTeamId]);
                 }
             );
-    }
-
-    public function configure(): void {}
-
-    /**
-     * Undocumented function
-     *
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('titles.name'), 'name'),
-            Column::make(__('championships.previous_champion'), 'previous_champion'),
-            Column::make(__('championships.dates_held'), 'dates_held'),
-            Column::make(__('championships.reign_length'), 'reign_length'),
-        ];
     }
 }
