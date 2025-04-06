@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\Title;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
+use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class BasePreviousTitleChampionshipsTable extends DataTableComponent
@@ -21,7 +21,14 @@ class BasePreviousTitleChampionshipsTable extends DataTableComponent
 
     protected string $resourceName = 'title championships';
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        $this->addAdditionalSelects([
+            'title_championships.title_id',
+            'title_championships.won_at',
+            'title_championships.lost_at',
+        ]);
+    }
 
     /**
      * Undocumented function
@@ -32,14 +39,27 @@ class BasePreviousTitleChampionshipsTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('titles.name'))
-                ->title(fn (Title $row) => $row->name)
-                ->location(fn (Title $row) => route('titles.show', $row)),
+                ->title(fn (TitleChampionship $row) => $row->title->name)
+                ->location(fn (TitleChampionship $row) => route('titles.show', $row->title)),
             LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn (TitleChampionship $row) => $row->previousChampion->name ?? '')
-                ->location(fn (Model $row) => route('wrestlers.show', $row)),
-            Column::make(__('championships.dates_held'), 'dates_held'),
-            CountColumn::make(__('championships.days_held'))
-                ->setDataSource('days_held'),
+                ->title(fn (TitleChampionship $row) => $row->previousChampion->name ?? 'N/A')
+                ->location(function (Model $row) {
+                    $previousChampion = $row->previousChampion;
+
+                    if ($previousChampion) {
+                        $type = str($previousChampion->getMorphClass())->kebab()->plural();
+
+                        return route($type.'.show', $previousChampion);
+                    }
+
+                    return 'N/A';
+                }),
+            DateColumn::make(__('championships.dates_held'), 'won_at')
+                ->outputFormat('Y-m-d'),
+            DateColumn::make(__('championships.dates_held'), 'lost_at')
+                ->outputFormat('Y-m-d'),
+            // CountColumn::make(__('championships.days_held'))
+            //     ->setDataSource('lengthInDays'),
         ];
     }
 }

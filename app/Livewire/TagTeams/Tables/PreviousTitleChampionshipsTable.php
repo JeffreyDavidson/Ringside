@@ -27,7 +27,7 @@ class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTabl
 
         return TitleChampionship::query()
             ->whereHasMorph(
-                'newChampion',
+                'previousChampion',
                 [TagTeam::class],
                 function (Builder $query) {
                     $query->whereIn('id', [$this->tagTeamId]);

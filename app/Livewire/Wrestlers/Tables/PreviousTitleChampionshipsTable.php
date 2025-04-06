@@ -25,9 +25,18 @@ class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTabl
             throw new \Exception("You didn't specify a wrestler");
         }
 
+        // dd(TitleChampionship::query()
+        //     ->whereHasMorph(
+        //         'previousChampion',
+        //         [Wrestler::class],
+        //         function (Builder $query) {
+        //             $query->whereIn('id', [$this->wrestlerId]);
+        //         }
+        //     )->get());
+
         return TitleChampionship::query()
             ->whereHasMorph(
-                'newChampion',
+                'previousChampion',
                 [Wrestler::class],
                 function (Builder $query) {
                     $query->whereIn('id', [$this->wrestlerId]);
