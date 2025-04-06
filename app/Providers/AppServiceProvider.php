@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
             'wrestler' => \App\Models\Wrestler::class,
             'manager' => \App\Models\Manager::class,
             'title' => \App\Models\Title::class,
-            'tagteam' => \App\Models\TagTeam::class,
+            'tagTeam' => \App\Models\TagTeam::class,
             'referee' => \App\Models\Referee::class,
             'stable' => \App\Models\Stable::class,
         ]);
