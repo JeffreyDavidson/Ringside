@@ -7,8 +7,11 @@ namespace App\Livewire\Stables\Tables;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\StableWrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
+use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class PreviousWrestlersTable extends DataTableComponent
 {
@@ -30,6 +33,7 @@ class PreviousWrestlersTable extends DataTableComponent
         }
 
         return StableWrestler::query()
+            ->with(['wrestler'])
             ->where('stable_id', $this->stableId)
             ->whereNotNull('left_at')
             ->orderByDesc('joined_at');
@@ -48,9 +52,13 @@ class PreviousWrestlersTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('wrestlers.name'), 'wrestler_name'),
-            Column::make(__('stables.date_joined'), 'date_joined'),
-            Column::make(__('stables.date_left'), 'date_left'),
+            LinkColumn::make(__('wrestlers.name'))
+                ->title(fn (Model $row) => $row->wrestler->name)
+                ->location(fn (Model $row) => route('wrestlers.show', $row)),
+            DateColumn::make(__('stables.date_joined'), 'joined_at')
+                ->outputFormat('Y-m-d'),
+            DateColumn::make(__('stables.date_left'), 'left_at')
+                ->outputFormat('Y-m-d'),
         ];
     }
 }

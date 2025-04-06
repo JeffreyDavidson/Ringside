@@ -33,10 +33,16 @@ class EventMatchesTable extends BaseTableWithActions
         }
 
         return EventMatch::query()
+            ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
             ->where('event_id', $this->eventId);
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        $this->addAdditionalSelects([
+            'events_matches.event_id',
+        ]);
+    }
 
     /**
      * Undocumented function
@@ -49,7 +55,7 @@ class EventMatchesTable extends BaseTableWithActions
             Column::make(__('event-matches.match_type'), 'matchType.name'),
             ArrayColumn::make(__('event-matches.competitors'))
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(fn ($index, EventMatchCompetitor $value) => $value->competitor->name)
+                ->outputFormat(fn ($index, EventMatchCompetitor $value) => $value->getCompetitor()->name)
                 ->separator(' vs '),
             ArrayColumn::make(__('event-matches.referees'))
                 ->data(fn ($value, EventMatch $row) => ($row->referees))

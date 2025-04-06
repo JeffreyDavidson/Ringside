@@ -28,28 +28,30 @@ class PreviousMatchesTable extends DataTableComponent
     /**
      * Tag Team to use for component.
      */
-    public ?TagTeam $tagTeam;
+    public ?int $tagTeamId;
 
     /**
      * @return Builder<EventMatch>
      */
     public function builder(): Builder
     {
-        if (! isset($this->tagTeam)) {
+        if (! isset($this->tagTeamId)) {
             throw new \Exception("You didn't specify a tag team");
         }
 
+        $tagTeam = TagTeam::find($this->tagTeamId);
+
         return EventMatch::query()
-            ->with(['event'])
-            ->withWhereHas('competitors', function ($query) {
-                $query->whereMorphedTo('competitor', $this->tagTeam);
+            ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
+            ->withWhereHas('competitors', function ($query) use ($tagTeam) {
+                $query->whereMorphedTo('competitor', $tagTeam);
             });
     }
 
     public function configure(): void
     {
         $this->addAdditionalSelects([
-            'event_matches.event_id as event_id',
+            'events_matches.event_id as event_id',
         ]);
     }
 

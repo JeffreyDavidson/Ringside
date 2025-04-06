@@ -25,27 +25,23 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
     /**
      * Wrestler to use for component.
      */
-    public Wrestler $wrestler;
-
-    /**
-     * Undocumented function.
-     */
-    public function mount(Wrestler $wrestler): void
-    {
-        $this->wrestler = $wrestler;
-    }
+    public ?int $wrestlerId;
 
     /**
      * @return Builder<TitleChampionship>
      */
     public function builder(): Builder
     {
+        if (! isset($this->wrestlerId)) {
+            throw new \Exception("You didn't specify a wrestler");
+        }
+
         return TitleChampionship::query()
             ->whereHasMorph(
-                'new_champion',
+                'newChampion',
                 [Wrestler::class],
                 function (Builder $query) {
-                    $query->whereIn('wrestler_id', [$this->wrestler->id]);
+                    $query->whereIn('id', [$this->wrestlerId]);
                 }
             );
     }
@@ -65,8 +61,8 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
                 ->title(fn (TitleChampionship $row) => $row->previousChampion->name ?? '')
                 ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
             Column::make(__('championships.dates_held'), 'dates_held'),
-            CountColumn::make(__('championships.days_held'))
-                ->setDataSource('days_held'),
+            // CountColumn::make(__('championships.days_held'))
+            //     ->setDataSource('days_held'),
         ];
     }
 }

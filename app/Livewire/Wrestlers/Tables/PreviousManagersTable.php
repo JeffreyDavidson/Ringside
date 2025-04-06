@@ -54,7 +54,7 @@ class PreviousManagersTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('managers.full_name'), 'manager.full_name')
+            Column::make(__('managers.name'), 'manager.full_name')
                 ->searchable(),
             DateColumn::make(__('managers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
