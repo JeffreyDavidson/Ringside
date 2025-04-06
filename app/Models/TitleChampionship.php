@@ -100,7 +100,7 @@ class TitleChampionship extends Model
      */
     public function previousChampion(): MorphTo
     {
-        return $this->morphTo(__FUNCTION__, 'previous_champion_type', 'previous_champion_id');
+        return $this->morphTo(__FUNCTION__, 'former_champion_type', 'former_champion_id');
     }
 
     /**
@@ -121,8 +121,8 @@ class TitleChampionship extends Model
         /** @var Carbon $datetime */
         $datetime = $this->lost_at ?? now();
 
+        // dd($this->won_at, $this->lost_at);
+
         return intval($this->won_at->diffInDays($datetime));
     }
-
-    public function wrestlers(): void {}
 }
