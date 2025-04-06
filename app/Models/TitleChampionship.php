@@ -88,7 +88,7 @@ class TitleChampionship extends Model
      *
      * @return MorphTo<Model, $this>
      */
-    public function currentChampion(): MorphTo
+    public function newChampion(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'new_champion_type', 'new_champion_id');
     }
