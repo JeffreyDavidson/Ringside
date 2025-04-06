@@ -12,7 +12,6 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Event;
 use App\Models\Venue;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
@@ -61,8 +60,8 @@ class EventsTable extends BaseTableWithActions
             DateColumn::make(__('events.date'), 'date')
                 ->outputFormat('Y-m-d'),
             LinkColumn::make(__('venues.name'))
-                ->title(fn (Model $row) => $row->venue->name)
-                ->location(fn (Model $row) => route('venues.show', $row)),
+                ->title(fn (Event $row) => $row->venue->name)
+                ->location(fn (Event $row) => route('venues.show', $row->venue)),
         ];
     }
 
