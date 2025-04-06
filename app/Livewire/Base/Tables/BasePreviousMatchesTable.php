@@ -75,7 +75,7 @@ class BasePreviousMatchesTable extends DataTableComponent
                     }
 
                     return 'N/A';
-                }),
+                })->html(),
         ];
     }
 }
