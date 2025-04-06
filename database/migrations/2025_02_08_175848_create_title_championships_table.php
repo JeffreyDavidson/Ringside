@@ -20,7 +20,7 @@ return new class extends Migration
             $table->morphs('new_champion', 'new_champion');
             $table->nullableMorphs('former_champion', 'former_champion');
             $table->dateTime('won_at');
-            $table->dateTime('lost_at');
+            $table->dateTime('lost_at')->nullable();
             $table->timestamps();
         });
     }
