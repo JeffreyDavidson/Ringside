@@ -35,7 +35,7 @@ class PreviousManagersTable extends BasePreviousManagersTable
     public function configure(): void
     {
         $this->addAdditionalSelects([
-            'wrestlers_managers.manager_id as manager_id',
+            'wrestlers_managers.manager_id',
         ]);
     }
 }
