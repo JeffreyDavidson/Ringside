@@ -7265,16 +7265,16 @@
         },
         {
             "name": "calebdw/larastan",
-            "version": "v3.3.2",
+            "version": "v3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/calebdw/larastan.git",
-                "reference": "8a0edf1febc9f491da39079943c8c4a076878816"
+                "reference": "5d3e9164318dad65e24c0eb973dbe5a1edd10afb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/calebdw/larastan/zipball/8a0edf1febc9f491da39079943c8c4a076878816",
-                "reference": "8a0edf1febc9f491da39079943c8c4a076878816",
+                "url": "https://api.github.com/repos/calebdw/larastan/zipball/5d3e9164318dad65e24c0eb973dbe5a1edd10afb",
+                "reference": "5d3e9164318dad65e24c0eb973dbe5a1edd10afb",
                 "shasum": ""
             },
             "require": {
@@ -7354,7 +7354,7 @@
             ],
             "support": {
                 "issues": "https://github.com/calebdw/larastan/issues",
-                "source": "https://github.com/calebdw/larastan/tree/v3.3.2"
+                "source": "https://github.com/calebdw/larastan/tree/v3.4.0"
             },
             "funding": [
                 {
@@ -7362,7 +7362,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-04-01T15:21:01+00:00"
+            "time": "2025-04-04T12:57:04+00:00"
         },
         {
             "name": "composer/class-map-generator",
