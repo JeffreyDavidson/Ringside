@@ -27,7 +27,7 @@ class PreviousManagersTable extends BasePreviousManagersTable
             ->with(['manager'])
             ->where('stable_id', $this->stableId)
             ->whereNotNull('left_at')
-            ->orderByDesc('hired_at');
+            ->orderByDesc('joined_at');
     }
 
     public function configure(): void

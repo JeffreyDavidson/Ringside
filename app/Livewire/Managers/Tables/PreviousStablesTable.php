@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
-use App\Livewire\Base\Tables\BasePreviousManagersTable;
+use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\StableManager;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousStablesTable extends BasePreviousManagersTable
+class PreviousStablesTable extends BasePreviousStablesTable
 {
     protected string $databaseTableName = 'stables_managers';
 
@@ -29,7 +29,7 @@ class PreviousStablesTable extends BasePreviousManagersTable
         return StableManager::query()
             ->where('manager_id', $this->managerId)
             ->whereNotNull('left_at')
-            ->orderByDesc('hired_at');
+            ->orderByDesc('joined_at');
     }
 
     public function configure(): void

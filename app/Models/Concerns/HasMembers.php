@@ -92,7 +92,7 @@ trait HasMembers
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(Manager::class, 'stables_managers')
-            ->withPivot(['hired_at', 'left_at'])
+            ->withPivot(['joined_at', 'left_at'])
             ->using(StableManager::class)
             ->withTimestamps();
     }
