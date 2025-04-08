@@ -29,7 +29,7 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
         $wrestler = Wrestler::find($this->wrestlerId);
 
         return EventMatch::query()
-            ->with(['titles', 'competitors', 'result.winner', 'result.decision'])
+            ->with(['titles', 'result.winner', 'result.decision'])
             ->withWhereHas('competitors', function ($query) use ($wrestler) {
                 $query->whereMorphedTo('competitor', $wrestler);
             })
