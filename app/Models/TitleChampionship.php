@@ -43,7 +43,7 @@ class TitleChampionship extends Model
      *
      * @var string
      */
-    protected $table = 'title_championships';
+    protected $table = 'titles_championships';
 
     /**
      * The attributes that are mass assignable.
