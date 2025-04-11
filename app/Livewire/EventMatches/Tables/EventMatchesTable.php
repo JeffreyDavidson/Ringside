@@ -83,11 +83,16 @@ class EventMatchesTable extends DataTableComponent
                 ->label(
                     function (EventMatch $row, Column $column) {
                         $winner = $row->result?->getWinner();
-                        $type = str($winner->getMorphClass())->kebab()->plural();
 
-                        return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->decision->name;
+                        if ($winner) {
+                            $type = str($winner->getMorphClass())->kebab()->plural();
+
+                            return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->decision->name;
+                        }
+
+                        return 'N/A';
                     }
-                ),
+                )->html(),
         ];
     }
 }

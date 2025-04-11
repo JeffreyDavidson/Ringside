@@ -23,7 +23,7 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new \Exception("You didn't sp ecify a wrestler");
         }
 
         $wrestler = Wrestler::find($this->wrestlerId);
@@ -34,7 +34,8 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
                 $query->whereMorphedTo('competitor', $wrestler);
             })
             ->withWhereHas('event', function ($query) {
-                $query->where('status', EventStatus::Past);
-            });
+                $query->whereNotNull('date')->where('status', EventStatus::Past);
+            })
+            ->orderByDesc('date');
     }
 }

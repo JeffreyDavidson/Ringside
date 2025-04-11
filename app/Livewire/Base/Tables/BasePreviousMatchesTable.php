@@ -43,7 +43,9 @@ class BasePreviousMatchesTable extends DataTableComponent
                 ->title(fn (Model $row) => $row->event->name)
                 ->location(fn (Model $row) => route('events.show', $row->event)),
             DateColumn::make(__('events.date'), 'event.date')
-                ->outputFormat('Y-m-d H:i'),
+                ->inputFormat('Y-m-d H:i:s')
+                ->outputFormat('Y-m-d')
+                ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.referees'))
                 ->data(fn ($value, EventMatch $row) => ($row->referees))
                 ->outputFormat(function ($index, Referee $value) {

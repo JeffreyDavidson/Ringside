@@ -12,6 +12,7 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Event;
 use App\Models\Venue;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
@@ -36,7 +37,7 @@ class EventsTable extends BaseTableWithActions
     {
         return Event::query()
             ->with(['venue'])
-            ->oldest('name');
+            ->orderBy(DB::raw('date IS NOT NULL, date'), 'desc');
     }
 
     public function configure(): void
@@ -47,8 +48,6 @@ class EventsTable extends BaseTableWithActions
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
@@ -58,16 +57,17 @@ class EventsTable extends BaseTableWithActions
                 ->searchable(),
             $this->getDefaultStatusColumn(),
             DateColumn::make(__('events.date'), 'date')
-                ->outputFormat('Y-m-d'),
-            LinkColumn::make(__('venues.name'))
-                ->title(fn (Event $row) => $row->venue->name)
-                ->location(fn (Event $row) => route('venues.show', $row->venue)),
+                ->inputFormat('Y-m-d H:i:s')
+                ->outputFormat('Y-m-d')
+                ->emptyValue('No Date Set'),
+            LinkColumn::make(__('events.venue'))
+                ->title(fn (Event $row) => $row->venue ? $row->venue->name : 'No Venue')
+                ->location(fn (Event $row) => $row->venue ? route('venues.show', $row->venue) : ''),
+
         ];
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Filter>
      */
     public function filters(): array
