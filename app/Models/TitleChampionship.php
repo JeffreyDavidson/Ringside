@@ -121,8 +121,6 @@ class TitleChampionship extends Model
         /** @var Carbon $datetime */
         $datetime = $this->lost_at ?? now();
 
-        // dd($this->won_at, $this->lost_at);
-
         return intval($this->won_at->diffInDays($datetime));
     }
 }
