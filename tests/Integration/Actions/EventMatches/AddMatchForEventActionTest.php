@@ -35,12 +35,12 @@ test('add a match to an event', function () {
             'wrestlers' => collect([$wrestlerB]),
         ],
     ]);
-    $data = new EventMatchData($matchType, $referees, new Collection, $competitors, null);
+    $data = new EventMatchData($matchType, $referees, new Collection(), $competitors, null);
 
     $this->eventMatchRepository
         ->shouldReceive('createForEvent')
         ->with($this->event, $data)
-        ->andReturn($eventMatch = new EventMatch);
+        ->andReturn($eventMatch = new EventMatch());
 
     AddRefereesToMatchAction::shouldRun($this->event, $data->referees);
     AddTitlesToMatchAction::shouldNotRun();
@@ -68,7 +68,7 @@ test('add a title match to an event', function () {
         ->shouldReceive('createForEvent')
         ->with($this->event, $data)
         ->once()
-        ->andReturn($eventMatch = new EventMatch);
+        ->andReturn($eventMatch = new EventMatch());
 
     AddRefereesToMatchAction::shouldRun($this->event, $data->referees);
     AddTitlesToMatchAction::shouldRun($this->event, $data->titles);
