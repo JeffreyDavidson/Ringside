@@ -140,6 +140,6 @@ final class User extends Authenticatable
      */
     public function getFormattedPhoneNumber(): string
     {
-        return $this->phone_number ? sprintf('(%s) %s-%s', substr($this->phone_number, 0, 3), substr($this->phone_number, 3, 3), substr($this->phone_number, 6, 4)) : '';
+        return $this->phone_number ? sprintf('(%s) %s-%s', mb_substr($this->phone_number, 0, 3), mb_substr($this->phone_number, 3, 3), mb_substr($this->phone_number, 6, 4)) : '';
     }
 }
