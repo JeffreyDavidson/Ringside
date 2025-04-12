@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('stable_id')->constrained();
             $table->foreignId('manager_id')->constrained();
-            $table->dateTime('hired_at');
+            $table->dateTime('joined_at');
             $table->dateTime('left_at')->nullable();
             $table->timestamps();
         });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -36,5 +37,21 @@ class StableWrestler extends Pivot
             'joined_at' => 'datetime',
             'left_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<Wrestler, $this>
+     */
+    public function wrestler(): BelongsTo
+    {
+        return $this->belongsTo(Wrestler::class);
+    }
+
+    /**
+     * @return BelongsTo<Stable, $this>
+     */
+    public function stable(): BelongsTo
+    {
+        return $this->belongsTo(Stable::class);
     }
 }

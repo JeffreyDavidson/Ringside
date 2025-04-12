@@ -15,6 +15,7 @@ return new class extends Migration {
         Schema::create('events_matches', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Event::class);
+            $table->unsignedTinyInteger('match_number');
             $table->foreignIdFor(MatchType::class);
             $table->text('preview')->nullable();
             $table->timestamps();

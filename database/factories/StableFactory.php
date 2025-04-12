@@ -77,7 +77,7 @@ class StableFactory extends Factory
             )
             ->hasAttached(
                 Manager::factory()->has(ManagerEmployment::factory()->started($activationDate), 'employments'),
-                ['hired_at' => $activationDate]
+                ['joined_at' => $activationDate]
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
@@ -111,7 +111,7 @@ class StableFactory extends Factory
             )
             ->hasAttached(
                 Manager::factory()->has(ManagerEmployment::factory()->started($start), 'employments'),
-                ['hired_at' => $start, 'left_at' => $end]
+                ['joined_at' => $start, 'left_at' => $end]
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
@@ -152,7 +152,7 @@ class StableFactory extends Factory
                 Manager::factory()
                     ->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments')
                     ->has(ManagerRetirement::factory()->started($end), 'retirements'),
-                ['hired_at' => $start]
+                ['joined_at' => $start]
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
@@ -190,7 +190,7 @@ class StableFactory extends Factory
             )
             ->hasAttached(
                 Manager::factory()->has(ManagerEmployment::factory()->started(Carbon::yesterday()), 'employments'),
-                ['hired_at' => now()]
+                ['joined_at' => now()]
             )
             ->afterCreating(function (Stable $stable) {
                 $stable->save();
