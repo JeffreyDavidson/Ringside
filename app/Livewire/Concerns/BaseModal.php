@@ -35,7 +35,7 @@ abstract class BaseModal extends ModalComponent
 
     protected string $titleField;
 
-    public function mount(?int $modelId = null): void
+    final public function mount(?int $modelId = null): void
     {
         if (isset($modelId)) {
             try {
@@ -47,7 +47,7 @@ abstract class BaseModal extends ModalComponent
         }
     }
 
-    public function getModalTitle(): string
+    final public function getModalTitle(): string
     {
         if (isset($this->model)) {
             return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
@@ -56,7 +56,7 @@ abstract class BaseModal extends ModalComponent
         return 'Add '.class_basename($this->modelType);
     }
 
-    public function clear(): void
+    final public function clear(): void
     {
         if (! is_null($this->model)) {
             $this->modelForm->setModel($this->model);
@@ -65,7 +65,7 @@ abstract class BaseModal extends ModalComponent
         }
     }
 
-    public function save(): void
+    final public function save(): void
     {
         if ($this->modelForm->store()) {
             $this->dispatch('refreshDatatable');
@@ -77,7 +77,7 @@ abstract class BaseModal extends ModalComponent
     /**
      * Get the view / contents that represent the component.
      */
-    public function render(): View
+    final public function render(): View
     {
         $view = 'livewire.'.$this->modalFormPath;
 

@@ -23,14 +23,14 @@ abstract class LivewireBaseForm extends Form
     /**
      * @param  TFormModel  $formModel
      */
-    public function setModel($formModel): void
+    final public function setModel($formModel): void
     {
         $this->formModel = $formModel;
         $this->fill($formModel);
         $this->loadExtraData();
     }
 
-    public function generateModelEditName(string $fieldName): string
+    final public function generateModelEditName(string $fieldName): string
     {
         if (property_exists($this->formModel, $fieldName)) {
             return (string) ($this->formModel->{$fieldName} ?? 'Unknown');
@@ -39,5 +39,5 @@ abstract class LivewireBaseForm extends Form
         return 'Unknown';
     }
 
-    public function loadExtraData(): void {}
+    final public function loadExtraData(): void {}
 }
