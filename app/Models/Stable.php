@@ -60,7 +60,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-class Stable extends Model implements Activatable, Retirable
+final class Stable extends Model implements Activatable, Retirable
 {
     use Concerns\HasMembers;
     use Concerns\IsActivatable;

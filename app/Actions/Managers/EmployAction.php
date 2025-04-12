@@ -9,7 +9,7 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseManagerAction
+final class EmployAction extends BaseManagerAction
 {
     use AsAction;
 

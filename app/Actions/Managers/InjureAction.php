@@ -9,7 +9,7 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InjureAction extends BaseManagerAction
+final class InjureAction extends BaseManagerAction
 {
     use AsAction;
 

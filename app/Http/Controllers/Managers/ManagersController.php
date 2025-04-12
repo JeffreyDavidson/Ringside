@@ -9,7 +9,7 @@ use App\Models\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class ManagersController extends Controller
+final class ManagersController extends Controller
 {
     /**
      * View a list of managers.

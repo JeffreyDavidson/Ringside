@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-class TagTeamManager extends Pivot
+final class TagTeamManager extends Pivot
 {
     protected $table = 'tag_teams_managers';
 

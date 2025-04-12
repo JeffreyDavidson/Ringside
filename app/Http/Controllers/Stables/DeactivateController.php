@@ -11,7 +11,7 @@ use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class DeactivateController extends Controller
+final class DeactivateController extends Controller
 {
     /**
      * Deactivate a stable.

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class WrestlerCanJoinExistingStable implements ValidationRule
+final class WrestlerCanJoinExistingStable implements ValidationRule
 {
     /**
      * @param  Collection<int, int>  $tagTeamIds

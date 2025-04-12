@@ -10,7 +10,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseWrestlerAction
+final class SuspendAction extends BaseWrestlerAction
 {
     use AsAction;
 

@@ -9,7 +9,7 @@ use App\Models\Wrestler;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class WrestlersController extends Controller
+final class WrestlersController extends Controller
 {
     public function index(): View
     {

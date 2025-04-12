@@ -13,7 +13,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousTagTeamsTable extends DataTableComponent
+final class PreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
 

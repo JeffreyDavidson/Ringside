@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<StableForm, Stable>
  */
-class FormModal extends BaseModal
+final class FormModal extends BaseModal
 {
     use PresentsManagersList;
     use PresentsTagTeamsList;

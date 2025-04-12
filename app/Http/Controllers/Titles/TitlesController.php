@@ -9,7 +9,7 @@ use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class TitlesController extends Controller
+final class TitlesController extends Controller
 {
     public function index(): View
     {

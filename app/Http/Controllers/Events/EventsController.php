@@ -9,7 +9,7 @@ use App\Models\Event;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class EventsController extends Controller
+final class EventsController extends Controller
 {
     /**
      * View a list of events.

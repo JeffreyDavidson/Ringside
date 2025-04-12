@@ -8,7 +8,7 @@ use App\Models\Referee;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class RefereeCanRefereeMatch implements ValidationRule
+final class RefereeCanRefereeMatch implements ValidationRule
 {
     /**
      * Run the validation rule.

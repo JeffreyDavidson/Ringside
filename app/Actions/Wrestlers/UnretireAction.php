@@ -9,7 +9,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseWrestlerAction
+final class UnretireAction extends BaseWrestlerAction
 {
     use AsAction;
 

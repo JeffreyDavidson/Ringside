@@ -15,7 +15,7 @@ use Illuminate\Validation\Rules\Unique;
 /**
  * @extends LivewireBaseForm<WrestlerForm, ?Wrestler>
  */
-class WrestlerForm extends LivewireBaseForm
+final class WrestlerForm extends LivewireBaseForm
 {
     public $formModel;
 

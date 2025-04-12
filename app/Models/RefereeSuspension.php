@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-class RefereeSuspension extends Model
+final class RefereeSuspension extends Model
 {
     /** @use HasFactory<\Database\Factories\RefereeSuspensionFactory> */
     use HasFactory;

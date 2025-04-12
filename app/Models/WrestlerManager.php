@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-class WrestlerManager extends Pivot
+final class WrestlerManager extends Pivot
 {
     protected $table = 'wrestlers_managers';
 

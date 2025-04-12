@@ -11,7 +11,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseTagTeamAction
+final class UnretireAction extends BaseTagTeamAction
 {
     use AsAction;
 

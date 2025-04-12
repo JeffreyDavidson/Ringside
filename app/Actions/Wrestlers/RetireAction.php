@@ -10,7 +10,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseWrestlerAction
+final class RetireAction extends BaseWrestlerAction
 {
     use AsAction;
 

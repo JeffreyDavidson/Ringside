@@ -11,7 +11,7 @@ use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RetireController extends Controller
+final class RetireController extends Controller
 {
     /**
      * Retire a stable.

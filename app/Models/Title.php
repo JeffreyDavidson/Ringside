@@ -50,7 +50,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-class Title extends Model implements Activatable, Retirable
+final class Title extends Model implements Activatable, Retirable
 {
     use Concerns\HasChampionships;
     use Concerns\IsActivatable;

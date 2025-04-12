@@ -11,7 +11,7 @@ use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReleaseController extends Controller
+final class ReleaseController extends Controller
 {
     /**
      * Release a tag team.

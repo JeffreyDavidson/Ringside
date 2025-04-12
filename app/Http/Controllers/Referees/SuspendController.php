@@ -11,7 +11,7 @@ use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class SuspendController extends Controller
+final class SuspendController extends Controller
 {
     /**
      * Suspend a referee.

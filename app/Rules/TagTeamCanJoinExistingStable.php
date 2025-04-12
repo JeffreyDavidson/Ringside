@@ -9,7 +9,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class TagTeamCanJoinExistingStable implements ValidationRule
+final class TagTeamCanJoinExistingStable implements ValidationRule
 {
     public function __construct(protected ?Carbon $startDate)
     {

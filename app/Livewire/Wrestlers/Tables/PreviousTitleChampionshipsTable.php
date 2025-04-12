@@ -14,7 +14,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousTitleChampionshipsTable extends DataTableComponent
+final class PreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
 

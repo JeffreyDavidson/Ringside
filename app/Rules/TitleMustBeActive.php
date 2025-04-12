@@ -8,7 +8,7 @@ use App\Models\Title;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class TitleMustBeActive implements ValidationRule
+final class TitleMustBeActive implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.

@@ -9,7 +9,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseTagTeamAction
+final class UpdateAction extends BaseTagTeamAction
 {
     use AsAction;
 

@@ -11,7 +11,7 @@ use App\Models\Title;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ActivateController extends Controller
+final class ActivateController extends Controller
 {
     public function __invoke(Title $title): RedirectResponse
     {

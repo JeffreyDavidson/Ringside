@@ -8,7 +8,7 @@ use App\Models\TagTeam;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class TagTeamMustBeBookable implements ValidationRule
+final class TagTeamMustBeBookable implements ValidationRule
 {
     /**
      * Run the validation rule.

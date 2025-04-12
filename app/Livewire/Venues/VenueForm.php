@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules\Unique;
 /**
  * @extends LivewireBaseForm<VenueForm, ?Venue>
  */
-class VenueForm extends LivewireBaseForm
+final class VenueForm extends LivewireBaseForm
 {
     public $formModel;
 

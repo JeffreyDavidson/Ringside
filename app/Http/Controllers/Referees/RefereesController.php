@@ -9,7 +9,7 @@ use App\Models\Referee;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class RefereesController extends Controller
+final class RefereesController extends Controller
 {
     /**
      * View a list of referees.

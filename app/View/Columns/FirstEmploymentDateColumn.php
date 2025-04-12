@@ -10,7 +10,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class FirstEmploymentDateColumn extends Column
+final class FirstEmploymentDateColumn extends Column
 {
     public function __construct(string $title, ?string $from = null)
     {

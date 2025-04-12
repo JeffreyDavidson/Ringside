@@ -8,7 +8,7 @@ use App\Models\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class WrestlerCanJoinNewTagTeam implements ValidationRule
+final class WrestlerCanJoinNewTagTeam implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.

@@ -9,7 +9,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
-class WrestlerCanJoinNewStable implements ValidationRule
+final class WrestlerCanJoinNewStable implements ValidationRule
 {
     /**
      * @param  Collection<int, int>  $tagTeamIds

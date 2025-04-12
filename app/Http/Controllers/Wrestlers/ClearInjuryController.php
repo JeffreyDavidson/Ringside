@@ -11,7 +11,7 @@ use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ClearInjuryController extends Controller
+final class ClearInjuryController extends Controller
 {
     /**
      * Have a wrestler recover from an injury.

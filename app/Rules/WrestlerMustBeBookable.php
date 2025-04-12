@@ -8,7 +8,7 @@ use App\Models\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class WrestlerMustBeBookable implements ValidationRule
+final class WrestlerMustBeBookable implements ValidationRule
 {
     /**
      * Run the validation rule.

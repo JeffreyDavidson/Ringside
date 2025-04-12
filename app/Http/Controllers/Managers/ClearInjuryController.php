@@ -11,7 +11,7 @@ use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ClearInjuryController extends Controller
+final class ClearInjuryController extends Controller
 {
     /**
      * Clear an injured manager.

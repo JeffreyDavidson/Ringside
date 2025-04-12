@@ -37,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  *
  * @mixin \Eloquent
  */
-class EventMatch extends Model
+final class EventMatch extends Model
 {
     /** @use HasFactory<\Database\Factories\EventMatchFactory> */
     use HasFactory;

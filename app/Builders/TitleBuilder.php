@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @extends Builder<TModel>
  */
-class TitleBuilder extends Builder
+final class TitleBuilder extends Builder
 {
     /**
      * Scope a query to include competable titles.

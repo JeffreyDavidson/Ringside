@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeReleasedException extends Exception
+final class CannotBeReleasedException extends Exception
 {
     public static function unemployed(): self
     {

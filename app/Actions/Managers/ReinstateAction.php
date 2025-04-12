@@ -9,7 +9,7 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseManagerAction
+final class ReinstateAction extends BaseManagerAction
 {
     use AsAction;
 

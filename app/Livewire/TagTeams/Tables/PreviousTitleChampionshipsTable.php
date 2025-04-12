@@ -8,7 +8,7 @@ use App\Models\TagTeam;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class PreviousTitleChampionshipsTable extends DataTableComponent
+final class PreviousTitleChampionshipsTable extends DataTableComponent
 {
     /**
      * Tag team to use for component.

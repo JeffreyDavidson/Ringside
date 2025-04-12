@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class PreviousWrestlersTable extends DataTableComponent
+final class PreviousWrestlersTable extends DataTableComponent
 {
     use ShowTableTrait;
 

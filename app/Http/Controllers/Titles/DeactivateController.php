@@ -11,7 +11,7 @@ use App\Models\Title;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class DeactivateController extends Controller
+final class DeactivateController extends Controller
 {
     /**
      * Deactivates a title.

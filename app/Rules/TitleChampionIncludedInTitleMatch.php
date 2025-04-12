@@ -12,7 +12,7 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
-class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
+final class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
 {
     /**
      * All the data under validation.

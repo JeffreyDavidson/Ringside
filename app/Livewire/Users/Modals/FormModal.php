@@ -11,7 +11,7 @@ use App\Models\User;
 /**
  * @extends BaseModal<UserForm, User>
  */
-class FormModal extends BaseModal
+final class FormModal extends BaseModal
 {
     protected string $modalLanguagePath = 'users';
 

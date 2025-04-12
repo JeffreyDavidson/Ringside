@@ -8,7 +8,7 @@ use App\Models\Event;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class EventDateCanBeChanged implements ValidationRule
+final class EventDateCanBeChanged implements ValidationRule
 {
     public function __construct(protected ?Event $model) {}
 

@@ -11,7 +11,7 @@ use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class UnretireController extends Controller
+final class UnretireController extends Controller
 {
     /**
      * Unretire a tag team.

@@ -9,7 +9,7 @@ use App\Models\Title;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ActivateAction extends BaseTitleAction
+final class ActivateAction extends BaseTitleAction
 {
     use AsAction;
 

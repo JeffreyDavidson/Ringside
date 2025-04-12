@@ -15,7 +15,7 @@ use App\View\Filters\FirstActivationFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-class StablesTable extends BaseTableWithActions
+final class StablesTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

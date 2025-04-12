@@ -9,7 +9,7 @@ use App\Models\Referee;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddRefereesToMatchAction extends BaseEventMatchAction
+final class AddRefereesToMatchAction extends BaseEventMatchAction
 {
     use AsAction;
 

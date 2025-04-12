@@ -9,7 +9,7 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseRefereeAction
+final class ReleaseAction extends BaseRefereeAction
 {
     use AsAction;
 

@@ -12,7 +12,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class StableRepository
+final class StableRepository
 {
     /**
      * Create a new stable with the given data.

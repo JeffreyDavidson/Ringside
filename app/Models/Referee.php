@@ -65,7 +65,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
+final class Referee extends Model implements Employable, Injurable, Retirable, Suspendable
 {
     use Concerns\IsEmployable;
     use Concerns\IsInjurable;

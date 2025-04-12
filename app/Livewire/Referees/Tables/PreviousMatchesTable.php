@@ -17,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousMatchesTable extends DataTableComponent
+final class PreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 

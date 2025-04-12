@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * @extends BaseModal<RefereeForm, Referee>
  */
-class FormModal extends BaseModal
+final class FormModal extends BaseModal
 {
     protected string $modalLanguagePath = 'referees';
 

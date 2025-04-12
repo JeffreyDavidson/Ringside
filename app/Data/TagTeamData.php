@@ -7,7 +7,7 @@ namespace App\Data;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 
-readonly class TagTeamData
+final readonly class TagTeamData
 {
     /**
      * Create a new tag team data instance.

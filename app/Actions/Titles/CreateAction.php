@@ -8,7 +8,7 @@ use App\Data\TitleData;
 use App\Models\Title;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseTitleAction
+final class CreateAction extends BaseTitleAction
 {
     use AsAction;
 

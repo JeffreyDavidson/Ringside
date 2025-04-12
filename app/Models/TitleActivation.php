@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-class TitleActivation extends Model
+final class TitleActivation extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleActivationFactory> */
     use HasFactory;

@@ -9,7 +9,7 @@ use App\Models\Title;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseTitleAction
+final class RetireAction extends BaseTitleAction
 {
     use AsAction;
 

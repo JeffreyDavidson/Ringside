@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Contracts\View\View;
 
-class EventMatchesController extends Controller
+final class EventMatchesController extends Controller
 {
     /**
      * View a list of events matches.

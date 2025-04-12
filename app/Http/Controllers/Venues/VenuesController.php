@@ -9,7 +9,7 @@ use App\Models\Venue;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class VenuesController extends Controller
+final class VenuesController extends Controller
 {
     /**
      * View a list of venues.

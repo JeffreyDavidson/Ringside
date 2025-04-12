@@ -9,7 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddCompetitorsToMatchAction extends BaseEventMatchAction
+final class AddCompetitorsToMatchAction extends BaseEventMatchAction
 {
     use AsAction;
 

@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-class TagTeamSuspension extends Model
+final class TagTeamSuspension extends Model
 {
     /** @use HasFactory<\Database\Factories\TagTeamSuspensionFactory> */
     use HasFactory;

@@ -9,7 +9,7 @@ use App\Models\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class VenuesTable extends BaseTableWithActions
+final class VenuesTable extends BaseTableWithActions
 {
     protected string $databaseTableName = 'venues';
 

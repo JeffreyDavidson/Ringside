@@ -9,7 +9,7 @@ use App\Models\Stable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class StablesController extends Controller
+final class StablesController extends Controller
 {
     /**
      * View a list of stables.

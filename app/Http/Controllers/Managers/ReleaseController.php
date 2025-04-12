@@ -11,7 +11,7 @@ use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReleaseController extends Controller
+final class ReleaseController extends Controller
 {
     /**
      * Release a manager.

@@ -11,7 +11,7 @@ use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class EmployController extends Controller
+final class EmployController extends Controller
 {
     /**
      * Employ a wrestler.

@@ -33,7 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-class Venue extends Model
+final class Venue extends Model
 {
     /** @use HasFactory<\Database\Factories\VenueFactory> */
     use HasFactory;

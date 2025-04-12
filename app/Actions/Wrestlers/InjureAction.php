@@ -10,7 +10,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InjureAction extends BaseWrestlerAction
+final class InjureAction extends BaseWrestlerAction
 {
     use AsAction;
 

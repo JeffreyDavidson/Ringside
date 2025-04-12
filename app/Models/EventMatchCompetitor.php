@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @mixin \Eloquent
  */
-class EventMatchCompetitor extends MorphPivot
+final class EventMatchCompetitor extends MorphPivot
 {
     /**
      * The table associated with the model.

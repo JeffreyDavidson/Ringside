@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @mixin \Eloquent
  */
-class EventMatchResult extends Model
+final class EventMatchResult extends Model
 {
     /**
      * The table associated with the model.

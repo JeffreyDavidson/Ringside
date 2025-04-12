@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 use Spatie\Navigation\Navigation;
 use Spatie\Navigation\Section;
 
-class NavigationServiceProvider extends ServiceProvider
+final class NavigationServiceProvider extends ServiceProvider
 {
     public function register(): void
     {

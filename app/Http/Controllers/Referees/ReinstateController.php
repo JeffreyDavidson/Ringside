@@ -11,7 +11,7 @@ use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReinstateController extends Controller
+final class ReinstateController extends Controller
 {
     /**
      * Reinstate a referee.

@@ -15,7 +15,7 @@ use Illuminate\Validation\Rules\Unique;
 /**
  * @extends LivewireBaseForm<TagTeamForm, ?TagTeam>
  */
-class TagTeamForm extends LivewireBaseForm
+final class TagTeamForm extends LivewireBaseForm
 {
     public $formModel;
 

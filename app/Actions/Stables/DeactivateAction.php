@@ -9,7 +9,7 @@ use App\Models\Stable;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeactivateAction extends BaseStableAction
+final class DeactivateAction extends BaseStableAction
 {
     use AsAction;
 

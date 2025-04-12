@@ -9,7 +9,7 @@ use App\Models\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class WrestlerCanJoinExistingTagTeam implements ValidationRule
+final class WrestlerCanJoinExistingTagTeam implements ValidationRule
 {
     public function __construct(protected TagTeam $tagTeam) {}
 

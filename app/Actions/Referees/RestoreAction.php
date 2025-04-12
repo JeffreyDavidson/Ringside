@@ -7,7 +7,7 @@ namespace App\Actions\Referees;
 use App\Models\Referee;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseRefereeAction
+final class RestoreAction extends BaseRefereeAction
 {
     use AsAction;
 

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 
-class EventMatchesTable extends BaseTableWithActions
+final class EventMatchesTable extends BaseTableWithActions
 {
     public ?int $eventId;
 
