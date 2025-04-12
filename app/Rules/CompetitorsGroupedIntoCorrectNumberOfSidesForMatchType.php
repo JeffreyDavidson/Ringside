@@ -16,7 +16,7 @@ final class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements Da
      *
      * @var array<string, string>
      */
-    protected array $data = [];
+    private array $data = [];
 
     /**
      * Set the data under validation.

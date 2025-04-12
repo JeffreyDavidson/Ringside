@@ -19,7 +19,7 @@ final class TitleChampionIncludedInTitleMatch implements DataAwareRule, Validati
      *
      * @var array<string, array<string>|string>
      */
-    protected array $data = [];
+    private array $data = [];
 
     /**
      * Set the data under validation.
