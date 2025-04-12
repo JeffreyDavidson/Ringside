@@ -6,6 +6,7 @@ namespace App\Livewire\Stables\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\StableWrestler;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -26,7 +27,7 @@ class PreviousWrestlersTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->stableId)) {
-            throw new \Exception("You didn't specify a stable");
+            throw new Exception("You didn't specify a stable");
         }
 
         return StableWrestler::query()

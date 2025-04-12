@@ -7,6 +7,7 @@ namespace App\Livewire\Venues\Tables;
 use App\Builders\EventBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\Event;
+use Exception;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
@@ -30,7 +31,7 @@ class PreviousEventsTable extends DataTableComponent
     public function builder(): EventBuilder
     {
         if (! isset($this->venueId)) {
-            throw new \Exception("You didn't specify a venue");
+            throw new Exception("You didn't specify a venue");
         }
 
         return Event::query()

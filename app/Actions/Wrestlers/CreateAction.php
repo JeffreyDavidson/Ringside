@@ -17,7 +17,7 @@ class CreateAction extends BaseWrestlerAction
      */
     public function handle(WrestlerData $wrestlerData): Wrestler
     {
-        /** @var \App\Models\Wrestler $wrestler */
+        /** @var Wrestler $wrestler */
         $wrestler = $this->wrestlerRepository->create($wrestlerData);
 
         if (isset($wrestlerData->start_date)) {

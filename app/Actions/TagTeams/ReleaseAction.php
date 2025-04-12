@@ -18,7 +18,7 @@ class ReleaseAction extends BaseTagTeamAction
     /**
      * Release a tag team.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
@@ -39,7 +39,7 @@ class ReleaseAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(TagTeam $tagTeam): void
     {

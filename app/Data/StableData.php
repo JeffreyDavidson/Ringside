@@ -12,9 +12,9 @@ readonly class StableData
     /**
      * Create a new stable data instance.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, \App\Models\Manager>  $managers
      */
     public function __construct(
         public string $name,

@@ -16,7 +16,7 @@ class ReinstateAction extends BaseRefereeAction
     /**
      * Reinstate a referee.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
@@ -30,7 +30,7 @@ class ReinstateAction extends BaseRefereeAction
     /**
      * Ensure a referee can be reinstated.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(Referee $referee): void
     {

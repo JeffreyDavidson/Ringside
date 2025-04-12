@@ -22,31 +22,31 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $first_name
  * @property string $last_name
  * @property string $full_name
- * @property \App\Enums\EmploymentStatus $status
+ * @property EmploymentStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\RefereeEmployment|null $currentEmployment
- * @property-read \App\Models\RefereeInjury|null $currentInjury
- * @property-read \App\Models\RefereeRetirement|null $currentRetirement
- * @property-read \App\Models\RefereeSuspension|null $currentSuspension
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeEmployment> $employments
- * @property-read \App\Models\RefereeEmployment|null $firstEmployment
- * @property-read \App\Models\RefereeEmployment|null $futureEmployment
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeInjury> $injuries
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $matches
- * @property-read \App\Models\RefereeEmployment|null $previousEmployment
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeEmployment> $previousEmployments
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeInjury> $previousInjuries
- * @property-read \App\Models\RefereeInjury|null $previousInjury
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $previousMatches
- * @property-read \App\Models\RefereeRetirement|null $previousRetirement
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeRetirement> $previousRetirements
- * @property-read \App\Models\RefereeSuspension|null $previousSuspension
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeSuspension> $previousSuspensions
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeRetirement> $retirements
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RefereeSuspension> $suspensions
+ * @property-read RefereeEmployment|null $currentEmployment
+ * @property-read RefereeInjury|null $currentInjury
+ * @property-read RefereeRetirement|null $currentRetirement
+ * @property-read RefereeSuspension|null $currentSuspension
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeEmployment> $employments
+ * @property-read RefereeEmployment|null $firstEmployment
+ * @property-read RefereeEmployment|null $futureEmployment
+ * @property-read TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeInjury> $injuries
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, EventMatch> $matches
+ * @property-read RefereeEmployment|null $previousEmployment
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeEmployment> $previousEmployments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeInjury> $previousInjuries
+ * @property-read RefereeInjury|null $previousInjury
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, EventMatch> $previousMatches
+ * @property-read RefereeRetirement|null $previousRetirement
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeRetirement> $previousRetirements
+ * @property-read RefereeSuspension|null $previousSuspension
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeSuspension> $previousSuspensions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeRetirement> $retirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, RefereeSuspension> $suspensions
  *
  * @method static \Database\Factories\RefereeFactory factory($count = null, $state = [])
  * @method static \App\Builders\RefereeBuilder newModelQuery()

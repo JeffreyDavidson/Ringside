@@ -16,7 +16,7 @@ class ClearInjuryAction extends BaseRefereeAction
     /**
      * Clear an injury of a referee.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
@@ -30,7 +30,7 @@ class ClearInjuryAction extends BaseRefereeAction
     /**
      * Ensure a referee can be cleared from an injury.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     private function ensureCanBeClearedFromInjury(Referee $referee): void
     {

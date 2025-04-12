@@ -16,7 +16,7 @@ class DeactivateAction extends BaseStableAction
     /**
      * Deactivate a stable.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     public function handle(Stable $stable, ?Carbon $deactivationDate = null): void
     {
@@ -31,7 +31,7 @@ class DeactivateAction extends BaseStableAction
     /**
      * Ensure a stable can be deactivated.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     private function ensureCanBeDeactivated(Stable $stable): void
     {

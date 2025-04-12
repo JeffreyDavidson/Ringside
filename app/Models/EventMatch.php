@@ -19,16 +19,16 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
  * @property string|null $preview
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Collections\EventMatchCompetitorsCollection<int, \App\Models\EventMatchCompetitor> $competitors
- * @property-read \App\Models\Event $event
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\MatchType|null $matchType
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee> $referees
- * @property-read \App\Models\EventMatchResult|null $result
- * @property-read \App\Models\EventMatchCompetitor|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title> $titles
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
+ * @property-read \App\Collections\EventMatchCompetitorsCollection<int, EventMatchCompetitor> $competitors
+ * @property-read Event $event
+ * @property-read TFactory|null $use_factory
+ * @property-read MatchType|null $matchType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Referee> $referees
+ * @property-read EventMatchResult|null $result
+ * @property-read EventMatchCompetitor|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $tagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Title> $titles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\EventMatchFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()

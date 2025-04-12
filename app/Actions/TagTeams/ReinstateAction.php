@@ -18,7 +18,7 @@ class ReinstateAction extends BaseTagTeamAction
     /**
      * Reinstate a tag team.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
@@ -35,7 +35,7 @@ class ReinstateAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be reinstated.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(TagTeam $tagTeam): void
     {

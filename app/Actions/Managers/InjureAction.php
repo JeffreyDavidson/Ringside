@@ -16,7 +16,7 @@ class InjureAction extends BaseManagerAction
     /**
      * Injure a manager.
      *
-     * @throws \App\Exceptions\CannotBeInjuredException
+     * @throws CannotBeInjuredException
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void
     {
@@ -30,7 +30,7 @@ class InjureAction extends BaseManagerAction
     /**
      * Ensure a manager can be injured.
      *
-     * @throws \App\Exceptions\CannotBeInjuredException
+     * @throws CannotBeInjuredException
      */
     private function ensureCanBeInjured(Manager $manager): void
     {

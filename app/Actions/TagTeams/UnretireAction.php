@@ -18,7 +18,7 @@ class UnretireAction extends BaseTagTeamAction
     /**
      * Unretire a tag team.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
     {
@@ -37,7 +37,7 @@ class UnretireAction extends BaseTagTeamAction
     /**
      * Ensure tag team can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(TagTeam $tagTeam): void
     {

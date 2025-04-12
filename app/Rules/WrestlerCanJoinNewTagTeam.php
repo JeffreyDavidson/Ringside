@@ -15,7 +15,7 @@ class WrestlerCanJoinNewTagTeam implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        /** @var \App\Models\Wrestler $wrestler */
+        /** @var Wrestler $wrestler */
         $wrestler = Wrestler::query()->with(['currentEmployment', 'futureEmployment'])->whereKey($value)->sole();
 
         if ($wrestler->isSuspended() || $wrestler->isInjured()) {

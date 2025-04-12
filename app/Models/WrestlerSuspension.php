@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $ended_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\Wrestler|null $wrestler
+ * @property-read TFactory|null $use_factory
+ * @property-read Wrestler|null $wrestler
  *
  * @method static \Database\Factories\WrestlerSuspensionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WrestlerSuspension newModelQuery()

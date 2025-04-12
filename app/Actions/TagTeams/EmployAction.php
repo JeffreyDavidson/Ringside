@@ -18,7 +18,7 @@ class EmployAction extends BaseTagTeamAction
     /**
      * Employ a tag team.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void
     {
@@ -34,7 +34,7 @@ class EmployAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be employed.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     private function ensureCanBeEmployed(TagTeam $tagTeam): void
     {

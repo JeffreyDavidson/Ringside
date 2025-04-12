@@ -16,9 +16,9 @@ class AddMembersAction extends BaseStableAction
     /**
      * Add members to a given stable.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, \App\Models\Manager>  $managers
      */
     public function handle(
         Stable $stable,

@@ -16,7 +16,7 @@ class ReleaseAction extends BaseRefereeAction
     /**
      * Release a referee.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
@@ -38,7 +38,7 @@ class ReleaseAction extends BaseRefereeAction
     /**
      * Ensure a referee can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(Referee $referee): void
     {

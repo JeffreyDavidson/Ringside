@@ -17,7 +17,7 @@ class ReinstateAction extends BaseWrestlerAction
     /**
      * Reinstate a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
@@ -33,7 +33,7 @@ class ReinstateAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be reinstated.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(Wrestler $wrestler): void
     {

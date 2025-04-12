@@ -23,7 +23,7 @@ class RetireAction extends BaseStableAction
     /**
      * Retire a stable.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {
@@ -58,7 +58,7 @@ class RetireAction extends BaseStableAction
     /**
      * Ensure a stable can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(Stable $stable): void
     {

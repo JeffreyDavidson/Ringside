@@ -10,6 +10,7 @@ use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\Title;
 use App\Models\Wrestler;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -33,7 +34,7 @@ class PreviousMatchesTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->wrestler)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return EventMatch::query()

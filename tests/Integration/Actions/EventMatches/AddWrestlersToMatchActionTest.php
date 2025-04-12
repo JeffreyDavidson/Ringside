@@ -20,7 +20,7 @@ test('it adds wrestlers to a match', function () {
 
     $this->eventMatchRepository
         ->shouldReceive('addWrestlerToMatch')
-        ->with($eventMatch, \Mockery::type(Wrestler::class), $sideNumber)
+        ->with($eventMatch, Mockery::type(Wrestler::class), $sideNumber)
         ->times($wrestlers->count());
 
     AddWrestlersToMatchAction::run($eventMatch, $wrestlers, $sideNumber);

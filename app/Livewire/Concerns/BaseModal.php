@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns;
 
 use App\Livewire\Base\LivewireBaseForm;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -40,7 +41,7 @@ abstract class BaseModal extends ModalComponent
             try {
                 $this->model = $this->modelType::findOrFail($modelId);
                 $this->modelForm->setModel($this->model);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error($e->getMessage());
             }
         }

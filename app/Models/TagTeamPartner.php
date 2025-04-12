@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property \Illuminate\Support\Carbon|null $left_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TagTeam|null $tagTeam
- * @property-read \App\Models\Wrestler|null $partner
+ * @property-read TagTeam|null $tagTeam
+ * @property-read Wrestler|null $partner
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamPartner newQuery()

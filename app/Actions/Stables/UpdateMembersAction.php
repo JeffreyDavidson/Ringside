@@ -16,9 +16,9 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update a stable's members.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, \App\Models\Manager>  $managers
      */
     public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams, Collection $managers): void
     {
@@ -32,7 +32,7 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update wrestlers attached to a stable.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
      */
     protected function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now): void
     {
@@ -51,7 +51,7 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update tag teams attached to a stable.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
      */
     protected function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now): void
     {
@@ -70,7 +70,7 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update managers attached to a stable.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, \App\Models\Manager>  $managers
      */
     protected function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
     {

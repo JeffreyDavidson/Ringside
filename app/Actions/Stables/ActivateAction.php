@@ -20,7 +20,7 @@ class ActivateAction extends BaseStableAction
     /**
      * Activate a stable.
      *
-     * @throws \App\Exceptions\CannotBeActivatedException
+     * @throws CannotBeActivatedException
      */
     public function handle(Stable $stable, ?Carbon $startDate = null): void
     {
@@ -46,7 +46,7 @@ class ActivateAction extends BaseStableAction
     /**
      * Ensure a stable can be activated.
      *
-     * @throws \App\Exceptions\CannotBeActivatedException
+     * @throws CannotBeActivatedException
      */
     private function ensureCanBeActivated(Stable $stable): void
     {

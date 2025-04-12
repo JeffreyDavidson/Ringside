@@ -18,7 +18,7 @@ class RetireAction extends BaseTagTeamAction
     /**
      * Retire a tag team.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void
     {
@@ -43,7 +43,7 @@ class RetireAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(TagTeam $tagTeam): void
     {

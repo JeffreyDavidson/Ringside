@@ -22,7 +22,7 @@ class WrestlerCanJoinExistingStable implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        /** @var \App\Models\Wrestler $wrestler */
+        /** @var Wrestler $wrestler */
         $wrestler = Wrestler::with('currentStable')->whereKey($value)->first();
 
         if ($wrestler->isSuspended()) {

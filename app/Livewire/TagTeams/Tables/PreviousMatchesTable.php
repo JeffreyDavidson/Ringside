@@ -10,6 +10,7 @@ use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\TagTeam;
 use App\Models\Title;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -36,7 +37,7 @@ class PreviousMatchesTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->tagTeam)) {
-            throw new \Exception("You didn't specify a tag team");
+            throw new Exception("You didn't specify a tag team");
         }
 
         return EventMatch::query()

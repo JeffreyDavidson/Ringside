@@ -17,7 +17,7 @@ class CreateAction extends BaseTagTeamAction
      */
     public function handle(TagTeamData $tagTeamData): TagTeam
     {
-        /** @var \App\Models\TagTeam $tagTeam */
+        /** @var TagTeam $tagTeam */
         $tagTeam = $this->tagTeamRepository->create($tagTeamData);
 
         $datetime = now();
