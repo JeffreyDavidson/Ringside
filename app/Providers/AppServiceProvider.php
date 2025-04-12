@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
             /** @var Builder $builder */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);
-            $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+            $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
