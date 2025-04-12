@@ -32,6 +32,30 @@ class EventForm extends LivewireBaseForm
     #[Validate]
     public string $preview;
 
+    public function store(): bool
+    {
+        $this->validate();
+
+        if (! isset($this->formModel)) {
+            $this->formModel = new Event([
+                'name' => $this->name,
+                'date' => $this->date,
+                'venue_id' => $this->venue,
+                'preview' => $this->preview,
+            ]);
+            $this->formModel->save();
+        } else {
+            $this->formModel->update([
+                'name' => $this->name,
+                'date' => $this->date,
+                'venue_id' => $this->venue,
+                'preview' => $this->preview,
+            ]);
+        }
+
+        return true;
+    }
+
     /**
      * @return array<string, list<Unique|Exists|EventDateCanBeChanged|string>>
      */
@@ -56,29 +80,5 @@ class EventForm extends LivewireBaseForm
             'signature_move' => 'signature move',
             'start_date' => 'start date',
         ];
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new Event([
-                'name' => $this->name,
-                'date' => $this->date,
-                'venue_id' => $this->venue,
-                'preview' => $this->preview,
-            ]);
-            $this->formModel->save();
-        } else {
-            $this->formModel->update([
-                'name' => $this->name,
-                'date' => $this->date,
-                'venue_id' => $this->venue,
-                'preview' => $this->preview,
-            ]);
-        }
-
-        return true;
     }
 }

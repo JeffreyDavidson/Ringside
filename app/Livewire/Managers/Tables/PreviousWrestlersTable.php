@@ -16,11 +16,11 @@ class PreviousWrestlersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    public ?int $managerId;
+
     protected string $databaseTableName = 'wrestlers_managers';
 
     protected string $resourceName = 'wrestlers';
-
-    public ?int $managerId;
 
     /**
      * @return Builder<WrestlerManager>

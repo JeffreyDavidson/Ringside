@@ -21,14 +21,14 @@ class PreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    protected string $databaseTableName = 'event_matches';
-
-    protected string $resourceName = 'matches';
-
     /**
      * Referee to use for component.
      */
     public Referee $referee;
+
+    protected string $databaseTableName = 'event_matches';
+
+    protected string $resourceName = 'matches';
 
     /**
      * @return Builder<EventMatch>

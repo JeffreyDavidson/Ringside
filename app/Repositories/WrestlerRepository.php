@@ -16,6 +16,53 @@ use Illuminate\Support\Carbon;
 class WrestlerRepository
 {
     /**
+     * Undocumented function.
+     *
+     * @return Collection<int, covariant Wrestler>
+     */
+    public static function getAvailableWrestlersForNewTagTeam(): Collection
+    {
+        return Wrestler::query()
+            ->where(function (WrestlerBuilder $query) {
+                $query->unemployed();
+            })
+            ->orWhere(function (WrestlerBuilder $query) {
+                $query->futureEmployed();
+            })
+            ->orWhere(function (WrestlerBuilder $query) {
+                $query->employed()
+                    ->where('status', EmploymentStatus::Bookable)
+                    ->whereDoesntHave('currentTagTeam');
+            })
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, covariant Wrestler>
+     */
+    public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
+    {
+        return Wrestler::query()
+            ->where(function (WrestlerBuilder $query) {
+                $query->unemployed();
+            })
+            ->orWhere(function (WrestlerBuilder $query) {
+                $query->futureEmployed();
+            })
+            ->orWhere(function (WrestlerBuilder $query) {
+                $query->employed()
+                    ->where('status', EmploymentStatus::Bookable)
+                    ->whereDoesntHave('currentTagTeam');
+            })
+            ->orWhere(function (WrestlerBuilder $query) use ($tagTeam) {
+                $query->whereHas('currentTagTeam', function (Builder $query) use ($tagTeam) {
+                    $query->where('tag_team_id', '=', $tagTeam->id);
+                });
+            })
+            ->get();
+    }
+
+    /**
      * Create a new wrestler with the given data.
      */
     public function create(WrestlerData $wrestlerData): Wrestler
@@ -154,52 +201,5 @@ class WrestlerRepository
         $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot($currentTagTeamId, [
             'left_at' => $removalDate->toDateTimeString(),
         ]);
-    }
-
-    /**
-     * Undocumented function.
-     *
-     * @return Collection<int, covariant Wrestler>
-     */
-    public static function getAvailableWrestlersForNewTagTeam(): Collection
-    {
-        return Wrestler::query()
-            ->where(function (WrestlerBuilder $query) {
-                $query->unemployed();
-            })
-            ->orWhere(function (WrestlerBuilder $query) {
-                $query->futureEmployed();
-            })
-            ->orWhere(function (WrestlerBuilder $query) {
-                $query->employed()
-                    ->where('status', EmploymentStatus::Bookable)
-                    ->whereDoesntHave('currentTagTeam');
-            })
-            ->get();
-    }
-
-    /**
-     * @return Collection<int, covariant Wrestler>
-     */
-    public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
-    {
-        return Wrestler::query()
-            ->where(function (WrestlerBuilder $query) {
-                $query->unemployed();
-            })
-            ->orWhere(function (WrestlerBuilder $query) {
-                $query->futureEmployed();
-            })
-            ->orWhere(function (WrestlerBuilder $query) {
-                $query->employed()
-                    ->where('status', EmploymentStatus::Bookable)
-                    ->whereDoesntHave('currentTagTeam');
-            })
-            ->orWhere(function (WrestlerBuilder $query) use ($tagTeam) {
-                $query->whereHas('currentTagTeam', function (Builder $query) use ($tagTeam) {
-                    $query->where('tag_team_id', '=', $tagTeam->id);
-                });
-            })
-            ->get();
     }
 }

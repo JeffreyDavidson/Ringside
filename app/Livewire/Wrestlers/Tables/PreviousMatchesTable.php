@@ -22,11 +22,11 @@ class PreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    public ?Wrestler $wrestler;
+
     protected string $databaseTableName = 'event_matches';
 
     protected string $resourceName = 'matches';
-
-    public ?Wrestler $wrestler;
 
     /**
      * @return Builder<EventMatch>

@@ -26,28 +26,6 @@ class RefereeForm extends LivewireBaseForm
     #[Validate]
     public Carbon|string|null $start_date = '';
 
-    /**
-     * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
-     */
-    protected function rules(): array
-    {
-        return [
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function validationAttributes(): array
-    {
-        return [
-            'start_date' => 'start date',
-        ];
-    }
-
     public function loadExtraData(): void
     {
         $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
@@ -71,5 +49,27 @@ class RefereeForm extends LivewireBaseForm
         }
 
         return true;
+    }
+
+    /**
+     * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
+     */
+    protected function rules(): array
+    {
+        return [
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'start_date' => 'start date',
+        ];
     }
 }

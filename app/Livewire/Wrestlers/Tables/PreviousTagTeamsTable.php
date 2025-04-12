@@ -17,14 +17,14 @@ class PreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    protected string $databaseTableName = 'tag_teams';
-
-    protected string $resourceName = 'tag teams';
-
     /**
      * Wrestler to use for component.
      */
     public ?int $wrestlerId;
+
+    protected string $databaseTableName = 'tag_teams';
+
+    protected string $resourceName = 'tag teams';
 
     /**
      * @return Builder<TagTeamPartner>

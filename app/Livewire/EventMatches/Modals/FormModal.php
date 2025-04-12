@@ -28,14 +28,14 @@ class FormModal extends BaseModal
     use PresentsTitlesList;
     use PresentsWrestlersList;
 
-    protected string $modalLanguagePath = 'event-matches';
-
-    protected string $modalFormPath = 'event-matches.modals.form-modal';
-
     /**
      * String name to render view for each match type.
      */
     public string $subViewToUse;
+
+    protected string $modalLanguagePath = 'event-matches';
+
+    protected string $modalFormPath = 'event-matches.modals.form-modal';
 
     protected $modelForm;
 

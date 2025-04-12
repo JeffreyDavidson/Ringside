@@ -16,14 +16,14 @@ class PreviousManagersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    protected string $databaseTableName = 'wrestlers_managers';
-
-    protected string $resourceName = 'managers';
-
     /**
      * Wrestler to use for component.
      */
     public ?int $wrestlerId;
+
+    protected string $databaseTableName = 'wrestlers_managers';
+
+    protected string $resourceName = 'managers';
 
     /**
      * @return Builder<WrestlerManager>

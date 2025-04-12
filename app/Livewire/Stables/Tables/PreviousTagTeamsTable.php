@@ -16,11 +16,11 @@ class PreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    public ?int $stableId;
+
     protected string $databaseTableName = 'stables_tag_teams';
 
     protected string $resourceName = 'tag teams';
-
-    public ?int $stableId;
 
     /**
      * @return Builder<StableTagTeam>

@@ -29,6 +29,35 @@ class TagTeamForm extends LivewireBaseForm
 
     public ?int $wrestlerB;
 
+    public function loadExtraData(): void
+    {
+        $currentWrestlers = $this->formModel?->currentWrestlers;
+
+        $this->start_date = $this->formModel?->hasEmployments() ? $this->formModel->firstEmployment?->started_at->toDateString() : '';
+        $this->wrestlerA = ! is_null($currentWrestlers) && $currentWrestlers->isNotEmpty() ? $currentWrestlers->first()->id : null;
+        $this->wrestlerB = ! is_null($currentWrestlers) && $currentWrestlers->isNotEmpty() ? $currentWrestlers->last()->id : null;
+    }
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        if (! isset($this->formModel)) {
+            $this->formModel = new TagTeam([
+                'name' => $this->name,
+                'signature_move' => $this->signature_move,
+            ]);
+            $this->formModel->save();
+        } else {
+            $this->formModel->update([
+                'name' => $this->name,
+                'signature_move' => $this->signature_move,
+            ]);
+        }
+
+        return true;
+    }
+
     /**
      * @return array<string, list<Unique|Exists|EmploymentStartDateCanBeChanged|string>>
      */
@@ -72,34 +101,5 @@ class TagTeamForm extends LivewireBaseForm
             'wrestlerA' => 'tag team partner A',
             'wrestlerB' => 'tag team partner B',
         ];
-    }
-
-    public function loadExtraData(): void
-    {
-        $currentWrestlers = $this->formModel?->currentWrestlers;
-
-        $this->start_date = $this->formModel?->hasEmployments() ? $this->formModel->firstEmployment?->started_at->toDateString() : '';
-        $this->wrestlerA = ! is_null($currentWrestlers) && $currentWrestlers->isNotEmpty() ? $currentWrestlers->first()->id : null;
-        $this->wrestlerB = ! is_null($currentWrestlers) && $currentWrestlers->isNotEmpty() ? $currentWrestlers->last()->id : null;
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new TagTeam([
-                'name' => $this->name,
-                'signature_move' => $this->signature_move,
-            ]);
-            $this->formModel->save();
-        } else {
-            $this->formModel->update([
-                'name' => $this->name,
-                'signature_move' => $this->signature_move,
-            ]);
-        }
-
-        return true;
     }
 }

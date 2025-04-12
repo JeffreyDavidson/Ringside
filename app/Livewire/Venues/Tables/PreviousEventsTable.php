@@ -17,13 +17,13 @@ class PreviousEventsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    public ?int $venueId;
+
     protected string $databaseTableName = 'events';
 
     protected string $routeBasePath = 'events';
 
     protected string $resourceName = 'events';
-
-    public ?int $venueId;
 
     /**
      * @return EventBuilder<Event>

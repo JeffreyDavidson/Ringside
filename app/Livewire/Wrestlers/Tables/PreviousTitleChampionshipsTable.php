@@ -18,14 +18,14 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    protected string $databaseTableName = 'tittle_championships';
-
-    protected string $resourceName = 'title championships';
-
     /**
      * Wrestler to use for component.
      */
     public Wrestler $wrestler;
+
+    protected string $databaseTableName = 'tittle_championships';
+
+    protected string $resourceName = 'title championships';
 
     /**
      * Undocumented function.

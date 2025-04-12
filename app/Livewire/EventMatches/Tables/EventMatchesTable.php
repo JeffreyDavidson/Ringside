@@ -16,13 +16,13 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 
 class EventMatchesTable extends BaseTableWithActions
 {
+    public ?int $eventId;
+
     protected string $databaseTableName = 'event_matches';
 
     protected string $routeBasePath = 'event-matches';
 
     protected string $resourceName = 'matches';
-
-    public ?int $eventId;
 
     /**
      * @return Builder<EventMatch>

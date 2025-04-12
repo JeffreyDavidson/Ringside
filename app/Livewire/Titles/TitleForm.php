@@ -25,27 +25,6 @@ class TitleForm extends LivewireBaseForm
     #[Validate]
     public Carbon|string|null $start_date = '';
 
-    /**
-     * @return array<string, list<Unique|ActivationStartDateCanBeChanged|string>>
-     */
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel)],
-            'start_date' => ['nullable', 'date', new ActivationStartDateCanBeChanged($this->formModel)],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function validationAttributes(): array
-    {
-        return [
-            'start_date' => 'start date',
-        ];
-    }
-
     public function loadExtraData(): void
     {
         $this->start_date = $this->formModel?->firstActivation?->started_at->toDateString();
@@ -67,5 +46,26 @@ class TitleForm extends LivewireBaseForm
         }
 
         return true;
+    }
+
+    /**
+     * @return array<string, list<Unique|ActivationStartDateCanBeChanged|string>>
+     */
+    protected function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel)],
+            'start_date' => ['nullable', 'date', new ActivationStartDateCanBeChanged($this->formModel)],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'start_date' => 'start date',
+        ];
     }
 }

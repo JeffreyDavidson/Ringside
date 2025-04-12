@@ -16,14 +16,14 @@ class PreviousStablesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
-    protected string $databaseTableName = 'stables_managers';
-
-    protected string $resourceName = 'stables';
-
     /**
      * ManagerId to use for component.
      */
     public ?int $managerId;
+
+    protected string $databaseTableName = 'stables_managers';
+
+    protected string $resourceName = 'stables';
 
     /**
      * @return Builder<StableManager>
