@@ -4,19 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Base\Tables\BasePreviousWrestlersTable;
 use App\Models\StableWrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class PreviousWrestlersTable extends DataTableComponent
+class PreviousWrestlersTable extends BasePreviousWrestlersTable
 {
-    use ShowTableTrait;
-
     protected string $databaseTableName = 'stables_wrestlers';
-
-    protected string $resourceName = 'wrestlers';
 
     public ?int $stableId;
 
@@ -30,6 +24,7 @@ class PreviousWrestlersTable extends DataTableComponent
         }
 
         return StableWrestler::query()
+            ->with(['wrestler'])
             ->where('stable_id', $this->stableId)
             ->whereNotNull('left_at')
             ->orderByDesc('joined_at');
@@ -40,17 +35,5 @@ class PreviousWrestlersTable extends DataTableComponent
         $this->addAdditionalSelects([
             'stables_wrestlers.wrestler_id as wrestler_id',
         ]);
-    }
-
-    /**
-     * @return array<int, Column>
-     **/
-    public function columns(): array
-    {
-        return [
-            Column::make(__('wrestlers.name'), 'wrestler_name'),
-            Column::make(__('stables.date_joined'), 'date_joined'),
-            Column::make(__('stables.date_left'), 'date_left'),
-        ];
     }
 }

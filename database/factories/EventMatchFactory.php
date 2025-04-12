@@ -22,6 +22,7 @@ class EventMatchFactory extends Factory
     {
         return [
             'event_id' => Event::factory(),
+            'match_number' => fake()->randomDigitNotZero(),
             'match_type_id' => MatchType::first()->id,
             'preview' => null,
         ];

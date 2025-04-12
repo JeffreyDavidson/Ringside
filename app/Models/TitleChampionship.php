@@ -43,7 +43,7 @@ class TitleChampionship extends Model
      *
      * @var string
      */
-    protected $table = 'title_championships';
+    protected $table = 'titles_championships';
 
     /**
      * The attributes that are mass assignable.
@@ -88,7 +88,7 @@ class TitleChampionship extends Model
      *
      * @return MorphTo<Model, $this>
      */
-    public function currentChampion(): MorphTo
+    public function newChampion(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'new_champion_type', 'new_champion_id');
     }
@@ -100,7 +100,7 @@ class TitleChampionship extends Model
      */
     public function previousChampion(): MorphTo
     {
-        return $this->morphTo(__FUNCTION__, 'previous_champion_type', 'previous_champion_id');
+        return $this->morphTo(__FUNCTION__, 'former_champion_type', 'former_champion_id');
     }
 
     /**
@@ -123,6 +123,4 @@ class TitleChampionship extends Model
 
         return intval($this->won_at->diffInDays($datetime));
     }
-
-    public function wrestlers(): void {}
 }
