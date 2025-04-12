@@ -71,12 +71,12 @@ trait IsEmployable
 
     public function isUnemployed(): bool
     {
-        return $this->status == EmploymentStatus::Unemployed;
+        return $this->status === EmploymentStatus::Unemployed;
     }
 
     public function isReleased(): bool
     {
-        return $this->status == EmploymentStatus::Released;
+        return $this->status === EmploymentStatus::Released;
     }
 
     public function employedOn(Carbon $employmentDate): bool

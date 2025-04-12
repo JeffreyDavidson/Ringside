@@ -77,7 +77,7 @@ trait BaseTableTrait
                 'class' => '',
             ])
             ->setThAttributes(function (Column $column) {
-                if ($column->getTitle() == __('core.actions')) {
+                if ($column->getTitle() === __('core.actions')) {
                     return [
                         'default' => false,
                         'default-styling' => false,
@@ -124,7 +124,7 @@ trait BaseTableTrait
                         'class' => 'border-x border-solid border-gray-200 py-3 ps-4 pe-5 border-e-0',
                     ];
                 }
-                if ($columnIndex == 0) {
+                if ($columnIndex === 0) {
                     return [
                         'default' => false,
                         'default-styling' => false,
