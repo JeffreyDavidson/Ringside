@@ -13,14 +13,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('title_championships', function (Blueprint $table) {
+        Schema::create('titles_championships', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(EventMatch::class);
             $table->foreignIdFor(Title::class);
             $table->morphs('new_champion', 'new_champion');
             $table->nullableMorphs('former_champion', 'former_champion');
             $table->dateTime('won_at');
-            $table->dateTime('lost_at');
+            $table->dateTime('lost_at')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('title_championships');
+        Schema::dropIfExists('titles_championships');
     }
 };

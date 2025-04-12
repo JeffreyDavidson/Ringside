@@ -17,7 +17,7 @@ class ManagersTableSeeder extends Seeder
         Manager::factory()->count(20)->available()
             ->hasAttached(TagTeam::factory()->bookable(), ['hired_at' => now()])
             ->hasAttached(Wrestler::factory()->bookable(), ['hired_at' => now()])
-            ->hasAttached(Stable::factory()->active(), ['hired_at' => now()])
+            ->hasAttached(Stable::factory()->active(), ['joined_at' => now()])
             ->create();
         Manager::factory()->count(3)->injured()->create();
         Manager::factory()->count(5)->withFutureEmployment()->create();

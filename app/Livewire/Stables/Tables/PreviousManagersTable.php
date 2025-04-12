@@ -4,20 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\StableManager;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-class PreviousManagersTable extends DataTableComponent
+class PreviousManagersTable extends BasePreviousManagersTable
 {
-    use ShowTableTrait;
-
     protected string $databaseTableName = 'stables_managers';
-
-    protected string $resourceName = 'managers';
 
     public ?int $stableId;
 
@@ -31,31 +24,16 @@ class PreviousManagersTable extends DataTableComponent
         }
 
         return StableManager::query()
+            ->with(['manager'])
             ->where('stable_id', $this->stableId)
             ->whereNotNull('left_at')
-            ->orderByDesc('hired_at');
+            ->orderByDesc('joined_at');
     }
 
     public function configure(): void
     {
         $this->addAdditionalSelects([
-            'stables_managers.manager_id as manager_id',
+            'stables_managers.manager_id',
         ]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('managers.full_name'), 'manager.full_name'),
-            DateColumn::make(__('managers.date_hired'), 'hired_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('managers.date_fired'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 }

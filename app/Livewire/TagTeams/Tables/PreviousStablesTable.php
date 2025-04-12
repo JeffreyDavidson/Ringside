@@ -4,20 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\StableTagTeam;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-class PreviousStablesTable extends DataTableComponent
+class PreviousStablesTable extends BasePreviousStablesTable
 {
-    use ShowTableTrait;
-
     protected string $databaseTableName = 'stables_tag_teams';
-
-    protected string $resourceName = 'stables';
 
     public ?int $tagTeamId;
 
@@ -41,22 +34,5 @@ class PreviousStablesTable extends DataTableComponent
         $this->addAdditionalSelects([
             'stables_tag_teams.stable_id as stable_id',
         ]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('stables.name'), 'stable.name')
-                ->searchable(),
-            DateColumn::make(__('stables.date_joined'), 'joined_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('stables.date_left'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 }

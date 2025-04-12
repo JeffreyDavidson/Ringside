@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -42,7 +43,22 @@ class EventMatchResult extends Model
      */
     public function winner(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo(__FUNCTION__, 'winner_type', 'winner_id');
+    }
+
+    public function getCompetitor(): Wrestler|TagTeam
+    {
+        $competitor = $this->competitor;
+
+        if (! is_object($competitor)) {
+            throw new Exception('No popularized object');
+        }
+
+        return match ($competitor::class) {
+            Wrestler::class,
+            TagTeam::class => $competitor,
+            default => throw new Exception('Unexpected relation: '.$competitor::class),
+        };
     }
 
     /**
@@ -53,5 +69,20 @@ class EventMatchResult extends Model
     public function decision(): BelongsTo
     {
         return $this->belongsTo(MatchDecision::class, 'match_decision_id');
+    }
+
+    public function getWinner(): Wrestler|TagTeam
+    {
+        $winner = $this->winner;
+
+        if (! is_object($winner)) {
+            throw new Exception('No popularized object');
+        }
+
+        return match ($winner::class) {
+            Wrestler::class,
+            TagTeam::class => $winner,
+            default => throw new Exception('Unexpected relation: '.$winner::class),
+        };
     }
 }
