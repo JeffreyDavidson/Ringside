@@ -17,10 +17,8 @@ final class EventDateCanBeChanged implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->model) {
-            if ($this->model->hasPastDate()) {
-                $fail('events.validation.has_past_date');
-            }
+        if ($this->model instanceof \App\Models\Event && $this->model->hasPastDate()) {
+            $fail('events.validation.has_past_date');
         }
     }
 }
