@@ -21,7 +21,7 @@ final class SuspendController extends Controller
         Gate::authorize('suspend', $tagTeam);
 
         try {
-            SuspendAction::run($tagTeam);
+            resolve(SuspendAction::class)->handle($tagTeam);
         } catch (CannotBeSuspendedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

@@ -21,7 +21,7 @@ final class DeactivateController extends Controller
         Gate::authorize('deactivate', $title);
 
         try {
-            DeactivateAction::run($title);
+            resolve(DeactivateAction::class)->handle($title);
         } catch (CannotBeDeactivatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

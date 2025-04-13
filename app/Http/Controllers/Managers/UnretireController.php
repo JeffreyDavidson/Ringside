@@ -21,7 +21,7 @@ final class UnretireController extends Controller
         Gate::authorize('unretire', $manager);
 
         try {
-            UnretireAction::run($manager);
+            resolve(UnretireAction::class)->handle($manager);
         } catch (CannotBeUnretiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

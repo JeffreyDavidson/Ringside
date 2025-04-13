@@ -21,7 +21,7 @@ final class ClearInjuryController extends Controller
         Gate::authorize('clearFromInjury', $referee);
 
         try {
-            ClearInjuryAction::run($referee);
+            resolve(ClearInjuryAction::class)->handle($referee);
         } catch (CannotBeClearedFromInjuryException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

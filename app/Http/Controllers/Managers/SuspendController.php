@@ -21,7 +21,7 @@ final class SuspendController extends Controller
         Gate::authorize('suspend', $manager);
 
         try {
-            SuspendAction::run($manager);
+            resolve(SuspendAction::class)->handle($manager);
         } catch (CannotBeSuspendedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

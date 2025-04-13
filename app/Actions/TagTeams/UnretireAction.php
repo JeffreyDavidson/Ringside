@@ -29,7 +29,7 @@ final class UnretireAction extends BaseTagTeamAction
         $this->tagTeamRepository->unretire($tagTeam, $unretiredDate);
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlersUnretireAction::run($wrestler, $unretiredDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlersUnretireAction::class)->handle($wrestler, $unretiredDate));
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
     }

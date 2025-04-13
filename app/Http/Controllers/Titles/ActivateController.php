@@ -18,7 +18,7 @@ final class ActivateController extends Controller
         Gate::authorize('activate', $title);
 
         try {
-            ActivateAction::run($title);
+            resolve(ActivateAction::class)->handle($title);
         } catch (CannotBeActivatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

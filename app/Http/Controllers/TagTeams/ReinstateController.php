@@ -21,7 +21,7 @@ final class ReinstateController extends Controller
         Gate::authorize('reinstate', $tagTeam);
 
         try {
-            ReinstateAction::run($tagTeam);
+            resolve(ReinstateAction::class)->handle($tagTeam);
         } catch (CannotBeReinstatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

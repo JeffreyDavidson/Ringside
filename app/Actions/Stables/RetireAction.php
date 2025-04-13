@@ -38,17 +38,17 @@ final class RetireAction extends BaseStableAction
 
             if ($stable->currentTagTeams->isNotEmpty()) {
                 $stable->currentTagTeams
-                    ->each(fn (TagTeam $tagTeam) => TagTeamRetireAction::run($tagTeam, $retirementDate));
+                    ->each(fn (TagTeam $tagTeam) => resolve(TagTeamRetireAction::class)->handle($tagTeam, $retirementDate));
             }
 
             if ($stable->currentWrestlers->isNotEmpty()) {
                 $stable->currentWrestlers
-                    ->each(fn (Wrestler $wrestler) => WrestlerRetireAction::run($wrestler, $retirementDate));
+                    ->each(fn (Wrestler $wrestler) => resolve(WrestlerRetireAction::class)->handle($wrestler, $retirementDate));
             }
 
             if ($stable->currentManagers->isNotEmpty()) {
                 $stable->currentManagers
-                    ->each(fn (Manager $manager) => ManagerRetireAction::run($manager, $retirementDate));
+                    ->each(fn (Manager $manager) => resolve(ManagerRetireAction::class)->handle($manager, $retirementDate));
             }
 
             $this->stableRepository->retire($stable, $retirementDate);

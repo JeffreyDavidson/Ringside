@@ -21,7 +21,7 @@ final class ReinstateController extends Controller
         Gate::authorize('reinstate', $wrestler);
 
         try {
-            ReinstateAction::run($wrestler);
+            resolve(ReinstateAction::class)->handle($wrestler);
         } catch (CannotBeReinstatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

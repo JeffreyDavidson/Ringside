@@ -20,10 +20,10 @@ final class UpdateAction extends BaseStableAction
         $this->stableRepository->update($stable, $stableData);
 
         if (isset($stableData->start_date) && $this->ensureStartDateCanBeChanged($stable)) {
-            ActivateAction::run($stable, $stableData->start_date);
+            resolve(ActivateAction::class)->handle($stable, $stableData->start_date);
         }
 
-        UpdateMembersAction::run(
+        resolve(UpdateMembersAction::class)->handle(
             $stable,
             $stableData->wrestlers,
             $stableData->tagTeams,

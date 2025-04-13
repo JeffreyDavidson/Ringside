@@ -21,7 +21,7 @@ final class RestoreController extends Controller
 
         Gate::authorize('restore', $venue);
 
-        RestoreAction::run($venue);
+        resolve(RestoreAction::class)->handle($venue);
 
         return to_route('venues.index');
     }

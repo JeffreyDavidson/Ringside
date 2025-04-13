@@ -21,13 +21,13 @@ final class AddMatchForEventAction extends BaseEventMatchAction
     {
         $createdMatch = $this->eventMatchRepository->createForEvent($event, $eventMatchData);
 
-        AddRefereesToMatchAction::run($createdMatch, $eventMatchData->referees);
+        resolve(AddRefereesToMatchAction::class)->handle($createdMatch, $eventMatchData->referees);
 
         $eventMatchData->titles->whenNotEmpty(function (Collection $titles) use ($createdMatch): void {
-            AddTitlesToMatchAction::run($createdMatch, $titles);
+            resolve(AddTitlesToMatchAction::class)->handle($createdMatch, $titles);
         });
 
-        AddCompetitorsToMatchAction::run($createdMatch, $eventMatchData->competitors);
+        resolve(AddCompetitorsToMatchAction::class)->handle($createdMatch, $eventMatchData->competitors);
 
         return $createdMatch;
     }

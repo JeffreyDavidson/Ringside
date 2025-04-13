@@ -23,7 +23,7 @@ final class RestoreController extends Controller
         Gate::authorize('restore', $event);
 
         try {
-            RestoreAction::run($event);
+            resolve(RestoreAction::class)->handle($event);
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

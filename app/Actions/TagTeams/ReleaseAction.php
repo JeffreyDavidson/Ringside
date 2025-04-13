@@ -33,7 +33,7 @@ final class ReleaseAction extends BaseTagTeamAction
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlersReleaseAction::run($wrestler, $releaseDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlersReleaseAction::class)->handle($wrestler, $releaseDate));
     }
 
     /**

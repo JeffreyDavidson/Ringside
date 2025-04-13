@@ -21,7 +21,7 @@ final class ReleaseController extends Controller
         Gate::authorize('release', $wrestler);
 
         try {
-            ReleaseAction::run($wrestler);
+            resolve(ReleaseAction::class)->handle($wrestler);
         } catch (CannotBeReleasedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
