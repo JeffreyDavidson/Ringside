@@ -36,7 +36,7 @@ final class EventForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Event([
                 'name' => $this->name,
                 'date' => $this->date,

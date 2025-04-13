@@ -31,7 +31,7 @@ final class VenueForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Venue([
                 'name' => $this->name,
                 'street_address' => $this->street_address,

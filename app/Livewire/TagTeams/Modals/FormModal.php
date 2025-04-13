@@ -30,7 +30,7 @@ final class FormModal extends BaseModal
 
     public function fillDummyFields(): void
     {
-        if (isset($this->modelForm->formModel)) {
+        if ($this->modelForm->formModel !== null) {
             throw new Exception('No need to fill data on an edit form.');
         }
 

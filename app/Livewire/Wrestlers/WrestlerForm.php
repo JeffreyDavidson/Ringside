@@ -53,7 +53,7 @@ final class WrestlerForm extends LivewireBaseForm
 
         $height = new Height($this->height_feet, $this->height_inches);
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Wrestler([
                 'name' => $this->name,
                 'hometown' => $this->hometown,

@@ -47,7 +47,7 @@ final class AppServiceProvider extends ServiceProvider
             /** @var string $values */
             $values = array_pop($parameters);
 
-            if (count($parameters)) {
+            if (count($parameters) !== 0) {
                 $values = implode(', ', $parameters).' or '.$values;
             }
 

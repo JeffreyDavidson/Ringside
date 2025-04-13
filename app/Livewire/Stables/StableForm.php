@@ -31,7 +31,7 @@ final class StableForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Stable([
                 'name' => $this->name,
             ]);

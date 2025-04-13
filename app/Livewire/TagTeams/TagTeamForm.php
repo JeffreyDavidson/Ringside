@@ -42,7 +42,7 @@ final class TagTeamForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new TagTeam([
                 'name' => $this->name,
                 'signature_move' => $this->signature_move,

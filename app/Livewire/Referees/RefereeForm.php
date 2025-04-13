@@ -35,7 +35,7 @@ final class RefereeForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Referee([
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,

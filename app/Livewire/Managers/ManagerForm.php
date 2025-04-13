@@ -31,7 +31,7 @@ final class ManagerForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Manager([
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,

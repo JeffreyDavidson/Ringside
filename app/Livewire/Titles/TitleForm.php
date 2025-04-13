@@ -34,7 +34,7 @@ final class TitleForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Title([
                 'name' => $this->name,
             ]);
