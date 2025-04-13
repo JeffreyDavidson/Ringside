@@ -43,7 +43,7 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         /** @param array<string> $parameters */
-        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters) {
+        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters): string {
             /** @var string $values */
             $values = array_pop($parameters);
 

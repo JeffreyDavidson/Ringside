@@ -15,7 +15,7 @@ final class NavigationServiceProvider extends ServiceProvider
         $this->app->resolving(Navigation::class, function (Navigation $navigation): Navigation {
             return $navigation
                 ->add('Home', route('dashboard'))
-                ->add('Roster', '', fn (Section $section) => $section
+                ->add('Roster', '', fn (Section $section): \Spatie\Navigation\Section => $section
                     ->add('Wrestlers Table', route('wrestlers.index'))
                     ->add('Tag Teams Table', route('tag-teams.index'))
                     ->add('Managers Table', route('managers.index'))
