@@ -23,13 +23,13 @@ final class WrestlerRepository
     public static function getAvailableWrestlersForNewTagTeam(): Collection
     {
         return Wrestler::query()
-            ->where(function (WrestlerBuilder $query) {
+            ->where(function (WrestlerBuilder $query): void {
                 $query->unemployed();
             })
-            ->orWhere(function (WrestlerBuilder $query) {
+            ->orWhere(function (WrestlerBuilder $query): void {
                 $query->futureEmployed();
             })
-            ->orWhere(function (WrestlerBuilder $query) {
+            ->orWhere(function (WrestlerBuilder $query): void {
                 $query->employed()
                     ->where('status', EmploymentStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
@@ -43,19 +43,19 @@ final class WrestlerRepository
     public static function getAvailableWrestlersForExistingTagTeam(TagTeam $tagTeam): Collection
     {
         return Wrestler::query()
-            ->where(function (WrestlerBuilder $query) {
+            ->where(function (WrestlerBuilder $query): void {
                 $query->unemployed();
             })
-            ->orWhere(function (WrestlerBuilder $query) {
+            ->orWhere(function (WrestlerBuilder $query): void {
                 $query->futureEmployed();
             })
-            ->orWhere(function (WrestlerBuilder $query) {
+            ->orWhere(function (WrestlerBuilder $query): void {
                 $query->employed()
                     ->where('status', EmploymentStatus::Bookable)
                     ->whereDoesntHave('currentTagTeam');
             })
-            ->orWhere(function (WrestlerBuilder $query) use ($tagTeam) {
-                $query->whereHas('currentTagTeam', function (Builder $query) use ($tagTeam) {
+            ->orWhere(function (WrestlerBuilder $query) use ($tagTeam): void {
+                $query->whereHas('currentTagTeam', function (Builder $query) use ($tagTeam): void {
                     $query->where('tag_team_id', '=', $tagTeam->id);
                 });
             })

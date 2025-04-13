@@ -44,7 +44,7 @@ final class PreviousTitleChampionshipsTable extends DataTableComponent
             ->whereHasMorph(
                 'new_champion',
                 [Wrestler::class],
-                function (Builder $query) {
+                function (Builder $query): void {
                     $query->whereIn('wrestler_id', [$this->wrestler->id]);
                 }
             );

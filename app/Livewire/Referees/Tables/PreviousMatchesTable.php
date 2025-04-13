@@ -37,7 +37,7 @@ final class PreviousMatchesTable extends DataTableComponent
     {
         return EventMatch::query()
             ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
-            ->whereHas('referees', function (Builder $query) {
+            ->whereHas('referees', function (Builder $query): void {
                 $query->whereIn('referee_id', [$this->referee->id]);
             });
     }

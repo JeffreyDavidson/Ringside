@@ -38,7 +38,7 @@ final class WrestlerCanJoinExistingStable implements ValidationRule
         }
 
         if ($this->tagTeamIds->isNotEmpty()) {
-            collect($this->tagTeamIds)->map(function (mixed $id) use ($wrestler, $fail) {
+            collect($this->tagTeamIds)->map(function (mixed $id) use ($wrestler, $fail): void {
                 if ($id === $wrestler->currentTagTeam?->id) {
                     $fail('A wrestler in a tag team already belongs to a current stable.');
                 }

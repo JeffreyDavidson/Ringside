@@ -23,7 +23,7 @@ final class AddMatchForEventAction extends BaseEventMatchAction
 
         AddRefereesToMatchAction::run($createdMatch, $eventMatchData->referees);
 
-        $eventMatchData->titles->whenNotEmpty(function (Collection $titles) use ($createdMatch) {
+        $eventMatchData->titles->whenNotEmpty(function (Collection $titles) use ($createdMatch): void {
             AddTitlesToMatchAction::run($createdMatch, $titles);
         });
 

@@ -124,7 +124,7 @@ final class StableRepository
      */
     public function addWrestlers(Stable $stable, Collection $wrestlers, Carbon $joinDate): void
     {
-        $wrestlers->each(function (Wrestler $wrestler) use ($stable, $joinDate) {
+        $wrestlers->each(function (Wrestler $wrestler) use ($stable, $joinDate): void {
             $stable->currentWrestlers()->attach($wrestler->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
@@ -136,7 +136,7 @@ final class StableRepository
      */
     public function addTagTeams(Stable $stable, Collection $tagTeams, Carbon $joinDate): void
     {
-        $tagTeams->each(function (TagTeam $tagTeam) use ($stable, $joinDate) {
+        $tagTeams->each(function (TagTeam $tagTeam) use ($stable, $joinDate): void {
             $stable->currentTagTeams()->attach($tagTeam->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
@@ -148,7 +148,7 @@ final class StableRepository
      */
     public function addManagers(Stable $stable, Collection $managers, Carbon $joinDate): void
     {
-        $managers->each(function (Manager $manager) use ($stable, $joinDate) {
+        $managers->each(function (Manager $manager) use ($stable, $joinDate): void {
             $stable->currentManagers()->attach($manager->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
@@ -160,7 +160,7 @@ final class StableRepository
      */
     public function removeWrestlers(Stable $stable, Collection $currentWrestlers, Carbon $removalDate): void
     {
-        $currentWrestlers->each(function (Wrestler $wrestler) use ($stable, $removalDate) {
+        $currentWrestlers->each(function (Wrestler $wrestler) use ($stable, $removalDate): void {
             $stable->currentWrestlers()->updateExistingPivot(
                 $wrestler->id,
                 ['left_at' => $removalDate->toDateTimeString()]
@@ -175,7 +175,7 @@ final class StableRepository
      */
     public function removeTagTeams(Stable $stable, Collection $currentTagTeams, Carbon $removalDate): void
     {
-        $currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $removalDate) {
+        $currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $removalDate): void {
             $stable->currentTagTeams()->updateExistingPivot(
                 $tagTeam->id,
                 ['left_at' => $removalDate->toDateTimeString()]
@@ -190,7 +190,7 @@ final class StableRepository
      */
     public function removeManagers(Stable $stable, Collection $currentManagers, Carbon $removalDate): void
     {
-        $currentManagers->each(function (Manager $manager) use ($stable, $removalDate) {
+        $currentManagers->each(function (Manager $manager) use ($stable, $removalDate): void {
             $stable->currentManagers()->updateExistingPivot(
                 $manager->id,
                 ['left_at' => $removalDate->toDateTimeString()]

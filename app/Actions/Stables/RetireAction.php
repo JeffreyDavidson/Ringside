@@ -31,7 +31,7 @@ final class RetireAction extends BaseStableAction
 
         $retirementDate ??= now();
 
-        DB::transaction(function () use ($stable, $retirementDate) {
+        DB::transaction(function () use ($stable, $retirementDate): void {
             if ($stable->isCurrentlyActivated()) {
                 $this->stableRepository->deactivate($stable, $retirementDate);
             }
