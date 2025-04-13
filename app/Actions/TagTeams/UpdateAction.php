@@ -48,6 +48,6 @@ final class UpdateAction extends BaseTagTeamAction
      */
     private function shouldBeEmployed(TagTeam $tagTeam): bool
     {
-        return !$tagTeam->isCurrentlyEmployed();
+        return ! $tagTeam->isCurrentlyEmployed();
     }
 }

@@ -31,6 +31,6 @@ final class UpdateAction extends BaseManagerAction
      */
     private function shouldBeEmployed(Manager $manager): bool
     {
-        return !$manager->isCurrentlyEmployed();
+        return ! $manager->isCurrentlyEmployed();
     }
 }

@@ -29,6 +29,6 @@ trait HasMatches
      */
     public function isBookable(): bool
     {
-        return !($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
+        return ! ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
     }
 }

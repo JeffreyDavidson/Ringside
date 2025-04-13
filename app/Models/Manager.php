@@ -178,7 +178,7 @@ final class Manager extends Model implements CanBeAStableMember, Employable, Inj
      */
     public function canBeRetired(): bool
     {
-        return !$this->isNotInEmployment();
+        return ! $this->isNotInEmployment();
     }
 
     /**

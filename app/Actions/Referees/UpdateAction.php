@@ -31,6 +31,6 @@ final class UpdateAction extends BaseRefereeAction
      */
     private function shouldBeEmployed(Referee $referee): bool
     {
-        return !$referee->isCurrentlyEmployed();
+        return ! $referee->isCurrentlyEmployed();
     }
 }
