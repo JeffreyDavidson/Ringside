@@ -40,4 +40,14 @@ abstract class LivewireBaseForm extends Form
     }
 
     public function loadExtraData(): void {}
+
+    protected function rules(): array
+    {
+        return [];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [];
+    }
 }
