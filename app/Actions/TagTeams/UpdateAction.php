@@ -32,7 +32,7 @@ final class UpdateAction extends BaseTagTeamAction
         if ($tagTeam->currentWrestlers->isNotEmpty()) {
             $tagTeam
                 ->currentWrestlers
-                ->reject(fn (Wrestler $wrestler) => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
+                ->reject(fn (Wrestler $wrestler): bool => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
                 ->each(fn (Wrestler $wrestler) => $this->tagTeamRepository->removeTagTeamPartner($tagTeam, $wrestler, $datetime));
         }
 

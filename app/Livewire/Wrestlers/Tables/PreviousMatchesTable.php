@@ -66,14 +66,14 @@ final class PreviousMatchesTable extends DataTableComponent
                 ->outputFormat('Y-m-d H:i'),
             ArrayColumn::make(__('event-matches.competitors'))
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(fn ($index, EventMatchCompetitor $value) => '<a href="'.route('wrestlers.show', $value->getCompetitor()->id).'">'.$value->getCompetitor()->name.'</a>')
+                ->outputFormat(fn ($index, EventMatchCompetitor $value): string => '<a href="'.route('wrestlers.show', $value->getCompetitor()->id).'">'.$value->getCompetitor()->name.'</a>')
                 ->separator('<br />'),
             ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn ($value, EventMatch $row) => ($row->titles))
-                ->outputFormat(fn ($index, Title $value) => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
+                ->outputFormat(fn ($index, Title $value): string => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
                 ->separator('<br />'),
             Column::make(__('event-matches.result'))
-                ->label(fn (EventMatch $row) => $row->result?->winner->name.' by '.$row->result?->decision->name),
+                ->label(fn (EventMatch $row): string => $row->result?->winner->name.' by '.$row->result?->decision->name),
         ];
     }
 }

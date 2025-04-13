@@ -56,7 +56,7 @@ final class TitleChampionIncludedInTitleMatch implements DataAwareRule, Validati
 
         $champions = Title::with('currentChampionship.currentChampion')
             ->findMany($titles)
-            ->reject(fn (Title $title) => $title->isVacant())
+            ->reject(fn (Title $title): bool => $title->isVacant())
             ->every(fn (Title $title) => $competitors->contains($title->currentChampionship?->currentChampion));
 
         if (! $champions) {

@@ -62,7 +62,7 @@ final class EventMatchesTable extends BaseTableWithActions
                 ->separator(', '),
             Column::make(__('event-matches.result'))
                 ->label(
-                    fn (EventMatch $row, Column $column) => $row->result?->winner->name.' by '.$row->result?->decision->name
+                    fn (EventMatch $row, Column $column): string => $row->result?->winner->name.' by '.$row->result?->decision->name
                 ),
         ];
     }
