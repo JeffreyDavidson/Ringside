@@ -25,6 +25,6 @@ final class TitlesController extends Controller
     {
         Gate::authorize('view', Title::class);
 
-        return view('titles.show', compact('title'));
+        return view('titles.show', ['title' => $title]);
     }
 }
