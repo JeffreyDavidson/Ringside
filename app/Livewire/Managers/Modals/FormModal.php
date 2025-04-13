@@ -14,8 +14,6 @@ use Illuminate\Support\Carbon;
  */
 final class FormModal extends BaseModal
 {
-    protected string $modalLanguagePath = 'managers';
-
     protected string $modalFormPath = 'managers.modals.form-modal';
 
     protected string $modelTitleField = 'full_name';

@@ -13,8 +13,6 @@ use App\Models\User;
  */
 final class FormModal extends BaseModal
 {
-    protected string $modalLanguagePath = 'users';
-
     protected string $modalFormPath = 'users.modals.form-modal';
 
     protected $modelForm;

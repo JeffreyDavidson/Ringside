@@ -21,7 +21,6 @@ final class PreviousEventsTable extends DataTableComponent
 
     protected string $databaseTableName = 'events';
 
-    protected string $routeBasePath = 'events';
 
     protected string $resourceName = 'events';
 

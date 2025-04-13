@@ -19,8 +19,6 @@ final class FormModal extends BaseModal
 {
     use PresentsVenuesList;
 
-    protected string $modalLanguagePath = 'events';
-
     protected string $modalFormPath = 'events.modals.form-modal';
 
     protected $modelForm;

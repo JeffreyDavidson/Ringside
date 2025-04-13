@@ -33,8 +33,6 @@ final class FormModal extends BaseModal
      */
     public string $subViewToUse;
 
-    protected string $modalLanguagePath = 'event-matches';
-
     protected string $modalFormPath = 'event-matches.modals.form-modal';
 
     protected $modelForm;

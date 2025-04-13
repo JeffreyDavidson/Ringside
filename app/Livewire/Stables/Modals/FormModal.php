@@ -22,8 +22,6 @@ final class FormModal extends BaseModal
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
-    protected string $modalLanguagePath = 'stables';
-
     protected string $modalFormPath = 'stables.modals.form-modal';
 
     protected $modelForm;

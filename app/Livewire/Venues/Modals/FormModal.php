@@ -14,8 +14,6 @@ use Illuminate\Support\Str;
  */
 final class FormModal extends BaseModal
 {
-    protected string $modalLanguagePath = 'venues';
-
     protected string $modalFormPath = 'venues.modals.form-modal';
 
     protected $modelForm;

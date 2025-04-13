@@ -15,8 +15,6 @@ use Illuminate\Support\Str;
  */
 final class FormModal extends BaseModal
 {
-    protected string $modalLanguagePath = 'titles';
-
     protected string $modalFormPath = 'titles.modals.form-modal';
 
     protected $modelForm;
