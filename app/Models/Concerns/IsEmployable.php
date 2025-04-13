@@ -66,7 +66,13 @@ trait IsEmployable
 
     public function isNotInEmployment(): bool
     {
-        return $this->isUnemployed() || $this->isReleased() || $this->isRetired();
+        if ($this->isUnemployed()) {
+            return true;
+        }
+        if ($this->isReleased()) {
+            return true;
+        }
+        return (bool) $this->isRetired();
     }
 
     public function isUnemployed(): bool

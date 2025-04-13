@@ -163,11 +163,7 @@ final class Referee extends Model implements Employable, Injurable, Retirable, S
      */
     public function isBookable(): bool
     {
-        if ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment()) {
-            return false;
-        }
-
-        return true;
+        return !($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
     }
 
     /**

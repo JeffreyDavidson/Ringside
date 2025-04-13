@@ -31,10 +31,6 @@ final class UpdateAction extends BaseTitleAction
      */
     private function shouldBeActivated(Title $title): bool
     {
-        if ($title->isCurrentlyActivated()) {
-            return false;
-        }
-
-        return true;
+        return !$title->isCurrentlyActivated();
     }
 }

@@ -38,12 +38,11 @@ final class UpdateAction extends BaseStableAction
      */
     private function ensureStartDateCanBeChanged(Stable $stable): bool
     {
-        if ($stable->isUnactivated() || $stable->hasFutureActivation()) {
+        // Add check on start date from request
+        if ($stable->isUnactivated()) {
             return true;
         }
 
-        // Add check on start date from request
-
-        return false;
+        return $stable->hasFutureActivation();
     }
 }

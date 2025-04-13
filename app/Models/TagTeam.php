@@ -225,7 +225,7 @@ final class TagTeam extends Model implements Bookable, CanBeAStableMember, Emplo
      */
     public function isUnbookable(): bool
     {
-        return ! $this->currentWrestlers->every(fn (Wrestler $wrestler) => $wrestler->isBookable());
+        return ! $this->currentWrestlers->every(fn (Wrestler $wrestler): bool => $wrestler->isBookable());
     }
 
     /**
