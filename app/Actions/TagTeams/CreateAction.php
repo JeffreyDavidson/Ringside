@@ -22,11 +22,11 @@ final class CreateAction extends BaseTagTeamAction
 
         $datetime = now();
 
-        if ($tagTeamData->wrestlerA) {
+        if ($tagTeamData->wrestlerA instanceof \App\Models\Wrestler) {
             $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerA, $datetime);
         }
 
-        if ($tagTeamData->wrestlerB) {
+        if ($tagTeamData->wrestlerB instanceof \App\Models\Wrestler) {
             $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerB, $datetime);
         }
 
