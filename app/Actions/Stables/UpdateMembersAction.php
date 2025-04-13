@@ -34,7 +34,7 @@ final class UpdateMembersAction extends BaseStableAction
      *
      * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
      */
-    protected function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now): void
+    private function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now): void
     {
         if ($stable->currentWrestlers->isEmpty()) {
             $this->stableRepository->addWrestlers($stable, $wrestlers, $now);
@@ -53,7 +53,7 @@ final class UpdateMembersAction extends BaseStableAction
      *
      * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
      */
-    protected function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now): void
+    private function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now): void
     {
         if ($stable->currentTagTeams->isEmpty()) {
             $this->stableRepository->addTagTeams($stable, $tagTeams, $now);
@@ -72,7 +72,7 @@ final class UpdateMembersAction extends BaseStableAction
      *
      * @param  Collection<int, \App\Models\Manager>  $managers
      */
-    protected function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
+    private function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
     {
         if ($stable->currentManagers->isEmpty()) {
             $this->stableRepository->addManagers($stable, $managers, $now);
