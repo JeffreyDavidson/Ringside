@@ -72,6 +72,7 @@ trait IsEmployable
         if ($this->isReleased()) {
             return true;
         }
+
         return (bool) $this->isRetired();
     }
 
