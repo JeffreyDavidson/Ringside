@@ -10,7 +10,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 final class EventDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected ?Event $model) {}
+    public function __construct(private ?Event $model) {}
 
     /**
      * Determine if the validation rule passes.

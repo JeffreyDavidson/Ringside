@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 
 final class ActivationStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Title|Stable|null $model) {}
+    public function __construct(private Title|Stable|null $model) {}
 
     /**
      * Determine if the validation rule passes.

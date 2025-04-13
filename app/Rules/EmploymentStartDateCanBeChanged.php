@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 
 final class EmploymentStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Wrestler|Referee|TagTeam|Manager|null $model) {}
+    public function __construct(private Wrestler|Referee|TagTeam|Manager|null $model) {}
 
     /**
      * Determine if the validation rule passes.

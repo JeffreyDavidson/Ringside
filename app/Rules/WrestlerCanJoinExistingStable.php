@@ -15,7 +15,7 @@ final class WrestlerCanJoinExistingStable implements ValidationRule
     /**
      * @param  Collection<int, int>  $tagTeamIds
      */
-    public function __construct(protected Collection $tagTeamIds, protected ?Carbon $date) {}
+    public function __construct(private Collection $tagTeamIds, private ?Carbon $date) {}
 
     /**
      * Determine if the validation rule passes.

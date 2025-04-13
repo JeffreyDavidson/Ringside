@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 
 final class TagTeamCanJoinExistingStable implements ValidationRule
 {
-    public function __construct(protected ?Carbon $startDate)
+    public function __construct(private ?Carbon $startDate)
     {
         $this->startDate = $startDate;
     }
