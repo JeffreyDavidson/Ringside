@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\Auth\LoginRequest;
-use App\Providers\AppServiceProvider;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +29,7 @@ final class AuthenticatedSessionController
 
         $request->session()->regenerate();
 
-        return redirect()->to(AppServiceProvider::HOME);
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
