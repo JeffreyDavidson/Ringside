@@ -160,7 +160,7 @@ final class ManagersTable extends BaseTableWithActions
     /**
      * Release a manager.
      */
-    public function __invoke(Manager $manager): RedirectResponse
+    public function release(Manager $manager): RedirectResponse
     {
         Gate::authorize('release', $manager);
 

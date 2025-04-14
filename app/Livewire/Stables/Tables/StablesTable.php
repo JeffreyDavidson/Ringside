@@ -101,7 +101,7 @@ final class StablesTable extends BaseTableWithActions
     /**
      * Deactivate a stable.
      */
-    public function __invoke(Stable $stable): RedirectResponse
+    public function deactivate(Stable $stable): RedirectResponse
     {
         Gate::authorize('deactivate', $stable);
 
