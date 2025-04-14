@@ -17,7 +17,7 @@ trait HasStatusFilter
     {
         return SelectFilter::make('Status', 'status')
             ->options(['' => 'All'] + $statuses)
-            ->filter(function (Builder $builder, string $value) {
+            ->filter(function (Builder $builder, string $value): void {
                 $builder->where('status', $value);
             });
     }

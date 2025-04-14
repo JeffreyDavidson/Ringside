@@ -15,7 +15,7 @@ use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-class WrestlersTable extends BaseTableWithActions
+final class WrestlersTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

@@ -10,7 +10,7 @@ use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class ActivationStartDateCanBeChanged implements ValidationRule
+final class ActivationStartDateCanBeChanged implements ValidationRule
 {
     public function __construct(private Stable $stable) {}
 

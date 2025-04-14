@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @extends \Illuminate\Database\Eloquent\Collection<TKey, TModel>
  */
-class EventMatchCompetitorsCollection extends Collection
+final class EventMatchCompetitorsCollection extends Collection
 {
     /**
      * Get all competitors for a match grouped by side.

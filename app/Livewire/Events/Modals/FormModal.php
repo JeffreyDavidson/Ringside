@@ -15,11 +15,9 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<EventForm, Event>
  */
-class FormModal extends BaseModal
+final class FormModal extends BaseModal
 {
     use PresentsVenuesList;
-
-    protected string $modalLanguagePath = 'events';
 
     protected string $modalFormPath = 'events.modals.form-modal';
 

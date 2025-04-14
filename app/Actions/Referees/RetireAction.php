@@ -9,14 +9,14 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseRefereeAction
+final class RetireAction extends BaseRefereeAction
 {
     use AsAction;
 
     /**
      * Retire a referee.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
@@ -42,7 +42,7 @@ class RetireAction extends BaseRefereeAction
     /**
      * Ensure a referee can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(Referee $referee): void
     {

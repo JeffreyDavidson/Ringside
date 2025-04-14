@@ -8,7 +8,7 @@ use App\Models\Stable;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class StablePolicy
+final class StablePolicy
 {
     use HandlesAuthorization;
 

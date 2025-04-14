@@ -15,7 +15,7 @@ use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-class ManagersTable extends BaseTableWithActions
+final class ManagersTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

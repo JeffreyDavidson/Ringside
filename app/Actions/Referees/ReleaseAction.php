@@ -9,14 +9,14 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseRefereeAction
+final class ReleaseAction extends BaseRefereeAction
 {
     use AsAction;
 
     /**
      * Release a referee.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
@@ -38,7 +38,7 @@ class ReleaseAction extends BaseRefereeAction
     /**
      * Ensure a referee can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(Referee $referee): void
     {

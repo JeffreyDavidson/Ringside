@@ -9,14 +9,14 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseRefereeAction
+final class ReinstateAction extends BaseRefereeAction
 {
     use AsAction;
 
     /**
      * Reinstate a referee.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
@@ -30,7 +30,7 @@ class ReinstateAction extends BaseRefereeAction
     /**
      * Ensure a referee can be reinstated.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(Referee $referee): void
     {

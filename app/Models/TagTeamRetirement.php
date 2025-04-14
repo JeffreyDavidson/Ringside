@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $ended_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\TagTeam|null $tagTeam
+ * @property-read TFactory|null $use_factory
+ * @property-read TagTeam|null $tagTeam
  *
  * @method static \Database\Factories\TagTeamRetirementFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamRetirement newModelQuery()
@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-class TagTeamRetirement extends Model
+final class TagTeamRetirement extends Model
 {
     /** @use HasFactory<\Database\Factories\TagTeamRetirementFactory> */
     use HasFactory;

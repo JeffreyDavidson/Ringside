@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReinstateController extends Controller
+final class ReinstateController
 {
     /**
      * Reinstate a suspended manager.
@@ -21,7 +20,7 @@ class ReinstateController extends Controller
         Gate::authorize('reinstate', $manager);
 
         try {
-            ReinstateAction::run($manager);
+            resolve(ReinstateAction::class)->handle($manager);
         } catch (CannotBeReinstatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

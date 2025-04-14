@@ -8,7 +8,7 @@ use App\Models\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Events\Dispatchable;
 
-class WrestlerReinstated
+final class WrestlerReinstated
 {
     use Dispatchable;
 

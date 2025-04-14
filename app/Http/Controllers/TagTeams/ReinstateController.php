@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReinstateController extends Controller
+final class ReinstateController
 {
     /**
      * Reinstate a tag team.
@@ -21,7 +20,7 @@ class ReinstateController extends Controller
         Gate::authorize('reinstate', $tagTeam);
 
         try {
-            ReinstateAction::run($tagTeam);
+            resolve(ReinstateAction::class)->handle($tagTeam);
         } catch (CannotBeReinstatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

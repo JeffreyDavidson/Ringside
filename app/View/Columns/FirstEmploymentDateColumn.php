@@ -10,11 +10,11 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class FirstEmploymentDateColumn extends Column
+final class FirstEmploymentDateColumn extends Column
 {
     public function __construct(string $title, ?string $from = null)
     {
         parent::__construct($title, $from);
-        $this->label(fn (Wrestler|TagTeam|Manager|Referee $row, Column $column) => $row->getFormattedFirstEmployment());
+        $this->label(fn (Wrestler|TagTeam|Manager|Referee $row, Column $column): string => $row->getFormattedFirstEmployment());
     }
 }

@@ -12,7 +12,7 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
-readonly class EventMatchData
+final readonly class EventMatchData
 {
     /**
      * Create a new event match data instance.

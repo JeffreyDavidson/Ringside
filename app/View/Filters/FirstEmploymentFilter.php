@@ -12,7 +12,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
 use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
 use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
 
-class FirstEmploymentFilter extends DateRangeFilter
+final class FirstEmploymentFilter extends DateRangeFilter
 {
     use HandlesDates,
         HasConfig,
@@ -38,13 +38,13 @@ class FirstEmploymentFilter extends DateRangeFilter
             'locale' => 'en',
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
-            ->filter(function (Builder $query, array $dateRange) {
+            ->filter(function (Builder $query, array $dateRange): void {
                 /**
                  * @var array{'minDate': string, 'maxDate': string} $dateRange
                  */
-                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange) {
+                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange): void {
                     $query
-                        ->where(function (Builder $query) use ($dateRange) {
+                        ->where(function (Builder $query) use ($dateRange): void {
                             $query->whereBetween(
                                 $this->filterStartField,
                                 [
@@ -52,7 +52,7 @@ class FirstEmploymentFilter extends DateRangeFilter
                                     Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
                                 ]);
                         })
-                        ->orWhere(function (Builder $query) use ($dateRange) {
+                        ->orWhere(function (Builder $query) use ($dateRange): void {
                             $query->whereBetween(
                                 $this->filterEndField,
                                 [

@@ -13,4 +13,4 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-class Champion extends Model {}
+final class Champion extends Model {}

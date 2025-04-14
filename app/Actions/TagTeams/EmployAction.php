@@ -11,14 +11,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseTagTeamAction
+final class EmployAction extends BaseTagTeamAction
 {
     use AsAction;
 
     /**
      * Employ a tag team.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $startDate = null): void
     {
@@ -26,7 +26,7 @@ class EmployAction extends BaseTagTeamAction
 
         $startDate ??= now();
 
-        $tagTeam->currentWrestlers->each(fn (Wrestler $wrestler) => WrestlersEmployAction::run($wrestler, $startDate));
+        $tagTeam->currentWrestlers->each(fn (Wrestler $wrestler) => resolve(WrestlersEmployAction::class)->handle($wrestler, $startDate));
 
         $this->tagTeamRepository->employ($tagTeam, $startDate);
     }
@@ -34,7 +34,7 @@ class EmployAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be employed.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     private function ensureCanBeEmployed(TagTeam $tagTeam): void
     {

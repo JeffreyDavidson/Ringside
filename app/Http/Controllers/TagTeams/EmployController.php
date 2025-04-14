@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class EmployController extends Controller
+final class EmployController
 {
     /**
      * Employ a tag team.
@@ -21,7 +20,7 @@ class EmployController extends Controller
         Gate::authorize('employ', $tagTeam);
 
         try {
-            EmployAction::run($tagTeam);
+            resolve(EmployAction::class)->handle($tagTeam);
         } catch (CannotBeEmployedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

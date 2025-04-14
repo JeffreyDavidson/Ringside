@@ -8,7 +8,7 @@ use App\Data\ManagerData;
 use App\Models\Manager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseManagerAction
+final class UpdateAction extends BaseManagerAction
 {
     use AsAction;
 
@@ -31,10 +31,6 @@ class UpdateAction extends BaseManagerAction
      */
     private function shouldBeEmployed(Manager $manager): bool
     {
-        if ($manager->isCurrentlyEmployed()) {
-            return false;
-        }
-
-        return true;
+        return ! $manager->isCurrentlyEmployed();
     }
 }

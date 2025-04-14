@@ -4,34 +4,20 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-test('it will not use dump, dd or ray')
+arch()->preset()->php();
+arch()->preset()->security();
+arch()->preset()->laravel();
+
+arch('it will not use dump, dd or ray')
     ->expect(['dd', 'dump', 'ray'])
     ->each->not()->toBeUsed();
 
-test('controllers')
+arch('controllers')
     ->expect('App\Http\Controllers')
+    ->toExtendNothing()
+    ->toBeFinal()
     ->not->toUse('Illuminate\Http\Request')
     ->ignoring(AuthenticatedSessionController::class);
-
-// test('models')
-//     ->expect('App\Models')
-//     ->toOnlyBeUsedIn('App\Repositories')
-//     ->toOnlyUse('Illuminate\Database')
-//     ->ignoring('Database\Seeders');
-
-// test('repositories')
-//     ->expect('App\Repositories')
-//     ->toOnlyBeUsedIn(['App\Http\Controllers', 'App\Actions', 'App\Listeners'])
-//     ->toOnlyUse([
-//         'App\Models',
-//         'App\Data',
-//         'Illuminate\Support\Carbon',
-//         'now',
-//         'Illuminate\Support\Collection',
-//         'Illuminate\Database\Eloquent\Collection',
-//         'App\Enums',
-//         'Illuminate\Database\Eloquent\Builder',
-//     ]);
 
 test('enums')
     ->expect('App\Enums')
@@ -40,7 +26,3 @@ test('enums')
 test('strict types')
     ->expect('App')
     ->toUseStrictTypes();
-
-test('model traits')
-    ->expect('App\Models\Concerns')
-    ->toBeTraits();

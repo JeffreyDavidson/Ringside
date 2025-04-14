@@ -6,4 +6,4 @@ namespace App\Exceptions;
 
 use Exception;
 
-class WrestlerNotOnCurrentTagTeamException extends Exception {}
+final class WrestlerNotOnCurrentTagTeamException extends Exception {}

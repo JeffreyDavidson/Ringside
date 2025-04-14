@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules\Unique;
 /**
  * @extends LivewireBaseForm<VenueForm, ?Venue>
  */
-class VenueForm extends LivewireBaseForm
+final class VenueForm extends LivewireBaseForm
 {
     public $formModel;
 
@@ -26,6 +26,32 @@ class VenueForm extends LivewireBaseForm
     public string $state = '';
 
     public int|string $zipcode = '';
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        if ($this->formModel === null) {
+            $this->formModel = new Venue([
+                'name' => $this->name,
+                'street_address' => $this->street_address,
+                'city' => $this->city,
+                'state' => $this->state,
+                'zipcode' => $this->zipcode,
+            ]);
+            $this->formModel->save();
+        } else {
+            $this->formModel->update([
+                'name' => $this->name,
+                'street_address' => $this->street_address,
+                'city' => $this->city,
+                'state' => $this->state,
+                'zipcode' => $this->zipcode,
+            ]);
+        }
+
+        return true;
+    }
 
     /**
      * Undocumented function
@@ -52,31 +78,5 @@ class VenueForm extends LivewireBaseForm
             'street_address' => 'street address',
             'zipcode' => 'zip code',
         ];
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new Venue([
-                'name' => $this->name,
-                'street_address' => $this->street_address,
-                'city' => $this->city,
-                'state' => $this->state,
-                'zipcode' => $this->zipcode,
-            ]);
-            $this->formModel->save();
-        } else {
-            $this->formModel->update([
-                'name' => $this->name,
-                'street_address' => $this->street_address,
-                'city' => $this->city,
-                'state' => $this->state,
-                'zipcode' => $this->zipcode,
-            ]);
-        }
-
-        return true;
     }
 }

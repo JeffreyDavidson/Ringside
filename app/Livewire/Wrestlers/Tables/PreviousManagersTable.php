@@ -6,6 +6,7 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\WrestlerManager;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousManagersTable extends BasePreviousManagersTable
@@ -17,13 +18,17 @@ class PreviousManagersTable extends BasePreviousManagersTable
      */
     public ?int $wrestlerId;
 
+    protected string $databaseTableName = 'wrestlers_managers';
+
+    protected string $resourceName = 'managers';
+
     /**
      * @return Builder<WrestlerManager>
      */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return WrestlerManager::query()

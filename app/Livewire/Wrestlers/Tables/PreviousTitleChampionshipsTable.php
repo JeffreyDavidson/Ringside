@@ -16,6 +16,10 @@ class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTabl
      */
     public ?int $wrestlerId;
 
+    protected string $databaseTableName = 'tittle_championships';
+
+    protected string $resourceName = 'title championships';
+
     /**
      * @return Builder<TitleChampionship>
      */

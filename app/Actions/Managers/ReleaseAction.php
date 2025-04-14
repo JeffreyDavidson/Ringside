@@ -10,14 +10,14 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseManagerAction
+final class ReleaseAction extends BaseManagerAction
 {
     use AsAction;
 
     /**
      * Release a manager.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
@@ -41,7 +41,7 @@ class ReleaseAction extends BaseManagerAction
     /**
      * Ensure a manager can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(Manager $manager): void
     {

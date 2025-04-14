@@ -11,14 +11,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseTagTeamAction
+final class UnretireAction extends BaseTagTeamAction
 {
     use AsAction;
 
     /**
      * Unretire a tag team.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
     {
@@ -29,7 +29,7 @@ class UnretireAction extends BaseTagTeamAction
         $this->tagTeamRepository->unretire($tagTeam, $unretiredDate);
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlersUnretireAction::run($wrestler, $unretiredDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlersUnretireAction::class)->handle($wrestler, $unretiredDate));
 
         $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
     }
@@ -37,7 +37,7 @@ class UnretireAction extends BaseTagTeamAction
     /**
      * Ensure tag team can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(TagTeam $tagTeam): void
     {

@@ -11,14 +11,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseTagTeamAction
+final class ReinstateAction extends BaseTagTeamAction
 {
     use AsAction;
 
     /**
      * Reinstate a tag team.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
@@ -27,7 +27,7 @@ class ReinstateAction extends BaseTagTeamAction
         $reinstatementDate ??= now();
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlersReinstateAction::run($wrestler, $reinstatementDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlersReinstateAction::class)->handle($wrestler, $reinstatementDate));
 
         $this->tagTeamRepository->reinstate($tagTeam, $reinstatementDate);
     }
@@ -35,7 +35,7 @@ class ReinstateAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be reinstated.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(TagTeam $tagTeam): void
     {

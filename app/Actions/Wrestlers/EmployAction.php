@@ -9,14 +9,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseWrestlerAction
+final class EmployAction extends BaseWrestlerAction
 {
     use AsAction;
 
     /**
      * Employ a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void
     {
@@ -34,7 +34,7 @@ class EmployAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be employed.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     private function ensureCanBeEmployed(Wrestler $wrestler): void
     {

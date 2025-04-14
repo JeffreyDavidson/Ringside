@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Stables;
 
 use App\Actions\Stables\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class UnretireController extends Controller
+final class UnretireController
 {
     /**
      * Unretire a stable.
@@ -21,7 +20,7 @@ class UnretireController extends Controller
         Gate::authorize('unretire', $stable);
 
         try {
-            UnretireAction::run($stable);
+            resolve(UnretireAction::class)->handle($stable);
         } catch (CannotBeUnretiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
