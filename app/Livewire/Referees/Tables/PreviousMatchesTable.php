@@ -7,6 +7,7 @@ namespace App\Livewire\Referees\Tables;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\EventMatch;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 final class PreviousMatchesTable extends BasePreviousMatchesTable
@@ -26,7 +27,7 @@ final class PreviousMatchesTable extends BasePreviousMatchesTable
     public function builder(): Builder
     {
         if (! isset($this->refereeId)) {
-            throw new \Exception("You didn't specify a referee");
+            throw new Exception("You didn't specify a referee");
         }
 
         return EventMatch::query()
