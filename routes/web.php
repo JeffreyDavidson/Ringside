@@ -22,7 +22,7 @@ Route::middleware(['auth'])->prefix('roster')->group(function () {
     Route::resource('stables', StablesController::class)->only(['index', 'show']);
     Route::resource('wrestlers', WrestlersController::class)->only(['index', 'show']);
     Route::group([], __DIR__.'/web/managers.php');
-    Route::group([], __DIR__.'/web/referees.php');
+    Route::resource('referees', RefereesController::class)->only(['index', 'show']);
     Route::resource('tag-teams', TagTeamsController::class)->only(['index', 'show']);
 });
 
