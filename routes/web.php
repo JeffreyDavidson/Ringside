@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventMatches\EventMatchesController;
+use App\Http\Controllers\Events\EventsController;
 use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
@@ -33,7 +35,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::group([], __DIR__.'/web/events.php');
+    Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->name('events.matches');
+    Route::resource('events', EventsController::class)->only(['index', 'show']);
 });
 
 Route::middleware(['auth'])->group(function () {
