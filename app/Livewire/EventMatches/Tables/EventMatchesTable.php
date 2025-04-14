@@ -21,8 +21,6 @@ final class EventMatchesTable extends DataTableComponent
 
     protected string $databaseTableName = 'events_matches';
 
-    protected string $routeBasePath = 'event-matches';
-
     protected string $resourceName = 'matches';
 
     /**
