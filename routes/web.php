@@ -3,16 +3,16 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EventMatches\EventMatchesController;
-use App\Http\Controllers\Events\EventsController;
-use App\Http\Controllers\Managers\ManagersController;
-use App\Http\Controllers\Referees\RefereesController;
-use App\Http\Controllers\Stables\StablesController;
-use App\Http\Controllers\TagTeams\TagTeamsController;
-use App\Http\Controllers\Titles\TitlesController;
-use App\Http\Controllers\Users\UsersController;
-use App\Http\Controllers\Venues\VenuesController;
-use App\Http\Controllers\Wrestlers\WrestlersController;
+use App\Http\Controllers\EventMatchesController;
+use App\Http\Controllers\EventsController;
+use App\Http\Controllers\ManagersController;
+use App\Http\Controllers\RefereesController;
+use App\Http\Controllers\StablesController;
+use App\Http\Controllers\TagTeamsController;
+use App\Http\Controllers\TitlesController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\VenuesController;
+use App\Http\Controllers\WrestlersController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
