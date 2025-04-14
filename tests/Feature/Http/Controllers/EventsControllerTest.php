@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\EventsController;
 use App\Livewire\Events\Tables\EventsTable;
+use App\Models\Event;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
