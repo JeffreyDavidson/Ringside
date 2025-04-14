@@ -9,14 +9,14 @@ use App\Models\Stable;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseStableAction
+final class UnretireAction extends BaseStableAction
 {
     use AsAction;
 
     /**
      * Unretire a stable.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Stable $stable, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseStableAction
     /**
      * Ensure a stable can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Stable $stable): void
     {

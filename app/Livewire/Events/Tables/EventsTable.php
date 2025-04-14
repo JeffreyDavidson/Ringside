@@ -20,7 +20,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class EventsTable extends BaseTableWithActions
+final class EventsTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 
@@ -90,7 +90,7 @@ class EventsTable extends BaseTableWithActions
                     'locale' => 'en',
                 ])
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
-                ->filter(function (Builder $builder, array $dateRange) { // Expects an array.
+                ->filter(function (Builder $builder, array $dateRange): void { // Expects an array.
                     $builder
                         ->whereBetween('date', [$dateRange['minDate'], $dateRange['maxDate']]);
                 }),

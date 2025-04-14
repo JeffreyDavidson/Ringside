@@ -65,7 +65,15 @@ trait IsActivatable
 
     public function isNotInActivation(): bool
     {
-        return $this->isDeactivated() || $this->hasFutureActivation() || $this->isRetired();
+        if ($this->isDeactivated()) {
+            return true;
+        }
+
+        if ($this->hasFutureActivation()) {
+            return true;
+        }
+
+        return (bool) $this->isRetired();
     }
 
     public function isUnactivated(): bool

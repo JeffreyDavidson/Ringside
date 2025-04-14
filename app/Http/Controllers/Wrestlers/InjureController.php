@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class InjureController extends Controller
+final class InjureController
 {
     /**
      * Injure a wrestler.
@@ -21,7 +20,7 @@ class InjureController extends Controller
         Gate::authorize('injure', $wrestler);
 
         try {
-            InjureAction::run($wrestler);
+            resolve(InjureAction::class)->handle($wrestler);
         } catch (CannotBeInjuredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

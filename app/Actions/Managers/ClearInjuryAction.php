@@ -9,14 +9,14 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ClearInjuryAction extends BaseManagerAction
+final class ClearInjuryAction extends BaseManagerAction
 {
     use AsAction;
 
     /**
      * Clear an injury of a manager.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
     {
@@ -30,7 +30,7 @@ class ClearInjuryAction extends BaseManagerAction
     /**
      * Ensure a manager can be cleared from an injury.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     private function ensureCanBeClearedFromInjury(Manager $manager): void
     {

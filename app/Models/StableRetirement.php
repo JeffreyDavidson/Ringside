@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $ended_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\Stable|null $stable
+ * @property-read TFactory|null $use_factory
+ * @property-read Stable|null $stable
  *
  * @method static \Database\Factories\StableRetirementFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StableRetirement newModelQuery()
@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-class StableRetirement extends Model
+final class StableRetirement extends Model
 {
     /** @use HasFactory<\Database\Factories\StableRetirementFactory> */
     use HasFactory;

@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $side_number
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Relations\MorphTo<\App\Models\Wrestler|\App\Models\TagTeam> $competitor
+ * @property-read MorphTo<Wrestler|TagTeam> $competitor
  *
  * @method static EventMatchCompetitorsCollection<int, static> all($columns = ['*'])
  * @method static EventMatchCompetitorsCollection<int, static> get($columns = ['*'])
@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @mixin \Eloquent
  */
-class EventMatchCompetitor extends MorphPivot
+final class EventMatchCompetitor extends MorphPivot
 {
     /**
      * The table associated with the model.

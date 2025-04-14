@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeReinstatedException extends Exception
+final class CannotBeReinstatedException extends Exception
 {
     public static function unemployed(): self
     {

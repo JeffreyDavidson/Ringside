@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class InjureController extends Controller
+final class InjureController
 {
     /**
      * Injure a manager.
@@ -21,7 +20,7 @@ class InjureController extends Controller
         Gate::authorize('injure', $manager);
 
         try {
-            InjureAction::run($manager);
+            resolve(InjureAction::class)->handle($manager);
         } catch (CannotBeInjuredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

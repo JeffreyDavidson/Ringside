@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class EmployController extends Controller
+final class EmployController
 {
     /**
      * Employ a wrestler.
@@ -21,7 +20,7 @@ class EmployController extends Controller
         Gate::authorize('employ', $wrestler);
 
         try {
-            EmployAction::run($wrestler);
+            resolve(EmployAction::class)->handle($wrestler);
         } catch (CannotBeEmployedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

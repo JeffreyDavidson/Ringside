@@ -9,14 +9,14 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements DataAwareRule, ValidationRule
+final class CompetitorsGroupedIntoCorrectNumberOfSidesForMatchType implements DataAwareRule, ValidationRule
 {
     /**
      * All the data under validation.
      *
      * @var array<string, string>
      */
-    protected array $data = [];
+    private array $data = [];
 
     /**
      * Set the data under validation.

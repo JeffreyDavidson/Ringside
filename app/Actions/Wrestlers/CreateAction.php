@@ -8,7 +8,7 @@ use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseWrestlerAction
+final class CreateAction extends BaseWrestlerAction
 {
     use AsAction;
 
@@ -17,7 +17,7 @@ class CreateAction extends BaseWrestlerAction
      */
     public function handle(WrestlerData $wrestlerData): Wrestler
     {
-        /** @var \App\Models\Wrestler $wrestler */
+        /** @var Wrestler $wrestler */
         $wrestler = $this->wrestlerRepository->create($wrestlerData);
 
         if (isset($wrestlerData->start_date)) {

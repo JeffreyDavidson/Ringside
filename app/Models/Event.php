@@ -19,13 +19,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $date
  * @property int|null $venue_id
  * @property string|null $preview
- * @property \App\Enums\EventStatus $status
+ * @property EventStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $matches
- * @property-read \App\Models\Venue|null $venue
+ * @property-read TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, EventMatch> $matches
+ * @property-read Venue|null $venue
  *
  * @method static \Database\Factories\EventFactory factory($count = null, $state = [])
  * @method static \App\Builders\EventBuilder newModelQuery()
@@ -40,7 +40,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-class Event extends Model
+final class Event extends Model
 {
     /** @use HasBuilder<EventBuilder> */
     use HasBuilder;

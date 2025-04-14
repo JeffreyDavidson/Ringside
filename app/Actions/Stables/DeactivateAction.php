@@ -9,14 +9,14 @@ use App\Models\Stable;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeactivateAction extends BaseStableAction
+final class DeactivateAction extends BaseStableAction
 {
     use AsAction;
 
     /**
      * Deactivate a stable.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     public function handle(Stable $stable, ?Carbon $deactivationDate = null): void
     {
@@ -31,7 +31,7 @@ class DeactivateAction extends BaseStableAction
     /**
      * Ensure a stable can be deactivated.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     private function ensureCanBeDeactivated(Stable $stable): void
     {

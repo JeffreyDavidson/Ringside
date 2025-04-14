@@ -9,9 +9,9 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
+final class TagTeamMustBeEmployedBeforeStableStartDate implements ValidationRule
 {
-    public function __construct(protected Carbon $stableStartDate) {}
+    public function __construct(private Carbon $stableStartDate) {}
 
     /**
      * Determine if the validation rule passes.

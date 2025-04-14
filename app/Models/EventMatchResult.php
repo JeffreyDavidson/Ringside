@@ -17,9 +17,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $match_decision_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\MatchDecision $decision
- * @property-read \App\Models\Wrestler|\App\Models\TagTeam $winner
- * @property-read \App\Models\EventMatch $eventMatch
+ * @property-read MatchDecision $decision
+ * @property-read Wrestler|TagTeam $winner
+ * @property-read EventMatch $eventMatch
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newQuery()
@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * @mixin \Eloquent
  */
-class EventMatchResult extends Model
+final class EventMatchResult extends Model
 {
     /**
      * The table associated with the model.

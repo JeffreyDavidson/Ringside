@@ -9,14 +9,14 @@ use App\Models\Title;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ActivateAction extends BaseTitleAction
+final class ActivateAction extends BaseTitleAction
 {
     use AsAction;
 
     /**
      * Activate a title.
      *
-     * @throws \App\Exceptions\CannotBeActivatedException
+     * @throws CannotBeActivatedException
      */
     public function handle(Title $title, ?Carbon $activationDate = null): void
     {
@@ -34,7 +34,7 @@ class ActivateAction extends BaseTitleAction
     /**
      * Ensure a title can be activated.
      *
-     * @throws \App\Exceptions\CannotBeActivatedException
+     * @throws CannotBeActivatedException
      */
     private function ensureCanBeActivated(Title $title): void
     {

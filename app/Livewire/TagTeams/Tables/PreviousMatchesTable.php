@@ -17,6 +17,10 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
      */
     public ?int $tagTeamId;
 
+    protected string $databaseTableName = 'event_matches';
+
+    protected string $resourceName = 'matches';
+
     /**
      * @return Builder<EventMatch>
      */

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Stables;
 
 use App\Actions\Stables\ActivateAction;
 use App\Exceptions\CannotBeActivatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ActivateController extends Controller
+final class ActivateController
 {
     /**
      * Activate a stable.
@@ -21,7 +20,7 @@ class ActivateController extends Controller
         Gate::authorize('activate', $stable);
 
         try {
-            ActivateAction::run($stable);
+            resolve(ActivateAction::class)->handle($stable);
         } catch (CannotBeActivatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

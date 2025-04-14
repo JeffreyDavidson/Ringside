@@ -9,14 +9,14 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ClearInjuryAction extends BaseRefereeAction
+final class ClearInjuryAction extends BaseRefereeAction
 {
     use AsAction;
 
     /**
      * Clear an injury of a referee.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
@@ -30,7 +30,7 @@ class ClearInjuryAction extends BaseRefereeAction
     /**
      * Ensure a referee can be cleared from an injury.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     private function ensureCanBeClearedFromInjury(Referee $referee): void
     {

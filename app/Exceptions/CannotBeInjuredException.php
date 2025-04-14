@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeInjuredException extends Exception
+final class CannotBeInjuredException extends Exception
 {
     public static function unemployed(): self
     {

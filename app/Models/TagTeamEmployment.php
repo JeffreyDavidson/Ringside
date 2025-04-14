@@ -10,15 +10,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * @property-read \Illuminate\Support\Carbon $started_at
+ * @property-read Carbon $started_at
  * @property int $id
  * @property int $tag_team_id
- * @property \Illuminate\Support\Carbon $started_at
- * @property \Illuminate\Support\Carbon|null $ended_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\TagTeam|null $tagTeam
+ * @property Carbon $started_at
+ * @property Carbon|null $ended_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read TFactory|null $use_factory
+ * @property-read TagTeam|null $tagTeam
  *
  * @method static \Database\Factories\TagTeamEmploymentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamEmployment newModelQuery()
@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-class TagTeamEmployment extends Model
+final class TagTeamEmployment extends Model
 {
     /** @use HasFactory<\Database\Factories\TagTeamEmploymentFactory> */
     use HasFactory;

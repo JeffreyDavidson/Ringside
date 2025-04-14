@@ -7,7 +7,7 @@ namespace App\Actions\Managers;
 use App\Models\Manager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RemoveFromCurrentWrestlersAction extends BaseManagerAction
+final class RemoveFromCurrentWrestlersAction extends BaseManagerAction
 {
     use AsAction;
 

@@ -6,6 +6,7 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\TagTeamPartner;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
@@ -17,13 +18,17 @@ class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
      */
     public ?int $wrestlerId;
 
+    protected string $databaseTableName = 'tag_teams';
+
+    protected string $resourceName = 'tag teams';
+
     /**
      * @return Builder<TagTeamPartner>
      */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return TagTeamPartner::query()

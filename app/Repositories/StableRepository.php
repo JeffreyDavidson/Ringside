@@ -12,7 +12,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class StableRepository
+final class StableRepository
 {
     /**
      * Create a new stable with the given data.
@@ -120,11 +120,11 @@ class StableRepository
     /**
      * Add wrestlers to a given stable.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function addWrestlers(Stable $stable, Collection $wrestlers, Carbon $joinDate): void
     {
-        $wrestlers->each(function (Wrestler $wrestler) use ($stable, $joinDate) {
+        $wrestlers->each(function (Wrestler $wrestler) use ($stable, $joinDate): void {
             $stable->currentWrestlers()->attach($wrestler->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
@@ -132,11 +132,11 @@ class StableRepository
     /**
      * Add tag teams to a given stable at a given date.
      *
-     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, TagTeam>  $tagTeams
      */
     public function addTagTeams(Stable $stable, Collection $tagTeams, Carbon $joinDate): void
     {
-        $tagTeams->each(function (TagTeam $tagTeam) use ($stable, $joinDate) {
+        $tagTeams->each(function (TagTeam $tagTeam) use ($stable, $joinDate): void {
             $stable->currentTagTeams()->attach($tagTeam->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
@@ -144,11 +144,11 @@ class StableRepository
     /**
      * Add managers to a given stable.
      *
-     * @param  Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, Manager>  $managers
      */
     public function addManagers(Stable $stable, Collection $managers, Carbon $joinDate): void
     {
-        $managers->each(function (Manager $manager) use ($stable, $joinDate) {
+        $managers->each(function (Manager $manager) use ($stable, $joinDate): void {
             $stable->currentManagers()->attach($manager->id, ['joined_at' => $joinDate->toDateTimeString()]);
         });
     }
@@ -156,11 +156,11 @@ class StableRepository
     /**
      * Undocumented function.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $currentWrestlers
+     * @param  Collection<int, Wrestler>  $currentWrestlers
      */
     public function removeWrestlers(Stable $stable, Collection $currentWrestlers, Carbon $removalDate): void
     {
-        $currentWrestlers->each(function (Wrestler $wrestler) use ($stable, $removalDate) {
+        $currentWrestlers->each(function (Wrestler $wrestler) use ($stable, $removalDate): void {
             $stable->currentWrestlers()->updateExistingPivot(
                 $wrestler->id,
                 ['left_at' => $removalDate->toDateTimeString()]
@@ -171,11 +171,11 @@ class StableRepository
     /**
      * Undocumented function.
      *
-     * @param  Collection<int, \App\Models\TagTeam>  $currentTagTeams
+     * @param  Collection<int, TagTeam>  $currentTagTeams
      */
     public function removeTagTeams(Stable $stable, Collection $currentTagTeams, Carbon $removalDate): void
     {
-        $currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $removalDate) {
+        $currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $removalDate): void {
             $stable->currentTagTeams()->updateExistingPivot(
                 $tagTeam->id,
                 ['left_at' => $removalDate->toDateTimeString()]
@@ -186,11 +186,11 @@ class StableRepository
     /**
      * Undocumented function.
      *
-     * @param  Collection<int, \App\Models\Manager>  $currentManagers
+     * @param  Collection<int, Manager>  $currentManagers
      */
     public function removeManagers(Stable $stable, Collection $currentManagers, Carbon $removalDate): void
     {
-        $currentManagers->each(function (Manager $manager) use ($stable, $removalDate) {
+        $currentManagers->each(function (Manager $manager) use ($stable, $removalDate): void {
             $stable->currentManagers()->updateExistingPivot(
                 $manager->id,
                 ['left_at' => $removalDate->toDateTimeString()]

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @implements CastsAttributes<Height, int>
  */
-class HeightCast implements CastsAttributes
+final class HeightCast implements CastsAttributes
 {
     public function get(Model $model, string $key, mixed $value, array $attributes): Height
     {

@@ -8,7 +8,7 @@ use App\Data\StableData;
 use App\Models\Stable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseStableAction
+final class UpdateAction extends BaseStableAction
 {
     use AsAction;
 
@@ -20,10 +20,10 @@ class UpdateAction extends BaseStableAction
         $this->stableRepository->update($stable, $stableData);
 
         if (isset($stableData->start_date) && $this->ensureStartDateCanBeChanged($stable)) {
-            ActivateAction::run($stable, $stableData->start_date);
+            resolve(ActivateAction::class)->handle($stable, $stableData->start_date);
         }
 
-        UpdateMembersAction::run(
+        resolve(UpdateMembersAction::class)->handle(
             $stable,
             $stableData->wrestlers,
             $stableData->tagTeams,
@@ -38,12 +38,11 @@ class UpdateAction extends BaseStableAction
      */
     private function ensureStartDateCanBeChanged(Stable $stable): bool
     {
-        if ($stable->isUnactivated() || $stable->hasFutureActivation()) {
+        // Add check on start date from request
+        if ($stable->isUnactivated()) {
             return true;
         }
 
-        // Add check on start date from request
-
-        return false;
+        return $stable->hasFutureActivation();
     }
 }

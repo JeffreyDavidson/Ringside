@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class SuspendController extends Controller
+final class SuspendController
 {
     /**
      * Suspend a manager.
@@ -21,7 +20,7 @@ class SuspendController extends Controller
         Gate::authorize('suspend', $manager);
 
         try {
-            SuspendAction::run($manager);
+            resolve(SuspendAction::class)->handle($manager);
         } catch (CannotBeSuspendedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class EmployController extends Controller
+final class EmployController
 {
     /**
      * Employ a manager.
@@ -21,7 +20,7 @@ class EmployController extends Controller
         Gate::authorize('employ', $manager);
 
         try {
-            EmployAction::run($manager);
+            resolve(EmployAction::class)->handle($manager);
         } catch (CannotBeEmployedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

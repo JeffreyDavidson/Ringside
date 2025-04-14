@@ -10,7 +10,7 @@ use App\Models\EventMatch;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddMatchForEventAction extends BaseEventMatchAction
+final class AddMatchForEventAction extends BaseEventMatchAction
 {
     use AsAction;
 
@@ -21,13 +21,13 @@ class AddMatchForEventAction extends BaseEventMatchAction
     {
         $createdMatch = $this->eventMatchRepository->createForEvent($event, $eventMatchData);
 
-        AddRefereesToMatchAction::run($createdMatch, $eventMatchData->referees);
+        resolve(AddRefereesToMatchAction::class)->handle($createdMatch, $eventMatchData->referees);
 
-        $eventMatchData->titles->whenNotEmpty(function (Collection $titles) use ($createdMatch) {
-            AddTitlesToMatchAction::run($createdMatch, $titles);
+        $eventMatchData->titles->whenNotEmpty(function (Collection $titles) use ($createdMatch): void {
+            resolve(AddTitlesToMatchAction::class)->handle($createdMatch, $titles);
         });
 
-        AddCompetitorsToMatchAction::run($createdMatch, $eventMatchData->competitors);
+        resolve(AddCompetitorsToMatchAction::class)->handle($createdMatch, $eventMatchData->competitors);
 
         return $createdMatch;
     }

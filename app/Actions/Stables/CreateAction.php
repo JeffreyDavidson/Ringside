@@ -8,7 +8,7 @@ use App\Data\StableData;
 use App\Models\Stable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseStableAction
+final class CreateAction extends BaseStableAction
 {
     use AsAction;
 
@@ -17,14 +17,14 @@ class CreateAction extends BaseStableAction
      */
     public function handle(StableData $stableData): Stable
     {
-        /** @var \App\Models\Stable $stable */
+        /** @var Stable $stable */
         $stable = $this->stableRepository->create($stableData);
 
         if (isset($stableData->start_date)) {
-            ActivateAction::run($stable, $stableData->start_date);
+            resolve(ActivateAction::class)->handle($stable, $stableData->start_date);
         }
 
-        AddMembersAction::run(
+        resolve(AddMembersAction::class)->handle(
             $stable,
             $stableData->wrestlers,
             $stableData->tagTeams,

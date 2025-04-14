@@ -6,6 +6,7 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\StableWrestler;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousStablesTable extends BasePreviousStablesTable
@@ -17,13 +18,17 @@ class PreviousStablesTable extends BasePreviousStablesTable
      */
     public ?int $wrestlerId;
 
+    protected string $databaseTableName = 'stables_wrestlers';
+
+    protected string $resourceName = 'stables';
+
     /**
      * @return Builder<StableWrestler>
      */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return StableWrestler::query()

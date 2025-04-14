@@ -9,7 +9,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseTagTeamAction
+final class UpdateAction extends BaseTagTeamAction
 {
     use AsAction;
 
@@ -32,7 +32,7 @@ class UpdateAction extends BaseTagTeamAction
         if ($tagTeam->currentWrestlers->isNotEmpty()) {
             $tagTeam
                 ->currentWrestlers
-                ->reject(fn (Wrestler $wrestler) => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
+                ->reject(fn (Wrestler $wrestler): bool => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
                 ->each(fn (Wrestler $wrestler) => $this->tagTeamRepository->removeTagTeamPartner($tagTeam, $wrestler, $datetime));
         }
 
@@ -48,10 +48,6 @@ class UpdateAction extends BaseTagTeamAction
      */
     private function shouldBeEmployed(TagTeam $tagTeam): bool
     {
-        if ($tagTeam->isCurrentlyEmployed()) {
-            return false;
-        }
-
-        return true;
+        return ! $tagTeam->isCurrentlyEmployed();
     }
 }

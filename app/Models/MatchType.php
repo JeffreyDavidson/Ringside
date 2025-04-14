@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $number_of_sides
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read TFactory|null $use_factory
  *
  * @method static \Database\Factories\MatchTypeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchType newModelQuery()
@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-class MatchType extends Model
+final class MatchType extends Model
 {
     /** @use HasFactory<\Database\Factories\MatchTypeFactory> */
     use HasFactory;

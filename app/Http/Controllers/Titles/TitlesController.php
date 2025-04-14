@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Titles;
 
-use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class TitlesController extends Controller
+final class TitlesController
 {
     public function index(): View
     {
@@ -25,6 +24,6 @@ class TitlesController extends Controller
     {
         Gate::authorize('view', Title::class);
 
-        return view('titles.show', compact('title'));
+        return view('titles.show', ['title' => $title]);
     }
 }

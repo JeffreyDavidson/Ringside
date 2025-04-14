@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /**
      * The path to the "home" route for your application.
@@ -37,17 +37,17 @@ class AppServiceProvider extends ServiceProvider
             /** @var Builder $builder */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);
-            $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+            $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
 
         /** @param array<string> $parameters */
-        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters) {
+        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters): string {
             /** @var string $values */
             $values = array_pop($parameters);
 
-            if (count($parameters)) {
+            if (count($parameters) !== 0) {
                 $values = implode(', ', $parameters).' or '.$values;
             }
 

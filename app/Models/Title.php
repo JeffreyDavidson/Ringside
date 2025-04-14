@@ -17,23 +17,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property int $id
  * @property string $name
- * @property \App\Enums\ActivationStatus $status
+ * @property ActivationStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleActivation> $activations
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $championships
- * @property-read \App\Models\TitleActivation|null $currentActivation
- * @property-read \App\Models\TitleChampionship|null $currentChampionship
- * @property-read \App\Models\TitleRetirement|null $currentRetirement
- * @property-read \App\Models\TitleActivation|null $firstActivation
- * @property-read \App\Models\TitleActivation|null $futureActivation
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\TitleActivation|null $previousActivation
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleActivation> $previousActivations
- * @property-read \App\Models\TitleRetirement|null $previousRetirement
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleRetirement> $previousRetirements
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleRetirement> $retirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleActivation> $activations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleChampionship> $championships
+ * @property-read TitleActivation|null $currentActivation
+ * @property-read TitleChampionship|null $currentChampionship
+ * @property-read TitleRetirement|null $currentRetirement
+ * @property-read TitleActivation|null $firstActivation
+ * @property-read TitleActivation|null $futureActivation
+ * @property-read TFactory|null $use_factory
+ * @property-read TitleActivation|null $previousActivation
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleActivation> $previousActivations
+ * @property-read TitleRetirement|null $previousRetirement
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleRetirement> $previousRetirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleRetirement> $retirements
  *
  * @method static \Database\Factories\TitleFactory factory($count = null, $state = [])
  * @method static \App\Builders\TitleBuilder newModelQuery()
@@ -50,7 +50,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-class Title extends Model implements Activatable, Retirable
+final class Title extends Model implements Activatable, Retirable
 {
     use Concerns\HasChampionships;
     use Concerns\IsActivatable;
