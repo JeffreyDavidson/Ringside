@@ -4,23 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\TagTeamManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-final class PreviousManagersTable extends DataTableComponent
+class PreviousManagersTable extends BasePreviousManagersTable
 {
-    use ShowTableTrait;
-
-    public ?int $tagTeamId;
-
     protected string $databaseTableName = 'tag_teams_managers';
 
-    protected string $resourceName = 'managers';
+    /**
+     * Tag Team to use for component.
+     */
+    public ?int $tagTeamId;
 
     /**
      * @return Builder<TagTeamManager>
@@ -40,24 +36,7 @@ final class PreviousManagersTable extends DataTableComponent
     public function configure(): void
     {
         $this->addAdditionalSelects([
-            'tag_teams_managers.manager_id as manager_id',
+            'tag_teams_managers.manager_id',
         ]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('managers.full_name'), 'manager.full_name')
-                ->searchable(),
-            DateColumn::make(__('managers.date_hired'), 'hired_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('managers.date_fired'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 }

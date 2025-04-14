@@ -4,69 +4,47 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\Title;
+use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\TitleChampionship;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-final class PreviousTitleChampionshipsTable extends DataTableComponent
+class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
-    use ShowTableTrait;
-
     /**
      * Wrestler to use for component.
      */
-    public Wrestler $wrestler;
+    public ?int $wrestlerId;
 
     protected string $databaseTableName = 'tittle_championships';
 
     protected string $resourceName = 'title championships';
 
     /**
-     * Undocumented function.
-     */
-    public function mount(Wrestler $wrestler): void
-    {
-        $this->wrestler = $wrestler;
-    }
-
-    /**
      * @return Builder<TitleChampionship>
      */
     public function builder(): Builder
     {
+        if (! isset($this->wrestlerId)) {
+            throw new \Exception("You didn't specify a wrestler");
+        }
+
+        // dd(TitleChampionship::query()
+        //     ->whereHasMorph(
+        //         'previousChampion',
+        //         [Wrestler::class],
+        //         function (Builder $query) {
+        //             $query->whereIn('id', [$this->wrestlerId]);
+        //         }
+        //     )->get());
+
         return TitleChampionship::query()
             ->whereHasMorph(
-                'new_champion',
+                'previousChampion',
                 [Wrestler::class],
-                function (Builder $query): void {
-                    $query->whereIn('wrestler_id', [$this->wrestler->id]);
+                function (Builder $query) {
+                    $query->whereIn('id', [$this->wrestlerId]);
                 }
             );
-    }
-
-    public function configure(): void {}
-
-    /**
-     * @return array<int, Column>
-     **/
-    public function columns(): array
-    {
-        return [
-            LinkColumn::make(__('titles.name'))
-                ->title(fn (Title $row) => $row->name)
-                ->location(fn (Title $row) => route('titles.show', $row)),
-            LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn (TitleChampionship $row) => $row->previousChampion->name ?? '')
-                ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
-            Column::make(__('championships.dates_held'), 'dates_held'),
-            CountColumn::make(__('championships.days_held'))
-                ->setDataSource('days_held'),
-        ];
     }
 }

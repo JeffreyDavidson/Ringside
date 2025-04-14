@@ -4,23 +4,16 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Base\Tables\BasePreviousWrestlersTable;
 use App\Models\TagTeamPartner;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-final class PreviousWrestlersTable extends DataTableComponent
+class PreviousWrestlersTable extends BasePreviousWrestlersTable
 {
-    use ShowTableTrait;
-
-    public ?int $tagTeamId;
-
     protected string $databaseTableName = 'tag_team_wrestler';
 
-    protected string $resourceName = 'wrestlers';
+    public ?int $tagTeamId;
 
     /**
      * @return Builder<TagTeamPartner>
@@ -42,21 +35,5 @@ final class PreviousWrestlersTable extends DataTableComponent
         $this->addAdditionalSelects([
             'tag_team_wrestler.wrestler_id as wrestler_id',
         ]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('wrestlers.name'), 'wrestler.name'),
-            DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('tag-teams.date_left'), 'left_at')
-                ->outputFormat('Y-m-d'),
-        ];
     }
 }

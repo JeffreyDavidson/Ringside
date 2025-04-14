@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 /**
  * @property int $id
  * @property int $event_id
+ * @property int $match_number
  * @property int $match_type_id
  * @property string|null $preview
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -56,6 +57,7 @@ final class EventMatch extends Model
      */
     protected $fillable = [
         'event_id',
+        'match_number',
         'match_type_id',
         'preview',
     ];

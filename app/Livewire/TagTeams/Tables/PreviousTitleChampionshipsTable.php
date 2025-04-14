@@ -4,39 +4,34 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\TagTeam;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Models\TitleChampionship;
+use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousTitleChampionshipsTable extends DataTableComponent
+class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
     /**
-     * Tag team to use for component.
+     * Tag Team to use for component.
      */
-    public TagTeam $tagTeam;
+    public ?int $tagTeamId;
 
     /**
-     * Undocumented function.
+     * @return Builder<TitleChampionship>
      */
-    public function mount(TagTeam $tagTeam): void
+    public function builder(): Builder
     {
-        $this->tagTeam = $tagTeam;
-    }
+        if (! isset($this->tagTeamId)) {
+            throw new \Exception("You didn't specify a tag team");
+        }
 
-    public function configure(): void {}
-
-    /**
-     * Undocumented function
-     *
-     * @return array<int, Column>
-     */
-    public function columns(): array
-    {
-        return [
-            Column::make(__('titles.name'), 'name'),
-            Column::make(__('championships.previous_champion'), 'previous_champion'),
-            Column::make(__('championships.dates_held'), 'dates_held'),
-            Column::make(__('championships.reign_length'), 'reign_length'),
-        ];
+        return TitleChampionship::query()
+            ->whereHasMorph(
+                'previousChampion',
+                [TagTeam::class],
+                function (Builder $query) {
+                    $query->whereIn('id', [$this->tagTeamId]);
+                }
+            );
     }
 }
