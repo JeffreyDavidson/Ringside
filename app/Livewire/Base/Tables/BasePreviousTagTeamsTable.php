@@ -19,6 +19,8 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
 
     protected string $resourceName = 'tag teams';
 
+    protected string $databaseTableName;
+
     public function configure(): void {}
 
     /**

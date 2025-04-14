@@ -15,6 +15,8 @@ abstract class BasePreviousStablesTable extends DataTableComponent
 
     protected string $resourceName = 'stables';
 
+    protected string $databaseTableName;
+
     public function configure(): void {}
 
     /**

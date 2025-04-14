@@ -15,6 +15,8 @@ abstract class BasePreviousWrestlersTable extends DataTableComponent
 
     protected string $resourceName = 'wrestlers';
 
+    protected string $databaseTableName;
+
     public function configure(): void {}
 
     /**

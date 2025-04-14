@@ -15,6 +15,8 @@ abstract class BasePreviousManagersTable extends DataTableComponent
 
     protected string $resourceName = 'managers';
 
+    protected string $databaseTableName;
+
     public function configure(): void {}
 
     /**
