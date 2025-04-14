@@ -13,7 +13,7 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-final class BasePreviousTitleChampionshipsTable extends DataTableComponent
+abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
 

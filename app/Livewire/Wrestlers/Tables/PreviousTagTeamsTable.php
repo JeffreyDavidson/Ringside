@@ -18,8 +18,6 @@ final class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
 
     protected string $databaseTableName = 'tag_teams';
 
-    protected string $resourceName = 'tag teams';
-
     /**
      * @return Builder<TagTeamPartner>
      */

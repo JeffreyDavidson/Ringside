@@ -16,7 +16,7 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-final class BasePreviousMatchesTable extends DataTableComponent
+abstract class BasePreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
@@ -48,14 +48,14 @@ final class BasePreviousMatchesTable extends DataTableComponent
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.referees'))
                 ->data(fn ($value, EventMatch $row) => ($row->referees))
-                ->outputFormat(function ($index, Referee $value) {
+                ->outputFormat(function ($index, Referee $value): string {
                     return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
                 })
                 ->separator(', ')
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.competitors'))
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function ($index, EventMatchCompetitor $value) {
+                ->outputFormat(function ($index, EventMatchCompetitor $value): string {
                     $competitor = $value->getCompetitor();
                     $type = str($competitor->getMorphClass())->kebab()->plural();
 
@@ -64,11 +64,11 @@ final class BasePreviousMatchesTable extends DataTableComponent
                 ->separator('<br />'),
             ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn ($value, EventMatch $row) => ($row->titles))
-                ->outputFormat(fn ($index, Title $value) => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
+                ->outputFormat(fn ($index, Title $value): string => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
                 ->separator('<br />')
                 ->emptyValue('N/A'),
             Column::make(__('event-matches.result'))
-                ->label(function (EventMatch $row) {
+                ->label(function (EventMatch $row): string {
                     if ($row->result) {
                         $winner = $row->result?->getWinner();
                         $type = str($winner->getMorphClass())->kebab()->plural();

@@ -18,8 +18,6 @@ final class PreviousManagersTable extends BasePreviousManagersTable
 
     protected string $databaseTableName = 'wrestlers_managers';
 
-    protected string $resourceName = 'managers';
-
     /**
      * @return Builder<WrestlerManager>
      */
