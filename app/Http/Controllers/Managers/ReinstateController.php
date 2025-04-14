@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ReinstateController extends Controller
+final class ReinstateController
 {
     /**
      * Reinstate a suspended manager.

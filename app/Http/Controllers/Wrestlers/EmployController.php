@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class EmployController extends Controller
+final class EmployController
 {
     /**
      * Employ a wrestler.

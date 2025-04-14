@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TagTeams;
 
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-final class TagTeamsController extends Controller
+final class TagTeamsController
 {
     /**
      * View a list of tag teams.

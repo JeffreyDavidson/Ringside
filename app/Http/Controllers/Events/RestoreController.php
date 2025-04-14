@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Events;
 
 use App\Actions\Events\RestoreAction;
-use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class RestoreController extends Controller
+final class RestoreController
 {
     /**
      * Restore a deleted scheduled event.

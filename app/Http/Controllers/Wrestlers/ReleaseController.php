@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ReleaseController extends Controller
+final class ReleaseController
 {
     /**
      * Release a wrestler.

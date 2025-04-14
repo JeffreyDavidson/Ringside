@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ReleaseController extends Controller
+final class ReleaseController
 {
     /**
      * Release a tag team.

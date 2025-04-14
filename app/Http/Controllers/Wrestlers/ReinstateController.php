@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ReinstateController extends Controller
+final class ReinstateController
 {
     /**
      * Reinstate a wrestler.

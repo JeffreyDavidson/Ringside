@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Titles;
 
 use App\Actions\Titles\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class DeactivateController extends Controller
+final class DeactivateController
 {
     /**
      * Deactivates a title.

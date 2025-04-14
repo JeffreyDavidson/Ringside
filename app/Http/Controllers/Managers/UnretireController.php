@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class UnretireController extends Controller
+final class UnretireController
 {
     /**
      * Unretire a retired manager.

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Titles;
 
 use App\Actions\Titles\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retires a title.

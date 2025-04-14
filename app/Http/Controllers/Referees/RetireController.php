@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retire a referee.

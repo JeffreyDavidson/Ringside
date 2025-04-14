@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class SuspendController extends Controller
+final class SuspendController
 {
     /**
      * Suspend a tag team.

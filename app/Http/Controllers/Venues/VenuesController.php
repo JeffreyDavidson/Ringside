@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Venues;
 
-use App\Http\Controllers\Controller;
 use App\Models\Venue;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-final class VenuesController extends Controller
+final class VenuesController
 {
     /**
      * View a list of venues.

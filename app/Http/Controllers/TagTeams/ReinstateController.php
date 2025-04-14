@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ReinstateController extends Controller
+final class ReinstateController
 {
     /**
      * Reinstate a tag team.

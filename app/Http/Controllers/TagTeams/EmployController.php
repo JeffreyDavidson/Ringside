@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class EmployController extends Controller
+final class EmployController
 {
     /**
      * Employ a tag team.

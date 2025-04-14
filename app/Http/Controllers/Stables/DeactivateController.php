@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Stables;
 
 use App\Actions\Stables\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class DeactivateController extends Controller
+final class DeactivateController
 {
     /**
      * Deactivate a stable.

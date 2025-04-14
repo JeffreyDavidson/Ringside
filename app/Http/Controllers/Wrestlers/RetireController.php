@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retire a wrestler.

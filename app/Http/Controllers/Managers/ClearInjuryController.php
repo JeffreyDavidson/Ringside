@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ClearInjuryController extends Controller
+final class ClearInjuryController
 {
     /**
      * Clear an injured manager.

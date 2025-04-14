@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class SuspendController extends Controller
+final class SuspendController
 {
     /**
      * Suspend a referee.

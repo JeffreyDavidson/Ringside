@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ClearInjuryController extends Controller
+final class ClearInjuryController
 {
     /**
      * Have a wrestler recover from an injury.

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class UnretireController extends Controller
+final class UnretireController
 {
     /**
      * Unretire a tag team.

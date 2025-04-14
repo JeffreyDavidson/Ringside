@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class SuspendController extends Controller
+final class SuspendController
 {
     /**
      * Suspend a wrestler.

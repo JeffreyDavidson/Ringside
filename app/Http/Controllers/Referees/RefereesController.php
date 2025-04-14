@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Referees;
 
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-final class RefereesController extends Controller
+final class RefereesController
 {
     /**
      * View a list of referees.

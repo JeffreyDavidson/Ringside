@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retire a tag team.

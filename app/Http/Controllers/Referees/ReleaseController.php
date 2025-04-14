@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class ReleaseController extends Controller
+final class ReleaseController
 {
     /**
      * Release a referee.

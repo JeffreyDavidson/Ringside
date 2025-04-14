@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class InjureController extends Controller
+final class InjureController
 {
     /**
      * Injure a manager.

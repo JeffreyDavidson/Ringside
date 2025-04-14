@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Titles;
 
 use App\Actions\Titles\RestoreAction;
-use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-final class RestoreController extends Controller
+final class RestoreController
 {
     /**
      * Restores a title.
