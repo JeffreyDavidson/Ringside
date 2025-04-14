@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class PreviousTitleChampionshipsTable extends DataTableComponent
+final class PreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
