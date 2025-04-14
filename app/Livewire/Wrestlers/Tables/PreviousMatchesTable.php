@@ -24,7 +24,7 @@ final class PreviousMatchesTable extends BasePreviousMatchesTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't sp ecify a wrestler");
+            throw new Exception("You didn't sp ecify a wrestler");
         }
 
         $wrestler = Wrestler::find($this->wrestlerId);
