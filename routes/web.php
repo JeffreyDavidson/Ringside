@@ -9,6 +9,7 @@ use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
+use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::group([], __DIR__.'/web/venues.php');
+    Route::resource('venues', VenuesController::class)->only(['index', 'show']);
 });
 
 Route::middleware(['auth'])->prefix('user-management')->group(function () {
