@@ -9,7 +9,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-final class BasePreviousStablesTable extends DataTableComponent
+abstract class BasePreviousStablesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
