@@ -18,8 +18,6 @@ final class PreviousStablesTable extends BasePreviousStablesTable
 
     protected string $databaseTableName = 'stables_wrestlers';
 
-    protected string $resourceName = 'stables';
-
     /**
      * @return Builder<StableWrestler>
      */

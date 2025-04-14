@@ -32,10 +32,10 @@ final class PreviousMatchesTable extends BasePreviousMatchesTable
 
         return EventMatch::query()
             ->with(['titles', 'competitors', 'result.winner', 'result.decision'])
-            ->withWhereHas('referees', function ($query) {
+            ->withWhereHas('referees', function ($query): void {
                 $query->whereIn('referee_id', [$this->refereeId]);
             })
-            ->withWhereHas('event', function ($query) {
+            ->withWhereHas('event', function ($query): void {
                 $query->whereNotNull('date')->where('status', EventStatus::Past);
             })
             ->orderByDesc('date');

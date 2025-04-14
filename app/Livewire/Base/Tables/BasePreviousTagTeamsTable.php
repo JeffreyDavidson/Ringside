@@ -13,11 +13,13 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-final class BasePreviousTagTeamsTable extends DataTableComponent
+abstract class BasePreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
     protected string $resourceName = 'tag teams';
+
+    protected string $databaseTableName;
 
     public function configure(): void {}
 

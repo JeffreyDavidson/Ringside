@@ -30,7 +30,7 @@ final class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshi
             ->whereHasMorph(
                 'previousChampion',
                 [TagTeam::class],
-                function (Builder $query) {
+                function (Builder $query): void {
                     $query->whereIn('id', [$this->tagTeamId]);
                 }
             );
