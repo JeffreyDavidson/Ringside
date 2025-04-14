@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Tables;
 
+use App\Actions\Venues\RestoreAction;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Models\Venue;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 final class VenuesTable extends BaseTableWithActions
@@ -48,5 +51,19 @@ final class VenuesTable extends BaseTableWithActions
     public function delete(Venue $Venue): void
     {
         $this->deleteModel($Venue);
+    }
+
+    /**
+     * Restore a deleted venue.
+     */
+    public function restore(int $venueId): RedirectResponse
+    {
+        $venue = Venue::onlyTrashed()->findOrFail($venueId);
+
+        Gate::authorize('restore', $venue);
+
+        resolve(RestoreAction::class)->handle($venue);
+
+        return back();
     }
 }
