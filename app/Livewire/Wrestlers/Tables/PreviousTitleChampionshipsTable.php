@@ -9,7 +9,7 @@ use App\Models\TitleChampionship;
 use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
+final class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
     /**
      * Wrestler to use for component.

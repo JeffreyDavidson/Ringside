@@ -15,7 +15,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 
-class EventMatchesTable extends DataTableComponent
+final class EventMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 

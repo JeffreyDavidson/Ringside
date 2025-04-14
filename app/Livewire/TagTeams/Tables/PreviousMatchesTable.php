@@ -10,7 +10,7 @@ use App\Models\EventMatch;
 use App\Models\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousMatchesTable extends BasePreviousMatchesTable
+final class PreviousMatchesTable extends BasePreviousMatchesTable
 {
     /**
      * Tag Team to use for component.

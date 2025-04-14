@@ -9,7 +9,7 @@ use App\Models\TagTeam;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
+final class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
     /**
      * Tag Team to use for component.

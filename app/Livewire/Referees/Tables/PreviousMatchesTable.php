@@ -9,7 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\EventMatch;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousMatchesTable extends BasePreviousMatchesTable
+final class PreviousMatchesTable extends BasePreviousMatchesTable
 {
     /**
      * Referee to use for component.
