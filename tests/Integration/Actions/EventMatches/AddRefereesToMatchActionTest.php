@@ -19,7 +19,7 @@ test('it adds referees to a match', function () {
 
     $this->eventMatchRepository
         ->shouldReceive('addRefereeToMatch')
-        ->with($eventMatch, \Mockery::type(Referee::class))
+        ->with($eventMatch, Mockery::type(Referee::class))
         ->times($referees->count());
 
     AddRefereesToMatchAction::run($eventMatch, $referees);

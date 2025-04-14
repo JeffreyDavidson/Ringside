@@ -7,7 +7,7 @@ namespace App\Actions\Events;
 use App\Models\Event;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseEventAction
+final class DeleteAction extends BaseEventAction
 {
     use AsAction;
 

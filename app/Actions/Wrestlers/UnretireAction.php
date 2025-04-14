@@ -9,14 +9,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseWrestlerAction
+final class UnretireAction extends BaseWrestlerAction
 {
     use AsAction;
 
     /**
      * Unretire a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Wrestler $wrestler): void
     {

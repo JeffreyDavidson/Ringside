@@ -7,7 +7,7 @@ namespace App\Actions\Wrestlers;
 use App\Models\Wrestler;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseWrestlerAction
+final class RestoreAction extends BaseWrestlerAction
 {
     use AsAction;
 

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class SuspendController extends Controller
+final class SuspendController
 {
     /**
      * Suspend a wrestler.
@@ -21,7 +20,7 @@ class SuspendController extends Controller
         Gate::authorize('suspend', $wrestler);
 
         try {
-            SuspendAction::run($wrestler);
+            resolve(SuspendAction::class)->handle($wrestler);
         } catch (CannotBeSuspendedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

@@ -7,7 +7,7 @@ namespace App\Actions\Titles;
 use App\Models\Title;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseTitleAction
+final class DeleteAction extends BaseTitleAction
 {
     use AsAction;
 

@@ -9,14 +9,14 @@ use App\Models\Title;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseTitleAction
+final class RetireAction extends BaseTitleAction
 {
     use AsAction;
 
     /**
      * Retire a title.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
@@ -34,7 +34,7 @@ class RetireAction extends BaseTitleAction
     /**
      * Ensure a title can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(Title $title): void
     {

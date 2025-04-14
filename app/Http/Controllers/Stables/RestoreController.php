@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Stables;
 
 use App\Actions\Stables\RestoreAction;
-use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RestoreController extends Controller
+final class RestoreController
 {
     /**
      * Restore a stable.
@@ -23,7 +22,7 @@ class RestoreController extends Controller
         Gate::authorize('restore', $stable);
 
         try {
-            RestoreAction::run($stable);
+            resolve(RestoreAction::class)->handle($stable);
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

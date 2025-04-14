@@ -19,7 +19,7 @@ test('it adds titles to a match', function () {
 
     $this->eventMatchRepository
         ->shouldReceive('addTitleToMatch')
-        ->with($eventMatch, \Mockery::type(Title::class))
+        ->with($eventMatch, Mockery::type(Title::class))
         ->times($titles->count());
 
     AddTitlesToMatchAction::run($eventMatch, $titles);

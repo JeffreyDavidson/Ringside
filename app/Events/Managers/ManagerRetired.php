@@ -8,7 +8,7 @@ use App\Models\Manager;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Carbon;
 
-class ManagerRetired
+final class ManagerRetired
 {
     use Dispatchable;
 

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class SuspendController extends Controller
+final class SuspendController
 {
     /**
      * Suspend a tag team.
@@ -21,7 +20,7 @@ class SuspendController extends Controller
         Gate::authorize('suspend', $tagTeam);
 
         try {
-            SuspendAction::run($tagTeam);
+            resolve(SuspendAction::class)->handle($tagTeam);
         } catch (CannotBeSuspendedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

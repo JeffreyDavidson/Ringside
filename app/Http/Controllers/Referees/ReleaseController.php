@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReleaseController extends Controller
+final class ReleaseController
 {
     /**
      * Release a referee.
@@ -21,7 +20,7 @@ class ReleaseController extends Controller
         Gate::authorize('release', $referee);
 
         try {
-            ReleaseAction::run($referee);
+            resolve(ReleaseAction::class)->handle($referee);
         } catch (CannotBeReleasedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

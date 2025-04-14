@@ -6,7 +6,7 @@ namespace App\Data;
 
 use Illuminate\Support\Carbon;
 
-readonly class ManagerData
+final readonly class ManagerData
 {
     /**
      * Create a new manager data instance.

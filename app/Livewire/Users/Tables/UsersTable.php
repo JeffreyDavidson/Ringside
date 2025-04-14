@@ -12,7 +12,7 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\User;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class UsersTable extends BaseTableWithActions
+final class UsersTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 
@@ -48,7 +48,7 @@ class UsersTable extends BaseTableWithActions
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn (User $row, Column $column) => $row->getFormattedPhoneNumber()),
+                ->label(fn (User $row, Column $column): string => $row->getFormattedPhoneNumber()),
         ];
     }
 }

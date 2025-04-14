@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @extends Builder<\App\Models\TagTeam>
  */
-class TagTeamBuilder extends Builder
+final class TagTeamBuilder extends Builder
 {
     /**
      * Scope a query to include bookable tag teams.

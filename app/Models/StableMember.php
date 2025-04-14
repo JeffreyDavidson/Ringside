@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphPivot;
  *
  * @mixin \Eloquent
  */
-class StableMember extends MorphPivot
+final class StableMember extends MorphPivot
 {
     /**
      * The attributes that are mass assignable.

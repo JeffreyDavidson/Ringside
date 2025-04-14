@@ -9,14 +9,14 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseRefereeAction
+final class EmployAction extends BaseRefereeAction
 {
     use AsAction;
 
     /**
      * Employ a referee.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     public function handle(Referee $referee, ?Carbon $startDate = null): void
     {
@@ -34,7 +34,7 @@ class EmployAction extends BaseRefereeAction
     /**
      * Ensure a referee can be employed.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     private function ensureCanBeEmployed(Referee $referee): void
     {

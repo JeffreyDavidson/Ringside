@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-class StableTagTeam extends Pivot
+final class StableTagTeam extends Pivot
 {
     protected $table = 'stables_tag_teams';
 

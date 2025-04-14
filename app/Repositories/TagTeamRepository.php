@@ -10,7 +10,7 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-class TagTeamRepository
+final class TagTeamRepository
 {
     /**
      * Create a new tag team with the given data.
@@ -122,7 +122,7 @@ class TagTeamRepository
     /**
      * Add wrestlers to a tag team.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function addWrestlers(TagTeam $tagTeam, Collection $wrestlers, Carbon $joinDate): TagTeam
     {
@@ -136,8 +136,8 @@ class TagTeamRepository
     /**
      * Add wrestlers to a tag team.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $formerTagTeamPartners
-     * @param  Collection<int, \App\Models\Wrestler>  $newTagTeamPartners
+     * @param  Collection<int, Wrestler>  $formerTagTeamPartners
+     * @param  Collection<int, Wrestler>  $newTagTeamPartners
      */
     public function syncTagTeamPartners(
         TagTeam $tagTeam,

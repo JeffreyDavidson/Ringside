@@ -7,7 +7,7 @@ namespace App\Actions\Titles;
 use App\Models\Title;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseTitleAction
+final class RestoreAction extends BaseTitleAction
 {
     use AsAction;
 

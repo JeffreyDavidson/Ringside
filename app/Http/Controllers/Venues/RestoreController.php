@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Venues;
 
 use App\Actions\Venues\RestoreAction;
-use App\Http\Controllers\Controller;
 use App\Models\Venue;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RestoreController extends Controller
+final class RestoreController
 {
     /**
      * Restore a deleted venue.
@@ -21,7 +20,7 @@ class RestoreController extends Controller
 
         Gate::authorize('restore', $venue);
 
-        RestoreAction::run($venue);
+        resolve(RestoreAction::class)->handle($venue);
 
         return to_route('venues.index');
     }

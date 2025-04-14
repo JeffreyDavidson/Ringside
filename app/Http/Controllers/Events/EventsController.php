@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Events;
 
-use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class EventsController extends Controller
+final class EventsController
 {
     /**
      * View a list of events.

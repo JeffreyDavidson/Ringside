@@ -20,7 +20,7 @@ test('it adds tag teams to a match', function () {
 
     $this->eventMatchRepository
         ->shouldReceive('addTagTeamToMatch')
-        ->with($eventMatch, \Mockery::type(TagTeam::class), $sideNumber)
+        ->with($eventMatch, Mockery::type(TagTeam::class), $sideNumber)
         ->times($tagTeams->count());
 
     AddTagTeamsToMatchAction::run($eventMatch, $tagTeams, $sideNumber);

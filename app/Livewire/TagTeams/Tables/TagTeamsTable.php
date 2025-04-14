@@ -15,7 +15,7 @@ use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-class TagTeamsTable extends BaseTableWithActions
+final class TagTeamsTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

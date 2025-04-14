@@ -18,13 +18,13 @@ use Illuminate\Support\Carbon;
  * @property string $new_champion_type
  * @property int $former_champion_id
  * @property string $former_champion_type
- * @property \Illuminate\Support\Carbon $won_at
- * @property \Illuminate\Support\Carbon|null $lost_at
- * @property-read \App\Models\Wrestler|\App\Models\TagTeam $currentChampion
- * @property-read \App\Models\Wrestler|\App\Models\TagTeam|null $previousChampion
- * @property-read \App\Models\EventMatch|null $eventMatch
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\Title|null $title
+ * @property Carbon $won_at
+ * @property Carbon|null $lost_at
+ * @property-read Wrestler|TagTeam $currentChampion
+ * @property-read Wrestler|TagTeam|null $previousChampion
+ * @property-read EventMatch|null $eventMatch
+ * @property-read TFactory|null $use_factory
+ * @property-read Title|null $title
  *
  * @method static \Database\Factories\TitleChampionshipFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newModelQuery()
@@ -33,7 +33,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-class TitleChampionship extends Model
+final class TitleChampionship extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
     use HasFactory;
@@ -121,6 +121,6 @@ class TitleChampionship extends Model
         /** @var Carbon $datetime */
         $datetime = $this->lost_at ?? now();
 
-        return intval($this->won_at->diffInDays($datetime));
+        return (int) ($this->won_at->diffInDays($datetime));
     }
 }

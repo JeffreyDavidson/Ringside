@@ -6,6 +6,7 @@ namespace App\Livewire\Stables\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousWrestlersTable;
 use App\Models\StableWrestler;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousWrestlersTable extends BasePreviousWrestlersTable
@@ -20,7 +21,7 @@ class PreviousWrestlersTable extends BasePreviousWrestlersTable
     public function builder(): Builder
     {
         if (! isset($this->stableId)) {
-            throw new \Exception("You didn't specify a stable");
+            throw new Exception("You didn't specify a stable");
         }
 
         return StableWrestler::query()

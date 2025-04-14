@@ -11,9 +11,9 @@ use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class ActivationStartDateCanBeChanged implements ValidationRule
+final class ActivationStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Title|Stable|null $model) {}
+    public function __construct(private Title|Stable|null $model) {}
 
     /**
      * Determine if the validation rule passes.
@@ -22,10 +22,8 @@ class ActivationStartDateCanBeChanged implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->model) {
-            if ($this->model->isCurrentlyActivated() && ! $this->model->activatedOn(Carbon::parse($value))) {
-                $fail('activations.validation.activation_active')->translate(['name' => $this->model->getNameLabel()]);
-            }
+        if ($this->model && ($this->model->isCurrentlyActivated() && ! $this->model->activatedOn(Carbon::parse($value)))) {
+            $fail('activations.validation.activation_active')->translate(['name' => $this->model->getNameLabel()]);
         }
     }
 }

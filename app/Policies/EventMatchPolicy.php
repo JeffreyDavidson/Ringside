@@ -7,7 +7,7 @@ namespace App\Policies;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class EventMatchPolicy
+final class EventMatchPolicy
 {
     use HandlesAuthorization;
 

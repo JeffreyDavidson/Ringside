@@ -10,14 +10,14 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateTagTeamPartnersAction extends BaseTagTeamAction
+final class UpdateTagTeamPartnersAction extends BaseTagTeamAction
 {
     use AsAction;
 
     /**
      * Update a given tag team with given wrestlers.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function handle(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null): void
     {
@@ -28,7 +28,7 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
                 $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlers, $joinDate);
             }
         } else {
-            /** @var Collection<int, \App\Models\Wrestler> $formerTagTeamPartners */
+            /** @var Collection<int, Wrestler> $formerTagTeamPartners */
             $formerTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotNotIn(
                 'wrestler_id',
                 $wrestlers->modelKeys()

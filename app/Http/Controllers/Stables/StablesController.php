@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Stables;
 
-use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class StablesController extends Controller
+final class StablesController
 {
     /**
      * View a list of stables.

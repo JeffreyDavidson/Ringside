@@ -10,7 +10,7 @@ use App\Models\User;
 /**
  * @extends LivewireBaseForm<UserForm, ?User>
  */
-class UserForm extends LivewireBaseForm
+final class UserForm extends LivewireBaseForm
 {
     public $formModel;
 

@@ -15,7 +15,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<TitleForm, ?Title>
  */
-class TitleForm extends LivewireBaseForm
+final class TitleForm extends LivewireBaseForm
 {
     public $formModel;
 
@@ -24,6 +24,29 @@ class TitleForm extends LivewireBaseForm
 
     #[Validate]
     public Carbon|string|null $start_date = '';
+
+    public function loadExtraData(): void
+    {
+        $this->start_date = $this->formModel?->firstActivation?->started_at->toDateString();
+    }
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        if ($this->formModel === null) {
+            $this->formModel = new Title([
+                'name' => $this->name,
+            ]);
+            $this->formModel->save();
+        } else {
+            $this->formModel->update([
+                'name' => $this->name,
+            ]);
+        }
+
+        return true;
+    }
 
     /**
      * @return array<string, list<Unique|ActivationStartDateCanBeChanged|string>>
@@ -44,28 +67,5 @@ class TitleForm extends LivewireBaseForm
         return [
             'start_date' => 'start date',
         ];
-    }
-
-    public function loadExtraData(): void
-    {
-        $this->start_date = $this->formModel?->firstActivation?->started_at->toDateString();
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new Title([
-                'name' => $this->name,
-            ]);
-            $this->formModel->save();
-        } else {
-            $this->formModel->update([
-                'name' => $this->name,
-            ]);
-        }
-
-        return true;
     }
 }

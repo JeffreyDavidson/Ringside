@@ -7,22 +7,21 @@ namespace App\Livewire\Venues\Tables;
 use App\Builders\EventBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\Event;
+use Exception;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousEventsTable extends DataTableComponent
+final class PreviousEventsTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    public ?int $venueId;
+
     protected string $databaseTableName = 'events';
 
-    protected string $routeBasePath = 'events';
-
     protected string $resourceName = 'events';
-
-    public ?int $venueId;
 
     /**
      * @return EventBuilder<Event>
@@ -30,7 +29,7 @@ class PreviousEventsTable extends DataTableComponent
     public function builder(): EventBuilder
     {
         if (! isset($this->venueId)) {
-            throw new \Exception("You didn't specify a venue");
+            throw new Exception("You didn't specify a venue");
         }
 
         return Event::query()

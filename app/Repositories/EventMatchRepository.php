@@ -12,7 +12,7 @@ use App\Models\TagTeam;
 use App\Models\Title;
 use App\Models\Wrestler;
 
-class EventMatchRepository
+final class EventMatchRepository
 {
     /**
      * Create a new event match for a given event with the given data.

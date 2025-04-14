@@ -8,6 +8,7 @@ use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\EventMatch;
 use App\Models\Wrestler;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousMatchesTable extends BasePreviousMatchesTable

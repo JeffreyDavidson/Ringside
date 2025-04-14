@@ -6,6 +6,7 @@ namespace App\Livewire\Stables\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\StableTagTeam;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
@@ -20,7 +21,7 @@ class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
     public function builder(): Builder
     {
         if (! isset($this->stableId)) {
-            throw new \Exception("You didn't specify a stable");
+            throw new Exception("You didn't specify a stable");
         }
 
         return StableTagTeam::query()

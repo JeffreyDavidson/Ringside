@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeSuspendedException extends Exception
+final class CannotBeSuspendedException extends Exception
 {
     public static function unemployed(): self
     {

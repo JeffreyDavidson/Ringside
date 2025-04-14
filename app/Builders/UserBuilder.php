@@ -9,4 +9,4 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @extends Builder<\App\Models\User>
  */
-class UserBuilder extends Builder {}
+final class UserBuilder extends Builder {}

@@ -15,7 +15,7 @@ use App\View\Filters\FirstEmploymentFilter;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-class RefereesTable extends BaseTableWithActions
+final class RefereesTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
-class Height
+final class Height
 {
     public function __construct(public int $feet, public int $inches) {}
 

@@ -10,14 +10,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseWrestlerAction
+final class SuspendAction extends BaseWrestlerAction
 {
     use AsAction;
 
     /**
      * Suspend a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeSuspendedException
+     * @throws CannotBeSuspendedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
     {
@@ -33,7 +33,7 @@ class SuspendAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be suspended.
      *
-     * @throws \App\Exceptions\CannotBeSuspendedException
+     * @throws CannotBeSuspendedException
      */
     private function ensureCanBeSuspended(Wrestler $wrestler): void
     {

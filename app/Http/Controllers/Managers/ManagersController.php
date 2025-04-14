@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Managers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-class ManagersController extends Controller
+final class ManagersController
 {
     /**
      * View a list of managers.

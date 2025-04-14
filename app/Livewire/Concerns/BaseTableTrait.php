@@ -76,8 +76,8 @@ trait BaseTableTrait
                 'default-colors' => false,
                 'class' => '',
             ])
-            ->setThAttributes(function (Column $column) {
-                if ($column->getTitle() == __('core.actions')) {
+            ->setThAttributes(function (Column $column): array {
+                if ($column->getTitle() === __('core.actions')) {
                     return [
                         'default' => false,
                         'default-styling' => false,
@@ -93,7 +93,7 @@ trait BaseTableTrait
                     'class' => 'bg-[#fcfcfc] text-gray-600 font-medium text-[.8125rem] leading-[1.125rem] align-middle py-2.5 ps-4 pe-4 border-b border-gray-200 border-e border-e-solid border-e-gray-200',
                 ];
             })
-            ->setThSortButtonAttributes(function () {
+            ->setThSortButtonAttributes(function (): array {
                 return [
                     'default' => false,
                     'default-styling' => false,
@@ -107,7 +107,7 @@ trait BaseTableTrait
                 'default-colors' => false,
                 'class' => '',
             ])
-            ->setTrAttributes(function () {
+            ->setTrAttributes(function (): array {
                 return [
                     'default' => false,
                     'default-styling' => false,
@@ -115,7 +115,7 @@ trait BaseTableTrait
                     'class' => 'border-b border-solid border-gray-200',
                 ];
             })
-            ->setTdAttributes(function (Column $column, $row, $columnIndex, $rowIndex) {
+            ->setTdAttributes(function (Column $column, $row, $columnIndex, $rowIndex): array {
                 if ($this->columns->count() - 1 === $columnIndex) {
                     return [
                         'default' => false,
@@ -124,7 +124,7 @@ trait BaseTableTrait
                         'class' => 'border-x border-solid border-gray-200 py-3 ps-4 pe-5 border-e-0',
                     ];
                 }
-                if ($columnIndex == 0) {
+                if ($columnIndex === 0) {
                     return [
                         'default' => false,
                         'default-styling' => false,

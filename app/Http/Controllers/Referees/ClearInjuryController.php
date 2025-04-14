@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ClearInjuryController extends Controller
+final class ClearInjuryController
 {
     /**
      * Clear a referee.
@@ -21,7 +20,7 @@ class ClearInjuryController extends Controller
         Gate::authorize('clearFromInjury', $referee);
 
         try {
-            ClearInjuryAction::run($referee);
+            resolve(ClearInjuryAction::class)->handle($referee);
         } catch (CannotBeClearedFromInjuryException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

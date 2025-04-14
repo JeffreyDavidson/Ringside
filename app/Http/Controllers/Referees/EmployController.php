@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class EmployController extends Controller
+final class EmployController
 {
     /**
      * Employ a referee.
@@ -21,7 +20,7 @@ class EmployController extends Controller
         Gate::authorize('employ', $referee);
 
         try {
-            EmployAction::run($referee);
+            resolve(EmployAction::class)->handle($referee);
         } catch (CannotBeEmployedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

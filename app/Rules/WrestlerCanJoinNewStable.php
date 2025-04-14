@@ -9,12 +9,12 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
-class WrestlerCanJoinNewStable implements ValidationRule
+final class WrestlerCanJoinNewStable implements ValidationRule
 {
     /**
      * @param  Collection<int, int>  $tagTeamIds
      */
-    public function __construct(protected Collection $tagTeamIds) {}
+    public function __construct(private Collection $tagTeamIds) {}
 
     /**
      * Determine if the validation rule passes.
@@ -28,12 +28,8 @@ class WrestlerCanJoinNewStable implements ValidationRule
             $fail('This wrestler is already a member of a stable.');
         }
 
-        if ($this->tagTeamIds->isNotEmpty()) {
-            if (! is_null($wrestler->currentTagTeam)
-                && $this->tagTeamIds->contains($wrestler->currentTagTeam->id)
-            ) {
-                $fail('This wrestler is already a member of a stable.');
-            }
+        if ($this->tagTeamIds->isNotEmpty() && (! is_null($wrestler->currentTagTeam) && $this->tagTeamIds->contains($wrestler->currentTagTeam->id))) {
+            $fail('This wrestler is already a member of a stable.');
         }
     }
 }

@@ -7,7 +7,7 @@ namespace App\Actions\Events;
 use App\Models\Event;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseEventAction
+final class RestoreAction extends BaseEventAction
 {
     use AsAction;
 

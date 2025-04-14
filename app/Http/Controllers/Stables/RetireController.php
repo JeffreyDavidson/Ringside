@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Stables;
 
 use App\Actions\Stables\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Stable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retire a stable.
@@ -21,7 +20,7 @@ class RetireController extends Controller
         Gate::authorize('retire', $stable);
 
         try {
-            RetireAction::run($stable);
+            resolve(RetireAction::class)->handle($stable);
         } catch (CannotBeRetiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

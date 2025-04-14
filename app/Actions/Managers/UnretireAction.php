@@ -9,14 +9,14 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseManagerAction
+final class UnretireAction extends BaseManagerAction
 {
     use AsAction;
 
     /**
      * Unretire a manager.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseManagerAction
     /**
      * Ensure a manager can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Manager $manager): void
     {

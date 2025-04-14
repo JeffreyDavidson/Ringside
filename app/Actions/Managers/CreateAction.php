@@ -8,7 +8,7 @@ use App\Data\ManagerData;
 use App\Models\Manager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseManagerAction
+final class CreateAction extends BaseManagerAction
 {
     use AsAction;
 

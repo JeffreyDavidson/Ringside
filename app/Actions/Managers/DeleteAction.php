@@ -7,7 +7,7 @@ namespace App\Actions\Managers;
 use App\Models\Manager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseManagerAction
+final class DeleteAction extends BaseManagerAction
 {
     use AsAction;
 

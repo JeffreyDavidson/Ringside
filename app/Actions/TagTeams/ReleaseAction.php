@@ -11,14 +11,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseTagTeamAction
+final class ReleaseAction extends BaseTagTeamAction
 {
     use AsAction;
 
     /**
      * Release a tag team.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
@@ -33,13 +33,13 @@ class ReleaseAction extends BaseTagTeamAction
         $this->tagTeamRepository->release($tagTeam, $releaseDate);
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlersReleaseAction::run($wrestler, $releaseDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlersReleaseAction::class)->handle($wrestler, $releaseDate));
     }
 
     /**
      * Ensure a tag team can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(TagTeam $tagTeam): void
     {

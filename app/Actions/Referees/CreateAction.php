@@ -8,7 +8,7 @@ use App\Data\RefereeData;
 use App\Models\Referee;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseRefereeAction
+final class CreateAction extends BaseRefereeAction
 {
     use AsAction;
 
@@ -17,7 +17,7 @@ class CreateAction extends BaseRefereeAction
      */
     public function handle(RefereeData $refereeData): Referee
     {
-        /** @var \App\Models\Referee $referee */
+        /** @var Referee $referee */
         $referee = $this->refereeRepository->create($refereeData);
 
         if (isset($refereeData->start_date)) {

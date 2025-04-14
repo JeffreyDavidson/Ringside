@@ -9,14 +9,14 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseManagerAction
+final class ReinstateAction extends BaseManagerAction
 {
     use AsAction;
 
     /**
      * Reinstate a manager.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
@@ -30,7 +30,7 @@ class ReinstateAction extends BaseManagerAction
     /**
      * Ensure a manager can be reinstated.
      *
-     * @throws \App\Exceptions\CannotBeReinstatedException
+     * @throws CannotBeReinstatedException
      */
     private function ensureCanBeReinstated(Manager $manager): void
     {

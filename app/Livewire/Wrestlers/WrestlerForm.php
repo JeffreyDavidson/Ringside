@@ -15,7 +15,7 @@ use Illuminate\Validation\Rules\Unique;
 /**
  * @extends LivewireBaseForm<WrestlerForm, ?Wrestler>
  */
-class WrestlerForm extends LivewireBaseForm
+final class WrestlerForm extends LivewireBaseForm
 {
     public $formModel;
 
@@ -32,6 +32,52 @@ class WrestlerForm extends LivewireBaseForm
     public ?string $signature_move = '';
 
     public Carbon|string|null $start_date = '';
+
+    public function loadExtraData(): void
+    {
+        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
+
+        /** @var Height $height */
+        $height = $this->formModel?->height;
+
+        $feet = (int) floor($height->toInches() / 12);
+        $inches = $height->toInches() % 12;
+
+        $this->height_feet = $feet;
+        $this->height_inches = $inches;
+    }
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        $height = new Height($this->height_feet, $this->height_inches);
+
+        if ($this->formModel === null) {
+            $this->formModel = new Wrestler([
+                'name' => $this->name,
+                'hometown' => $this->hometown,
+                'height' => $height->toInches(),
+                'weight' => $this->weight,
+                'signature_move' => $this->signature_move,
+            ]);
+            $this->formModel->save();
+
+            if ($this->start_date) {
+                $this->formModel->employments()->create(['started_at' => $this->start_date]);
+            }
+        } else {
+            $this->formModel->update([
+                'name' => $this->name,
+                'hometown' => $this->hometown,
+                'height' => $height->toInches(),
+                'weight' => $this->weight,
+                'signature_move' => $this->signature_move,
+            ]);
+        }
+
+        return true;
+    }
 
     /**
      * @return array<string, list<EmploymentStartDateCanBeChanged|Unique|string>>
@@ -60,51 +106,5 @@ class WrestlerForm extends LivewireBaseForm
             'signature_move' => 'signature move',
             'start_date' => 'start date',
         ];
-    }
-
-    public function loadExtraData(): void
-    {
-        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
-
-        /** @var Height $height */
-        $height = $this->formModel?->height;
-
-        $feet = (int) floor($height->toInches() / 12);
-        $inches = $height->toInches() % 12;
-
-        $this->height_feet = $feet;
-        $this->height_inches = $inches;
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        $height = new Height($this->height_feet, $this->height_inches);
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new Wrestler([
-                'name' => $this->name,
-                'hometown' => $this->hometown,
-                'height' => $height->toInches(),
-                'weight' => $this->weight,
-                'signature_move' => $this->signature_move,
-            ]);
-            $this->formModel->save();
-
-            if ($this->start_date) {
-                $this->formModel->employments()->create(['started_at' => $this->start_date]);
-            }
-        } else {
-            $this->formModel->update([
-                'name' => $this->name,
-                'hometown' => $this->hometown,
-                'height' => $height->toInches(),
-                'weight' => $this->weight,
-                'signature_move' => $this->signature_move,
-            ]);
-        }
-
-        return true;
     }
 }

@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\ReleaseAction;
 use App\Exceptions\CannotBeReleasedException;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReleaseController extends Controller
+final class ReleaseController
 {
     /**
      * Release a manager.
@@ -21,7 +20,7 @@ class ReleaseController extends Controller
         Gate::authorize('release', $manager);
 
         try {
-            ReleaseAction::run($manager);
+            resolve(ReleaseAction::class)->handle($manager);
         } catch (CannotBeReleasedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

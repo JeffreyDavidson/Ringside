@@ -12,7 +12,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<StableForm, ?Stable>
  */
-class StableForm extends LivewireBaseForm
+final class StableForm extends LivewireBaseForm
 {
     public $formModel;
 
@@ -31,7 +31,7 @@ class StableForm extends LivewireBaseForm
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Stable([
                 'name' => $this->name,
             ]);

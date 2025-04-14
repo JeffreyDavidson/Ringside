@@ -8,7 +8,7 @@ use App\Models\Wrestler;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Support\Carbon;
 
-class WrestlerRetired
+final class WrestlerRetired
 {
     use Dispatchable;
 

@@ -6,6 +6,7 @@ namespace App\Livewire\Managers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\StableManager;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousStablesTable extends BasePreviousStablesTable
@@ -17,13 +18,17 @@ class PreviousStablesTable extends BasePreviousStablesTable
      */
     public ?int $managerId;
 
+    protected string $databaseTableName = 'stables_managers';
+
+    protected string $resourceName = 'stables';
+
     /**
      * @return Builder<StableManager>
      */
     public function builder(): Builder
     {
         if (! isset($this->managerId)) {
-            throw new \Exception("You didn't specify a manager");
+            throw new Exception("You didn't specify a manager");
         }
 
         return StableManager::query()

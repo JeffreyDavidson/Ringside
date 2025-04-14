@@ -10,14 +10,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ClearInjuryAction extends BaseWrestlerAction
+final class ClearInjuryAction extends BaseWrestlerAction
 {
     use AsAction;
 
     /**
      * Clear an injury of a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
@@ -33,7 +33,7 @@ class ClearInjuryAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be cleared from an injury.
      *
-     * @throws \App\Exceptions\CannotBeClearedFromInjuryException
+     * @throws CannotBeClearedFromInjuryException
      */
     private function ensureCanBeClearedFromInjury(Wrestler $wrestler): void
     {

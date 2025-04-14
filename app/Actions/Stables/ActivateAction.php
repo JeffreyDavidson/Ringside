@@ -13,14 +13,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ActivateAction extends BaseStableAction
+final class ActivateAction extends BaseStableAction
 {
     use AsAction;
 
     /**
      * Activate a stable.
      *
-     * @throws \App\Exceptions\CannotBeActivatedException
+     * @throws CannotBeActivatedException
      */
     public function handle(Stable $stable, ?Carbon $startDate = null): void
     {
@@ -30,13 +30,13 @@ class ActivateAction extends BaseStableAction
 
         if ($stable->currentWrestlers->isNotEmpty()) {
             $stable->currentWrestlers->each(
-                fn (Wrestler $wrestler) => WrestlerEmployAction::run($wrestler, $startDate)
+                fn (Wrestler $wrestler) => resolve(WrestlerEmployAction::class)->handle($wrestler, $startDate)
             );
         }
 
         if ($stable->currentTagTeams->isNotEmpty()) {
             $stable->currentTagTeams->each(
-                fn (TagTeam $tagTeam) => TagTeamEmployAction::run($tagTeam, $startDate)
+                fn (TagTeam $tagTeam) => resolve(TagTeamEmployAction::class)->handle($tagTeam, $startDate)
             );
         }
 
@@ -46,7 +46,7 @@ class ActivateAction extends BaseStableAction
     /**
      * Ensure a stable can be activated.
      *
-     * @throws \App\Exceptions\CannotBeActivatedException
+     * @throws CannotBeActivatedException
      */
     private function ensureCanBeActivated(Stable $stable): void
     {

@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\Wrestler;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class WrestlerPolicy
+final class WrestlerPolicy
 {
     use HandlesAuthorization;
 

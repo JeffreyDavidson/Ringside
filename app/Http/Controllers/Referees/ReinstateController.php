@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ReinstateController extends Controller
+final class ReinstateController
 {
     /**
      * Reinstate a referee.
@@ -21,7 +20,7 @@ class ReinstateController extends Controller
         Gate::authorize('reinstate', $referee);
 
         try {
-            ReinstateAction::run($referee);
+            resolve(ReinstateAction::class)->handle($referee);
         } catch (CannotBeReinstatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

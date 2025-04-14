@@ -11,14 +11,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseTagTeamAction
+final class SuspendAction extends BaseTagTeamAction
 {
     use AsAction;
 
     /**
      * Suspend a tag team.
      *
-     * @throws \App\Exceptions\CannotBeSuspendedException
+     * @throws CannotBeSuspendedException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void
     {
@@ -27,7 +27,7 @@ class SuspendAction extends BaseTagTeamAction
         $suspensionDate ??= now();
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlerSuspendAction::run($wrestler, $suspensionDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlerSuspendAction::class)->handle($wrestler, $suspensionDate));
 
         $this->tagTeamRepository->suspend($tagTeam, $suspensionDate);
     }
@@ -35,7 +35,7 @@ class SuspendAction extends BaseTagTeamAction
     /**
      * Ensure tag team can be suspended.
      *
-     * @throws \App\Exceptions\CannotBeSuspendedException
+     * @throws CannotBeSuspendedException
      */
     private function ensureCanBeSuspended(TagTeam $tagTeam): void
     {

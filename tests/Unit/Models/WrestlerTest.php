@@ -95,5 +95,5 @@ test('a wrestler uses soft deleted trait', function () {
 });
 
 test('a wrestler has its own eloquent builder', function () {
-    expect(new Wrestler)->query()->toBeInstanceOf(WrestlerBuilder::class);
+    expect(new Wrestler())->query()->toBeInstanceOf(WrestlerBuilder::class);
 });

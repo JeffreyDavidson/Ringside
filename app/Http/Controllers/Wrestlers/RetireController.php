@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retire a wrestler.
@@ -21,7 +20,7 @@ class RetireController extends Controller
         Gate::authorize('retire', $wrestler);
 
         try {
-            RetireAction::run($wrestler);
+            resolve(RetireAction::class)->handle($wrestler);
         } catch (CannotBeRetiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

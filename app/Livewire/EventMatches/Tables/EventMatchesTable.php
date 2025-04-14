@@ -9,6 +9,7 @@ use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\Referee;
 use App\Models\Title;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -24,15 +25,13 @@ class EventMatchesTable extends DataTableComponent
 
     protected string $resourceName = 'matches';
 
-    public ?int $eventId;
-
     /**
      * @return Builder<EventMatch>
      */
     public function builder(): Builder
     {
         if (! isset($this->eventId)) {
-            throw new \Exception("You didn't specify a event");
+            throw new Exception("You didn't specify a event");
         }
 
         return EventMatch::query()

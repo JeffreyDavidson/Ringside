@@ -9,14 +9,14 @@ use App\Models\Title;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeactivateAction extends BaseTitleAction
+final class DeactivateAction extends BaseTitleAction
 {
     use AsAction;
 
     /**
      * Deactivate a title.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     public function handle(Title $title, ?Carbon $deactivationDate = null): void
     {
@@ -30,7 +30,7 @@ class DeactivateAction extends BaseTitleAction
     /**
      * Ensure a title can be deactivated.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     private function ensureCanBeDeactivated(Title $title): void
     {

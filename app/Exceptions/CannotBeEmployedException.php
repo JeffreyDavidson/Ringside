@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeEmployedException extends Exception
+final class CannotBeEmployedException extends Exception
 {
     public static function employed(): self
     {

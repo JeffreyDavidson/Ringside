@@ -7,7 +7,7 @@ namespace App\Actions\Managers;
 use App\Models\Manager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RemoveFromCurrentTagTeamsAction extends BaseManagerAction
+final class RemoveFromCurrentTagTeamsAction extends BaseManagerAction
 {
     use AsAction;
 

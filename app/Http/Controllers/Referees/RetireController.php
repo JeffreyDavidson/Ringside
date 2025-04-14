@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Referees;
 
 use App\Actions\Referees\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Http\Controllers\Controller;
 use App\Models\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RetireController extends Controller
+final class RetireController
 {
     /**
      * Retire a referee.
@@ -21,7 +20,7 @@ class RetireController extends Controller
         Gate::authorize('retire', $referee);
 
         try {
-            RetireAction::run($referee);
+            resolve(RetireAction::class)->handle($referee);
         } catch (CannotBeRetiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
