@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\StablesController;
+use App\Livewire\Stables\Tables\PreviousManagersTable;
+use App\Livewire\Stables\Tables\PreviousTagTeamsTable;
+use App\Livewire\Stables\Tables\PreviousWrestlersTable;
 use App\Livewire\Stables\Tables\StablesTable;
 use App\Models\Stable;
 
@@ -39,7 +42,10 @@ describe('show', function () {
         actingAs(administrator())
             ->get(action([StablesController::class, 'show'], $this->stable))
             ->assertViewIs('stables.show')
-            ->assertViewHas('stable', $this->stable);
+            ->assertViewHas('stable', $this->stable)
+            ->assertSeeLivewire(PreviousWrestlersTable::class)
+            ->assertSeeLivewire(PreviousTagTeamsTable::class)
+            ->assertSeeLivewire(PreviousManagersTable::class);
     });
 
     test('a basic user can view their stable profile', function () {

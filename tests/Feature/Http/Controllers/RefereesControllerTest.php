@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\RefereesController;
+use App\Livewire\Referees\Tables\PreviousMatchesTable;
 use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Referee;
 
@@ -39,7 +40,8 @@ describe('show', function () {
         actingAs(administrator())
             ->get(action([RefereesController::class, 'show'], $this->referee))
             ->assertViewIs('referees.show')
-            ->assertViewHas('referee', $this->referee);
+            ->assertViewHas('referee', $this->referee)
+            ->assertSeeLivewire(PreviousMatchesTable::class);
     });
 
     test('a basic user cannot view a referee profile', function () {

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\TitlesController;
+use App\Livewire\Titles\Tables\PreviousTitleChampionshipsTable;
 use App\Livewire\Titles\Tables\TitlesTable;
 use App\Models\Title;
 
@@ -40,7 +41,8 @@ describe('show', function () {
             ->get(action([TitlesController::class, 'show'], $this->title))
             ->assertOk()
             ->assertViewIs('titles.show')
-            ->assertViewHas('title', $this->title);
+            ->assertViewHas('title', $this->title)
+            ->assertSeeLivewire(PreviousTitleChampionshipsTable::class);
     });
 
     test('a basic user cannot view a title', function () {

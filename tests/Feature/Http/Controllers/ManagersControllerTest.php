@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ManagersController;
 use App\Livewire\Managers\Tables\ManagersTable;
+use App\Livewire\Managers\Tables\PreviousStablesTable;
+use App\Livewire\Managers\Tables\PreviousTagTeamsTable;
+use App\Livewire\Managers\Tables\PreviousWrestlersTable;
 use App\Models\Manager;
 use App\Models\User;
 
@@ -40,7 +43,10 @@ describe('show', function () {
         actingAs(administrator())
             ->get(action([ManagersController::class, 'show'], $this->manager))
             ->assertViewIs('managers.show')
-            ->assertViewHas('manager', $this->manager);
+            ->assertViewHas('manager', $this->manager)
+            ->assertSeeLivewire(PreviousWrestlersTable::class)
+            ->assertSeeLivewire(PreviousTagTeamsTable::class)
+            ->assertSeeLivewire(PreviousStablesTable::class);
     });
 
     test('a basic user can view their manager profile', function () {

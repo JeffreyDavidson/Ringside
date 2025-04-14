@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\WrestlersController;
+use App\Livewire\Wrestlers\Tables\PreviousManagersTable;
+use App\Livewire\Wrestlers\Tables\PreviousMatchesTable;
+use App\Livewire\Wrestlers\Tables\PreviousStablesTable;
+use App\Livewire\Wrestlers\Tables\PreviousTagTeamsTable;
+use App\Livewire\Wrestlers\Tables\PreviousTitleChampionshipsTable;
 use App\Livewire\Wrestlers\Tables\WrestlersTable;
 use App\Models\User;
 use App\Models\Wrestler;
@@ -42,7 +47,12 @@ describe('show', function () {
             ->get(action([WrestlersController::class, 'show'], $this->wrestler))
             ->assertOk()
             ->assertViewIs('wrestlers.show')
-            ->assertViewHas('wrestler', $this->wrestler);
+            ->assertViewHas('wrestler', $this->wrestler)
+            ->assertSeeLivewire(PreviousTitleChampionshipsTable::class)
+            ->assertSeeLivewire(PreviousMatchesTable::class)
+            ->assertSeeLivewire(PreviousTagTeamsTable::class)
+            ->assertSeeLivewire(PreviousManagersTable::class)
+            ->assertSeeLivewire(PreviousStablesTable::class);
     });
 
     test('a basic user can view their wrestler profile', function () {

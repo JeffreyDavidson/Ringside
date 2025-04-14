@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\EventsController;
+use App\Livewire\EventMatches\Tables\EventMatchesTable;
 use App\Livewire\Events\Tables\EventsTable;
 use App\Models\Event;
 
@@ -39,7 +40,8 @@ describe('show', function () {
         actingAs(administrator())
             ->get(action([EventsController::class, 'show'], $this->event))
             ->assertViewIs('events.show')
-            ->assertViewHas('event', $this->event);
+            ->assertViewHas('event', $this->event)
+            ->assertSeeLivewire(EventMatchesTable::class);
     });
 
     test('a basic user cannot view an event profile', function () {

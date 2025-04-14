@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\TagTeamsController;
+use App\Livewire\TagTeams\Tables\PreviousManagersTable;
+use App\Livewire\TagTeams\Tables\PreviousMatchesTable;
+use App\Livewire\TagTeams\Tables\PreviousStablesTable;
+use App\Livewire\TagTeams\Tables\PreviousTitleChampionshipsTable;
+use App\Livewire\TagTeams\Tables\PreviousWrestlersTable;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\TagTeam;
 
@@ -39,7 +44,12 @@ describe('show', function () {
         actingAs(administrator())
             ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
             ->assertViewIs('tag-teams.show')
-            ->assertViewHas('tagTeam', $this->tagTeam);
+            ->assertViewHas('tagTeam', $this->tagTeam)
+            ->assertSeeLivewire(PreviousTitleChampionshipsTable::class)
+            ->assertSeeLivewire(PreviousMatchesTable::class)
+            ->assertSeeLivewire(PreviousWrestlersTable::class)
+            ->assertSeeLivewire(PreviousManagersTable::class)
+            ->assertSeeLivewire(PreviousStablesTable::class);
     });
 
     test('a basic user can view their tag team profile', function () {

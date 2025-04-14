@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\VenuesController;
+use App\Livewire\Venues\Tables\PreviousEventsTable;
 use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Venue;
 
@@ -41,7 +42,8 @@ describe('show', function () {
             ->get(action([VenuesController::class, 'show'], $this->venue))
             ->assertOk()
             ->assertViewIs('venues.show')
-            ->assertViewHas('venue', $this->venue);
+            ->assertViewHas('venue', $this->venue)
+            ->assertSeeLivewire(PreviousEventsTable::class);
     });
 
     test('a basic user cannot view a venue', function () {
