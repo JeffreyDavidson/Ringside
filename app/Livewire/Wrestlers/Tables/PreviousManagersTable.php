@@ -9,10 +9,8 @@ use App\Models\WrestlerManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousManagersTable extends BasePreviousManagersTable
+final class PreviousManagersTable extends BasePreviousManagersTable
 {
-    protected string $databaseTableName = 'wrestlers_managers';
-
     /**
      * Wrestler to use for component.
      */
