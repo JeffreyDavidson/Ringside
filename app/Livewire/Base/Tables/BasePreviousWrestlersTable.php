@@ -9,11 +9,13 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-final class BasePreviousWrestlersTable extends DataTableComponent
+abstract class BasePreviousWrestlersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
     protected string $resourceName = 'wrestlers';
+
+    protected string $databaseTableName;
 
     public function configure(): void {}
 

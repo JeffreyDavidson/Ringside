@@ -43,7 +43,7 @@ final class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshi
             ->whereHasMorph(
                 'previousChampion',
                 [Wrestler::class],
-                function (Builder $query) {
+                function (Builder $query): void {
                     $query->whereIn('id', [$this->wrestlerId]);
                 }
             );
