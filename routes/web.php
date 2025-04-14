@@ -9,6 +9,7 @@ use App\Http\Controllers\Managers\ManagersController;
 use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
+use App\Http\Controllers\Titles\TitlesController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use Illuminate\Support\Facades\Route;
@@ -32,7 +33,7 @@ Route::middleware(['auth'])->prefix('roster')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::group([], __DIR__.'/web/titles.php');
+    Route::resource('titles', TitlesController::class)->only(['index', 'show']);
 });
 
 Route::middleware(['auth'])->group(function () {
