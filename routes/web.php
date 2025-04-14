@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +19,7 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('roster')->group(function () {
-    Route::group([], __DIR__.'/web/stables.php');
+    Route::resource('stables', StablesController::class)->only(['index', 'show']);
     Route::resource('wrestlers', WrestlersController::class)->only(['index', 'show']);
     Route::group([], __DIR__.'/web/managers.php');
     Route::group([], __DIR__.'/web/referees.php');
