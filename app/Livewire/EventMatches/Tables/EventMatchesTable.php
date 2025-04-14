@@ -30,7 +30,7 @@ final class EventMatchesTable extends DataTableComponent
      */
     public function builder(): Builder
     {
-        if (! isset($this->eventId)) {
+        if (! property_exists($this, 'eventId') || $this->eventId === null) {
             throw new Exception("You didn't specify a event");
         }
 
