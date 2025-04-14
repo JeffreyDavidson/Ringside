@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Wrestlers\WrestlersController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
@@ -17,7 +18,7 @@ Route::middleware(['middleware' => 'auth'])->group(function () {
 
 Route::middleware(['auth'])->prefix('roster')->group(function () {
     Route::group([], __DIR__.'/web/stables.php');
-    Route::group([], __DIR__.'/web/wrestlers.php');
+    Route::resource('wrestlers', WrestlersController::class)->only(['index', 'show']);
     Route::group([], __DIR__.'/web/managers.php');
     Route::group([], __DIR__.'/web/referees.php');
     Route::group([], __DIR__.'/web/tagteams.php');
