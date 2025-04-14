@@ -6,6 +6,7 @@ namespace App\Livewire\Titles\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\TitleChampionship;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -31,7 +32,7 @@ final class PreviousTitleChampionshipsTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->titleId)) {
-            throw new \Exception("You didn't specify a title");
+            throw new Exception("You didn't specify a title");
         }
 
         return TitleChampionship::query()
