@@ -10,6 +10,7 @@ use App\Http\Controllers\Referees\RefereesController;
 use App\Http\Controllers\Stables\StablesController;
 use App\Http\Controllers\TagTeams\TagTeamsController;
 use App\Http\Controllers\Titles\TitlesController;
+use App\Http\Controllers\Users\UsersController;
 use App\Http\Controllers\Venues\VenuesController;
 use App\Http\Controllers\Wrestlers\WrestlersController;
 use Illuminate\Support\Facades\Route;
@@ -46,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('user-management')->group(function () {
-    Route::group([], __DIR__.'/web/users.php');
+    Route::resource('users', UsersController::class)->only(['index', 'show']);
 });
 
 Route::prefix('docs')->group(function () {
