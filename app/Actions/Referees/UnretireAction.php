@@ -9,14 +9,14 @@ use App\Models\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseRefereeAction
+final class UnretireAction extends BaseRefereeAction
 {
     use AsAction;
 
     /**
      * Unretire a referee.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseRefereeAction
     /**
      * Ensure a referee can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Referee $referee): void
     {

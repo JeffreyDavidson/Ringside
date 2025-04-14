@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Managers;
 
 use App\Actions\Managers\RestoreAction;
-use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class RestoreController extends Controller
+final class RestoreController
 {
     /**
      * Restore a deleted manager.
@@ -23,7 +22,7 @@ class RestoreController extends Controller
         Gate::authorize('restore', $manager);
 
         try {
-            RestoreAction::run($manager);
+            resolve(RestoreAction::class)->handle($manager);
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

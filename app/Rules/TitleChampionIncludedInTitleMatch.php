@@ -12,14 +12,14 @@ use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
-class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
+final class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
 {
     /**
      * All the data under validation.
      *
      * @var array<string, array<string>|string>
      */
-    protected array $data = [];
+    private array $data = [];
 
     /**
      * Set the data under validation.
@@ -56,7 +56,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
 
         $champions = Title::with('currentChampionship.currentChampion')
             ->findMany($titles)
-            ->reject(fn (Title $title) => $title->isVacant())
+            ->reject(fn (Title $title): bool => $title->isVacant())
             ->every(fn (Title $title) => $competitors->contains($title->currentChampionship?->currentChampion));
 
         if (! $champions) {

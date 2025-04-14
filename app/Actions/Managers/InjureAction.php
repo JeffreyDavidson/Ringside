@@ -9,14 +9,14 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InjureAction extends BaseManagerAction
+final class InjureAction extends BaseManagerAction
 {
     use AsAction;
 
     /**
      * Injure a manager.
      *
-     * @throws \App\Exceptions\CannotBeInjuredException
+     * @throws CannotBeInjuredException
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void
     {
@@ -30,7 +30,7 @@ class InjureAction extends BaseManagerAction
     /**
      * Ensure a manager can be injured.
      *
-     * @throws \App\Exceptions\CannotBeInjuredException
+     * @throws CannotBeInjuredException
      */
     private function ensureCanBeInjured(Manager $manager): void
     {

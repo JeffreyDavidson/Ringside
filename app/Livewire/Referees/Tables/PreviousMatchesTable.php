@@ -17,18 +17,18 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousMatchesTable extends DataTableComponent
+final class PreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
-
-    protected string $databaseTableName = 'event_matches';
-
-    protected string $resourceName = 'matches';
 
     /**
      * Referee to use for component.
      */
     public Referee $referee;
+
+    protected string $databaseTableName = 'event_matches';
+
+    protected string $resourceName = 'matches';
 
     /**
      * @return Builder<EventMatch>
@@ -37,7 +37,7 @@ class PreviousMatchesTable extends DataTableComponent
     {
         return EventMatch::query()
             ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
-            ->whereHas('referees', function (Builder $query) {
+            ->whereHas('referees', function (Builder $query): void {
                 $query->whereIn('referee_id', [$this->referee->id]);
             });
     }
@@ -59,14 +59,14 @@ class PreviousMatchesTable extends DataTableComponent
                 ->outputFormat('Y-m-d H:i'),
             ArrayColumn::make(__('event-matches.competitors'))
                 ->data(fn ($value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(fn ($index, EventMatchCompetitor $value) => '<a href="'.route('wrestlers.show', $value->competitor->id).'">'.$value->competitor->name.'</a>')
+                ->outputFormat(fn ($index, EventMatchCompetitor $value): string => '<a href="'.route('wrestlers.show', $value->competitor->id).'">'.$value->competitor->name.'</a>')
                 ->separator('<br />'),
             ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn ($value, EventMatch $row) => ($row->titles))
-                ->outputFormat(fn ($index, Title $value) => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
+                ->outputFormat(fn ($index, Title $value): string => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
                 ->separator('<br />'),
             Column::make(__('event-matches.result'))
-                ->label(fn (EventMatch $row) => $row->result?->winner->name.' by '.$row->result?->decision->name),
+                ->label(fn (EventMatch $row): string => $row->result?->winner->name.' by '.$row->result?->decision->name),
         ];
     }
 }

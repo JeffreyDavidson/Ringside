@@ -18,7 +18,7 @@ use Sushi\Sushi;
  *
  * @mixin \Eloquent
  */
-class State extends Model
+final class State extends Model
 {
     use Sushi;
 

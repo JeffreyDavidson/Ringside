@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class CannotBeRetiredException extends Exception
+final class CannotBeRetiredException extends Exception
 {
     public static function unemployed(): self
     {

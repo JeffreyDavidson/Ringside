@@ -16,13 +16,11 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<StableForm, Stable>
  */
-class FormModal extends BaseModal
+final class FormModal extends BaseModal
 {
     use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
-
-    protected string $modalLanguagePath = 'stables';
 
     protected string $modalFormPath = 'stables.modals.form-modal';
 

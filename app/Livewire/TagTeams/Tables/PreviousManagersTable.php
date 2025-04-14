@@ -6,20 +6,21 @@ namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\TagTeamManager;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-class PreviousManagersTable extends DataTableComponent
+final class PreviousManagersTable extends DataTableComponent
 {
     use ShowTableTrait;
+
+    public ?int $tagTeamId;
 
     protected string $databaseTableName = 'tag_teams_managers';
 
     protected string $resourceName = 'managers';
-
-    public ?int $tagTeamId;
 
     /**
      * @return Builder<TagTeamManager>
@@ -27,7 +28,7 @@ class PreviousManagersTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->tagTeamId)) {
-            throw new \Exception("You didn't specify a tag team");
+            throw new Exception("You didn't specify a tag team");
         }
 
         return TagTeamManager::query()

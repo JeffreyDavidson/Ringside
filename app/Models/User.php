@@ -22,16 +22,16 @@ use Illuminate\Notifications\Notifiable;
  * @property string $email
  * @property string|null $email_verified_at
  * @property string $password
- * @property \App\Enums\UserStatus $status
+ * @property UserStatus $status
  * @property string|null $avatar_path
  * @property string|null $phone_number
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Enums\Role $role
- * @property-read \App\Models\TFactory|null $use_factory
+ * @property-read Role $role
+ * @property-read TFactory|null $use_factory
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
- * @property-read \App\Models\Wrestler|null $wrestler
+ * @property-read Wrestler|null $wrestler
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \App\Builders\UserBuilder newModelQuery()
@@ -40,7 +40,7 @@ use Illuminate\Notifications\Notifiable;
  *
  * @mixin \Eloquent
  */
-class User extends Authenticatable
+final class User extends Authenticatable
 {
     /** @use HasBuilder<UserBuilder> */
     use HasBuilder;
@@ -140,6 +140,6 @@ class User extends Authenticatable
      */
     public function getFormattedPhoneNumber(): string
     {
-        return $this->phone_number ? sprintf('(%s) %s-%s', substr($this->phone_number, 0, 3), substr($this->phone_number, 3, 3), substr($this->phone_number, 6, 4)) : '';
+        return $this->phone_number ? sprintf('(%s) %s-%s', mb_substr($this->phone_number, 0, 3), mb_substr($this->phone_number, 3, 3), mb_substr($this->phone_number, 6, 4)) : '';
     }
 }

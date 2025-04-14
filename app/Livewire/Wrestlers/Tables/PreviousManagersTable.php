@@ -6,23 +6,24 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\WrestlerManager;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
-class PreviousManagersTable extends DataTableComponent
+final class PreviousManagersTable extends DataTableComponent
 {
     use ShowTableTrait;
-
-    protected string $databaseTableName = 'wrestlers_managers';
-
-    protected string $resourceName = 'managers';
 
     /**
      * Wrestler to use for component.
      */
     public ?int $wrestlerId;
+
+    protected string $databaseTableName = 'wrestlers_managers';
+
+    protected string $resourceName = 'managers';
 
     /**
      * @return Builder<WrestlerManager>
@@ -30,7 +31,7 @@ class PreviousManagersTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return WrestlerManager::query()

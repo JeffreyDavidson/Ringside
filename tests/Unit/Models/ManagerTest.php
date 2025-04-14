@@ -56,5 +56,5 @@ test('a manager uses soft deleted trait', function () {
 });
 
 test('a manager has its own eloquent builder', function () {
-    expect(new Manager)->query()->toBeInstanceOf(ManagerBuilder::class);
+    expect(new Manager())->query()->toBeInstanceOf(ManagerBuilder::class);
 });

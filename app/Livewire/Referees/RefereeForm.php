@@ -13,7 +13,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<RefereeForm, ?Referee>
  */
-class RefereeForm extends LivewireBaseForm
+final class RefereeForm extends LivewireBaseForm
 {
     public $formModel;
 
@@ -25,6 +25,31 @@ class RefereeForm extends LivewireBaseForm
 
     #[Validate]
     public Carbon|string|null $start_date = '';
+
+    public function loadExtraData(): void
+    {
+        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
+    }
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        if ($this->formModel === null) {
+            $this->formModel = new Referee([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+            ]);
+            $this->formModel->save();
+        } else {
+            $this->formModel->update([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+            ]);
+        }
+
+        return true;
+    }
 
     /**
      * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
@@ -46,30 +71,5 @@ class RefereeForm extends LivewireBaseForm
         return [
             'start_date' => 'start date',
         ];
-    }
-
-    public function loadExtraData(): void
-    {
-        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new Referee([
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-            ]);
-            $this->formModel->save();
-        } else {
-            $this->formModel->update([
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-            ]);
-        }
-
-        return true;
     }
 }

@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $ended_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\Title|null $title
+ * @property-read TFactory|null $use_factory
+ * @property-read Title|null $title
  *
  * @method static \Database\Factories\TitleActivationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleActivation newModelQuery()
@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-class TitleActivation extends Model
+final class TitleActivation extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleActivationFactory> */
     use HasFactory;

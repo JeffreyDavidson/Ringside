@@ -10,14 +10,14 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseWrestlerAction
+final class ReleaseAction extends BaseWrestlerAction
 {
     use AsAction;
 
     /**
      * Release a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
@@ -41,7 +41,7 @@ class ReleaseAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be released.
      *
-     * @throws \App\Exceptions\CannotBeReleasedException
+     * @throws CannotBeReleasedException
      */
     private function ensureCanBeReleased(Wrestler $wrestler): void
     {

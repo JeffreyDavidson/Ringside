@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<EventMatchForm, EventMatch>
  */
-class FormModal extends BaseModal
+final class FormModal extends BaseModal
 {
     use PresentsMatchTypesList;
     use PresentsRefereesList;
@@ -28,14 +28,12 @@ class FormModal extends BaseModal
     use PresentsTitlesList;
     use PresentsWrestlersList;
 
-    protected string $modalLanguagePath = 'event-matches';
-
-    protected string $modalFormPath = 'event-matches.modals.form-modal';
-
     /**
      * String name to render view for each match type.
      */
     public string $subViewToUse;
+
+    protected string $modalFormPath = 'event-matches.modals.form-modal';
 
     protected $modelForm;
 

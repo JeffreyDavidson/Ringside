@@ -4,6 +4,6 @@ return [
     'started_at' => 'Start Date',
 
     'validation' => [
-        'employment_released' => ':name is currently activated and the activation date cannot be changed.',
+        'employment_released' => ':name was released and the start date cannot be changed.',
     ]
 ];

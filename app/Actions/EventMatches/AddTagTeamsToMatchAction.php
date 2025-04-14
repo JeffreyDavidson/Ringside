@@ -9,14 +9,14 @@ use App\Models\TagTeam;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddTagTeamsToMatchAction extends BaseEventMatchAction
+final class AddTagTeamsToMatchAction extends BaseEventMatchAction
 {
     use AsAction;
 
     /**
      * Add tag teams to an event match.
      *
-     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, TagTeam>  $tagTeams
      */
     public function handle(EventMatch $eventMatch, Collection $tagTeams, int $sideNumber): void
     {

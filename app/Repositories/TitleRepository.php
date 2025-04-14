@@ -8,7 +8,7 @@ use App\Data\TitleData;
 use App\Models\Title;
 use Illuminate\Support\Carbon;
 
-class TitleRepository
+final class TitleRepository
 {
     public function create(TitleData $titleData): Title
     {

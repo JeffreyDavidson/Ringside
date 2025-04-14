@@ -6,12 +6,11 @@ namespace App\Http\Controllers\TagTeams;
 
 use App\Actions\TagTeams\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Http\Controllers\Controller;
 use App\Models\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class UnretireController extends Controller
+final class UnretireController
 {
     /**
      * Unretire a tag team.
@@ -21,7 +20,7 @@ class UnretireController extends Controller
         Gate::authorize('unretire', $tagTeam);
 
         try {
-            UnretireAction::run($tagTeam);
+            resolve(UnretireAction::class)->handle($tagTeam);
         } catch (CannotBeUnretiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

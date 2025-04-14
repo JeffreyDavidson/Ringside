@@ -9,19 +9,20 @@ use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\Referee;
 use App\Models\Title;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 
-class EventMatchesTable extends BaseTableWithActions
+final class EventMatchesTable extends BaseTableWithActions
 {
+    public ?int $eventId;
+
     protected string $databaseTableName = 'event_matches';
 
     protected string $routeBasePath = 'event-matches';
 
     protected string $resourceName = 'matches';
-
-    public ?int $eventId;
 
     /**
      * @return Builder<EventMatch>
@@ -29,7 +30,7 @@ class EventMatchesTable extends BaseTableWithActions
     public function builder(): Builder
     {
         if (! isset($this->eventId)) {
-            throw new \Exception("You didn't specify a event");
+            throw new Exception("You didn't specify a event");
         }
 
         return EventMatch::query()
@@ -61,7 +62,7 @@ class EventMatchesTable extends BaseTableWithActions
                 ->separator(', '),
             Column::make(__('event-matches.result'))
                 ->label(
-                    fn (EventMatch $row, Column $column) => $row->result?->winner->name.' by '.$row->result?->decision->name
+                    fn (EventMatch $row, Column $column): string => $row->result?->winner->name.' by '.$row->result?->decision->name
                 ),
         ];
     }

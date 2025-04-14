@@ -9,14 +9,14 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseManagerAction
+final class EmployAction extends BaseManagerAction
 {
     use AsAction;
 
     /**
      * Employ a manager.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
@@ -34,7 +34,7 @@ class EmployAction extends BaseManagerAction
     /**
      * Ensure a manager can be employed.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     private function ensureCanBeEmployed(Manager $manager): void
     {

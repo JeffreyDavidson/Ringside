@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Wrestlers;
 
 use App\Actions\Wrestlers\ClearInjuryAction;
 use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Http\Controllers\Controller;
 use App\Models\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class ClearInjuryController extends Controller
+final class ClearInjuryController
 {
     /**
      * Have a wrestler recover from an injury.
@@ -21,7 +20,7 @@ class ClearInjuryController extends Controller
         Gate::authorize('clearFromInjury', $wrestler);
 
         try {
-            ClearInjuryAction::run($wrestler);
+            resolve(ClearInjuryAction::class)->handle($wrestler);
         } catch (CannotBeClearedFromInjuryException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

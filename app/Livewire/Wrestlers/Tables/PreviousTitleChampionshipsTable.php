@@ -14,18 +14,18 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\CountColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousTitleChampionshipsTable extends DataTableComponent
+final class PreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;
-
-    protected string $databaseTableName = 'tittle_championships';
-
-    protected string $resourceName = 'title championships';
 
     /**
      * Wrestler to use for component.
      */
     public Wrestler $wrestler;
+
+    protected string $databaseTableName = 'tittle_championships';
+
+    protected string $resourceName = 'title championships';
 
     /**
      * Undocumented function.
@@ -44,7 +44,7 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
             ->whereHasMorph(
                 'new_champion',
                 [Wrestler::class],
-                function (Builder $query) {
+                function (Builder $query): void {
                     $query->whereIn('wrestler_id', [$this->wrestler->id]);
                 }
             );

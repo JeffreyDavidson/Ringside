@@ -6,12 +6,11 @@ namespace App\Http\Controllers\Titles;
 
 use App\Actions\Titles\DeactivateAction;
 use App\Exceptions\CannotBeDeactivatedException;
-use App\Http\Controllers\Controller;
 use App\Models\Title;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
-class DeactivateController extends Controller
+final class DeactivateController
 {
     /**
      * Deactivates a title.
@@ -21,7 +20,7 @@ class DeactivateController extends Controller
         Gate::authorize('deactivate', $title);
 
         try {
-            DeactivateAction::run($title);
+            resolve(DeactivateAction::class)->handle($title);
         } catch (CannotBeDeactivatedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

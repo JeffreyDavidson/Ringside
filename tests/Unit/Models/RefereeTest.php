@@ -41,5 +41,5 @@ test('a referee uses soft deleted trait', function () {
 });
 
 test('a referee has its own eloquent builder', function () {
-    expect(new Referee)->query()->toBeInstanceOf(RefereeBuilder::class);
+    expect(new Referee())->query()->toBeInstanceOf(RefereeBuilder::class);
 });

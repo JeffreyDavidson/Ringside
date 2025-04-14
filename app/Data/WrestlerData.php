@@ -6,7 +6,7 @@ namespace App\Data;
 
 use Illuminate\Support\Carbon;
 
-class WrestlerData
+final class WrestlerData
 {
     /**
      * Create a new wrestler data instance.

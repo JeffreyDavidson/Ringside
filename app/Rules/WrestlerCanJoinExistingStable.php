@@ -10,19 +10,19 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class WrestlerCanJoinExistingStable implements ValidationRule
+final class WrestlerCanJoinExistingStable implements ValidationRule
 {
     /**
      * @param  Collection<int, int>  $tagTeamIds
      */
-    public function __construct(protected Collection $tagTeamIds, protected ?Carbon $date) {}
+    public function __construct(private Collection $tagTeamIds, private ?Carbon $date) {}
 
     /**
      * Determine if the validation rule passes.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        /** @var \App\Models\Wrestler $wrestler */
+        /** @var Wrestler $wrestler */
         $wrestler = Wrestler::with('currentStable')->whereKey($value)->first();
 
         if ($wrestler->isSuspended()) {
@@ -38,7 +38,7 @@ class WrestlerCanJoinExistingStable implements ValidationRule
         }
 
         if ($this->tagTeamIds->isNotEmpty()) {
-            collect($this->tagTeamIds)->map(function (mixed $id) use ($wrestler, $fail) {
+            collect($this->tagTeamIds)->map(function (mixed $id) use ($wrestler, $fail): void {
                 if ($id === $wrestler->currentTagTeam?->id) {
                     $fail('A wrestler in a tag team already belongs to a current stable.');
                 }

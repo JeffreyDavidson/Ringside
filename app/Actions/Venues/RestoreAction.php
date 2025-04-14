@@ -7,7 +7,7 @@ namespace App\Actions\Venues;
 use App\Models\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseVenueAction
+final class RestoreAction extends BaseVenueAction
 {
     use AsAction;
 

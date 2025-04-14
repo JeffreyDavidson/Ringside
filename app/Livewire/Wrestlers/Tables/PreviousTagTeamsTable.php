@@ -7,23 +7,24 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\TagTeam;
 use App\Models\TagTeamPartner;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousTagTeamsTable extends DataTableComponent
+final class PreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
-
-    protected string $databaseTableName = 'tag_teams';
-
-    protected string $resourceName = 'tag teams';
 
     /**
      * Wrestler to use for component.
      */
     public ?int $wrestlerId;
+
+    protected string $databaseTableName = 'tag_teams';
+
+    protected string $resourceName = 'tag teams';
 
     /**
      * @return Builder<TagTeamPartner>
@@ -31,7 +32,7 @@ class PreviousTagTeamsTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return TagTeamPartner::query()
