@@ -9,10 +9,8 @@ use App\Models\StableManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousStablesTable extends BasePreviousStablesTable
+final class PreviousStablesTable extends BasePreviousStablesTable
 {
-    protected string $databaseTableName = 'stables_managers';
-
     /**
      * ManagerId to use for component.
      */

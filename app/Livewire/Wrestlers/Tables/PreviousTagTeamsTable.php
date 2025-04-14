@@ -9,10 +9,8 @@ use App\Models\TagTeamPartner;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
+final class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
 {
-    protected string $databaseTableName = 'tag_teams_wrestlers';
-
     /**
      * Wrestler to use for component.
      */

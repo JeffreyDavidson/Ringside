@@ -9,10 +9,8 @@ use App\Models\StableWrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-class PreviousStablesTable extends BasePreviousStablesTable
+final class PreviousStablesTable extends BasePreviousStablesTable
 {
-    protected string $databaseTableName = 'stables_wrestlers';
-
     /**
      * Wrestler to use for component.
      */
