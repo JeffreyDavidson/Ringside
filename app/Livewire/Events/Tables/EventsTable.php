@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Tables;
 
+use App\Actions\Events\RestoreAction;
 use App\Builders\EventBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
@@ -11,8 +12,11 @@ use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\Event;
 use App\Models\Venue;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
@@ -90,7 +94,7 @@ final class EventsTable extends BaseTableWithActions
                     'locale' => 'en',
                 ])
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
-                ->filter(function (Builder $builder, array $dateRange): void { // Expects an array.
+                ->filter(function (Builder $builder, array $dateRange) { // Expects an array.
                     $builder
                         ->whereBetween('date', [$dateRange['minDate'], $dateRange['maxDate']]);
                 }),
@@ -105,5 +109,23 @@ final class EventsTable extends BaseTableWithActions
     public function delete(Event $event): void
     {
         $this->deleteModel($event);
+    }
+
+    /**
+     * Restore a deleted scheduled event.
+     */
+    public function restore(int $eventId): RedirectResponse
+    {
+        $event = Event::onlyTrashed()->findOrFail($eventId);
+
+        Gate::authorize('restore', $event);
+
+        try {
+            resolve(RestoreAction::class)->handle($event);
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
     }
 }
