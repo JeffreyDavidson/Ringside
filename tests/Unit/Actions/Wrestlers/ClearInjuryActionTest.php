@@ -35,7 +35,7 @@ test('it clears an injury of an injured wrestler at the current datetime by defa
         })
         ->andReturn($wrestler);
 
-    ClearInjuryAction::run($wrestler);
+    resolve(ClearInjuryAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerClearedFromInjury::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
