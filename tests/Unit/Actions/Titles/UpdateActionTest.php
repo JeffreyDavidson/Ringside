@@ -24,7 +24,7 @@ test('it updates a title', function () {
     $this->titleRepository
         ->shouldNotReceive('activate');
 
-    UpdateAction::run($title, $data);
+    resolve(UpdateAction::class)->handle($title, $data);
 });
 
 test('it activates an unactivated title if activation date is filled in request', function () {
@@ -44,7 +44,7 @@ test('it activates an unactivated title if activation date is filled in request'
         ->once()
         ->andReturn($title);
 
-    UpdateAction::run($title, $data);
+    resolve(UpdateAction::class)->handle($title, $data);
 });
 
 test('it updates a title with a future activated title activation date if activation date is filled in request', function () {
@@ -64,5 +64,5 @@ test('it updates a title with a future activated title activation date if activa
         ->once()
         ->andReturn($title);
 
-    UpdateAction::run($title, $data);
+    resolve(UpdateAction::class)->handle($title, $data);
 })->skip();

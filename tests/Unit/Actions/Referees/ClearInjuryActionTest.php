@@ -31,7 +31,7 @@ test('it clears an injury of an injured referee at the current datetime by defau
         })
         ->andReturn($referee);
 
-    ClearInjuryAction::run($referee);
+    resolve(ClearInjuryAction::class)->handle($referee);
 });
 
 test('it clears an injury of an injured referee at a specific datetime', function () {
@@ -44,13 +44,13 @@ test('it clears an injury of an injured referee at a specific datetime', functio
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    ClearInjuryAction::run($referee, $datetime);
+    resolve(ClearInjuryAction::class)->handle($referee, $datetime);
 });
 
 test('it throws exception for injuring a non injurable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    ClearInjuryAction::run($referee);
+    resolve(ClearInjuryAction::class)->handle($referee);
 })->throws(CannotBeClearedFromInjuryException::class)->with([
     'unemployed',
     'released',

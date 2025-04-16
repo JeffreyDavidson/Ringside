@@ -31,7 +31,7 @@ test('it suspends a bookable referee at the current datetime by default', functi
         })
         ->andReturn($referee);
 
-    SuspendAction::run($referee);
+    resolve(SuspendAction::class)->handle($referee);
 });
 
 test('it suspends a bookable referee at a specific datetime', function () {
@@ -44,13 +44,13 @@ test('it suspends a bookable referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    SuspendAction::run($referee, $datetime);
+    resolve(SuspendAction::class)->handle($referee, $datetime);
 });
 
 test('invoke throws exception for suspending a non suspendable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    SuspendAction::run($referee);
+    resolve(SuspendAction::class)->handle($referee);
 })->throws(CannotBeSuspendedException::class)->with([
     'unemployed',
     'withFutureEmployment',

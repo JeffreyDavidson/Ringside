@@ -37,7 +37,7 @@ test('it releases a bookable referee at the current datetime by default', functi
         })
         ->andReturn($referee);
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 });
 
 test('it releases an bookable referee at a specific datetime', function () {
@@ -56,7 +56,7 @@ test('it releases an bookable referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    ReleaseAction::run($referee, $datetime);
+    resolve(ReleaseAction::class)->handle($referee, $datetime);
 });
 
 test('it releases a suspended referee at the current datetime by default', function () {
@@ -88,7 +88,7 @@ test('it releases a suspended referee at the current datetime by default', funct
         })
         ->andReturn($referee);
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 });
 
 test('it releases a suspended referee at a specific datetime', function () {
@@ -110,13 +110,13 @@ test('it releases a suspended referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    ReleaseAction::run($referee, $datetime);
+    resolve(ReleaseAction::class)->handle($referee, $datetime);
 });
 
 test('it throws an exception for releasing a non releasable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 })->throws(CannotBeReleasedException::class)->with([
     'unemployed',
     'withFutureEmployment',

@@ -31,7 +31,7 @@ test('it reinstates a suspended referee at the current datetime by default', fun
         })
         ->andReturn($referee);
 
-    ReinstateAction::run($referee);
+    resolve(ReinstateAction::class)->handle($referee);
 });
 
 test('it reinstates a suspended referee at a specific datetime', function () {
@@ -44,13 +44,13 @@ test('it reinstates a suspended referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    ReinstateAction::run($referee, $datetime);
+    resolve(ReinstateAction::class)->handle($referee, $datetime);
 });
 
 test('invoke throws exception for reinstating a non reinstatable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    ReinstateAction::run($referee);
+    resolve(ReinstateAction::class)->handle($referee);
 })->throws(CannotBeReinstatedException::class)->with([
     'bookable',
     'unemployed',

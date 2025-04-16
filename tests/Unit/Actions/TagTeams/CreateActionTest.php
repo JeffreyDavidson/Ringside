@@ -40,7 +40,7 @@ test('it creates a tag team without tag team partners and employment', function 
     $this->tagTeamRepository
         ->shouldNotReceive('employ');
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });
 
 test('it employs a tag team and tag team partners and employment when start date is present', function () {
@@ -93,5 +93,5 @@ test('it employs a tag team and tag team partners and employment when start date
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

@@ -19,5 +19,5 @@ test('it creates an event', function () {
         ->with($data)
         ->andReturns(new App\Models\Event());
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

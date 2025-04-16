@@ -24,7 +24,7 @@ test('it updates a manager', function () {
     $this->managerRepository
         ->shouldNotReceive('employ');
 
-    UpdateAction::run($manager, $data);
+    resolve(UpdateAction::class)->handle($manager, $data);
 });
 
 test('it employs an employable manager if start date is filled in request', function () {
@@ -44,7 +44,7 @@ test('it employs an employable manager if start date is filled in request', func
         ->once()
         ->andReturn($manager);
 
-    UpdateAction::run($manager, $data);
+    resolve(UpdateAction::class)->handle($manager, $data);
 });
 
 test('it updates a future employed manager employment date if start date is filled in request', function () {
@@ -64,5 +64,5 @@ test('it updates a future employed manager employment date if start date is fill
         ->once()
         ->andReturn($manager);
 
-    UpdateAction::run($manager, $data);
+    resolve(UpdateAction::class)->handle($manager, $data);
 })->skip();

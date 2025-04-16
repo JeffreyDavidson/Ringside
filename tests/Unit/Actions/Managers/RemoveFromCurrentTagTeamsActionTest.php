@@ -21,5 +21,5 @@ test('it can remove current tag teams from a manager', function () {
         ->once()
         ->with($manager);
 
-    RemoveFromCurrentTagTeamsAction::run($manager);
+    resolve(RemoveFromCurrentTagTeamsAction::class)->handle($manager);
 });

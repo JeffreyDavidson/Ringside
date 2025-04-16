@@ -18,5 +18,5 @@ test('it restores a deleted wrestler', function () {
         ->once()
         ->with($wrestler);
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 });

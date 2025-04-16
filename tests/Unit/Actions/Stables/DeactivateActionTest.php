@@ -42,7 +42,7 @@ test('it deactivates a stable at the current datetime by default', function () {
         })
         ->andReturn($stable);
 
-    DeactivateAction::run($stable);
+    resolve(DeactivateAction::class)->handle($stable);
 });
 
 test('it deactivates a stable at a specific datetime', function () {
@@ -61,13 +61,13 @@ test('it deactivates a stable at a specific datetime', function () {
         ->with($stable, $datetime)
         ->andReturn($stable);
 
-    DeactivateAction::run($stable, $datetime);
+    resolve(DeactivateAction::class)->handle($stable, $datetime);
 });
 
 test('it throws exception for deactivating a non deactivatable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    DeactivateAction::run($stable);
+    resolve(DeactivateAction::class)->handle($stable);
 })->throws(CannotBeDeactivatedException::class)->with([
     'inactive',
     'retired',

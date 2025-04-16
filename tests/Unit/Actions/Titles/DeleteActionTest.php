@@ -18,5 +18,5 @@ test('it deletes a title', function () {
         ->once()
         ->with($title);
 
-    DeleteAction::run($title);
+    resolve(DeleteAction::class)->handle($title);
 });

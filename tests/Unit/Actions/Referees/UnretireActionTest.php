@@ -45,7 +45,7 @@ test('it unretires a retired referee at the current datetime by default', functi
         })
         ->andReturn($referee);
 
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 });
 
 test('it unretires a retired referee at a specific datetime', function () {
@@ -64,13 +64,13 @@ test('it unretires a retired referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    UnretireAction::run($referee, $datetime);
+    resolve(UnretireAction::class)->handle($referee, $datetime);
 });
 
 test('invoke throws exception for unretiring a non unretirable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 })->throws(CannotBeUnretiredException::class)->with([
     'bookable',
     'withFutureEmployment',

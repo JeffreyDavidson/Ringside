@@ -45,7 +45,7 @@ test('it unretires a retired wrestler at the current datetime by default', funct
         })
         ->andReturn($wrestler);
 
-    UnretireAction::run($wrestler);
+    resolve(UnretireAction::class)->handle($wrestler);
 });
 
 test('it unretires a retired wrestler at a specific datetime', function () {
@@ -64,13 +64,13 @@ test('it unretires a retired wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    UnretireAction::run($wrestler, $datetime);
+    resolve(UnretireAction::class)->handle($wrestler, $datetime);
 });
 
 test('invoke throws exception for unretiring a non unretirable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    UnretireAction::run($wrestler);
+    resolve(UnretireAction::class)->handle($wrestler);
 })->throws(CannotBeUnretiredException::class)->with([
     'bookable',
     'withFutureEmployment',

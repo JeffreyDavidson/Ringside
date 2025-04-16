@@ -35,7 +35,7 @@ test('it suspends a bookable wrestler at the current datetime by default', funct
         })
         ->andReturn($wrestler);
 
-    SuspendAction::run($wrestler);
+    resolve(SuspendAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerSuspended::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -55,7 +55,7 @@ test('it suspends a bookable wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    SuspendAction::run($wrestler, $datetime);
+    resolve(SuspendAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerSuspended::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -68,7 +68,7 @@ test('it suspends a bookable wrestler at a specific datetime', function () {
 test('it throws exception for suspending a non suspendable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    SuspendAction::run($wrestler);
+    resolve(SuspendAction::class)->handle($wrestler);
 })->throws(CannotBeSuspendedException::class)->with([
     'unemployed',
     'withFutureEmployment',

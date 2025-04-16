@@ -34,7 +34,7 @@ test('it creates a wrestler', function () {
     $this->wrestlerRepository
         ->shouldNotReceive('employ');
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });
 
 test('it employs a wrestler if start date is filled in request', function () {
@@ -58,5 +58,5 @@ test('it employs a wrestler if start date is filled in request', function () {
         ->once()
         ->with($wrestler, $data->start_date);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

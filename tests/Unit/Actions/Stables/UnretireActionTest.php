@@ -42,7 +42,7 @@ test('it unretires a retired tag team at the current datetime by default', funct
         })
         ->andReturns($stable);
 
-    UnretireAction::run($stable);
+    resolve(UnretireAction::class)->handle($stable);
 });
 
 test('it unretires a retired tag team at a specific datetime', function () {
@@ -61,13 +61,13 @@ test('it unretires a retired tag team at a specific datetime', function () {
         ->with($stable, $datetime)
         ->andReturns($stable);
 
-    UnretireAction::run($stable, $datetime);
+    resolve(UnretireAction::class)->handle($stable, $datetime);
 });
 
 test('it throws exception for unretiring a non unretirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    UnretireAction::run($stable);
+    resolve(UnretireAction::class)->handle($stable);
 })->throws(CannotBeUnretiredException::class)->with([
     'active',
     'withFutureActivation',

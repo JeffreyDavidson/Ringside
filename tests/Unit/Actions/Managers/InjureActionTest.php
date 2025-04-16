@@ -34,7 +34,7 @@ test('it injures an available manager at the current datetime by default', funct
         })
         ->andReturn($manager);
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 });
 
 test('it injures an available manager at a specific datetime', function () {
@@ -47,13 +47,13 @@ test('it injures an available manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    InjureAction::run($manager, $datetime);
+    resolve(InjureAction::class)->handle($manager, $datetime);
 });
 
 test('it throws exception for injuring a non injurable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 })->throws(CannotBeInjuredException::class)->with([
     'unemployed',
     'suspended',

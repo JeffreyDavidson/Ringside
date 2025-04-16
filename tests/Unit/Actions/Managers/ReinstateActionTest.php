@@ -34,7 +34,7 @@ test('it reinstates a suspended manager at the current datetime by default', fun
         })
         ->andReturn($manager);
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 });
 
 test('it reinstates a suspended manager at a specific datetime', function () {
@@ -47,13 +47,13 @@ test('it reinstates a suspended manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    ReinstateAction::run($manager, $datetime);
+    resolve(ReinstateAction::class)->handle($manager, $datetime);
 });
 
 test('it throws exception for reinstating a non reinstatable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 })->throws(CannotBeReinstatedException::class)->with([
     'available',
     'unemployed',

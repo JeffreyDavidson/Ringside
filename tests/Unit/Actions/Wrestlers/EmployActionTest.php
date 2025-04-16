@@ -34,7 +34,7 @@ test('it employs an employable wrestler at the current datetime by default', fun
         })
         ->andReturn($wrestler);
 
-    EmployAction::run($wrestler);
+    resolve(EmployAction::class)->handle($wrestler);
 })->with([
     'unemployed',
     'released',
@@ -54,7 +54,7 @@ test('it employs an employable wrestler at a specific datetime', function ($fact
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    EmployAction::run($wrestler, $datetime);
+    resolve(EmployAction::class)->handle($wrestler, $datetime);
 })->with([
     'unemployed',
     'released',
@@ -87,7 +87,7 @@ test('it employs a retired wrestler at the current datetime by default', functio
         })
         ->andReturns($wrestler);
 
-    EmployAction::run($wrestler);
+    resolve(EmployAction::class)->handle($wrestler);
 });
 
 test('it employs a retired wrestler at a specific datetime', function () {
@@ -106,13 +106,13 @@ test('it employs a retired wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    EmployAction::run($wrestler, $datetime);
+    resolve(EmployAction::class)->handle($wrestler, $datetime);
 });
 
 test('it throws exception for employing a non employable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    EmployAction::run($wrestler);
+    resolve(EmployAction::class)->handle($wrestler);
 })->throws(CannotBeEmployedException::class)->with([
     'suspended',
     'injured',

@@ -34,7 +34,7 @@ test('it employs an employable manager at the current datetime by default', func
         })
         ->andReturn($manager);
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 })->with([
     'unemployed',
     'released',
@@ -54,7 +54,7 @@ test('it employs an employable manager at a specific datetime', function ($facto
         ->with($manager, $datetime)
         ->andReturns($manager);
 
-    EmployAction::run($manager, $datetime);
+    resolve(EmployAction::class)->handle($manager, $datetime);
 })->with([
     'unemployed',
     'released',
@@ -87,7 +87,7 @@ test('it employs a retired manager at the current datetime by default', function
         })
         ->andReturns($manager);
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 });
 
 test('it employs a retired manager at a specific datetime', function () {
@@ -106,13 +106,13 @@ test('it employs a retired manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturns($manager);
 
-    EmployAction::run($manager, $datetime);
+    resolve(EmployAction::class)->handle($manager, $datetime);
 });
 
 test('it throws exception for employing a non employable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 })->throws(CannotBeEmployedException::class)->with([
     'suspended',
     'injured',

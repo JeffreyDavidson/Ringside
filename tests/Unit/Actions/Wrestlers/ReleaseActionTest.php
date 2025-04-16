@@ -41,7 +41,7 @@ test('it releases a bookable wrestler at the current datetime by default', funct
         })
         ->andReturn($wrestler);
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -67,7 +67,7 @@ test('it releases an bookable wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    ReleaseAction::run($wrestler, $datetime);
+    resolve(ReleaseAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -106,7 +106,7 @@ test('it releases a suspended wrestler at the current datetime by default', func
         })
         ->andReturn($wrestler);
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -135,7 +135,7 @@ test('it releases a suspended wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    ReleaseAction::run($wrestler, $datetime);
+    resolve(ReleaseAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -148,7 +148,7 @@ test('it releases a suspended wrestler at a specific datetime', function () {
 test('invoke throws an exception for releasing a non releasable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 })->throws(CannotBeReleasedException::class)->with([
     'unemployed',
     'withFutureEmployment',

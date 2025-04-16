@@ -34,7 +34,7 @@ test('it suspends an available manager at the current datetime by default', func
         })
         ->andReturn($manager);
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 });
 
 test('it suspends an available manager at a specific datetime', function () {
@@ -47,13 +47,13 @@ test('it suspends an available manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    SuspendAction::run($manager, $datetime);
+    resolve(SuspendAction::class)->handle($manager, $datetime);
 });
 
 test('it throws exception for suspending a non suspendable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 })->throws(CannotBeSuspendedException::class)->with([
     'unemployed',
     'withFutureEmployment',

@@ -31,7 +31,7 @@ test('it activates an unactivated stable and employs its unemployed members at t
         })
         ->andReturn($stable);
 
-    ActivateAction::run($stable);
+    resolve(ActivateAction::class)->handle($stable);
 });
 
 test('it activates an unactivated stable with members at a specific datetime', function () {
@@ -44,7 +44,7 @@ test('it activates an unactivated stable with members at a specific datetime', f
         ->with($stable, $datetime)
         ->andReturns($stable);
 
-    ActivateAction::run($stable, $datetime);
+    resolve(ActivateAction::class)->handle($stable, $datetime);
 });
 
 test('it activates a future activated stable and employs its unemployed members at the current datetime by default', function () {
@@ -62,7 +62,7 @@ test('it activates a future activated stable and employs its unemployed members 
         })
         ->andReturn($stable);
 
-    ActivateAction::run($stable);
+    resolve(ActivateAction::class)->handle($stable);
 });
 
 test('it activates a future activated stable with members at a specific datetime', function () {
@@ -75,13 +75,13 @@ test('it activates a future activated stable with members at a specific datetime
         ->with($stable, $datetime)
         ->andReturns($stable);
 
-    ActivateAction::run($stable, $datetime);
+    resolve(ActivateAction::class)->handle($stable, $datetime);
 })->skip();
 
 test('it throws exception for activating a non activatable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    ActivateAction::run($stable);
+    resolve(ActivateAction::class)->handle($stable);
 })->throws(CannotBeActivatedException::class)->with([
     'active',
 ]);

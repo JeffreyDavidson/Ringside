@@ -38,7 +38,7 @@ test('it employs an unemployed tag team at the current datetime by default', fun
         })
         ->andReturns($tagTeam);
 
-    EmployAction::run($tagTeam);
+    resolve(EmployAction::class)->handle($tagTeam);
 });
 
 test('it employs an unemployed tag team at a specific datetime', function () {
@@ -56,5 +56,5 @@ test('it employs an unemployed tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    EmployAction::run($tagTeam, $datetime);
+    resolve(EmployAction::class)->handle($tagTeam, $datetime);
 });

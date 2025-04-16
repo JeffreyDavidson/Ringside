@@ -48,7 +48,7 @@ test('it retires an active stable at the current datetime by default', function 
         })
         ->andReturns($stable);
 
-    RetireAction::run($stable);
+    resolve(RetireAction::class)->handle($stable);
 });
 
 test('it retires an active stable at a specific datetime', function () {
@@ -67,7 +67,7 @@ test('it retires an active stable at a specific datetime', function () {
         ->with($stable, $datetime)
         ->andReturns($stable);
 
-    RetireAction::run($stable, $datetime);
+    resolve(RetireAction::class)->handle($stable, $datetime);
 });
 
 test('it retires an inactive stable at the current datetime by default', function () {
@@ -88,7 +88,7 @@ test('it retires an inactive stable at the current datetime by default', functio
         })
         ->andReturns($stable);
 
-    RetireAction::run($stable);
+    resolve(RetireAction::class)->handle($stable);
 });
 
 test('it retires an inactive stable at a specific datetime', function () {
@@ -104,7 +104,7 @@ test('it retires an inactive stable at a specific datetime', function () {
         ->with($stable, $datetime)
         ->andReturns($stable);
 
-    RetireAction::run($stable, $datetime);
+    resolve(RetireAction::class)->handle($stable, $datetime);
 });
 
 test('it retires the current tag teams and current wrestlers and current managers of a stable', function () {
@@ -136,13 +136,13 @@ test('it retires the current tag teams and current wrestlers and current manager
     WrestlerRetireAction::shouldRun()->times(2);
     ManagerRetireAction::shouldRun()->times(1);
 
-    RetireAction::run($stable, $datetime);
+    resolve(RetireAction::class)->handle($stable, $datetime);
 })->skip();
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    RetireAction::run($stable);
+    resolve(RetireAction::class)->handle($stable);
 })->throws(CannotBeRetiredException::class)->with([
     'unactivated',
     'withFutureActivation',

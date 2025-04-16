@@ -37,7 +37,7 @@ test('it suspends a bookable tag team at the current datetime by default', funct
         })
         ->andReturns($tagTeam);
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 });
 
 test('it suspends a bookable tag team at a specific datetime', function () {
@@ -50,13 +50,13 @@ test('it suspends a bookable tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    SuspendAction::run($tagTeam, $datetime);
+    resolve(SuspendAction::class)->handle($tagTeam, $datetime);
 });
 
 test('invoke throws exception for retiring a non retirable tag team', function ($factoryState) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 })->throws(CannotBeSuspendedException::class)->with([
     'unemployed',
     'released',

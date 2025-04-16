@@ -34,7 +34,7 @@ test('it deactivates an active title at the current datetime by default', functi
         })
         ->andReturn($title);
 
-    DeactivateAction::run($title);
+    resolve(DeactivateAction::class)->handle($title);
 });
 
 test('it deactivates an active title at a specific datetime', function () {
@@ -47,13 +47,13 @@ test('it deactivates an active title at a specific datetime', function () {
         ->with($title, $datetime)
         ->andReturn($title);
 
-    DeactivateAction::run($title, $datetime);
+    resolve(DeactivateAction::class)->handle($title, $datetime);
 });
 
 test('it throws exception for deactivating a non deactivatable title', function ($factoryState) {
     $title = Title::factory()->{$factoryState}()->create();
 
-    DeactivateAction::run($title);
+    resolve(DeactivateAction::class)->handle($title);
 })->throws(CannotBeDeactivatedException::class)->with([
     'unactivated',
     'withFutureActivation',

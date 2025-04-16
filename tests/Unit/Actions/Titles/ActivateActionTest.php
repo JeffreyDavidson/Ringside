@@ -34,7 +34,7 @@ test('it activates an activatable title at the current datetime by default', fun
         })
         ->andReturn($title);
 
-    ActivateAction::run($title);
+    resolve(ActivateAction::class)->handle($title);
 })->with([
     'unactivated',
     'inactive',
@@ -54,7 +54,7 @@ test('it activates an activatable title at a specific datetime', function ($fact
         ->with($title, $datetime)
         ->andReturns($title);
 
-    ActivateAction::run($title, $datetime);
+    resolve(ActivateAction::class)->handle($title, $datetime);
 })->with([
     'unactivated',
     'inactive',
@@ -87,7 +87,7 @@ test('it activates a retired title at the current datetime by default', function
         })
         ->andReturns($title);
 
-    ActivateAction::run($title);
+    resolve(ActivateAction::class)->handle($title);
 });
 
 test('it activates a retired title at a specific datetime', function () {
@@ -106,13 +106,13 @@ test('it activates a retired title at a specific datetime', function () {
         ->with($title, $datetime)
         ->andReturns($title);
 
-    ActivateAction::run($title, $datetime);
+    resolve(ActivateAction::class)->handle($title, $datetime);
 });
 
 test('it throws exception for activating a non activatable title', function ($factoryState) {
     $title = Title::factory()->{$factoryState}()->create();
 
-    ActivateAction::run($title);
+    resolve(ActivateAction::class)->handle($title);
 })->throws(CannotBeActivatedException::class)->with([
     'active',
 ]);

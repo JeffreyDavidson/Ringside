@@ -52,7 +52,7 @@ test('it retires a bookable wrestler at the current datetime by default', functi
         })
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -84,7 +84,7 @@ test('it retires a bookable wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler, $datetime);
+    resolve(RetireAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -134,7 +134,7 @@ test('it retires a suspended wrestler at the current datetime by default', funct
         })
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -169,7 +169,7 @@ test('it retires a suspended wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler, $datetime);
+    resolve(RetireAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -219,7 +219,7 @@ test('it retires an injured wrestler at the current datetime by default', functi
         })
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -254,7 +254,7 @@ test('it retires an injured wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler, $datetime);
+    resolve(RetireAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -288,7 +288,7 @@ test('it retires a released wrestler at the current datetime by default', functi
         })
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -317,7 +317,7 @@ test('it retires a released wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
 
-    RetireAction::run($wrestler, $datetime);
+    resolve(RetireAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerRetired::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -330,7 +330,7 @@ test('it retires a released wrestler at a specific datetime', function () {
 test('it throws exception trying to retire a non retirable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 })->throws(CannotBeRetiredException::class)->with([
     'unemployed',
     'withFutureEmployment',

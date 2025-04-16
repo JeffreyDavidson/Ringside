@@ -19,4 +19,5 @@ test('it deletes a stable', function () {
         ->with($stable);
 
     DeleteAction::run($stable);
+    resolve(DeleteAction::class)->handle($stable);
 });

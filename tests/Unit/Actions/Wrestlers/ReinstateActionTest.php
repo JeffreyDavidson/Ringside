@@ -35,7 +35,7 @@ test('it reinstates a suspended wrestler at the current datetime by default', fu
         })
         ->andReturn($wrestler);
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerReinstated::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -55,7 +55,7 @@ test('it reinstates a suspended wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    ReinstateAction::run($wrestler, $datetime);
+    resolve(ReinstateAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerReinstated::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -69,7 +69,7 @@ test('invoke throws exception for reinstating a non reinstatable wrestler', func
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
     $datetime = now();
 
-    ReinstateAction::run($wrestler, $datetime);
+    resolve(ReinstateAction::class)->handle($wrestler, $datetime);
 })->throws(CannotBeReinstatedException::class)->with([
     'bookable',
     'unemployed',

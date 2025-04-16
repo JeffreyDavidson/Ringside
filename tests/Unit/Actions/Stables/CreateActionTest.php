@@ -35,5 +35,5 @@ test('it creates a stable', function () {
     AddMembersAction::shouldRun()
         ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

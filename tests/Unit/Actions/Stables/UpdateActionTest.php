@@ -43,7 +43,7 @@ test('wrestlers of stable are synced when stable is updated', function () {
     UpdateMembersAction::shouldRun()
         ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
 
-    UpdateAction::run($stable, $data);
+    resolve(UpdateAction::class)->handle($stable, $data);
 });
 
 test('tag teams of stable are synced when stable is updated', function () {
@@ -74,7 +74,7 @@ test('tag teams of stable are synced when stable is updated', function () {
         ->once()
         ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
 
-    UpdateAction::run($stable, $data);
+    resolve(UpdateAction::class)->handle($stable, $data);
 });
 
 test('managers of stable are synced when stable is updated', function () {
@@ -104,5 +104,5 @@ test('managers of stable are synced when stable is updated', function () {
     UpdateMembersAction::shouldRun()
         ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
 
-    UpdateAction::run($stable, $data);
+    resolve(UpdateAction::class)->handle($stable, $data);
 });

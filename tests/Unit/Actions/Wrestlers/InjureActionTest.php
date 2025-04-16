@@ -35,7 +35,7 @@ test('it injures a bookable wrestler at the current datetime by default', functi
         })
         ->andReturn($wrestler);
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     Event::assertDispatched(WrestlerInjured::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -55,7 +55,7 @@ test('it injures a bookable wrestler at a specific datetime', function () {
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    InjureAction::run($wrestler, $datetime);
+    resolve(InjureAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerInjured::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -68,7 +68,7 @@ test('it injures a bookable wrestler at a specific datetime', function () {
 test('invoke throws exception for injuring a non injurable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 })->throws(CannotBeInjuredException::class)->with([
     'unemployed',
     'suspended',

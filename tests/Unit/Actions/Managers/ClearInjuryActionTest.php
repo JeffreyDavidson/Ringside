@@ -34,7 +34,7 @@ test('it clears an injury of an injured manager at the current datetime by defau
         })
         ->andReturn($manager);
 
-    ClearInjuryAction::run($manager);
+    resolve(ClearInjuryAction::class)->handle($manager);
 });
 
 test('it clears an injury of an injured manager at a specific datetime', function () {
@@ -47,13 +47,13 @@ test('it clears an injury of an injured manager at a specific datetime', functio
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    ClearInjuryAction::run($manager, $datetime);
+    resolve(ClearInjuryAction::class)->handle($manager, $datetime);
 });
 
 test('invoke throws exception for injuring a non injurable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    ClearInjuryAction::run($manager);
+    resolve(ClearInjuryAction::class)->handle($manager);
 })->throws(CannotBeClearedFromInjuryException::class)->with([
     'unemployed',
     'released',

@@ -25,7 +25,7 @@ test('it creates a referee', function () {
         ->with($data)
         ->andReturns($referee);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });
 
 test('it employs a referee if start date is provided', function () {
@@ -44,5 +44,5 @@ test('it employs a referee if start date is provided', function () {
         ->once()
         ->with($referee, $data->start_date);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

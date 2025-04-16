@@ -42,7 +42,7 @@ test('it retires an active title at the current datetime by default', function (
         })
         ->andReturns($title);
 
-    RetireAction::run($title);
+    resolve(RetireAction::class)->handle($title);
 });
 
 test('it retires an active title at a specific datetime', function () {
@@ -61,7 +61,7 @@ test('it retires an active title at a specific datetime', function () {
         ->with($title, $datetime)
         ->andReturns($title);
 
-    RetireAction::run($title, $datetime);
+    resolve(RetireAction::class)->handle($title, $datetime);
 });
 
 test('it retires an inactive title at the current datetime by default', function () {
@@ -82,7 +82,7 @@ test('it retires an inactive title at the current datetime by default', function
         })
         ->andReturns($title);
 
-    RetireAction::run($title);
+    resolve(RetireAction::class)->handle($title);
 });
 
 test('it retires an inactive title at a specific datetime', function () {
@@ -98,13 +98,13 @@ test('it retires an inactive title at a specific datetime', function () {
         ->with($title, $datetime)
         ->andReturns($title);
 
-    RetireAction::run($title, $datetime);
+    resolve(RetireAction::class)->handle($title, $datetime);
 });
 
 test('it throws exception for unretiring a non unretirable title', function ($factoryState) {
     $title = Title::factory()->{$factoryState}()->create();
 
-    RetireAction::run($title);
+    resolve(RetireAction::class)->handle($title);
 })->throws(CannotBeRetiredException::class)->with([
     'retired',
     'withFutureActivation',

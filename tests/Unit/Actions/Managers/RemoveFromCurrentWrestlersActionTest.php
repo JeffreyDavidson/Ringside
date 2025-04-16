@@ -21,5 +21,5 @@ test('it can remove current wrestlers from a manager', function () {
         ->once()
         ->with($manager);
 
-    RemoveFromCurrentWrestlersAction::run($manager);
+    resolve(RemoveFromCurrentWrestlersAction::class)->handle($manager);
 });

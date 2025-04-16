@@ -27,7 +27,7 @@ test('it creates a manager', function () {
     $this->managerRepository
         ->shouldNotReceive('employ');
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });
 
 test('an employment is created for the manager if start date is filled in request', function () {
@@ -46,5 +46,5 @@ test('an employment is created for the manager if start date is filled in reques
         ->once()
         ->with($manager, $data->start_date);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

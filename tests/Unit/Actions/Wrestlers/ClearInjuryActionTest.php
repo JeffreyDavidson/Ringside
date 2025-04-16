@@ -55,7 +55,7 @@ test('it clears an injury of an injured wrestler at a specific datetime', functi
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    ClearInjuryAction::run($wrestler, $datetime);
+    resolve(ClearInjuryAction::class)->handle($wrestler, $datetime);
 
     Event::assertDispatched(WrestlerClearedFromInjury::class, function ($event) use ($wrestler, $datetime) {
         expect($event->wrestler->is($wrestler))->toBeTrue()
@@ -68,7 +68,7 @@ test('it clears an injury of an injured wrestler at a specific datetime', functi
 test('it throws exception for injuring a non injurable wrestler', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-    ClearInjuryAction::run($wrestler);
+    resolve(ClearInjuryAction::class)->handle($wrestler);
 })->throws(CannotBeClearedFromInjuryException::class)->with([
     'unemployed',
     'released',

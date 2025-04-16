@@ -20,5 +20,5 @@ test('it creates a venue', function () {
         ->with($data)
         ->andReturns(new Venue());
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

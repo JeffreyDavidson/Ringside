@@ -37,7 +37,7 @@ test('it employs an employable referee at the current datetime by default', func
         })
         ->andReturn($referee);
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 })->with([
     'unemployed',
     'released',
@@ -57,7 +57,7 @@ test('it employs an employable referee at a specific datetime', function ($facto
         ->with($referee, $datetime)
         ->andReturns($referee);
 
-    EmployAction::run($referee, $datetime);
+    resolve(EmployAction::class)->handle($referee, $datetime);
 })->with([
     'unemployed',
     'released',
@@ -90,7 +90,7 @@ test('it employs a retired referee at the current datetime by default', function
         })
         ->andReturns($referee);
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 });
 
 test('it employs a retired referee at a specific datetime', function () {
@@ -109,13 +109,13 @@ test('it employs a retired referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturns($referee);
 
-    EmployAction::run($referee, $datetime);
+    resolve(EmployAction::class)->handle($referee, $datetime);
 });
 
 test('invoke employs a released referee and redirects', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 })->throws(CannotBeEmployedException::class)->with([
     'suspended',
     'injured',

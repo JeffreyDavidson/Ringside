@@ -31,7 +31,7 @@ test('it injures a bookable referee at the current datetime by default', functio
         })
         ->andReturn($referee);
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 });
 
 test('it injures a bookable referee at a specific datetime', function () {
@@ -44,13 +44,13 @@ test('it injures a bookable referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturn($referee);
 
-    InjureAction::run($referee, $datetime);
+    resolve(InjureAction::class)->handle($referee, $datetime);
 });
 
 test('it throws exception for injuring a non injurable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 })->throws(CannotBeInjuredException::class)->with([
     'unemployed',
     'suspended',

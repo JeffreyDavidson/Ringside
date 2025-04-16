@@ -52,7 +52,7 @@ test('it retires a available manager at the current datetime by default', functi
         })
         ->andReturns($manager);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -82,7 +82,7 @@ test('it retires a available manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturns($manager);
 
-    RetireAction::run($manager, $datetime);
+    resolve(RetireAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -132,7 +132,7 @@ test('it retires a suspended manager at the current datetime by default', functi
         })
         ->andReturns($manager);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -167,7 +167,7 @@ test('it retires a suspended manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturns($manager);
 
-    RetireAction::run($manager, $datetime);
+    resolve(RetireAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -217,7 +217,7 @@ test('it retires an injured manager at the current datetime by default', functio
         })
         ->andReturns($manager);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -252,7 +252,7 @@ test('it retires an injured manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturns($manager);
 
-    RetireAction::run($manager, $datetime);
+    resolve(RetireAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -286,7 +286,7 @@ test('it retires a released manager at the current datetime by default', functio
         })
         ->andReturns($manager);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -315,7 +315,7 @@ test('it retires a released manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturns($manager);
 
-    RetireAction::run($manager, $datetime);
+    resolve(RetireAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerRetired::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -328,7 +328,7 @@ test('it retires a released manager at a specific datetime', function () {
 test('it throws exception for retiring a non retirable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 })->throws(CannotBeRetiredException::class)->with([
     'retired',
     'withFutureEmployment',

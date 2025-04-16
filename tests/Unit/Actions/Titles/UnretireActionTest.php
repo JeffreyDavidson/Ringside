@@ -42,7 +42,7 @@ test('it unretires a retired title and redirects', function () {
         })
         ->andReturn($title);
 
-    UnretireAction::run($title);
+    resolve(UnretireAction::class)->handle($title);
 });
 
 test('it unretires a retired title at a specific datetime', function () {
@@ -61,13 +61,13 @@ test('it unretires a retired title at a specific datetime', function () {
         ->with($title, $datetime)
         ->andReturn($title);
 
-    UnretireAction::run($title, $datetime);
+    resolve(UnretireAction::class)->handle($title, $datetime);
 });
 
 test('it throws exception for unretiring a non unretirable title', function ($factoryState) {
     $title = Title::factory()->{$factoryState}()->create();
 
-    UnretireAction::run($title);
+    resolve(UnretireAction::class)->handle($title);
 })->throws(CannotBeUnretiredException::class)->with([
     'active',
     'inactive',

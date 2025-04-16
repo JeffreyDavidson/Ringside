@@ -31,7 +31,7 @@ test('it releases a bookable tag team at the current datetime by default', funct
         })
         ->andReturns($tagTeam);
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 });
 
 test('it releases a bookable tag team at a specific datetime', function () {
@@ -44,7 +44,7 @@ test('it releases a bookable tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    ReleaseAction::run($tagTeam, $datetime);
+    resolve(ReleaseAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it releases a suspended tag team at the current datetime by default', function () {
@@ -73,7 +73,7 @@ test('it releases a suspended tag team at the current datetime by default', func
         })
         ->andReturns($tagTeam);
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 });
 
 test('it releases a suspended tag team at a specific datetime', function () {
@@ -92,7 +92,7 @@ test('it releases a suspended tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    ReleaseAction::run($tagTeam, $datetime);
+    resolve(ReleaseAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it releases an unbookable tag team at the current datetime by default', function () {
@@ -113,7 +113,7 @@ test('it releases an unbookable tag team at the current datetime by default', fu
         })
         ->andReturns($tagTeam);
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 });
 
 test('it releases an unbookable tag team at a specific datetime', function () {
@@ -129,13 +129,13 @@ test('it releases an unbookable tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    ReleaseAction::run($tagTeam, $datetime);
+    resolve(ReleaseAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it throws an exception for releasing a non releasable tag team', function ($factoryState) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 })->throws(CannotBeReleasedException::class)->with([
     'unemployed',
     'withFutureEmployment',

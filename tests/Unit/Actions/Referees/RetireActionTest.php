@@ -51,7 +51,7 @@ test('it retires a bookable referee at the current datetime by default', functio
         })
         ->andReturns($referee);
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 });
 
 test('it retires a bookable referee at a specific datetime', function () {
@@ -76,7 +76,7 @@ test('it retires a bookable referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturns($referee);
 
-    RetireAction::run($referee, $datetime);
+    resolve(RetireAction::class)->handle($referee, $datetime);
 });
 
 test('it retires a suspended referee at the current datetime by default', function () {
@@ -119,7 +119,7 @@ test('it retires a suspended referee at the current datetime by default', functi
         })
         ->andReturns($referee);
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 });
 
 test('it retires a suspended referee at a specific datetime', function () {
@@ -147,7 +147,7 @@ test('it retires a suspended referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturns($referee);
 
-    RetireAction::run($referee, $datetime);
+    resolve(RetireAction::class)->handle($referee, $datetime);
 });
 
 test('it retires an injured referee at the current datetime by default', function () {
@@ -190,7 +190,7 @@ test('it retires an injured referee at the current datetime by default', functio
         })
         ->andReturns($referee);
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 });
 
 test('it retires an injured referee at a specific datetime', function () {
@@ -218,7 +218,7 @@ test('it retires an injured referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturns($referee);
 
-    RetireAction::run($referee, $datetime);
+    resolve(RetireAction::class)->handle($referee, $datetime);
 });
 
 test('it retires a released referee at the current datetime by default', function () {
@@ -245,7 +245,7 @@ test('it retires a released referee at the current datetime by default', functio
         })
         ->andReturns($referee);
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 });
 
 test('it retires a released referee at a specific datetime', function () {
@@ -267,13 +267,13 @@ test('it retires a released referee at a specific datetime', function () {
         ->with($referee, $datetime)
         ->andReturns($referee);
 
-    RetireAction::run($referee, $datetime);
+    resolve(RetireAction::class)->handle($referee, $datetime);
 });
 
 test('it throws exception for retiring a non retirable referee', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 })->throws(CannotBeRetiredException::class)->with([
     'retired',
     'withFutureEmployment',

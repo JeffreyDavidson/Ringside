@@ -27,7 +27,7 @@ test('it creates a title', function () {
     $this->titleRepository
         ->shouldNotReceive('activate');
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });
 
 test('it activates a title if activation date is filled in request', function () {
@@ -46,5 +46,5 @@ test('it activates a title if activation date is filled in request', function ()
         ->once()
         ->with($title, $data->activation_date);
 
-    CreateAction::run($data);
+    resolve(CreateAction::class)->handle($data);
 });

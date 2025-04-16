@@ -18,5 +18,5 @@ test('it deletes a venue', function () {
         ->once()
         ->with($venue);
 
-    DeleteAction::run($venue);
+    resolve(DeleteAction::class)->handle($venue);
 });

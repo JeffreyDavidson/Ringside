@@ -18,5 +18,5 @@ test('it restores a soft deleted venue', function () {
         ->once()
         ->with($venue);
 
-    RestoreAction::run($venue);
+    resolve(RestoreAction::class)->handle($venue);
 });

@@ -45,7 +45,7 @@ test('it retires a bookable tag team at the current datetime by default', functi
         })
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 });
 
 test('it retires a bookable tag team at a specific datetime', function () {
@@ -67,7 +67,7 @@ test('it retires a bookable tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam, $datetime);
+    resolve(RetireAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it retires a released tag team at the current datetime by default', function () {
@@ -91,7 +91,7 @@ test('it retires a released tag team at the current datetime by default', functi
         })
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 });
 
 test('it retires a released tag team at a specific datetime', function () {
@@ -113,7 +113,7 @@ test('it retires a released tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam, $datetime);
+    resolve(RetireAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it retires a suspended tag team at the current datetime by default', function () {
@@ -153,7 +153,7 @@ test('it retires a suspended tag team at the current datetime by default', funct
         })
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 });
 
 test('it retires a suspended tag team at a specific datetime', function () {
@@ -178,7 +178,7 @@ test('it retires a suspended tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam, $datetime);
+    resolve(RetireAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it retires an unbookable tag team at the current datetime by default', function () {
@@ -210,7 +210,7 @@ test('it retires an unbookable tag team at the current datetime by default', fun
         })
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 });
 
 test('it retires an unbookable tag team at a specific datetime', function () {
@@ -232,13 +232,13 @@ test('it retires an unbookable tag team at a specific datetime', function () {
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
-    RetireAction::run($tagTeam, $datetime);
+    resolve(RetireAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it throws exception for retiring a non retirable tag team', function ($factoryState) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 })->throws(CannotBeRetiredException::class)->with([
     'retired',
     'withFutureEmployment',

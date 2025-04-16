@@ -18,5 +18,5 @@ test('it deletes a manager', function () {
         ->once()
         ->with($manager);
 
-    DeleteAction::run($manager);
+    resolve(DeleteAction::class)->handle($manager);
 });

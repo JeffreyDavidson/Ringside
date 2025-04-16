@@ -18,5 +18,5 @@ test('it restores a deleted referee', function () {
         ->once()
         ->with($referee);
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 });

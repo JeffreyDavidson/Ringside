@@ -41,7 +41,7 @@ test('it releases an available manager at the current datetime by default', func
         ->once()
         ->andReturn($manager);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -67,7 +67,7 @@ test('it releases an available manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    ReleaseAction::run($manager, $datetime);
+    resolve(ReleaseAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -106,7 +106,7 @@ test('it releases a suspended manager at the current datetime by default', funct
         })
         ->andReturn($manager);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -135,7 +135,7 @@ test('it releases a suspended manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    ReleaseAction::run($manager, $datetime);
+    resolve(ReleaseAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -174,7 +174,7 @@ test('it releases an injured manager at the current datetime by default', functi
         })
         ->andReturn($manager);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -203,7 +203,7 @@ test('it releases an injured manager at a specific datetime', function () {
         ->with($manager, $datetime)
         ->andReturn($manager);
 
-    ReleaseAction::run($manager, $datetime);
+    resolve(ReleaseAction::class)->handle($manager, $datetime);
 
     Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
         expect($event->manager->is($manager))->toBeTrue()
@@ -216,7 +216,7 @@ test('it releases an injured manager at a specific datetime', function () {
 test('it throws an exception for releasing a non releasable manager', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 })->throws(CannotBeReleasedException::class)->with([
     'unemployed',
     'withFutureEmployment',
