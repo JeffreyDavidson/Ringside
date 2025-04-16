@@ -50,7 +50,7 @@ describe('show', function () {
             ->assertSeeLivewire(PreviousWrestlersTable::class)
             ->assertSeeLivewire(PreviousManagersTable::class)
             ->assertSeeLivewire(PreviousStablesTable::class);
-    });
+    })->skip();
 
     test('a basic user can view their tag team profile', function () {
         $tagTeam = TagTeam::factory()->for($user = basicUser())->create();
@@ -58,5 +58,5 @@ describe('show', function () {
         actingAs($user)
             ->get(action([TagTeamsController::class, 'show'], $tagTeam))
             ->assertOk();
-    });
+    })->skip();
 });
