@@ -24,6 +24,11 @@ final class EventMatchesTable extends DataTableComponent
     protected string $resourceName = 'matches';
 
     /**
+     * Event to use for component.
+     */
+    public ?int $eventId;
+
+    /**
      * @return Builder<EventMatch>
      */
     public function builder(): Builder
