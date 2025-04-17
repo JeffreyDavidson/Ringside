@@ -23,11 +23,6 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@latest
-        with:
-          pintVersion: 1.18.3
-
       - name: Install Pint
         run: composer global require laravel/pint
 
