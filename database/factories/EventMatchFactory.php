@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Event;
+use App\Models\EventMatch;
+use App\Models\EventMatchCompetitor;
 use App\Models\MatchType;
+use App\Models\Referee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +26,7 @@ class EventMatchFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'match_number' => fake()->randomDigitNotZero(),
-            'match_type_id' => MatchType::first()->id,
+            'match_type_id' => MatchType::inRandomOrder()->value('id'),
             'preview' => null,
         ];
     }
@@ -47,5 +50,26 @@ class EventMatchFactory extends Factory
         $this->hasAttached($competitors, ['side_number' => 0]);
 
         return $this;
+    }
+
+    /**
+     * Define the match's preview.
+     */
+    public function withPreview(): static
+    {
+        return $this->state([
+            'preview' => $this->faker->paragraphs(3, true)
+        ]);
+    }
+
+    public function assigned(): static
+    {
+        return $this
+            ->state([
+                'match_type_id' => $matchType = MatchType::inRandomOrder()->value('id')
+            ])
+            ->has(EventMatchCompetitor::factory()->count($matchType->sides))
+            ->hasAttached(Referee::factory())
+            ->withPreview();
     }
 }

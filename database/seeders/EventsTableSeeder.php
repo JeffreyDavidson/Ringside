@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\Event;
+use App\Models\EventMatch;
+use App\Models\Venue;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 
 class EventsTableSeeder extends Seeder
@@ -14,7 +17,52 @@ class EventsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        Event::factory()->scheduled()->count(5)->create();
-        Event::factory()->past()->count(100)->create();
+        // $this->createUnscheduledEvents();
+        $this->createScheduledEvents();
+        // $this->createPastEvents();
+    }
+
+    public function createUnscheduledEvents()
+    {
+        Event::factory()
+            ->unscheduled()
+            ->count(10)
+            ->create();
+    }
+
+    private function createScheduledEvents()
+    {
+        for ($x = 0; $x <= 5; $x++) {
+            Event::factory()
+                ->has(
+                    EventMatch::factory()
+                        ->sequence(fn (Sequence $sequence) => ['match_number' => $sequence->index + 1])
+                        ->assigned()
+                        ->count(8),
+                    'matches'
+                )
+                ->scheduled()
+                ->atRandomVenue()
+                ->create();
+        }
+    }
+
+    private function createPastEvents()
+    {
+        for ($x = 0; $x <= 100; $x++) {
+            Event::factory()
+                // ->has(
+                //     EventMatch::factory()
+                //         ->state(new Sequence(
+                //             fn($sequence) => ['match_number' => $sequence->index + 1]
+                //         ))
+                //         // ->sequence(fn (Sequence $sequence) => ['match_number' => $sequence->index + 1])
+                //         ->count(8),
+                //     'matches'
+                // )
+                ->past()
+                ->atRandomVenue()
+                ->create();
+        }
     }
 }

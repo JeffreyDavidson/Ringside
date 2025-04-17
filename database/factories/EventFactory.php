@@ -38,6 +38,7 @@ class EventFactory extends Factory
         return $this->state([
             'status' => EventStatus::Unscheduled,
             'date' => null,
+            'preview' => fake()->optional(.1)->paragraphs(3, true)
         ]);
     }
 
@@ -49,6 +50,7 @@ class EventFactory extends Factory
         return $this->state([
             'status' => EventStatus::Scheduled,
             'date' => Carbon::tomorrow()->hour(19),
+            'preview' => fake()->optional(.9)->paragraphs(3, true)
         ]);
     }
 
@@ -60,7 +62,7 @@ class EventFactory extends Factory
         return $this->state([
             'status' => EventStatus::Past,
             'date' => Carbon::yesterday(),
-        ]);
+        ])->withPreview();
     }
 
     /**
@@ -68,7 +70,9 @@ class EventFactory extends Factory
      */
     public function atVenue(Venue $venue): static
     {
-        return $this->state(['venue_id' => $venue->id]);
+        return $this->state([
+            'venue_id' => $venue->id
+        ]);
     }
 
     /**
@@ -87,14 +91,18 @@ class EventFactory extends Factory
      */
     public function withPreview(): static
     {
-        return $this->state(['preview' => $this->faker->paragraphs(3, true)]);
+        return $this->state([
+            'preview' => $this->faker->paragraphs(3, true)
+        ]);
     }
 
     /**
      * Define the event's preview.
      */
-    public function withVenue(): static
+    public function atRandomVenue(): static
     {
-        return $this->state(['venue_id' => Venue::inRandomOrder()->first()]);
+        return $this->state([
+            'venue_id' => Venue::inRandomOrder()->value('id'),
+        ]);
     }
 }
