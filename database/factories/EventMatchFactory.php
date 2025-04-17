@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Event;
-use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\MatchType;
 use App\Models\Referee;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Collection;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EventMatch>
@@ -31,21 +31,27 @@ class EventMatchFactory extends Factory
         ];
     }
 
-    public function withReferees($referees): static
+    /**
+     * @param Collection<Referee> $referees
+     */
+    public function withReferees(Collection $referees): static
     {
         $this->hasAttached($referees);
 
         return $this;
     }
 
-    public function withTitles($titles): static
+    /**
+     * @param Collection<Title> $referees
+     */
+    public function withTitles(Collection $titles): static
     {
         $this->hasAttached($titles);
 
         return $this;
     }
 
-    public function withCompetitors($competitors): static
+    public function withCompetitors(Collection $competitors): static
     {
         $this->hasAttached($competitors, ['side_number' => 0]);
 

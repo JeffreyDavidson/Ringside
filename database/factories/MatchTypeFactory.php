@@ -18,6 +18,7 @@ class MatchTypeFactory extends Factory
      */
     public function definition(): array
     {
+        /** @var string $name */
         $name = fake()->words(2, true);
 
         return [

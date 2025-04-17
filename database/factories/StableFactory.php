@@ -32,8 +32,11 @@ class StableFactory extends Factory
      */
     public function definition(): array
     {
+        /** @var string $name */
+        $name = fake()->words(2, true);
+
         return [
-            'name' => str(fake()->words(2, true))->title()->value(),
+            'name' => str($name)->title()->value(),
             'status' => ActivationStatus::Unactivated,
         ];
     }
