@@ -18,5 +18,5 @@ test('it restores a deleted tag team', function () {
         ->once()
         ->with($tagTeam);
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 });

@@ -50,7 +50,7 @@ test('it reinstates a suspended tag team at a specific datetime', function () {
 test('it throws exception for reinstating a non reinstatable tag team', function ($factoryState) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 })->throws(CannotBeReinstatedException::class)->with([
     'bookable',
     'withFutureEmployment',

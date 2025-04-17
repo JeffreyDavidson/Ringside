@@ -18,5 +18,5 @@ test('it restores a deleted title', function () {
         ->once()
         ->with($title);
 
-    RestoreAction::run($title);
+    resolve(RestoreAction::class)->handle($title);
 });

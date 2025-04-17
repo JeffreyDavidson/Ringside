@@ -18,5 +18,5 @@ test('it restores a deleted manager', function () {
         ->once()
         ->with($manager);
 
-    RestoreAction::run($manager);
+    resolve(RestoreAction::class)->handle($manager);
 });
