@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-final class StableManager extends Pivot
+class StableManager extends Pivot
 {
     protected $table = 'stables_managers';
 

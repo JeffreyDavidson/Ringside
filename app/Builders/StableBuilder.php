@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @extends Builder<\App\Models\Stable>
  */
-final class StableBuilder extends Builder
+class StableBuilder extends Builder
 {
     /**
      * Scope a query to include unactivated stables.

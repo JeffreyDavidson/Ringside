@@ -16,7 +16,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<EventForm, ?Event>
  */
-final class EventForm extends LivewireBaseForm
+class EventForm extends LivewireBaseForm
 {
     public $formModel;
 

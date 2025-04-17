@@ -8,7 +8,7 @@ use App\Data\StableData;
 use App\Models\Stable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class CreateAction extends BaseStableAction
+class CreateAction extends BaseStableAction
 {
     use AsAction;
 

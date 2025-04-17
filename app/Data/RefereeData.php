@@ -6,7 +6,7 @@ namespace App\Data;
 
 use Illuminate\Support\Carbon;
 
-final readonly class RefereeData
+readonly class RefereeData
 {
     /**
      * Create a new referee data instance.

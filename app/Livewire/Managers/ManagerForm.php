@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * @extends LivewireBaseForm<ManagerForm, ?Manager>
  */
-final class ManagerForm extends LivewireBaseForm
+class ManagerForm extends LivewireBaseForm
 {
     public $formModel;
 

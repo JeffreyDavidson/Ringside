@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-final class TagTeamEmployment extends Model
+class TagTeamEmployment extends Model
 {
     /** @use HasFactory<\Database\Factories\TagTeamEmploymentFactory> */
     use HasFactory;

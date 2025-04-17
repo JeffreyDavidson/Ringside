@@ -7,7 +7,7 @@ namespace App\Actions\Venues;
 use App\Models\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class DeleteAction extends BaseVenueAction
+class DeleteAction extends BaseVenueAction
 {
     use AsAction;
 

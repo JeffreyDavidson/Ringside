@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Models\Stable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class DeleteAction extends BaseStableAction
+class DeleteAction extends BaseStableAction
 {
     use AsAction;
 

@@ -8,7 +8,7 @@ use App\Models\Title;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-final class TitleChampionshipsTable extends DataTableComponent
+class TitleChampionshipsTable extends DataTableComponent
 {
     /**
      * Undocumented variable.

@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-final class CannotBeDeactivatedException extends Exception
+class CannotBeDeactivatedException extends Exception
 {
     public static function unactivated(): self
     {
