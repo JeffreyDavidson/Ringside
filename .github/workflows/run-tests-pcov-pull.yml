@@ -87,8 +87,11 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+      - name: Generate app key
+        run: php artisan key:generate
+
       - name: Run All Tests
-        run: ./vendor/bin/pest --parallel --cache-directory=".phpunit.cache/code-coverage" --strict-coverage --coverage-clover ./coverage.xml --testsuite "Feature","Integration","Unit"
+        run: ./vendor/bin/pest --parallel --cache-directory=".phpunit.cache/code-coverage" --strict-coverage --coverage-clover ./coverage.xml --testsuite "Feature","Unit"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5

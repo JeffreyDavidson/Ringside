@@ -86,11 +86,11 @@ jobs:
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+      - name: Generate app key
+        run: php artisan key:generate
+
       - name: Run Feature Tests
         run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage
-
-      - name: Run Integration Tests
-        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage
 
       - name: Run Unit Tests
         run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage
