@@ -17,12 +17,12 @@ class EventsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->createUnscheduledEvents();
+        $this->createUnscheduledEvents();
         $this->createScheduledEvents();
-        // $this->createPastEvents();
+        $this->createPastEvents();
     }
 
-    public function createUnscheduledEvents()
+    public function createUnscheduledEvents(): void
     {
         Event::factory()
             ->unscheduled()
@@ -30,7 +30,7 @@ class EventsTableSeeder extends Seeder
             ->create();
     }
 
-    private function createScheduledEvents()
+    private function createScheduledEvents(): void
     {
         for ($x = 0; $x <= 5; $x++) {
             Event::factory()
@@ -47,19 +47,18 @@ class EventsTableSeeder extends Seeder
         }
     }
 
-    private function createPastEvents()
+    private function createPastEvents(): void
     {
         for ($x = 0; $x <= 100; $x++) {
             Event::factory()
-                // ->has(
-                //     EventMatch::factory()
-                //         ->state(new Sequence(
-                //             fn($sequence) => ['match_number' => $sequence->index + 1]
-                //         ))
-                //         // ->sequence(fn (Sequence $sequence) => ['match_number' => $sequence->index + 1])
-                //         ->count(8),
-                //     'matches'
-                // )
+                ->has(
+                    EventMatch::factory()
+                        ->state(new Sequence(
+                            fn($sequence) => ['match_number' => $sequence->index + 1]
+                        ))
+                        ->count(8),
+                    'matches'
+                )
                 ->past()
                 ->atRandomVenue()
                 ->create();
