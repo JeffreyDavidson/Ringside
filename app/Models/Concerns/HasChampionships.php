@@ -21,7 +21,7 @@ trait HasChampionships
     }
 
     /**
-     * Retrieve the curren championship for a title.
+     * Retrieve the current champion for a title.
      *
      * @return HasOne<TitleChampionship, $this>
      */
@@ -31,7 +31,7 @@ trait HasChampionships
     }
 
     /**
-     * Retrieve the curren championship for a title.
+     * Retrieve the previous champion for a title.
      */
     public function previousChampionship(): BelongsToOne
     {
