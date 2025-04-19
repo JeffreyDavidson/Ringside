@@ -77,7 +77,7 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the title of the championship.
+     * Retrieve the title of the title championship.
      *
      * @return BelongsTo<Title, $this>
      */
@@ -87,7 +87,7 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the current champion of the title championship.
+     * Retrieve the champion of the title championship.
      *
      * @return MorphTo<Model, $this>
      */
@@ -117,7 +117,7 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the number of days for a title championship.
+     * Retrieve the number of days for a title championship reign.
      */
     public function lengthInDays(): int
     {
