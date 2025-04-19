@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\TitleChampionshipFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,16 +25,16 @@ use Illuminate\Support\Carbon;
  * @property-read TFactory|null $use_factory
  * @property-read Title|null $title
  *
- * @method static \Database\Factories\TitleChampionshipFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship query()
+ * @method static TitleChampionshipFactory factory($count = null, $state = [])
+ * @method static Builder<static>|TitleChampionship newModelQuery()
+ * @method static Builder<static>|TitleChampionship newQuery()
+ * @method static Builder<static>|TitleChampionship query()
  *
  * @mixin \Eloquent
  */
 class TitleChampionship extends Model
 {
-    /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
+    /** @use HasFactory<TitleChampionshipFactory> */
     use HasFactory;
 
     /**
