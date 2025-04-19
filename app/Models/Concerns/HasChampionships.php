@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use Ankurk91\Eloquent\HasBelongsToOne;
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 trait HasChampionships
 {
-    use HasBelongsToOne;
-
     /**
      * Retrieve the championships for a title.
      *
@@ -25,23 +21,23 @@ trait HasChampionships
     }
 
     /**
-     * Retrieve the curren championship for a title.
+     * Retrieve the current champion for a title.
      *
-     * @return HasOne<TitleChampionship, $this>
+     * @return MorphTo<Model, $this>
      */
-    public function currentChampionship(): HasOne
+    public function currentChampion(): MorphTo
     {
-        return $this->hasOne(TitleChampionship::class)->whereNull('lost_at')->latestOfMany();
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
     }
 
     /**
-     * Retrieve the curren championship for a title.
+     * Retrieve the previous champion for a title.
+     *
+     * @return MorphTo<Model, $this>
      */
-    public function previousChampionship(): BelongsToOne
+    public function previousChampion(): MorphTo
     {
-        return $this->belongsToOne(TitleChampionship::class, 'title_championships')
-            ->wherePivotNotNull('lost_at')
-            ->orderByPivot('lost_at', 'desc');
+        return $this->morphTo(__FUNCTION__, 'previous_champion_type', 'previous_champion_id');
     }
 
     /**
@@ -49,6 +45,6 @@ trait HasChampionships
      */
     public function isVacant(): bool
     {
-        return $this->currentChampionship?->currentChampion === null;
+        return $this->currentChampion === null;
     }
 }
