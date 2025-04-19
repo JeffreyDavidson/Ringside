@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use Ankurk91\Eloquent\HasBelongsToOne;
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\TitleChampionship;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait HasChampionships
 {
-    use HasBelongsToOne;
-
     /**
      * Retrieve the championships for a title.
      *
