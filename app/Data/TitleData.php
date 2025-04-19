@@ -6,7 +6,7 @@ namespace App\Data;
 
 use Illuminate\Support\Carbon;
 
-final readonly class TitleData
+readonly class TitleData
 {
     public function __construct(
         public string $name,

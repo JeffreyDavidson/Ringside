@@ -7,7 +7,7 @@ namespace App\Data;
 use App\Models\Venue;
 use Illuminate\Support\Carbon;
 
-final readonly class EventData
+readonly class EventData
 {
     /**
      * Create a new event data instance.
