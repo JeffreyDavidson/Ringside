@@ -7,7 +7,7 @@ namespace App\Repositories;
 use App\Data\EventData;
 use App\Models\Event;
 
-final class EventRepository
+class EventRepository
 {
     /**
      * Create a new event with the given data.

@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-final class ManagersTable extends BaseTableWithActions
+class ManagersTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

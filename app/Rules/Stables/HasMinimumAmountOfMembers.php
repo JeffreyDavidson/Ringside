@@ -11,7 +11,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;
 
-final class HasMinimumAmountOfMembers implements ValidationRule
+class HasMinimumAmountOfMembers implements ValidationRule
 {
     /**
      * @param  Collection<int, Wrestler>  $wrestlers

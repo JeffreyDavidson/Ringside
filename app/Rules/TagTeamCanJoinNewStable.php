@@ -8,7 +8,7 @@ use App\Models\TagTeam;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-final class TagTeamCanJoinNewStable implements ValidationRule
+class TagTeamCanJoinNewStable implements ValidationRule
 {
     /**
      * Determine if the validation rule passes.

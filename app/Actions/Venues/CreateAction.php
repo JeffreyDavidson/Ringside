@@ -8,7 +8,7 @@ use App\Data\VenueData;
 use App\Models\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class CreateAction extends BaseVenueAction
+class CreateAction extends BaseVenueAction
 {
     use AsAction;
 

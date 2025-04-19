@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-final class StablesTable extends BaseTableWithActions
+class StablesTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 
