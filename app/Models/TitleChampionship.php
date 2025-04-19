@@ -16,11 +16,11 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $title_id
  * @property int $event_match_id
- * @property int $new_champion_id
- * @property string $new_champion_type
+ * @property int $champion_id
+ * @property string $champion_type
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
- * @property-read Wrestler|TagTeam $currentChampion
+ * @property-read Wrestler|TagTeam $champion
  * @property-read EventMatch|null $eventMatch
  * @property-read TFactory|null $use_factory
  * @property-read Title|null $title
@@ -87,9 +87,9 @@ class TitleChampionship extends Model
      *
      * @return MorphTo<Model, $this>
      */
-    public function newChampion(): MorphTo
+    public function champion(): MorphTo
     {
-        return $this->morphTo(__FUNCTION__, 'new_champion_type', 'new_champion_id');
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
     }
 
     /**
