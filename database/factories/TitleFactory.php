@@ -6,14 +6,16 @@ namespace Database\Factories;
 
 use App\Enums\ActivationStatus;
 use App\Enums\TitleType;
+use App\Models\Title;
 use App\Models\TitleActivation;
 use App\Models\TitleChampionship;
 use App\Models\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Title>
+ * @extends Factory<Title>
  */
 class TitleFactory extends Factory
 {
