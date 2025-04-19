@@ -16,12 +16,9 @@ use Illuminate\Support\Carbon;
  * @property int $event_match_id
  * @property int $new_champion_id
  * @property string $new_champion_type
- * @property int $former_champion_id
- * @property string $former_champion_type
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
  * @property-read Wrestler|TagTeam $currentChampion
- * @property-read Wrestler|TagTeam|null $previousChampion
  * @property-read EventMatch|null $eventMatch
  * @property-read TFactory|null $use_factory
  * @property-read Title|null $title
@@ -91,16 +88,6 @@ class TitleChampionship extends Model
     public function newChampion(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'new_champion_type', 'new_champion_id');
-    }
-
-    /**
-     * Retrieve the current champion of the title championship.
-     *
-     * @return MorphTo<Model, $this>
-     */
-    public function previousChampion(): MorphTo
-    {
-        return $this->morphTo(__FUNCTION__, 'former_champion_type', 'former_champion_id');
     }
 
     /**
