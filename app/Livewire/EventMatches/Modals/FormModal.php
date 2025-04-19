@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<EventMatchForm, EventMatch>
  */
-final class FormModal extends BaseModal
+class FormModal extends BaseModal
 {
     use PresentsMatchTypesList;
     use PresentsRefereesList;

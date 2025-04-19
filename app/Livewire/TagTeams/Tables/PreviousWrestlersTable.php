@@ -9,7 +9,7 @@ use App\Models\TagTeamPartner;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousWrestlersTable extends BasePreviousWrestlersTable
+class PreviousWrestlersTable extends BasePreviousWrestlersTable
 {
     protected string $databaseTableName = 'tag_team_wrestler';
 

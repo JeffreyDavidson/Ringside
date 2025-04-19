@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-final class WrestlerSuspension extends Model
+class WrestlerSuspension extends Model
 {
     /** @use HasFactory<\Database\Factories\WrestlerSuspensionFactory> */
     use HasFactory;

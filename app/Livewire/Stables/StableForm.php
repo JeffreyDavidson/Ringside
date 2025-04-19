@@ -12,7 +12,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<StableForm, ?Stable>
  */
-final class StableForm extends LivewireBaseForm
+class StableForm extends LivewireBaseForm
 {
     public $formModel;
 

@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-final class StableWrestler extends Pivot
+class StableWrestler extends Pivot
 {
     protected $table = 'stables_wrestlers';
 

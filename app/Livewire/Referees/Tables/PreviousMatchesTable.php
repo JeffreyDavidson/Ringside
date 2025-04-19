@@ -10,7 +10,7 @@ use App\Models\EventMatch;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousMatchesTable extends BasePreviousMatchesTable
+class PreviousMatchesTable extends BasePreviousMatchesTable
 {
     /**
      * Referee to use for component.

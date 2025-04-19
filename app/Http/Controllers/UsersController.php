@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
-final class UsersController
+class UsersController
 {
     public function index(): View
     {

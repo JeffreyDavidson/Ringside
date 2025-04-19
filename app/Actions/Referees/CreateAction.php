@@ -8,7 +8,7 @@ use App\Data\RefereeData;
 use App\Models\Referee;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class CreateAction extends BaseRefereeAction
+class CreateAction extends BaseRefereeAction
 {
     use AsAction;
 

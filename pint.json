@@ -10,7 +10,6 @@
         "modernize_strpos": true,
         "lowercase_keywords": true,
         "lowercase_static_reference": true,
-        "final_class": true,
         "fully_qualified_strict_types": {
             "import_symbols": false,
             "leading_backslash_in_global_namespace": false

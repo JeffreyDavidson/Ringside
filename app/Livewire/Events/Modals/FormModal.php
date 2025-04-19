@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<EventForm, Event>
  */
-final class FormModal extends BaseModal
+class FormModal extends BaseModal
 {
     use PresentsVenuesList;
 

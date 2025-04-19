@@ -9,7 +9,7 @@ use App\Models\WrestlerManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousManagersTable extends BasePreviousManagersTable
+class PreviousManagersTable extends BasePreviousManagersTable
 {
     /**
      * Wrestler to use for component.

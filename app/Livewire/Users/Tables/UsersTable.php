@@ -12,7 +12,7 @@ use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\User;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-final class UsersTable extends BaseTableWithActions
+class UsersTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

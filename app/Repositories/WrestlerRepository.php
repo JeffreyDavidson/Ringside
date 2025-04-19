@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-final class WrestlerRepository
+class WrestlerRepository
 {
     /**
      * Undocumented function.

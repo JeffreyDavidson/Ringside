@@ -15,7 +15,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<TitleForm, ?Title>
  */
-final class TitleForm extends LivewireBaseForm
+class TitleForm extends LivewireBaseForm
 {
     public $formModel;
 

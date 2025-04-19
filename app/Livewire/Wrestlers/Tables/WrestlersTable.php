@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 
-final class WrestlersTable extends BaseTableWithActions
+class WrestlersTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

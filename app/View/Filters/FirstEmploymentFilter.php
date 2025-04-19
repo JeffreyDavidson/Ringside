@@ -12,7 +12,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
 use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
 use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
 
-final class FirstEmploymentFilter extends DateRangeFilter
+class FirstEmploymentFilter extends DateRangeFilter
 {
     use HandlesDates,
         HasConfig,

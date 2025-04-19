@@ -8,7 +8,7 @@ use App\Models\TagTeam;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-final class TagTeamsController
+class TagTeamsController
 {
     /**
      * View a list of tag teams.

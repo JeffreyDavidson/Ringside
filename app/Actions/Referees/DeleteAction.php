@@ -7,7 +7,7 @@ namespace App\Actions\Referees;
 use App\Models\Referee;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class DeleteAction extends BaseRefereeAction
+class DeleteAction extends BaseRefereeAction
 {
     use AsAction;
 

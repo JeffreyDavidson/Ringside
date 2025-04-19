@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Models\Stable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class RestoreAction extends BaseStableAction
+class RestoreAction extends BaseStableAction
 {
     use AsAction;
 

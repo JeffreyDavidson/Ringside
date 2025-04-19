@@ -13,7 +13,7 @@ use Livewire\Attributes\Validate;
 /**
  * @extends LivewireBaseForm<RefereeForm, ?Referee>
  */
-final class RefereeForm extends LivewireBaseForm
+class RefereeForm extends LivewireBaseForm
 {
     public $formModel;
 

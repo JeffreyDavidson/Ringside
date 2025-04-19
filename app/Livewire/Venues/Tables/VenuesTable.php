@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-final class VenuesTable extends BaseTableWithActions
+class VenuesTable extends BaseTableWithActions
 {
     protected string $databaseTableName = 'venues';
 

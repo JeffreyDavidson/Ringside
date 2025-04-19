@@ -8,7 +8,7 @@ use App\Models\Manager;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class ManagerPolicy
+class ManagerPolicy
 {
     use HandlesAuthorization;
 

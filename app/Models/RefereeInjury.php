@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-final class RefereeInjury extends Model
+class RefereeInjury extends Model
 {
     /** @use HasFactory<\Database\Factories\RefereeInjuryFactory> */
     use HasFactory;

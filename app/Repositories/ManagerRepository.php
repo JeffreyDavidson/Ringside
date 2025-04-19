@@ -10,7 +10,7 @@ use App\Models\TagTeam;
 use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 
-final class ManagerRepository
+class ManagerRepository
 {
     /**
      * Create a new manager with the given data.

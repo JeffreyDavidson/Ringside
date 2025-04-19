@@ -77,7 +77,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-final class Manager extends Model implements CanBeAStableMember, Employable, Injurable, Retirable, Suspendable
+class Manager extends Model implements CanBeAStableMember, Employable, Injurable, Retirable, Suspendable
 {
     use Concerns\CanJoinStables;
     use Concerns\IsEmployable;

@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-final class StableActivation extends Model
+class StableActivation extends Model
 {
     /** @use HasFactory<\Database\Factories\StableActivationFactory> */
     use HasFactory;

@@ -13,7 +13,7 @@ use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-final class EmploymentStartDateCanBeChanged implements ValidationRule
+class EmploymentStartDateCanBeChanged implements ValidationRule
 {
     public function __construct(private Wrestler|Referee|TagTeam|Manager|null $model) {}
 

@@ -8,7 +8,7 @@ use App\Models\Stable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-final class StablesController
+class StablesController
 {
     /**
      * View a list of stables.

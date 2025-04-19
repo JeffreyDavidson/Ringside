@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-final class MatchType extends Model
+class MatchType extends Model
 {
     /** @use HasFactory<\Database\Factories\MatchTypeFactory> */
     use HasFactory;

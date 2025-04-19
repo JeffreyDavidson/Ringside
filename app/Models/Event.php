@@ -40,7 +40,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @mixin \Eloquent
  */
-final class Event extends Model
+class Event extends Model
 {
     /** @use HasBuilder<EventBuilder> */
     use HasBuilder;

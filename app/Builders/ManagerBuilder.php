@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @extends Builder<TModel>
  */
-final class ManagerBuilder extends Builder
+class ManagerBuilder extends Builder
 {
     /**
      * Scope a query to include available managers.

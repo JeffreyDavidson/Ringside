@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * @extends BaseModal<ManagerForm, Manager>
  */
-final class FormModal extends BaseModal
+class FormModal extends BaseModal
 {
     protected string $modalFormPath = 'managers.modals.form-modal';
 

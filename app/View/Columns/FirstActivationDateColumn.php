@@ -8,7 +8,7 @@ use App\Models\Stable;
 use App\Models\Title;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-final class FirstActivationDateColumn extends Column
+class FirstActivationDateColumn extends Column
 {
     public function __construct(string $title, ?string $from = null)
     {

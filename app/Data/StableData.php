@@ -7,7 +7,7 @@ namespace App\Data;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-final readonly class StableData
+readonly class StableData
 {
     /**
      * Create a new stable data instance.

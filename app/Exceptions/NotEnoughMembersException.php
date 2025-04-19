@@ -7,7 +7,7 @@ namespace App\Exceptions;
 use App\Models\TagTeam;
 use Exception;
 
-final class NotEnoughMembersException extends Exception
+class NotEnoughMembersException extends Exception
 {
     /**
      * The default message for sending with exception.

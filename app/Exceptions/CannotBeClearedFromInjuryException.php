@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-final class CannotBeClearedFromInjuryException extends Exception
+class CannotBeClearedFromInjuryException extends Exception
 {
     public static function notInjured(): self
     {

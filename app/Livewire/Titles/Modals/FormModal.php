@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 /**
  * @extends BaseModal<TitleForm, Title>
  */
-final class FormModal extends BaseModal
+class FormModal extends BaseModal
 {
     protected string $modalFormPath = 'titles.modals.form-modal';
 

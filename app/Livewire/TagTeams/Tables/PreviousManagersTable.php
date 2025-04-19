@@ -9,7 +9,7 @@ use App\Models\TagTeamManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousManagersTable extends BasePreviousManagersTable
+class PreviousManagersTable extends BasePreviousManagersTable
 {
     protected string $databaseTableName = 'tag_teams_managers';
 

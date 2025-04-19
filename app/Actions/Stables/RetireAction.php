@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class RetireAction extends BaseStableAction
+class RetireAction extends BaseStableAction
 {
     use AsAction;
 

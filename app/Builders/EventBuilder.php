@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @extends Builder<TModel>
  */
-final class EventBuilder extends Builder
+class EventBuilder extends Builder
 {
     /**
      * Scope a query to include scheduled events.

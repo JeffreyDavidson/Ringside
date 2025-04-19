@@ -13,7 +13,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class ActivateAction extends BaseStableAction
+class ActivateAction extends BaseStableAction
 {
     use AsAction;
 

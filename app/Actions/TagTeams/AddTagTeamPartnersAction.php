@@ -8,7 +8,7 @@ use App\Models\TagTeam;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class AddTagTeamPartnersAction extends BaseTagTeamAction
+class AddTagTeamPartnersAction extends BaseTagTeamAction
 {
     use AsAction;
 

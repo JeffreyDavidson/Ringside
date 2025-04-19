@@ -40,7 +40,7 @@ use Illuminate\Notifications\Notifiable;
  *
  * @mixin \Eloquent
  */
-final class User extends Authenticatable
+class User extends Authenticatable
 {
     /** @use HasBuilder<UserBuilder> */
     use HasBuilder;

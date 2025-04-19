@@ -8,7 +8,7 @@ use App\Data\RefereeData;
 use App\Models\Referee;
 use Illuminate\Support\Carbon;
 
-final class RefereeRepository
+class RefereeRepository
 {
     /**
      * Create a new referee with the given data.

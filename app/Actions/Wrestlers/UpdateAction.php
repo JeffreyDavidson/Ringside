@@ -8,7 +8,7 @@ use App\Data\WrestlerData;
 use App\Models\Wrestler;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class UpdateAction extends BaseWrestlerAction
+class UpdateAction extends BaseWrestlerAction
 {
     use AsAction;
 

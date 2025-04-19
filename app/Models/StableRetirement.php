@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @mixin \Eloquent
  */
-final class StableRetirement extends Model
+class StableRetirement extends Model
 {
     /** @use HasFactory<\Database\Factories\StableRetirementFactory> */
     use HasFactory;
