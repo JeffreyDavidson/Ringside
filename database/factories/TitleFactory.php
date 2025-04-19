@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ActivationStatus;
+use App\Enums\TitleType;
 use App\Models\TitleActivation;
 use App\Models\TitleChampionship;
 use App\Models\TitleRetirement;
@@ -26,6 +27,7 @@ class TitleFactory extends Factory
         return [
             'name' => str(fake()->unique()->words(2, true))->title().' Title',
             'status' => ActivationStatus::Unactivated,
+            'type' => $titleType,
         ];
     }
 
@@ -75,5 +77,15 @@ class TitleFactory extends Factory
             TitleChampionship::factory()->for($champion, 'champion'),
             'championships'
         );
+    }
+
+    public function singles(): static
+    {
+        return $this->state(fn () => ['type' => TitleType::Singles]);
+    }
+
+    public function tagTeam(): static
+    {
+        return $this->state(fn () => ['type' => TitleType::TagTeam]);
     }
 }
