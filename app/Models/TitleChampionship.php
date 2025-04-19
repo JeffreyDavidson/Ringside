@@ -54,8 +54,8 @@ class TitleChampionship extends Model
      */
     protected $fillable = [
         'title_id',
-        'champion_id',
         'champion_type',
+        'champion_id',
         'won_event_match_id',
         'lost_event_match_id',
         'won_at',
