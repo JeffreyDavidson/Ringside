@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('titles_championships', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(EventMatch::class);
             $table->foreignIdFor(Title::class);
-            $table->morphs('new_champion', 'new_champion');
-            $table->nullableMorphs('former_champion', 'former_champion');
+            $table->morphs('champion');
+            $table->foreignIdFor(EventMatch::class, 'won_event_match_id');
+            $table->foreignIdFor(EventMatch::class, 'lost_event_match_id');
             $table->dateTime('won_at');
             $table->dateTime('lost_at')->nullable();
             $table->timestamps();
