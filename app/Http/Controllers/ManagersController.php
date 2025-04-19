@@ -8,7 +8,7 @@ use App\Models\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 
-final class ManagersController
+class ManagersController
 {
     /**
      * View a list of managers.

@@ -33,7 +33,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-final class TitleChampionship extends Model
+class TitleChampionship extends Model
 {
     /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
     use HasFactory;

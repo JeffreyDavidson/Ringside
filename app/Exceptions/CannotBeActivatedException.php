@@ -6,7 +6,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-final class CannotBeActivatedException extends Exception
+class CannotBeActivatedException extends Exception
 {
     public static function activated(): self
     {

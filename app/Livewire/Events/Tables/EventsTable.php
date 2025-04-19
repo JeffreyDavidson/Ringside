@@ -24,7 +24,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-final class EventsTable extends BaseTableWithActions
+class EventsTable extends BaseTableWithActions
 {
     use HasStatusColumn, HasStatusFilter;
 

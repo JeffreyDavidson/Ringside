@@ -10,7 +10,7 @@ use App\Models\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
+class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
     /**
      * Wrestler to use for component.

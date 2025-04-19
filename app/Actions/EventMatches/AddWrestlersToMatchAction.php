@@ -9,7 +9,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class AddWrestlersToMatchAction extends BaseEventMatchAction
+class AddWrestlersToMatchAction extends BaseEventMatchAction
 {
     use AsAction;
 

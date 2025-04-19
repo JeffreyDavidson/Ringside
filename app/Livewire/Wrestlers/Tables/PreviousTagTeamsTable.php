@@ -9,7 +9,7 @@ use App\Models\TagTeamPartner;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
+class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
 {
     /**
      * Wrestler to use for component.

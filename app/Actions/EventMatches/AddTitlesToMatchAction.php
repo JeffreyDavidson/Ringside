@@ -9,7 +9,7 @@ use App\Models\Title;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class AddTitlesToMatchAction extends BaseEventMatchAction
+class AddTitlesToMatchAction extends BaseEventMatchAction
 {
     use AsAction;
 

@@ -10,7 +10,7 @@ use App\Models\TitleChampionship;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
+class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTable
 {
     /**
      * Tag Team to use for component.

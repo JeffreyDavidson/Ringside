@@ -9,7 +9,7 @@ use App\Models\Stable;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class UnretireAction extends BaseStableAction
+class UnretireAction extends BaseStableAction
 {
     use AsAction;
 

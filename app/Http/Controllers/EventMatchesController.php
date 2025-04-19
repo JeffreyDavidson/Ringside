@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use Illuminate\Contracts\View\View;
 
-final class EventMatchesController
+class EventMatchesController
 {
     /**
      * View a list of events matches.

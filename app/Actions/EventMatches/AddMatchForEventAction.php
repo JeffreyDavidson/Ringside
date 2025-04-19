@@ -10,7 +10,7 @@ use App\Models\EventMatch;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class AddMatchForEventAction extends BaseEventMatchAction
+class AddMatchForEventAction extends BaseEventMatchAction
 {
     use AsAction;
 

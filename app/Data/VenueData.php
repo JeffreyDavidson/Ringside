@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-final readonly class VenueData
+readonly class VenueData
 {
     /**
      * Create a new venue data instance.
