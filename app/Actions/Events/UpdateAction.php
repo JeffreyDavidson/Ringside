@@ -8,7 +8,7 @@ use App\Data\EventData;
 use App\Models\Event;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class UpdateAction extends BaseEventAction
+class UpdateAction extends BaseEventAction
 {
     use AsAction;
 

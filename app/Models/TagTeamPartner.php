@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @mixin \Eloquent
  */
-final class TagTeamPartner extends Pivot
+class TagTeamPartner extends Pivot
 {
     /**
      * The table associated with the model.

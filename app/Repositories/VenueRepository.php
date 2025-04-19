@@ -7,7 +7,7 @@ namespace App\Repositories;
 use App\Data\VenueData;
 use App\Models\Venue;
 
-final class VenueRepository
+class VenueRepository
 {
     /**
      * Create a new venue with the given data.

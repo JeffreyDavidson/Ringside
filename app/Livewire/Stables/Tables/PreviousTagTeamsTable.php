@@ -9,7 +9,7 @@ use App\Models\StableTagTeam;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
+class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
 {
     protected string $databaseTableName = 'stables_tag_teams';
 

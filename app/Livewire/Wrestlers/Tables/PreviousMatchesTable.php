@@ -11,7 +11,7 @@ use App\Models\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousMatchesTable extends BasePreviousMatchesTable
+class PreviousMatchesTable extends BasePreviousMatchesTable
 {
     /**
      * Wrestler to use for component.

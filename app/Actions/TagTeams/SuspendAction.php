@@ -11,7 +11,7 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class SuspendAction extends BaseTagTeamAction
+class SuspendAction extends BaseTagTeamAction
 {
     use AsAction;
 

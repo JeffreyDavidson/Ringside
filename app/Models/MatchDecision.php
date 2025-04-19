@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @mixin \Eloquent
  */
-final class MatchDecision extends Model
+class MatchDecision extends Model
 {
     /** @use HasFactory<\Database\Factories\MatchDecisionFactory> */
     use HasFactory;

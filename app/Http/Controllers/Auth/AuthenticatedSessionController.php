@@ -10,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-final class AuthenticatedSessionController
+class AuthenticatedSessionController
 {
     /**
      * Display the login view.

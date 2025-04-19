@@ -9,7 +9,7 @@ use App\Models\TagTeam;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class AddTagTeamsToMatchAction extends BaseEventMatchAction
+class AddTagTeamsToMatchAction extends BaseEventMatchAction
 {
     use AsAction;
 

@@ -9,7 +9,7 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class SuspendAction extends BaseManagerAction
+class SuspendAction extends BaseManagerAction
 {
     use AsAction;
 

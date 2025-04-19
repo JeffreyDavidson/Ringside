@@ -8,7 +8,7 @@ use App\Models\TagTeam;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-final class TagTeamPolicy
+class TagTeamPolicy
 {
     use HandlesAuthorization;
 

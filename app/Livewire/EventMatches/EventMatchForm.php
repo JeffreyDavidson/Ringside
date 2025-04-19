@@ -12,7 +12,7 @@ use Illuminate\Validation\Rules\Exists;
 /**
  * @extends LivewireBaseForm<EventMatchForm, ?EventMatch>
  */
-final class EventMatchForm extends LivewireBaseForm
+class EventMatchForm extends LivewireBaseForm
 {
     public $formModel;
 

@@ -11,7 +11,7 @@ use App\Models\User;
 /**
  * @extends BaseModal<UserForm, User>
  */
-final class FormModal extends BaseModal
+class FormModal extends BaseModal
 {
     protected string $modalFormPath = 'users.modals.form-modal';
 

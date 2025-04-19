@@ -10,7 +10,7 @@ use App\Models\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class ReleaseAction extends BaseManagerAction
+class ReleaseAction extends BaseManagerAction
 {
     use AsAction;
 

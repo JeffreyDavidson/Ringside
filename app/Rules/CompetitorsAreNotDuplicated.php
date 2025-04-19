@@ -8,7 +8,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
-final class CompetitorsAreNotDuplicated implements ValidationRule
+class CompetitorsAreNotDuplicated implements ValidationRule
 {
     /**
      * Run the validation rule.

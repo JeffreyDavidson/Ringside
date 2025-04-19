@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @extends Builder<\App\Models\Wrestler>
  */
-final class WrestlerBuilder extends Builder
+class WrestlerBuilder extends Builder
 {
     public function unemployed(): static
     {

@@ -8,7 +8,7 @@ use App\Data\TagTeamData;
 use App\Models\TagTeam;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class CreateAction extends BaseTagTeamAction
+class CreateAction extends BaseTagTeamAction
 {
     use AsAction;
 

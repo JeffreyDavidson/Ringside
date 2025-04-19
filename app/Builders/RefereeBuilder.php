@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @extends Builder<TModel>
  */
-final class RefereeBuilder extends Builder
+class RefereeBuilder extends Builder
 {
     /**
      * Scope a query to include bookable referees.

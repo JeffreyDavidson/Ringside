@@ -7,7 +7,7 @@ namespace App\Actions\Managers;
 use App\Models\Manager;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class RestoreAction extends BaseManagerAction
+class RestoreAction extends BaseManagerAction
 {
     use AsAction;
 

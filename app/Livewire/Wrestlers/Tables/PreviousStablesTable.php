@@ -9,7 +9,7 @@ use App\Models\StableWrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousStablesTable extends BasePreviousStablesTable
+class PreviousStablesTable extends BasePreviousStablesTable
 {
     /**
      * Wrestler to use for component.

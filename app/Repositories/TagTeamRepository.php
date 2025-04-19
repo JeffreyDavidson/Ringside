@@ -10,7 +10,7 @@ use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-final class TagTeamRepository
+class TagTeamRepository
 {
     /**
      * Create a new tag team with the given data.

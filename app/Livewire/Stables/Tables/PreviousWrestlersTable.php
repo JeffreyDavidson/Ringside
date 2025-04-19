@@ -9,7 +9,7 @@ use App\Models\StableWrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
-final class PreviousWrestlersTable extends BasePreviousWrestlersTable
+class PreviousWrestlersTable extends BasePreviousWrestlersTable
 {
     protected string $databaseTableName = 'stables_wrestlers';
 
