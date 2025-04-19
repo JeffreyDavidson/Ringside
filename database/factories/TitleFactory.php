@@ -24,8 +24,10 @@ class TitleFactory extends Factory
      */
     public function definition(): array
     {
+        $titleType = fake()->randomElement(TitleType::cases());
+
         return [
-            'name' => str(fake()->unique()->words(2, true))->title().' Title',
+            'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
             'status' => ActivationStatus::Unactivated,
             'type' => $titleType,
         ];
