@@ -26,6 +26,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --no-suggest
       - name: Run PHPLint
-        run: vendor/bin/phplint --configuration=.phplint.yml
+        run: phplint --configuration=.phplint.yml
       - name: Run PHPStan
         run: composer test:types
