@@ -1,0 +1,9 @@
+paths:
+  - app
+  - routes
+  - database
+  - tests
+exclude:
+  - vendor
+  - storage
+  - bootstrap/cache
