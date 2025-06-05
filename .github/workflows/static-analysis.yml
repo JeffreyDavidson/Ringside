@@ -1,0 +1,24 @@
+name: static analysis
+on: [push]
+jobs:
+  types:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        php: [8.4]
+        laravel: [12]
+        stability: [prefer-dist]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: overtrue/phplint
+      - name: Run PHPLint
+        run: phplint --exclude=*.log .
+      - name: Run PHPStan
+        run: composer test:types
