@@ -9,21 +9,21 @@ use Livewire\Form;
 
 /**
  * @template TForm of LivewireBaseForm
- * @template TFormModel of ?Model
+ * @template TFormModel of Model|null
  */
 abstract class LivewireBaseForm extends Form
 {
     /**
      * @var TFormModel
      */
-    protected $formModel;
+    protected ?Model $formModel;
 
     protected string $fieldName = 'Unknown';
 
     /**
      * @param  TFormModel  $formModel
      */
-    public function setModel($formModel): void
+    public function setModel(?Model $formModel): void
     {
         $this->formModel = $formModel;
         $this->fill($formModel);

@@ -39,7 +39,7 @@ class FirstActivationFilter extends DateRangeFilter
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
             ->filter(function (Builder $query, array $dateRange): void {
-                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange): void {
+                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange): void {
                     /**
                      * @var array{'minDate': string, 'maxDate': string} $dateRange
                      */
