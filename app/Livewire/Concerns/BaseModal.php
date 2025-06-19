@@ -22,12 +22,12 @@ abstract class BaseModal extends ModalComponent
     /**
      * @var TModelForm
      */
-    protected $modelForm;
+    protected LivewireBaseForm $modelForm;
 
     /**
      * @var TModelType
      */
-    protected $modelType;
+    protected Model $modelType;
 
     protected string $modalFormPath;
 
