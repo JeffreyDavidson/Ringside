@@ -42,7 +42,7 @@ class FirstEmploymentFilter extends DateRangeFilter
                 /**
                  * @var array{'minDate': string, 'maxDate': string} $dateRange
                  */
-                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange): void {
+                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange): void {
                     $query
                         ->where(function (Builder $query) use ($dateRange): void {
                             $query->whereBetween(

@@ -59,8 +59,8 @@ class EventMatchesTable extends DataTableComponent
         return [
             Column::make(__('event-matches.match_type'), 'matchType.name'),
             ArrayColumn::make(__('event-matches.competitors'))
-                ->data(fn ($value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function ($index, EventMatchCompetitor $value): string {
+                ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
+                ->outputFormat(function (int $index, EventMatchCompetitor $value): string {
                     $competitor = $value->getCompetitor();
                     $type = str($competitor->getMorphClass())->kebab()->plural();
 
@@ -68,15 +68,15 @@ class EventMatchesTable extends DataTableComponent
                 })
                 ->separator(' vs '),
             ArrayColumn::make(__('event-matches.referees'))
-                ->data(fn ($value, EventMatch $row) => ($row->referees))
-                ->outputFormat(function ($index, Referee $value): string {
+                ->data(fn (mixed $value, EventMatch $row) => ($row->referees))
+                ->outputFormat(function (int $index, Referee $value): string {
                     return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
                 })
                 ->separator(', ')
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.titles'))
-                ->data(fn ($value, EventMatch $row) => ($row->titles))
-                ->outputFormat(function ($index, Title $value): string {
+                ->data(fn (mixed $value, EventMatch $row) => ($row->titles))
+                ->outputFormat(function (int $index, Title $value): string {
                     return '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>';
                 })
                 ->separator(', ')
