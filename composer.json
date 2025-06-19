@@ -87,21 +87,11 @@
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
-        "analyze": [
-            "./vendor/bin/phpstan analyze --memory-limit=2G app"
-        ],
-        "type-coverage": [
-            "sail artisan test --type-coverage"
-        ],
-        "test": [
-            "sail artisan test"
-        ],
-        "test-coverage": [
-            "sail artisan test --coverage"
-        ],
-        "format": [
-            "vendor/bin/pint"
-        ],
+        "analyze": "./vendor/bin/phpstan analyze --memory-limit=2G app",
+        "type-coverage": "php artisan test --type-coverage",
+        "test": "php artisan test",
+        "test-coverage": "php artisan test --coverage",
+        "format": "vendor/bin/pint",
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
