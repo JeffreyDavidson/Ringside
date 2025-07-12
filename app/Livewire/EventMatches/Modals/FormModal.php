@@ -17,6 +17,9 @@ use App\Traits\Data\PresentsTitlesList;
 use App\Traits\Data\PresentsWrestlersList;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<EventMatchForm, EventMatch>
+ */
 class FormModal extends BaseModal
 {
     use PresentsMatchTypesList;
@@ -25,19 +28,16 @@ class FormModal extends BaseModal
     use PresentsTitlesList;
     use PresentsWrestlersList;
 
-    protected string $modelType = EventMatch::class;
-
-    protected string $modalLanguagePath = 'event-matches';
-
-    /** @var view-string|null */
-    protected string $modalFormPath = 'event-matches.modals.form-modal';
-
     /**
      * String name to render view for each match type.
      */
     public string $subViewToUse;
 
-    protected EventMatchForm $modelForm;
+    protected string $modalFormPath = 'event-matches.modals.form-modal';
+
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

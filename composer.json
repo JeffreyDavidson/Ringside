@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.1|^8.2|^8.3|^8.4",
+        "php": "^8.4",
         "ankurk91/laravel-eloquent-relationships": "^2.2",
         "calebporzio/sushi": "^2.5",
         "jenssegers/agent": "^2.6",
@@ -24,19 +24,21 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
+        "calebdw/larastan": "^3.2",
+        "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.14",
-        "larastan/larastan": "^3.1",
         "laravel/breeze": "^2.3",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
-        "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
+        "peckphp/peck": "^0.1.3",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-faker": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.1",
         "pestphp/pest-plugin-livewire": "^3.0",
+        "pestphp/pest-plugin-type-coverage": "^3.5",
         "phpstan/extension-installer": "^1.4",
         "povils/phpmnd": "^3.4",
         "rector/rector": "^2.0",
@@ -86,20 +88,19 @@
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
-        "analyze": [
-            "./vendor/bin/phpstan analyze --memory-limit=2G app"
-        ],
-        "type-coverage": [
-            "sail artisan test --type-coverage"
-        ],
+        "rector": "rector",
+        "lint": "pint",
+        "test:rector": "rector --dry-run",
+        "test:lint": "pint --test",
+        "test:types": "phpstan analyze --memory-limit=2G --ansi",
+        "test:unit": "pest --colors=always --parallel --coverage --exactly=100",
+        "test:type-coverage": "pest --memory-limit=2G --type-coverage --min=100",
         "test": [
-            "sail artisan test"
-        ],
-        "test-coverage": [
-            "sail artisan test --coverage"
-        ],
-        "format": [
-            "vendor/bin/pint"
+            "@test:type-coverage",
+            "@test:rector",
+            "@test:lint",
+            "@test:types",
+            "@test:unit"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",

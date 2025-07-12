@@ -10,15 +10,16 @@ use App\Models\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<WrestlerForm, Wrestler>
+ */
 class FormModal extends BaseModal
 {
-    protected string $modelType = Wrestler::class;
-
-    protected string $modalLanguagePath = 'wrestlers';
-
     protected string $modalFormPath = 'wrestlers.modals.form-modal';
 
-    protected WrestlerForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

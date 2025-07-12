@@ -10,6 +10,7 @@ use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasStatusColumn;
 use App\Livewire\Concerns\Filters\HasStatusFilter;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class UsersTable extends BaseTableWithActions
@@ -37,7 +38,7 @@ class UsersTable extends BaseTableWithActions
         return [
             Column::make(__('users.name'), 'full_name')
                 ->label(
-                    fn ($row, Column $column) => view('components.tables.columns.full-name')->with([
+                    fn (Model $row, Column $column) => view('components.tables.columns.full-name')->with([
                         'model' => $row,
                     ])
                 )->html()
@@ -48,7 +49,7 @@ class UsersTable extends BaseTableWithActions
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn (User $row, Column $column) => $row->getFormattedPhoneNumber()),
+                ->label(fn (User $row, Column $column): string => $row->getFormattedPhoneNumber()),
         ];
     }
 }

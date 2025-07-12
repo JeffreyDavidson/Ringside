@@ -9,17 +9,18 @@ use App\Livewire\Referees\RefereeForm;
 use App\Models\Referee;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends BaseModal<RefereeForm, Referee>
+ */
 class FormModal extends BaseModal
 {
-    protected string $modelType = Referee::class;
-
-    protected string $modalLanguagePath = 'referees';
-
     protected string $modalFormPath = 'referees.modals.form-modal';
 
     protected string $modelTitleField = 'full_name';
 
-    protected RefereeForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

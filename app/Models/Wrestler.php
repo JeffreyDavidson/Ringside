@@ -33,45 +33,45 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $weight
  * @property string $hometown
  * @property string|null $signature_move
- * @property \App\Enums\EmploymentStatus $status
+ * @property EmploymentStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \App\Models\TitleChampionship|null $currentChampionship
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $currentChampionships
- * @property-read \App\Models\WrestlerEmployment|null $currentEmployment
- * @property-read \App\Models\WrestlerInjury|null $currentInjury
- * @property-read \App\Models\TagTeamPartner|\App\Models\WrestlerManager|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $currentManagers
- * @property-read \App\Models\WrestlerRetirement|null $currentRetirement
- * @property-read \App\Models\Stable|null $currentStable
- * @property-read \App\Models\WrestlerSuspension|null $currentSuspension
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerEmployment> $employments
- * @property-read \App\Models\WrestlerEmployment|null $firstEmployment
- * @property-read \App\Models\WrestlerEmployment|null $futureEmployment
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerInjury> $injuries
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $matches
- * @property-read \App\Models\WrestlerEmployment|null $previousEmployment
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerEmployment> $previousEmployments
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerInjury> $previousInjuries
- * @property-read \App\Models\WrestlerInjury|null $previousInjury
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $previousManagers
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\EventMatch> $previousMatches
- * @property-read \App\Models\WrestlerRetirement|null $previousRetirement
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerRetirement> $previousRetirements
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stable> $previousStables
- * @property-read \App\Models\WrestlerSuspension|null $previousSuspension
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerSuspension> $previousSuspensions
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $previousTagTeams
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $previousTitleChampionships
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerRetirement> $retirements
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stable> $stables
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\WrestlerSuspension> $suspensions
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TitleChampionship> $titleChampionships
- * @property-read \App\Models\User|null $user
+ * @property-read TitleChampionship|null $currentChampionship
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleChampionship> $currentChampionships
+ * @property-read WrestlerEmployment|null $currentEmployment
+ * @property-read WrestlerInjury|null $currentInjury
+ * @property-read TagTeamPartner|WrestlerManager|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Manager> $currentManagers
+ * @property-read WrestlerRetirement|null $currentRetirement
+ * @property-read Stable|null $currentStable
+ * @property-read WrestlerSuspension|null $currentSuspension
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerEmployment> $employments
+ * @property-read WrestlerEmployment|null $firstEmployment
+ * @property-read WrestlerEmployment|null $futureEmployment
+ * @property-read TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerInjury> $injuries
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Manager> $managers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, EventMatch> $matches
+ * @property-read WrestlerEmployment|null $previousEmployment
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerEmployment> $previousEmployments
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerInjury> $previousInjuries
+ * @property-read WrestlerInjury|null $previousInjury
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Manager> $previousManagers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, EventMatch> $previousMatches
+ * @property-read WrestlerRetirement|null $previousRetirement
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerRetirement> $previousRetirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Stable> $previousStables
+ * @property-read WrestlerSuspension|null $previousSuspension
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerSuspension> $previousSuspensions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $previousTagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleChampionship> $previousTitleChampionships
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerRetirement> $retirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Stable> $stables
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WrestlerSuspension> $suspensions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $tagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TitleChampionship> $titleChampionships
+ * @property-read User|null $user
  *
  * @method static \Database\Factories\WrestlerFactory factory($count = null, $state = [])
  * @method static \App\Builders\WrestlerBuilder newModelQuery()
@@ -190,7 +190,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, Employable
     /**
      * Get all the managers the model has had.
      *
-     * @return BelongsToMany<Manager, $this>
+     * @return BelongsToMany<Manager, $this, WrestlerManager>
      */
     public function managers(): BelongsToMany
     {

@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
 
-class DashboardController extends Controller
+class DashboardController
 {
     /**
      * Handle the incoming request.

@@ -16,7 +16,7 @@ class InjureAction extends BaseRefereeAction
     /**
      * Injure a referee.
      *
-     * @throws \App\Exceptions\CannotBeInjuredException
+     * @throws CannotBeInjuredException
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void
     {
@@ -30,7 +30,7 @@ class InjureAction extends BaseRefereeAction
     /**
      * Ensure a referee can be injured.
      *
-     * @throws \App\Exceptions\CannotBeInjuredException
+     * @throws CannotBeInjuredException
      */
     private function ensureCanBeInjured(Referee $referee): void
     {

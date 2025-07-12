@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * @property int $id
  * @property int $stable_id
  * @property int $manager_id
- * @property \Illuminate\Support\Carbon $hired_at
+ * @property \Illuminate\Support\Carbon $joined_at
  * @property \Illuminate\Support\Carbon|null $left_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Manager $manager
- * @property-read \App\Models\Stable $stable
+ * @property-read Manager $manager
+ * @property-read Stable $stable
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StableManager newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|StableManager newQuery()
@@ -36,7 +36,7 @@ class StableManager extends Pivot
     protected function casts(): array
     {
         return [
-            'hired_at' => 'datetime',
+            'joined_at' => 'datetime',
             'left_at' => 'datetime',
         ];
     }

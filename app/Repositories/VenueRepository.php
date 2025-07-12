@@ -26,7 +26,7 @@ class VenueRepository
     /**
      * Update the given venue with the given data.
      *
-     * @return \App\Models\Venue $venue
+     * @return Venue $venue
      */
     public function update(Venue $venue, VenueData $venueData): Venue
     {

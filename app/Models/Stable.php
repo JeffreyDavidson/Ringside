@@ -18,32 +18,32 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int|null $user_id
  * @property string $name
- * @property \App\Enums\ActivationStatus $status
+ * @property ActivationStatus $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StableActivation> $activations
- * @property-read \App\Models\StableActivation|null $currentActivation
- * @property-read \App\Models\StableWrestler|\App\Models\StableTagTeam|\App\Models\StableManager|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $currentManagers
- * @property-read \App\Models\StableRetirement|null $currentRetirement
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $currentTagTeams
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $currentWrestlers
- * @property-read \App\Models\StableActivation|null $firstActivation
- * @property-read \App\Models\StableActivation|null $futureActivation
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers
- * @property-read \App\Models\StableActivation|null $previousActivation
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StableActivation> $previousActivations
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $previousManagers
- * @property-read \App\Models\StableRetirement|null $previousRetirement
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StableRetirement> $previousRetirements
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $previousTagTeams
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $previousWrestlers
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StableRetirement> $retirements
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
- * @property-read \App\Models\User|null $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, StableActivation> $activations
+ * @property-read StableActivation|null $currentActivation
+ * @property-read StableWrestler|StableTagTeam|StableManager|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Manager> $currentManagers
+ * @property-read StableRetirement|null $currentRetirement
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $currentTagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Wrestler> $currentWrestlers
+ * @property-read StableActivation|null $firstActivation
+ * @property-read StableActivation|null $futureActivation
+ * @property-read TFactory|null $use_factory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Manager> $managers
+ * @property-read StableActivation|null $previousActivation
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, StableActivation> $previousActivations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Manager> $previousManagers
+ * @property-read StableRetirement|null $previousRetirement
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, StableRetirement> $previousRetirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $previousTagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Wrestler> $previousWrestlers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, StableRetirement> $retirements
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $tagTeams
+ * @property-read User|null $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\StableFactory factory($count = null, $state = [])
  * @method static \App\Builders\StableBuilder newModelQuery()
@@ -128,5 +128,13 @@ class Stable extends Model implements Activatable, Retirable
     public function retirements(): HasMany
     {
         return $this->hasMany(StableRetirement::class);
+    }
+
+    /**
+     * Retrieve the readable name of the model.
+     */
+    public function getNameLabel(): string
+    {
+        return $this->name;
     }
 }

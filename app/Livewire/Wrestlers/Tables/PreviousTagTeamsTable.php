@@ -4,26 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\TagTeam;
+use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\TagTeamPartner;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousTagTeamsTable extends DataTableComponent
+class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
 {
-    use ShowTableTrait;
-
-    protected string $databaseTableName = 'tag_teams';
-
-    protected string $resourceName = 'tag teams';
-
     /**
      * Wrestler to use for component.
      */
     public ?int $wrestlerId;
+
+    protected string $databaseTableName = 'tag_teams';
 
     /**
      * @return Builder<TagTeamPartner>
@@ -31,7 +24,7 @@ class PreviousTagTeamsTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new \Exception("You didn't specify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         return TagTeamPartner::query()
@@ -40,24 +33,10 @@ class PreviousTagTeamsTable extends DataTableComponent
             ->orderByDesc('joined_at');
     }
 
-    public function configure(): void {}
-
-    /**
-     * @return array<int, LinkColumn|DateColumn>
-     **/
-    public function columns(): array
+    public function configure(): void
     {
-        return [
-            LinkColumn::make(__('tag-teams.name'))
-                ->title(fn (TagTeam $row) => $row->name)
-                ->location(fn ($row) => route('tag-teams.show', $row)),
-            LinkColumn::make(__('tag-teams.partner'))
-                ->title(fn (TagTeamPartner $row) => $row->partner->name)
-                ->location(fn (TagTeam $row) => route('wrestlers.show', $row)),
-            DateColumn::make(__('tag-teams.date_joined'), 'date_joined')
-                ->outputFormat('Y-m-d H:i'),
-            DateColumn::make(__('tag-teams.date_left'), 'date_left')
-                ->outputFormat('Y-m-d H:i'),
-        ];
+        $this->addAdditionalSelects([
+            'tag_teams_wrestlers.tag_team_id',
+        ]);
     }
 }

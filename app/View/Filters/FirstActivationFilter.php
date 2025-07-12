@@ -38,14 +38,27 @@ class FirstActivationFilter extends DateRangeFilter
             'locale' => 'en',
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
-            ->filter(function (Builder $query, array $dateRange) {
-                $query->withWhereHas($this->filterRelationshipName, function ($query) use ($dateRange) {
+            ->filter(function (Builder $query, array $dateRange): void {
+                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange): void {
+                    /**
+                     * @var array{'minDate': string, 'maxDate': string} $dateRange
+                     */
                     $query
-                        ->where(function (Builder $query) use ($dateRange) {
-                            $query->whereBetween($this->filterStartField, [Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(), Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay()]);
+                        ->where(function (Builder $query) use ($dateRange): void {
+                            $query->whereBetween(
+                                $this->filterStartField,
+                                [
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
+                                ]);
                         })
-                        ->orWhere(function (Builder $query) use ($dateRange) {
-                            $query->whereBetween($this->filterEndField, [Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])->startOfDay(), Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])->endOfDay()]);
+                        ->orWhere(function (Builder $query) use ($dateRange): void {
+                            $query->whereBetween(
+                                $this->filterEndField,
+                                [
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
+                                ]);
                         });
                 });
             });

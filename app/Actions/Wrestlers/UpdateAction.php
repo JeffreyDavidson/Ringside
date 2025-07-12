@@ -31,10 +31,6 @@ class UpdateAction extends BaseWrestlerAction
      */
     private function shouldBeEmployed(Wrestler $wrestler): bool
     {
-        if ($wrestler->isCurrentlyEmployed()) {
-            return false;
-        }
-
-        return true;
+        return ! $wrestler->isCurrentlyEmployed();
     }
 }

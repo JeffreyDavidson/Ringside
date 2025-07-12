@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 
 class TagTeamCanJoinExistingStable implements ValidationRule
 {
-    public function __construct(protected ?Carbon $startDate)
+    public function __construct(private ?Carbon $startDate)
     {
         $this->startDate = $startDate;
     }
@@ -21,7 +21,7 @@ class TagTeamCanJoinExistingStable implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        /** @var \App\Models\TagTeam $tagTeam */
+        /** @var TagTeam $tagTeam */
         $tagTeam = TagTeam::with(['currentWrestlers', 'currentStable'])->whereKey($value)->sole();
 
         if ($tagTeam->currentStable !== null) {

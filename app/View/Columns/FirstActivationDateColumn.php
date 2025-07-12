@@ -13,6 +13,6 @@ class FirstActivationDateColumn extends Column
     public function __construct(string $title, ?string $from = null)
     {
         parent::__construct($title, $from);
-        $this->label(fn (Stable|Title $row, Column $column) => $row->getFormattedFirstActivation());
+        $this->label(fn (Stable|Title $row, Column $column): string => $row->getFormattedFirstActivation());
     }
 }

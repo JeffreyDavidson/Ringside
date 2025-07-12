@@ -6,6 +6,7 @@ namespace App\Livewire\Managers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\WrestlerManager;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -15,11 +16,11 @@ class PreviousWrestlersTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    public ?int $managerId;
+
     protected string $databaseTableName = 'wrestlers_managers';
 
     protected string $resourceName = 'wrestlers';
-
-    public ?int $managerId;
 
     /**
      * @return Builder<WrestlerManager>
@@ -27,7 +28,7 @@ class PreviousWrestlersTable extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->managerId)) {
-            throw new \Exception("You didn't specify a manager");
+            throw new Exception("You didn't specify a manager");
         }
 
         return WrestlerManager::query()

@@ -11,52 +11,32 @@ use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
+use Livewire\Attributes\Validate;
 
+/**
+ * @extends LivewireBaseForm<EventForm, ?Event>
+ */
 class EventForm extends LivewireBaseForm
 {
-    protected string $formModelType = Event::class;
+    public $formModel;
 
-    public ?Event $formModel;
-
+    #[Validate]
     public string $name = '';
 
+    #[Validate]
     public Carbon|string|null $date = '';
 
+    #[Validate]
     public int $venue;
 
+    #[Validate]
     public string $preview;
-
-    /**
-     * @return array<string, list<Unique|Exists|EventDateCanBeChanged|string>>
-     */
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel ?? '')],
-            'date' => ['nullable', 'date', new EventDateCanBeChanged($this->formModel)],
-            'venue' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
-            'preview' => ['required', 'string'],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function validationAttributes(): array
-    {
-        return [
-            'height_feet' => 'feet',
-            'height_inches' => 'inches',
-            'signature_move' => 'signature move',
-            'start_date' => 'start date',
-        ];
-    }
 
     public function store(): bool
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Event([
                 'name' => $this->name,
                 'date' => $this->date,
@@ -74,5 +54,31 @@ class EventForm extends LivewireBaseForm
         }
 
         return true;
+    }
+
+    /**
+     * @return array<string, list<Unique|Exists|EventDateCanBeChanged|string>>
+     */
+    protected function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel)],
+            'date' => ['nullable', 'date', new EventDateCanBeChanged($this->formModel)],
+            'venue' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
+            'preview' => ['required', 'string'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'height_feet' => 'feet',
+            'height_inches' => 'inches',
+            'signature_move' => 'signature move',
+            'start_date' => 'start date',
+        ];
     }
 }

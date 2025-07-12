@@ -18,7 +18,7 @@ class RetireAction extends BaseTagTeamAction
     /**
      * Retire a tag team.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void
     {
@@ -27,11 +27,11 @@ class RetireAction extends BaseTagTeamAction
         $retirementDate ??= now();
 
         if ($tagTeam->isSuspended()) {
-            ReinstateAction::run($tagTeam, $retirementDate);
+            resolve(ReinstateAction::class)->handle($tagTeam, $retirementDate);
         }
 
         $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => WrestlersRetireAction::run($wrestler, $retirementDate));
+            ->each(fn (Wrestler $wrestler) => resolve(WrestlersRetireAction::class)->handle($wrestler, $retirementDate));
 
         if ($tagTeam->isCurrentlyEmployed()) {
             $this->tagTeamRepository->release($tagTeam, $retirementDate);
@@ -43,7 +43,7 @@ class RetireAction extends BaseTagTeamAction
     /**
      * Ensure a tag team can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(TagTeam $tagTeam): void
     {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\TitleChampionshipFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,28 +16,28 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $title_id
  * @property int $event_match_id
- * @property int $new_champion_id
- * @property string $new_champion_type
- * @property int $former_champion_id
- * @property string $former_champion_type
- * @property \Illuminate\Support\Carbon $won_at
- * @property \Illuminate\Support\Carbon|null $lost_at
- * @property-read \App\Models\Wrestler|\App\Models\TagTeam $currentChampion
- * @property-read \App\Models\Wrestler|\App\Models\TagTeam|null $previousChampion
- * @property-read \App\Models\EventMatch|null $eventMatch
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\Title|null $title
+ * @property int $champion_id
+ * @property string $champion_type
+ * @property int|null $won_event_match_id
+ * @property int|null $lost_event_match_id
+ * @property Carbon $won_at
+ * @property Carbon|null $lost_at
+ * @property-read Wrestler|TagTeam $champion
+ * @property-read EventMatch|null $wonEventMatch
+ * @property-read EventMatch|null $lostEventMatch
+ * @property-read TFactory|null $use_factory
+ * @property-read Title|null $title
  *
- * @method static \Database\Factories\TitleChampionshipFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship query()
+ * @method static TitleChampionshipFactory factory($count = null, $state = [])
+ * @method static Builder<static>|TitleChampionship newModelQuery()
+ * @method static Builder<static>|TitleChampionship newQuery()
+ * @method static Builder<static>|TitleChampionship query()
  *
  * @mixin \Eloquent
  */
 class TitleChampionship extends Model
 {
-    /** @use HasFactory<\Database\Factories\TitleChampionshipFactory> */
+    /** @use HasFactory<TitleChampionshipFactory> */
     use HasFactory;
 
     /**
@@ -43,7 +45,7 @@ class TitleChampionship extends Model
      *
      * @var string
      */
-    protected $table = 'title_championships';
+    protected $table = 'titles_championships';
 
     /**
      * The attributes that are mass assignable.
@@ -52,9 +54,10 @@ class TitleChampionship extends Model
      */
     protected $fillable = [
         'title_id',
-        'event_match_id',
-        'champion_id',
         'champion_type',
+        'champion_id',
+        'won_event_match_id',
+        'lost_event_match_id',
         'won_at',
         'lost_at',
     ];
@@ -74,7 +77,7 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the title of the championship.
+     * Retrieve the title of the title championship.
      *
      * @return BelongsTo<Title, $this>
      */
@@ -84,45 +87,43 @@ class TitleChampionship extends Model
     }
 
     /**
-     * Retrieve the current champion of the title championship.
+     * Retrieve the champion of the title championship.
      *
      * @return MorphTo<Model, $this>
      */
-    public function currentChampion(): MorphTo
+    public function champion(): MorphTo
     {
-        return $this->morphTo(__FUNCTION__, 'new_champion_type', 'new_champion_id');
+        return $this->morphTo(__FUNCTION__, 'champion_type', 'champion_id');
     }
 
     /**
-     * Retrieve the current champion of the title championship.
-     *
-     * @return MorphTo<Model, $this>
-     */
-    public function previousChampion(): MorphTo
-    {
-        return $this->morphTo(__FUNCTION__, 'previous_champion_type', 'previous_champion_id');
-    }
-
-    /**
-     * Retrieve the event match where the title championship switched hands.
+     * Retrieve the event match where the champion won the title.
      *
      * @return BelongsTo<EventMatch, $this>
      */
-    public function eventMatch(): BelongsTo
+    public function wonEventMatch(): BelongsTo
     {
-        return $this->belongsTo(EventMatch::class);
+        return $this->belongsTo(EventMatch::class, 'won_event_match_id');
     }
 
     /**
-     * Retrieve the number of days for a title championship.
+     * Retrieve the event match where the champion lost the title.
+     *
+     * @return BelongsTo<EventMatch, $this>
+     */
+    public function lostEventMatch(): BelongsTo
+    {
+        return $this->belongsTo(EventMatch::class, 'lost_event_match_id');
+    }
+
+    /**
+     * Retrieve the number of days for a title championship reign.
      */
     public function lengthInDays(): int
     {
         /** @var Carbon $datetime */
         $datetime = $this->lost_at ?? now();
 
-        return intval($this->won_at->diffInDays($datetime));
+        return (int) ($this->won_at->diffInDays($datetime));
     }
-
-    public function wrestlers(): void {}
 }

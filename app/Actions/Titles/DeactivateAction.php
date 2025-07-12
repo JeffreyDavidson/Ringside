@@ -16,7 +16,7 @@ class DeactivateAction extends BaseTitleAction
     /**
      * Deactivate a title.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     public function handle(Title $title, ?Carbon $deactivationDate = null): void
     {
@@ -30,7 +30,7 @@ class DeactivateAction extends BaseTitleAction
     /**
      * Ensure a title can be deactivated.
      *
-     * @throws \App\Exceptions\CannotBeDeactivatedException
+     * @throws CannotBeDeactivatedException
      */
     private function ensureCanBeDeactivated(Title $title): void
     {

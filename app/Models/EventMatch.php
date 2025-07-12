@@ -15,20 +15,21 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 /**
  * @property int $id
  * @property int $event_id
+ * @property int $match_number
  * @property int $match_type_id
  * @property string|null $preview
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Collections\EventMatchCompetitorsCollection<int, \App\Models\EventMatchCompetitor> $competitors
- * @property-read \App\Models\Event $event
- * @property-read \App\Models\TFactory|null $use_factory
- * @property-read \App\Models\MatchType|null $matchType
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Referee> $referees
- * @property-read \App\Models\EventMatchResult|null $result
- * @property-read \App\Models\EventMatchCompetitor|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $tagTeams
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Title> $titles
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Wrestler> $wrestlers
+ * @property-read \App\Collections\EventMatchCompetitorsCollection<int, EventMatchCompetitor> $competitors
+ * @property-read Event $event
+ * @property-read TFactory|null $use_factory
+ * @property-read MatchType|null $matchType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Referee> $referees
+ * @property-read EventMatchResult|null $result
+ * @property-read EventMatchCompetitor|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TagTeam> $tagTeams
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Title> $titles
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\EventMatchFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
@@ -56,6 +57,7 @@ class EventMatch extends Model
      */
     protected $fillable = [
         'event_id',
+        'match_number',
         'match_type_id',
         'preview',
     ];
@@ -113,7 +115,7 @@ class EventMatch extends Model
     /**
      * Get the wrestlers involved in the match.
      *
-     * @return MorphToMany<Wrestler, $this>
+     * @return MorphToMany<Wrestler, $this, EventMatchCompetitor>
      */
     public function wrestlers(): MorphToMany
     {
@@ -125,7 +127,7 @@ class EventMatch extends Model
     /**
      * Get the tag teams involved in the match.
      *
-     * @return MorphToMany<TagTeam, $this>
+     * @return MorphToMany<TagTeam, $this, EventMatchCompetitor>
      */
     public function tagTeams(): MorphToMany
     {

@@ -16,7 +16,7 @@ class UnretireAction extends BaseRefereeAction
     /**
      * Unretire a referee.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseRefereeAction
     /**
      * Ensure a referee can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Referee $referee): void
     {

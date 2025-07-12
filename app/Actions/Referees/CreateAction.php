@@ -17,7 +17,7 @@ class CreateAction extends BaseRefereeAction
      */
     public function handle(RefereeData $refereeData): Referee
     {
-        /** @var \App\Models\Referee $referee */
+        /** @var Referee $referee */
         $referee = $this->refereeRepository->create($refereeData);
 
         if (isset($refereeData->start_date)) {

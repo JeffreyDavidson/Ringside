@@ -11,7 +11,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class WrestlerCanJoinExistingTagTeam implements ValidationRule
 {
-    public function __construct(protected TagTeam $tagTeam) {}
+    public function __construct(private TagTeam $tagTeam) {}
 
     /**
      * Determine if the validation rule passes.
@@ -29,10 +29,10 @@ class WrestlerCanJoinExistingTagTeam implements ValidationRule
             $fail('This wrestler cannot join the tag team.');
         }
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\TagTeam> $bookableTagTeams */
+        /** @var \Illuminate\Database\Eloquent\Collection<int, TagTeam> $bookableTagTeams */
         $bookableTagTeams = TagTeam::query()->bookable()->whereNotIn('id', [$this->tagTeam->id])->get();
 
-        $bookableTagTeams->each(function (TagTeam $tagTeam) use ($wrestler, $fail) {
+        $bookableTagTeams->each(function (TagTeam $tagTeam) use ($wrestler, $fail): void {
             if ($tagTeam->currentWrestlers->contains($wrestler)) {
                 $fail('This wrestler cannot join the tag team.');
             }

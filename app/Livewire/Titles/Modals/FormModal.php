@@ -10,15 +10,16 @@ use App\Models\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<TitleForm, Title>
+ */
 class FormModal extends BaseModal
 {
-    protected string $modelType = Title::class;
-
-    protected string $modalLanguagePath = 'titles';
-
     protected string $modalFormPath = 'titles.modals.form-modal';
 
-    protected TitleForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

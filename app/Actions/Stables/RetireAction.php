@@ -23,7 +23,7 @@ class RetireAction extends BaseStableAction
     /**
      * Retire a stable.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {
@@ -31,24 +31,24 @@ class RetireAction extends BaseStableAction
 
         $retirementDate ??= now();
 
-        DB::transaction(function () use ($stable, $retirementDate) {
+        DB::transaction(function () use ($stable, $retirementDate): void {
             if ($stable->isCurrentlyActivated()) {
                 $this->stableRepository->deactivate($stable, $retirementDate);
             }
 
             if ($stable->currentTagTeams->isNotEmpty()) {
                 $stable->currentTagTeams
-                    ->each(fn (TagTeam $tagTeam) => TagTeamRetireAction::run($tagTeam, $retirementDate));
+                    ->each(fn (TagTeam $tagTeam) => resolve(TagTeamRetireAction::class)->handle($tagTeam, $retirementDate));
             }
 
             if ($stable->currentWrestlers->isNotEmpty()) {
                 $stable->currentWrestlers
-                    ->each(fn (Wrestler $wrestler) => WrestlerRetireAction::run($wrestler, $retirementDate));
+                    ->each(fn (Wrestler $wrestler) => resolve(WrestlerRetireAction::class)->handle($wrestler, $retirementDate));
             }
 
             if ($stable->currentManagers->isNotEmpty()) {
                 $stable->currentManagers
-                    ->each(fn (Manager $manager) => ManagerRetireAction::run($manager, $retirementDate));
+                    ->each(fn (Manager $manager) => resolve(ManagerRetireAction::class)->handle($manager, $retirementDate));
             }
 
             $this->stableRepository->retire($stable, $retirementDate);
@@ -58,7 +58,7 @@ class RetireAction extends BaseStableAction
     /**
      * Ensure a stable can be retired.
      *
-     * @throws \App\Exceptions\CannotBeRetiredException
+     * @throws CannotBeRetiredException
      */
     private function ensureCanBeRetired(Stable $stable): void
     {

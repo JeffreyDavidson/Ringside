@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ActivationStatus;
+use App\Enums\TitleType;
+use App\Models\Title;
 use App\Models\TitleActivation;
 use App\Models\TitleChampionship;
 use App\Models\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Title>
+ * @extends Factory<Title>
  */
 class TitleFactory extends Factory
 {
@@ -23,9 +26,14 @@ class TitleFactory extends Factory
      */
     public function definition(): array
     {
+        $titleType = fake()->randomElement(TitleType::cases());
+
         return [
-            'name' => str(fake()->unique()->words(2, true))->title().' Title',
+            'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
             'status' => ActivationStatus::Unactivated,
+            'type' => $titleType,
+            'current_champion_id' => null,
+            'previous_champion_id' => null,
         ];
     }
 
@@ -75,5 +83,15 @@ class TitleFactory extends Factory
             TitleChampionship::factory()->for($champion, 'champion'),
             'championships'
         );
+    }
+
+    public function singles(): static
+    {
+        return $this->state(fn () => ['type' => TitleType::Singles]);
+    }
+
+    public function tagTeam(): static
+    {
+        return $this->state(fn () => ['type' => TitleType::TagTeam]);
     }
 }

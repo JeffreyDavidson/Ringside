@@ -9,17 +9,43 @@ use App\Models\Manager;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends LivewireBaseForm<ManagerForm, ?Manager>
+ */
 class ManagerForm extends LivewireBaseForm
 {
-    protected string $formModelType = Manager::class;
-
-    public ?Manager $formModel;
+    public $formModel;
 
     public string $first_name = '';
 
     public string $last_name = '';
 
     public Carbon|string|null $start_date = '';
+
+    public function loadExtraData(): void
+    {
+        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
+    }
+
+    public function store(): bool
+    {
+        $this->validate();
+
+        if ($this->formModel === null) {
+            $this->formModel = new Manager([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+            ]);
+            $this->formModel->save();
+        } else {
+            $this->formModel->update([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+            ]);
+        }
+
+        return true;
+    }
 
     /**
      * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
@@ -41,30 +67,5 @@ class ManagerForm extends LivewireBaseForm
         return [
             'start_date' => 'start date',
         ];
-    }
-
-    public function loadExtraData(): void
-    {
-        $this->start_date = $this->formModel?->firstEmployment?->started_at->toDateString();
-    }
-
-    public function store(): bool
-    {
-        $this->validate();
-
-        if (! isset($this->formModel)) {
-            $this->formModel = new Manager([
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-            ]);
-            $this->formModel->save();
-        } else {
-            $this->formModel->update([
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-            ]);
-        }
-
-        return true;
     }
 }

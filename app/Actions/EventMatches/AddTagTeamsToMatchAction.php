@@ -16,7 +16,7 @@ class AddTagTeamsToMatchAction extends BaseEventMatchAction
     /**
      * Add tag teams to an event match.
      *
-     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, TagTeam>  $tagTeams
      */
     public function handle(EventMatch $eventMatch, Collection $tagTeams, int $sideNumber): void
     {

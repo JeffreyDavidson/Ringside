@@ -16,7 +16,7 @@ class EmployAction extends BaseWrestlerAction
     /**
      * Employ a wrestler.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     public function handle(Wrestler $wrestler, ?Carbon $startDate = null): void
     {
@@ -34,7 +34,7 @@ class EmployAction extends BaseWrestlerAction
     /**
      * Ensure a wrestler can be employed.
      *
-     * @throws \App\Exceptions\CannotBeEmployedException
+     * @throws CannotBeEmployedException
      */
     private function ensureCanBeEmployed(Wrestler $wrestler): void
     {

@@ -16,7 +16,7 @@ class UnretireAction extends BaseStableAction
     /**
      * Unretire a stable.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Stable $stable, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseStableAction
     /**
      * Ensure a stable can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Stable $stable): void
     {

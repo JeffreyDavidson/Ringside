@@ -22,11 +22,11 @@ class AddCompetitorsToMatchAction extends BaseEventMatchAction
     {
         foreach ($competitors as $sideNumber => $sideCompetitors) {
             if (Arr::exists($sideCompetitors, 'wrestlers')) {
-                AddWrestlersToMatchAction::run($eventMatch, Arr::get($sideCompetitors, 'wrestlers'), $sideNumber);
+                resolve(AddWrestlersToMatchAction::class)->handle($eventMatch, Arr::get($sideCompetitors, 'wrestlers'), $sideNumber);
             }
 
             if (Arr::exists($sideCompetitors, 'tag_teams')) {
-                AddTagTeamsToMatchAction::run($eventMatch, Arr::get($sideCompetitors, 'tag_teams'), $sideNumber);
+                resolve(AddTagTeamsToMatchAction::class)->handle($eventMatch, Arr::get($sideCompetitors, 'tag_teams'), $sideNumber);
             }
         }
     }

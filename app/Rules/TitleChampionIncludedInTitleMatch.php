@@ -19,7 +19,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
      *
      * @var array<string, array<string>|string>
      */
-    protected array $data = [];
+    private array $data = [];
 
     /**
      * Set the data under validation.
@@ -39,7 +39,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $competitors = collect((array) $value);
+        $competitors = collect([$value]);
 
         $wrestlerIds = $competitors->groupBy('wrestlers')->flatten();
         $tagTeamIds = $competitors->groupBy('tag_teams')->flatten();
@@ -47,7 +47,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
         $wrestlers = Wrestler::query()->whereIn('id', $wrestlerIds)->get();
         $tagTeams = TagTeam::query()->whereIn('id', $tagTeamIds)->get();
 
-        /** @var Collection<int, Wrestler|TagTeam>  $competitors */
+        /** @var Collection<int, Wrestler|TagTeam|null>  $competitors */
         $competitors = collect();
         $competitors->merge($wrestlers)->merge($tagTeams);
 
@@ -56,7 +56,7 @@ class TitleChampionIncludedInTitleMatch implements DataAwareRule, ValidationRule
 
         $champions = Title::with('currentChampionship.currentChampion')
             ->findMany($titles)
-            ->reject(fn (Title $title) => $title->isVacant())
+            ->reject(fn (Title $title): bool => $title->isVacant())
             ->every(fn (Title $title) => $competitors->contains($title->currentChampionship?->currentChampion));
 
         if (! $champions) {

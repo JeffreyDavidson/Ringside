@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 
 class EmploymentStartDateCanBeChanged implements ValidationRule
 {
-    public function __construct(protected Wrestler|Referee|TagTeam|Manager $model) {}
+    public function __construct(private Wrestler|Referee|TagTeam|Manager|null $model) {}
 
     /**
      * Determine if the validation rule passes.
@@ -24,12 +24,14 @@ class EmploymentStartDateCanBeChanged implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->model->isReleased() && ! $this->model->employedOn(Carbon::parse($value))) {
-            $fail("{$this->model->getNameLabel()} was released and the start date cannot be changed.");
-        }
+        if ($this->model) {
+            if ($this->model->isReleased() && ! $this->model->employedOn(Carbon::parse($value))) {
+                $fail('employments.validation.employment_released')->translate(['name' => $this->model->getNameLabel()]);
+            }
 
-        if ($this->model->isCurrentlyEmployed() && ! $this->model->employedOn(Carbon::parse($value))) {
-            $fail("{$this->model->getNameLabel()} is currently employed and the start date cannot be changed.");
+            if ($this->model->isCurrentlyEmployed() && ! $this->model->employedOn(Carbon::parse($value))) {
+                $fail('employments.validation.employment_released')->translate(['name' => $this->model->getNameLabel()]);
+            }
         }
     }
 }

@@ -4,23 +4,28 @@ declare(strict_types=1);
 
 namespace App\Livewire\EventMatches\Tables;
 
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\EventMatch;
 use App\Models\EventMatchCompetitor;
 use App\Models\Referee;
 use App\Models\Title;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
 
-class EventMatchesTable extends BaseTableWithActions
+class EventMatchesTable extends DataTableComponent
 {
-    protected string $databaseTableName = 'event_matches';
+    use ShowTableTrait;
 
-    protected string $routeBasePath = 'event-matches';
+    protected string $databaseTableName = 'events_matches';
 
     protected string $resourceName = 'matches';
 
+    /**
+     * Event to use for component.
+     */
     public ?int $eventId;
 
     /**
@@ -28,15 +33,21 @@ class EventMatchesTable extends BaseTableWithActions
      */
     public function builder(): Builder
     {
-        if (! isset($this->eventId)) {
-            throw new \Exception("You didn't specify a event");
+        if (! property_exists($this, 'eventId') || $this->eventId === null) {
+            throw new Exception("You didn't specify a event");
         }
 
         return EventMatch::query()
+            ->with(['event', 'titles', 'competitors', 'result.winner', 'result.decision'])
             ->where('event_id', $this->eventId);
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        $this->addAdditionalSelects([
+            'events_matches.event_id',
+        ]);
+    }
 
     /**
      * Undocumented function
@@ -48,21 +59,42 @@ class EventMatchesTable extends BaseTableWithActions
         return [
             Column::make(__('event-matches.match_type'), 'matchType.name'),
             ArrayColumn::make(__('event-matches.competitors'))
-                ->data(fn ($value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(fn ($index, EventMatchCompetitor $value) => $value->competitor->name)
+                ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
+                ->outputFormat(function (int $index, EventMatchCompetitor $value): string {
+                    $competitor = $value->getCompetitor();
+                    $type = str($competitor->getMorphClass())->kebab()->plural();
+
+                    return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
+                })
                 ->separator(' vs '),
             ArrayColumn::make(__('event-matches.referees'))
-                ->data(fn ($value, EventMatch $row) => ($row->referees))
-                ->outputFormat(fn ($index, Referee $value) => $value->full_name)
-                ->separator(', '),
+                ->data(fn (mixed $value, EventMatch $row) => ($row->referees))
+                ->outputFormat(function (int $index, Referee $value): string {
+                    return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
+                })
+                ->separator(', ')
+                ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.titles'))
-                ->data(fn ($value, EventMatch $row) => ($row->titles))
-                ->outputFormat(fn ($index, Title $value) => $value->name)
-                ->separator(', '),
+                ->data(fn (mixed $value, EventMatch $row) => ($row->titles))
+                ->outputFormat(function (int $index, Title $value): string {
+                    return '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>';
+                })
+                ->separator(', ')
+                ->emptyValue('N/A'),
             Column::make(__('event-matches.result'))
                 ->label(
-                    fn (EventMatch $row, Column $column) => $row->result?->winner->name.' by '.$row->result?->decision->name
-                ),
+                    function (EventMatch $row, Column $column): string {
+                        $winner = $row->result?->getWinner();
+
+                        if ($winner) {
+                            $type = str($winner->getMorphClass())->kebab()->plural();
+
+                            return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->decision->name;
+                        }
+
+                        return 'N/A';
+                    }
+                )->html(),
         ];
     }
 }

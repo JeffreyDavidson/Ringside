@@ -13,21 +13,22 @@ use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @extends BaseModal<TagTeamForm, TagTeam>
+ */
 class FormModal extends BaseModal
 {
     use PresentsWrestlersList;
 
-    protected string $modelType = TagTeam::class;
-
-    protected string $modalLanguagePath = 'tag-teams';
-
     protected string $modalFormPath = 'tag-teams.modals.form-modal';
 
-    protected TagTeamForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {
-        if (isset($this->modelForm->formModel)) {
+        if ($this->modelForm->formModel !== null) {
             throw new Exception('No need to fill data on an edit form.');
         }
 

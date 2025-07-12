@@ -14,7 +14,7 @@ class CreateAction extends BaseTitleAction
 
     public function handle(TitleData $titleData): Title
     {
-        /** @var \App\Models\Title $title */
+        /** @var Title $title */
         $title = $this->titleRepository->create($titleData);
 
         if (isset($titleData->activation_date)) {

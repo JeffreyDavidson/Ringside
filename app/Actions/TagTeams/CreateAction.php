@@ -17,16 +17,16 @@ class CreateAction extends BaseTagTeamAction
      */
     public function handle(TagTeamData $tagTeamData): TagTeam
     {
-        /** @var \App\Models\TagTeam $tagTeam */
+        /** @var TagTeam $tagTeam */
         $tagTeam = $this->tagTeamRepository->create($tagTeamData);
 
         $datetime = now();
 
-        if ($tagTeamData->wrestlerA) {
+        if ($tagTeamData->wrestlerA instanceof \App\Models\Wrestler) {
             $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerA, $datetime);
         }
 
-        if ($tagTeamData->wrestlerB) {
+        if ($tagTeamData->wrestlerB instanceof \App\Models\Wrestler) {
             $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerB, $datetime);
         }
 

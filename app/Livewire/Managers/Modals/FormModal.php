@@ -9,17 +9,18 @@ use App\Livewire\Managers\ManagerForm;
 use App\Models\Manager;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends BaseModal<ManagerForm, Manager>
+ */
 class FormModal extends BaseModal
 {
-    protected string $modelType = Manager::class;
-
-    protected string $modalLanguagePath = 'managers';
-
     protected string $modalFormPath = 'managers.modals.form-modal';
 
     protected string $modelTitleField = 'full_name';
 
-    protected ManagerForm $modelForm;
+    protected $modelForm;
+
+    protected $modelType;
 
     public function fillDummyFields(): void
     {

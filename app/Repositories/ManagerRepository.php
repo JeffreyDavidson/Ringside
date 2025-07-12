@@ -140,7 +140,7 @@ class ManagerRepository
      */
     public function removeFromCurrentTagTeams(Manager $manager): void
     {
-        $manager->currentTagTeams->each(function (TagTeam $tagTeam) use ($manager) {
+        $manager->currentTagTeams->each(function (TagTeam $tagTeam) use ($manager): void {
             $manager->currentTagTeams()->updateExistingPivot($tagTeam->id, [
                 'left_at' => now()->toDateTimeString(),
             ]);
@@ -152,7 +152,7 @@ class ManagerRepository
      */
     public function removeFromCurrentWrestlers(Manager $manager): void
     {
-        $manager->currentWrestlers->each(function (Wrestler $wrestler) use ($manager) {
+        $manager->currentWrestlers->each(function (Wrestler $wrestler) use ($manager): void {
             $manager->currentWrestlers()->updateExistingPivot($wrestler->id, [
                 'left_at' => now()->toDateTimeString(),
             ]);

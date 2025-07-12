@@ -10,11 +10,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 
+/**
+ * @extends LivewireBaseForm<VenueForm, ?Venue>
+ */
 class VenueForm extends LivewireBaseForm
 {
-    protected string $formModelType = Venue::class;
-
-    public ?Venue $formModel;
+    public $formModel;
 
     public string $name = '';
 
@@ -26,38 +27,11 @@ class VenueForm extends LivewireBaseForm
 
     public int|string $zipcode = '';
 
-    /**
-     * Undocumented function
-     *
-     * @return array<string, list<Unique|Exists|string>>
-     */
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel ?? '')],
-            'street_address' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', 'max:255', Rule::exists(\App\Models\State::class, 'name')],
-            'zipcode' => ['required', 'integer', 'digits:5'],
-        ];
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function validationAttributes(): array
-    {
-        return [
-            'street_address' => 'street address',
-            'zipcode' => 'zip code',
-        ];
-    }
-
     public function store(): bool
     {
         $this->validate();
 
-        if (! isset($this->formModel)) {
+        if ($this->formModel === null) {
             $this->formModel = new Venue([
                 'name' => $this->name,
                 'street_address' => $this->street_address,
@@ -77,5 +51,32 @@ class VenueForm extends LivewireBaseForm
         }
 
         return true;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array<string, list<Unique|Exists|string>>
+     */
+    protected function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255', Rule::unique('venues')->ignore($this->formModel)],
+            'street_address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
+            'state' => ['required', 'string', 'max:255', Rule::exists(\App\Models\State::class, 'name')],
+            'zipcode' => ['required', 'integer', 'digits:5'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'street_address' => 'street address',
+            'zipcode' => 'zip code',
+        ];
     }
 }

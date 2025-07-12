@@ -16,7 +16,7 @@ class UnretireAction extends BaseTitleAction
     /**
      * Unretire a title.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void
     {
@@ -31,7 +31,7 @@ class UnretireAction extends BaseTitleAction
     /**
      * Ensure a title can be unretired.
      *
-     * @throws \App\Exceptions\CannotBeUnretiredException
+     * @throws CannotBeUnretiredException
      */
     private function ensureCanBeUnretired(Title $title): void
     {

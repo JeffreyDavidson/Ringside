@@ -37,17 +37,17 @@ class AppServiceProvider extends ServiceProvider
             /** @var Builder $builder */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);
-            $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+            $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';
 
             return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
         });
 
         /** @param array<string> $parameters */
-        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters) {
+        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters): string {
             /** @var string $values */
             $values = array_pop($parameters);
 
-            if (count($parameters)) {
+            if (count($parameters) !== 0) {
                 $values = implode(', ', $parameters).' or '.$values;
             }
 
@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
             'wrestler' => \App\Models\Wrestler::class,
             'manager' => \App\Models\Manager::class,
             'title' => \App\Models\Title::class,
-            'tagteam' => \App\Models\TagTeam::class,
+            'tagTeam' => \App\Models\TagTeam::class,
             'referee' => \App\Models\Referee::class,
             'stable' => \App\Models\Stable::class,
         ]);
