@@ -2,9 +2,155 @@
 
 declare(strict_types=1);
 
+use App\Models\Matches\EventMatch;
+use App\Models\Users\User;
 use App\Policies\EventMatchPolicy;
+use Illuminate\Support\Facades\Gate;
 
-test('it authorizes a user can create a EventMatch', function () {
-    expect((new EventMatchPolicy())->create(administrator()))->toBeTruthy();
-    expect((new EventMatchPolicy())->create(basicUser()))->toBeFalsy();
+/**
+ * Unit tests for EventMatchPolicy authorization logic.
+ *
+ * These tests focus on the authorization logic in isolation,
+ * testing each permission method independently.
+ *
+ * @see EventMatchPolicy
+ */
+describe('EventMatchPolicy Unit Tests', function () {
+
+    beforeEach(function () {
+        $this->policy = new EventMatchPolicy();
+        $this->admin = administrator();
+        $this->basicUser = basicUser();
+        $this->eventMatch = EventMatch::factory()->create();
+    });
+
+    describe('before hook behavior', function () {
+        test('administrators bypass all authorization checks', function () {
+            expect($this->policy->before($this->admin, 'viewList'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'view'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'create'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'update'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
+        });
+
+        test('basic users continue to individual method checks', function () {
+            expect($this->policy->before($this->basicUser, 'viewList'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'delete'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'restore'))->toBeNull();
+        });
+
+        test('before hook works for arbitrary abilities', function () {
+            expect($this->policy->before($this->admin, 'custom-ability'))->toBeTrue();
+            expect($this->policy->before($this->basicUser, 'custom-ability'))->toBeNull();
+        });
+    });
+
+    describe('basic CRUD permissions', function () {
+        test('viewList method denies basic users', function () {
+            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+        });
+
+        test('view method denies basic users', function () {
+            expect($this->policy->view($this->basicUser))->toBeFalse();
+        });
+
+        test('create method denies basic users', function () {
+            expect($this->policy->create($this->basicUser))->toBeFalse();
+        });
+
+        test('update method denies basic users', function () {
+            expect($this->policy->update($this->basicUser))->toBeFalse();
+        });
+
+        test('delete method denies basic users', function () {
+            expect($this->policy->delete($this->basicUser))->toBeFalse();
+        });
+
+        test('restore method denies basic users', function () {
+            expect($this->policy->restore($this->basicUser))->toBeFalse();
+        });
+    });
+
+    describe('policy integration with Laravel Gate', function () {
+        test('policy integrates correctly with Gate facade', function () {
+            // Test administrator permissions through Gate
+            expect(Gate::forUser($this->admin)->allows('viewList', EventMatch::class))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('create', EventMatch::class))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', EventMatch::class))->toBeTrue();
+
+            // Test basic user permissions through Gate
+            expect(Gate::forUser($this->basicUser)->denies('viewList', EventMatch::class))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('create', EventMatch::class))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('update', EventMatch::class))->toBeTrue();
+        });
+
+        test('policy works with specific event match instances', function () {
+            // Test with specific event match instance
+            expect(Gate::forUser($this->admin)->allows('view', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('delete', $this->eventMatch))->toBeTrue();
+
+            expect(Gate::forUser($this->basicUser)->denies('view', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('update', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('delete', $this->eventMatch))->toBeTrue();
+        });
+    });
+
+    describe('policy method consistency', function () {
+        test('all policy methods follow consistent pattern', function () {
+            $methods = [
+                'viewList', 'view', 'create', 'update', 'delete', 'restore',
+            ];
+
+            foreach ($methods as $method) {
+                // All methods should return false for basic users
+                expect($this->policy->{$method}($this->basicUser))
+                    ->toBeFalse("Method {$method} should deny basic users");
+
+                // All methods should be bypassed for administrators via before hook
+                expect($this->policy->before($this->admin, $method))
+                    ->toBeTrue("Method {$method} should be bypassed for administrators");
+            }
+        });
+
+        test('policy has all expected methods', function () {
+            $expectedMethods = [
+                'before', 'viewList', 'view', 'create', 'update', 'delete', 'restore',
+            ];
+
+            foreach ($expectedMethods as $method) {
+                expect(method_exists($this->policy, $method))
+                    ->toBeTrue("Policy should have {$method} method");
+            }
+        });
+    });
+
+    describe('edge cases and security', function () {
+        test('policy handles null user gracefully', function () {
+            // Laravel typically doesn't pass null users to policies, but test defensive programming
+            expect(fn () => $this->policy->before(null, 'viewList'))
+                ->toThrow(TypeError::class);
+        });
+
+        test('policy methods are type-safe', function () {
+            // All policy methods should require User parameter
+            expect(fn () => $this->policy->viewList('not-a-user'))
+                ->toThrow(TypeError::class);
+
+            expect(fn () => $this->policy->create(123))
+                ->toThrow(TypeError::class);
+        });
+
+        test('policy is consistent across multiple instances', function () {
+            $policy1 = new EventMatchPolicy();
+            $policy2 = new EventMatchPolicy();
+
+            expect($policy1->before($this->admin, 'create'))->toBe($policy2->before($this->admin, 'create'));
+            expect($policy1->viewList($this->basicUser))->toBe($policy2->viewList($this->basicUser));
+        });
+    });
 });

@@ -2,142 +2,312 @@
 
 declare(strict_types=1);
 
-use App\Data\RefereeData;
-use App\Models\Referee;
-use App\Models\RefereeEmployment;
+use App\Data\Referees\RefereeData;
+use App\Models\Referees\Referee;
+use App\Models\Referees\RefereeEmployment;
+use App\Models\Referees\RefereeInjury;
+use App\Models\Referees\RefereeRetirement;
+use App\Models\Referees\RefereeSuspension;
+use App\Repositories\Concerns\ManagesEmployment;
+use App\Repositories\Concerns\ManagesInjury;
+use App\Repositories\Concerns\ManagesRetirement;
+use App\Repositories\Concerns\ManagesSuspension;
+use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
+use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
+use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
+use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
+use App\Repositories\Contracts\RefereeRepositoryInterface;
 use App\Repositories\RefereeRepository;
 
-test('creates a referee', function () {
-    $data = new RefereeData('Taylor', 'Otwell', null);
+/**
+ * Unit tests for RefereeRepository business logic and data operations.
+ *
+ * UNIT TEST SCOPE:
+ * - Repository configuration and structure verification
+ * - Core CRUD operations (create, update, delete, restore)
+ * - Trait-based functionality (employment, retirement, suspension, injury management)
+ * - Referee specific business logic
+ *
+ * These tests verify that the RefereeRepository correctly implements
+ * all business operations and data persistence requirements.
+ *
+ * @see RefereeRepository
+ */
+describe('RefereeRepository Unit Tests', function () {
+    beforeEach(function () {
+        $this->repository = app(RefereeRepository::class);
+    });
 
-    $referee = app(RefereeRepository::class)->create($data);
+    describe('repository configuration', function () {
+        test('repository can be resolved from container', function () {
+            expect($this->repository)->toBeInstanceOf(RefereeRepository::class);
+            expect($this->repository)->toBeInstanceOf(RefereeRepositoryInterface::class);
+        });
 
-    expect($referee)
-        ->first_name->toEqual('Taylor')
-        ->last_name->toEqual('Otwell');
-});
+        test('repository implements all required contracts', function () {
+            expect($this->repository)->toBeInstanceOf(ManagesEmploymentContract::class);
+            expect($this->repository)->toBeInstanceOf(ManagesInjuryContract::class);
+            expect($this->repository)->toBeInstanceOf(ManagesRetirementContract::class);
+            expect($this->repository)->toBeInstanceOf(ManagesSuspensionContract::class);
+        });
 
-test('it updates a referee', function () {
-    $referee = Referee::factory()->create();
-    $data = new RefereeData('Taylor', 'Otwell', null);
+        test('repository uses all required traits', function () {
+            expect(RefereeRepository::class)->usesTrait(ManagesEmployment::class);
+            expect(RefereeRepository::class)->usesTrait(ManagesInjury::class);
+            expect(RefereeRepository::class)->usesTrait(ManagesRetirement::class);
+            expect(RefereeRepository::class)->usesTrait(ManagesSuspension::class);
+        });
 
-    $referee = app(RefereeRepository::class)->update($referee, $data);
+        test('repository has all expected methods', function () {
+            $methods = [
+                'create', 'update', 'restore',
+                'createEmployment', 'createRelease', 'createRetirement', 'endRetirement',
+                'createSuspension', 'endSuspension', 'createInjury', 'endInjury'
+            ];
 
-    expect($referee->fresh())
-        ->first_name->toBe('Taylor')
-        ->last_name->toBe('Otwell');
-});
+            foreach ($methods as $method) {
+                expect(method_exists($this->repository, $method))
+                    ->toBeTrue("Repository should have {$method} method");
+            }
+        });
+    });
 
-test('deletes a referee', function () {
-    $referee = Referee::factory()->create();
+    describe('core CRUD operations', function () {
+        test('can create referee with required data', function () {
+            // Arrange
+            $data = new RefereeData('Taylor', 'Otwell', null);
 
-    app(RefereeRepository::class)->delete($referee);
+            // Act
+            $referee = $this->repository->create($data);
 
-    expect($referee)
-        ->deleted_at->not()->toBeNull();
-});
+            // Assert
+            expect($referee)
+                ->toBeInstanceOf(Referee::class)
+                ->first_name->toEqual('Taylor')
+                ->last_name->toEqual('Otwell');
 
-test('restore a trashed referee', function () {
-    $referee = Referee::factory()->trashed()->create();
+            $this->assertDatabaseHas('referees', [
+                'first_name' => 'Taylor',
+                'last_name' => 'Otwell',
+            ]);
+        });
 
-    app(RefereeRepository::class)->restore($referee);
+        test('can update existing referee', function () {
+            // Arrange
+            $referee = Referee::factory()->create();
+            $data = new RefereeData('Updated', 'Name', null);
 
-    expect($referee->fresh())
-        ->deleted_at->toBeNull();
-});
+            // Act
+            $updatedReferee = $this->repository->update($referee, $data);
 
-test('employ a referee', function () {
-    $referee = Referee::factory()->create();
-    $datetime = now();
+            // Assert
+            expect($updatedReferee->fresh())
+                ->first_name->toBe('Updated')
+                ->last_name->toBe('Name');
 
-    $referee = app(RefereeRepository::class)->employ($referee, $datetime);
+            $this->assertDatabaseHas('referees', [
+                'id' => $referee->id,
+                'first_name' => 'Updated',
+                'last_name' => 'Name',
+            ]);
+        });
 
-    expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())->started_at->eq($datetime);
-});
+        test('can soft delete referee', function () {
+            // Arrange
+            $referee = Referee::factory()->create();
 
-test('updates employment of a referee', function () {
-    $datetime = now();
-    $referee = Referee::factory()
-        ->has(RefereeEmployment::factory()->started($datetime->copy()->addDays(2)), 'employments')
-        ->create();
+            // Act
+            $this->repository->delete($referee);
 
-    expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())
-        ->started_at->toDateTimeString()->toEqual($datetime->copy()->addDays(2)->toDateTimeString());
+            // Assert
+            expect($referee->deleted_at)->not()->toBeNull();
+            $this->assertSoftDeleted('referees', ['id' => $referee->id]);
+        });
 
-    $referee = app(RefereeRepository::class)->employ($referee, $datetime);
+        test('can restore soft deleted referee', function () {
+            // Arrange
+            $referee = Referee::factory()->trashed()->create();
 
-    expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())->started_at->eq($datetime);
-});
+            // Act
+            $this->repository->restore($referee);
 
-test('release a referee', function () {
-    $referee = Referee::factory()->bookable()->create();
-    $datetime = now();
+            // Assert
+            expect($referee->fresh()->deleted_at)->toBeNull();
+            $this->assertDatabaseHas('referees', [
+                'id' => $referee->id,
+                'deleted_at' => null,
+            ]);
+        });
+    });
 
-    $referee = app(RefereeRepository::class)->release($referee, $datetime);
+    describe('employment management', function () {
+        test('can create employment for referee', function () {
+            // Arrange
+            $referee = Referee::factory()->create();
+            $employmentDate = now()->subDays(30);
 
-    expect($referee->fresh())->employments->toHaveCount(1);
-    expect($referee->fresh()->employments->first())->ended_at->eq($datetime);
-});
+            // Act
+            $this->repository->createEmployment($referee, $employmentDate);
 
-test('injure a referee', function () {
-    $referee = Referee::factory()->bookable()->create();
-    $datetime = now();
+            // Assert
+            expect($referee->fresh()->employments)->toHaveCount(1);
+            expect($referee->fresh()->employments->first()->started_at)->eq($employmentDate);
 
-    $referee = app(RefereeRepository::class)->injure($referee, $datetime);
+            $this->assertDatabaseHas('referees_employments', [
+                'referee_id' => $referee->id,
+                'started_at' => $employmentDate,
+                'ended_at' => null,
+            ]);
+        });
 
-    expect($referee->fresh())->injuries->toHaveCount(1);
-    expect($referee->fresh()->injuries->first())->started_at->eq($datetime);
-});
+        test('can release employed referee', function () {
+            // Arrange
+            $referee = Referee::factory()->bookable()->create();
+            $releaseDate = now();
 
-test('clear an injured referee', function () {
-    $referee = Referee::factory()->injured()->create();
-    $datetime = now();
+            // Act
+            $this->repository->createRelease($referee, $releaseDate);
 
-    $referee = app(RefereeRepository::class)->clearInjury($referee, $datetime);
+            // Assert
+            expect($referee->fresh()->employments)->toHaveCount(1);
+            expect($referee->fresh()->employments->first()->ended_at)->eq($releaseDate);
 
-    expect($referee->fresh())->injuries->toHaveCount(1);
-    expect($referee->fresh()->injuries->first())->ended_at->eq($datetime);
-});
+            $this->assertDatabaseHas('referees_employments', [
+                'referee_id' => $referee->id,
+                'ended_at' => $releaseDate,
+            ]);
+        });
 
-test('retire a referee', function () {
-    $referee = Referee::factory()->bookable()->create();
-    $datetime = now();
+        test('updates existing employment when creating new employment', function () {
+            // Arrange
+            $referee = Referee::factory()
+                ->has(RefereeEmployment::factory()->started(now()->subDays(10)), 'employments')
+                ->create();
+            $newEmploymentDate = now()->subDays(5);
 
-    $referee = app(RefereeRepository::class)->retire($referee, $datetime);
+            // Act
+            $this->repository->createEmployment($referee, $newEmploymentDate);
 
-    expect($referee->fresh())->retirements->toHaveCount(1);
-    expect($referee->fresh()->retirements->first())->started_at->eq($datetime);
-});
+            // Assert
+            expect($referee->fresh()->employments)->toHaveCount(1);
+            expect($referee->fresh()->employments->first()->started_at)->eq($newEmploymentDate);
+        });
+    });
 
-test('unretire a referee', function () {
-    $referee = Referee::factory()->retired()->create();
-    $datetime = now();
+    describe('injury management', function () {
+        test('can injure referee', function () {
+            // Arrange
+            $referee = Referee::factory()->bookable()->create();
+            $injuryDate = now();
 
-    $referee = app(RefereeRepository::class)->unretire($referee, $datetime);
+            // Act
+            $this->repository->createInjury($referee, $injuryDate);
 
-    expect($referee->fresh())->retirements->toHaveCount(1);
-    expect($referee->fresh()->retirements->first())->ended_at->eq($datetime);
-});
+            // Assert
+            expect($referee->fresh()->injuries)->toHaveCount(1);
+            expect($referee->fresh()->injuries->first()->started_at)->eq($injuryDate);
 
-test('suspend a referee', function () {
-    $referee = Referee::factory()->bookable()->create();
-    $datetime = now();
+            $this->assertDatabaseHas('referees_injuries', [
+                'referee_id' => $referee->id,
+                'started_at' => $injuryDate,
+                'ended_at' => null,
+            ]);
+        });
 
-    $referee = app(RefereeRepository::class)->suspend($referee, $datetime);
+        test('can clear injured referee', function () {
+            // Arrange
+            $referee = Referee::factory()->injured()->create();
+            $clearDate = now();
 
-    expect($referee->fresh())->suspensions->toHaveCount(1);
-    expect($referee->fresh()->suspensions->first())->started_at->eq($datetime);
-});
+            // Act
+            $this->repository->endInjury($referee, $clearDate);
 
-test('reinstate a referee', function () {
-    $referee = Referee::factory()->suspended()->create();
-    $datetime = now();
+            // Assert
+            expect($referee->fresh()->injuries)->toHaveCount(1);
+            expect($referee->fresh()->injuries->first()->ended_at)->eq($clearDate);
 
-    $referee = app(RefereeRepository::class)->reinstate($referee, $datetime);
+            $this->assertDatabaseHas('referees_injuries', [
+                'referee_id' => $referee->id,
+                'ended_at' => $clearDate,
+            ]);
+        });
+    });
 
-    expect($referee->fresh())->suspensions->toHaveCount(1);
-    expect($referee->fresh()->suspensions->first())->ended_at->eq($datetime);
+    describe('retirement management', function () {
+        test('can retire referee', function () {
+            // Arrange
+            $referee = Referee::factory()->bookable()->create();
+            $retirementDate = now();
+
+            // Act
+            $this->repository->createRetirement($referee, $retirementDate);
+
+            // Assert
+            expect($referee->fresh()->retirements)->toHaveCount(1);
+            expect($referee->fresh()->retirements->first()->started_at)->eq($retirementDate);
+
+            $this->assertDatabaseHas('referees_retirements', [
+                'referee_id' => $referee->id,
+                'started_at' => $retirementDate,
+                'ended_at' => null,
+            ]);
+        });
+
+        test('can unretire referee', function () {
+            // Arrange
+            $referee = Referee::factory()->retired()->create();
+            $unretirementDate = now();
+
+            // Act
+            $this->repository->endRetirement($referee, $unretirementDate);
+
+            // Assert
+            expect($referee->fresh()->retirements)->toHaveCount(1);
+            expect($referee->fresh()->retirements->first()->ended_at)->eq($unretirementDate);
+
+            $this->assertDatabaseHas('referees_retirements', [
+                'referee_id' => $referee->id,
+                'ended_at' => $unretirementDate,
+            ]);
+        });
+    });
+
+    describe('suspension management', function () {
+        test('can suspend referee', function () {
+            // Arrange
+            $referee = Referee::factory()->bookable()->create();
+            $suspensionDate = now();
+
+            // Act
+            $this->repository->createSuspension($referee, $suspensionDate);
+
+            // Assert
+            expect($referee->fresh()->suspensions)->toHaveCount(1);
+            expect($referee->fresh()->suspensions->first()->started_at)->eq($suspensionDate);
+
+            $this->assertDatabaseHas('referees_suspensions', [
+                'referee_id' => $referee->id,
+                'started_at' => $suspensionDate,
+                'ended_at' => null,
+            ]);
+        });
+
+        test('can reinstate suspended referee', function () {
+            // Arrange
+            $referee = Referee::factory()->suspended()->create();
+            $reinstatementDate = now();
+
+            // Act
+            $this->repository->endSuspension($referee, $reinstatementDate);
+
+            // Assert
+            expect($referee->fresh()->suspensions)->toHaveCount(1);
+            expect($referee->fresh()->suspensions->first()->ended_at)->eq($reinstatementDate);
+
+            $this->assertDatabaseHas('referees_suspensions', [
+                'referee_id' => $referee->id,
+                'ended_at' => $reinstatementDate,
+            ]);
+        });
+    });
 });
