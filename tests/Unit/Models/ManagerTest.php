@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Builders\ManagerBuilder;
-use App\Enums\EmploymentStatus;
+use App\Builders\Roster\ManagerBuilder;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\Manageables;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\CanBeAStableMember;

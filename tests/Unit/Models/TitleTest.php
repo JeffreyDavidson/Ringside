@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Builders\TitleBuilder;
+use App\Builders\Titles\TitleBuilder;
 use App\Enums\ActivationStatus;
 use App\Models\Concerns\HasChampionships;
 use App\Models\Titles\Title;

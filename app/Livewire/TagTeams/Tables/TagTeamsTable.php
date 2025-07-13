@@ -11,7 +11,7 @@ use App\Actions\TagTeams\RestoreAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
-use App\Builders\TagTeamBuilder;
+use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeEmployedException;
 use App\Exceptions\Status\CannotBeReinstatedException;

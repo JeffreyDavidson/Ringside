@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Builders\WrestlerBuilder;
+use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\EmploymentStatus;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\HasMatches;

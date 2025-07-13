@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Builders\RefereeBuilder;
+use App\Builders\Roster\RefereeBuilder;
 use App\Enums\EmploymentStatus;
 use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
