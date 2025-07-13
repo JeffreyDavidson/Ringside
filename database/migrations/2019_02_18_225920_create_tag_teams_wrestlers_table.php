@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
