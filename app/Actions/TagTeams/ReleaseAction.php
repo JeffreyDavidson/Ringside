@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Managers\ReleaseAction as ManagersReleaseAction;
 use App\Actions\Wrestlers\ReleaseAction as WrestlersReleaseAction;
-use App\Exceptions\CannotBeReleasedException;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Exceptions\Status\CannotBeReleasedException;
+use App\Models\Managers\Manager;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
+use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction extends BaseTagTeamAction
@@ -16,47 +20,63 @@ class ReleaseAction extends BaseTagTeamAction
     use AsAction;
 
     /**
-     * Release a tag team.
-     *
-     * @throws CannotBeReleasedException
+     * Create a new release action instance.
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
-    {
-        $this->ensureCanBeReleased($tagTeam);
-
-        $releaseDate ??= now();
-
-        if ($tagTeam->isSuspended()) {
-            $this->tagTeamRepository->reinstate($tagTeam, $releaseDate);
-        }
-
-        $this->tagTeamRepository->release($tagTeam, $releaseDate);
-
-        $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => resolve(WrestlersReleaseAction::class)->handle($wrestler, $releaseDate));
+    public function __construct(
+        protected TagTeamRepository $tagTeamRepository,
+        protected WrestlersReleaseAction $wrestlersReleaseAction,
+        protected ManagersReleaseAction $managersReleaseAction
+    ) {
+        parent::__construct($tagTeamRepository);
     }
 
     /**
-     * Ensure a tag team can be released.
+     * Release a tag team from employment and end all current relationships.
      *
-     * @throws CannotBeReleasedException
+     * This handles the complete tag team release workflow with cascading effects:
+     * - Validates the tag team can be released (currently employed)
+     * - Ends current wrestler partnerships (wrestlers become free agents)
+     * - Ends current manager relationships
+     * - Ends suspension if active
+     * - Ends employment period with the specified date
+     * - Maintains all historical records for tracking purposes
+     * - Individual members may be re-hired independently
+     *
+     * @param  TagTeam  $tagTeam  The tag team to release
+     * @param  Carbon|null  $releaseDate  The release date (defaults to now)
+     *
+     * @throws CannotBeReleasedException When tag team cannot be released due to business rules
+     *
+     * @example
+     * ```php
+     * // Release tag team immediately
+     * $tagTeam = TagTeam::where('name', 'The Shield')->first();
+     * ReleaseAction::run($tagTeam);
+     *
+     * // Release with specific date
+     * ReleaseAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     * ```
      */
-    private function ensureCanBeReleased(TagTeam $tagTeam): void
+    public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
-        if ($tagTeam->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed();
-        }
+        $tagTeam->ensureCanBeReleased();
 
-        if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment();
-        }
+        $releaseDate = $this->getEffectiveDate($releaseDate);
 
-        if ($tagTeam->isRetired()) {
-            throw CannotBeReleasedException::retired();
-        }
+        DB::transaction(function () use ($tagTeam, $releaseDate): void {
+            // End suspension if active
+            if ($tagTeam->isSuspended()) {
+                $this->tagTeamRepository->endSuspension($tagTeam, $releaseDate);
+            }
 
-        if ($tagTeam->isReleased()) {
-            throw CannotBeReleasedException::released();
-        }
+            // End current wrestler partnerships (wrestlers become free agents)
+            $this->tagTeamRepository->removeWrestlers($tagTeam, $tagTeam->currentWrestlers, $releaseDate);
+
+            // End current manager relationships
+            $this->tagTeamRepository->removeManagers($tagTeam, $tagTeam->currentManagers, $releaseDate);
+
+            // End tag team employment
+            $this->tagTeamRepository->endEmployment($tagTeam, $releaseDate);
+        });
     }
 }

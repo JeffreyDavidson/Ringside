@@ -4,58 +4,54 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\CannotBeInjuredException;
-use App\Models\Manager;
+use App\Exceptions\Status\CannotBeInjuredException;
+use App\Models\Managers\Manager;
+use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class InjureAction extends BaseManagerAction
 {
     use AsAction;
 
-    /**
-     * Injure a manager.
-     *
-     * @throws CannotBeInjuredException
-     */
-    public function handle(Manager $manager, ?Carbon $injureDate = null): void
-    {
-        $this->ensureCanBeInjured($manager);
-
-        $injureDate ??= now();
-
-        $this->managerRepository->injure($manager, $injureDate);
+    public function __construct(
+        ManagerRepository $managerRepository
+    ) {
+        parent::__construct($managerRepository);
     }
 
     /**
-     * Ensure a manager can be injured.
+     * Record a manager injury.
      *
-     * @throws CannotBeInjuredException
+     * This handles the complete manager injury workflow:
+     * - Validates the manager can be injured (currently employed, not already injured)
+     * - Creates an injury record with the specified start date
+     * - Temporarily removes the manager from active wrestler/tag team management duties
+     * - Maintains employment status while marking as unavailable due to injury
+     *
+     * @param  Manager  $manager  The manager to mark as injured
+     * @param  Carbon|null  $injureDate  The injury date (defaults to now)
+     *
+     * @throws CannotBeInjuredException When manager cannot be injured due to business rules
+     *
+     * @example
+     * ```php
+     * // Mark manager as injured immediately
+     * InjureAction::run($manager);
+     *
+     * // Record injury with specific date
+     * InjureAction::run($manager, Carbon::parse('2024-01-15'));
+     * ```
      */
-    private function ensureCanBeInjured(Manager $manager): void
+    public function handle(Manager $manager, ?Carbon $injureDate = null): void
     {
-        if ($manager->isUnemployed()) {
-            throw CannotBeInjuredException::unemployed();
-        }
+        $manager->ensureCanBeInjured();
 
-        if ($manager->isReleased()) {
-            throw CannotBeInjuredException::released();
-        }
+        $injureDate = $this->getEffectiveDate($injureDate);
 
-        if ($manager->isRetired()) {
-            throw CannotBeInjuredException::retired();
-        }
-
-        if ($manager->hasFutureEmployment()) {
-            throw CannotBeInjuredException::hasFutureEmployment();
-        }
-
-        if ($manager->isInjured()) {
-            throw CannotBeInjuredException::injured();
-        }
-
-        if ($manager->isSuspended()) {
-            throw CannotBeInjuredException::suspended();
-        }
+        DB::transaction(function () use ($manager, $injureDate): void {
+            $this->managerRepository->createInjury($manager, $injureDate);
+        });
     }
 }

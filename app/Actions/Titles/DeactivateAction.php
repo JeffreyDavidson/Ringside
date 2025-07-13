@@ -4,50 +4,34 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\CannotBeDeactivatedException;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
+/**
+ * Deactivate action for titles.
+ *
+ * This is an alias for PullAction to maintain backward compatibility with tests.
+ * Use PullAction for new code.
+ */
 class DeactivateAction extends BaseTitleAction
 {
     use AsAction;
 
-    /**
-     * Deactivate a title.
-     *
-     * @throws CannotBeDeactivatedException
-     */
-    public function handle(Title $title, ?Carbon $deactivationDate = null): void
-    {
-        $this->ensureCanBeDeactivated($title);
-
-        $deactivationDate ??= now();
-
-        $this->titleRepository->deactivate($title, $deactivationDate);
+    public function __construct(
+        private PullAction $pullAction
+    ) {
+        parent::__construct($this->pullAction->titleRepository);
     }
 
     /**
-     * Ensure a title can be deactivated.
+     * Deactivate a title.
      *
-     * @throws CannotBeDeactivatedException
+     * @param  Title  $title  The title to deactivate
+     * @param  Carbon|null  $deactivationDate  The deactivation date (defaults to now)
      */
-    private function ensureCanBeDeactivated(Title $title): void
+    public function handle(Title $title, ?Carbon $deactivationDate = null): void
     {
-        if ($title->isUnactivated()) {
-            throw CannotBeDeactivatedException::unactivated();
-        }
-
-        if ($title->isDeactivated()) {
-            throw CannotBeDeactivatedException::deactivated();
-        }
-
-        if ($title->hasFutureActivation()) {
-            throw CannotBeDeactivatedException::hasFutureActivation();
-        }
-
-        if ($title->isRetired()) {
-            throw CannotBeDeactivatedException::retired();
-        }
+        $this->pullAction->handle($title, $deactivationDate);
     }
 }

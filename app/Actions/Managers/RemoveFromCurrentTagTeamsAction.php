@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Models\Manager;
+use App\Models\Managers\Manager;
+use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class RemoveFromCurrentTagTeamsAction extends BaseManagerAction
 {
     use AsAction;
 
-    /**
-     * Remove manager from currently managed tag teams.
-     */
-    public function handle(Manager $manager): void
+    public function handle(Manager $manager, ?Carbon $removalDate = null): void
     {
-        $this->managerRepository->removeFromCurrentTagTeams($manager);
+        $removalDate = $removalDate ?? now();
+        $this->managerRepository->removeFromCurrentTagTeams($manager, $removalDate);
     }
 }
