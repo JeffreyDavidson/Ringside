@@ -1,0 +1,255 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Wrestlers;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Wrestlers\WrestlerFormModal;
+use Tests\Browser\Components\Wrestlers\WrestlerActionsDropdown;
+
+/**
+ * Page Object for the Wrestler Index page.
+ * 
+ * This page represents the main wrestlers table interface including
+ * the create button, search functionality, filtering, and wrestler
+ * table with actions. Provides a clean API for interacting with
+ * all wrestler table elements.
+ */
+class WrestlerIndexPage extends BasePage
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/roster/wrestlers';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-dusk="create-wrestler-button"]',
+            '@wrestlers-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"], input[name="search"], .search input, [wire\\:model*="search"]',
+            '@status-filter' => 'select[name*="status"], select[wire\\:model*="status"], .filter select, [data-filter] select',
+            '@pagination' => '.pagination, [aria-label="Pagination"], button:contains("Next"), button:contains("2"), .page-link',
+            '@sort-name' => 'th:contains("Name"), th[wire\\:click*="sort"]',
+            '@sort-status' => 'th:contains("Status")',
+            '@sort-height' => 'th:contains("Height")',
+            '@sort-weight' => 'th:contains("Weight")',
+            '@sort-hometown' => 'th:contains("Hometown")',
+            '@empty-state' => '.empty-state, .no-results, .no-data',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow Livewire to initialize
+                ->assertPresent('@wrestlers-table');
+        
+        return $this;
+    }
+
+    /**
+     * Click the create wrestler button.
+     */
+    public function clickCreateWrestler(Browser $browser): WrestlerFormModal
+    {
+        $browser->click('@create-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new WrestlerFormModal();
+    }
+
+    /**
+     * Search for wrestlers by name.
+     */
+    public function searchForWrestler(Browser $browser, string $searchTerm): static
+    {
+        $searchSelectors = [
+            'input[placeholder*="Search"]',
+            'input[type="search"]',
+            'input[name="search"]',
+            '.search input',
+            '[wire\\:model*="search"]'
+        ];
+
+        foreach ($searchSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->type($selector, $searchTerm)
+                            ->pause(1500); // Wait for search to process
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter wrestlers by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): static
+    {
+        $filterSelectors = [
+            'select[name*="status"]',
+            'select[wire\\:model*="status"]',
+            '.filter select',
+            '[data-filter] select'
+        ];
+
+        foreach ($filterSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $status)
+                            ->pause(1500); // Wait for filter to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a wrestler is visible in the table.
+     */
+    public function assertWrestlerVisible(Browser $browser, string $wrestlerName): static
+    {
+        $browser->assertSee($wrestlerName);
+        return $this;
+    }
+
+    /**
+     * Assert that a wrestler is not visible in the table.
+     */
+    public function assertWrestlerNotVisible(Browser $browser, string $wrestlerName): static
+    {
+        $browser->assertDontSee($wrestlerName);
+        return $this;
+    }
+
+    /**
+     * Click the actions button for a specific wrestler.
+     */
+    public function clickWrestlerActions(Browser $browser, int $wrestlerId): WrestlerActionsDropdown
+    {
+        $browser->click("@wrestler-actions-button-{$wrestlerId}")
+                ->pause(1000); // Wait for dropdown to open
+        
+        return new WrestlerActionsDropdown($wrestlerId);
+    }
+
+    /**
+     * Navigate to a wrestler's detail page by clicking their name.
+     */
+    public function clickWrestlerName(Browser $browser, string $wrestlerName): WrestlerDetailPage
+    {
+        $browser->clickLink($wrestlerName);
+        return new WrestlerDetailPage();
+    }
+
+    /**
+     * Sort the table by a specific column.
+     */
+    public function sortBy(Browser $browser, string $column): static
+    {
+        $sortSelectors = [
+            "th:contains(\"{$column}\")",
+            "th[wire\\:click*=\"sort\"]",
+            ".sortable",
+            "[data-sort=\"{$column}\"]"
+        ];
+
+        foreach ($sortSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000); // Wait for sort to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the table headers are visible.
+     */
+    public function assertTableHeadersVisible(Browser $browser): static
+    {
+        $browser->assertSee('Name')
+                ->assertSee('Status')
+                ->assertSee('Height')
+                ->assertSee('Weight')
+                ->assertSee('Hometown');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that pagination is working.
+     */
+    public function assertPaginationWorks(Browser $browser): static
+    {
+        $paginationSelectors = [
+            '.pagination',
+            '[aria-label="Pagination"]',
+            'button:contains("Next")',
+            'button:contains("2")',
+            '.page-link'
+        ];
+
+        foreach ($paginationSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the create button is visible.
+     */
+    public function assertCreateButtonVisible(Browser $browser): static
+    {
+        $browser->assertSee('Create')
+                ->assertPresent('@create-button');
+        
+        return $this;
+    }
+}

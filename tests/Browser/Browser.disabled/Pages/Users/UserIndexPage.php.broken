@@ -1,0 +1,328 @@
+<?php
+
+namespace Tests\Browser\Pages\Users;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class UserIndexPage extends Page
+{
+    public function url(): string
+    {
+        return '/users';
+    }
+
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-testid="create-user-btn"], .create-user, button:contains("Create")',
+            '@users-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"]',
+            '@action-dropdown' => '.dropdown, [data-testid="actions"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-title' => '.modal-title, [data-testid="modal-title"]',
+            '@modal-overlay' => '.modal-backdrop, .modal-overlay',
+            '@cancel-button' => '[data-testid="cancel"], .btn-cancel, button:contains("Cancel")',
+            '@submit-button' => '[data-testid="submit"], .btn-submit, button[type="submit"]',
+            '@dummy-data-button' => '[data-testid="dummy-data"], .btn-dummy-data',
+            '@success-message' => '.alert-success, .toast-success, [data-testid="success"]',
+            '@loading-spinner' => '.spinner, .loading, [data-testid="loading"]',
+        ];
+    }
+
+    public function visit(Browser $browser, $user): self
+    {
+        $browser->loginAs($user)->visit($this->url());
+        return $this;
+    }
+
+    public function openCreateModal(Browser $browser): self
+    {
+        $browser->click('@create-button')
+                ->waitFor('@modal', 5);
+        return $this;
+    }
+
+    public function openEditModal(Browser $browser, $user): self
+    {
+        $editSelector = sprintf('[data-testid="edit-user-%d"], [data-user-id="%d"] .btn-edit', $user->id, $user->id);
+        $browser->click($editSelector)
+                ->waitFor('@modal', 5);
+        return $this;
+    }
+
+    public function assertModalVisible(Browser $browser): self
+    {
+        $browser->assertVisible('@modal');
+        return $this;
+    }
+
+    public function assertModalClosed(Browser $browser): self
+    {
+        $browser->assertMissing('@modal');
+        return $this;
+    }
+
+    public function assertModalStillVisible(Browser $browser): self
+    {
+        $browser->assertVisible('@modal');
+        return $this;
+    }
+
+    public function assertModalTitle(Browser $browser, string $title): self
+    {
+        $browser->assertSeeIn('@modal-title', $title);
+        return $this;
+    }
+
+    public function assertCreateFormFields(Browser $browser): self
+    {
+        $browser->assertVisible('@first-name-field')
+                ->assertVisible('@last-name-field')
+                ->assertVisible('@email-field')
+                ->assertVisible('@role-field')
+                ->assertVisible('@status-field');
+        return $this;
+    }
+
+    public function assertRoleOptions(Browser $browser, array $options): self
+    {
+        foreach ($options as $option) {
+            $browser->assertSeeIn('@role-field', $option);
+        }
+        return $this;
+    }
+
+    public function assertStatusOptions(Browser $browser, array $options): self
+    {
+        foreach ($options as $option) {
+            $browser->assertSeeIn('@status-field', $option);
+        }
+        return $this;
+    }
+
+    public function fillCreateForm(Browser $browser, array $data): self
+    {
+        if (isset($data['first_name'])) {
+            $browser->type('@first-name-field', $data['first_name']);
+        }
+        if (isset($data['last_name'])) {
+            $browser->type('@last-name-field', $data['last_name']);
+        }
+        if (isset($data['email'])) {
+            $browser->type('@email-field', $data['email']);
+        }
+        if (isset($data['password'])) {
+            $browser->type('@password-field', $data['password']);
+        }
+        if (isset($data['role'])) {
+            $browser->select('@role-field', $data['role']);
+        }
+        if (isset($data['status'])) {
+            $browser->select('@status-field', $data['status']);
+        }
+        if (isset($data['phone_number'])) {
+            $browser->type('@phone-field', $data['phone_number']);
+        }
+        return $this;
+    }
+
+    public function fillEditForm(Browser $browser, array $data): self
+    {
+        return $this->fillCreateForm($browser, $data);
+    }
+
+    public function assertFormPrefilledWith(Browser $browser, array $data): self
+    {
+        if (isset($data['first_name'])) {
+            $browser->assertInputValue('@first-name-field', $data['first_name']);
+        }
+        if (isset($data['last_name'])) {
+            $browser->assertInputValue('@last-name-field', $data['last_name']);
+        }
+        if (isset($data['email'])) {
+            $browser->assertInputValue('@email-field', $data['email']);
+        }
+        return $this;
+    }
+
+    public function submitForm(Browser $browser): self
+    {
+        $browser->click('@submit-button')
+                ->waitUntilMissing('@modal', 10);
+        return $this;
+    }
+
+    public function submitFormWithoutData(Browser $browser): self
+    {
+        $browser->click('@submit-button');
+        return $this;
+    }
+
+    public function cancelModal(Browser $browser): self
+    {
+        $browser->click('@cancel-button')
+                ->waitUntilMissing('@modal', 5);
+        return $this;
+    }
+
+    public function clickModalOverlay(Browser $browser): self
+    {
+        $browser->click('@modal-overlay')
+                ->waitUntilMissing('@modal', 5);
+        return $this;
+    }
+
+    public function clearFormFields(Browser $browser): self
+    {
+        $browser->clear('@first-name-field')
+                ->clear('@last-name-field')
+                ->clear('@email-field');
+        return $this;
+    }
+
+    public function assertValidationErrors(Browser $browser, array $fields): self
+    {
+        foreach ($fields as $field) {
+            $errorSelector = sprintf('[data-field="%s"] .error, .%s-error, [data-testid="%s-error"]', $field, $field, $field);
+            $browser->assertVisible($errorSelector);
+        }
+        return $this;
+    }
+
+    public function assertValidationError(Browser $browser, string $field, string $message = null): self
+    {
+        $errorSelector = sprintf('[data-field="%s"] .error, .%s-error, [data-testid="%s-error"]', $field, $field, $field);
+        $browser->assertVisible($errorSelector);
+        
+        if ($message) {
+            $browser->assertSeeIn($errorSelector, $message);
+        }
+        return $this;
+    }
+
+    public function assertNoValidationError(Browser $browser, string $field): self
+    {
+        $errorSelector = sprintf('[data-field="%s"] .error, .%s-error, [data-testid="%s-error"]', $field, $field, $field);
+        $browser->assertMissing($errorSelector);
+        return $this;
+    }
+
+    public function assertUserInList(Browser $browser, string $userName): self
+    {
+        $browser->assertSeeIn('@users-table', $userName);
+        return $this;
+    }
+
+    public function assertSuccessMessage(Browser $browser): self
+    {
+        $browser->assertVisible('@success-message');
+        return $this;
+    }
+
+    public function assertDummyDataButton(Browser $browser): self
+    {
+        $browser->assertVisible('@dummy-data-button');
+        return $this;
+    }
+
+    public function clickDummyDataButton(Browser $browser): self
+    {
+        $browser->click('@dummy-data-button');
+        return $this;
+    }
+
+    public function assertFormFieldsPopulated(Browser $browser): self
+    {
+        $browser->assertInputValueIsNot('@first-name-field', '')
+                ->assertInputValueIsNot('@last-name-field', '')
+                ->assertInputValueIsNot('@email-field', '');
+        return $this;
+    }
+
+    public function assertLoadingState(Browser $browser): self
+    {
+        $browser->assertVisible('@loading-spinner');
+        return $this;
+    }
+
+    public function assertModalResponsive(Browser $browser): self
+    {
+        // Check that modal is properly displayed on current screen size
+        $browser->assertVisible('@modal');
+        return $this;
+    }
+
+    public function clickSubmitAndWait(Browser $browser): self
+    {
+        $browser->click('@submit-button');
+        // Don't wait for modal to close, just for loading state
+        return $this;
+    }
+
+    public function clickSubmitMultipleTimes(Browser $browser): self
+    {
+        $browser->click('@submit-button')
+                ->click('@submit-button')
+                ->click('@submit-button');
+        return $this;
+    }
+
+    public function waitForSubmissionComplete(Browser $browser): self
+    {
+        $browser->waitUntilMissing('@modal', 10);
+        return $this;
+    }
+
+    public function waitForErrorHandling(Browser $browser): self
+    {
+        $browser->pause(2000); // Wait for error handling
+        return $this;
+    }
+
+    public function assertFirstNameFieldFocused(Browser $browser): self
+    {
+        $browser->assertFocused('@first-name-field');
+        return $this;
+    }
+
+    public function searchFor(Browser $browser, string $term): self
+    {
+        $browser->type('@search-input', $term)
+                ->pause(500); // Allow search to process
+        return $this;
+    }
+
+    public function assertFocused(Browser $browser, string $selector): self
+    {
+        $browser->assertFocused($selector);
+        return $this;
+    }
+
+    public function assertInputType(Browser $browser, string $selector, string $type): self
+    {
+        $browser->assertAttribute($selector, 'type', $type);
+        return $this;
+    }
+
+    public function assertInputValue(Browser $browser, string $selector, string $value): self
+    {
+        $browser->assertInputValue($selector, $value);
+        return $this;
+    }
+
+    // Additional element selectors for form fields
+    public function elements(): array
+    {
+        return array_merge(parent::elements(), [
+            '@first-name-field' => 'input[name="first_name"], [data-testid="first-name"]',
+            '@last-name-field' => 'input[name="last_name"], [data-testid="last-name"]',
+            '@email-field' => 'input[name="email"], [data-testid="email"]',
+            '@password-field' => 'input[name="password"], [data-testid="password"]',
+            '@role-field' => 'select[name="role"], [data-testid="role"]',
+            '@status-field' => 'select[name="status"], [data-testid="status"]',
+            '@phone-field' => 'input[name="phone_number"], [data-testid="phone"]',
+            '@password-toggle' => '[data-testid="password-toggle"], .password-toggle',
+        ]);
+    }
+}

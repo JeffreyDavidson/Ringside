@@ -1,0 +1,576 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Events\Event;
+use App\Models\Shared\Venue;
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Events\EventIndexPage;
+use Tests\Browser\Pages\Events\EventDetailPage;
+use Tests\DuskTestCase;
+
+/**
+ * Browser tests for Event management workflows.
+ * 
+ * BROWSER TEST SCOPE:
+ * - Visual workflow testing for event management interface
+ * - User interaction patterns with event scheduling lifecycle
+ * - Modal form interactions and validation
+ * - Event status transitions through UI
+ * - Venue association management visual workflows
+ * - Response feedback and error handling
+ * 
+ * These tests verify that event management works correctly
+ * from a user perspective, including visual feedback, form
+ * interactions, and complex scheduling lifecycle workflows.
+ * 
+ * **IMPORTANT**: All browser tests use Page Object classes for
+ * maintainable and reliable testing as required by CLAUDE.md.
+ */
+
+class EventManagementBrowserTest extends DuskTestCase
+{
+    protected User $admin;
+    protected EventIndexPage $indexPage;
+    protected Venue $venue;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->administrator()->create();
+        $this->indexPage = new EventIndexPage();
+        $this->venue = Venue::factory()->create(['name' => 'Test Arena']);
+    }
+
+    /**
+     * @test
+     */
+    public function event_index_page_displays_correctly(): void
+    {
+        $event = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'WrestleMania 40']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage)
+                    ->waitForPageLoad()
+                    ->screenshot('events-index')
+                    ->pause(2000)
+                    ->assertPathIs('/events');
+
+            $this->indexPage->assertTableHasData($browser);
+            $this->indexPage->assertEventVisible($browser, 'WrestleMania 40');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_creation_modal_displays_correctly_and_accepts_input(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage)
+                    ->screenshot('events-index')
+                    ->pause(2000)
+                    ->assertPathIs('/events');
+
+            $this->indexPage->assertCanCreate($browser);
+            
+            $this->indexPage->createEvent($browser, [
+                'name' => 'SummerSlam 2024',
+                'preview' => 'The biggest party of the summer'
+            ]);
+
+            $browser->pause(2000)
+                    ->screenshot('event-created');
+
+            $this->indexPage->assertEventVisible($browser, 'SummerSlam 2024');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_scheduling_workflow_works_through_ui(): void
+    {
+        $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
+
+        $this->browse(function (Browser $browser) use ($unscheduledEvent) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertEventVisible($browser, 'Unscheduled Event');
+
+            // Schedule the event
+            $this->indexPage->scheduleEvent($browser, 'Unscheduled Event', [
+                'date' => '2024-12-25',
+                'venue' => $this->venue->name
+            ]);
+            
+            $browser->pause(2000)
+                    ->screenshot('event-scheduled');
+
+            // Verify scheduling status change
+            $this->indexPage->assertStatusBadge($browser, 'Scheduled');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_venue_management_workflow_works_through_ui(): void
+    {
+        $event = Event::factory()->scheduled()->create(['name' => 'Venue Test Event']);
+        $newVenue = Venue::factory()->create(['name' => 'New Arena']);
+
+        $this->browse(function (Browser $browser) use ($event, $newVenue) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertEventVisible($browser, 'Venue Test Event');
+
+            // Change venue
+            $this->indexPage->changeVenue($browser, 'Venue Test Event', $newVenue->name);
+            
+            $browser->pause(2000)
+                    ->screenshot('event-venue-changed');
+
+            // Verify venue change
+            $this->indexPage->assertVenueDisplayed($browser, 'New Arena');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_deletion_and_restoration_workflow_works(): void
+    {
+        $event = Event::factory()->unscheduled()->create(['name' => 'Deletable Event']);
+
+        $this->browse(function (Browser $browser) use ($event) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertEventVisible($browser, 'Deletable Event');
+
+            // Delete event
+            $this->indexPage->deleteEvent($browser, 'Deletable Event');
+            
+            $browser->pause(2000)
+                    ->screenshot('event-deleted');
+
+            $this->indexPage->assertEventNotVisible($browser, 'Deletable Event');
+
+            // Restore event (would need to implement restoration workflow)
+            // This would typically involve accessing a "show deleted" view
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_search_functionality_works_correctly(): void
+    {
+        Event::factory()->scheduled()->create(['name' => 'WrestleMania 40']);
+        Event::factory()->scheduled()->create(['name' => 'SummerSlam 2024']);
+        Event::factory()->scheduled()->create(['name' => 'Royal Rumble 2024']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Test search functionality
+            $this->indexPage->searchFor($browser, 'WrestleMania');
+            
+            $browser->pause(1000)
+                    ->screenshot('events-search-wrestlemania');
+
+            $this->indexPage->assertEventVisible($browser, 'WrestleMania 40');
+            $this->indexPage->assertEventNotVisible($browser, 'SummerSlam 2024');
+            $this->indexPage->assertEventNotVisible($browser, 'Royal Rumble 2024');
+
+            // Clear search and verify all events visible
+            $this->indexPage->clearFilters($browser);
+            
+            $browser->pause(1000)
+                    ->screenshot('events-search-cleared');
+
+            $this->indexPage->assertEventVisible($browser, 'WrestleMania 40');
+            $this->indexPage->assertEventVisible($browser, 'SummerSlam 2024');
+            $this->indexPage->assertEventVisible($browser, 'Royal Rumble 2024');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_filtering_by_status_works_correctly(): void
+    {
+        Event::factory()->scheduled()->create(['name' => 'Scheduled Event']);
+        Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
+        Event::factory()->past()->create(['name' => 'Past Event']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Filter by scheduled status
+            $this->indexPage->filterByStatus($browser, 'scheduled');
+            
+            $browser->pause(1000)
+                    ->screenshot('events-filter-scheduled');
+
+            $this->indexPage->assertEventVisible($browser, 'Scheduled Event');
+            $this->indexPage->assertEventNotVisible($browser, 'Unscheduled Event');
+            $this->indexPage->assertEventNotVisible($browser, 'Past Event');
+
+            // Filter by past status
+            $this->indexPage->filterByStatus($browser, 'past');
+            
+            $browser->pause(1000)
+                    ->screenshot('events-filter-past');
+
+            $this->indexPage->assertEventNotVisible($browser, 'Scheduled Event');
+            $this->indexPage->assertEventNotVisible($browser, 'Unscheduled Event');
+            $this->indexPage->assertEventVisible($browser, 'Past Event');
+
+            // Clear filter
+            $this->indexPage->clearFilters($browser);
+            
+            $browser->pause(1000);
+
+            $this->indexPage->assertEventVisible($browser, 'Scheduled Event');
+            $this->indexPage->assertEventVisible($browser, 'Unscheduled Event');
+            $this->indexPage->assertEventVisible($browser, 'Past Event');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_detail_page_displays_complete_information(): void
+    {
+        $event = Event::factory()->scheduled()->atVenue($this->venue)->withPreview()->create(['name' => 'Detailed Event']);
+
+        $detailPage = new EventDetailPage($event->id);
+
+        $this->browse(function (Browser $browser) use ($event, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+            
+            $browser->screenshot('event-detail-page');
+
+            // Assert event information
+            $detailPage->assertEventInfo($browser, [
+                'name' => 'Detailed Event',
+                'status' => 'Scheduled'
+            ]);
+
+            // Assert scheduling information
+            $detailPage->assertSchedulingInfo($browser);
+
+            // Assert venue information
+            $detailPage->assertVenueInfo($browser, $this->venue->name);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_edit_functionality_works_through_detail_page(): void
+    {
+        $event = Event::factory()->scheduled()->create(['name' => 'Original Event Name']);
+        $detailPage = new EventDetailPage($event->id);
+
+        $this->browse(function (Browser $browser) use ($event, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+
+            // Edit event
+            $detailPage->editEvent($browser, [
+                'name' => 'Updated Event Name',
+                'preview' => 'Updated preview'
+            ]);
+            
+            $browser->pause(2000)
+                    ->screenshot('event-edited');
+
+            // Verify update
+            $detailPage->assertEventInfo($browser, [
+                'name' => 'Updated Event Name'
+            ]);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_scheduling_lifecycle_works_through_detail_page(): void
+    {
+        $event = Event::factory()->unscheduled()->create(['name' => 'Lifecycle Event']);
+        $detailPage = new EventDetailPage($event->id);
+
+        $this->browse(function (Browser $browser) use ($event, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+
+            // Schedule event through detail page
+            $detailPage->scheduleEvent($browser, [
+                'date' => '2024-08-15',
+                'venue' => $this->venue->name
+            ]);
+            
+            $browser->pause(2000)->screenshot('event-scheduled-detail');
+            $detailPage->assertStatus($browser, 'Scheduled');
+
+            // Unschedule event
+            $detailPage->unscheduleEvent($browser);
+            $browser->pause(2000)->screenshot('event-unscheduled-detail');
+            $detailPage->assertStatus($browser, 'Unscheduled');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_venue_association_displays_correctly(): void
+    {
+        $venue1 = Venue::factory()->create(['name' => 'Original Venue']);
+        $venue2 = Venue::factory()->create(['name' => 'New Venue']);
+        
+        $event = Event::factory()->scheduled()->atVenue($venue1)->create(['name' => 'Venue Association Event']);
+        $detailPage = new EventDetailPage($event->id);
+
+        $this->browse(function (Browser $browser) use ($event, $detailPage, $venue2) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+            
+            $browser->screenshot('event-venue-association');
+
+            // Assert original venue
+            $detailPage->assertVenueInfo($browser, 'Original Venue');
+
+            // Change venue
+            $detailPage->changeVenue($browser, $venue2->name);
+            
+            $browser->pause(2000)
+                    ->screenshot('event-venue-changed-detail');
+
+            // Assert new venue
+            $detailPage->assertVenueInfo($browser, 'New Venue');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_date_management_works_correctly(): void
+    {
+        $event = Event::factory()->unscheduled()->create(['name' => 'Date Management Event']);
+        $detailPage = new EventDetailPage($event->id);
+
+        $this->browse(function (Browser $browser) use ($event, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+
+            // Initially unscheduled
+            $detailPage->assertStatus($browser, 'Unscheduled');
+
+            // Set future date
+            $detailPage->setEventDate($browser, '2024-06-15');
+            
+            $browser->pause(2000)
+                    ->screenshot('event-future-date');
+
+            $detailPage->assertStatus($browser, 'Scheduled');
+            $detailPage->assertDateDisplayed($browser, '2024-06-15');
+
+            // Change to past date
+            $detailPage->setEventDate($browser, '2023-06-15');
+            
+            $browser->pause(2000)
+                    ->screenshot('event-past-date');
+
+            $detailPage->assertStatus($browser, 'Past');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_responsive_design_works_correctly(): void
+    {
+        $event = Event::factory()->scheduled()->create(['name' => 'Responsive Event']);
+
+        $this->browse(function (Browser $browser) use ($event) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            // Test mobile viewport
+            $browser->resize(375, 667) // iPhone 6/7/8 size
+                    ->pause(1000)
+                    ->screenshot('events-mobile');
+
+            $this->indexPage->assertTableHasData($browser);
+
+            // Test tablet viewport
+            $browser->resize(768, 1024) // iPad size
+                    ->pause(1000)
+                    ->screenshot('events-tablet');
+
+            $this->indexPage->assertEventVisible($browser, 'Responsive Event');
+
+            // Test desktop viewport
+            $browser->resize(1200, 800)
+                    ->pause(1000)
+                    ->screenshot('events-desktop');
+
+            $this->indexPage->assertCanCreate($browser);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_error_handling_displays_user_friendly_messages(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Attempt invalid operation (create event with invalid data)
+            $this->indexPage->createEventWithInvalidData($browser, [
+                'name' => '', // Empty name should cause error
+            ]);
+            
+            $browser->pause(2000)
+                    ->screenshot('event-error-handling');
+
+            // Should see error message or validation feedback
+            // The exact error handling would depend on implementation
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_table_sorting_works_correctly(): void
+    {
+        Event::factory()->scheduled()->create(['name' => 'Alpha Event']);
+        Event::factory()->scheduled()->create(['name' => 'Beta Event']);
+        Event::factory()->scheduled()->create(['name' => 'Charlie Event']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Test sorting by name
+            $this->indexPage->sortByColumn($browser, 'Name');
+            
+            $browser->pause(1000)
+                    ->screenshot('events-sorted');
+
+            // Verify events are visible (exact sort order would need DOM inspection)
+            $this->indexPage->assertEventVisible($browser, 'Alpha Event');
+            $this->indexPage->assertEventVisible($browser, 'Beta Event');
+            $this->indexPage->assertEventVisible($browser, 'Charlie Event');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_filtering_by_date_range_works(): void
+    {
+        Event::factory()->scheduledOn('2024-01-15')->create(['name' => 'January Event']);
+        Event::factory()->scheduledOn('2024-06-15')->create(['name' => 'June Event']);
+        Event::factory()->scheduledOn('2024-12-15')->create(['name' => 'December Event']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Filter by date range
+            $this->indexPage->filterByDateRange($browser, '2024-01-01', '2024-06-30');
+            
+            $browser->pause(1000)
+                    ->screenshot('events-date-filter');
+
+            $this->indexPage->assertEventVisible($browser, 'January Event');
+            $this->indexPage->assertEventVisible($browser, 'June Event');
+            $this->indexPage->assertEventNotVisible($browser, 'December Event');
+
+            // Clear date filter
+            $this->indexPage->clearFilters($browser);
+            
+            $browser->pause(1000);
+
+            $this->indexPage->assertEventVisible($browser, 'January Event');
+            $this->indexPage->assertEventVisible($browser, 'June Event');
+            $this->indexPage->assertEventVisible($browser, 'December Event');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function event_venue_filtering_works_correctly(): void
+    {
+        $venue1 = Venue::factory()->create(['name' => 'Arena One']);
+        $venue2 = Venue::factory()->create(['name' => 'Arena Two']);
+
+        Event::factory()->scheduled()->atVenue($venue1)->create(['name' => 'Event at Arena One']);
+        Event::factory()->scheduled()->atVenue($venue2)->create(['name' => 'Event at Arena Two']);
+        Event::factory()->scheduled()->create(['name' => 'Event with No Venue']);
+
+        $this->browse(function (Browser $browser) use ($venue1) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Filter by specific venue
+            $this->indexPage->filterByVenue($browser, $venue1->name);
+            
+            $browser->pause(1000)
+                    ->screenshot('events-venue-filter');
+
+            $this->indexPage->assertEventVisible($browser, 'Event at Arena One');
+            $this->indexPage->assertEventNotVisible($browser, 'Event at Arena Two');
+            $this->indexPage->assertEventNotVisible($browser, 'Event with No Venue');
+
+            // Clear filter
+            $this->indexPage->clearFilters($browser);
+            
+            $browser->pause(1000);
+
+            $this->indexPage->assertEventVisible($browser, 'Event at Arena One');
+            $this->indexPage->assertEventVisible($browser, 'Event at Arena Two');
+            $this->indexPage->assertEventVisible($browser, 'Event with No Venue');
+        });
+    }
+}

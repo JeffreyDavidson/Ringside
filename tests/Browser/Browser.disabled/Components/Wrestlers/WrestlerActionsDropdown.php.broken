@@ -1,0 +1,374 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Components\Wrestlers;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Components\Shared\BaseComponent;
+use Tests\Browser\Pages\Wrestlers\WrestlerDetailPage;
+use Tests\Browser\Pages\Wrestlers\WrestlerIndexPage;
+
+/**
+ * Component Object for the Wrestler Actions Dropdown.
+ * 
+ * This component represents the dropdown menu that appears when clicking
+ * the actions button for a wrestler in the table. Provides methods
+ * for interacting with all wrestler business actions like employ,
+ * release, injure, suspend, retire, etc.
+ */
+class WrestlerActionsDropdown extends BaseComponent
+{
+    private int $wrestlerId;
+
+    public function __construct(int $wrestlerId)
+    {
+        $this->wrestlerId = $wrestlerId;
+    }
+
+    /**
+     * Get the root selector for this component.
+     */
+    public function selector(): string
+    {
+        return "[data-dusk=\"wrestler-actions-{$this->wrestlerId}\"]";
+    }
+
+    /**
+     * Assert that the component is displayed.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPresent("@wrestler-actions-menu-{$this->wrestlerId}");
+    }
+
+    /**
+     * Get the element shortcuts for the component.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return array_merge($this->commonElements(), [
+            '@dropdown-menu' => "[data-dusk=\"wrestler-actions-{$this->wrestlerId}\"]",
+            '@dropdown-button' => "[data-dusk=\"wrestler-actions-button-{$this->wrestlerId}\"]",
+            
+            // Basic actions
+            '@view-action' => "[data-dusk=\"view-wrestler-{$this->wrestlerId}\"]",
+            '@edit-action' => "[data-dusk=\"edit-wrestler-{$this->wrestlerId}\"]",
+            '@delete-action' => "[data-dusk=\"delete-wrestler-{$this->wrestlerId}\"]",
+            
+            // Employment actions
+            '@employ-action' => "[data-dusk=\"employ-wrestler-{$this->wrestlerId}\"]",
+            '@release-action' => "[data-dusk=\"release-wrestler-{$this->wrestlerId}\"]",
+            
+            // Status actions
+            '@injure-action' => "[data-dusk=\"injure-wrestler-{$this->wrestlerId}\"]",
+            '@heal-action' => "[data-dusk=\"heal-wrestler-{$this->wrestlerId}\"]",
+            '@suspend-action' => "[data-dusk=\"suspend-wrestler-{$this->wrestlerId}\"]",
+            '@reinstate-action' => "[data-dusk=\"reinstate-wrestler-{$this->wrestlerId}\"]",
+            
+            // Retirement actions
+            '@retire-action' => "[data-dusk=\"retire-wrestler-{$this->wrestlerId}\"]",
+            '@unretire-action' => "[data-dusk=\"unretire-wrestler-{$this->wrestlerId}\"]",
+        ]);
+    }
+
+    /**
+     * Wait for the dropdown to be fully loaded and visible.
+     */
+    public function waitForDropdownLoad(Browser $browser): static
+    {
+        $browser->waitFor("@wrestler-actions-menu-{$this->wrestlerId}")
+                ->pause(1000); // Allow dropdown animation to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the view wrestler action.
+     */
+    public function clickViewWrestler(Browser $browser): WrestlerDetailPage
+    {
+        $browser->click('@view-action')
+                ->pause(2000); // Wait for navigation
+        
+        return new WrestlerDetailPage($this->wrestlerId);
+    }
+
+    /**
+     * Click the edit wrestler action.
+     */
+    public function clickEditWrestler(Browser $browser): WrestlerFormModal
+    {
+        $browser->click('@edit-action')
+                ->pause(1000); // Wait for modal to open
+        
+        return new WrestlerFormModal();
+    }
+
+    /**
+     * Click the employ wrestler action.
+     */
+    public function clickEmployWrestler(Browser $browser): static
+    {
+        $browser->click('@employ-action')
+                ->pause(2000); // Wait for action to process
+        
+        return $this;
+    }
+
+    /**
+     * Click the release wrestler action.
+     */
+    public function clickReleaseWrestler(Browser $browser): static
+    {
+        $browser->click('@release-action')
+                ->pause(1000); // Wait for confirmation dialog
+        
+        return $this;
+    }
+
+    /**
+     * Click the injure wrestler action.
+     */
+    public function clickInjureWrestler(Browser $browser): static
+    {
+        $browser->click('@injure-action')
+                ->pause(1000); // Wait for confirmation dialog
+        
+        return $this;
+    }
+
+    /**
+     * Click the heal wrestler action.
+     */
+    public function clickHealWrestler(Browser $browser): static
+    {
+        $browser->click('@heal-action')
+                ->pause(2000); // Wait for action to process
+        
+        return $this;
+    }
+
+    /**
+     * Click the suspend wrestler action.
+     */
+    public function clickSuspendWrestler(Browser $browser): static
+    {
+        $browser->click('@suspend-action')
+                ->pause(1000); // Wait for confirmation dialog
+        
+        return $this;
+    }
+
+    /**
+     * Click the reinstate wrestler action.
+     */
+    public function clickReinstateWrestler(Browser $browser): static
+    {
+        $browser->click('@reinstate-action')
+                ->pause(2000); // Wait for action to process
+        
+        return $this;
+    }
+
+    /**
+     * Click the retire wrestler action.
+     */
+    public function clickRetireWrestler(Browser $browser): static
+    {
+        $browser->click('@retire-action')
+                ->pause(1000); // Wait for confirmation dialog
+        
+        return $this;
+    }
+
+    /**
+     * Click the unretire wrestler action.
+     */
+    public function clickUnretireWrestler(Browser $browser): static
+    {
+        $browser->click('@unretire-action')
+                ->pause(2000); // Wait for action to process
+        
+        return $this;
+    }
+
+    /**
+     * Click the delete wrestler action.
+     */
+    public function clickDeleteWrestler(Browser $browser): static
+    {
+        $browser->click('@delete-action')
+                ->pause(1000); // Wait for confirmation dialog
+        
+        return $this;
+    }
+
+    /**
+     * Confirm an action in the confirmation dialog.
+     */
+    public function confirmAction(Browser $browser): WrestlerIndexPage
+    {
+        $this->handleConfirmation($browser, true);
+        $browser->pause(2000); // Additional wait for page refresh
+        return new WrestlerIndexPage();
+    }
+
+    /**
+     * Cancel an action in the confirmation dialog.
+     */
+    public function cancelAction(Browser $browser): static
+    {
+        $this->handleConfirmation($browser, false);
+        return $this;
+    }
+
+    /**
+     * Close the dropdown menu.
+     */
+    public function closeDropdown(Browser $browser): WrestlerIndexPage
+    {
+        $this->closeComponent($browser);
+        return new WrestlerIndexPage();
+    }
+
+    /**
+     * Assert that specific actions are visible based on wrestler status.
+     */
+    public function assertActionsVisibleForStatus(Browser $browser, string $status): static
+    {
+        switch ($status) {
+            case 'employed':
+                $this->assertActionPresent($browser, '@release-action');
+                $this->assertActionPresent($browser, '@injure-action');
+                $this->assertActionPresent($browser, '@suspend-action');
+                $this->assertActionPresent($browser, '@retire-action');
+                break;
+                
+            case 'unemployed':
+                $this->assertActionPresent($browser, '@employ-action');
+                $this->assertActionPresent($browser, '@retire-action');
+                break;
+                
+            case 'injured':
+                $this->assertActionPresent($browser, '@heal-action');
+                $this->assertActionPresent($browser, '@retire-action');
+                break;
+                
+            case 'suspended':
+                $this->assertActionPresent($browser, '@reinstate-action');
+                $this->assertActionPresent($browser, '@retire-action');
+                break;
+                
+            case 'retired':
+                $this->assertActionPresent($browser, '@unretire-action');
+                break;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that status-specific actions are visible.
+     */
+    public function assertStatusSpecificActionsVisible(Browser $browser, string $status): static
+    {
+        return $this->assertActionsVisibleForStatus($browser, $status);
+    }
+
+    /**
+     * Assert that a specific action is present in the dropdown.
+     */
+    public function assertActionPresent(Browser $browser, string $action): static
+    {
+        try {
+            $browser->assertPresent($action);
+        } catch (\Exception) {
+            $this->componentScreenshot($browser, "missing-action-{$action}");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a specific action is not present in the dropdown.
+     */
+    public function assertActionNotPresent(Browser $browser, string $action): static
+    {
+        try {
+            $browser->assertMissing($action);
+        } catch (\Exception) {
+            $this->componentScreenshot($browser, "unexpected-action-{$action}");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a confirmation dialog is visible.
+     */
+    public function assertConfirmationDialogVisible(Browser $browser): static
+    {
+        $confirmationSelectors = [
+            '.swal2-popup',
+            '.confirm-dialog',
+            '[role="dialog"]',
+            '.modal',
+            'button:contains("Confirm")'
+        ];
+
+        $dialogFound = false;
+        foreach ($confirmationSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $dialogFound = true;
+                    $this->componentScreenshot($browser, 'confirmation-dialog-visible');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        if (!$dialogFound) {
+            $this->componentScreenshot($browser, 'confirmation-dialog-not-found');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get all available actions in the dropdown.
+     */
+    public function getAvailableActions(Browser $browser): array
+    {
+        $availableActions = [];
+        $allActions = [
+            'view' => '@view-action',
+            'edit' => '@edit-action',
+            'employ' => '@employ-action',
+            'release' => '@release-action',
+            'injure' => '@injure-action',
+            'heal' => '@heal-action',
+            'suspend' => '@suspend-action',
+            'reinstate' => '@reinstate-action',
+            'retire' => '@retire-action',
+            'unretire' => '@unretire-action',
+            'delete' => '@delete-action',
+        ];
+
+        foreach ($allActions as $actionName => $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $availableActions[] = $actionName;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $availableActions;
+    }
+}

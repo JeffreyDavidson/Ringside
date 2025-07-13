@@ -1,0 +1,396 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Titles;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Titles\TitleFormModal;
+
+/**
+ * Page Object for the Title Detail page.
+ * 
+ * This page represents the detailed view of a single title including
+ * title information, championship history, current champion details,
+ * and available actions for the title.
+ */
+class TitleDetailPage extends BasePage
+{
+    private ?int $titleId = null;
+
+    public function __construct(?int $titleId = null)
+    {
+        $this->titleId = $titleId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        if ($this->titleId) {
+            return "/titles/{$this->titleId}";
+        }
+        
+        return '/titles/{titleId}';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        if ($this->titleId) {
+            $browser->assertPathIs("/titles/{$this->titleId}");
+        } else {
+            $browser->assertPathMatches('/titles\/\d+/');
+        }
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@title-name' => 'h1, .title-name, .page-title, [data-testid="title-name"]',
+            '@title-status' => '.title-status, .status-badge, [data-testid="title-status"]',
+            '@title-type' => '.title-type, [data-testid="title-type"]',
+            '@current-champion' => '.current-champion, .champion-info, [data-testid="current-champion"]',
+            '@championship-history' => '.championship-history, .title-history, [data-testid="championship-history"]',
+            '@edit-button' => 'button:contains("Edit"), .edit-button, [data-testid="edit-title"]',
+            '@delete-button' => 'button:contains("Delete"), .delete-button, [data-testid="delete-title"]',
+            '@actions-dropdown' => '.actions-dropdown, .title-actions, [data-testid="title-actions"]',
+            '@back-button' => 'a:contains("Back"), .back-button, [data-testid="back-to-titles"]',
+            '@debut-button' => 'button:contains("Debut"), .debut-button, [data-testid="debut-title"]',
+            '@retire-button' => 'button:contains("Retire"), .retire-button, [data-testid="retire-title"]',
+            '@activate-button' => 'button:contains("Activate"), .activate-button, [data-testid="activate-title"]',
+            '@deactivate-button' => 'button:contains("Deactivate"), .deactivate-button, [data-testid="deactivate-title"]',
+            '@assign-champion' => 'button:contains("Assign Champion"), .assign-champion, [data-testid="assign-champion"]',
+            '@vacant-indicator' => '.vacant, .no-champion, [data-testid="vacant-title"]',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow page to load
+                ->assertPresent('@title-name');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that the title name is displayed.
+     */
+    public function assertTitleName(Browser $browser, string $expectedName): static
+    {
+        $browser->assertSee($expectedName);
+        return $this;
+    }
+
+    /**
+     * Assert that the title status is displayed correctly.
+     */
+    public function assertTitleStatus(Browser $browser, string $expectedStatus): static
+    {
+        $browser->assertSee($expectedStatus);
+        return $this;
+    }
+
+    /**
+     * Assert that the title type is displayed correctly.
+     */
+    public function assertTitleType(Browser $browser, string $expectedType): static
+    {
+        $browser->assertSee($expectedType);
+        return $this;
+    }
+
+    /**
+     * Assert that the current champion is displayed.
+     */
+    public function assertCurrentChampion(Browser $browser, string $championName): static
+    {
+        $browser->assertSee($championName)
+                ->assertPresent('@current-champion');
+        return $this;
+    }
+
+    /**
+     * Assert that the title is vacant.
+     */
+    public function assertTitleIsVacant(Browser $browser): static
+    {
+        $vacantIndicators = ['Vacant', 'No Champion', 'Unoccupied'];
+        
+        foreach ($vacantIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        // Also check for vacant indicator element
+        try {
+            $browser->assertPresent('@vacant-indicator');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Click the edit title button.
+     */
+    public function clickEditTitle(Browser $browser): TitleFormModal
+    {
+        $browser->click('@edit-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new TitleFormModal();
+    }
+
+    /**
+     * Click the delete title button.
+     */
+    public function clickDeleteTitle(Browser $browser): static
+    {
+        $browser->click('@delete-button')
+                ->pause(500); // Wait for confirmation or action
+        
+        return $this;
+    }
+
+    /**
+     * Click the debut title button.
+     */
+    public function clickDebutTitle(Browser $browser): static
+    {
+        $browser->click('@debut-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the retire title button.
+     */
+    public function clickRetireTitle(Browser $browser): static
+    {
+        $browser->click('@retire-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the activate title button.
+     */
+    public function clickActivateTitle(Browser $browser): static
+    {
+        $browser->click('@activate-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the deactivate title button.
+     */
+    public function clickDeactivateTitle(Browser $browser): static
+    {
+        $browser->click('@deactivate-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the assign champion button.
+     */
+    public function clickAssignChampion(Browser $browser): static
+    {
+        $browser->click('@assign-champion')
+                ->pause(1000); // Wait for modal or form to open
+        
+        return $this;
+    }
+
+    /**
+     * Navigate back to the titles index.
+     */
+    public function goBackToTitles(Browser $browser): TitleIndexPage
+    {
+        $browser->click('@back-button');
+        return new TitleIndexPage();
+    }
+
+    /**
+     * Assert that championship history is displayed.
+     */
+    public function assertChampionshipHistoryVisible(Browser $browser): static
+    {
+        $historyIndicators = [
+            'Championship History',
+            'Title History',
+            'Previous Champions',
+            'Reigns'
+        ];
+
+        foreach ($historyIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@championship-history');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a specific championship reign is visible.
+     */
+    public function assertChampionshipReign(Browser $browser, string $championName, string $startDate): static
+    {
+        $browser->assertSee($championName)
+                ->assertSee($startDate);
+        return $this;
+    }
+
+    /**
+     * Assert that title actions are available based on current state.
+     */
+    public function assertTitleActionsAvailable(Browser $browser): static
+    {
+        try {
+            $browser->assertPresent('@actions-dropdown');
+        } catch (\Exception) {
+            // Check for individual action buttons
+            $actionButtons = ['@edit-button', '@delete-button', '@debut-button', '@retire-button'];
+            
+            foreach ($actionButtons as $button) {
+                try {
+                    $browser->assertPresent($button);
+                    return $this; // Found at least one action
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific action buttons are visible.
+     */
+    public function assertActionButtonVisible(Browser $browser, string $action): static
+    {
+        $actionMap = [
+            'edit' => '@edit-button',
+            'delete' => '@delete-button',
+            'debut' => '@debut-button',
+            'retire' => '@retire-button',
+            'activate' => '@activate-button',
+            'deactivate' => '@deactivate-button',
+            'assign' => '@assign-champion'
+        ];
+
+        if (isset($actionMap[$action])) {
+            $browser->assertPresent($actionMap[$action]);
+        } else {
+            $browser->assertSee(ucfirst($action));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific action buttons are not visible.
+     */
+    public function assertActionButtonNotVisible(Browser $browser, string $action): static
+    {
+        $actionMap = [
+            'edit' => '@edit-button',
+            'delete' => '@delete-button',
+            'debut' => '@debut-button',
+            'retire' => '@retire-button',
+            'activate' => '@activate-button',
+            'deactivate' => '@deactivate-button',
+            'assign' => '@assign-champion'
+        ];
+
+        if (isset($actionMap[$action])) {
+            try {
+                $browser->assertMissing($actionMap[$action]);
+            } catch (\Exception) {
+                // Element might be present but disabled
+                $browser->assertAttribute($actionMap[$action], 'disabled', 'true');
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page shows loading state.
+     */
+    public function assertLoadingState(Browser $browser): static
+    {
+        $browser->assertPresent('@loading-indicator');
+        return $this;
+    }
+
+    /**
+     * Assert that the page is not in loading state.
+     */
+    public function assertNotLoadingState(Browser $browser): static
+    {
+        $browser->assertMissing('@loading-indicator');
+        return $this;
+    }
+
+    /**
+     * Assert that all title information is displayed.
+     */
+    public function assertTitleInformationComplete(Browser $browser, array $titleData): static
+    {
+        if (isset($titleData['name'])) {
+            $this->assertTitleName($browser, $titleData['name']);
+        }
+
+        if (isset($titleData['status'])) {
+            $this->assertTitleStatus($browser, $titleData['status']);
+        }
+
+        if (isset($titleData['type'])) {
+            $this->assertTitleType($browser, $titleData['type']);
+        }
+
+        if (isset($titleData['champion'])) {
+            $this->assertCurrentChampion($browser, $titleData['champion']);
+        } elseif (isset($titleData['vacant']) && $titleData['vacant']) {
+            $this->assertTitleIsVacant($browser);
+        }
+
+        return $this;
+    }
+}

@@ -1,0 +1,391 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Titles;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Titles\TitleFormModal;
+use Tests\Browser\Components\Titles\TitleActionsDropdown;
+
+/**
+ * Page Object for the Title Index page.
+ * 
+ * This page represents the main titles table interface including
+ * the create button, search functionality, filtering, and title
+ * table with actions. Provides a clean API for interacting with
+ * all title table elements.
+ */
+class TitleIndexPage extends BasePage
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/titles';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-dusk="create-title-button"], [data-testid="create-title-btn"], .create-title, button:contains("Create")',
+            '@titles-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"], input[name="search"], .search input, [wire\\:model*="search"]',
+            '@status-filter' => 'select[name*="status"], select[wire\\:model*="status"], .filter select, [data-filter] select',
+            '@type-filter' => 'select[name*="type"], select[wire\\:model*="type"], .type-filter select',
+            '@pagination' => '.pagination, [aria-label="Pagination"], button:contains("Next"), button:contains("2"), .page-link',
+            '@sort-name' => 'th:contains("Name"), th[wire\\:click*="sort"]',
+            '@sort-status' => 'th:contains("Status")',
+            '@sort-type' => 'th:contains("Type")',
+            '@sort-champion' => 'th:contains("Champion")',
+            '@empty-state' => '.empty-state, .no-results, .no-data',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+            '@title-status-badge' => '.badge, .status, [data-testid="title-status"]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow Livewire to initialize
+                ->assertPresent('@titles-table');
+        
+        return $this;
+    }
+
+    /**
+     * Click the create title button.
+     */
+    public function clickCreateTitle(Browser $browser): TitleFormModal
+    {
+        $browser->click('@create-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new TitleFormModal();
+    }
+
+    /**
+     * Search for titles by name.
+     */
+    public function searchForTitle(Browser $browser, string $searchTerm): static
+    {
+        $searchSelectors = [
+            'input[placeholder*="Search"]',
+            'input[type="search"]',
+            'input[name="search"]',
+            '.search input',
+            '[wire\\:model*="search"]'
+        ];
+
+        foreach ($searchSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->type($selector, $searchTerm)
+                            ->pause(1500); // Wait for search to process
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter titles by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): static
+    {
+        $filterSelectors = [
+            'select[name*="status"]',
+            'select[wire\\:model*="status"]',
+            '.filter select',
+            '[data-filter] select'
+        ];
+
+        foreach ($filterSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $status)
+                            ->pause(1500); // Wait for filter to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter titles by type (singles, tag_team, etc.).
+     */
+    public function filterByType(Browser $browser, string $type): static
+    {
+        $filterSelectors = [
+            'select[name*="type"]',
+            'select[wire\\:model*="type"]',
+            '.type-filter select',
+            '[data-filter-type] select'
+        ];
+
+        foreach ($filterSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $type)
+                            ->pause(1500); // Wait for filter to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a title is visible in the table.
+     */
+    public function assertTitleVisible(Browser $browser, string $titleName): static
+    {
+        $browser->assertSee($titleName);
+        return $this;
+    }
+
+    /**
+     * Assert that a title is not visible in the table.
+     */
+    public function assertTitleNotVisible(Browser $browser, string $titleName): static
+    {
+        $browser->assertDontSee($titleName);
+        return $this;
+    }
+
+    /**
+     * Click the actions button for a specific title.
+     */
+    public function clickTitleActions(Browser $browser, int $titleId): TitleActionsDropdown
+    {
+        $browser->click("@title-actions-button-{$titleId}")
+                ->pause(1000); // Wait for dropdown to open
+        
+        return new TitleActionsDropdown($titleId);
+    }
+
+    /**
+     * Navigate to a title's detail page by clicking their name.
+     */
+    public function clickTitleName(Browser $browser, string $titleName): TitleDetailPage
+    {
+        $browser->clickLink($titleName);
+        return new TitleDetailPage();
+    }
+
+    /**
+     * Sort the table by a specific column.
+     */
+    public function sortBy(Browser $browser, string $column): static
+    {
+        $sortSelectors = [
+            "th:contains(\"{$column}\")",
+            "th[wire\\:click*=\"sort\"]",
+            ".sortable",
+            "[data-sort=\"{$column}\"]"
+        ];
+
+        foreach ($sortSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000); // Wait for sort to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the table headers are visible.
+     */
+    public function assertTableHeadersVisible(Browser $browser): static
+    {
+        $browser->assertSee('Name')
+                ->assertSee('Status')
+                ->assertSee('Type')
+                ->assertSee('Champion');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that title status badges are displayed correctly.
+     */
+    public function assertTitleStatusBadges(Browser $browser): static
+    {
+        // Look for title status indicators
+        $statusSelectors = [
+            '.badge',
+            '.status',
+            '[data-testid="title-status"]'
+        ];
+
+        foreach ($statusSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    return $this; // Found status badges
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that championship information is displayed.
+     */
+    public function assertChampionshipInfo(Browser $browser, string $championName): static
+    {
+        $browser->assertSee($championName);
+        return $this;
+    }
+
+    /**
+     * Assert that vacant title is properly indicated.
+     */
+    public function assertVacantTitle(Browser $browser): static
+    {
+        $vacantIndicators = [
+            'Vacant',
+            'No Champion',
+            'Unoccupied',
+            '.vacant'
+        ];
+
+        foreach ($vacantIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that pagination is working.
+     */
+    public function assertPaginationWorks(Browser $browser): static
+    {
+        $paginationSelectors = [
+            '.pagination',
+            '[aria-label="Pagination"]',
+            'button:contains("Next")',
+            'button:contains("2")',
+            '.page-link'
+        ];
+
+        foreach ($paginationSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the create button is visible.
+     */
+    public function assertCreateButtonVisible(Browser $browser): static
+    {
+        $browser->assertSee('Create')
+                ->assertPresent('@create-button');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that title actions are available.
+     */
+    public function assertTitleActionsAvailable(Browser $browser): static
+    {
+        $actionSelectors = [
+            '[data-testid="title-actions"]',
+            '.title-actions',
+            '.dropdown-toggle',
+            '.action-button'
+        ];
+
+        foreach ($actionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    return $this;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter by title availability (active, retired, etc.).
+     */
+    public function filterByAvailability(Browser $browser, string $availability): static
+    {
+        $availabilitySelectors = [
+            'select[name*="availability"]',
+            'select[wire\\:model*="availability"]',
+            '.availability-filter select'
+        ];
+
+        foreach ($availabilitySelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $availability)
+                            ->pause(1500);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+}

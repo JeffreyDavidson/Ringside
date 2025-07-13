@@ -1,0 +1,257 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Components\Shared;
+
+use Laravel\Dusk\Component as DuskComponent;
+use Laravel\Dusk\Browser;
+
+/**
+ * Base component class for all Dusk UI components.
+ * 
+ * Provides common functionality for modals, dropdowns, forms,
+ * and other UI elements that appear within pages. Components
+ * handle interactions with specific UI elements rather than
+ * full page navigation.
+ */
+abstract class BaseComponent extends DuskComponent
+{
+    /**
+     * Common component element selectors.
+     *
+     * @return array<string, string>
+     */
+    public function commonElements(): array
+    {
+        return [
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+            '@error-message' => '.alert-danger, .error, .text-red-500, [class*="error"]',
+            '@success-message' => '.alert-success, .success, .text-green-500, [class*="success"]',
+            '@confirmation-dialog' => '.swal2-popup, .confirm-dialog, [role="dialog"], .modal',
+            '@confirm-button' => 'button:contains("Confirm"), button:contains("Yes"), .swal2-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), button:contains("No"), .swal2-cancel',
+            '@close-button' => 'button:contains("Close"), .close, [data-dismiss="modal"]',
+        ];
+    }
+
+    /**
+     * Wait for component to be fully loaded.
+     */
+    public function waitForComponentLoad(Browser $browser, int $timeout = 5000): static
+    {
+        $browser->pause(1000); // Basic wait for component initialization
+        
+        // Wait for Livewire components within this component
+        $this->waitForLivewireInComponent($browser, $timeout);
+        
+        return $this;
+    }
+
+    /**
+     * Wait for Livewire components within this component to initialize.
+     */
+    protected function waitForLivewireInComponent(Browser $browser, int $timeout = 5000): void
+    {
+        // Wait for any loading indicators within this component to disappear
+        $loadingSelectors = [
+            '[wire\\:loading]',
+            '.loading',
+            '.spinner',
+            '.wire-loading',
+            '[data-loading]'
+        ];
+
+        foreach ($loadingSelectors as $selector) {
+            try {
+                $browser->waitUntilMissing($selector, 2);
+            } catch (\Exception) {
+                // Continue if selector not found or timeout
+                continue;
+            }
+        }
+
+        // Wait for any Livewire requests to complete
+        $browser->pause(500);
+    }
+
+    /**
+     * Take a screenshot with component-specific naming.
+     */
+    public function componentScreenshot(Browser $browser, string $name): static
+    {
+        $componentName = strtolower(class_basename(static::class));
+        $browser->screenshot("{$componentName}-{$name}");
+        return $this;
+    }
+
+    /**
+     * Assert that component is visible and loaded.
+     */
+    public function assertComponentVisible(Browser $browser): static
+    {
+        $browser->assertPresent($this->selector());
+        return $this;
+    }
+
+    /**
+     * Wait for and handle loading states.
+     */
+    public function waitForNoLoading(Browser $browser, int $timeout = 10000): static
+    {
+        try {
+            $browser->waitUntilMissing('@loading-indicator', $timeout / 1000);
+        } catch (\Exception) {
+            // Continue if loading indicator not found or doesn't disappear
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Handle confirmation dialogs with multiple fallback strategies.
+     */
+    public function handleConfirmation(Browser $browser, bool $confirm = true): static
+    {
+        $buttonSelector = $confirm ? '@confirm-button' : '@cancel-button';
+        $fallbackSelectors = $confirm 
+            ? ['button:contains("Confirm")', 'button:contains("Yes")', '.swal2-confirm', '.btn-primary:contains("Confirm")']
+            : ['button:contains("Cancel")', 'button:contains("No")', '.swal2-cancel', '.btn-secondary:contains("Cancel")'];
+
+        // Try primary selector first
+        try {
+            if ($browser->element($buttonSelector)) {
+                $browser->click($buttonSelector)->pause(1000);
+                return $this;
+            }
+        } catch (\Exception) {
+            // Continue to fallbacks
+        }
+
+        // Try fallback selectors
+        foreach ($fallbackSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)->pause(1000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that success feedback is displayed.
+     */
+    public function assertSuccessFeedback(Browser $browser): static
+    {
+        $successSelectors = [
+            '.alert-success',
+            '.success',
+            '.text-green-500',
+            '.swal2-success',
+            '[class*="success"]'
+        ];
+
+        foreach ($successSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $this->componentScreenshot($browser, 'success-feedback');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that error feedback is displayed.
+     */
+    public function assertErrorFeedback(Browser $browser): static
+    {
+        $errorSelectors = [
+            '.alert-danger',
+            '.error',
+            '.text-red-500',
+            '[class*="error"]',
+            '.invalid-feedback'
+        ];
+
+        foreach ($errorSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $this->componentScreenshot($browser, 'error-feedback');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Close component using various strategies.
+     */
+    public function closeComponent(Browser $browser): static
+    {
+        $closeStrategies = [
+            // Try close button
+            function() use ($browser) {
+                $closeSelectors = [
+                    '@close-button',
+                    '.close',
+                    'button:contains("Close")',
+                    '[data-dismiss="modal"]'
+                ];
+                
+                foreach ($closeSelectors as $selector) {
+                    try {
+                        if ($browser->element($selector)) {
+                            $browser->click($selector)->pause(1000);
+                            return true;
+                        }
+                    } catch (\Exception) {
+                        continue;
+                    }
+                }
+                return false;
+            },
+            
+            // Try clicking outside
+            function() use ($browser) {
+                try {
+                    $browser->click('body')->pause(1000);
+                    return true;
+                } catch (\Exception) {
+                    return false;
+                }
+            },
+            
+            // Try Escape key
+            function() use ($browser) {
+                try {
+                    $browser->keys('body', '{escape}')->pause(1000);
+                    return true;
+                } catch (\Exception) {
+                    return false;
+                }
+            }
+        ];
+
+        foreach ($closeStrategies as $strategy) {
+            if ($strategy()) {
+                break;
+            }
+        }
+
+        return $this;
+    }
+}

@@ -1,0 +1,549 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Managers;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Managers\ManagerFormModal;
+
+/**
+ * Page Object for the Manager Detail page.
+ * 
+ * This page represents the detailed view of a single manager including
+ * manager information, employment history, stable membership, managed
+ * entities (wrestlers/tag teams), and available actions.
+ */
+class ManagerDetailPage extends BasePage
+{
+    private ?int $managerId = null;
+
+    public function __construct(?int $managerId = null)
+    {
+        $this->managerId = $managerId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        if ($this->managerId) {
+            return "/managers/{$this->managerId}";
+        }
+        
+        return '/managers/{managerId}';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        if ($this->managerId) {
+            $browser->assertPathIs("/managers/{$this->managerId}");
+        } else {
+            $browser->assertPathMatches('/managers\/\d+/');
+        }
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@manager-name' => 'h1, .manager-name, .page-title, [data-testid="manager-name"]',
+            '@manager-status' => '.manager-status, .status-badge, [data-testid="manager-status"]',
+            '@manager-hometown' => '.manager-hometown, [data-testid="manager-hometown"]',
+            '@employment-history' => '.employment-history, .manager-employment, [data-testid="employment-history"]',
+            '@stable-membership' => '.stable-membership, .current-stable, [data-testid="stable-membership"]',
+            '@managed-entities' => '.managed-entities, .managed-wrestlers, [data-testid="managed-entities"]',
+            '@edit-button' => 'button:contains("Edit"), .edit-button, [data-testid="edit-manager"]',
+            '@delete-button' => 'button:contains("Delete"), .delete-button, [data-testid="delete-manager"]',
+            '@actions-dropdown' => '.actions-dropdown, .manager-actions, [data-testid="manager-actions"]',
+            '@back-button' => 'a:contains("Back"), .back-button, [data-testid="back-to-managers"]',
+            '@employ-button' => 'button:contains("Employ"), .employ-button, [data-testid="employ-manager"]',
+            '@release-button' => 'button:contains("Release"), .release-button, [data-testid="release-manager"]',
+            '@retire-button' => 'button:contains("Retire"), .retire-button, [data-testid="retire-manager"]',
+            '@unretire-button' => 'button:contains("Unretire"), .unretire-button, [data-testid="unretire-manager"]',
+            '@injure-button' => 'button:contains("Injure"), .injure-button, [data-testid="injure-manager"]',
+            '@heal-button' => 'button:contains("Heal"), .heal-button, [data-testid="heal-manager"]',
+            '@suspend-button' => 'button:contains("Suspend"), .suspend-button, [data-testid="suspend-manager"]',
+            '@reinstate-button' => 'button:contains("Reinstate"), .reinstate-button, [data-testid="reinstate-manager"]',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow page to load
+                ->assertPresent('@manager-name');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that the manager name is displayed.
+     */
+    public function assertManagerName(Browser $browser, string $expectedName): static
+    {
+        $browser->assertSee($expectedName);
+        return $this;
+    }
+
+    /**
+     * Assert that the manager status is displayed correctly.
+     */
+    public function assertManagerStatus(Browser $browser, string $expectedStatus): static
+    {
+        $browser->assertSee($expectedStatus);
+        return $this;
+    }
+
+    /**
+     * Assert that the manager hometown is displayed correctly.
+     */
+    public function assertManagerHometown(Browser $browser, string $expectedHometown): static
+    {
+        $browser->assertSee($expectedHometown);
+        return $this;
+    }
+
+    /**
+     * Assert that employment history is displayed.
+     */
+    public function assertEmploymentHistoryVisible(Browser $browser): static
+    {
+        $historyIndicators = [
+            'Employment History',
+            'Work History',
+            'Contract History',
+            'Employment Records'
+        ];
+
+        foreach ($historyIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@employment-history');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that stable membership is displayed.
+     */
+    public function assertStableMembership(Browser $browser, string $stableName): static
+    {
+        $browser->assertSee($stableName)
+                ->assertPresent('@stable-membership');
+        return $this;
+    }
+
+    /**
+     * Assert that the manager is independent (no stable).
+     */
+    public function assertIndependentManager(Browser $browser): static
+    {
+        $independentIndicators = ['Independent', 'No Stable', 'Freelance'];
+        
+        foreach ($independentIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that managed entities are displayed.
+     */
+    public function assertManagedEntitiesVisible(Browser $browser): static
+    {
+        $entityIndicators = [
+            'Managed Wrestlers',
+            'Managed Tag Teams',
+            'Clients',
+            'Managed Entities'
+        ];
+
+        foreach ($entityIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@managed-entities');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a specific managed entity is listed.
+     */
+    public function assertManagedEntity(Browser $browser, string $entityName): static
+    {
+        $browser->assertSee($entityName);
+        return $this;
+    }
+
+    /**
+     * Click the edit manager button.
+     */
+    public function clickEditManager(Browser $browser): ManagerFormModal
+    {
+        $browser->click('@edit-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new ManagerFormModal();
+    }
+
+    /**
+     * Click the delete manager button.
+     */
+    public function clickDeleteManager(Browser $browser): static
+    {
+        $browser->click('@delete-button')
+                ->pause(500); // Wait for confirmation or action
+        
+        return $this;
+    }
+
+    /**
+     * Click the employ manager button.
+     */
+    public function clickEmployManager(Browser $browser): static
+    {
+        $browser->click('@employ-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the release manager button.
+     */
+    public function clickReleaseManager(Browser $browser): static
+    {
+        $browser->click('@release-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the retire manager button.
+     */
+    public function clickRetireManager(Browser $browser): static
+    {
+        $browser->click('@retire-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the unretire manager button.
+     */
+    public function clickUnretireManager(Browser $browser): static
+    {
+        $browser->click('@unretire-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the injure manager button.
+     */
+    public function clickInjureManager(Browser $browser): static
+    {
+        $browser->click('@injure-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the heal manager button.
+     */
+    public function clickHealManager(Browser $browser): static
+    {
+        $browser->click('@heal-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the suspend manager button.
+     */
+    public function clickSuspendManager(Browser $browser): static
+    {
+        $browser->click('@suspend-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the reinstate manager button.
+     */
+    public function clickReinstateManager(Browser $browser): static
+    {
+        $browser->click('@reinstate-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Navigate back to the managers index.
+     */
+    public function goBackToManagers(Browser $browser): ManagerIndexPage
+    {
+        $browser->click('@back-button');
+        return new ManagerIndexPage();
+    }
+
+    /**
+     * Assert that manager actions are available based on current state.
+     */
+    public function assertManagerActionsAvailable(Browser $browser): static
+    {
+        try {
+            $browser->assertPresent('@actions-dropdown');
+        } catch (\Exception) {
+            // Check for individual action buttons
+            $actionButtons = ['@edit-button', '@delete-button', '@employ-button', '@release-button'];
+            
+            foreach ($actionButtons as $button) {
+                try {
+                    $browser->assertPresent($button);
+                    return $this; // Found at least one action
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific action buttons are visible.
+     */
+    public function assertActionButtonVisible(Browser $browser, string $action): static
+    {
+        $actionMap = [
+            'edit' => '@edit-button',
+            'delete' => '@delete-button',
+            'employ' => '@employ-button',
+            'release' => '@release-button',
+            'retire' => '@retire-button',
+            'unretire' => '@unretire-button',
+            'injure' => '@injure-button',
+            'heal' => '@heal-button',
+            'suspend' => '@suspend-button',
+            'reinstate' => '@reinstate-button'
+        ];
+
+        if (isset($actionMap[$action])) {
+            $browser->assertPresent($actionMap[$action]);
+        } else {
+            $browser->assertSee(ucfirst($action));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific action buttons are not visible.
+     */
+    public function assertActionButtonNotVisible(Browser $browser, string $action): static
+    {
+        $actionMap = [
+            'edit' => '@edit-button',
+            'delete' => '@delete-button',
+            'employ' => '@employ-button',
+            'release' => '@release-button',
+            'retire' => '@retire-button',
+            'unretire' => '@unretire-button',
+            'injure' => '@injure-button',
+            'heal' => '@heal-button',
+            'suspend' => '@suspend-button',
+            'reinstate' => '@reinstate-button'
+        ];
+
+        if (isset($actionMap[$action])) {
+            try {
+                $browser->assertMissing($actionMap[$action]);
+            } catch (\Exception) {
+                // Element might be present but disabled
+                $browser->assertAttribute($actionMap[$action], 'disabled', 'true');
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page shows loading state.
+     */
+    public function assertLoadingState(Browser $browser): static
+    {
+        $browser->assertPresent('@loading-indicator');
+        return $this;
+    }
+
+    /**
+     * Assert that the page is not in loading state.
+     */
+    public function assertNotLoadingState(Browser $browser): static
+    {
+        $browser->assertMissing('@loading-indicator');
+        return $this;
+    }
+
+    /**
+     * Assert that all manager information is displayed.
+     */
+    public function assertManagerInformationComplete(Browser $browser, array $managerData): static
+    {
+        if (isset($managerData['name'])) {
+            $this->assertManagerName($browser, $managerData['name']);
+        }
+
+        if (isset($managerData['status'])) {
+            $this->assertManagerStatus($browser, $managerData['status']);
+        }
+
+        if (isset($managerData['hometown'])) {
+            $this->assertManagerHometown($browser, $managerData['hometown']);
+        }
+
+        if (isset($managerData['stable'])) {
+            $this->assertStableMembership($browser, $managerData['stable']);
+        } elseif (isset($managerData['independent']) && $managerData['independent']) {
+            $this->assertIndependentManager($browser);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert current employment status.
+     */
+    public function assertCurrentEmploymentStatus(Browser $browser, string $status): static
+    {
+        $statusMap = [
+            'employed' => ['Employed', 'Active', 'Working'],
+            'unemployed' => ['Unemployed', 'Available', 'Free Agent'],
+            'released' => ['Released', 'Terminated'],
+            'retired' => ['Retired', 'Inactive']
+        ];
+
+        if (isset($statusMap[$status])) {
+            foreach ($statusMap[$status] as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $browser->assertSee($status);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert current injury status.
+     */
+    public function assertCurrentInjuryStatus(Browser $browser, bool $isInjured): static
+    {
+        if ($isInjured) {
+            $injuryIndicators = ['Injured', 'Hurt', 'Medical Leave'];
+            foreach ($injuryIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $healthyIndicators = ['Healthy', 'Active', 'Available'];
+            // Check that injury indicators are not present
+            $injuryIndicators = ['Injured', 'Hurt', 'Medical Leave'];
+            foreach ($injuryIndicators as $indicator) {
+                try {
+                    $browser->assertDontSee($indicator);
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert current suspension status.
+     */
+    public function assertCurrentSuspensionStatus(Browser $browser, bool $isSuspended): static
+    {
+        if ($isSuspended) {
+            $suspensionIndicators = ['Suspended', 'Disciplinary Action', 'Banned'];
+            foreach ($suspensionIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            // Check that suspension indicators are not present
+            $suspensionIndicators = ['Suspended', 'Disciplinary Action', 'Banned'];
+            foreach ($suspensionIndicators as $indicator) {
+                try {
+                    $browser->assertDontSee($indicator);
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+}

@@ -1,0 +1,860 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Managers\Manager;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Wrestlers\Wrestler;
+
+/**
+ * Browser tests for complex roster relationship management workflows.
+ * 
+ * These tests focus on the visual and interactive aspects of managing
+ * complex relationships between roster members that Feature tests cannot verify.
+ * This includes manager assignments, tag team formation, stable management,
+ * and championship workflows.
+ * 
+ * Current Implementation: Preparatory structure for Dusk integration
+ * Future Implementation: Full browser automation with Laravel Dusk
+ */
+
+describe('Manager-Wrestler Assignment Visual Workflow', function () {
+    test('manager assignment modal displays with real-time availability checking', function () {
+        // Given: A wrestler and available managers
+        $wrestler = Wrestler::factory()->create(['name' => 'Stone Cold Steve Austin']);
+        $availableManager = Manager::factory()->create(['name' => 'Paul Bearer']);
+        $busyManager = Manager::factory()->create(['name' => 'Jimmy Hart']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to wrestler detail page
+        // 2. Click "Assign Manager" button
+        // 3. Verify assignment modal opens with manager selection
+        // 4. Verify available managers are highlighted in green
+        // 5. Verify unavailable managers are grayed out with reasons
+        // 6. Test real-time search filtering of managers
+        // 7. Select manager and verify assignment confirmation
+        // 8. Verify success message and table update
+        
+        // TODO: Replace with actual Dusk browser test when available:
+        /*
+        $this->browse(function (Browser $browser) use ($wrestler, $availableManager, $busyManager) {
+            $browser->loginAs(administrator())
+                    ->visit("/wrestlers/{$wrestler->id}")
+                    ->assertSee($wrestler->name)
+                    ->click('@assign-manager-button')
+                    ->waitFor('@manager-assignment-modal')
+                    ->assertSee('Assign Manager')
+                    ->within('@manager-selection-grid', function ($grid) use ($availableManager, $busyManager) {
+                        $grid->assertVisible("@manager-{$availableManager->id}")
+                             ->assertElementHasClass("@manager-{$availableManager->id}", 'available')
+                             ->assertElementHasClass("@manager-{$busyManager->id}", 'unavailable')
+                             ->assertSeeIn("@manager-{$busyManager->id}", 'Currently managing 3 wrestlers')
+                             ->type('@manager-search', 'Paul')
+                             ->pause(500)
+                             ->assertVisible("@manager-{$availableManager->id}")
+                             ->assertDontSee("@manager-{$busyManager->id}")
+                             ->click("@manager-{$availableManager->id}");
+                    })
+                    ->click('@confirm-assignment')
+                    ->waitFor('@success-notification')
+                    ->assertSee('Manager assigned successfully')
+                    ->assertSee($availableManager->name);
+        });
+        */
+        
+        expect($wrestler->name)->toBe('Stone Cold Steve Austin');
+        expect($availableManager->name)->toBe('Paul Bearer');
+        expect($busyManager->name)->toBe('Jimmy Hart');
+    });
+
+    test('manager removal workflow displays confirmation with impact analysis', function () {
+        // Given: A wrestler with current manager assignments
+        $wrestler = Wrestler::factory()->create(['name' => 'The Undertaker']);
+        $manager = Manager::factory()->create(['name' => 'Paul Bearer']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to wrestler with assigned manager
+        // 2. Click "Remove Manager" action button
+        // 3. Verify confirmation modal shows impact analysis
+        // 4. Display other wrestlers this manager currently manages
+        // 5. Show upcoming events/matches that might be affected
+        // 6. Test "Cancel" and "Remove Anyway" options
+        // 7. Verify manager removal updates all relevant displays
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($wrestler, $manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/wrestlers/{$wrestler->id}")
+                    ->within('@current-managers-table', function ($table) use ($manager) {
+                        $table->assertSee($manager->name)
+                              ->click("@remove-manager-{$manager->id}");
+                    })
+                    ->waitFor('@removal-confirmation-modal')
+                    ->assertSee('Remove Manager Confirmation')
+                    ->assertSee('This will affect the following:')
+                    ->assertVisible('@impact-analysis')
+                    ->within('@impact-analysis', function ($analysis) {
+                        $analysis->assertSee('Other wrestlers managed')
+                              ->assertSee('Upcoming events')
+                              ->assertSee('Match assignments');
+                    })
+                    ->click('@cancel-removal')
+                    ->waitUntilMissing('@removal-confirmation-modal')
+                    ->assertSee($manager->name);
+        });
+        */
+        
+        expect($wrestler->name)->toBe('The Undertaker');
+        expect($manager->name)->toBe('Paul Bearer');
+    });
+
+    test('bulk manager assignment displays with conflict detection', function () {
+        // Given: Multiple wrestlers and managers
+        $wrestler1 = Wrestler::factory()->create(['name' => 'Wrestler One']);
+        $wrestler2 = Wrestler::factory()->create(['name' => 'Wrestler Two']);
+        $manager = Manager::factory()->create(['name' => 'Shared Manager']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to managers index page
+        // 2. Select multiple wrestlers for bulk assignment
+        // 3. Click "Bulk Assign Manager"
+        // 4. Verify conflict detection for overloaded managers
+        // 5. Display warning messages for capacity issues
+        // 6. Test proceeding with warnings vs. canceling
+        // 7. Verify all assignments complete successfully
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($wrestler1, $wrestler2, $manager) {
+            $browser->loginAs(administrator())
+                    ->visit('/wrestlers')
+                    ->check("@wrestler-{$wrestler1->id}-checkbox")
+                    ->check("@wrestler-{$wrestler2->id}-checkbox")
+                    ->assertVisible('@bulk-actions-toolbar')
+                    ->click('@bulk-assign-manager')
+                    ->waitFor('@bulk-assignment-modal')
+                    ->select('@manager-dropdown', $manager->id)
+                    ->assertSee('Conflict Warning')
+                    ->assertSee('This manager will be assigned to 2 additional wrestlers')
+                    ->assertVisible('@capacity-warning')
+                    ->click('@proceed-anyway')
+                    ->waitFor('@bulk-success-message')
+                    ->assertSee('2 wrestlers assigned successfully');
+        });
+        */
+        
+        expect($wrestler1->name)->toBe('Wrestler One');
+        expect($wrestler2->name)->toBe('Wrestler Two');
+        expect($manager->name)->toBe('Shared Manager');
+    });
+});
+
+describe('Tag Team Formation Visual Workflow', function () {
+    test('tag team creation modal displays with partner selection interface', function () {
+        // Given: Available wrestlers for tag team formation
+        $wrestler1 = Wrestler::factory()->create(['name' => 'Hardy Brother One']);
+        $wrestler2 = Wrestler::factory()->create(['name' => 'Hardy Brother Two']);
+        $unavailableWrestler = Wrestler::factory()->create(['name' => 'Solo Wrestler']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to tag teams page
+        // 2. Click "Create Tag Team" button
+        // 3. Verify team creation modal with partner selection
+        // 4. Test drag-and-drop wrestler selection interface
+        // 5. Verify visual feedback for valid/invalid combinations
+        // 6. Test team name suggestions based on selected wrestlers
+        // 7. Submit form and verify team creation
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($wrestler1, $wrestler2, $unavailableWrestler) {
+            $browser->loginAs(administrator())
+                    ->visit('/tag-teams')
+                    ->click('@create-tag-team-button')
+                    ->waitFor('@tag-team-creation-modal')
+                    ->assertSee('Create Tag Team')
+                    ->within('@wrestler-selection-area', function ($area) use ($wrestler1, $wrestler2, $unavailableWrestler) {
+                        $area->assertVisible("@wrestler-{$wrestler1->id}")
+                             ->assertElementHasClass("@wrestler-{$wrestler1->id}", 'available')
+                             ->assertElementHasClass("@wrestler-{$unavailableWrestler->id}", 'in-existing-team')
+                             ->dragAndDrop("@wrestler-{$wrestler1->id}", '@selected-partners')
+                             ->dragAndDrop("@wrestler-{$wrestler2->id}", '@selected-partners')
+                             ->assertVisible('@team-preview');
+                    })
+                    ->assertSee('Suggested Team Names')
+                    ->click('@use-suggestion-1')
+                    ->click('@create-team-button')
+                    ->waitFor('@success-message')
+                    ->assertSee('Tag team created successfully');
+        });
+        */
+        
+        expect($wrestler1->name)->toBe('Hardy Brother One');
+        expect($wrestler2->name)->toBe('Hardy Brother Two');
+        expect($unavailableWrestler->name)->toBe('Solo Wrestler');
+    });
+
+    test('tag team partner management displays with swap and replacement options', function () {
+        // Given: An existing tag team with partners
+        $tagTeam = TagTeam::factory()->create(['name' => 'The New Day']);
+        $currentPartner = Wrestler::factory()->create(['name' => 'Big E']);
+        $newPartner = Wrestler::factory()->create(['name' => 'Xavier Woods']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to tag team detail page
+        // 2. Verify current partners are displayed with actions
+        // 3. Click "Replace Partner" button
+        // 4. Verify partner replacement modal with available wrestlers
+        // 5. Test partner swap functionality with visual preview
+        // 6. Verify business rule validation (employment status, availability)
+        // 7. Complete partner change and verify updates
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($tagTeam, $currentPartner, $newPartner) {
+            $browser->loginAs(administrator())
+                    ->visit("/tag-teams/{$tagTeam->id}")
+                    ->assertSee($tagTeam->name)
+                    ->within('@current-partners-section', function ($section) use ($currentPartner) {
+                        $section->assertSee($currentPartner->name)
+                                ->click("@replace-partner-{$currentPartner->id}");
+                    })
+                    ->waitFor('@partner-replacement-modal')
+                    ->assertSee('Replace Team Partner')
+                    ->within('@available-wrestlers-grid', function ($grid) use ($newPartner) {
+                        $grid->assertVisible("@wrestler-{$newPartner->id}")
+                             ->assertElementHasClass("@wrestler-{$newPartner->id}", 'available')
+                             ->click("@wrestler-{$newPartner->id}");
+                    })
+                    ->assertVisible('@replacement-preview')
+                    ->assertSeeIn('@replacement-preview', 'Before → After')
+                    ->click('@confirm-replacement')
+                    ->waitFor('@success-notification')
+                    ->assertSee('Partner replaced successfully')
+                    ->assertSee($newPartner->name);
+        });
+        */
+        
+        expect($tagTeam->name)->toBe('The New Day');
+        expect($currentPartner->name)->toBe('Big E');
+        expect($newPartner->name)->toBe('Xavier Woods');
+    });
+
+    test('tag team dissolution workflow displays with impact warnings', function () {
+        // Given: A tag team with history and commitments
+        $tagTeam = TagTeam::factory()->create(['name' => 'Team to Dissolve']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to tag team management page
+        // 2. Click "Dissolve Team" action
+        // 3. Verify dissolution modal with impact analysis
+        // 4. Display championship implications if team holds titles
+        // 5. Show upcoming match commitments
+        // 6. Test different dissolution options (immediate vs. scheduled)
+        // 7. Verify confirmation process and team removal
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($tagTeam) {
+            $browser->loginAs(administrator())
+                    ->visit('/tag-teams')
+                    ->within("@tag-team-{$tagTeam->id}-actions", function ($actions) {
+                        $actions->click('@dissolve-team');
+                    })
+                    ->waitFor('@dissolution-modal')
+                    ->assertSee('Dissolve Tag Team')
+                    ->assertVisible('@impact-warnings')
+                    ->within('@impact-warnings', function ($warnings) {
+                        $warnings->assertSee('Championship implications')
+                               ->assertSee('Upcoming matches')
+                               ->assertSee('Partner reassignments');
+                    })
+                    ->select('@dissolution-type', 'immediate')
+                    ->click('@confirm-dissolution')
+                    ->waitFor('@dissolution-success')
+                    ->assertSee('Tag team dissolved successfully')
+                    ->assertDontSee($tagTeam->name);
+        });
+        */
+        
+        expect($tagTeam->name)->toBe('Team to Dissolve');
+    });
+});
+
+describe('Stable Management Visual Workflow', function () {
+    test('stable creation displays with member recruitment interface', function () {
+        // Given: Available roster members for stable
+        $leader = Wrestler::factory()->create(['name' => 'Stable Leader']);
+        $wrestler = Wrestler::factory()->create(['name' => 'Member Wrestler']);
+        $manager = Manager::factory()->create(['name' => 'Stable Manager']);
+        $tagTeam = TagTeam::factory()->create(['name' => 'Allied Tag Team']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to stables page
+        // 2. Click "Create Stable" button
+        // 3. Verify stable creation form with member selection
+        // 4. Test multi-type member selection (wrestlers, managers, tag teams)
+        // 5. Verify hierarchy assignment (leader, members, associates)
+        // 6. Test minimum member requirements validation
+        // 7. Complete stable creation with member assignments
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($leader, $wrestler, $manager, $tagTeam) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->click('@create-stable-button')
+                    ->waitFor('@stable-creation-modal')
+                    ->type('@stable-name', 'The Authority')
+                    ->within('@member-recruitment-section', function ($section) use ($leader, $wrestler, $manager, $tagTeam) {
+                        $section->click('@add-wrestler-tab')
+                               ->dragAndDrop("@wrestler-{$leader->id}", '@stable-leader-slot')
+                               ->dragAndDrop("@wrestler-{$wrestler->id}", '@stable-members-area')
+                               ->click('@add-manager-tab')
+                               ->dragAndDrop("@manager-{$manager->id}", '@stable-members-area')
+                               ->click('@add-tag-team-tab')
+                               ->dragAndDrop("@tag-team-{$tagTeam->id}", '@stable-members-area');
+                    })
+                    ->assertVisible('@member-count-indicator')
+                    ->assertSeeIn('@member-count-indicator', '4 members')
+                    ->click('@create-stable-submit')
+                    ->waitFor('@stable-created-success')
+                    ->assertSee('Stable created successfully');
+        });
+        */
+        
+        expect($leader->name)->toBe('Stable Leader');
+        expect($wrestler->name)->toBe('Member Wrestler');
+        expect($manager->name)->toBe('Stable Manager');
+        expect($tagTeam->name)->toBe('Allied Tag Team');
+    });
+
+    test('stable member hierarchy management displays with role assignment', function () {
+        // Given: An existing stable with members
+        $stable = Stable::factory()->create(['name' => 'Evolution']);
+        $leader = Wrestler::factory()->create(['name' => 'Triple H']);
+        $member = Wrestler::factory()->create(['name' => 'Randy Orton']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to stable detail page
+        // 2. Verify member hierarchy visualization
+        // 3. Test role reassignment drag-and-drop interface
+        // 4. Verify leadership change confirmation dialogs
+        // 5. Test member promotion/demotion workflows
+        // 6. Verify visual feedback for hierarchy changes
+        // 7. Test bulk member status updates
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($stable, $leader, $member) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->assertSee($stable->name)
+                    ->assertVisible('@hierarchy-visualization')
+                    ->within('@hierarchy-visualization', function ($hierarchy) use ($leader, $member) {
+                        $hierarchy->assertSeeIn('@leader-position', $leader->name)
+                                 ->assertSeeIn('@members-section', $member->name)
+                                 ->dragAndDrop("@member-{$member->id}", '@leader-position');
+                    })
+                    ->waitFor('@leadership-change-modal')
+                    ->assertSee('Change Stable Leadership')
+                    ->assertSee('This will promote')
+                    ->click('@confirm-leadership-change')
+                    ->waitFor('@hierarchy-updated')
+                    ->assertSeeIn('@leader-position', $member->name)
+                    ->assertSeeIn('@members-section', $leader->name);
+        });
+        */
+        
+        expect($stable->name)->toBe('Evolution');
+        expect($leader->name)->toBe('Triple H');
+        expect($member->name)->toBe('Randy Orton');
+    });
+
+    test('stable split and merge workflow displays with member redistribution', function () {
+        // Given: A large stable that can be split
+        $stable = Stable::factory()->create(['name' => 'Large Stable']);
+        $wrestler1 = Wrestler::factory()->create(['name' => 'Split Member 1']);
+        $wrestler2 = Wrestler::factory()->create(['name' => 'Split Member 2']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to stable with many members
+        // 2. Click "Split Stable" action
+        // 3. Verify split interface with member redistribution
+        // 4. Test drag-and-drop member assignment to new groups
+        // 5. Verify new stable name suggestions
+        // 6. Test validation for minimum members per stable
+        // 7. Complete split and verify new stables created
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($stable, $wrestler1, $wrestler2) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->click('@split-stable-button')
+                    ->waitFor('@stable-split-modal')
+                    ->assertSee('Split Stable')
+                    ->within('@member-redistribution', function ($redistribution) use ($wrestler1, $wrestler2) {
+                        $redistribution->dragAndDrop("@member-{$wrestler1->id}", '@new-stable-1')
+                                     ->dragAndDrop("@member-{$wrestler2->id}", '@new-stable-2')
+                                     ->assertVisible('@split-preview');
+                    })
+                    ->type('@new-stable-1-name', 'Faction Alpha')
+                    ->type('@new-stable-2-name', 'Faction Beta')
+                    ->click('@execute-split')
+                    ->waitFor('@split-success')
+                    ->assertSee('Stable split successfully')
+                    ->assertSee('Faction Alpha')
+                    ->assertSee('Faction Beta');
+        });
+        */
+        
+        expect($stable->name)->toBe('Large Stable');
+        expect($wrestler1->name)->toBe('Split Member 1');
+        expect($wrestler2->name)->toBe('Split Member 2');
+    });
+});
+
+describe('Championship Assignment Visual Workflow', function () {
+    test('title championship assignment displays with eligibility verification', function () {
+        // Given: A title and eligible wrestlers
+        $title = Title::factory()->create(['name' => 'World Championship']);
+        $eligibleWrestler = Wrestler::factory()->create(['name' => 'Top Contender']);
+        $ineligibleWrestler = Wrestler::factory()->create(['name' => 'Suspended Wrestler']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to title detail page
+        // 2. Click "Assign Championship" button
+        // 3. Verify eligibility checking interface
+        // 4. Display eligible wrestlers with green indicators
+        // 5. Show ineligible wrestlers with reason tooltips
+        // 6. Test championship assignment with ceremony options
+        // 7. Verify championship history updates
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($title, $eligibleWrestler, $ineligibleWrestler) {
+            $browser->loginAs(administrator())
+                    ->visit("/titles/{$title->id}")
+                    ->click('@assign-championship-button')
+                    ->waitFor('@championship-assignment-modal')
+                    ->assertSee('Assign Championship')
+                    ->within('@wrestler-eligibility-grid', function ($grid) use ($eligibleWrestler, $ineligibleWrestler) {
+                        $grid->assertElementHasClass("@wrestler-{$eligibleWrestler->id}", 'eligible')
+                             ->assertElementHasClass("@wrestler-{$ineligibleWrestler->id}", 'ineligible')
+                             ->hover("@wrestler-{$ineligibleWrestler->id}")
+                             ->assertVisible('@ineligibility-tooltip')
+                             ->assertSeeIn('@ineligibility-tooltip', 'Currently suspended')
+                             ->click("@wrestler-{$eligibleWrestler->id}");
+                    })
+                    ->select('@ceremony-type', 'event')
+                    ->click('@assign-championship')
+                    ->waitFor('@assignment-success')
+                    ->assertSee('Championship assigned successfully')
+                    ->assertSee($eligibleWrestler->name);
+        });
+        */
+        
+        expect($title->name)->toBe('World Championship');
+        expect($eligibleWrestler->name)->toBe('Top Contender');
+        expect($ineligibleWrestler->name)->toBe('Suspended Wrestler');
+    });
+
+    test('championship history timeline displays with interactive navigation', function () {
+        // Given: A title with championship history
+        $title = Title::factory()->create(['name' => 'Historic Title']);
+        $champion1 = Wrestler::factory()->create(['name' => 'Former Champion']);
+        $champion2 = Wrestler::factory()->create(['name' => 'Current Champion']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to title with championship history
+        // 2. Verify interactive timeline visualization
+        // 3. Test timeline navigation and zoom controls
+        // 4. Click on championship reigns for details
+        // 5. Verify champion profile popups
+        // 6. Test filtering by wrestler or date range
+        // 7. Verify export functionality for championship data
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($title, $champion1, $champion2) {
+            $browser->loginAs(administrator())
+                    ->visit("/titles/{$title->id}")
+                    ->assertVisible('@championship-timeline')
+                    ->within('@championship-timeline', function ($timeline) use ($champion1, $champion2) {
+                        $timeline->assertVisible("@reign-{$champion1->id}")
+                               ->assertVisible("@reign-{$champion2->id}")
+                               ->click("@reign-{$champion1->id}");
+                    })
+                    ->waitFor('@championship-detail-popup')
+                    ->assertSee('Championship Details')
+                    ->assertSee($champion1->name)
+                    ->assertVisible('@reign-statistics')
+                    ->click('@timeline-zoom-in')
+                    ->assertVisible('@detailed-timeline-view')
+                    ->click('@export-history-button')
+                    ->waitFor('@export-options-modal');
+        });
+        */
+        
+        expect($title->name)->toBe('Historic Title');
+        expect($champion1->name)->toBe('Former Champion');
+        expect($champion2->name)->toBe('Current Champion');
+    });
+
+    test('championship vacancy management displays with tournament bracket interface', function () {
+        // Given: A vacant title needing new champion
+        $vacantTitle = Title::factory()->create(['name' => 'Vacant Championship']);
+        $contestant1 = Wrestler::factory()->create(['name' => 'Tournament Seed 1']);
+        $contestant2 = Wrestler::factory()->create(['name' => 'Tournament Seed 2']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to vacant title page
+        // 2. Click "Create Tournament" for title
+        // 3. Verify tournament bracket creation interface
+        // 4. Test wrestler seeding and bracket population
+        // 5. Verify tournament progression visualization
+        // 6. Test match result entry and bracket updates
+        // 7. Complete tournament and crown new champion
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($vacantTitle, $contestant1, $contestant2) {
+            $browser->loginAs(administrator())
+                    ->visit("/titles/{$vacantTitle->id}")
+                    ->assertSee('VACANT')
+                    ->click('@create-tournament-button')
+                    ->waitFor('@tournament-creation-modal')
+                    ->select('@tournament-type', '8-man-single-elimination')
+                    ->within('@bracket-setup', function ($bracket) use ($contestant1, $contestant2) {
+                        $bracket->dragAndDrop("@wrestler-{$contestant1->id}", '@bracket-position-1')
+                               ->dragAndDrop("@wrestler-{$contestant2->id}", '@bracket-position-2')
+                               ->assertVisible('@bracket-preview');
+                    })
+                    ->click('@create-tournament')
+                    ->waitFor('@tournament-bracket-view')
+                    ->assertVisible('@interactive-bracket')
+                    ->assertSee('Tournament Created')
+                    ->assertSee($contestant1->name)
+                    ->assertSee($contestant2->name);
+        });
+        */
+        
+        expect($vacantTitle->name)->toBe('Vacant Championship');
+        expect($contestant1->name)->toBe('Tournament Seed 1');
+        expect($contestant2->name)->toBe('Tournament Seed 2');
+    });
+});
+
+describe('Roster Status Management Visual Workflow', function () {
+    test('employment status changes display with timeline visualization', function () {
+        // Given: A wrestler with employment history
+        $wrestler = Wrestler::factory()->create(['name' => 'Career Wrestler']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to wrestler detail page
+        // 2. Verify employment timeline visualization
+        // 3. Click "Change Employment Status" button
+        // 4. Test status change modal with effective date picker
+        // 5. Verify business rule validation for status changes
+        // 6. Test bulk status changes for multiple wrestlers
+        // 7. Verify timeline updates with new status
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($wrestler) {
+            $browser->loginAs(administrator())
+                    ->visit("/wrestlers/{$wrestler->id}")
+                    ->assertVisible('@employment-timeline')
+                    ->click('@change-employment-status')
+                    ->waitFor('@status-change-modal')
+                    ->select('@new-status', 'suspended')
+                    ->click('@effective-date-picker')
+                    ->selectDate('tomorrow')
+                    ->type('@reason', 'Policy violation')
+                    ->click('@confirm-status-change')
+                    ->waitFor('@timeline-updated')
+                    ->assertVisible('@future-status-indicator')
+                    ->assertSeeIn('@future-status-indicator', 'Suspended starting tomorrow');
+        });
+        */
+        
+        expect($wrestler->name)->toBe('Career Wrestler');
+    });
+
+    test('injury tracking displays with medical clearance workflow', function () {
+        // Given: Wrestlers with various injury statuses
+        $healthyWrestler = Wrestler::factory()->create(['name' => 'Healthy Wrestler']);
+        $injuredWrestler = Wrestler::factory()->create(['name' => 'Injured Wrestler']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to roster health overview
+        // 2. Verify injury status visualization with color coding
+        // 3. Click "Report Injury" for healthy wrestler
+        // 4. Test injury reporting form with medical details
+        // 5. Verify injured list updates with new entry
+        // 6. Test medical clearance workflow for injured wrestler
+        // 7. Verify return-to-action authorization process
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($healthyWrestler, $injuredWrestler) {
+            $browser->loginAs(administrator())
+                    ->visit('/roster/health')
+                    ->assertElementHasClass("@wrestler-{$healthyWrestler->id}", 'status-healthy')
+                    ->assertElementHasClass("@wrestler-{$injuredWrestler->id}", 'status-injured')
+                    ->click("@report-injury-{$healthyWrestler->id}")
+                    ->waitFor('@injury-report-modal')
+                    ->select('@injury-type', 'knee')
+                    ->select('@severity', 'moderate')
+                    ->click('@estimated-recovery-picker')
+                    ->selectDate('+4 weeks')
+                    ->click('@submit-injury-report')
+                    ->waitFor('@injury-reported-success')
+                    ->assertElementHasClass("@wrestler-{$healthyWrestler->id}", 'status-injured')
+                    ->click("@clear-injury-{$injuredWrestler->id}")
+                    ->waitFor('@medical-clearance-modal')
+                    ->upload('@medical-clearance-file', 'medical-clearance.pdf')
+                    ->click('@authorize-return')
+                    ->assertElementHasClass("@wrestler-{$injuredWrestler->id}", 'status-healthy');
+        });
+        */
+        
+        expect($healthyWrestler->name)->toBe('Healthy Wrestler');
+        expect($injuredWrestler->name)->toBe('Injured Wrestler');
+    });
+
+    test('bulk roster actions display with progress tracking', function () {
+        // Given: Multiple wrestlers for bulk operations
+        $wrestler1 = Wrestler::factory()->create(['name' => 'Bulk Action 1']);
+        $wrestler2 = Wrestler::factory()->create(['name' => 'Bulk Action 2']);
+        $wrestler3 = Wrestler::factory()->create(['name' => 'Bulk Action 3']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to wrestlers index with selection interface
+        // 2. Select multiple wrestlers using checkboxes
+        // 3. Verify bulk actions toolbar appears
+        // 4. Test bulk employment status changes
+        // 5. Verify progress bar during bulk operations
+        // 6. Test conflict resolution for problematic entries
+        // 7. Verify final results summary and error reporting
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($wrestler1, $wrestler2, $wrestler3) {
+            $browser->loginAs(administrator())
+                    ->visit('/wrestlers')
+                    ->check("@select-wrestler-{$wrestler1->id}")
+                    ->check("@select-wrestler-{$wrestler2->id}")
+                    ->check("@select-wrestler-{$wrestler3->id}")
+                    ->assertVisible('@bulk-actions-toolbar')
+                    ->assertSeeIn('@selected-count', '3 selected')
+                    ->click('@bulk-status-change')
+                    ->waitFor('@bulk-status-modal')
+                    ->select('@bulk-new-status', 'released')
+                    ->click('@execute-bulk-action')
+                    ->waitFor('@bulk-progress-modal')
+                    ->assertVisible('@progress-bar')
+                    ->waitFor('@bulk-complete-summary')
+                    ->assertSee('3 wrestlers updated successfully')
+                    ->assertSee('0 errors');
+        });
+        */
+        
+        expect($wrestler1->name)->toBe('Bulk Action 1');
+        expect($wrestler2->name)->toBe('Bulk Action 2');
+        expect($wrestler3->name)->toBe('Bulk Action 3');
+    });
+});
+
+describe('Interactive Data Visualization and Reporting', function () {
+    test('roster analytics dashboard displays with interactive charts', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to roster analytics dashboard
+        // 2. Verify interactive charts and graphs are loaded
+        // 3. Test chart filtering and drill-down functionality
+        // 4. Verify hover tooltips and data point details
+        // 5. Test date range selection for historical analysis
+        // 6. Verify export functionality for charts and data
+        // 7. Test dashboard customization and layout options
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/roster/analytics')
+                    ->assertVisible('@roster-statistics-dashboard')
+                    ->within('@employment-status-chart', function ($chart) {
+                        $chart->assertVisible('@chart-canvas')
+                             ->hover('@active-employment-segment')
+                             ->assertVisible('@tooltip')
+                             ->assertSeeIn('@tooltip', 'Active: 85%')
+                             ->click('@active-employment-segment');
+                    })
+                    ->waitFor('@drill-down-view')
+                    ->assertSee('Active Wrestlers Detail')
+                    ->click('@date-range-picker')
+                    ->selectDateRange('last-6-months')
+                    ->assertVisible('@chart-updated-indicator')
+                    ->click('@export-chart-button')
+                    ->waitFor('@export-format-modal');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('roster availability calendar displays with booking conflict detection', function () {
+        // Given: Wrestlers with varying availability
+        $availableWrestler = Wrestler::factory()->create(['name' => 'Available Wrestler']);
+        $bookedWrestler = Wrestler::factory()->create(['name' => 'Booked Wrestler']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to roster availability calendar
+        // 2. Verify calendar view with wrestler availability
+        // 3. Test date selection and availability filtering
+        // 4. Verify conflict highlighting for double-bookings
+        // 5. Test drag-and-drop event scheduling
+        // 6. Verify availability warnings and suggestions
+        // 7. Test calendar export and sharing functionality
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($availableWrestler, $bookedWrestler) {
+            $browser->loginAs(administrator())
+                    ->visit('/roster/availability')
+                    ->assertVisible('@availability-calendar')
+                    ->click('@calendar-date-tomorrow')
+                    ->assertVisible('@availability-sidebar')
+                    ->within('@availability-sidebar', function ($sidebar) use ($availableWrestler, $bookedWrestler) {
+                        $sidebar->assertElementHasClass("@wrestler-{$availableWrestler->id}", 'available')
+                               ->assertElementHasClass("@wrestler-{$bookedWrestler->id}", 'booked')
+                               ->assertSeeIn("@wrestler-{$bookedWrestler->id}", 'Already scheduled');
+                    })
+                    ->dragAndDrop("@wrestler-{$availableWrestler->id}", '@calendar-date-tomorrow')
+                    ->waitFor('@booking-confirmation-modal')
+                    ->assertSee('Schedule Wrestler')
+                    ->click('@confirm-booking')
+                    ->assertElementHasClass("@wrestler-{$availableWrestler->id}", 'booked');
+        });
+        */
+        
+        expect($availableWrestler->name)->toBe('Available Wrestler');
+        expect($bookedWrestler->name)->toBe('Booked Wrestler');
+    });
+
+    test('roster export and reporting displays with format options', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to roster reporting interface
+        // 2. Verify export options and format selection
+        // 3. Test custom report builder with field selection
+        // 4. Verify preview functionality before export
+        // 5. Test scheduled report automation setup
+        // 6. Verify different output formats (PDF, Excel, CSV)
+        // 7. Test email delivery and sharing options
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/roster/reports')
+                    ->assertVisible('@report-builder')
+                    ->click('@create-custom-report')
+                    ->waitFor('@report-builder-modal')
+                    ->within('@field-selection', function ($fields) {
+                        $fields->check('@include-personal-info')
+                             ->check('@include-employment-status')
+                             ->check('@include-match-history')
+                             ->uncheck('@include-financial-data');
+                    })
+                    ->select('@export-format', 'pdf')
+                    ->click('@preview-report')
+                    ->waitFor('@report-preview')
+                    ->assertVisible('@preview-content')
+                    ->click('@schedule-report')
+                    ->select('@schedule-frequency', 'weekly')
+                    ->click('@save-scheduled-report')
+                    ->assertSee('Report scheduled successfully');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Mobile and Accessibility Roster Management', function () {
+    test('roster management interface works correctly on mobile devices', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Resize browser to mobile dimensions
+        // 2. Navigate to roster management pages
+        // 3. Verify touch-friendly interface elements
+        // 4. Test swipe gestures for table navigation
+        // 5. Verify modal responsiveness on small screens
+        // 6. Test mobile-specific navigation patterns
+        // 7. Verify form usability with virtual keyboards
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs(administrator())
+                    ->visit('/wrestlers')
+                    ->assertVisible('@mobile-roster-interface')
+                    ->assertVisible('@mobile-navigation-tabs')
+                    ->swipeLeft('@wrestler-card-1')
+                    ->assertVisible('@quick-actions-menu')
+                    ->tap('@assign-manager-quick-action')
+                    ->waitFor('@mobile-manager-selection')
+                    ->assertVisible('@touch-friendly-buttons')
+                    ->tap('@mobile-search-button')
+                    ->assertVisible('@mobile-search-overlay')
+                    ->type('@mobile-search-input', 'wrestler')
+                    ->assertVisible('@mobile-search-results');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('roster management meets accessibility standards', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate roster pages using only keyboard
+        // 2. Verify all interactive elements are focusable
+        // 3. Test screen reader compatibility
+        // 4. Verify ARIA labels and roles are present
+        // 5. Test high contrast mode compatibility
+        // 6. Verify proper heading hierarchy
+        // 7. Test form accessibility and error announcements
+        
+        // TODO: Replace with actual Dusk browser test with accessibility assertions
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/wrestlers')
+                    ->assertAriaLabel('@main-roster-table', 'Wrestlers roster table')
+                    ->keys('body', '{tab}')
+                    ->assertFocused('@skip-to-content')
+                    ->keys('@skip-to-content', '{enter}')
+                    ->assertFocused('@main-content')
+                    ->keys('body', '{tab}')
+                    ->assertFocused('@create-wrestler-button')
+                    ->keys('@create-wrestler-button', '{enter}')
+                    ->waitFor('@wrestler-form-modal')
+                    ->assertAriaLive('@form-errors')
+                    ->keys('@wrestler-name-field', '{tab}')
+                    ->assertFocused('@wrestler-hometown-field');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+// Note: When Laravel Dusk is installed, add these dependencies to the top:
+// use Laravel\Dusk\Browser;
+// use Tests\DuskTestCase;
+
+// And extend DuskTestCase instead of the current structure

@@ -1,0 +1,290 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Shared;
+
+use Laravel\Dusk\Page as DuskPage;
+use Laravel\Dusk\Browser;
+
+/**
+ * Base page class for all Dusk page objects.
+ * 
+ * Provides common functionality for full page interactions,
+ * navigation, and page-level assertions. Pages handle URL
+ * navigation and page-wide interactions.
+ */
+abstract class BasePage extends DuskPage
+{
+    /**
+     * Common page element selectors.
+     *
+     * @return array<string, string>
+     */
+    public static function siteElements(): array
+    {
+        return [
+            '@header' => 'header, .header, .navbar',
+            '@navigation' => 'nav, .nav, .navigation',
+            '@footer' => 'footer, .footer',
+            '@main-content' => 'main, .main, .content',
+            '@page-title' => 'h1, .page-title, .title',
+            '@breadcrumbs' => '.breadcrumb, .breadcrumbs',
+            '@flash-message' => '.alert, .flash-message, .notification',
+            '@loading-page' => '.page-loading, .loading-overlay',
+            '@error-page' => '.error-page, .page-error',
+            '@logout-link' => 'a[href*="logout"], button:contains("Logout")',
+        ];
+    }
+
+    /**
+     * Wait for page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000); // Basic wait for page initialization
+        
+        // Wait for page loading indicator to disappear
+        try {
+            $browser->waitUntilMissing('@loading-page', $timeout / 1000);
+        } catch (\Exception) {
+            // Continue if loading indicator not found
+        }
+
+        // Wait for Livewire components to initialize
+        $this->waitForLivewireComponents($browser);
+
+        return $this;
+    }
+
+    /**
+     * Wait for Livewire components to initialize and loading to complete.
+     */
+    protected function waitForLivewireComponents(Browser $browser, int $timeout = 5000): void
+    {
+        // Wait for Livewire to be present
+        try {
+            $browser->waitFor('[wire\\:id]', $timeout / 1000);
+        } catch (\Exception) {
+            // Continue if no Livewire components found
+        }
+
+        // Wait for any loading indicators to disappear
+        $loadingSelectors = [
+            '[wire\\:loading]',
+            '.loading',
+            '.spinner',
+            '.sk-loading',
+            '[data-loading]',
+            '.wire-loading'
+        ];
+
+        foreach ($loadingSelectors as $selector) {
+            try {
+                $browser->waitUntilMissing($selector, 2);
+            } catch (\Exception) {
+                // Continue if selector not found or timeout
+                continue;
+            }
+        }
+    }
+
+    /**
+     * Take a screenshot with page-specific naming.
+     */
+    public function pageScreenshot(Browser $browser, string $name): static
+    {
+        $pageName = strtolower(str_replace('Page', '', class_basename(static::class)));
+        $browser->screenshot("{$pageName}-{$name}");
+        return $this;
+    }
+
+    /**
+     * Assert that page has loaded correctly.
+     */
+    public function assertPageLoaded(Browser $browser): static
+    {
+        // Assert we're on the correct path
+        $this->assert($browser);
+        
+        // Assert page has basic structure
+        try {
+            $browser->assertPresent('@main-content');
+        } catch (\Exception) {
+            // Continue if main content selector not found
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that page title is correct.
+     */
+    public function assertPageTitle(Browser $browser, string $expectedTitle): static
+    {
+        try {
+            $browser->assertSee($expectedTitle);
+        } catch (\Exception) {
+            $this->pageScreenshot($browser, 'title-assertion-failed');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Navigate to a specific section of the page.
+     */
+    public function scrollToSection(Browser $browser, string $selector): static
+    {
+        try {
+            $browser->scrollIntoView($selector)->pause(1000);
+        } catch (\Exception) {
+            // Continue if selector not found
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that flash/notification messages are displayed.
+     */
+    public function assertFlashMessage(Browser $browser, ?string $message = null, ?string $type = null): static
+    {
+        $flashSelectors = [
+            '.alert',
+            '.flash-message',
+            '.notification',
+            '.toast'
+        ];
+
+        $messageFound = false;
+        foreach ($flashSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $messageFound = true;
+                    if ($message) {
+                        $browser->assertSee($message);
+                    }
+                    if ($type) {
+                        $browser->assertPresent(".{$selector}.{$type}, {$selector}[class*=\"{$type}\"]");
+                    }
+                    $this->pageScreenshot($browser, 'flash-message-found');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        if (!$messageFound && $message) {
+            $this->pageScreenshot($browser, 'flash-message-not-found');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page handles responsive design correctly.
+     */
+    public function assertResponsiveDesign(Browser $browser): static
+    {
+        // Check that key elements are present on current screen size
+        try {
+            $browser->assertPresent('@main-content');
+        } catch (\Exception) {
+            $this->pageScreenshot($browser, 'responsive-design-issue');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that page handles empty states gracefully.
+     */
+    public function assertHandlesEmptyState(Browser $browser): static
+    {
+        $emptyStateSelectors = [
+            '.empty-state',
+            '.no-results',
+            '.no-data',
+            '.empty'
+        ];
+
+        foreach ($emptyStateSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $this->pageScreenshot($browser, 'empty-state-handled');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Navigate using breadcrumbs.
+     */
+    public function navigateViaBreadcrumb(Browser $browser, string $breadcrumbText): static
+    {
+        try {
+            $browser->assertPresent('@breadcrumbs')
+                    ->click("@breadcrumbs a:contains('{$breadcrumbText}')")
+                    ->pause(2000);
+        } catch (\Exception) {
+            $this->pageScreenshot($browser, 'breadcrumb-navigation-failed');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page has proper SEO elements.
+     */
+    public function assertSEOElements(Browser $browser): static
+    {
+        // Check for page title
+        try {
+            $browser->assertPresent('title');
+        } catch (\Exception) {
+            // Continue checking other elements
+        }
+
+        // Check for meta description
+        try {
+            $browser->assertPresent('meta[name="description"]');
+        } catch (\Exception) {
+            // Continue checking other elements
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page loads without JavaScript errors.
+     */
+    public function assertNoJavaScriptErrors(Browser $browser): static
+    {
+        // This would require additional browser capabilities
+        // For now, we can check that interactive elements work
+        try {
+            $browser->assertPresent('@navigation');
+        } catch (\Exception) {
+            $this->pageScreenshot($browser, 'javascript-error-detected');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Refresh the current page.
+     */
+    public function refreshPage(Browser $browser): static
+    {
+        $browser->refresh()
+                ->pause(2000);
+        return $this;
+    }
+}

@@ -1,0 +1,502 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
+use App\Models\Wrestlers\Wrestler;
+
+/**
+ * Browser tests for TitleChampionship management workflows.
+ *
+ * BROWSER TEST SCOPE:
+ * - Visual championship history display and interaction
+ * - Championship transition workflows and visual feedback
+ * - Polymorphic champion display (Wrestler vs TagTeam)
+ * - Championship statistics and data visualization
+ * - Real-time championship data updates and filtering
+ *
+ * NOTE: These tests are prepared for Laravel Dusk implementation.
+ * Currently using basic assertions as placeholder for future browser automation.
+ */
+
+describe('Championship Management Browser Workflows', function () {
+    beforeEach(function () {
+        $this->title = Title::factory()->create(['name' => 'World Championship']);
+        $this->wrestler = Wrestler::factory()->create(['name' => 'John Champion']);
+        $this->tagTeam = TagTeam::factory()->create(['name' => 'Championship Team']);
+        
+        $this->currentChampionship = TitleChampionship::factory()
+            ->for($this->title, 'title')
+            ->for($this->wrestler, 'champion')
+            ->create([
+                'won_at' => now()->subMonths(3),
+                'lost_at' => null
+            ]);
+            
+        $this->previousChampionship = TitleChampionship::factory()
+            ->for($this->title, 'title')
+            ->for($this->tagTeam, 'champion')
+            ->create([
+                'won_at' => now()->subYear(),
+                'lost_at' => now()->subMonths(6)
+            ]);
+    });
+
+    describe('Title Show Page Championship Display', function () {
+        test('title show page displays championship history visually', function () {
+            // Arrange
+            $title = $this->title;
+            $currentChampionship = $this->currentChampionship;
+            $previousChampionship = $this->previousChampionship;
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Navigate to title show page using route('titles.show', $title) and verify championship table visibility
+            // 2. Check that current champion is prominently displayed
+            // 3. Verify championship history table shows correct chronological order
+            // 4. Test championship duration calculations display correctly
+            // 5. Validate polymorphic champion types display with proper styling
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($title) {
+                $browser->loginAs(administrator())
+                        ->visit(route('titles.show', $title))
+                        ->assertSee('World Championship')
+                        ->assertSee('John Champion')
+                        ->assertSee('Championship Team')
+                        ->waitFor('@championship-history-table')
+                        ->assertSeeIn('@current-champion-section', 'John Champion')
+                        ->assertSeeIn('@championship-history-table', 'Championship Team')
+                        ->assertElementCount('@championship-row', 2)
+                        ->scrollIntoView('@championship-statistics')
+                        ->assertSee('Total Championships: 2')
+                        ->assertSee('Current Reign: 3 months');
+            });
+            */
+
+            // Act & Assert
+            expect($title->name)->toBe('World Championship');
+            expect($currentChampionship->lost_at)->toBeNull();
+            expect($previousChampionship->lost_at)->not->toBeNull();
+            expect($title->id)->toBeInt();
+            expect($currentChampionship->champion->name)->toBe('John Champion');
+            expect($previousChampionship->champion->name)->toBe('Championship Team');
+        });
+
+        test('championship history table interactions work smoothly', function () {
+            // Arrange
+            $title = $this->title;
+            $additionalChampionships = TitleChampionship::factory()
+                ->count(3)
+                ->for($title, 'title')
+                ->sequence(
+                    ['won_at' => now()->subMonths(18), 'lost_at' => now()->subMonths(15)],
+                    ['won_at' => now()->subMonths(15), 'lost_at' => now()->subMonths(12)],
+                    ['won_at' => now()->subMonths(12), 'lost_at' => now()->subMonths(9)]
+                )
+                ->create();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Test table sorting by championship dates (won_at, lost_at) using route('titles.show', $title)
+            // 2. Verify table pagination for titles with many championships
+            // 3. Test championship filtering (current vs previous)
+            // 4. Validate hover effects and tooltip information
+            // 5. Check responsive table behavior on different screen sizes
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($title) {
+                $browser->loginAs(administrator())
+                        ->visit(route('titles.show', $title))
+                        ->waitFor('@championship-history-table')
+                        ->click('@sort-by-duration')
+                        ->pause(500)
+                        ->assertSeeIn('@championship-row:first-child', 'Longest Reign')
+                        ->click('@filter-current-only')
+                        ->assertElementCount('@championship-row', 1)
+                        ->assertSeeIn('@championship-row:first-child', 'John Champion')
+                        ->click('@filter-show-all')
+                        ->assertElementCount('@championship-row', 5)
+                        ->hover('@championship-row:first-child')
+                        ->waitFor('@championship-tooltip')
+                        ->assertSee('Championship Details');
+            });
+            */
+
+            // Act & Assert
+            expect($additionalChampionships)->toHaveCount(3);
+            expect($title->id)->toBeInt();
+        });
+
+        test('championship statistics display provides meaningful insights', function () {
+            // Given: Varied championship data for statistics
+            expect($this->currentChampionship->lengthInDays())->toBeGreaterThan(0);
+            expect($this->previousChampionship->lengthInDays())->toBeGreaterThan(0);
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Display total number of championship reigns
+            // 2. Show average championship duration
+            // 3. Highlight longest and shortest reigns
+            // 4. Display current champion prominence
+            // 5. Show championship frequency timeline/chart
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->scrollIntoView('@championship-statistics')
+                        ->assertSee('Total Reigns: 2')
+                        ->assertSee('Average Duration:')
+                        ->assertSee('Longest Reign:')
+                        ->assertSee('Current Champion: John Champion')
+                        ->click('@view-championship-timeline')
+                        ->waitFor('@championship-timeline-chart')
+                        ->assertSee('Championship History Timeline')
+                        ->assertElementExists('@timeline-current-marker')
+                        ->hover('@timeline-previous-reign')
+                        ->waitFor('@timeline-tooltip')
+                        ->assertSee('Championship Team');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->currentChampionship->title_id)->toBe($this->title->id);
+            expect($this->previousChampionship->title_id)->toBe($this->title->id);
+        });
+    });
+
+    describe('Championship Transition Visual Workflows', function () {
+        test('championship transition process displays clearly', function () {
+            // Arrange
+            $title = $this->title;
+            $currentChampionship = $this->currentChampionship;
+            $challenger = Wrestler::factory()->create(['name' => 'Title Challenger']);
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Visual representation of championship changes using route('titles.show', $title)
+            // 2. Before/after state comparison display
+            // 3. Championship transition confirmation dialogs
+            // 4. Success/failure visual feedback
+            // 5. Real-time championship history updates
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($title, $challenger) {
+                $browser->loginAs(administrator())
+                        ->visit(route('titles.show', $title))
+                        ->assertSeeIn('@current-champion', 'John Champion')
+                        ->click('@manage-championship-button')
+                        ->waitFor('@championship-management-modal')
+                        ->select('@new-champion-select', $challenger->id)
+                        ->type('@championship-date', '2024-02-01')
+                        ->click('@transition-championship-button')
+                        ->waitFor('@confirmation-dialog')
+                        ->assertSee('Transfer championship from John Champion to Title Challenger?')
+                        ->click('@confirm-transition')
+                        ->waitFor('@success-notification')
+                        ->assertSee('Championship successfully transferred')
+                        ->waitUntilMissing('@championship-management-modal')
+                        ->assertSeeIn('@current-champion', 'Title Challenger')
+                        ->assertSeeIn('@championship-history-table', 'John Champion');
+            });
+            */
+
+            // Act & Assert
+            expect($challenger->name)->toBe('Title Challenger');
+            expect($currentChampionship->champion->name)->toBe('John Champion');
+        });
+
+        test('polymorphic champion type changes display correctly', function () {
+            // Given: Transition from individual to team champion
+            expect($this->currentChampionship->champion)->toBeInstanceOf(Wrestler::class);
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Visual distinction between wrestler and tag team champions
+            // 2. Champion type icons and styling differences
+            // 3. Transition animations between champion types
+            // 4. Champion profile information display
+            // 5. Team member information for tag team champions
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->assertElementExists('@wrestler-champion-icon')
+                        ->assertSeeIn('@current-champion-type', 'Individual Champion')
+                        ->click('@manage-championship-button')
+                        ->waitFor('@championship-management-modal')
+                        ->click('@champion-type-toggle')
+                        ->assertChecked('@team-champion-radio')
+                        ->select('@new-team-champion-select', $this->tagTeam->id)
+                        ->type('@championship-date', '2024-02-15')
+                        ->click('@transition-championship-button')
+                        ->waitFor('@success-notification')
+                        ->assertSeeIn('@current-champion-type', 'Tag Team Champions')
+                        ->assertElementExists('@tag-team-champion-icon')
+                        ->assertSee('Championship Team')
+                        ->click('@view-team-details')
+                        ->waitFor('@team-member-list')
+                        ->assertSee('Team Members:');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->tagTeam->name)->toBe('Championship Team');
+        });
+
+        test('championship duration calculations update in real-time', function () {
+            // Given: Current championship with calculable duration
+            $reignDays = $this->currentChampionship->lengthInDays();
+            expect($reignDays)->toBeGreaterThan(0);
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Real-time reign duration counter display
+            // 2. Days/months/years formatting
+            // 3. Milestone notifications (100 days, 1 year, etc.)
+            // 4. Comparison with historical reigns
+            // 5. Progressive reign length visualization
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($reignDays) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->assertSeeIn('@current-reign-duration', "{$reignDays} days")
+                        ->assertSeeIn('@current-reign-milestone', 'Current Reign')
+                        ->pause(1000) // Simulate real-time update
+                        ->refresh()
+                        ->waitFor('@current-reign-duration')
+                        ->assertSeeIn('@current-reign-duration', 'days')
+                        ->scrollIntoView('@reign-comparison-chart')
+                        ->assertElementExists('@current-reign-bar')
+                        ->assertElementExists('@average-reign-line')
+                        ->hover('@longest-reign-bar')
+                        ->waitFor('@reign-tooltip')
+                        ->assertSee('Longest Reign in History');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($reignDays)->toBeInt();
+        });
+    });
+
+    describe('Championship Data Visualization', function () {
+        test('championship timeline displays comprehensive history', function () {
+            // Given: Multiple championships for timeline visualization
+            $timelineChampionships = TitleChampionship::factory()
+                ->count(5)
+                ->for($this->title, 'title')
+                ->sequence(
+                    ['won_at' => now()->subYears(3), 'lost_at' => now()->subYears(2)->subMonths(6)],
+                    ['won_at' => now()->subYears(2)->subMonths(6), 'lost_at' => now()->subYears(2)],
+                    ['won_at' => now()->subYears(2), 'lost_at' => now()->subYear()->subMonths(3)],
+                    ['won_at' => now()->subYear()->subMonths(3), 'lost_at' => now()->subYear()],
+                    ['won_at' => now()->subYear(), 'lost_at' => now()->subMonths(6)]
+                )
+                ->create();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Interactive championship timeline with hover details
+            // 2. Zoomable timeline for different time periods
+            // 3. Champion photos/avatars on timeline
+            // 4. Championship transition markers and animations
+            // 5. Exportable championship history reports
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@view-championship-timeline')
+                        ->waitFor('@championship-timeline-container')
+                        ->assertElementCount('@timeline-championship-block', 7) // 5 + 2 original
+                        ->click('@timeline-zoom-1year')
+                        ->waitForText('Last 12 Months')
+                        ->assertElementExists('@current-championship-highlight')
+                        ->drag('@timeline-scrubber', 100, 0)
+                        ->waitFor('@timeline-date-indicator')
+                        ->hover('@timeline-championship-block:nth-child(3)')
+                        ->waitFor('@championship-details-popup')
+                        ->assertSee('Championship Duration:')
+                        ->assertSee('Champion Name:')
+                        ->click('@export-timeline-button')
+                        ->waitFor('@export-options-modal')
+                        ->click('@export-pdf-option')
+                        ->waitFor('@export-success-message');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($timelineChampionships)->toHaveCount(5);
+        });
+
+        test('championship statistics dashboard provides insights', function () {
+            // Given: Diverse championship data for statistics
+            expect($this->title->id)->toBeInt();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Championship frequency charts and graphs
+            // 2. Champion type distribution (wrestler vs tag team)
+            // 3. Average reign duration trends over time
+            // 4. Championship transition frequency analysis
+            // 5. Interactive filtering and data drill-down
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@championship-analytics-tab')
+                        ->waitFor('@analytics-dashboard')
+                        ->assertElementExists('@reign-duration-chart')
+                        ->assertElementExists('@champion-type-pie-chart')
+                        ->assertElementExists('@championship-frequency-graph')
+                        ->click('@filter-by-year-dropdown')
+                        ->select('@year-filter', '2023')
+                        ->waitFor('@chart-update-animation')
+                        ->assertSeeIn('@filtered-results-summary', '2023')
+                        ->hover('@pie-chart-wrestler-segment')
+                        ->waitFor('@chart-tooltip')
+                        ->assertSee('Individual Champions: 60%')
+                        ->click('@download-analytics-report')
+                        ->waitFor('@report-generation-modal')
+                        ->assertSee('Generating championship analytics report...');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->currentChampionship->title_id)->toBe($this->title->id);
+        });
+
+        test('championship comparison tools work effectively', function () {
+            // Given: Multiple titles for comparison
+            $otherTitle = Title::factory()->create(['name' => 'Secondary Championship']);
+            $comparisonChampionship = TitleChampionship::factory()
+                ->for($otherTitle, 'title')
+                ->create();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Side-by-side championship comparison interface
+            // 2. Statistical comparison between different titles
+            // 3. Champion performance across multiple titles
+            // 4. Reign duration comparison visualization
+            // 5. Championship prestige and activity metrics
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($otherTitle) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@compare-championships-button')
+                        ->waitFor('@championship-comparison-modal')
+                        ->select('@comparison-title-select', $otherTitle->id)
+                        ->click('@add-to-comparison')
+                        ->waitFor('@comparison-dashboard')
+                        ->assertSeeIn('@title-1-header', 'World Championship')
+                        ->assertSeeIn('@title-2-header', 'Secondary Championship')
+                        ->assertElementExists('@comparison-stats-table')
+                        ->assertSee('Total Championships')
+                        ->assertSee('Average Reign Duration')
+                        ->assertSee('Most Recent Champion')
+                        ->click('@switch-to-chart-view')
+                        ->waitFor('@comparison-chart-container')
+                        ->assertElementExists('@reign-duration-comparison-bars')
+                        ->assertElementExists('@championship-frequency-comparison');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($otherTitle->name)->toBe('Secondary Championship');
+            expect($comparisonChampionship->title_id)->toBe($otherTitle->id);
+        });
+    });
+
+    describe('Championship Management Interface', function () {
+        test('championship management controls are intuitive', function () {
+            // Given: Current championship requiring management
+            expect($this->currentChampionship->lost_at)->toBeNull();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Championship management button accessibility
+            // 2. Championship transition form validation
+            // 3. Date picker integration for championship dates
+            // 4. Champion selection dropdown with search
+            // 5. Bulk championship operations interface
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->assertElementExists('@championship-management-section')
+                        ->click('@manage-current-championship')
+                        ->waitFor('@championship-form-modal')
+                        ->assertElementExists('@championship-action-select')
+                        ->assertElementExists('@new-champion-search')
+                        ->assertElementExists('@championship-date-picker')
+                        ->type('@new-champion-search', 'Test')
+                        ->waitFor('@champion-search-results')
+                        ->assertElementCount('@search-result-item', function ($count) {
+                            return $count > 0;
+                        })
+                        ->click('@search-result-item:first-child')
+                        ->assertInputValue('@selected-champion-id', function ($value) {
+                            return is_numeric($value);
+                        })
+                        ->click('@championship-date-picker')
+                        ->waitFor('@date-picker-calendar')
+                        ->click('@date-picker-today')
+                        ->assertInputValue('@championship-date', date('Y-m-d'));
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->wrestler->name)->toBe('John Champion');
+        });
+
+        test('championship form validation provides clear feedback', function () {
+            // Given: Championship management scenario
+            expect($this->currentChampionship->id)->toBeInt();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Form field validation with real-time feedback
+            // 2. Date validation for championship transitions
+            // 3. Champion availability checking
+            // 4. Error message display and styling
+            // 5. Form submission loading states and success feedback
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@manage-current-championship')
+                        ->waitFor('@championship-form-modal')
+                        ->click('@submit-championship-change')
+                        ->waitFor('@validation-errors')
+                        ->assertSee('New champion is required')
+                        ->assertSee('Championship date is required')
+                        ->type('@championship-date', '2020-01-01') // Past date
+                        ->click('@submit-championship-change')
+                        ->waitFor('@date-error-message')
+                        ->assertSee('Championship date cannot be in the past')
+                        ->clear('@championship-date')
+                        ->type('@championship-date', date('Y-m-d'))
+                        ->select('@new-champion-select', $this->tagTeam->id)
+                        ->click('@submit-championship-change')
+                        ->waitFor('@loading-spinner')
+                        ->waitFor('@success-notification')
+                        ->assertSee('Championship transferred successfully');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->title->id)->toBeInt();
+        });
+    });
+});

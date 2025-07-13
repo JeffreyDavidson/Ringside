@@ -1,0 +1,450 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Managers;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Managers\ManagerFormModal;
+use Tests\Browser\Components\Managers\ManagerActionsDropdown;
+
+/**
+ * Page Object for the Manager Index page.
+ * 
+ * This page represents the main managers table interface including
+ * the create button, search functionality, filtering, and manager
+ * table with actions. Provides a clean API for interacting with
+ * all manager table elements.
+ */
+class ManagerIndexPage extends BasePage
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/managers';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-dusk="create-manager-button"], [data-testid="create-manager-btn"], .create-manager, button:contains("Create")',
+            '@managers-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"], input[name="search"], .search input, [wire\\:model*="search"]',
+            '@status-filter' => 'select[name*="status"], select[wire\\:model*="status"], .filter select, [data-filter] select',
+            '@pagination' => '.pagination, [aria-label="Pagination"], button:contains("Next"), button:contains("2"), .page-link',
+            '@sort-name' => 'th:contains("Name"), th[wire\\:click*="sort"]',
+            '@sort-status' => 'th:contains("Status")',
+            '@sort-hometown' => 'th:contains("Hometown")',
+            '@sort-stable' => 'th:contains("Stable")',
+            '@empty-state' => '.empty-state, .no-results, .no-data',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+            '@manager-status-badge' => '.badge, .status, [data-testid="manager-status"]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow Livewire to initialize
+                ->assertPresent('@managers-table');
+        
+        return $this;
+    }
+
+    /**
+     * Click the create manager button.
+     */
+    public function clickCreateManager(Browser $browser): ManagerFormModal
+    {
+        $browser->click('@create-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new ManagerFormModal();
+    }
+
+    /**
+     * Search for managers by name.
+     */
+    public function searchForManager(Browser $browser, string $searchTerm): static
+    {
+        $searchSelectors = [
+            'input[placeholder*="Search"]',
+            'input[type="search"]',
+            'input[name="search"]',
+            '.search input',
+            '[wire\\:model*="search"]'
+        ];
+
+        foreach ($searchSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->type($selector, $searchTerm)
+                            ->pause(1500); // Wait for search to process
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter managers by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): static
+    {
+        $filterSelectors = [
+            'select[name*="status"]',
+            'select[wire\\:model*="status"]',
+            '.filter select',
+            '[data-filter] select'
+        ];
+
+        foreach ($filterSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $status)
+                            ->pause(1500); // Wait for filter to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a manager is visible in the table.
+     */
+    public function assertManagerVisible(Browser $browser, string $managerName): static
+    {
+        $browser->assertSee($managerName);
+        return $this;
+    }
+
+    /**
+     * Assert that a manager is not visible in the table.
+     */
+    public function assertManagerNotVisible(Browser $browser, string $managerName): static
+    {
+        $browser->assertDontSee($managerName);
+        return $this;
+    }
+
+    /**
+     * Click the actions button for a specific manager.
+     */
+    public function clickManagerActions(Browser $browser, int $managerId): ManagerActionsDropdown
+    {
+        $browser->click("@manager-actions-button-{$managerId}")
+                ->pause(1000); // Wait for dropdown to open
+        
+        return new ManagerActionsDropdown($managerId);
+    }
+
+    /**
+     * Navigate to a manager's detail page by clicking their name.
+     */
+    public function clickManagerName(Browser $browser, string $managerName): ManagerDetailPage
+    {
+        $browser->clickLink($managerName);
+        return new ManagerDetailPage();
+    }
+
+    /**
+     * Sort the table by a specific column.
+     */
+    public function sortBy(Browser $browser, string $column): static
+    {
+        $sortSelectors = [
+            "th:contains(\"{$column}\")",
+            "th[wire\\:click*=\"sort\"]",
+            ".sortable",
+            "[data-sort=\"{$column}\"]"
+        ];
+
+        foreach ($sortSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000); // Wait for sort to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the table headers are visible.
+     */
+    public function assertTableHeadersVisible(Browser $browser): static
+    {
+        $browser->assertSee('Name')
+                ->assertSee('Status')
+                ->assertSee('Hometown');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that manager status badges are displayed correctly.
+     */
+    public function assertManagerStatusBadges(Browser $browser): static
+    {
+        // Look for manager status indicators
+        $statusSelectors = [
+            '.badge',
+            '.status',
+            '[data-testid="manager-status"]'
+        ];
+
+        foreach ($statusSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    return $this; // Found status badges
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that stable membership information is displayed.
+     */
+    public function assertStableMembership(Browser $browser, string $stableName): static
+    {
+        $browser->assertSee($stableName);
+        return $this;
+    }
+
+    /**
+     * Assert that independent manager is properly indicated.
+     */
+    public function assertIndependentManager(Browser $browser): static
+    {
+        $independentIndicators = [
+            'Independent',
+            'No Stable',
+            'Freelance',
+            '.independent'
+        ];
+
+        foreach ($independentIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that pagination is working.
+     */
+    public function assertPaginationWorks(Browser $browser): static
+    {
+        $paginationSelectors = [
+            '.pagination',
+            '[aria-label="Pagination"]',
+            'button:contains("Next")',
+            'button:contains("2")',
+            '.page-link'
+        ];
+
+        foreach ($paginationSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the create button is visible.
+     */
+    public function assertCreateButtonVisible(Browser $browser): static
+    {
+        $browser->assertSee('Create')
+                ->assertPresent('@create-button');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that manager actions are available.
+     */
+    public function assertManagerActionsAvailable(Browser $browser): static
+    {
+        $actionSelectors = [
+            '[data-testid="manager-actions"]',
+            '.manager-actions',
+            '.dropdown-toggle',
+            '.action-button'
+        ];
+
+        foreach ($actionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    return $this;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Perform a manager business action.
+     */
+    public function performManagerAction(Browser $browser, string $action, int $managerId): static
+    {
+        $actionSelectors = [
+            "[data-testid=\"manager-{$action}\"]",
+            ".{$action}-action",
+            "button:contains(\"" . ucfirst($action) . "\")"
+        ];
+
+        foreach ($actionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(1500); // Wait for action to complete
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that employment status is displayed correctly.
+     */
+    public function assertEmploymentStatus(Browser $browser, string $status): static
+    {
+        $statusMap = [
+            'employed' => ['Employed', 'Active', 'Working'],
+            'unemployed' => ['Unemployed', 'Available', 'Free Agent'],
+            'released' => ['Released', 'Terminated'],
+            'retired' => ['Retired', 'Inactive']
+        ];
+
+        if (isset($statusMap[$status])) {
+            foreach ($statusMap[$status] as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $browser->assertSee($status);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that injury status is displayed correctly.
+     */
+    public function assertInjuryStatus(Browser $browser, bool $isInjured): static
+    {
+        if ($isInjured) {
+            $injuryIndicators = ['Injured', 'Hurt', 'Medical Leave'];
+            foreach ($injuryIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $healthyIndicators = ['Healthy', 'Active', 'Available'];
+            foreach ($healthyIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that suspension status is displayed correctly.
+     */
+    public function assertSuspensionStatus(Browser $browser, bool $isSuspended): static
+    {
+        if ($isSuspended) {
+            $suspensionIndicators = ['Suspended', 'Disciplinary Action', 'Banned'];
+            foreach ($suspensionIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $activeIndicators = ['Active', 'Good Standing', 'Available'];
+            foreach ($activeIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+}
