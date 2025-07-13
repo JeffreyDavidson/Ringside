@@ -24,11 +24,12 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
-        "calebdw/larastan": "^3.2",
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.14",
+        "larastan/larastan": "^3.0",
         "laravel/breeze": "^2.3",
+        "laravel/dusk": "^8.3",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
@@ -62,10 +63,7 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        },
-        "files": [
-            "bootstrap/helpers.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -92,9 +90,10 @@
         "lint": "pint",
         "test:rector": "rector --dry-run",
         "test:lint": "pint --test",
-        "test:types": "phpstan analyze --memory-limit=2G --ansi",
-        "test:unit": "pest --colors=always --parallel --coverage --exactly=100",
-        "test:type-coverage": "pest --memory-limit=2G --type-coverage --min=100",
+        "test:types": "phpstan analyze --memory-limit=4G --ansi",
+        "test:unit": "php -d memory_limit=4G ./vendor/bin/pest --colors=always --parallel --coverage --exactly=100",
+        "test:browser": "php artisan dusk",
+        "test:type-coverage": "php -d memory_limit=4G ./vendor/bin/pest --type-coverage --min=100",
         "test": [
             "@test:type-coverage",
             "@test:rector",

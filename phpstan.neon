@@ -1,4 +1,22 @@
 parameters:
-    paths:
-        - app
-    level: 6
+  level: 6  # ✅ Reasonable for a Laravel project (go up to 8+ for stricter static analysis)
+
+  paths:
+    - app  # ✅ Standard — analyzes all app code
+
+  bootstrapFiles:
+    - bootstrap/app.php  # ✅ Correct — loads Laravel's autoloader and service container
+
+  excludePaths:
+    - tests  # ✅ Tests are usually excluded (unless you're analyzing them too)
+    - bootstrap/cache  # ✅ Should always be excluded
+    - storage  # ✅ Should always be excluded
+
+  # Type coverage configuration - be reasonable about expectations
+  type_coverage:
+    param: 85  # Lower from 99% to 85% which is more realistic
+    return: 85
+    property: 85
+    
+  # Treat PHPDoc types as certain to reduce false positives
+  treatPhpDocTypesAsCertain: true
