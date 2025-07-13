@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Managers\UnretireAction as ManagersUnretireAction;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Exceptions\Status\CannotBeUnretiredException;
+use App\Models\TagTeams\TagTeam;
+use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction extends BaseTagTeamAction
@@ -16,33 +18,63 @@ class UnretireAction extends BaseTagTeamAction
     use AsAction;
 
     /**
-     * Unretire a tag team.
-     *
-     * @throws CannotBeUnretiredException
+     * Create a new unretire action instance.
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
-    {
-        $this->ensureCanBeUnretired($tagTeam);
-
-        $unretiredDate ??= now();
-
-        $this->tagTeamRepository->unretire($tagTeam, $unretiredDate);
-
-        $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => resolve(WrestlersUnretireAction::class)->handle($wrestler, $unretiredDate));
-
-        $this->tagTeamRepository->employ($tagTeam, $unretiredDate);
+    public function __construct(
+        protected TagTeamRepository $tagTeamRepository,
+        protected WrestlersUnretireAction $wrestlersUnretireAction,
+        protected ManagersUnretireAction $managersUnretireAction
+    ) {
+        parent::__construct($tagTeamRepository);
     }
 
     /**
-     * Ensure tag team can be unretired.
+     * Unretire a retired tag team and return them to active competition.
      *
-     * @throws CannotBeUnretiredException
+     * This handles the complete tag team comeback workflow:
+     * - Validates the tag team can come out of retirement (currently retired)
+     * - Ends the current retirement period with the specified date
+     * - Creates a new employment record starting from the unretirement date
+     * - Restores the tag team to available status for match bookings
+     * - Makes the team available for championship opportunities again
+     * - Preserves all historical retirement and partnership records
+     * - Unretires current wrestlers and managers who were retired with the team
+     *
+     * @param  TagTeam  $tagTeam  The tag team to unretire
+     * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
+     *
+     * @throws CannotBeUnretiredException When tag team cannot be unretired due to business rules
+     *
+     * @example
+     * ```php
+     * // Unretire tag team immediately
+     * $tagTeam = TagTeam::where('name', 'The Hardy Boyz')->first();
+     * UnretireAction::run($tagTeam);
+     *
+     * // Unretire with specific date
+     * UnretireAction::run($tagTeam, Carbon::parse('2024-01-01'));
+     * ```
      */
-    private function ensureCanBeUnretired(TagTeam $tagTeam): void
+    public function handle(TagTeam $tagTeam, ?Carbon $unretiredDate = null): void
     {
-        if (! $tagTeam->isRetired()) {
-            throw CannotBeUnretiredException::notRetired();
-        }
+        $tagTeam->ensureCanBeUnretired();
+
+        $unretiredDate = $this->getEffectiveDate($unretiredDate);
+
+        DB::transaction(function () use ($tagTeam, $unretiredDate): void {
+            // End the current retirement record
+            $this->tagTeamRepository->endRetirement($tagTeam, $unretiredDate);
+
+            // Unretire current wrestlers and managers who were retired with the team
+            $wrestlersToUnretire = $tagTeam->currentWrestlers
+                ->filter(fn ($wrestler) => $wrestler->isRetired());
+            $managersToUnretire = $tagTeam->currentManagers
+                ->filter(fn ($manager) => $manager->isRetired());
+
+            $this->unretireMembers($wrestlersToUnretire, $managersToUnretire, $unretiredDate, $this->wrestlersUnretireAction, $this->managersUnretireAction);
+
+            // Create a new employment record starting from the unretirement date
+            $this->tagTeamRepository->createEmployment($tagTeam, $unretiredDate);
+        });
     }
 }

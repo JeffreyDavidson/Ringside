@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
-use App\Exceptions\CannotBeRetiredException;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Actions\Concerns\UnifiedRetireAction;
+use App\Models\TagTeams\TagTeam;
+use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -16,47 +15,36 @@ class RetireAction extends BaseTagTeamAction
     use AsAction;
 
     /**
-     * Retire a tag team.
+     * Retire a tag team and end their partnership.
      *
-     * @throws CannotBeRetiredException
+     * This handles the complete tag team retirement workflow using the UnifiedRetireAction:
+     * - Validates the tag team can be retired (currently employed/active)
+     * - Ends current wrestler partnerships (wrestlers may continue as singles)
+     * - Ends current manager relationships
+     * - Ends suspension if active
+     * - Ends employment period if currently employed
+     * - Creates retirement record to formally end the tag team partnership
+     * - Makes the tag team permanently unavailable for competition
+     * - Preserves all historical records and championship lineage
+     * - Individual members may continue their careers independently
+     *
+     * @param  TagTeam  $tagTeam  The tag team to retire
+     * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     *
+     * @throws Exception When tag team cannot be retired due to business rules
+     *
+     * @example
+     * ```php
+     * // Retire tag team immediately
+     * $tagTeam = TagTeam::where('name', 'The Undertakers')->first();
+     * RetireAction::run($tagTeam);
+     *
+     * // Retire with specific date
+     * RetireAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void
     {
-        $this->ensureCanBeRetired($tagTeam);
-
-        $retirementDate ??= now();
-
-        if ($tagTeam->isSuspended()) {
-            resolve(ReinstateAction::class)->handle($tagTeam, $retirementDate);
-        }
-
-        $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => resolve(WrestlersRetireAction::class)->handle($wrestler, $retirementDate));
-
-        if ($tagTeam->isCurrentlyEmployed()) {
-            $this->tagTeamRepository->release($tagTeam, $retirementDate);
-        }
-
-        $this->tagTeamRepository->retire($tagTeam, $retirementDate);
-    }
-
-    /**
-     * Ensure a tag team can be retired.
-     *
-     * @throws CannotBeRetiredException
-     */
-    private function ensureCanBeRetired(TagTeam $tagTeam): void
-    {
-        if ($tagTeam->isUnemployed()) {
-            throw CannotBeRetiredException::unemployed();
-        }
-
-        if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment();
-        }
-
-        if ($tagTeam->isRetired()) {
-            throw CannotBeRetiredException::retired();
-        }
+        UnifiedRetireAction::run($tagTeam, $retirementDate);
     }
 }
