@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Events\Wrestlers\WrestlerInjured;
-use App\Exceptions\CannotBeInjuredException;
-use App\Models\Wrestler;
+use App\Exceptions\Status\CannotBeInjuredException;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -15,50 +14,35 @@ class InjureAction extends BaseWrestlerAction
     use AsAction;
 
     /**
-     * Injure a wrestler.
+     * Injure a wrestler and make them unavailable for competition.
      *
-     * @throws CannotBeInjuredException
-     */
-    public function handle(Wrestler $wrestler, ?Carbon $injureDate = null): void
-    {
-        $this->ensureCanBeInjured($wrestler);
-
-        $injureDate ??= now();
-
-        $this->wrestlerRepository->injure($wrestler, $injureDate);
-
-        event(new WrestlerInjured($wrestler, $injureDate));
-    }
-
-    /**
-     * Ensure a wrestler can be injured.
+     * This handles the complete wrestler injury workflow:
+     * - Validates the wrestler can be injured (currently employed)
+     * - Creates an injury record with the specified start date
+     * - Makes the wrestler unavailable for match bookings
+     * - May affect tag team bookability if wrestler is in a team
      *
-     * @throws CannotBeInjuredException
+     * @param  Wrestler  $wrestler  The wrestler to injure
+     * @param  Carbon|null  $injuryDate  The injury start date (defaults to now)
+     *
+     * @throws CannotBeInjuredException When wrestler cannot be injured due to business rules
+     *
+     * @example
+     * ```php
+     * // Injure wrestler immediately
+     * InjureAction::run($wrestler);
+     *
+     * // Injure with specific start date
+     * InjureAction::run($wrestler, Carbon::parse('2024-01-15'));
+     * ```
      */
-    private function ensureCanBeInjured(Wrestler $wrestler): void
+    public function handle(Wrestler $wrestler, ?Carbon $injuryDate = null): void
     {
-        if ($wrestler->isUnemployed()) {
-            throw CannotBeInjuredException::unemployed();
-        }
+        // Validate business rules before proceeding
+        $wrestler->ensureCanBeInjured();
 
-        if ($wrestler->isReleased()) {
-            throw CannotBeInjuredException::released();
-        }
+        $injuryDate = $this->getEffectiveDate($injuryDate);
 
-        if ($wrestler->isRetired()) {
-            throw CannotBeInjuredException::retired();
-        }
-
-        if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeInjuredException::hasFutureEmployment();
-        }
-
-        if ($wrestler->isInjured()) {
-            throw CannotBeInjuredException::injured();
-        }
-
-        if ($wrestler->isSuspended()) {
-            throw CannotBeInjuredException::suspended();
-        }
+        $this->wrestlerRepository->createInjury($wrestler, $injuryDate);
     }
 }
