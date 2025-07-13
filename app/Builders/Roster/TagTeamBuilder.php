@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Builders;
+namespace App\Builders\Roster;
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
