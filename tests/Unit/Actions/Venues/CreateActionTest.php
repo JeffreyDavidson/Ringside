@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Venues\CreateAction;
-use App\Data\VenueData;
+use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
 use App\Repositories\VenueRepository;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
-use App\Data\Shared\VenueData;
+use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
 
 interface VenueRepositoryInterface
