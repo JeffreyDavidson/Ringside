@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Models\Stables\StableMember;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,16 +12,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Provides relationship methods to access wrestlers and tag teams
  * that are or have been part of a stable.
  *
- * This trait uses a polymorphic approach with the StableMember pivot model
- * to manage stable membership through a single table.
+ * This trait uses separate pivot tables (stables_wrestlers, stables_tag_teams)
+ * to manage stable membership with joined_at/left_at timestamps.
  *
  * It includes helpers to retrieve:
  * - All members of each type (wrestlers, tag teams)
  * - Currently active members (those without a `left_at` timestamp)
  * - Previously associated members (those with a `left_at` timestamp)
  *
- * Note: Managers are not direct stable members. They are associated
- * through the wrestlers/tag teams they manage.
+ * Note: Managers are NOT direct stable members. They are associated
+ * with wrestlers/tag teams through hired_at/fired_at relationships.
  *
  * @example
  * ```php
@@ -39,39 +38,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 trait HasMembers
 {
-    /**
-     * Define the many-to-many relationship with a stable member.
-     *
-     * This is a helper method that sets up the basic many-to-many relationship
-     * with the necessary pivot fields and timestamps for tracking membership periods.
-     *
-     * @template TMemberModel of \Illuminate\Database\Eloquent\Model
-     * @template TPivot of \Illuminate\Database\Eloquent\Relations\Pivot
-     *
-     * @param  class-string<TMemberModel>  $related  The related model class
-     * @param  class-string<TPivot>  $pivot  The pivot model class
-     * @param  string  $table  The pivot table name
-     * @return BelongsToMany<TMemberModel, $this, TPivot>
-     *                                                    A relationship instance for accessing members
-     */
-    protected function members(string $related, string $pivot, string $table): BelongsToMany
-    {
-        /** @var BelongsToMany<TMemberModel, $this, TPivot> $relation */
-        $relation = $this->belongsToMany($related, $table)
-            ->withPivot(['joined_at', 'left_at'])
-            ->using($pivot)
-            ->withTimestamps();
-
-        return $relation;
-    }
 
     // ==================== WRESTLER RELATIONSHIPS ====================
 
     /**
      * Get all wrestlers that have ever been part of the stable.
      *
-     * @return BelongsToMany<Wrestler, static, StableMember>
-     *                                                       A relationship instance for accessing all wrestlers
+     * @return BelongsToMany<Wrestler, static>
+     *                                         A relationship instance for accessing all wrestlers
      *
      * @example
      * ```php
@@ -82,10 +56,9 @@ trait HasMembers
      */
     public function wrestlers(): BelongsToMany
     {
-        /** @var BelongsToMany<Wrestler, static, StableMember> $relation */
-        $relation = $this->morphedByMany(Wrestler::class, 'member', 'stables_members')
+        /** @var BelongsToMany<Wrestler, static> $relation */
+        $relation = $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class)
             ->withTimestamps();
 
         return $relation;
@@ -96,8 +69,8 @@ trait HasMembers
      *
      * Returns wrestlers who are active members (no 'left_at' timestamp).
      *
-     * @return BelongsToMany<Wrestler, static, StableMember>
-     *                                                       A relationship instance for accessing current wrestlers
+     * @return BelongsToMany<Wrestler, static>
+     *                                         A relationship instance for accessing current wrestlers
      *
      * @example
      * ```php
@@ -111,10 +84,9 @@ trait HasMembers
      */
     public function currentWrestlers(): BelongsToMany
     {
-        /** @var BelongsToMany<Wrestler, static, StableMember> $relation */
-        $relation = $this->morphedByMany(Wrestler::class, 'member', 'stables_members')
+        /** @var BelongsToMany<Wrestler, static> $relation */
+        $relation = $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class)
             ->withTimestamps()
             ->wherePivotNull('left_at');
 
@@ -126,8 +98,8 @@ trait HasMembers
      *
      * Returns wrestlers who have left the stable (have a 'left_at' timestamp).
      *
-     * @return BelongsToMany<Wrestler, static, StableMember>
-     *                                                       A relationship instance for accessing previous wrestlers
+     * @return BelongsToMany<Wrestler, static>
+     *                                         A relationship instance for accessing previous wrestlers
      *
      * @example
      * ```php
@@ -138,10 +110,9 @@ trait HasMembers
      */
     public function previousWrestlers(): BelongsToMany
     {
-        /** @var BelongsToMany<Wrestler, static, StableMember> $relation */
-        $relation = $this->morphedByMany(Wrestler::class, 'member', 'stables_members')
+        /** @var BelongsToMany<Wrestler, static> $relation */
+        $relation = $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class)
             ->withTimestamps()
             ->wherePivotNotNull('left_at');
 
@@ -153,8 +124,8 @@ trait HasMembers
     /**
      * Get all tag teams that have ever been part of the stable.
      *
-     * @return BelongsToMany<TagTeam, static, StableMember>
-     *                                                      A relationship instance for accessing all tag teams
+     * @return BelongsToMany<TagTeam, static>
+     *                                        A relationship instance for accessing all tag teams
      *
      * @example
      * ```php
@@ -165,10 +136,9 @@ trait HasMembers
      */
     public function tagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, StableMember> $relation */
-        $relation = $this->morphedByMany(TagTeam::class, 'member', 'stables_members')
+        /** @var BelongsToMany<TagTeam, static> $relation */
+        $relation = $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class)
             ->withTimestamps();
 
         return $relation;
@@ -179,8 +149,8 @@ trait HasMembers
      *
      * Returns tag teams who are active members (no 'left_at' timestamp).
      *
-     * @return BelongsToMany<TagTeam, static, StableMember>
-     *                                                      A relationship instance for accessing current tag teams
+     * @return BelongsToMany<TagTeam, static>
+     *                                        A relationship instance for accessing current tag teams
      *
      * @example
      * ```php
@@ -194,10 +164,9 @@ trait HasMembers
      */
     public function currentTagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, StableMember> $relation */
-        $relation = $this->morphedByMany(TagTeam::class, 'member', 'stables_members')
+        /** @var BelongsToMany<TagTeam, static> $relation */
+        $relation = $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class)
             ->withTimestamps()
             ->wherePivotNull('left_at');
 
@@ -209,8 +178,8 @@ trait HasMembers
      *
      * Returns tag teams who have left the stable (have a 'left_at' timestamp).
      *
-     * @return BelongsToMany<TagTeam, static, StableMember>
-     *                                                      A relationship instance for accessing previous tag teams
+     * @return BelongsToMany<TagTeam, static>
+     *                                        A relationship instance for accessing previous tag teams
      *
      * @example
      * ```php
@@ -221,13 +190,13 @@ trait HasMembers
      */
     public function previousTagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, StableMember> $relation */
-        $relation = $this->morphedByMany(TagTeam::class, 'member', 'stables_members')
+        /** @var BelongsToMany<TagTeam, static> $relation */
+        $relation = $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
             ->withPivot(['joined_at', 'left_at'])
-            ->using(StableMember::class)
             ->withTimestamps()
             ->wherePivotNotNull('left_at');
 
         return $relation;
     }
+
 }
