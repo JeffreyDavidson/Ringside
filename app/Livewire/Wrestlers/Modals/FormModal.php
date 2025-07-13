@@ -6,7 +6,7 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Wrestlers\WrestlerForm;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 

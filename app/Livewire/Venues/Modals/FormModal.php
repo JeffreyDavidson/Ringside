@@ -6,7 +6,7 @@ namespace App\Livewire\Venues\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Venues\VenueForm;
-use App\Models\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Support\Str;
 
 /**

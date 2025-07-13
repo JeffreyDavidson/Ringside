@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Managers;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 

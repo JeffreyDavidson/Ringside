@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Data\WrestlerData;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 
 use function Spatie\PestPluginTestTime\testTime;

@@ -5,10 +5,10 @@ declare(strict_types=1);
 use App\Actions\Stables\UpdateAction;
 use App\Actions\Stables\UpdateMembersAction;
 use App\Data\StableData;
-use App\Models\Manager;
-use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\Managers\Manager;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
 

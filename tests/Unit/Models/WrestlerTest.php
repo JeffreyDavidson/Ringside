@@ -11,7 +11,7 @@ use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\TagTeamMember;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;

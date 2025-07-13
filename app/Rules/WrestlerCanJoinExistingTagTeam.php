@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 
 test('bookable wrestlers can be retrieved', function () {
     $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\ReinstateAction;
 use App\Exceptions\CannotBeReinstatedException;
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 

@@ -6,7 +6,7 @@ namespace App\Livewire\Managers\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Managers\ManagerForm;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 
 /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\RetireAction;
 use App\Events\Wrestlers\WrestlerRetired;
 use App\Exceptions\CannotBeRetiredException;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;

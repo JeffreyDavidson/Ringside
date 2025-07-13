@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Users;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\User;
+use App\Models\Users\User;
 
 /**
  * @extends LivewireBaseForm<UserForm, ?User>

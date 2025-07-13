@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\View\Columns;
 
-use App\Models\Manager;
-use App\Models\Referee;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class FirstEmploymentDateColumn extends Column

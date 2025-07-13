@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Venues\DeleteAction;
-use App\Models\Venue;
+use App\Models\Events\Venue;
 use App\Repositories\VenueRepository;
 
 beforeEach(function () {

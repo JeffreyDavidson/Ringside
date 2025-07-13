@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Managers\ReleaseAction;
 use App\Events\Managers\ManagerReleased;
 use App\Exceptions\CannotBeReleasedException;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\InjureAction;
 use App\Exceptions\CannotBeInjuredException;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;

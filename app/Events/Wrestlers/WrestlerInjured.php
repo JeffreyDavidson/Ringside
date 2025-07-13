@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Events\Wrestlers;
 
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use Carbon\Carbon;
 use Illuminate\Foundation\Events\Dispatchable;
 

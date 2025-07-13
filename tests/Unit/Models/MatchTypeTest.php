@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\MatchType;
+use App\Models\Matches\MatchType;
 
 test('a match type has a name', function () {
     $matchType = MatchType::factory()->create(['name' => 'Example Match Type Name']);
