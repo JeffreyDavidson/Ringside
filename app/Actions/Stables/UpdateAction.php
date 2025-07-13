@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Data\StableData;
-use App\Models\Stable;
+use App\Data\Stables\StableData;
+use InvalidArgumentException;
+use App\Models\Stables\Stable;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseStableAction
@@ -14,35 +16,57 @@ class UpdateAction extends BaseStableAction
 
     /**
      * Update a stable.
+     *
+     * This handles the complete stable update workflow:
+     * - Updates stable information (name, description)
+     * - Handles establishment date changes if allowed
+     * - Updates stable membership (wrestlers, tag teams, managers)
+     * - Maintains stable integrity and member relationships
+     *
+     * @param  Stable  $stable  The stable to update
+     * @param  StableData  $stableData  The updated stable information
+     * @return Stable The updated stable instance
+     *
+     * @example
+     * ```php
+     * $stableData = new StableData([
+     *     'name' => 'Updated Stable Name',
+     *     'wrestlers' => [$wrestler1, $wrestler2, $wrestler3],
+     *     'managers' => [$manager1]
+     * ]);
+     * $updatedStable = UpdateAction::run($stable, $stableData);
+     * ```
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {
-        $this->stableRepository->update($stable, $stableData);
+        return DB::transaction(function () use ($stable, $stableData): Stable {
+            $this->stableRepository->update($stable, $stableData);
 
-        if (isset($stableData->start_date) && $this->ensureStartDateCanBeChanged($stable)) {
-            resolve(ActivateAction::class)->handle($stable, $stableData->start_date);
-        }
+            if (isset($stableData->start_date)) {
+                $this->validateEstablishmentDateChange($stable);
+                $this->stableRepository->createEstablishment($stable, $stableData->start_date);
+            }
 
-        resolve(UpdateMembersAction::class)->handle(
-            $stable,
-            $stableData->wrestlers,
-            $stableData->tagTeams,
-            $stableData->managers
-        );
+            $this->stableRepository->updateStableMembers(
+                $stable,
+                $stableData->wrestlers,
+                $stableData->tagTeams,
+                $stableData->managers
+            );
 
-        return $stable;
+            return $stable;
+        });
     }
 
     /**
-     * Ensure a stable's start date can be changed.
+     * Validate that the stable's establishment date can be changed.
+     *
+     * @throws InvalidArgumentException When establishment date change is not allowed
      */
-    private function ensureStartDateCanBeChanged(Stable $stable): bool
+    private function validateEstablishmentDateChange(Stable $stable): void
     {
-        // Add check on start date from request
-        if ($stable->isUnactivated()) {
-            return true;
+        if ($stable->isCurrentlyActive() && ! $stable->hasFutureActivity()) {
+            throw new InvalidArgumentException("Establishment date cannot be changed for stable '{$stable->name}' that is currently active.");
         }
-
-        return $stable->hasFutureActivation();
     }
 }

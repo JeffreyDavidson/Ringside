@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\CannotBeUnretiredException;
-use App\Models\Manager;
+use App\Exceptions\Status\CannotBeUnretiredException;
+use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction extends BaseManagerAction
@@ -14,29 +15,41 @@ class UnretireAction extends BaseManagerAction
     use AsAction;
 
     /**
-     * Unretire a manager.
+     * Unretire a retired manager and return them to active talent management.
      *
-     * @throws CannotBeUnretiredException
+     * This handles the complete manager unretirement workflow:
+     * - Validates the manager can be unretired (currently retired)
+     * - Ends the current retirement period with the specified date
+     * - Creates a new employment record starting from the unretirement date
+     * - Restores the manager to available status for wrestler and tag team assignments
+     * - Preserves all historical retirement and employment records
+     *
+     * @param  Manager  $manager  The manager to unretire
+     * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
+     *
+     * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
+     *
+     * @example
+     * ```php
+     * // Unretire manager immediately
+     * UnretireAction::run($manager);
+     *
+     * // Unretire with specific date
+     * UnretireAction::run($manager, Carbon::parse('2024-01-01'));
+     * ```
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
     {
-        $this->ensureCanBeUnretired($manager);
+        $manager->ensureCanBeUnretired();
 
-        $unretiredDate ??= now();
+        $unretiredDate = $this->getEffectiveDate($unretiredDate);
 
-        $this->managerRepository->unretire($manager, $unretiredDate);
-        $this->managerRepository->employ($manager, $unretiredDate);
-    }
+        DB::transaction(function () use ($manager, $unretiredDate): void {
+            // End the current retirement record
+            $this->managerRepository->endRetirement($manager, $unretiredDate);
 
-    /**
-     * Ensure a manager can be unretired.
-     *
-     * @throws CannotBeUnretiredException
-     */
-    private function ensureCanBeUnretired(Manager $manager): void
-    {
-        if (! $manager->isRetired()) {
-            throw CannotBeUnretiredException::notRetired();
-        }
+            // Create a new employment record starting from the unretirement date
+            $this->managerRepository->createEmployment($manager, $unretiredDate);
+        });
     }
 }

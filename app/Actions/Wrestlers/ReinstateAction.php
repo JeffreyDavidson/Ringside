@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Events\Wrestlers\WrestlerReinstated;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Models\Wrestler;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -15,50 +15,73 @@ class ReinstateAction extends BaseWrestlerAction
     use AsAction;
 
     /**
-     * Reinstate a wrestler.
+     * Reinstate a wrestler and make them available for employment.
      *
-     * @throws CannotBeReinstatedException
+     * This handles the complete wrestler reinstatement workflow:
+     * - Validates the wrestler can be reinstated (not currently employed)
+     * - Ends any current suspension or injury if active
+     * - Makes the wrestler available for new employment opportunities
+     *
+     * @param  Wrestler  $wrestler  The wrestler to reinstate
+     * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
+     *
+     * @throws CannotBeReinstatedException When wrestler cannot be reinstated due to business rules
+     *
+     * @example
+     * ```php
+     * // Reinstate wrestler immediately
+     * ReinstateAction::run($wrestler);
+     *
+     * // Reinstate with specific date
+     * ReinstateAction::run($wrestler, Carbon::parse('2024-01-15'));
+     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
-        $this->ensureCanBeReinstated($wrestler);
+        // Validate business rules before proceeding
+        $this->validateCanBeReinstated($wrestler);
 
-        $reinstatementDate ??= now();
+        $reinstatementDate = $this->getEffectiveDate($reinstatementDate);
 
-        $this->wrestlerRepository->reinstate($wrestler, $reinstatementDate);
+        // End current suspension if active
+        if ($wrestler->isSuspended()) {
+            $this->wrestlerRepository->endSuspension($wrestler, $reinstatementDate);
+        }
 
-        event(new WrestlerReinstated($wrestler, $reinstatementDate));
+        // End current injury if active
+        if ($wrestler->isInjured()) {
+            $this->wrestlerRepository->endInjury($wrestler, $reinstatementDate);
+        }
     }
 
     /**
-     * Ensure a wrestler can be reinstated.
+     * Validate that a wrestler can be reinstated.
+     *
+     * This method allows both suspended and injured wrestlers to be reinstated,
+     * but prevents reinstatement of unemployed, released, or retired wrestlers.
      *
      * @throws CannotBeReinstatedException
      */
-    private function ensureCanBeReinstated(Wrestler $wrestler): void
+    private function validateCanBeReinstated(Wrestler $wrestler): void
     {
-        if ($wrestler->isUnemployed()) {
-            throw CannotBeReinstatedException::unemployed();
+        if ($wrestler->hasStatus(EmploymentStatus::Unemployed)) {
+            throw new CannotBeReinstatedException();
         }
 
         if ($wrestler->isReleased()) {
-            throw CannotBeReinstatedException::released();
+            throw new CannotBeReinstatedException();
         }
 
         if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment();
-        }
-
-        if ($wrestler->isInjured()) {
-            throw CannotBeReinstatedException::injured();
+            throw new CannotBeReinstatedException();
         }
 
         if ($wrestler->isRetired()) {
-            throw CannotBeReinstatedException::retired();
+            throw new CannotBeReinstatedException();
         }
 
         if ($wrestler->isBookable()) {
-            throw CannotBeReinstatedException::bookable();
+            throw new CannotBeReinstatedException();
         }
     }
 }
