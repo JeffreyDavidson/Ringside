@@ -4,66 +4,79 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Users\User;
+use Tests\Unit\Policies\EventPolicyTest;
 
+/**
+ * Simplified EventPolicy using before hook pattern.
+ *
+ * All repetitive administrator checks are handled by the before hook.
+ * Business validation is handled in Actions using custom exceptions.
+ *
+ * @see EventPolicyTest
+ */
 class EventPolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can create an event.
+     * Administrator bypass for all actions.
+     *
+     * This before hook allows administrators to perform any action without
+     * further permission checks, dramatically simplifying policy logic.
      */
-    public function create(User $user): bool
+    public function before(User $user, string $ability): ?bool
     {
-        return $user->isAdministrator();
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return null; // Continue to individual method checks
     }
 
     /**
-     * Determine whether the user can update an event.
-     */
-    public function update(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can delete an event.
-     */
-    public function delete(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can restore a deleted event.
-     */
-    public function restore(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can view a list of events.
+     * Only administrators can view entity lists (handled by before hook).
      */
     public function viewList(User $user): bool
     {
-        return $user->isAdministrator();
+        return false; // Will be bypassed by before hook for administrators
     }
 
     /**
-     * Determine whether the user can view an event.
+     * Only administrators can view individual entities (handled by before hook).
      */
     public function view(User $user): bool
     {
-        return $user->isAdministrator();
+        return false; // Will be bypassed by before hook for administrators
     }
 
     /**
-     * Determine whether the user can add matches to an event.
+     * Only administrators can create entities (handled by before hook).
      */
-    public function addMatches(User $user): bool
+    public function create(User $user): bool
     {
-        return $user->isAdministrator();
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can update entities (handled by before hook).
+     */
+    public function update(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can delete entities (handled by before hook).
+     */
+    public function delete(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can restore entities (handled by before hook).
+     */
+    public function restore(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
     }
 }

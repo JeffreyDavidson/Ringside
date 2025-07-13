@@ -4,47 +4,47 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Actions\Stables\ActivateAction;
-use App\Actions\Stables\DeactivateAction;
+use App\Actions\Stables\DebutAction;
+use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
-use App\Builders\StableBuilder;
-use App\Enums\ActivationStatus;
-use App\Exceptions\CannotBeActivatedException;
-use App\Exceptions\CannotBeDeactivatedException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Builders\Roster\StableBuilder;
+use App\Exceptions\Status\CannotBeDisbandedException;
+use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\Stable;
-use App\View\Columns\FirstActivationDateColumn;
-use App\View\Filters\FirstActivationFilter;
+use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
+use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Models\Stables\Stable;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class StablesTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'stables';
 
     protected string $routeBasePath = 'stables';
 
     protected string $resourceName = 'stables';
 
+    /** @return StableBuilder<Stable> */
     public function builder(): StableBuilder
     {
         return Stable::query()
-            ->with('currentActivation')
+            ->with('currentActivityPeriod')
             ->oldest('name');
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Stable::class);
+    }
 
     /**
      * Undocumented function
@@ -56,8 +56,10 @@ class StablesTable extends BaseTableWithActions
         return [
             Column::make(__('stables.name'), 'name')
                 ->searchable(),
-            $this->getDefaultStatusColumn(),
-            FirstActivationDateColumn::make(__('activations.started_at')),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
+            FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
     }
 
@@ -68,12 +70,26 @@ class StablesTable extends BaseTableWithActions
      */
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = collect(ActivationStatus::cases())->pluck('name', 'value')->toArray();
-
         return [
-            $this->getDefaultStatusFilter($statuses),
-            FirstActivationFilter::make('Activation Date')->setFields('activations', 'stables_activations.started_at', 'stables_activations.ended_at'),
+            SelectFilter::make('Status', 'status')
+                ->options([
+                    '' => 'All',
+                    'unestablished' => 'Unestablished',
+                    'established' => 'Established',
+                    'disbanded' => 'Disbanded',
+                    'with_future_establishment' => 'Pending Establishment',
+                ])
+                ->filter(function (Builder $builder, string $value): void {
+                    /** @var StableBuilder $builder */
+                    match ($value) {
+                        'unestablished' => $builder->unestablished(),
+                        'established' => $builder->established(),
+                        'disbanded' => $builder->disbanded(),
+                        'with_future_establishment' => $builder->withFutureEstablishment(),
+                        default => null,
+                    };
+                }),
+            FirstActivityPeriodFilter::make('Activation Date')->setFields('activations', 'stables_activations.started_at', 'stables_activations.ended_at'),
         ];
     }
 
@@ -83,31 +99,15 @@ class StablesTable extends BaseTableWithActions
     }
 
     /**
-     * Activate a stable.
+     * Disband a stable.
      */
-    public function activate(Stable $stable): RedirectResponse
+    public function disband(Stable $stable): RedirectResponse
     {
-        Gate::authorize('activate', $stable);
+        Gate::authorize('disband', $stable);
 
         try {
-            resolve(ActivateAction::class)->handle($stable);
-        } catch (CannotBeActivatedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
-    }
-
-    /**
-     * Deactivate a stable.
-     */
-    public function deactivate(Stable $stable): RedirectResponse
-    {
-        Gate::authorize('deactivate', $stable);
-
-        try {
-            resolve(DeactivateAction::class)->handle($stable);
-        } catch (CannotBeDeactivatedException $e) {
+            resolve(DisbandAction::class)->handle($stable);
+        } catch (CannotBeDisbandedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -162,5 +162,25 @@ class StablesTable extends BaseTableWithActions
         }
 
         return back();
+    }
+
+    /**
+     * Handle stable actions through a unified interface.
+     */
+    public function handleStableAction(string $action, int $stableId): void
+    {
+        $stable = Stable::findOrFail($stableId);
+
+        try {
+            match ($action) {
+                'debut' => resolve(DebutAction::class)->handle($stable),
+                'disband' => resolve(DisbandAction::class)->handle($stable),
+                'retire' => resolve(RetireAction::class)->handle($stable),
+                'unretire' => resolve(UnretireAction::class)->handle($stable),
+                default => null,
+            };
+        } catch (Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
     }
 }

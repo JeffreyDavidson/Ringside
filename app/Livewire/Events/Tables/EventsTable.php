@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\Events\Tables;
 
 use App\Actions\Events\RestoreAction;
-use App\Builders\EventBuilder;
-use App\Enums\EventStatus;
+use App\Builders\Events\EventBuilder;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\Event;
-use App\Models\Venue;
+use App\Models\Events\Event;
+use App\Models\Shared\Venue;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -26,8 +23,6 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class EventsTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'events';
 
     protected string $routeBasePath = 'events';
@@ -46,6 +41,8 @@ class EventsTable extends BaseTableWithActions
 
     public function configure(): void
     {
+        Gate::authorize('viewList', Event::class);
+
         $this->addAdditionalSelects([
             'events.venue_id',
         ]);
@@ -59,7 +56,9 @@ class EventsTable extends BaseTableWithActions
         return [
             Column::make(__('events.name'), 'name')
                 ->searchable(),
-            $this->getDefaultStatusColumn(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
             DateColumn::make(__('events.date'), 'date')
                 ->inputFormat('Y-m-d H:i:s')
                 ->outputFormat('Y-m-d')
@@ -77,13 +76,34 @@ class EventsTable extends BaseTableWithActions
     public function filters(): array
     {
         /** @var array<string, string> $statuses */
-        $statuses = collect(EventStatus::cases())->pluck('name', 'value')->toArray();
+        $statuses = [
+            'scheduled' => 'Scheduled',
+            'unscheduled' => 'Unscheduled',
+            'past' => 'Past',
+            'future' => 'Future',
+        ];
 
         /** @var array<int, Venue> $venues */
         $venues = Venue::query()->orderBy('name')->pluck('name', 'id')->toArray();
 
         return [
-            $this->getDefaultStatusFilter($statuses),
+            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+                ->setFilterPillTitle(__('core.status'))
+                ->options([
+                    '' => __('core.all'),
+                    'schedule' => 'Scheduled',
+                    'past' => 'Past',
+                    'unscheduled' => 'Unscheduled',
+                ])
+                ->filter(function ($builder, string $value) {
+                    /** @var EventBuilder<Event> $builder */
+                    match ($value) {
+                        'scheduled' => $builder->scheduled(),
+                        'past' => $builder->past(),
+                        'unscheduled' => $builder->unscheduled(),
+                        default => null,
+                    };
+                }),
             DateRangeFilter::make('Event Dates')
                 ->config([
                     'allowInput' => true,   // Allow manual input of dates

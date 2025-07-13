@@ -4,27 +4,70 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Data\ManagerData;
-use App\Models\Manager;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Data\Managers\ManagerData;
+use App\Models\Managers\Manager;
+use App\Models\Managers\ManagerEmployment;
+use App\Models\Managers\ManagerInjury;
+use App\Models\Managers\ManagerRetirement;
+use App\Models\Managers\ManagerSuspension;
+use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamManager;
+use App\Models\Wrestlers\Wrestler;
+use App\Repositories\Concerns\ManagesEmployment;
+use App\Repositories\Concerns\ManagesInjury;
+use App\Repositories\Concerns\ManagesMembers;
+use App\Repositories\Concerns\ManagesRetirement;
+use App\Repositories\Concerns\ManagesSuspension;
+use App\Repositories\Contracts\ManagerRepositoryInterface;
+use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
+use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
+use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
+use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
+use App\Repositories\Support\BaseRepository;
 use Illuminate\Support\Carbon;
+use Tests\Unit\Repositories\ManagerRepositoryTest;
 
-class ManagerRepository
+/**
+ * Repository for Manager model business operations and data persistence.
+ *
+ * Handles all manager related database operations including CRUD operations,
+ * employment/retirement/suspension/injury management, and wrestler/tag team relationships.
+ *
+ * @see ManagerRepositoryTest
+ */
+class ManagerRepository extends BaseRepository implements ManagerRepositoryInterface, ManagesEmploymentContract, ManagesInjuryContract, ManagesRetirementContract, ManagesSuspensionContract
 {
+    /** @use ManagesEmployment<ManagerEmployment, Manager> */
+    use ManagesEmployment;
+
+    /** @use ManagesInjury<ManagerInjury, Manager> */
+    use ManagesInjury;
+
+    /** @use ManagesMembers<TagTeamManager, Manager> */
+    use ManagesMembers;
+
+    /** @use ManagesRetirement<ManagerRetirement, Manager> */
+    use ManagesRetirement;
+
+    /** @use ManagesSuspension<ManagerSuspension, Manager> */
+    use ManagesSuspension;
+
     /**
-     * Create a new manager with the given data.
+     * Create a new manager.
      */
     public function create(ManagerData $managerData): Manager
     {
-        return Manager::query()->create([
+        /** @var Manager $manager */
+        $manager = Manager::query()->create([
             'first_name' => $managerData->first_name,
             'last_name' => $managerData->last_name,
         ]);
+
+        return $manager;
     }
 
     /**
-     * Update a given manager with the given data.
+     * Update a manager.
      */
     public function update(Manager $manager, ManagerData $managerData): Manager
     {
@@ -37,125 +80,36 @@ class ManagerRepository
     }
 
     /**
-     * Delete a given manager.
+     * Remove manager from all current tag teams.
      */
-    public function delete(Manager $manager): void
+    public function removeFromCurrentTagTeams(Manager $manager, Carbon $removalDate): void
     {
-        $manager->delete();
+        $manager->currentTagTeams()->get()->each(function (TagTeam $tagTeam) use ($manager, $removalDate): void {
+            // Use specific manager column names (fired_at instead of left_at)
+            $manager->currentTagTeams()
+                ->wherePivotNull('fired_at')
+                ->updateExistingPivot($tagTeam->getKey(), ['fired_at' => $removalDate->toDateTimeString()]);
+        });
     }
 
     /**
-     * Restore a given manager.
+     * Remove manager from all current wrestlers.
+     */
+    public function removeFromCurrentWrestlers(Manager $manager, Carbon $removalDate): void
+    {
+        $manager->currentWrestlers->each(function (Wrestler $wrestler) use ($manager, $removalDate): void {
+            // Use specific manager column names (fired_at instead of left_at)
+            $manager->currentWrestlers()
+                ->wherePivotNull('fired_at')
+                ->updateExistingPivot($wrestler->getKey(), ['fired_at' => $removalDate->toDateTimeString()]);
+        });
+    }
+
+    /**
+     * Restore a soft-deleted manager.
      */
     public function restore(Manager $manager): void
     {
         $manager->restore();
-    }
-
-    /**
-     * Employ a given manager on a given date.
-     */
-    public function employ(Manager $manager, Carbon $employmentDate): Manager
-    {
-        $manager->employments()->updateOrCreate(
-            ['ended_at' => null],
-            ['started_at' => $employmentDate->toDateTimeString()]
-        );
-
-        return $manager;
-    }
-
-    /**
-     * Release a given manager on a given date.
-     */
-    public function release(Manager $manager, Carbon $releaseDate): Manager
-    {
-        $manager->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Injure a given manager on a given date.
-     */
-    public function injure(Manager $manager, Carbon $injureDate): Manager
-    {
-        $manager->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Clear the current injury of a given manager on a given date.
-     */
-    public function clearInjury(Manager $manager, Carbon $recoveryDate): Manager
-    {
-        $manager->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Retire a given manager on a given date.
-     */
-    public function retire(Manager $manager, Carbon $retirementDate): Manager
-    {
-        $manager->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Unretire a given manager on a given date.
-     */
-    public function unretire(Manager $manager, Carbon $unretireDate): Manager
-    {
-        $manager->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Suspend a given manager on a given date.
-     */
-    public function suspend(Manager $manager, Carbon $suspensionDate): Manager
-    {
-        $manager->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Reinstate a given manager on a given date.
-     */
-    public function reinstate(Manager $manager, Carbon $reinstateDate): Manager
-    {
-        $manager->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
-
-        return $manager;
-    }
-
-    /**
-     * Disassociate a manager from its current tag teams.
-     */
-    public function removeFromCurrentTagTeams(Manager $manager): void
-    {
-        $manager->currentTagTeams->each(function (TagTeam $tagTeam) use ($manager): void {
-            $manager->currentTagTeams()->updateExistingPivot($tagTeam->id, [
-                'left_at' => now()->toDateTimeString(),
-            ]);
-        });
-    }
-
-    /**
-     * Disassociate a manager from its current wrestlers.
-     */
-    public function removeFromCurrentWrestlers(Manager $manager): void
-    {
-        $manager->currentWrestlers->each(function (Wrestler $wrestler) use ($manager): void {
-            $manager->currentWrestlers()->updateExistingPivot($wrestler->id, [
-                'left_at' => now()->toDateTimeString(),
-            ]);
-        });
     }
 }

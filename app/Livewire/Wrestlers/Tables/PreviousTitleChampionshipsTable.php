@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
-use App\Models\TitleChampionship;
-use App\Models\Wrestler;
+use App\Models\Titles\TitleChampionship;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -17,7 +17,7 @@ class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTabl
      */
     public ?int $wrestlerId;
 
-    protected string $databaseTableName = 'tittle_championships';
+    public string $databaseTableName = 'titles_championships';
 
     protected string $resourceName = 'title championships';
 
@@ -41,11 +41,12 @@ class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTabl
 
         return TitleChampionship::query()
             ->whereHasMorph(
-                'previousChampion',
+                'champion',
                 [Wrestler::class],
                 function (Builder $query): void {
                     $query->whereIn('id', [$this->wrestlerId]);
                 }
-            );
+            )
+            ->whereNotNull('lost_at');
     }
 }

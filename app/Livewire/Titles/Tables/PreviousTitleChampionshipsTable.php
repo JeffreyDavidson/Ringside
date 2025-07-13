@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Titles\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\TitleChampionship;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
@@ -24,7 +26,10 @@ class PreviousTitleChampionshipsTable extends DataTableComponent
      */
     public ?int $titleId;
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Title::class);
+    }
 
     /**
      * @return Builder<TitleChampionship>

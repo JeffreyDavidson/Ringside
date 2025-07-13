@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\TagTeamManager;
+use App\Models\TagTeams\TagTeamManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -36,7 +36,7 @@ class PreviousTagTeamsTable extends DataTableComponent
 
         return TagTeamManager::query()
             ->where('manager_id', $this->managerId)
-            ->whereNotNull('left_at')
+            ->whereNotNull('fired_at')
             ->orderByDesc('hired_at');
     }
 
@@ -58,7 +58,7 @@ class PreviousTagTeamsTable extends DataTableComponent
             Column::make(__('tag-teams.name'), 'tagTeam.name'),
             DateColumn::make(__('managers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
-            DateColumn::make(__('managers.date_fired'), 'left_at')
+            DateColumn::make(__('managers.date_fired'), 'fired_at')
                 ->outputFormat('Y-m-d'),
         ];
     }

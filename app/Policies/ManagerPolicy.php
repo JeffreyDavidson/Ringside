@@ -4,127 +4,151 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Manager;
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Users\User;
+use Tests\Unit\Policies\ManagerPolicyTest;
 
+/**
+ * Simplified ManagerPolicy using before hook pattern.
+ *
+ * All repetitive administrator checks are handled by the before hook.
+ * Business validation is handled in Actions using custom exceptions.
+ *
+ * @see ManagerPolicyTest
+ */
 class ManagerPolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can create managers.
+     * Administrator bypass for all actions.
+     *
+     * This before hook allows administrators to perform any action without
+     * further permission checks, dramatically simplifying policy logic.
      */
-    public function create(User $user): bool
+    public function before(User $user, string $ability): ?bool
     {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can update a manager.
-     */
-    public function update(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can delete a manager.
-     */
-    public function delete(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can restore a manager.
-     */
-    public function restore(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can retire a manager.
-     */
-    public function retire(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can unretire a manager.
-     */
-    public function unretire(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can suspend a manager.
-     */
-    public function suspend(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can reinstate a manager.
-     */
-    public function reinstate(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can injure a manager.
-     */
-    public function injure(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can recover a manager.
-     */
-    public function clearFromInjury(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can employ a manager.
-     */
-    public function employ(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can release a manager.
-     */
-    public function release(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can view a list of managers.
-     */
-    public function viewList(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can view a profile for a manager.
-     */
-    public function view(User $user, Manager $manager): bool
-    {
-        if ($manager->user !== null && $manager->user->is($user)) {
+        if ($user->isAdministrator()) {
             return true;
         }
 
-        return $user->isAdministrator();
+        return null; // Continue to individual method checks
+    }
+
+    /**
+     * Only administrators can view entity lists (handled by before hook).
+     */
+    public function viewList(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can view individual entities (handled by before hook).
+     */
+    public function view(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can create entities (handled by before hook).
+     */
+    public function create(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can update entities (handled by before hook).
+     */
+    public function update(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can delete entities (handled by before hook).
+     */
+    public function delete(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can restore entities (handled by before hook).
+     */
+    public function restore(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can employ managers (handled by before hook).
+     */
+    public function employ(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can release managers (handled by before hook).
+     */
+    public function release(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can retire managers (handled by before hook).
+     */
+    public function retire(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can unretire managers (handled by before hook).
+     */
+    public function unretire(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can suspend managers (handled by before hook).
+     */
+    public function suspend(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can reinstate managers (handled by before hook).
+     */
+    public function reinstate(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can injure managers (handled by before hook).
+     */
+    public function injure(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can clear managers from injury (handled by before hook).
+     */
+    public function clearFromInjury(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can heal managers (alias for clearFromInjury, handled by before hook).
+     */
+    public function heal(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
     }
 }
