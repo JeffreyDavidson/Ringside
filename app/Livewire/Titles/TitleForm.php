@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Titles;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use App\Rules\ActivationStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;

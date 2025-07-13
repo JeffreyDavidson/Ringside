@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 

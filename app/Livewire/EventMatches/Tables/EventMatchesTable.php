@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\EventMatches\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\EventMatch;
-use App\Models\EventMatchCompetitor;
-use App\Models\Referee;
-use App\Models\Title;
+use App\Models\Matches\EventMatch;
+use App\Models\Matches\EventMatchCompetitor;
+use App\Models\Referees\Referee;
+use App\Models\Titles\Title;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;

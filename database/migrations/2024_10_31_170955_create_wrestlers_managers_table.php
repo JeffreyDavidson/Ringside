@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignId('wrestler_id')->constrained();
             $table->foreignId('manager_id')->constrained();
             $table->dateTime('hired_at');
-            $table->dateTime('left_at')->nullable();
+            $table->dateTime('fired_at')->nullable();
             $table->timestamps();
         });
     }

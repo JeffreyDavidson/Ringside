@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\UpdateAction;
 use App\Data\TitleData;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 
 beforeEach(function () {

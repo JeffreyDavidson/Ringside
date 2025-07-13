@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
-use App\Models\Stable;
-use App\Models\Title;
+use App\Models\Stables\Stable;
+use App\Models\Titles\Title;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;

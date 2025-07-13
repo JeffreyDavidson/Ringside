@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeamData;
-use App\Models\TagTeam;
-use App\Models\TagTeamEmployment;
+use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamEmployment;
 use App\Repositories\TagTeamRepository;
 
 beforeEach(function () {

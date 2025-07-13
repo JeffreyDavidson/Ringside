@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Database\Seeder;
 
 class TitlesTableSeeder extends Seeder

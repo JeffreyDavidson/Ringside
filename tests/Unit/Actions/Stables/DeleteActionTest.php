@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\DeleteAction;
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use App\Repositories\StableRepository;
 
 beforeEach(function () {

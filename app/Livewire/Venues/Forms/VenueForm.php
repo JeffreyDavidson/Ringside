@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Venues\Forms;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 

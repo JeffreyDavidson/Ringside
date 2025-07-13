@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\MatchType;
+use App\Models\Matches\MatchType;
 use Livewire\Attributes\Computed;
 
 trait PresentsMatchTypesList

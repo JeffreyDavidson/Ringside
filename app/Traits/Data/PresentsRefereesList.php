@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Livewire\Attributes\Computed;
 
 trait PresentsRefereesList

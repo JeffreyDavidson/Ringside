@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use Livewire\Attributes\Computed;
 
 trait PresentsWrestlersList

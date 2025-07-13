@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Stables;
 
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;

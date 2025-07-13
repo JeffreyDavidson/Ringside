@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\EmploymentStatus;
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 
 test('a tag team has a name', function () {
     $tagTeam = TagTeam::factory()->create(['name' => 'Example Tag Team Name']);

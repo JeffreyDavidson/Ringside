@@ -6,7 +6,7 @@ namespace App\Livewire\Venues\Tables;
 
 use App\Actions\Venues\RestoreAction;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;

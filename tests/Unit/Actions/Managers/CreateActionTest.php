@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\CreateAction;
 use App\Data\ManagerData;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 
 use function Spatie\PestPluginTestTime\testTime;

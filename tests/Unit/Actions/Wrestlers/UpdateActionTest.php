@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\UpdateAction;
 use App\Data\WrestlerData;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 
 beforeEach(function () {

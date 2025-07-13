@@ -6,7 +6,7 @@ use App\Enums\ActivationStatus;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 test('a stable has a name', function () {

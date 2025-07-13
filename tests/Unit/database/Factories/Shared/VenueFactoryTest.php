@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories;
 
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 
 /**
  * Unit tests for VenueFactory data generation and state management.

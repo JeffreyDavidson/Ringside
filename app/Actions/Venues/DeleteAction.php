@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction extends BaseVenueAction

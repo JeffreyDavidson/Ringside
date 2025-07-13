@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\MatchDecision;
+use App\Models\Matches\MatchDecision;
 
 test('a match decision has a name', function () {
     $matchDecision = MatchDecision::factory()->create(['name' => 'Example Match Decision Name']);

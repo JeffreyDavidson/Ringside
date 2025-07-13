@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 
 test('bookable tag teams can be retrieved', function () {
     $futureEmployedTagTeam = TagTeam::factory()->withFutureEmployment()->create();

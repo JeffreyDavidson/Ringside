@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

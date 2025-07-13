@@ -6,8 +6,8 @@ namespace App\Livewire\Events\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Events\EventForm;
-use App\Models\Event;
-use App\Models\Venue;
+use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Traits\Data\PresentsVenuesList;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;

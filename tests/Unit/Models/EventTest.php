@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Models\Event;
-use App\Models\Venue;
+use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use Illuminate\Support\Carbon;
 
 test('an event has a name', function () {

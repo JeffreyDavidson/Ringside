@@ -6,10 +6,10 @@ namespace App\Livewire\EventMatches\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\EventMatches\EventMatchForm;
-use App\Models\EventMatch;
-use App\Models\MatchType;
-use App\Models\Referee;
-use App\Models\Title;
+use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchType;
+use App\Models\Referees\Referee;
+use App\Models\Titles\Title;
 use App\Traits\Data\PresentsMatchTypesList;
 use App\Traits\Data\PresentsRefereesList;
 use App\Traits\Data\PresentsTagTeamsList;

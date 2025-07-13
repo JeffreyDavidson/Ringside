@@ -7,7 +7,7 @@ use App\Enums\EmploymentStatus;
 use App\Models\Concerns\Manageables;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\CanBeAStableMember;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

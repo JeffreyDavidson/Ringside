@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\MatchDecision;
+use App\Models\Matches\MatchDecision;
 use Illuminate\Database\Seeder;
 
 class MatchDecisionsTableSeeder extends Seeder

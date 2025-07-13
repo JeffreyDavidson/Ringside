@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\RestoreAction;
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use App\Repositories\TagTeamRepository;
 
 beforeEach(function () {

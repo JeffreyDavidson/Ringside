@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\EventMatches;
 
-use App\Models\EventMatch;
-use App\Models\Wrestler;
+use App\Models\Matches\EventMatch;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 

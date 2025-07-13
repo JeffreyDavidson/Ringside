@@ -14,8 +14,11 @@ use Illuminate\Support\Carbon;
  * Polymorphic pivot model for stable memberships.
  *
  * This model handles the many-to-many polymorphic relationship between
- * stables and their members (wrestlers, tag teams, managers). It tracks
+ * stables and their members (wrestlers and tag teams only). It tracks
  * when members join and leave stables through timestamp fields.
+ *
+ * Note: Managers are NOT directly associated with stables. They are
+ * associated with wrestlers and tag teams who may be in stables.
  *
  * @property int $id
  * @property int $stable_id
