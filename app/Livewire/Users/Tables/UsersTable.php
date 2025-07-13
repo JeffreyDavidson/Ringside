@@ -4,25 +4,22 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Tables;
 
-use App\Builders\UserBuilder;
-use App\Enums\Role;
+use App\Builders\Users\UserBuilder;
+use App\Enums\Users\Role;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class UsersTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'users';
 
     protected string $routeBasePath = 'users';
 
     protected string $resourceName = 'users';
 
+    /** @return UserBuilder<User> */
     public function builder(): UserBuilder
     {
         return User::query()
@@ -45,11 +42,13 @@ class UsersTable extends BaseTableWithActions
                 ->searchable(),
             Column::make(__('users.role'), 'role')
                 ->format(fn (Role $value) => $value->name),
-            $this->getDefaultStatusColumn(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn (User $row, Column $column): string => $row->getFormattedPhoneNumber()),
+                ->label(fn (User $row, Column $column): string => $row->formattedPhoneNumber),
         ];
     }
 }

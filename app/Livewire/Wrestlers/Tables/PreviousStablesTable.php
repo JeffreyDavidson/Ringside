@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
-use App\Models\StableWrestler;
+use App\Models\Stables\StableMember;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -16,10 +16,10 @@ class PreviousStablesTable extends BasePreviousStablesTable
      */
     public ?int $wrestlerId;
 
-    protected string $databaseTableName = 'stables_wrestlers';
+    public string $databaseTableName = 'stables_members';
 
     /**
-     * @return Builder<StableWrestler>
+     * @return Builder<StableMember>
      */
     public function builder(): Builder
     {
@@ -27,8 +27,9 @@ class PreviousStablesTable extends BasePreviousStablesTable
             throw new Exception("You didn't specify a wrestler");
         }
 
-        return StableWrestler::query()
-            ->where('wrestler_id', $this->wrestlerId)
+        return StableMember::query()
+            ->where('member_id', $this->wrestlerId)
+            ->where('member_type', 'wrestler')
             ->whereNotNull('left_at')
             ->orderByDesc('joined_at');
     }
@@ -36,7 +37,7 @@ class PreviousStablesTable extends BasePreviousStablesTable
     public function configure(): void
     {
         $this->addAdditionalSelects([
-            'stables_wrestlers.stable_id as stable_id',
+            'stables_members.stable_id as stable_id',
         ]);
     }
 }

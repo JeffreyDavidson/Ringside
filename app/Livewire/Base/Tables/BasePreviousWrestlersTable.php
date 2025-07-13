@@ -27,7 +27,7 @@ abstract class BasePreviousWrestlersTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('wrestlers.name'), 'wrestler.name'),
+            Column::make(__('wrestlers.name'), 'member.name'),
             DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('tag-teams.date_left'), 'left_at')

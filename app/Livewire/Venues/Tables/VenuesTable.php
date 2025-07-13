@@ -6,7 +6,7 @@ namespace App\Livewire\Venues\Tables;
 
 use App\Actions\Venues\RestoreAction;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Models\Venue;
+use App\Models\Shared\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -29,7 +29,10 @@ class VenuesTable extends BaseTableWithActions
             ->orderBy('name');
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Venue::class);
+    }
 
     /**
      * Undocumented function

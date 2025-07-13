@@ -4,19 +4,27 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
-use App\Models\StableTagTeam;
+use App\Livewire\Concerns\ShowTableTrait;
+use App\Models\Stables\StableMember;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
+use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
-class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
+class PreviousTagTeamsTable extends DataTableComponent
 {
-    protected string $databaseTableName = 'stables_tag_teams';
+    use ShowTableTrait;
+
+    protected string $resourceName = 'tag teams';
+
+    protected string $databaseTableName = 'stables_members';
 
     public ?int $stableId;
 
     /**
-     * @return Builder<StableTagTeam>
+     * @return Builder<StableMember>
      */
     public function builder(): Builder
     {
@@ -24,17 +32,33 @@ class PreviousTagTeamsTable extends BasePreviousTagTeamsTable
             throw new Exception("You didn't specify a stable");
         }
 
-        return StableTagTeam::query()
-            ->with(['tagTeam'])
-            ->where('stable_id', $this->stableId)
-            ->whereNotNull('left_at')
-            ->orderByDesc('joined_at');
+        return StableMember::query()
+            ->with(['member'])
+            ->where('stables_members.stable_id', $this->stableId)
+            ->where('stables_members.member_type', 'tagTeam')
+            ->whereNotNull('stables_members.left_at')
+            ->orderByDesc('stables_members.joined_at');
+    }
+
+    /**
+     * @return array<int, Column>
+     */
+    public function columns(): array
+    {
+        return [
+            LinkColumn::make(__('tag-teams.name'))
+                ->title(fn (StableMember $row) => $row->member?->name ?? 'Unknown')
+                ->location(fn (StableMember $row) => $row->member ? route('tag-teams.show', $row->member) : '#'),
+            DateColumn::make(__('stables.date_joined'), 'joined_at')
+                ->outputFormat('Y-m-d'),
+            DateColumn::make(__('stables.date_left'), 'left_at')
+                ->outputFormat('Y-m-d'),
+        ];
     }
 
     public function configure(): void
     {
-        $this->addAdditionalSelects([
-            'stables_tag_teams.tag_team_id as tag_team_id',
-        ]);
+        // Removed additional selects that were causing SQL conflicts
+        // The polymorphic relationship handles member selection automatically
     }
 }

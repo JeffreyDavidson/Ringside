@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
-use App\Models\WrestlerManager;
+use App\Models\Wrestlers\WrestlerManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -16,7 +16,7 @@ class PreviousManagersTable extends BasePreviousManagersTable
      */
     public ?int $wrestlerId;
 
-    protected string $databaseTableName = 'wrestlers_managers';
+    public string $databaseTableName = 'wrestlers_managers';
 
     /**
      * @return Builder<WrestlerManager>
@@ -29,7 +29,7 @@ class PreviousManagersTable extends BasePreviousManagersTable
 
         return WrestlerManager::query()
             ->where('wrestler_id', $this->wrestlerId)
-            ->whereNotNull('left_at')
+            ->whereNotNull('fired_at')
             ->orderByDesc('hired_at');
     }
 

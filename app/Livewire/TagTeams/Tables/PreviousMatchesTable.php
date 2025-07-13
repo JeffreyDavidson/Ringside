@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
-use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
-use App\Models\EventMatch;
-use App\Models\TagTeam;
+use App\Models\Matches\EventMatch;
+use App\Models\TagTeams\TagTeam;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -39,7 +38,7 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
                 $query->whereMorphedTo('competitor', $tagTeam);
             })
             ->withWhereHas('event', function (Builder $query): void {
-                $query->whereNotNull('date')->where('status', EventStatus::Past);
+                $query->whereNotNull('date')->where('date', '<', now()->toDateString());
             })
             ->orderByDesc('date');
     }

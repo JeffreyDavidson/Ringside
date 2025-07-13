@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
-use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
-use App\Models\EventMatch;
-use App\Models\Wrestler;
+use App\Models\Matches\EventMatch;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -18,13 +17,15 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
      */
     public ?int $wrestlerId;
 
+    public string $databaseTableName = 'events_matches_competitors';
+
     /**
      * @return Builder<EventMatch>
      */
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't sp ecify a wrestler");
+            throw new Exception("You didn't specify a wrestler");
         }
 
         $wrestler = Wrestler::find($this->wrestlerId);
@@ -35,7 +36,7 @@ class PreviousMatchesTable extends BasePreviousMatchesTable
                 $query->whereMorphedTo('competitor', $wrestler);
             })
             ->withWhereHas('event', function (Builder $query): void {
-                $query->whereNotNull('date')->where('status', EventStatus::Past);
+                $query->whereNotNull('date')->where('date', '<', now()->toDateString());
             })
             ->orderByDesc('date');
     }

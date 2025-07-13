@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Tables;
 
-use App\Actions\Referees\ClearInjuryAction;
 use App\Actions\Referees\EmployAction;
+use App\Actions\Referees\HealAction;
 use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReinstateAction;
 use App\Actions\Referees\ReleaseAction;
@@ -13,32 +13,30 @@ use App\Actions\Referees\RestoreAction;
 use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
-use App\Builders\RefereeBuilder;
-use App\Enums\EmploymentStatus;
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\CannotBeInjuredException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeReleasedException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeSuspendedException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Builders\Roster\RefereeBuilder;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Status\CannotBeClearedFromInjuryException;
+use App\Exceptions\Status\CannotBeEmployedException;
+use App\Exceptions\Status\CannotBeInjuredException;
+use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Status\CannotBeReleasedException;
+use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\Referee;
-use App\View\Columns\FirstEmploymentDateColumn;
-use App\View\Filters\FirstEmploymentFilter;
+use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
+use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Referees\Components\RefereeActionsComponent;
+use App\Models\Referees\Referee;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class RefereesTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'referees';
 
     protected string $routeBasePath = 'referees';
@@ -55,7 +53,10 @@ class RefereesTable extends BaseTableWithActions
             ->oldest('last_name');
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Referee::class);
+    }
 
     /**
      * Undocumented function
@@ -67,7 +68,9 @@ class RefereesTable extends BaseTableWithActions
         return [
             Column::make(__('referees.name'), 'full_name')
                 ->searchable(),
-            $this->getDefaultStatusColumn(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
@@ -79,11 +82,28 @@ class RefereesTable extends BaseTableWithActions
      */
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = collect(EmploymentStatus::cases())->pluck('name', 'value')->toArray();
-
         return [
-            $this->getDefaultStatusFilter($statuses),
+            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+                ->setFilterPillTitle(__('core.status'))
+                ->options([
+                    '' => __('core.all'),
+                    'employed' => 'Employed',
+                    'future_employment' => 'Awaiting Employment',
+                    'released' => 'Released',
+                    'unemployed' => 'Unemployed',
+                    'retired' => 'Retired',
+                ])
+                ->filter(function ($builder, string $value) {
+                    /** @var RefereeBuilder $builder */
+                    match ($value) {
+                        'employed' => $builder->employed(),
+                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'released' => $builder->released(),
+                        'unemployed' => $builder->unemployed(),
+                        'retired' => $builder->retired(),
+                        default => null,
+                    };
+                }),
             FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'referees_employments.started_at', 'referees_employments.ended_at'),
         ];
     }
@@ -101,7 +121,7 @@ class RefereesTable extends BaseTableWithActions
         Gate::authorize('clearFromInjury', $referee);
 
         try {
-            resolve(ClearInjuryAction::class)->handle($referee);
+            resolve(HealAction::class)->handle($referee);
         } catch (CannotBeClearedFromInjuryException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -237,5 +257,27 @@ class RefereesTable extends BaseTableWithActions
         }
 
         return back();
+    }
+
+    public function handleRefereeAction(string $action, int $refereeId): void
+    {
+        $referee = Referee::findOrFail($refereeId);
+
+        // Delegate to the RefereeActionsComponent
+        $actionsComponent = new RefereeActionsComponent();
+        $actionsComponent->referee = $referee;
+
+        match ($action) {
+            'employ' => $actionsComponent->employ(),
+            'release' => $actionsComponent->release(),
+            'retire' => $actionsComponent->retire(),
+            'unretire' => $actionsComponent->unretire(),
+            'suspend' => $actionsComponent->suspend(),
+            'reinstate' => $actionsComponent->reinstate(),
+            'injure' => $actionsComponent->injure(),
+            'heal' => $actionsComponent->healFromInjury(),
+            'restore' => $actionsComponent->restore(),
+            default => null,
+        };
     }
 }

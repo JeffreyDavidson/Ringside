@@ -12,35 +12,33 @@ use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
 use App\Builders\TagTeamBuilder;
-use App\Enums\EmploymentStatus;
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeReleasedException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeSuspendedException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Status\CannotBeEmployedException;
+use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Status\CannotBeReleasedException;
+use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\TagTeam;
-use App\View\Columns\FirstEmploymentDateColumn;
-use App\View\Filters\FirstEmploymentFilter;
+use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
+use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Models\TagTeams\TagTeam;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class TagTeamsTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'tag_teams';
 
     protected string $routeBasePath = 'tag-teams';
 
     protected string $resourceName = 'tag teams';
 
+    /** @return TagTeamBuilder<TagTeam> */
     public function builder(): TagTeamBuilder
     {
         return TagTeam::query()
@@ -50,6 +48,8 @@ class TagTeamsTable extends BaseTableWithActions
 
     public function configure(): void
     {
+        Gate::authorize('viewList', TagTeam::class);
+
         $this->addExtraWithSum('currentWrestlers', 'weight');
     }
 
@@ -63,7 +63,9 @@ class TagTeamsTable extends BaseTableWithActions
         return [
             Column::make(__('tag-teams.name'), 'name')
                 ->searchable(),
-            $this->getDefaultStatusColumn(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
@@ -75,11 +77,28 @@ class TagTeamsTable extends BaseTableWithActions
      */
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = collect(EmploymentStatus::cases())->pluck('name', 'value')->toArray();
-
         return [
-            $this->getDefaultStatusFilter($statuses),
+            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+                ->setFilterPillTitle(__('core.status'))
+                ->options([
+                    '' => __('core.all'),
+                    'employed' => 'Employed',
+                    'future_employment' => 'Awaiting Employment',
+                    'released' => 'Released',
+                    'unemployed' => 'Unemployed',
+                    'retired' => 'Retired',
+                ])
+                ->filter(function ($builder, string $value) {
+                    /** @var WrestlerBuilder $builder */
+                    match ($value) {
+                        'employed' => $builder->employed(),
+                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'released' => $builder->released(),
+                        'unemployed' => $builder->unemployed(),
+                        'retired' => $builder->retired(),
+                        default => null,
+                    };
+                }),
             FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'tag_teams_employments.started_at', 'tag_teams_employments.ended_at'),
         ];
     }
@@ -201,5 +220,27 @@ class TagTeamsTable extends BaseTableWithActions
         }
 
         return back();
+    }
+
+    /**
+     * Handle tag team actions through a unified interface.
+     */
+    public function handleTagTeamAction(string $action, int $tagTeamId): void
+    {
+        $tagTeam = TagTeam::findOrFail($tagTeamId);
+
+        try {
+            match ($action) {
+                'employ' => resolve(EmployAction::class)->handle($tagTeam),
+                'release' => resolve(ReleaseAction::class)->handle($tagTeam),
+                'suspend' => resolve(SuspendAction::class)->handle($tagTeam),
+                'reinstate' => resolve(ReinstateAction::class)->handle($tagTeam),
+                'retire' => resolve(RetireAction::class)->handle($tagTeam),
+                'unretire' => resolve(UnretireAction::class)->handle($tagTeam),
+                default => null,
+            };
+        } catch (Exception $e) {
+            session()->flash('error', $e->getMessage());
+        }
     }
 }

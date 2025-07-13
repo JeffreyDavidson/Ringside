@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
-use App\Models\StableTagTeam;
+use App\Models\Stables\StableMember;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
 class PreviousStablesTable extends BasePreviousStablesTable
 {
-    protected string $databaseTableName = 'stables_tag_teams';
+    protected string $databaseTableName = 'stables_members';
 
     public ?int $tagTeamId;
 
     /**
-     * @return Builder<StableTagTeam>
+     * @return Builder<StableMember>
      */
     public function builder(): Builder
     {
@@ -24,8 +24,9 @@ class PreviousStablesTable extends BasePreviousStablesTable
             throw new Exception("You didn't specify a tag team");
         }
 
-        return StableTagTeam::query()
-            ->where('tag_team_id', $this->tagTeamId)
+        return StableMember::query()
+            ->where('member_id', $this->tagTeamId)
+            ->where('member_type', 'tagTeam')
             ->whereNotNull('left_at')
             ->orderByDesc('joined_at');
     }
@@ -33,7 +34,7 @@ class PreviousStablesTable extends BasePreviousStablesTable
     public function configure(): void
     {
         $this->addAdditionalSelects([
-            'stables_tag_teams.stable_id as stable_id',
+            'stables_members.stable_id as stable_id',
         ]);
     }
 }

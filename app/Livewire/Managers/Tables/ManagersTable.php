@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
-use App\Actions\Managers\ClearInjuryAction;
 use App\Actions\Managers\EmployAction;
+use App\Actions\Managers\HealAction;
 use App\Actions\Managers\InjureAction;
 use App\Actions\Managers\ReinstateAction;
 use App\Actions\Managers\ReleaseAction;
@@ -13,32 +13,30 @@ use App\Actions\Managers\RestoreAction;
 use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
-use App\Builders\ManagerBuilder;
-use App\Enums\EmploymentStatus;
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\CannotBeInjuredException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeReleasedException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeSuspendedException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Builders\Roster\ManagerBuilder;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Status\CannotBeClearedFromInjuryException;
+use App\Exceptions\Status\CannotBeEmployedException;
+use App\Exceptions\Status\CannotBeInjuredException;
+use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Status\CannotBeReleasedException;
+use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\Manager;
-use App\View\Columns\FirstEmploymentDateColumn;
-use App\View\Filters\FirstEmploymentFilter;
+use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
+use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Managers\Components\ManagerActionsComponent;
+use App\Models\Managers\Manager;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class ManagersTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'managers';
 
     protected string $routeBasePath = 'managers';
@@ -55,7 +53,10 @@ class ManagersTable extends BaseTableWithActions
             ->oldest('last_name');
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Manager::class);
+    }
 
     /**
      * Undocumented function
@@ -67,7 +68,9 @@ class ManagersTable extends BaseTableWithActions
         return [
             Column::make(__('managers.name'), 'full_name')
                 ->searchable(),
-            $this->getDefaultStatusColumn(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
     }
@@ -79,11 +82,28 @@ class ManagersTable extends BaseTableWithActions
      */
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = collect(EmploymentStatus::cases())->pluck('name', 'value')->toArray();
-
         return [
-            $this->getDefaultStatusFilter($statuses),
+            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+                ->setFilterPillTitle(__('core.status'))
+                ->options([
+                    '' => __('core.all'),
+                    'employed' => 'Employed',
+                    'future_employment' => 'Awaiting Employment',
+                    'released' => 'Released',
+                    'unemployed' => 'Unemployed',
+                    'retired' => 'Retired',
+                ])
+                ->filter(function ($builder, string $value) {
+                    /** @var ManagerBuilder<Manager> $builder */
+                    match ($value) {
+                        'employed' => $builder->employed(),
+                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'released' => $builder->released(),
+                        'unemployed' => $builder->unemployed(),
+                        'retired' => $builder->retired(),
+                        default => null,
+                    };
+                }),
             FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'managers_employments.started_at', 'managers_employments.ended_at'),
         ];
     }
@@ -101,7 +121,7 @@ class ManagersTable extends BaseTableWithActions
         Gate::authorize('clearFromInjury', $manager);
 
         try {
-            resolve(ClearInjuryAction::class)->handle($manager);
+            resolve(HealAction::class)->handle($manager);
         } catch (CannotBeClearedFromInjuryException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -237,5 +257,27 @@ class ManagersTable extends BaseTableWithActions
         }
 
         return back();
+    }
+
+    public function handleManagerAction(string $action, int $managerId): void
+    {
+        $manager = Manager::findOrFail($managerId);
+
+        // Delegate to the ManagerActionsComponent
+        $actionsComponent = new ManagerActionsComponent();
+        $actionsComponent->manager = $manager;
+
+        match ($action) {
+            'employ' => $actionsComponent->employ(),
+            'release' => $actionsComponent->release(),
+            'retire' => $actionsComponent->retire(),
+            'unretire' => $actionsComponent->unretire(),
+            'suspend' => $actionsComponent->suspend(),
+            'reinstate' => $actionsComponent->reinstate(),
+            'injure' => $actionsComponent->injure(),
+            'heal' => $actionsComponent->healFromInjury(),
+            'restore' => $actionsComponent->restore(),
+            default => null,
+        };
     }
 }

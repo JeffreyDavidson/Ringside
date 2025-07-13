@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
-use App\Models\TagTeamManager;
+use App\Models\TagTeams\TagTeamManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -29,7 +29,7 @@ class PreviousManagersTable extends BasePreviousManagersTable
 
         return TagTeamManager::query()
             ->where('tag_team_id', $this->tagTeamId)
-            ->whereNotNull('left_at')
+            ->whereNotNull('fired_at')
             ->orderByDesc('hired_at');
     }
 
