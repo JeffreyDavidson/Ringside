@@ -10,7 +10,7 @@ use App\Builders\Contracts\HasSuspension;
 use App\Builders\Roster\ManagerBuilder;
 use App\Builders\Roster\RefereeBuilder;
 use App\Builders\Roster\WrestlerBuilder;
-use App\Builders\TagTeamBuilder;
+use App\Builders\Roster\TagTeamBuilder;
 use App\Builders\Titles\TitleBuilder;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;

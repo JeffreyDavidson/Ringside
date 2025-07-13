@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Roster\WrestlerBuilder;
-use App\Builders\TagTeamBuilder;
+use App\Builders\Roster\TagTeamBuilder;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;

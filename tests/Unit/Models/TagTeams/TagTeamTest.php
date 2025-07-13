@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Builders\TagTeamBuilder;
+use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
