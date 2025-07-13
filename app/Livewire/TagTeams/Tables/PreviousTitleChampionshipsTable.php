@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
-use App\Models\TagTeam;
-use App\Models\TitleChampionship;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\TitleChampionship;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -28,11 +28,12 @@ class PreviousTitleChampionshipsTable extends BasePreviousTitleChampionshipsTabl
 
         return TitleChampionship::query()
             ->whereHasMorph(
-                'previousChampion',
+                'champion',
                 [TagTeam::class],
                 function (Builder $query): void {
                     $query->whereIn('id', [$this->tagTeamId]);
                 }
-            );
+            )
+            ->whereNotNull('lost_at');
     }
 }

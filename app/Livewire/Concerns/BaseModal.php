@@ -22,7 +22,7 @@ abstract class BaseModal extends ModalComponent
     /**
      * @var TModelForm
      */
-    protected LivewireBaseForm $modelForm;
+    protected $modelForm;
 
     /**
      * @var TModelType
@@ -35,7 +35,7 @@ abstract class BaseModal extends ModalComponent
 
     protected string $titleField;
 
-    public function mount(?int $modelId = null): void
+    public function mount(mixed $modelId = null): void
     {
         if (isset($modelId)) {
             try {
@@ -79,6 +79,11 @@ abstract class BaseModal extends ModalComponent
      */
     public function render(): View
     {
+        // Ensure modalFormPath is set
+        if (! isset($this->modalFormPath)) {
+            $this->modalFormPath = 'blank';
+        }
+
         $view = 'livewire.'.$this->modalFormPath;
 
         if (! view()->exists($view)) {

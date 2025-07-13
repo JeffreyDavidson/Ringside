@@ -29,9 +29,9 @@ abstract class BasePreviousManagersTable extends DataTableComponent
         return [
             Column::make(__('managers.name'), 'manager.full_name')
                 ->searchable(),
-            DateColumn::make(__('managers.date_hired'), 'joined_at')
+            DateColumn::make(__('managers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
-            DateColumn::make(__('managers.date_fired'), 'left_at')
+            DateColumn::make(__('managers.date_fired'), 'fired_at')
                 ->outputFormat('Y-m-d'),
         ];
     }

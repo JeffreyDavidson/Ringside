@@ -4,53 +4,39 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
-use App\Actions\Wrestlers\ClearInjuryAction;
-use App\Actions\Wrestlers\EmployAction;
-use App\Actions\Wrestlers\InjureAction;
-use App\Actions\Wrestlers\ReinstateAction;
-use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RestoreAction;
-use App\Actions\Wrestlers\RetireAction;
-use App\Actions\Wrestlers\SuspendAction;
-use App\Actions\Wrestlers\UnretireAction;
-use App\Builders\WrestlerBuilder;
-use App\Enums\EmploymentStatus;
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Exceptions\CannotBeEmployedException;
-use App\Exceptions\CannotBeInjuredException;
-use App\Exceptions\CannotBeReinstatedException;
-use App\Exceptions\CannotBeReleasedException;
-use App\Exceptions\CannotBeRetiredException;
-use App\Exceptions\CannotBeSuspendedException;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
-use App\Livewire\Concerns\Columns\HasStatusColumn;
-use App\Livewire\Concerns\Filters\HasStatusFilter;
-use App\Models\Wrestler;
-use App\View\Columns\FirstEmploymentDateColumn;
-use App\View\Filters\FirstEmploymentFilter;
+use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
+use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Wrestlers\Components\WrestlerActionsComponent;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class WrestlersTable extends BaseTableWithActions
 {
-    use HasStatusColumn, HasStatusFilter;
-
     protected string $databaseTableName = 'wrestlers';
 
     protected string $routeBasePath = 'wrestlers';
 
     protected string $resourceName = 'wrestlers';
 
+    /** @return WrestlerBuilder<Wrestler> */
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
             ->with('currentEmployment');
     }
 
-    public function configure(): void {}
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Wrestler::class);
+    }
 
     /**
      * @return array<int, Column>
@@ -60,7 +46,9 @@ class WrestlersTable extends BaseTableWithActions
         return [
             Column::make(__('wrestlers.name'), 'name')
                 ->searchable(),
-            $this->getDefaultStatusColumn(),
+            Column::make(__('core.status'), 'status')
+                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->excludeFromColumnSelect(),
             Column::make(__('wrestlers.height'), 'height'),
             Column::make(__('wrestlers.weight'), 'weight'),
             Column::make(__('wrestlers.hometown'), 'hometown'),
@@ -73,11 +61,28 @@ class WrestlersTable extends BaseTableWithActions
      **/
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = collect(EmploymentStatus::cases())->pluck('name', 'value')->toArray();
-
         return [
-            $this->getDefaultStatusFilter($statuses),
+            SelectFilter::make(__('core.status'))
+                ->setFilterPillTitle(__('core.status'))
+                ->options([
+                    '' => __('core.all'),
+                    'employed' => 'Employed',
+                    'future_employment' => 'Awaiting Employment',
+                    'released' => 'Released',
+                    'unemployed' => 'Unemployed',
+                    'retired' => 'Retired',
+                ])
+                ->filter(function ($builder, string $value) {
+                    /** @var WrestlerBuilder $builder */
+                    match ($value) {
+                        'employed' => $builder->employed(),
+                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'released' => $builder->released(),
+                        'unemployed' => $builder->unemployed(),
+                        'retired' => $builder->retired(),
+                        default => null,
+                    };
+                }),
             FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'wrestlers_employments.started_at', 'wrestlers_employments.ended_at'),
         ];
     }
@@ -85,86 +90,6 @@ class WrestlersTable extends BaseTableWithActions
     public function delete(Wrestler $wrestler): void
     {
         $this->deleteModel($wrestler);
-    }
-
-    /**
-     * Have a wrestler heal from an injury.
-     */
-    public function healFromInjury(Wrestler $wrestler): RedirectResponse
-    {
-        Gate::authorize('clearFromInjury', $wrestler);
-
-        try {
-            resolve(ClearInjuryAction::class)->handle($wrestler);
-        } catch (CannotBeClearedFromInjuryException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
-    }
-
-    /**
-     * Employ a wrestler.
-     */
-    public function employ(Wrestler $wrestler): RedirectResponse
-    {
-        Gate::authorize('employ', $wrestler);
-
-        try {
-            resolve(EmployAction::class)->handle($wrestler);
-        } catch (CannotBeEmployedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
-    }
-
-    /**
-     * Injure a wrestler.
-     */
-    public function injure(Wrestler $wrestler): RedirectResponse
-    {
-        Gate::authorize('injure', $wrestler);
-
-        try {
-            resolve(InjureAction::class)->handle($wrestler);
-        } catch (CannotBeInjuredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
-    }
-
-    /**
-     * Reinstate a wrestler.
-     */
-    public function reinstate(Wrestler $wrestler): RedirectResponse
-    {
-        Gate::authorize('reinstate', $wrestler);
-
-        try {
-            resolve(ReinstateAction::class)->handle($wrestler);
-        } catch (CannotBeReinstatedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return to_route('wrestlers.index');
-    }
-
-    /**
-     * Release a wrestler.
-     */
-    public function release(Wrestler $wrestler): RedirectResponse
-    {
-        Gate::authorize('release', $wrestler);
-
-        try {
-            resolve(ReleaseAction::class)->handle($wrestler);
-        } catch (CannotBeReleasedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
     }
 
     /**
@@ -182,50 +107,39 @@ class WrestlersTable extends BaseTableWithActions
     }
 
     /**
-     * Retire a wrestler.
+     * Override the default action column to use wrestler-specific actions.
      */
-    public function retire(Wrestler $wrestler): RedirectResponse
+    protected $listeners = ['wrestler-action' => 'handleWrestlerAction'];
+
+    protected function getDefaultActionColumn(): Column
     {
-        Gate::authorize('retire', $wrestler);
-
-        try {
-            resolve(RetireAction::class)->handle($wrestler);
-        } catch (CannotBeRetiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        return Column::make(__('core.actions'))
+            ->label(fn ($row) => view('components.tables.columns.wrestler-actions', [
+                'wrestler' => $row,
+            ])->render())
+            ->html()
+            ->excludeFromColumnSelect();
     }
 
-    /**
-     * Suspend a wrestler.
-     */
-    public function suspend(Wrestler $wrestler): RedirectResponse
+    public function handleWrestlerAction(string $action, int $wrestlerId): void
     {
-        Gate::authorize('suspend', $wrestler);
+        $wrestler = Wrestler::findOrFail($wrestlerId);
 
-        try {
-            resolve(SuspendAction::class)->handle($wrestler);
-        } catch (CannotBeSuspendedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
+        // Delegate to the WrestlerActionsComponent
+        $actionsComponent = new WrestlerActionsComponent();
+        $actionsComponent->wrestler = $wrestler;
 
-        return back();
-    }
-
-    /**
-     * Unretire a wrestler.
-     */
-    public function unretire(Wrestler $wrestler): RedirectResponse
-    {
-        Gate::authorize('unretire', $wrestler);
-
-        try {
-            resolve(UnretireAction::class)->handle($wrestler);
-        } catch (CannotBeUnretiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-
-        return back();
+        match ($action) {
+            'employ' => $actionsComponent->employ(),
+            'release' => $actionsComponent->release(),
+            'retire' => $actionsComponent->retire(),
+            'unretire' => $actionsComponent->unretire(),
+            'suspend' => $actionsComponent->suspend(),
+            'reinstate' => $actionsComponent->reinstate(),
+            'injure' => $actionsComponent->injure(),
+            'heal' => $actionsComponent->healFromInjury(),
+            'restore' => $actionsComponent->restore(),
+            default => null,
+        };
     }
 }
