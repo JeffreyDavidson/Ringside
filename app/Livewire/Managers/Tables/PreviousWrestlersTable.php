@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\WrestlerManager;
+use App\Models\Wrestlers\WrestlerManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -33,7 +33,7 @@ class PreviousWrestlersTable extends DataTableComponent
 
         return WrestlerManager::query()
             ->where('manager_id', $this->managerId)
-            ->whereNotNull('left_at')
+            ->whereNotNull('fired_at')
             ->orderByDesc('hired_at');
     }
 
@@ -55,7 +55,7 @@ class PreviousWrestlersTable extends DataTableComponent
             Column::make(__('wrestlers.name'), 'wrestler.name'),
             DateColumn::make(__('wrestlers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
-            DateColumn::make(__('wrestlers.date_left'), 'left_at')
+            DateColumn::make(__('wrestlers.date_left'), 'fired_at')
                 ->outputFormat('Y-m-d'),
         ];
     }
