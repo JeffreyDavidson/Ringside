@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Tables;
 
-use App\Builders\EventBuilder;
+use App\Builders\Events\EventBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\Event;
+use App\Models\Events\Event;
 use Exception;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
