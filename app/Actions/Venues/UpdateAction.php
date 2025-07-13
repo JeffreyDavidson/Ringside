@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Venues;
 
 use App\Data\Shared\VenueData;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Repositories\VenueRepository;
 use Lorisleiva\Actions\Concerns\AsAction;
 

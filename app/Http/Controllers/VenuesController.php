@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Tests\Feature\Http\Controllers\VenuesControllerTest;

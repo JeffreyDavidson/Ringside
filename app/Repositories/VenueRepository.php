@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Data\Shared\VenueData;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Repositories\Contracts\VenueRepositoryInterface;
 use App\Repositories\Support\BaseRepository;
 use Tests\Unit\Repositories\VenueRepositoryTest;
