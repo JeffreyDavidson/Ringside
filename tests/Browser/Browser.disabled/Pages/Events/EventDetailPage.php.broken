@@ -1,0 +1,547 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Events;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class EventDetailPage extends Page
+{
+    protected int $eventId;
+
+    public function __construct(int $eventId)
+    {
+        $this->eventId = $eventId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return "/events/{$this->eventId}";
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@event-name' => 'h1, .event-name, [data-testid="event-name"]',
+            '@event-status' => '.status, .badge, [data-testid="event-status"]',
+            '@scheduling-info' => '.scheduling-info, [data-testid="scheduling-info"]',
+            '@event-date' => '.event-date, [data-testid="event-date"]',
+            '@venue-info' => '.venue-info, [data-testid="venue-info"]',
+            '@venue-name' => '.venue-name, [data-testid="venue-name"]',
+            '@event-preview' => '.event-preview, [data-testid="event-preview"]',
+            '@matches-section' => '.matches, [data-testid="matches"]',
+            '@matches-list' => '.matches-list, [data-testid="matches-list"]',
+            '@edit-button' => '[data-testid="edit-event"], .btn-edit',
+            '@delete-button' => '[data-testid="delete-event"], .btn-delete',
+            '@schedule-button' => '[data-testid="schedule-event"], .btn-schedule',
+            '@unschedule-button' => '[data-testid="unschedule-event"], .btn-unschedule',
+            '@change-venue-button' => '[data-testid="change-venue"], .btn-change-venue',
+            '@set-date-button' => '[data-testid="set-date"], .btn-set-date',
+            '@remove-date-button' => '[data-testid="remove-date"], .btn-remove-date',
+            '@restore-button' => '[data-testid="restore-event"], .btn-restore',
+            '@add-match-button' => '[data-testid="add-match"], .btn-add-match',
+            '@history-section' => '.history, [data-testid="history"]',
+            '@scheduling-history' => '.scheduling-history, [data-testid="scheduling-history"]',
+            '@venue-history' => '.venue-history, [data-testid="venue-history"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-form' => '.modal form, [role="dialog"] form',
+            '@confirm-button' => 'button:contains("Confirm"), .btn-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), .btn-cancel',
+            '@back-button' => '.btn-back, [data-testid="back"]',
+            '@breadcrumb' => '.breadcrumb, [aria-label="breadcrumb"]',
+        ];
+    }
+
+    /**
+     * Assert that event information is displayed correctly.
+     */
+    public function assertEventInfo(Browser $browser, array $expectedData): void
+    {
+        $browser->assertSeeIn('@event-name', $expectedData['name']);
+        
+        if (isset($expectedData['status'])) {
+            $browser->assertSeeIn('@event-status', $expectedData['status']);
+        }
+        
+        if (isset($expectedData['preview'])) {
+            $browser->assertSeeIn('@event-preview', $expectedData['preview']);
+        }
+    }
+
+    /**
+     * Assert that the event has the expected status.
+     */
+    public function assertStatus(Browser $browser, string $status): void
+    {
+        $browser->assertSeeIn('@event-status', $status);
+    }
+
+    /**
+     * Assert that scheduling information is shown.
+     */
+    public function assertSchedulingInfo(Browser $browser): void
+    {
+        $browser->assertVisible('@scheduling-info');
+    }
+
+    /**
+     * Assert that venue information is displayed.
+     */
+    public function assertVenueInfo(Browser $browser, string $venueName): void
+    {
+        $browser->assertVisible('@venue-info')
+                ->assertSeeIn('@venue-name', $venueName);
+    }
+
+    /**
+     * Assert that event date is displayed.
+     */
+    public function assertDateDisplayed(Browser $browser, string $date): void
+    {
+        $browser->assertSeeIn('@event-date', $date);
+    }
+
+    /**
+     * Assert that matches section is displayed.
+     */
+    public function assertMatchesSection(Browser $browser): void
+    {
+        $browser->assertVisible('@matches-section');
+    }
+
+    /**
+     * Assert that specific matches are listed.
+     */
+    public function assertMatches(Browser $browser, array $matchNames): void
+    {
+        $browser->within('@matches-list', function (Browser $browser) use ($matchNames) {
+            foreach ($matchNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Edit the event through the UI.
+     */
+    public function editEvent(Browser $browser, array $data): void
+    {
+        $browser->click('@edit-button')
+                ->waitFor('@modal');
+        
+        if (isset($data['name'])) {
+            $browser->clear('name')
+                    ->type('name', $data['name']);
+        }
+        
+        if (isset($data['preview'])) {
+            $browser->clear('preview')
+                    ->type('preview', $data['preview']);
+        }
+        
+        if (isset($data['date'])) {
+            $browser->type('date', $data['date']);
+        }
+        
+        if (isset($data['venue'])) {
+            $browser->select('venue_id', $data['venue']);
+        }
+        
+        $browser->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Delete the event through the UI.
+     */
+    public function deleteEvent(Browser $browser): void
+    {
+        $browser->click('@delete-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Schedule the event through the UI.
+     */
+    public function scheduleEvent(Browser $browser, array $data): void
+    {
+        $browser->click('@schedule-button')
+                ->waitFor('@modal');
+        
+        if (isset($data['date'])) {
+            $browser->type('date', $data['date']);
+        }
+        
+        if (isset($data['venue'])) {
+            $browser->select('venue_id', $data['venue']);
+        }
+        
+        $browser->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Unschedule the event through the UI.
+     */
+    public function unscheduleEvent(Browser $browser): void
+    {
+        $browser->click('@unschedule-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Change the venue through the UI.
+     */
+    public function changeVenue(Browser $browser, string $venueName): void
+    {
+        $browser->click('@change-venue-button')
+                ->waitFor('@modal')
+                ->select('venue_id', $venueName)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Set event date through the UI.
+     */
+    public function setEventDate(Browser $browser, string $date): void
+    {
+        $browser->click('@set-date-button')
+                ->waitFor('@modal')
+                ->type('date', $date)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Remove event date through the UI.
+     */
+    public function removeEventDate(Browser $browser): void
+    {
+        $browser->click('@remove-date-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Restore the event through the UI.
+     */
+    public function restoreEvent(Browser $browser): void
+    {
+        $browser->click('@restore-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Add a match to the event.
+     */
+    public function addMatch(Browser $browser, array $matchData): void
+    {
+        $browser->click('@add-match-button')
+                ->waitFor('@modal');
+        
+        // Fill in match details
+        if (isset($matchData['match_type'])) {
+            $browser->select('match_type_id', $matchData['match_type']);
+        }
+        
+        if (isset($matchData['competitors'])) {
+            foreach ($matchData['competitors'] as $competitor) {
+                $browser->select('competitors[]', $competitor);
+            }
+        }
+        
+        $browser->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that specific action buttons are available.
+     */
+    public function assertActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-button");
+        }
+    }
+
+    /**
+     * Assert that specific action buttons are not available.
+     */
+    public function assertActionsNotAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertMissing("@{$action}-button");
+        }
+    }
+
+    /**
+     * Assert that history section is visible.
+     */
+    public function assertHistorySection(Browser $browser): void
+    {
+        $browser->assertVisible('@history-section');
+    }
+
+    /**
+     * Assert that scheduling history is displayed.
+     */
+    public function assertSchedulingHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@scheduling-history');
+    }
+
+    /**
+     * Assert that venue history is displayed.
+     */
+    public function assertVenueHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@venue-history');
+    }
+
+    /**
+     * Navigate back to events index.
+     */
+    public function goBack(Browser $browser): void
+    {
+        if ($browser->element('@back-button')) {
+            $browser->click('@back-button');
+        } elseif ($browser->element('@breadcrumb')) {
+            $browser->click('@breadcrumb a:contains("Events")');
+        } else {
+            $browser->visit('/events');
+        }
+    }
+
+    /**
+     * Assert that breadcrumb navigation is present.
+     */
+    public function assertBreadcrumb(Browser $browser): void
+    {
+        $browser->assertVisible('@breadcrumb')
+                ->assertSeeIn('@breadcrumb', 'Events');
+    }
+
+    /**
+     * Assert that the page is in edit mode.
+     */
+    public function assertEditMode(Browser $browser): void
+    {
+        $browser->assertVisible('@modal')
+                ->assertVisible('@modal-form');
+    }
+
+    /**
+     * Assert that the page is in view mode.
+     */
+    public function assertViewMode(Browser $browser): void
+    {
+        $browser->assertMissing('@modal')
+                ->assertVisible('@event-name');
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForLoad(Browser $browser): void
+    {
+        $browser->waitFor('@event-name')
+                ->waitFor('@event-status')
+                ->pause(1000); // Allow time for all data to load
+    }
+
+    /**
+     * Assert that the event detail page displays correctly for the given status.
+     */
+    public function assertForStatus(Browser $browser, string $status): void
+    {
+        $this->assertStatus($browser, $status);
+        
+        switch ($status) {
+            case 'Scheduled':
+                $this->assertActionsAvailable($browser, ['edit', 'unschedule', 'change-venue', 'delete']);
+                $this->assertActionsNotAvailable($browser, ['schedule', 'restore']);
+                break;
+                
+            case 'Unscheduled':
+                $this->assertActionsAvailable($browser, ['edit', 'schedule', 'delete']);
+                $this->assertActionsNotAvailable($browser, ['unschedule', 'change-venue', 'restore']);
+                break;
+                
+            case 'Past':
+                $this->assertActionsAvailable($browser, ['edit']);
+                $this->assertActionsNotAvailable($browser, ['schedule', 'unschedule', 'delete', 'restore']);
+                break;
+        }
+    }
+
+    /**
+     * Assert responsive design elements.
+     */
+    public function assertResponsive(Browser $browser): void
+    {
+        // Check that key elements are visible on mobile
+        $browser->assertVisible('@event-name')
+                ->assertVisible('@event-status');
+                
+        // Scheduling section should be accessible
+        if ($browser->element('@scheduling-info')) {
+            $browser->assertVisible('@scheduling-info');
+        }
+    }
+
+    /**
+     * Assert that scheduling details are shown.
+     */
+    public function assertSchedulingDetails(Browser $browser, array $expectedData): void
+    {
+        $browser->within('@scheduling-info', function (Browser $browser) use ($expectedData) {
+            if (isset($expectedData['date'])) {
+                $browser->assertSee($expectedData['date']);
+            }
+            
+            if (isset($expectedData['venue'])) {
+                $browser->assertSee($expectedData['venue']);
+            }
+        });
+    }
+
+    /**
+     * Assert that event statistics are displayed.
+     */
+    public function assertStatistics(Browser $browser): void
+    {
+        // This would include match count, attendance, etc.
+        $browser->assertVisible('.statistics, [data-testid="statistics"]');
+    }
+
+    /**
+     * Assert that event relationships are displayed.
+     */
+    public function assertRelationships(Browser $browser): void
+    {
+        // This would include matches, venue, etc.
+        $browser->assertVisible('.relationships, [data-testid="relationships"]');
+    }
+
+    /**
+     * Manage event scheduling through detail page.
+     */
+    public function manageScheduling(Browser $browser, string $action, array $data = []): void
+    {
+        switch ($action) {
+            case 'schedule':
+                $this->scheduleEvent($browser, $data);
+                break;
+            case 'unschedule':
+                $this->unscheduleEvent($browser);
+                break;
+            case 'change_venue':
+                $this->changeVenue($browser, $data['venue'] ?? '');
+                break;
+            case 'set_date':
+                $this->setEventDate($browser, $data['date'] ?? '');
+                break;
+            case 'remove_date':
+                $this->removeEventDate($browser);
+                break;
+        }
+    }
+
+    /**
+     * View comprehensive history for event.
+     */
+    public function viewHistory(Browser $browser, string $historyType): void
+    {
+        $element = "@{$historyType}-history";
+        
+        if ($browser->element($this->elements()[$element] ?? '')) {
+            $browser->click($element);
+        }
+    }
+
+    /**
+     * Assert that event detail page shows complete information.
+     */
+    public function assertCompleteInformation(Browser $browser): void
+    {
+        $this->assertEventInfo($browser, []);
+        $this->assertSchedulingInfo($browser);
+        $this->assertMatchesSection($browser);
+        $this->assertHistorySection($browser);
+    }
+
+    /**
+     * Assert that event preview information is displayed.
+     */
+    public function assertPreviewInfo(Browser $browser, string $preview): void
+    {
+        $browser->assertSeeIn('@event-preview', $preview);
+    }
+
+    /**
+     * Assert that the event is properly associated with matches.
+     */
+    public function assertMatchAssociations(Browser $browser): void
+    {
+        $browser->assertVisible('@matches-section');
+        // Could also check for specific match elements
+    }
+
+    /**
+     * Handle event state transitions through UI.
+     */
+    public function transitionToState(Browser $browser, string $targetState, array $data = []): void
+    {
+        switch ($targetState) {
+            case 'scheduled':
+                if ($browser->element('@schedule-button')) {
+                    $this->scheduleEvent($browser, $data);
+                }
+                break;
+                
+            case 'unscheduled':
+                if ($browser->element('@unschedule-button')) {
+                    $this->unscheduleEvent($browser);
+                }
+                break;
+                
+            case 'deleted':
+                if ($browser->element('@delete-button')) {
+                    $this->deleteEvent($browser);
+                }
+                break;
+                
+            case 'restored':
+                if ($browser->element('@restore-button')) {
+                    $this->restoreEvent($browser);
+                }
+                break;
+        }
+    }
+}

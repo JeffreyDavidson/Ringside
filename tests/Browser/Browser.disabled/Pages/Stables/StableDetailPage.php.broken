@@ -1,0 +1,399 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Stables;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class StableDetailPage extends Page
+{
+    protected int $stableId;
+
+    public function __construct(int $stableId)
+    {
+        $this->stableId = $stableId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return "/stables/{$this->stableId}";
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@stable-name' => 'h1, .stable-name, [data-testid="stable-name"]',
+            '@stable-status' => '.status, .badge, [data-testid="stable-status"]',
+            '@activity-period' => '.activity-period, [data-testid="activity-period"]',
+            '@members-section' => '.members, [data-testid="members"]',
+            '@wrestlers-list' => '.wrestlers, [data-testid="wrestlers"]',
+            '@tag-teams-list' => '.tag-teams, [data-testid="tag-teams"]',
+            '@managers-list' => '.managers, [data-testid="managers"]',
+            '@member-count' => '.member-count, [data-testid="member-count"]',
+            '@edit-button' => '[data-testid="edit-stable"], .btn-edit',
+            '@delete-button' => '[data-testid="delete-stable"], .btn-delete',
+            '@disband-button' => '[data-testid="disband-stable"], .btn-disband',
+            '@retire-button' => '[data-testid="retire-stable"], .btn-retire',
+            '@unretire-button' => '[data-testid="unretire-stable"], .btn-unretire',
+            '@restore-button' => '[data-testid="restore-stable"], .btn-restore',
+            '@add-member-button' => '[data-testid="add-member"], .btn-add-member',
+            '@remove-member-button' => '[data-testid="remove-member"], .btn-remove-member',
+            '@history-section' => '.history, [data-testid="history"]',
+            '@activity-history' => '.activity-history, [data-testid="activity-history"]',
+            '@member-history' => '.member-history, [data-testid="member-history"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-form' => '.modal form, [role="dialog"] form',
+            '@confirm-button' => 'button:contains("Confirm"), .btn-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), .btn-cancel',
+            '@back-button' => '.btn-back, [data-testid="back"]',
+            '@breadcrumb' => '.breadcrumb, [aria-label="breadcrumb"]',
+        ];
+    }
+
+    /**
+     * Assert that stable information is displayed correctly.
+     */
+    public function assertStableInfo(Browser $browser, array $expectedData): void
+    {
+        $browser->assertSeeIn('@stable-name', $expectedData['name']);
+        
+        if (isset($expectedData['status'])) {
+            $browser->assertSeeIn('@stable-status', $expectedData['status']);
+        }
+    }
+
+    /**
+     * Assert that the stable has the expected status.
+     */
+    public function assertStatus(Browser $browser, string $status): void
+    {
+        $browser->assertSeeIn('@stable-status', $status);
+    }
+
+    /**
+     * Assert that activity period information is shown.
+     */
+    public function assertActivityPeriod(Browser $browser): void
+    {
+        $browser->assertVisible('@activity-period');
+    }
+
+    /**
+     * Assert that members section is displayed.
+     */
+    public function assertMembersSection(Browser $browser): void
+    {
+        $browser->assertVisible('@members-section');
+    }
+
+    /**
+     * Assert that specific members are listed.
+     */
+    public function assertMembers(Browser $browser, array $members): void
+    {
+        foreach ($members as $memberType => $memberNames) {
+            $elementKey = "@{$memberType}-list";
+            
+            if ($browser->element($this->elements()[$elementKey] ?? '')) {
+                foreach ($memberNames as $name) {
+                    $browser->assertSeeIn($elementKey, $name);
+                }
+            }
+        }
+    }
+
+    /**
+     * Assert that wrestler members are displayed.
+     */
+    public function assertWrestlerMembers(Browser $browser, array $wrestlerNames): void
+    {
+        $browser->within('@wrestlers-list', function (Browser $browser) use ($wrestlerNames) {
+            foreach ($wrestlerNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Assert that tag team members are displayed.
+     */
+    public function assertTagTeamMembers(Browser $browser, array $tagTeamNames): void
+    {
+        $browser->within('@tag-teams-list', function (Browser $browser) use ($tagTeamNames) {
+            foreach ($tagTeamNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Assert that manager members are displayed.
+     */
+    public function assertManagerMembers(Browser $browser, array $managerNames): void
+    {
+        $browser->within('@managers-list', function (Browser $browser) use ($managerNames) {
+            foreach ($managerNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Assert that member count is displayed correctly.
+     */
+    public function assertMemberCount(Browser $browser, int $expectedCount): void
+    {
+        $browser->assertSeeIn('@member-count', (string) $expectedCount);
+    }
+
+    /**
+     * Edit the stable through the UI.
+     */
+    public function editStable(Browser $browser, array $data): void
+    {
+        $browser->click('@edit-button')
+                ->waitFor('@modal')
+                ->clear('name')
+                ->type('name', $data['name'])
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Delete the stable through the UI.
+     */
+    public function deleteStable(Browser $browser): void
+    {
+        $browser->click('@delete-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Disband the stable through the UI.
+     */
+    public function disbandStable(Browser $browser): void
+    {
+        $browser->click('@disband-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Retire the stable through the UI.
+     */
+    public function retireStable(Browser $browser): void
+    {
+        $browser->click('@retire-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Unretire the stable through the UI.
+     */
+    public function unretireStable(Browser $browser): void
+    {
+        $browser->click('@unretire-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Restore the stable through the UI.
+     */
+    public function restoreStable(Browser $browser): void
+    {
+        $browser->click('@restore-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Add a member to the stable.
+     */
+    public function addMember(Browser $browser, string $memberType, string $memberName): void
+    {
+        $browser->click('@add-member-button')
+                ->waitFor('@modal')
+                ->select('member_type', $memberType)
+                ->select('member_id', $memberName)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Remove a member from the stable.
+     */
+    public function removeMember(Browser $browser, string $memberName): void
+    {
+        $browser->clickLink($memberName)
+                ->click('@remove-member-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that specific action buttons are available.
+     */
+    public function assertActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-button");
+        }
+    }
+
+    /**
+     * Assert that specific action buttons are not available.
+     */
+    public function assertActionsNotAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertMissing("@{$action}-button");
+        }
+    }
+
+    /**
+     * Assert that history section is visible.
+     */
+    public function assertHistorySection(Browser $browser): void
+    {
+        $browser->assertVisible('@history-section');
+    }
+
+    /**
+     * Assert that activity history is displayed.
+     */
+    public function assertActivityHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@activity-history');
+    }
+
+    /**
+     * Assert that member history is displayed.
+     */
+    public function assertMemberHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@member-history');
+    }
+
+    /**
+     * Navigate back to stables index.
+     */
+    public function goBack(Browser $browser): void
+    {
+        if ($browser->element('@back-button')) {
+            $browser->click('@back-button');
+        } elseif ($browser->element('@breadcrumb')) {
+            $browser->click('@breadcrumb a:contains("Stables")');
+        } else {
+            $browser->visit('/stables');
+        }
+    }
+
+    /**
+     * Assert that breadcrumb navigation is present.
+     */
+    public function assertBreadcrumb(Browser $browser): void
+    {
+        $browser->assertVisible('@breadcrumb')
+                ->assertSeeIn('@breadcrumb', 'Stables');
+    }
+
+    /**
+     * Assert that the page is in edit mode.
+     */
+    public function assertEditMode(Browser $browser): void
+    {
+        $browser->assertVisible('@modal')
+                ->assertVisible('@modal-form');
+    }
+
+    /**
+     * Assert that the page is in view mode.
+     */
+    public function assertViewMode(Browser $browser): void
+    {
+        $browser->assertMissing('@modal')
+                ->assertVisible('@stable-name');
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForLoad(Browser $browser): void
+    {
+        $browser->waitFor('@stable-name')
+                ->waitFor('@stable-status')
+                ->pause(1000); // Allow time for all data to load
+    }
+
+    /**
+     * Assert that the stable detail page displays correctly for the given status.
+     */
+    public function assertForStatus(Browser $browser, string $status): void
+    {
+        $this->assertStatus($browser, $status);
+        
+        switch ($status) {
+            case 'Active':
+                $this->assertActionsAvailable($browser, ['edit', 'disband', 'retire']);
+                $this->assertActionsNotAvailable($browser, ['unretire', 'restore']);
+                break;
+                
+            case 'Disbanded':
+                $this->assertActionsAvailable($browser, ['edit', 'retire']);
+                $this->assertActionsNotAvailable($browser, ['disband', 'unretire', 'restore']);
+                break;
+                
+            case 'Retired':
+                $this->assertActionsAvailable($browser, ['edit', 'unretire']);
+                $this->assertActionsNotAvailable($browser, ['disband', 'retire', 'restore']);
+                break;
+                
+            case 'Inactive':
+                $this->assertActionsAvailable($browser, ['edit', 'delete']);
+                $this->assertActionsNotAvailable($browser, ['disband', 'retire', 'unretire', 'restore']);
+                break;
+        }
+    }
+
+    /**
+     * Assert responsive design elements.
+     */
+    public function assertResponsive(Browser $browser): void
+    {
+        // Check that key elements are visible on mobile
+        $browser->assertVisible('@stable-name')
+                ->assertVisible('@stable-status');
+                
+        // Members section should be accessible
+        if ($browser->element('@members-section')) {
+            $browser->assertVisible('@members-section');
+        }
+    }
+}

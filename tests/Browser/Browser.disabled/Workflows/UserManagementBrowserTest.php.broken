@@ -1,0 +1,479 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\Users\Role;
+use App\Enums\Users\UserStatus;
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+
+/**
+ * Browser tests for user management visual workflows.
+ * 
+ * These tests focus on visual elements, user interactions, and browser behavior
+ * that Feature tests cannot cover. These tests use Laravel Dusk for full
+ * browser automation.
+ */
+
+describe('User Creation Visual Workflow', function () {
+    test('user creation modal displays correctly and accepts input', function () {
+        // Given: An authenticated administrator
+        $admin = administrator();
+        
+        // When & Then: Test the user creation workflow
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/users')
+                    ->screenshot('users-index')
+                    ->pause(2000) // Give page time to load
+                    ->assertPathIs('/users')
+                    ->assertTitle('Laravel');
+        });
+    });
+
+    test('basic browser functionality works for users', function () {
+        // When & Then: Test basic browser functionality
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                    ->screenshot('homepage-visit-users')
+                    ->assertTitle('Laravel'); // Basic assertion that browser works
+        });
+    });
+
+    test('user detail page can be accessed', function () {
+        // Given: A user with complete information
+        $user = User::factory()->administrator()->create([
+            'first_name' => 'John',
+            'last_name' => 'Administrator',
+            'email' => 'john@example.com',
+            'phone_number' => '1234567890'
+        ]);
+        
+        // When & Then: Test accessing user detail page
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs(administrator())
+                    ->visit("/users/{$user->id}")
+                    ->screenshot('user-detail')
+                    ->assertSee($user->first_name)
+                    ->assertSee($user->last_name)
+                    ->assertSee('John Administrator')
+                    ->assertPathIs("/users/{$user->id}");
+        });
+    });
+});
+
+describe('User Table Interaction Workflow', function () {
+    test('users index page has basic table structure', function () {
+        // When & Then: Verify the page has basic table structure
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('users-page-structure')
+                    ->pause(2000) // Wait for Livewire to load
+                    ->assertPathIs('/users');
+                    
+            // Check if basic page elements exist
+            if ($browser->element('table, .table, [role="table"]')) {
+                $browser->screenshot('users-table-structure-found');
+            } else {
+                $browser->screenshot('users-no-table-structure');
+            }
+        });
+    });
+
+    test('user actions dropdown functionality', function () {
+        // Given: A user that can have actions performed on it
+        $user = User::factory()->create([
+            'first_name' => 'Action',
+            'last_name' => 'Test',
+            'email' => 'action@test.com'
+        ]);
+
+        // When & Then: Test action dropdown interactions
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('before-user-actions')
+                    ->pause(3000); // Wait for page to fully load
+
+            // Look for action elements (specific selectors depend on implementation)
+            if ($browser->element('[data-testid="user-actions"]')) {
+                $browser->screenshot('user-actions-found');
+            } else {
+                $browser->screenshot('user-actions-not-found');
+            }
+        });
+    });
+
+    test('user search functionality works visually', function () {
+        // Given: Multiple users to search through
+        User::factory()->create([
+            'first_name' => 'John',
+            'last_name' => 'Searchable',
+            'email' => 'john@example.com'
+        ]);
+        User::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Findable', 
+            'email' => 'jane@example.com'
+        ]);
+        User::factory()->create([
+            'first_name' => 'Bob',
+            'last_name' => 'Discoverable',
+            'email' => 'bob@example.com'
+        ]);
+
+        // When & Then: Test search functionality
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('before-user-search')
+                    ->pause(2000);
+
+            // Look for search input (specific selector depends on implementation)
+            if ($browser->element('input[type="search"], input[placeholder*="search"], .search-input')) {
+                $browser->type('input[type="search"], input[placeholder*="search"], .search-input', 'John')
+                        ->pause(1000)
+                        ->screenshot('after-user-search')
+                        ->assertSee('John Searchable');
+            } else {
+                $browser->screenshot('user-search-input-not-found');
+            }
+        });
+    });
+});
+
+describe('User Detail Page Visual Workflow', function () {
+    test('user detail page displays user information correctly', function () {
+        // Given: A user with complete information
+        $user = User::factory()->administrator()->create([
+            'first_name' => 'Complete',
+            'last_name' => 'Information',
+            'email' => 'complete@info.com',
+            'phone_number' => '5551234567'
+        ]);
+        
+        // When & Then: Verify user detail page displays information
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs(administrator())
+                    ->visit("/users/{$user->id}")
+                    ->screenshot('user-detail-page')
+                    ->assertSee($user->first_name)
+                    ->assertSee($user->last_name)
+                    ->assertSee($user->email)
+                    ->assertSee('Complete Information')
+                    ->assertPathIs("/users/{$user->id}");
+        });
+    });
+
+    test('user detail page shows role information', function () {
+        // Given: Users with different roles
+        $adminUser = User::factory()->administrator()->create([
+            'first_name' => 'Admin',
+            'last_name' => 'User'
+        ]);
+        
+        $basicUser = User::factory()->create([
+            'role' => Role::Basic,
+            'first_name' => 'Basic',
+            'last_name' => 'User'
+        ]);
+        
+        // When & Then: Verify role information is displayed
+        $this->browse(function (Browser $browser) use ($adminUser, $basicUser) {
+            // Test admin user
+            $browser->loginAs(administrator())
+                    ->visit("/users/{$adminUser->id}")
+                    ->screenshot('admin-user-detail')
+                    ->assertSee('Admin User')
+                    ->assertSee('Administrator');
+                    
+            // Test basic user  
+            $browser->visit("/users/{$basicUser->id}")
+                    ->screenshot('basic-user-detail')
+                    ->assertSee('Basic User')
+                    ->assertSee('Basic');
+        });
+    });
+
+    test('user detail page shows status information', function () {
+        // Given: Users with different statuses
+        $activeUser = User::factory()->create([
+            'status' => UserStatus::Active,
+            'first_name' => 'Active',
+            'last_name' => 'User'
+        ]);
+        
+        $unverifiedUser = User::factory()->create([
+            'status' => UserStatus::Unverified,
+            'first_name' => 'Unverified',
+            'last_name' => 'User'
+        ]);
+        
+        // When & Then: Verify status information is displayed
+        $this->browse(function (Browser $browser) use ($activeUser, $unverifiedUser) {
+            $browser->loginAs(administrator())
+                    ->visit("/users/{$activeUser->id}")
+                    ->screenshot('active-user-status')
+                    ->assertSee('Active User')
+                    ->assertSee('Active');
+                    
+            $browser->visit("/users/{$unverifiedUser->id}")
+                    ->screenshot('unverified-user-status')
+                    ->assertSee('Unverified User')
+                    ->assertSee('Unverified');
+        });
+    });
+});
+
+describe('User Role and Permission Visual Workflow', function () {
+    test('administrator can access user management interface', function () {
+        // Given: An administrator user
+        $admin = administrator();
+        
+        // When & Then: Test administrator access
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/users')
+                    ->screenshot('admin-user-access')
+                    ->assertPathIs('/users')
+                    ->pause(2000);
+                    
+            // Administrator should see user management interface
+            if ($browser->element('table, .users-table, [data-testid="users-table"]')) {
+                $browser->screenshot('admin-sees-user-table');
+            } else {
+                $browser->screenshot('admin-no-user-table');
+            }
+        });
+    });
+
+    test('basic user cannot access user management interface', function () {
+        // Given: A basic user
+        $basicUser = basicUser();
+        
+        // When & Then: Test basic user restriction
+        $this->browse(function (Browser $browser) use ($basicUser) {
+            $browser->loginAs($basicUser)
+                    ->visit('/users')
+                    ->screenshot('basic-user-restricted-access')
+                    ->pause(2000);
+                    
+            // Should show 403 or redirect
+            $currentUrl = $browser->driver->getCurrentURL();
+            $browser->screenshot('basic-user-final-page');
+            
+            // Verify they're not on the users page
+            expect($currentUrl)->not->toContain('/users');
+        });
+    });
+
+    test('user can view their own profile', function () {
+        // Given: A basic user
+        $basicUser = basicUser();
+        
+        // When & Then: Test self-profile access
+        $this->browse(function (Browser $browser) use ($basicUser) {
+            $browser->loginAs($basicUser)
+                    ->visit("/users/{$basicUser->id}")
+                    ->screenshot('user-own-profile')
+                    ->assertSee($basicUser->first_name)
+                    ->assertSee($basicUser->last_name)
+                    ->assertPathIs("/users/{$basicUser->id}");
+        });
+    });
+
+    test('user cannot view other users profiles', function () {
+        // Given: A basic user and another user
+        $basicUser = basicUser();
+        $otherUser = User::factory()->create();
+        
+        // When & Then: Test profile access restriction
+        $this->browse(function (Browser $browser) use ($basicUser, $otherUser) {
+            $browser->loginAs($basicUser)
+                    ->visit("/users/{$otherUser->id}")
+                    ->screenshot('user-denied-other-profile')
+                    ->pause(2000);
+                    
+            // Should show 403 or redirect away from the profile
+            $currentUrl = $browser->driver->getCurrentURL();
+            expect($currentUrl)->not->toContain("/users/{$otherUser->id}");
+        });
+    });
+});
+
+describe('Navigation and Responsive Design', function () {
+    test('user management interface works on mobile viewport', function () {
+        // Given: A user to display
+        $user = User::factory()->create([
+            'first_name' => 'Mobile',
+            'last_name' => 'Test',
+            'email' => 'mobile@test.com'
+        ]);
+        
+        // When & Then: Test mobile viewport functionality
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('mobile-users')
+                    ->pause(2000)
+                    ->assertPathIs('/users');
+        });
+    });
+    
+    test('navigation between users index and detail works', function () {
+        // Given: A user to navigate to
+        $user = User::factory()->create([
+            'first_name' => 'Navigation',
+            'last_name' => 'Test',
+            'email' => 'nav@test.com'
+        ]);
+        
+        // When & Then: Test navigation workflow
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('before-user-navigation')
+                    ->pause(2000)
+                    ->visit("/users/{$user->id}")
+                    ->screenshot('after-user-navigation')
+                    ->assertSee($user->first_name)
+                    ->assertSee($user->last_name)
+                    ->assertPathIs("/users/{$user->id}");
+        });
+    });
+
+    test('users table responsive design works correctly', function () {
+        // Given: Multiple users to test table responsiveness
+        User::factory()->count(5)->create();
+        
+        // When & Then: Test responsive table behavior
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/users');
+
+            // Test desktop view
+            $browser->resize(1200, 800)
+                    ->screenshot('users-desktop-view')
+                    ->pause(1000);
+
+            // Test tablet view
+            $browser->resize(768, 1024)
+                    ->screenshot('users-tablet-view')
+                    ->pause(1000);
+
+            // Test mobile view
+            $browser->resize(375, 667)
+                    ->screenshot('users-mobile-view')
+                    ->pause(1000);
+        });
+    });
+});
+
+describe('User Form Modal Interactions', function () {
+    test('create user modal opens and accepts input', function () {
+        // When & Then: Test user creation modal
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('before-create-modal')
+                    ->pause(2000);
+
+            // Look for create button (selector depends on implementation)
+            if ($browser->element('[data-testid="create-user"], .btn-create, button:contains("Create")')) {
+                $browser->click('[data-testid="create-user"], .btn-create, button:contains("Create")')
+                        ->pause(1000)
+                        ->screenshot('create-modal-opened');
+
+                // Test form input if modal opened
+                if ($browser->element('.modal, [role="dialog"]')) {
+                    $browser->screenshot('user-modal-form-visible');
+                } else {
+                    $browser->screenshot('user-modal-not-visible');
+                }
+            } else {
+                $browser->screenshot('create-button-not-found');
+            }
+        });
+    });
+
+    test('edit user modal functionality', function () {
+        // Given: A user to edit
+        $user = User::factory()->create([
+            'first_name' => 'Editable',
+            'last_name' => 'User',
+            'email' => 'edit@example.com'
+        ]);
+
+        // When & Then: Test edit modal functionality
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs(administrator())
+                    ->visit('/users')
+                    ->screenshot('before-edit-modal')
+                    ->pause(2000);
+
+            // Look for edit action (selector depends on implementation)
+            if ($browser->element('[data-testid="edit-user"], .btn-edit')) {
+                $browser->click('[data-testid="edit-user"], .btn-edit')
+                        ->pause(1000)
+                        ->screenshot('edit-modal-opened');
+            } else {
+                $browser->screenshot('edit-button-not-found');
+            }
+        });
+    });
+});
+
+describe('Error Handling and Edge Cases', function () {
+    test('browser handles non-existent user gracefully', function () {
+        // When & Then: Test accessing non-existent user
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/users/99999')
+                    ->screenshot('non-existent-user')
+                    ->pause(1000);
+
+            // Should show 404 or appropriate error
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('browser handles unauthorized access gracefully', function () {
+        // Given: A basic user and another user's profile
+        $basicUser = basicUser();
+        $otherUser = User::factory()->create();
+
+        // When & Then: Test unauthorized access
+        $this->browse(function (Browser $browser) use ($basicUser, $otherUser) {
+            $browser->loginAs($basicUser)
+                    ->visit("/users/{$otherUser->id}")
+                    ->screenshot('unauthorized-user-access')
+                    ->pause(1000);
+
+            // Should show 403 or redirect to appropriate page
+            $currentUrl = $browser->driver->getCurrentURL();
+            expect($currentUrl)->not->toContain("/users/{$otherUser->id}");
+        });
+    });
+
+    test('browser handles empty user data gracefully', function () {
+        // Given: A user with minimal data
+        $user = User::factory()->create([
+            'first_name' => 'Minimal',
+            'last_name' => 'Data',
+            'phone_number' => null,
+            'avatar_path' => null
+        ]);
+
+        // When & Then: Test display of minimal user data
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->loginAs(administrator())
+                    ->visit("/users/{$user->id}")
+                    ->screenshot('minimal-user-data')
+                    ->assertSee('Minimal Data')
+                    ->pause(1000);
+        });
+    });
+});

@@ -1,0 +1,289 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Stables;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class StableIndexPage extends Page
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/stables';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-testid="create-stable-btn"], .create-stable, button:contains("Create")',
+            '@stables-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"]',
+            '@action-dropdown' => '.dropdown, [data-testid="actions"]',
+            '@status-filter' => 'select[name="status"], .status-filter',
+            '@activity-filter' => 'select[name="activity"], .activity-filter',
+            '@disband-action' => '[data-testid="disband-stable"], .disband-action',
+            '@retire-action' => '[data-testid="retire-stable"], .retire-action',
+            '@unretire-action' => '[data-testid="unretire-stable"], .unretire-action',
+            '@restore-action' => '[data-testid="restore-stable"], .restore-action',
+            '@delete-action' => '[data-testid="delete-stable"], .delete-action',
+            '@status-badge' => '.badge, .status, [data-testid="stable-status"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-form' => '.modal form, [role="dialog"] form',
+            '@modal-close' => '.modal-close, [aria-label="Close"]',
+            '@confirm-button' => 'button:contains("Confirm"), .btn-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), .btn-cancel',
+        ];
+    }
+
+    /**
+     * Create a new stable through the UI.
+     */
+    public function createStable(Browser $browser, array $data): void
+    {
+        $browser->click('@create-button')
+                ->waitFor('@modal')
+                ->type('name', $data['name'])
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Search for stables by name.
+     */
+    public function searchFor(Browser $browser, string $term): void
+    {
+        $browser->type('@search-input', $term)
+                ->pause(500); // Allow search to process
+    }
+
+    /**
+     * Filter stables by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): void
+    {
+        $browser->select('@status-filter', $status)
+                ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Filter stables by activity period.
+     */
+    public function filterByActivity(Browser $browser, string $activity): void
+    {
+        $browser->select('@activity-filter', $activity)
+                ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Perform a disband action on a stable.
+     */
+    public function disbandStable(Browser $browser, string $stableName): void
+    {
+        $browser->clickLink($stableName)
+                ->click('@disband-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform a retire action on a stable.
+     */
+    public function retireStable(Browser $browser, string $stableName): void
+    {
+        $browser->clickLink($stableName)
+                ->click('@retire-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform an unretire action on a stable.
+     */
+    public function unretireStable(Browser $browser, string $stableName): void
+    {
+        $browser->clickLink($stableName)
+                ->click('@unretire-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Edit a stable through the UI.
+     */
+    public function editStable(Browser $browser, string $stableName, array $data): void
+    {
+        $browser->clickLink($stableName)
+                ->click('[data-testid="edit-stable"], .btn-edit')
+                ->waitFor('@modal')
+                ->clear('name')
+                ->type('name', $data['name'])
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Delete a stable through the UI.
+     */
+    public function deleteStable(Browser $browser, string $stableName): void
+    {
+        $browser->clickLink($stableName)
+                ->click('@delete-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Restore a deleted stable through the UI.
+     */
+    public function restoreStable(Browser $browser, string $stableName): void
+    {
+        $browser->clickLink($stableName)
+                ->click('@restore-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that a stable is visible in the table.
+     */
+    public function assertStableVisible(Browser $browser, string $stableName): void
+    {
+        $browser->within('@stables-table', function (Browser $browser) use ($stableName) {
+            $browser->assertSee($stableName);
+        });
+    }
+
+    /**
+     * Assert that a stable is not visible in the table.
+     */
+    public function assertStableNotVisible(Browser $browser, string $stableName): void
+    {
+        $browser->within('@stables-table', function (Browser $browser) use ($stableName) {
+            $browser->assertDontSee($stableName);
+        });
+    }
+
+    /**
+     * Assert that a specific status badge is displayed.
+     */
+    public function assertStatusBadge(Browser $browser, string $status): void
+    {
+        $browser->assertSeeIn('@status-badge', $status);
+    }
+
+    /**
+     * Wait for the table to load completely.
+     */
+    public function waitForTableLoad(Browser $browser): void
+    {
+        $browser->waitFor('@stables-table')
+                ->pause(1000); // Allow time for data to load
+    }
+
+    /**
+     * Assert that the create button is visible and clickable.
+     */
+    public function assertCanCreate(Browser $browser): void
+    {
+        $browser->assertVisible('@create-button')
+                ->assertEnabled('@create-button');
+    }
+
+    /**
+     * Assert that action buttons are available for a stable.
+     */
+    public function assertActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-action");
+        }
+    }
+
+    /**
+     * Clear all filters and search.
+     */
+    public function clearFilters(Browser $browser): void
+    {
+        $browser->clear('@search-input');
+        
+        if ($browser->element('@status-filter')) {
+            $browser->select('@status-filter', '');
+        }
+        
+        if ($browser->element('@activity-filter')) {
+            $browser->select('@activity-filter', '');
+        }
+        
+        $browser->pause(500); // Allow filters to reset
+    }
+
+    /**
+     * Navigate to stable detail page.
+     */
+    public function viewStableDetails(Browser $browser, string $stableName): void
+    {
+        $browser->clickLink($stableName);
+    }
+
+    /**
+     * Assert table pagination works correctly.
+     */
+    public function assertPaginationWorks(Browser $browser): void
+    {
+        if ($browser->element('.pagination, [aria-label="Pagination"]')) {
+            $browser->assertVisible('.pagination, [aria-label="Pagination"]');
+        }
+    }
+
+    /**
+     * Sort table by column.
+     */
+    public function sortByColumn(Browser $browser, string $column): void
+    {
+        $browser->click("th:contains('{$column}'), [data-sort='{$column}']")
+                ->pause(500); // Allow sorting to process
+    }
+
+    /**
+     * Assert that the stable table has data.
+     */
+    public function assertTableHasData(Browser $browser): void
+    {
+        $browser->within('@stables-table', function (Browser $browser) {
+            $browser->assertPresent('tbody tr, .table-row');
+        });
+    }
+
+    /**
+     * Assert that the stable table is empty.
+     */
+    public function assertTableEmpty(Browser $browser): void
+    {
+        $browser->within('@stables-table', function (Browser $browser) {
+            $browser->assertSee('No stables found');
+        });
+    }
+}

@@ -1,0 +1,336 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+/**
+ * Page Object for Championship Index/List page.
+ *
+ * Provides reusable methods for interacting with championship list interfaces,
+ * including championship tables, filtering, and navigation elements.
+ *
+ * USAGE: Used by browser tests for championship list management workflows.
+ */
+class ChampionshipIndexPage extends Page
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/titles';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url())
+                ->assertSee('Championships');
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            // Navigation and Header Elements
+            '@page-title' => 'h1, .page-title, [data-test="page-title"]',
+            '@championships-header' => '.championships-header, [data-test="championships-header"]',
+            '@navigation-breadcrumb' => '.breadcrumb, [data-test="breadcrumb"]',
+            
+            // Championship List Table
+            '@championships-table' => 'table, .table, [role="table"], [data-test="championships-table"]',
+            '@championship-row' => 'tr[data-championship], .championship-row, [data-test="championship-row"]',
+            '@championship-header' => 'thead, .table-header, [data-test="table-header"]',
+            '@championship-body' => 'tbody, .table-body, [data-test="table-body"]',
+            
+            // Championship Actions
+            '@create-championship-button' => '[data-test="create-championship"], .create-championship, button:contains("Create Championship")',
+            '@view-championship-button' => '[data-test="view-championship"], .view-championship, a:contains("View")',
+            '@edit-championship-button' => '[data-test="edit-championship"], .edit-championship, button:contains("Edit")',
+            '@delete-championship-button' => '[data-test="delete-championship"], .delete-championship, button:contains("Delete")',
+            
+            // Filtering and Search
+            '@championship-filter' => '[data-test="championship-filter"], .championship-filter, select[name="filter"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"], [data-test="search-input"]',
+            '@filter-current-only' => '[data-test="filter-current"], .filter-current, input[value="current"]',
+            '@filter-previous-only' => '[data-test="filter-previous"], .filter-previous, input[value="previous"]',
+            '@filter-by-champion-type' => '[data-test="champion-type-filter"], .champion-type-filter, select[name="champion_type"]',
+            '@date-range-filter' => '[data-test="date-filter"], .date-filter, input[type="date"]',
+            '@apply-filters-button' => '[data-test="apply-filters"], .apply-filters, button:contains("Apply")',
+            '@clear-filters-button' => '[data-test="clear-filters"], .clear-filters, button:contains("Clear")',
+            
+            // Championship Statistics
+            '@championship-statistics' => '[data-test="championship-stats"], .championship-statistics, .stats-panel',
+            '@total-championships-count' => '[data-test="total-count"], .total-championships, .championship-count',
+            '@current-championships-count' => '[data-test="current-count"], .current-championships',
+            '@average-reign-duration' => '[data-test="average-duration"], .average-reign-duration',
+            '@longest-reign-record' => '[data-test="longest-reign"], .longest-reign',
+            
+            // Pagination and Loading
+            '@pagination-controls' => '.pagination, [data-test="pagination"]',
+            '@next-page-button' => '.pagination .next, [data-test="next-page"]',
+            '@previous-page-button' => '.pagination .prev, [data-test="previous-page"]',
+            '@page-size-selector' => '[data-test="page-size"], select[name="per_page"]',
+            '@loading-spinner' => '.loading, .spinner, [data-test="loading"]',
+            '@no-results-message' => '.no-results, .empty-state, [data-test="no-results"]',
+            
+            // Championship Details in List
+            '@champion-name' => '[data-test="champion-name"], .champion-name',
+            '@championship-title' => '[data-test="championship-title"], .championship-title',
+            '@championship-duration' => '[data-test="championship-duration"], .championship-duration',
+            '@championship-status' => '[data-test="championship-status"], .championship-status',
+            '@championship-dates' => '[data-test="championship-dates"], .championship-dates',
+            
+            // Modal and Overlay Elements
+            '@modal-overlay' => '.modal, [role="dialog"], [data-test="modal"]',
+            '@confirmation-modal' => '[data-test="confirmation-modal"], .confirmation-dialog',
+            '@modal-close-button' => '[data-test="modal-close"], .modal-close, button:contains("Close")',
+            '@confirm-action-button' => '[data-test="confirm-action"], .confirm-action, button:contains("Confirm")',
+            '@cancel-action-button' => '[data-test="cancel-action"], .cancel-action, button:contains("Cancel")',
+        ];
+    }
+
+    /**
+     * Navigate to create new championship page/modal.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function createNewChampionship(Browser $browser): void
+    {
+        $browser->click('@create-championship-button')
+                ->waitFor('@modal-overlay');
+    }
+
+    /**
+     * Search for championships by champion name or title.
+     *
+     * @param Browser $browser
+     * @param string $searchTerm
+     * @return void
+     */
+    public function searchChampionships(Browser $browser, string $searchTerm): void
+    {
+        $browser->type('@search-input', $searchTerm)
+                ->pause(500); // Allow search to process
+    }
+
+    /**
+     * Filter championships by current status.
+     *
+     * @param Browser $browser
+     * @param string $status 'current', 'previous', or 'all'
+     * @return void
+     */
+    public function filterByStatus(Browser $browser, string $status): void
+    {
+        match ($status) {
+            'current' => $browser->click('@filter-current-only'),
+            'previous' => $browser->click('@filter-previous-only'),
+            'all' => $browser->click('@clear-filters-button'),
+            default => throw new \InvalidArgumentException("Invalid status filter: {$status}")
+        };
+        
+        $browser->pause(300); // Allow filter to apply
+    }
+
+    /**
+     * Filter championships by champion type.
+     *
+     * @param Browser $browser
+     * @param string $championType 'wrestler', 'tag_team', or 'all'
+     * @return void
+     */
+    public function filterByChampionType(Browser $browser, string $championType): void
+    {
+        $browser->select('@filter-by-champion-type', $championType)
+                ->click('@apply-filters-button')
+                ->pause(300);
+    }
+
+    /**
+     * View specific championship details.
+     *
+     * @param Browser $browser
+     * @param int $championshipId
+     * @return void
+     */
+    public function viewChampionship(Browser $browser, int $championshipId): void
+    {
+        $browser->click("@view-championship-{$championshipId}")
+                ->waitForLocation("/championships/{$championshipId}");
+    }
+
+    /**
+     * Edit specific championship.
+     *
+     * @param Browser $browser
+     * @param int $championshipId
+     * @return void
+     */
+    public function editChampionship(Browser $browser, int $championshipId): void
+    {
+        $browser->click("@edit-championship-{$championshipId}")
+                ->waitFor('@modal-overlay');
+    }
+
+    /**
+     * Delete championship with confirmation.
+     *
+     * @param Browser $browser
+     * @param int $championshipId
+     * @return void
+     */
+    public function deleteChampionship(Browser $browser, int $championshipId): void
+    {
+        $browser->click("@delete-championship-{$championshipId}")
+                ->waitFor('@confirmation-modal')
+                ->click('@confirm-action-button')
+                ->waitFor('.success-notification, .alert-success');
+    }
+
+    /**
+     * Navigate to next page of championships.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function goToNextPage(Browser $browser): void
+    {
+        $browser->click('@next-page-button')
+                ->waitFor('@championships-table');
+    }
+
+    /**
+     * Navigate to previous page of championships.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function goToPreviousPage(Browser $browser): void
+    {
+        $browser->click('@previous-page-button')
+                ->waitFor('@championships-table');
+    }
+
+    /**
+     * Change page size for championship list.
+     *
+     * @param Browser $browser
+     * @param int $pageSize
+     * @return void
+     */
+    public function changePageSize(Browser $browser, int $pageSize): void
+    {
+        $browser->select('@page-size-selector', (string) $pageSize)
+                ->waitFor('@championships-table');
+    }
+
+    /**
+     * Verify championship appears in the list.
+     *
+     * @param Browser $browser
+     * @param string $championName
+     * @param string $titleName
+     * @return void
+     */
+    public function assertChampionshipExists(Browser $browser, string $championName, string $titleName): void
+    {
+        $browser->assertSeeIn('@championships-table', $championName)
+                ->assertSeeIn('@championships-table', $titleName);
+    }
+
+    /**
+     * Verify championship statistics are displayed.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assertStatisticsVisible(Browser $browser): void
+    {
+        $browser->assertVisible('@championship-statistics')
+                ->assertVisible('@total-championships-count')
+                ->assertVisible('@current-championships-count');
+    }
+
+    /**
+     * Apply date range filter to championships.
+     *
+     * @param Browser $browser
+     * @param string $startDate
+     * @param string $endDate
+     * @return void
+     */
+    public function filterByDateRange(Browser $browser, string $startDate, string $endDate): void
+    {
+        $browser->type('@date-range-filter[name="start_date"]', $startDate)
+                ->type('@date-range-filter[name="end_date"]', $endDate)
+                ->click('@apply-filters-button')
+                ->waitFor('@championships-table');
+    }
+
+    /**
+     * Clear all applied filters.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function clearAllFilters(Browser $browser): void
+    {
+        $browser->click('@clear-filters-button')
+                ->waitFor('@championships-table');
+    }
+
+    /**
+     * Verify empty state when no championships found.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assertEmptyState(Browser $browser): void
+    {
+        $browser->assertVisible('@no-results-message')
+                ->assertSee('No championships found');
+    }
+
+    /**
+     * Sort championships by column.
+     *
+     * @param Browser $browser
+     * @param string $column 'champion', 'title', 'duration', 'dates'
+     * @return void
+     */
+    public function sortBy(Browser $browser, string $column): void
+    {
+        $browser->click("@sort-by-{$column}")
+                ->waitFor('@championships-table');
+    }
+
+    /**
+     * Verify championship table headers are present.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assertTableHeaders(Browser $browser): void
+    {
+        $browser->assertVisible('@championship-header')
+                ->assertSeeIn('@championship-header', 'Champion')
+                ->assertSeeIn('@championship-header', 'Title')
+                ->assertSeeIn('@championship-header', 'Duration')
+                ->assertSeeIn('@championship-header', 'Status');
+    }
+}

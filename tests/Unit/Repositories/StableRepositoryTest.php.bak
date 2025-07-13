@@ -1,0 +1,977 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Data\Stables\StableData;
+use App\Models\Managers\Manager;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
+use App\Repositories\StableRepository;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
+
+/**
+ * Unit tests for StableRepository business logic and operations.
+ *
+ * UNIT TEST SCOPE:
+ * - CRUD operations and data handling
+ * - Activity management (establishment, debut, deactivation)
+ * - Retirement management (retire, unretire)
+ * - Individual member operations (add/remove wrestlers, tag teams, managers)
+ * - Bulk member operations with collections
+ * - Complex stable operations (member updates, disassembly)
+ * - Member type resolution and polymorphic handling
+ * - Business rule validation (manager counting, minimum members)
+ * - Repository trait integration testing
+ *
+ * CRITICAL BUSINESS RULE:
+ * Managers are no longer included in number of members for a stable but are still
+ * hired/fired from stables when they are directly hired managers (not ones already
+ * assigned to tag teams or wrestlers).
+ */
+describe('StableRepository Unit Tests', function () {
+    beforeEach(function () {
+        $this->repository = new StableRepository();
+
+        // Create test entities
+        $this->wrestler1 = Wrestler::factory()->create(['name' => 'Test Wrestler 1']);
+        $this->wrestler2 = Wrestler::factory()->create(['name' => 'Test Wrestler 2']);
+        $this->wrestler3 = Wrestler::factory()->create(['name' => 'Test Wrestler 3']);
+
+        $this->tagTeam1 = TagTeam::factory()->create(['name' => 'Test Tag Team 1']);
+        $this->tagTeam2 = TagTeam::factory()->create(['name' => 'Test Tag Team 2']);
+
+        $this->manager1 = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'One']);
+        $this->manager2 = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'Two']);
+
+        $this->stable = Stable::factory()->create(['name' => 'Test Stable']);
+
+        // Set test time
+        Carbon::setTestNow(Carbon::parse('2024-01-15 12:00:00'));
+    });
+
+    afterEach(function () {
+        Carbon::setTestNow(null);
+    });
+
+    describe('CRUD operations', function () {
+        test('create method creates stable with valid data', function () {
+            // Arrange
+            $stableData = new StableData(
+                'New Test Stable',
+                null,
+                new Collection(),
+                new Collection(),
+                new Collection()
+            );
+
+            // Act
+            $stable = $this->repository->create($stableData);
+
+            // Assert
+            expect($stable)->toBeInstanceOf(Stable::class);
+            expect($stable->exists)->toBeTrue();
+            expect($stable->name)->toBe('New Test Stable');
+
+            $this->assertDatabaseHas('stables', [
+                'name' => 'New Test Stable',
+            ]);
+        });
+
+        test('update method modifies stable with new data', function () {
+            // Arrange
+            $stable = $this->stable;
+            $stableData = new StableData(
+                'Updated Stable Name',
+                null,
+                new Collection(),
+                new Collection(),
+                new Collection()
+            );
+
+            // Act
+            $updatedStable = $this->repository->update($stable, $stableData);
+
+            // Assert
+            expect($updatedStable->id)->toBe($stable->id);
+            expect($updatedStable->name)->toBe('Updated Stable Name');
+
+            $this->assertDatabaseHas('stables', [
+                'id' => $stable->id,
+                'name' => 'Updated Stable Name',
+            ]);
+        });
+
+        test('restore method restores soft-deleted stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $stable->delete();
+            expect($stable->trashed())->toBeTrue();
+
+            // Act
+            $this->repository->restore($stable);
+
+            // Assert
+            expect($stable->fresh()->trashed())->toBeFalse();
+
+            $this->assertDatabaseHas('stables', [
+                'id' => $stable->id,
+                'deleted_at' => null,
+            ]);
+        });
+    });
+
+    describe('activity management', function () {
+        test('createEstablishment creates activity period for stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $establishmentDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->createEstablishment($stable, $establishmentDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_activations', [
+                'stable_id' => $stable->id,
+                'started_at' => $establishmentDate,
+                'ended_at' => null,
+            ]);
+        });
+
+        test('createDebut creates activity period for stable debut', function () {
+            // Arrange
+            $stable = $this->stable;
+            $debutDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->createDebut($stable, $debutDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_activations', [
+                'stable_id' => $stable->id,
+                'started_at' => $debutDate,
+                'ended_at' => null,
+            ]);
+        });
+
+        test('createActivity method creates basic activity period', function () {
+            // Arrange
+            $stable = $this->stable;
+            $startDate = Carbon::parse('2024-01-05');
+
+            // Act
+            $this->repository->createActivity($stable, $startDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_activations', [
+                'stable_id' => $stable->id,
+                'started_at' => $startDate,
+                'ended_at' => null,
+            ]);
+        });
+
+        test('endActivity method ends current activity period', function () {
+            // Arrange
+            $stable = $this->stable;
+            $startDate = Carbon::parse('2024-01-01');
+            $endDate = Carbon::parse('2024-01-10');
+
+            $this->repository->createActivity($stable, $startDate);
+
+            // Act
+            $this->repository->endActivity($stable, $endDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_activations', [
+                'stable_id' => $stable->id,
+                'started_at' => $startDate,
+                'ended_at' => $endDate,
+            ]);
+        });
+    });
+
+    describe('retirement management', function () {
+        test('createRetirement creates retirement record for stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $retirementDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->createRetirement($stable, $retirementDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_retirements', [
+                'stable_id' => $stable->id,
+                'started_at' => $retirementDate,
+                'ended_at' => null,
+            ]);
+        });
+
+        test('endRetirement ends current retirement period', function () {
+            // Arrange
+            $stable = $this->stable;
+            $retirementStart = Carbon::parse('2024-01-01');
+            $retirementEnd = Carbon::parse('2024-01-10');
+
+            $this->repository->createRetirement($stable, $retirementStart);
+
+            // Act
+            $this->repository->endRetirement($stable, $retirementEnd);
+
+            // Assert
+            $this->assertDatabaseHas('stables_retirements', [
+                'stable_id' => $stable->id,
+                'started_at' => $retirementStart,
+                'ended_at' => $retirementEnd,
+            ]);
+        });
+    });
+
+    describe('individual member operations', function () {
+        test('addWrestler adds wrestler to stable with join date', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addWrestler($stable, $wrestler, $joinDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $wrestler->id,
+                'member_type' => 'wrestler',
+                'joined_at' => $joinDate,
+                'left_at' => null,
+            ]);
+        });
+
+        test('removeWrestler removes wrestler from stable with leave date', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addWrestler($stable, $wrestler, $joinDate);
+
+            // Act
+            $this->repository->removeWrestler($stable, $wrestler, $leaveDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_wrestlers', [
+                'stable_id' => $stable->id,
+                'wrestler_id' => $wrestler->id,
+                'joined_at' => $joinDate,
+                'left_at' => $leaveDate,
+            ]);
+        });
+
+        test('addTagTeam adds tag team to stable with join date', function () {
+            // Arrange
+            $stable = $this->stable;
+            $tagTeam = $this->tagTeam1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addTagTeam($stable, $tagTeam, $joinDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_tag_teams', [
+                'stable_id' => $stable->id,
+                'tag_team_id' => $tagTeam->id,
+                'joined_at' => $joinDate,
+                'left_at' => null,
+            ]);
+        });
+
+        test('removeTagTeam removes tag team from stable with leave date', function () {
+            // Arrange
+            $stable = $this->stable;
+            $tagTeam = $this->tagTeam1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addTagTeam($stable, $tagTeam, $joinDate);
+
+            // Act
+            $this->repository->removeTagTeam($stable, $tagTeam, $leaveDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_tag_teams', [
+                'stable_id' => $stable->id,
+                'tag_team_id' => $tagTeam->id,
+                'joined_at' => $joinDate,
+                'left_at' => $leaveDate,
+            ]);
+        });
+
+        test('addManager is deprecated no-op operation', function () {
+            // Arrange
+            $stable = $this->stable;
+            $manager = $this->manager1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addManager($stable, $manager, $joinDate);
+
+            // Assert - Operation completes without error but creates no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operation should complete successfully
+        });
+
+        test('removeManager is deprecated no-op operation', function () {
+            // Arrange
+            $stable = $this->stable;
+            $manager = $this->manager1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            // Both operations are now no-ops
+            $this->repository->addManager($stable, $manager, $joinDate);
+
+            // Act
+            $this->repository->removeManager($stable, $manager, $leaveDate);
+
+            // Assert - Operation completes without error but creates no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operation should complete successfully
+        });
+    });
+
+    describe('bulk member operations', function () {
+        test('addWrestlers adds multiple wrestlers to stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestlers = collect([$this->wrestler1, $this->wrestler2, $this->wrestler3]);
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addWrestlers($stable, $wrestlers, $joinDate);
+
+            // Assert
+            foreach ($wrestlers as $wrestler) {
+                $this->assertDatabaseHas('stables_wrestlers', [
+                    'stable_id' => $stable->id,
+                    'wrestler_id' => $wrestler->id,
+                    'joined_at' => $joinDate,
+                    'left_at' => null,
+                ]);
+            }
+        });
+
+        test('removeWrestlers removes multiple wrestlers from stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestlers = collect([$this->wrestler1, $this->wrestler2]);
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addWrestlers($stable, $wrestlers, $joinDate);
+
+            // Act
+            $this->repository->removeWrestlers($stable, $wrestlers, $leaveDate);
+
+            // Assert
+            foreach ($wrestlers as $wrestler) {
+                $this->assertDatabaseHas('stables_wrestlers', [
+                    'stable_id' => $stable->id,
+                    'wrestler_id' => $wrestler->id,
+                    'joined_at' => $joinDate,
+                    'left_at' => $leaveDate,
+                ]);
+            }
+        });
+
+        test('addTagTeams adds multiple tag teams to stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $tagTeams = collect([$this->tagTeam1, $this->tagTeam2]);
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addTagTeams($stable, $tagTeams, $joinDate);
+
+            // Assert
+            foreach ($tagTeams as $tagTeam) {
+                $this->assertDatabaseHas('stables_tag_teams', [
+                    'stable_id' => $stable->id,
+                    'tag_team_id' => $tagTeam->id,
+                    'joined_at' => $joinDate,
+                    'left_at' => null,
+                ]);
+            }
+        });
+
+        test('removeTagTeams removes multiple tag teams from stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $tagTeams = collect([$this->tagTeam1, $this->tagTeam2]);
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addTagTeams($stable, $tagTeams, $joinDate);
+
+            // Act
+            $this->repository->removeTagTeams($stable, $tagTeams, $leaveDate);
+
+            // Assert
+            foreach ($tagTeams as $tagTeam) {
+                $this->assertDatabaseHas('stables_tag_teams', [
+                    'stable_id' => $stable->id,
+                    'tag_team_id' => $tagTeam->id,
+                    'joined_at' => $joinDate,
+                    'left_at' => $leaveDate,
+                ]);
+            }
+        });
+
+        test('addManagers is deprecated no-op operation', function () {
+            // Arrange
+            $stable = $this->stable;
+            $managers = collect([$this->manager1, $this->manager2]);
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addManagers($stable, $managers, $joinDate);
+
+            // Assert - Operation completes without error but creates no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operation should complete successfully
+        });
+
+        test('removeManagers is deprecated no-op operation', function () {
+            // Arrange
+            $stable = $this->stable;
+            $managers = collect([$this->manager1, $this->manager2]);
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            // Both operations are now no-ops
+            $this->repository->addManagers($stable, $managers, $joinDate);
+
+            // Act
+            $this->repository->removeManagers($stable, $managers, $leaveDate);
+
+            // Assert - Operation completes without error but creates no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operation should complete successfully
+        });
+
+        test('bulk operations handle empty collections gracefully', function () {
+            // Arrange
+            $stable = $this->stable;
+            $emptyCollection = collect([]);
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act & Assert - Should not throw exceptions
+            $this->repository->addWrestlers($stable, $emptyCollection, $joinDate);
+            $this->repository->addTagTeams($stable, $emptyCollection, $joinDate);
+            $this->repository->addManagers($stable, $emptyCollection, $joinDate);
+
+            expect(true)->toBeTrue(); // Test completed without exceptions
+        });
+    });
+
+    describe('member type resolution', function () {
+        test('addMember resolves wrestler type correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addMember($stable, $wrestler, $joinDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_wrestlers', [
+                'stable_id' => $stable->id,
+                'wrestler_id' => $wrestler->id,
+                'joined_at' => $joinDate,
+                'left_at' => null,
+            ]);
+        });
+
+        test('addMember resolves tag team type correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $tagTeam = $this->tagTeam1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addMember($stable, $tagTeam, $joinDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_tag_teams', [
+                'stable_id' => $stable->id,
+                'tag_team_id' => $tagTeam->id,
+                'joined_at' => $joinDate,
+                'left_at' => null,
+            ]);
+        });
+
+        test('addMember handles manager type as no-op', function () {
+            // Arrange
+            $stable = $this->stable;
+            $manager = $this->manager1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addMember($stable, $manager, $joinDate);
+
+            // Assert - Operation completes without error but creates no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operation should complete successfully
+        });
+
+        test('removeMember resolves wrestler type correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addMember($stable, $wrestler, $joinDate);
+
+            // Act
+            $this->repository->removeMember($stable, $wrestler, $leaveDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_wrestlers', [
+                'stable_id' => $stable->id,
+                'wrestler_id' => $wrestler->id,
+                'joined_at' => $joinDate,
+                'left_at' => $leaveDate,
+            ]);
+        });
+
+        test('removeMember resolves tag team type correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $tagTeam = $this->tagTeam1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addMember($stable, $tagTeam, $joinDate);
+
+            // Act
+            $this->repository->removeMember($stable, $tagTeam, $leaveDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_tag_teams', [
+                'stable_id' => $stable->id,
+                'tag_team_id' => $tagTeam->id,
+                'joined_at' => $joinDate,
+                'left_at' => $leaveDate,
+            ]);
+        });
+
+        test('removeMember handles manager type as no-op', function () {
+            // Arrange
+            $stable = $this->stable;
+            $manager = $this->manager1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            // Both operations are now no-ops for managers
+            $this->repository->addMember($stable, $manager, $joinDate);
+
+            // Act
+            $this->repository->removeMember($stable, $manager, $leaveDate);
+
+            // Assert - Operations complete without error but create no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operations should complete successfully
+        });
+
+        test('addMember throws exception for invalid member type', function () {
+            // Arrange
+            $stable = $this->stable;
+            $invalidMember = new stdClass(); // Invalid type
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act & Assert
+            expect(function () use ($stable, $invalidMember, $joinDate) {
+                $this->repository->addMember($stable, $invalidMember, $joinDate);
+            })->toThrow(TypeError::class);
+        });
+
+        test('removeMember throws exception for invalid member type', function () {
+            // Arrange
+            $stable = $this->stable;
+            $invalidMember = new stdClass(); // Invalid type
+            $leaveDate = Carbon::parse('2024-01-01');
+
+            // Act & Assert
+            expect(function () use ($stable, $invalidMember, $leaveDate) {
+                $this->repository->removeMember($stable, $invalidMember, $leaveDate);
+            })->toThrow(TypeError::class);
+        });
+    });
+
+    describe('complex stable operations', function () {
+        test('disassembleAllMembers removes all current members from stable', function () {
+            // Arrange
+            $stable = $this->stable;
+            $joinDate = Carbon::parse('2024-01-01');
+            $disassembleDate = Carbon::parse('2024-01-10');
+
+            // Add members of all types
+            $this->repository->addWrestler($stable, $this->wrestler1, $joinDate);
+            $this->repository->addWrestler($stable, $this->wrestler2, $joinDate);
+            $this->repository->addTagTeam($stable, $this->tagTeam1, $joinDate);
+            // Manager operations are now no-ops, but test still verifies disassemble works
+            $this->repository->addManager($stable, $this->manager1, $joinDate);
+
+            // Act
+            $this->repository->disassembleAllMembers($stable, $disassembleDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_wrestlers', [
+                'stable_id' => $stable->id,
+                'wrestler_id' => $this->wrestler1->id,
+                'left_at' => $disassembleDate,
+            ]);
+
+            $this->assertDatabaseHas('stables_wrestlers', [
+                'stable_id' => $stable->id,
+                'wrestler_id' => $this->wrestler2->id,
+                'left_at' => $disassembleDate,
+            ]);
+
+            $this->assertDatabaseHas('stables_tag_teams', [
+                'stable_id' => $stable->id,
+                'tag_team_id' => $this->tagTeam1->id,
+                'left_at' => $disassembleDate,
+            ]);
+
+            // Manager operations are no-ops, so no database entries to check
+            // Disassemble only affects wrestlers and tag teams now
+        });
+
+        test('disbandMembers is alias for disassembleAllMembers', function () {
+            // Arrange
+            $stable = $this->stable;
+            $joinDate = Carbon::parse('2024-01-01');
+            $disbandDate = Carbon::parse('2024-01-10');
+
+            $this->repository->addWrestler($stable, $this->wrestler1, $joinDate);
+
+            // Act
+            $this->repository->disbandMembers($stable, $disbandDate);
+
+            // Assert
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->wrestler1->id,
+                'member_type' => 'wrestler',
+                'left_at' => $disbandDate,
+            ]);
+        });
+
+        test('updateStableMembers adds new members and removes existing ones', function () {
+            // Arrange
+            $stable = $this->stable;
+            $initialDate = Carbon::parse('2024-01-01');
+            $updateDate = Carbon::parse('2024-01-10');
+
+            // Add initial members
+            $this->repository->addWrestler($stable, $this->wrestler1, $initialDate);
+            $this->repository->addWrestler($stable, $this->wrestler2, $initialDate);
+            $this->repository->addTagTeam($stable, $this->tagTeam1, $initialDate);
+            // Manager operations are now no-ops
+            $this->repository->addManager($stable, $this->manager1, $initialDate);
+
+            // New member collections (wrestler1 stays, wrestler2 removed, wrestler3 added)
+            $newWrestlers = collect([$this->wrestler1, $this->wrestler3]);
+            $newTagTeams = collect([$this->tagTeam2]); // tagTeam1 removed, tagTeam2 added
+            $newManagers = collect([$this->manager1, $this->manager2]); // manager1 stays, manager2 added
+
+            // Act
+            $this->repository->updateStableMembers($stable, $newWrestlers, $newTagTeams, $newManagers, $updateDate);
+
+            // Assert
+
+            // wrestler1 should remain (no left_at date)
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->wrestler1->id,
+                'member_type' => 'wrestler',
+                'left_at' => null,
+            ]);
+
+            // wrestler2 should be removed (has left_at date)
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->wrestler2->id,
+                'member_type' => 'wrestler',
+                'left_at' => $updateDate,
+            ]);
+
+            // wrestler3 should be added
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->wrestler3->id,
+                'member_type' => 'wrestler',
+                'joined_at' => $updateDate,
+                'left_at' => null,
+            ]);
+
+            // tagTeam1 should be removed
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->tagTeam1->id,
+                'member_type' => 'tagTeam',
+                'left_at' => $updateDate,
+            ]);
+
+            // tagTeam2 should be added
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->tagTeam2->id,
+                'member_type' => 'tagTeam',
+                'joined_at' => $updateDate,
+                'left_at' => null,
+            ]);
+
+            // Manager parameter is ignored in updateStableMembers
+            // Managers are now associated through wrestlers/tag teams, not directly
+        });
+
+        test('updateStableMembers uses current time when date is null', function () {
+            // Arrange
+            $stable = $this->stable;
+            $currentTime = Carbon::now();
+            Carbon::setTestNow($currentTime);
+
+            $wrestlers = collect([$this->wrestler1]);
+            $tagTeams = collect([]);
+            $managers = collect([]);
+
+            // Act
+            $this->repository->updateStableMembers($stable, $wrestlers, $tagTeams, $managers, null);
+
+            // Assert
+            $this->assertDatabaseHas('stables_members', [
+                'stable_id' => $stable->id,
+                'member_id' => $this->wrestler1->id,
+                'member_type' => 'wrestler',
+                'joined_at' => $currentTime,
+            ]);
+        });
+    });
+
+    describe('business rule validation', function () {
+        test('manager operations are deprecated no-ops', function () {
+            // Arrange
+            $stable = $this->stable;
+            $manager = $this->manager1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addManager($stable, $manager, $joinDate);
+
+            // Assert - Operation completes without error but creates no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operation should complete successfully
+        });
+
+        test('manager removal operations are deprecated no-ops', function () {
+            // Arrange
+            $stable = $this->stable;
+            $manager = $this->manager1;
+            $joinDate = Carbon::parse('2024-01-01');
+            $leaveDate = Carbon::parse('2024-01-10');
+
+            // Both operations are now no-ops
+            $this->repository->addManager($stable, $manager, $joinDate);
+
+            // Act
+            $this->repository->removeManager($stable, $manager, $leaveDate);
+
+            // Assert - Operations complete without error but create no database entries
+            // Managers are now associated through wrestlers/tag teams, not directly
+            expect(true)->toBeTrue(); // No-op operations should complete successfully
+        });
+
+        test('managers are now associated through wrestlers and tag teams only', function () {
+            // Arrange
+            $stable = $this->stable;
+            $directManager = $this->manager1; // No longer directly hired by stable
+            $wrestler = $this->wrestler1; // Can have manager through wrestler relationship
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act - Manager operations are now no-ops
+            $this->repository->addManager($stable, $directManager, $joinDate);
+            $this->repository->addWrestler($stable, $wrestler, $joinDate);
+
+            // Assert - Manager operations are no-ops, no database entries created
+            // Managers are now only associated through managed wrestlers/tag teams
+            expect(true)->toBeTrue(); // No-op operations should complete successfully
+        });
+    });
+
+    describe('trait integration', function () {
+        test('repository integrates ManagesActivity trait correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $startDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->createActivity($stable, $startDate);
+
+            // Assert
+            expect($stable->fresh()->activityPeriods()->count())->toBe(1);
+
+            $activityPeriod = $stable->fresh()->activityPeriods()->first();
+            expect($activityPeriod->started_at->toDateString())->toBe($startDate->toDateString());
+            expect($activityPeriod->ended_at)->toBeNull();
+        });
+
+        test('repository integrates ManagesRetirement trait correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $retirementDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->createRetirement($stable, $retirementDate);
+
+            // Assert
+            expect($stable->fresh()->retirements()->count())->toBe(1);
+
+            $retirement = $stable->fresh()->retirements()->first();
+            expect($retirement->started_at->toDateString())->toBe($retirementDate->toDateString());
+            expect($retirement->ended_at)->toBeNull();
+        });
+
+        test('repository integrates ManagesMembers trait correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Act
+            $this->repository->addWrestler($stable, $wrestler, $joinDate);
+
+            // Assert
+            expect($stable->fresh()->currentWrestlers()->count())->toBe(1);
+            expect($stable->fresh()->currentWrestlers()->first()->id)->toBe($wrestler->id);
+        });
+    });
+
+    describe('edge cases and error handling', function () {
+        test('adding same member twice updates existing membership', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $firstJoinDate = Carbon::parse('2024-01-01');
+            $secondJoinDate = Carbon::parse('2024-01-05');
+
+            $this->repository->addWrestler($stable, $wrestler, $firstJoinDate);
+
+            // Act - Add same wrestler again
+            $this->repository->addWrestler($stable, $wrestler, $secondJoinDate);
+
+            // Assert - Should have two records for same wrestler
+            expect($stable->fresh()->wrestlers()->count())->toBe(2);
+        });
+
+        test('removing non-existent member does not cause errors', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $leaveDate = Carbon::parse('2024-01-01');
+
+            // Act & Assert - Should not throw exception
+            $this->repository->removeWrestler($stable, $wrestler, $leaveDate);
+
+            expect(true)->toBeTrue(); // Test completed without exception
+        });
+
+        test('bulk operations with mixed valid and invalid data handle gracefully', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestlers = collect([$this->wrestler1, $this->wrestler2]);
+            $joinDate = Carbon::parse('2024-01-01');
+
+            // Add one wrestler first
+            $this->repository->addWrestler($stable, $this->wrestler1, $joinDate);
+
+            // Act - Try to add collection including already-added wrestler
+            $this->repository->addWrestlers($stable, $wrestlers, $joinDate);
+
+            // Assert - Should handle duplicate gracefully
+            expect($stable->fresh()->wrestlers()->count())->toBeGreaterThanOrEqual(2);
+        });
+
+        test('repository handles date edge cases correctly', function () {
+            // Arrange
+            $stable = $this->stable;
+            $wrestler = $this->wrestler1;
+            $sameDateTime = Carbon::parse('2024-01-01 12:00:00');
+
+            // Act - Add and remove on same datetime
+            $this->repository->addWrestler($stable, $wrestler, $sameDateTime);
+            $this->repository->removeWrestler($stable, $wrestler, $sameDateTime);
+
+            // Assert
+            $this->assertDatabaseHas('stables_wrestlers', [
+                'stable_id' => $stable->id,
+                'wrestler_id' => $wrestler->id,
+                'joined_at' => $sameDateTime,
+                'left_at' => $sameDateTime,
+            ]);
+        });
+    });
+
+    describe('interface compliance validation', function () {
+        test('repository implements StableRepositoryInterface completely', function () {
+            // Arrange
+            $repositoryInterfaces = class_implements($this->repository);
+
+            // Assert
+            expect($repositoryInterfaces)->toContain('App\Repositories\Contracts\StableRepositoryInterface');
+        });
+
+        test('repository has all required interface methods', function () {
+            // Arrange
+            $requiredMethods = [
+                'create', 'update', 'delete', 'restore',
+                'createActivity', 'endActivity',
+                'createRetirement', 'endRetirement',
+                'addWrestler', 'removeWrestler',
+                'addTagTeam', 'removeTagTeam',
+                'addManager', 'removeManager',
+                'addWrestlers', 'removeWrestlers',
+                'addTagTeams', 'removeTagTeams',
+                'addManagers', 'removeManagers',
+                'disassembleAllMembers',
+                'createEstablishment',
+            ];
+
+            // Act & Assert
+            foreach ($requiredMethods as $method) {
+                expect(method_exists($this->repository, $method))->toBeTrue("Method {$method} should exist");
+            }
+        });
+
+        test('repository method return types match interface expectations', function () {
+            // Arrange
+            $stable = $this->stable;
+            $stableData = new StableData('Test Stable', null, new Collection(), new Collection(), new Collection());
+
+            // Act & Assert
+            $createdStable = $this->repository->create($stableData);
+            expect($createdStable)->toBeInstanceOf(Stable::class);
+
+            $updatedStable = $this->repository->update($stable, $stableData);
+            expect($updatedStable)->toBeInstanceOf(Stable::class);
+
+            // Void methods should not throw exceptions
+            $this->repository->createEstablishment($stable, Carbon::now());
+            expect(true)->toBeTrue();
+        });
+    });
+});

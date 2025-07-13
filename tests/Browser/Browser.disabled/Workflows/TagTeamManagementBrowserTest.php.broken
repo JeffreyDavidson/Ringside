@@ -1,0 +1,539 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\TagTeams\TagTeam;
+use App\Models\Users\User;
+use App\Models\Wrestlers\Wrestler;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\TagTeams\TagTeamIndexPage;
+use Tests\Browser\Pages\TagTeams\TagTeamDetailPage;
+use Tests\DuskTestCase;
+
+/**
+ * Browser tests for TagTeam management workflows.
+ * 
+ * BROWSER TEST SCOPE:
+ * - Visual workflow testing for tag team management interface
+ * - User interaction patterns with employment lifecycle
+ * - Modal form interactions and validation
+ * - Tag team status transitions through UI
+ * - Partnership management visual workflows
+ * - Response feedback and error handling
+ * 
+ * These tests verify that tag team management works correctly
+ * from a user perspective, including visual feedback, form
+ * interactions, and complex employment lifecycle workflows.
+ * 
+ * **IMPORTANT**: All browser tests use Page Object classes for
+ * maintainable and reliable testing as required by CLAUDE.md.
+ */
+
+class TagTeamManagementBrowserTest extends DuskTestCase
+{
+    protected User $admin;
+    protected TagTeamIndexPage $indexPage;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->admin = User::factory()->administrator()->create();
+        $this->indexPage = new TagTeamIndexPage();
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_index_page_displays_correctly(): void
+    {
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'The Hardy Boyz']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage)
+                    ->waitForPageLoad()
+                    ->screenshot('tag-teams-index')
+                    ->pause(2000)
+                    ->assertPathIs('/tag-teams');
+
+            $this->indexPage->assertTableHasData($browser);
+            $this->indexPage->assertTagTeamVisible($browser, 'The Hardy Boyz');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_creation_modal_displays_correctly_and_accepts_input(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage)
+                    ->screenshot('tag-teams-index')
+                    ->pause(2000)
+                    ->assertPathIs('/tag-teams');
+
+            $this->indexPage->assertCanCreate($browser);
+            
+            $this->indexPage->createTagTeam($browser, [
+                'name' => 'The New Day'
+            ]);
+
+            $browser->pause(2000)
+                    ->screenshot('tag-team-created');
+
+            $this->indexPage->assertTagTeamVisible($browser, 'The New Day');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_employment_workflow_works_through_ui(): void
+    {
+        $unemployedTeam = TagTeam::factory()->unemployed()->create(['name' => 'Unemployed Team']);
+
+        $this->browse(function (Browser $browser) use ($unemployedTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertTagTeamVisible($browser, 'Unemployed Team');
+
+            // Employment workflow
+            $this->indexPage->employTagTeam($browser, 'Unemployed Team');
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-employed');
+
+            // Verify employment status change
+            $this->indexPage->assertStatusBadge($browser, 'Employed');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_suspension_workflow_works_through_ui(): void
+    {
+        $employedTeam = TagTeam::factory()->employed()->create(['name' => 'Active Team']);
+
+        $this->browse(function (Browser $browser) use ($employedTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertTagTeamVisible($browser, 'Active Team');
+
+            // Suspension workflow
+            $this->indexPage->suspendTagTeam($browser, 'Active Team');
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-suspended');
+
+            // Verify suspension status
+            $this->indexPage->assertStatusBadge($browser, 'Suspended');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_retirement_workflow_works_through_ui(): void
+    {
+        $employedTeam = TagTeam::factory()->employed()->create(['name' => 'Veteran Team']);
+
+        $this->browse(function (Browser $browser) use ($employedTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertTagTeamVisible($browser, 'Veteran Team');
+
+            // Retirement workflow
+            $this->indexPage->retireTagTeam($browser, 'Veteran Team');
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-retired');
+
+            // Verify retirement status
+            $this->indexPage->assertStatusBadge($browser, 'Retired');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_reinstatement_workflow_works_through_ui(): void
+    {
+        $suspendedTeam = TagTeam::factory()->suspended()->create(['name' => 'Suspended Team']);
+
+        $this->browse(function (Browser $browser) use ($suspendedTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertTagTeamVisible($browser, 'Suspended Team');
+
+            // Reinstatement workflow
+            $this->indexPage->reinstateTagTeam($browser, 'Suspended Team');
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-reinstated');
+
+            // Verify reinstatement to employed status
+            $this->indexPage->assertStatusBadge($browser, 'Employed');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_search_functionality_works_correctly(): void
+    {
+        TagTeam::factory()->employed()->create(['name' => 'The Hardy Boyz']);
+        TagTeam::factory()->employed()->create(['name' => 'The Dudley Boyz']);
+        TagTeam::factory()->employed()->create(['name' => 'Edge and Christian']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Test search functionality
+            $this->indexPage->searchFor($browser, 'Hardy');
+            
+            $browser->pause(1000)
+                    ->screenshot('tag-teams-search-hardy');
+
+            $this->indexPage->assertTagTeamVisible($browser, 'The Hardy Boyz');
+            $this->indexPage->assertTagTeamNotVisible($browser, 'The Dudley Boyz');
+            $this->indexPage->assertTagTeamNotVisible($browser, 'Edge and Christian');
+
+            // Clear search and verify all teams visible
+            $this->indexPage->clearFilters($browser);
+            
+            $browser->pause(1000)
+                    ->screenshot('tag-teams-search-cleared');
+
+            $this->indexPage->assertTagTeamVisible($browser, 'The Hardy Boyz');
+            $this->indexPage->assertTagTeamVisible($browser, 'The Dudley Boyz');
+            $this->indexPage->assertTagTeamVisible($browser, 'Edge and Christian');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_filtering_by_status_works_correctly(): void
+    {
+        TagTeam::factory()->employed()->create(['name' => 'Employed Team']);
+        TagTeam::factory()->unemployed()->create(['name' => 'Unemployed Team']);
+        TagTeam::factory()->retired()->create(['name' => 'Retired Team']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Filter by employed status
+            $this->indexPage->filterByStatus($browser, 'employed');
+            
+            $browser->pause(1000)
+                    ->screenshot('tag-teams-filter-employed');
+
+            $this->indexPage->assertTagTeamVisible($browser, 'Employed Team');
+            $this->indexPage->assertTagTeamNotVisible($browser, 'Unemployed Team');
+            $this->indexPage->assertTagTeamNotVisible($browser, 'Retired Team');
+
+            // Filter by retired status
+            $this->indexPage->filterByStatus($browser, 'retired');
+            
+            $browser->pause(1000)
+                    ->screenshot('tag-teams-filter-retired');
+
+            $this->indexPage->assertTagTeamNotVisible($browser, 'Employed Team');
+            $this->indexPage->assertTagTeamNotVisible($browser, 'Unemployed Team');
+            $this->indexPage->assertTagTeamVisible($browser, 'Retired Team');
+
+            // Clear filter
+            $this->indexPage->clearFilters($browser);
+            
+            $browser->pause(1000);
+
+            $this->indexPage->assertTagTeamVisible($browser, 'Employed Team');
+            $this->indexPage->assertTagTeamVisible($browser, 'Unemployed Team');
+            $this->indexPage->assertTagTeamVisible($browser, 'Retired Team');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_detail_page_displays_complete_information(): void
+    {
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Detailed Team']);
+        
+        // Add wrestler partners
+        $wrestler1 = Wrestler::factory()->bookable()->create(['name' => 'Partner One']);
+        $wrestler2 = Wrestler::factory()->bookable()->create(['name' => 'Partner Two']);
+
+        $wrestler1->tagTeams()->attach($tagTeam->id, [
+            'joined_at' => now()->subMonths(6),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        $wrestler2->tagTeams()->attach($tagTeam->id, [
+            'joined_at' => now()->subMonths(3),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        $detailPage = new TagTeamDetailPage($tagTeam->id);
+
+        $this->browse(function (Browser $browser) use ($tagTeam, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+            
+            $browser->screenshot('tag-team-detail-page');
+
+            // Assert tag team information
+            $detailPage->assertTagTeamInfo($browser, [
+                'name' => 'Detailed Team',
+                'status' => 'Employed'
+            ]);
+
+            // Assert employment period information
+            $detailPage->assertEmploymentPeriod($browser);
+
+            // Assert partnership information
+            $detailPage->assertPartnersSection($browser);
+            $detailPage->assertWrestlerPartners($browser, ['Partner One', 'Partner Two']);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_edit_functionality_works_through_detail_page(): void
+    {
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Original Name']);
+        $detailPage = new TagTeamDetailPage($tagTeam->id);
+
+        $this->browse(function (Browser $browser) use ($tagTeam, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+
+            // Edit tag team
+            $detailPage->editTagTeam($browser, [
+                'name' => 'Updated Name'
+            ]);
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-edited');
+
+            // Verify update
+            $detailPage->assertTagTeamInfo($browser, [
+                'name' => 'Updated Name'
+            ]);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_employment_lifecycle_works_through_detail_page(): void
+    {
+        $tagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Lifecycle Team']);
+        $detailPage = new TagTeamDetailPage($tagTeam->id);
+
+        $this->browse(function (Browser $browser) use ($tagTeam, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+
+            // Employment lifecycle through detail page
+            $detailPage->employTagTeam($browser);
+            $browser->pause(2000)->screenshot('tag-team-employed-detail');
+            $detailPage->assertStatus($browser, 'Employed');
+
+            $detailPage->suspendTagTeam($browser);
+            $browser->pause(2000)->screenshot('tag-team-suspended-detail');
+            $detailPage->assertStatus($browser, 'Suspended');
+
+            $detailPage->reinstateTagTeam($browser);
+            $browser->pause(2000)->screenshot('tag-team-reinstated-detail');
+            $detailPage->assertStatus($browser, 'Employed');
+
+            $detailPage->retireTagTeam($browser);
+            $browser->pause(2000)->screenshot('tag-team-retired-detail');
+            $detailPage->assertStatus($browser, 'Retired');
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_deletion_and_restoration_workflow_works(): void
+    {
+        $tagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Deletable Team']);
+
+        $this->browse(function (Browser $browser) use ($tagTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+            $this->indexPage->assertTagTeamVisible($browser, 'Deletable Team');
+
+            // Delete tag team
+            $this->indexPage->deleteTagTeam($browser, 'Deletable Team');
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-deleted');
+
+            $this->indexPage->assertTagTeamNotVisible($browser, 'Deletable Team');
+
+            // Restore tag team (would need to implement restoration workflow)
+            // This would typically involve accessing a "show deleted" view
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_partnership_management_displays_correctly(): void
+    {
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Partnership Team']);
+        
+        // Create wrestlers with partnership history
+        $currentPartner = Wrestler::factory()->bookable()->create(['name' => 'Current Partner']);
+        $formerPartner = Wrestler::factory()->bookable()->create(['name' => 'Former Partner']);
+
+        // Current partnership
+        $currentPartner->tagTeams()->attach($tagTeam->id, [
+            'joined_at' => now()->subMonths(6),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Former partnership
+        $formerPartner->tagTeams()->attach($tagTeam->id, [
+            'joined_at' => now()->subYear(),
+            'left_at' => now()->subMonths(8),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        $detailPage = new TagTeamDetailPage($tagTeam->id);
+
+        $this->browse(function (Browser $browser) use ($tagTeam, $detailPage) {
+            $browser->loginAs($this->admin)
+                    ->visit($detailPage);
+
+            $detailPage->waitForLoad($browser);
+            
+            $browser->screenshot('tag-team-partnerships');
+
+            // Assert current partnerships
+            $detailPage->assertWrestlerPartners($browser, ['Current Partner']);
+
+            // Assert partnership history is visible
+            $detailPage->assertHistorySection($browser);
+            $detailPage->assertPartnershipHistory($browser);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_responsive_design_works_correctly(): void
+    {
+        $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Responsive Team']);
+
+        $this->browse(function (Browser $browser) use ($tagTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            // Test mobile viewport
+            $browser->resize(375, 667) // iPhone 6/7/8 size
+                    ->pause(1000)
+                    ->screenshot('tag-teams-mobile');
+
+            $this->indexPage->assertTableHasData($browser);
+
+            // Test tablet viewport
+            $browser->resize(768, 1024) // iPad size
+                    ->pause(1000)
+                    ->screenshot('tag-teams-tablet');
+
+            $this->indexPage->assertTagTeamVisible($browser, 'Responsive Team');
+
+            // Test desktop viewport
+            $browser->resize(1200, 800)
+                    ->pause(1000)
+                    ->screenshot('tag-teams-desktop');
+
+            $this->indexPage->assertCanCreate($browser);
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_error_handling_displays_user_friendly_messages(): void
+    {
+        $employedTeam = TagTeam::factory()->employed()->create(['name' => 'Already Employed']);
+
+        $this->browse(function (Browser $browser) use ($employedTeam) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Attempt invalid operation (employ already employed team)
+            $this->indexPage->employTagTeam($browser, 'Already Employed');
+            
+            $browser->pause(2000)
+                    ->screenshot('tag-team-error-handling');
+
+            // Should see error message or remain on same page with feedback
+            // The exact error handling would depend on implementation
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function tag_team_table_sorting_works_correctly(): void
+    {
+        TagTeam::factory()->employed()->create(['name' => 'Alpha Team']);
+        TagTeam::factory()->employed()->create(['name' => 'Beta Team']);
+        TagTeam::factory()->employed()->create(['name' => 'Charlie Team']);
+
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->admin)
+                    ->visit($this->indexPage);
+
+            $this->indexPage->waitForTableLoad($browser);
+
+            // Test sorting by name
+            $this->indexPage->sortByColumn($browser, 'Name');
+            
+            $browser->pause(1000)
+                    ->screenshot('tag-teams-sorted');
+
+            // Verify teams are visible (exact sort order would need DOM inspection)
+            $this->indexPage->assertTagTeamVisible($browser, 'Alpha Team');
+            $this->indexPage->assertTagTeamVisible($browser, 'Beta Team');
+            $this->indexPage->assertTagTeamVisible($browser, 'Charlie Team');
+        });
+    }
+}

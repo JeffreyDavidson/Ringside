@@ -1,0 +1,257 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Wrestlers\Wrestler;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Wrestlers\WrestlerIndexPage;
+use Tests\Browser\Components\Wrestlers\WrestlerActionsDropdown;
+
+/**
+ * Dusk tests for wrestler actions and table interactions.
+ * 
+ * These tests focus on the wrestler actions dropdown, business logic workflows,
+ * and table-based interactions that require visual verification.
+ * Tests the complete action workflows including confirmations and feedback.
+ */
+
+test('wrestler actions dropdown opens correctly', function () {
+    // Given: A wrestler to interact with
+    $wrestler = Wrestler::factory()->create(['name' => 'Action Test Wrestler']);
+
+    $this->browse(function (Browser $browser) use ($wrestler) {
+        $actionsDropdown = $browser->loginAs($this->getAdminUser())
+                                   ->visit(new WrestlerIndexPage())
+                                   ->waitForPageLoad($browser)
+                                   ->assertWrestlerVisible($browser, $wrestler->name)
+                                   ->clickWrestlerActions($browser, $wrestler->id);
+
+        $actionsDropdown->waitForDropdownLoad($browser)
+                        ->assertComponentVisible($browser)
+                        ->componentScreenshot($browser, 'opened-correctly');
+    });
+});
+
+test('can view wrestler from actions menu', function () {
+    $wrestler = Wrestler::factory()->create(['name' => 'View Test Wrestler']);
+
+    $this->browse(function (Browser $browser) use ($wrestler) {
+        $actionsDropdown = $browser->loginAs($this->getAdminUser())
+                                   ->visit(new WrestlerIndexPage())
+                                   ->waitForPageLoad($browser)
+                                   ->assertWrestlerVisible($browser, $wrestler->name)
+                                   ->clickWrestlerActions($browser, $wrestler->id);
+
+        $detailPage = $actionsDropdown->waitForDropdownLoad($browser)
+                                      ->componentScreenshot($browser, 'before-view-action')
+                                      ->clickViewWrestler($browser);
+
+        $detailPage->waitForPageLoad($browser)
+                   ->assertWrestlerInfoVisible($browser, $wrestler->name)
+                   ->pageScreenshot($browser, 'detail-via-actions');
+    });
+});
+
+test('can edit wrestler from actions menu', function () {
+    $wrestler = Wrestler::factory()->create(['name' => 'Edit Test Wrestler']);
+
+    $this->browse(function (Browser $browser) use ($wrestler) {
+        $indexPage = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->assertWrestlerVisible($browser, $wrestler->name);
+        
+        $indexPage->pageScreenshot($browser, 'before-edit-action');
+        
+        $actionsDropdown = $indexPage->clickWrestlerActions($browser, $wrestler->id);
+        
+        $formModal = $actionsDropdown->waitForDropdownLoad($browser)
+                                     ->componentScreenshot($browser, 'actions-opened')
+                                     ->clickEditWrestler($browser);
+        
+        $formModal->waitForModalLoad($browser)
+                  ->assertComponentVisible($browser)
+                  ->componentScreenshot($browser, 'wrestler-edit-modal-opened')
+                  ->assertFormPrefilledWithData($browser, $wrestler->name)
+                  ->componentScreenshot($browser, 'wrestler-edit-form-prefilled');
+    });
+});
+
+test('wrestler business actions display based on status', function () {
+    // Create wrestlers with different statuses
+    $employedWrestler = Wrestler::factory()->create(['name' => 'Employed Wrestler']);
+    $unemployedWrestler = Wrestler::factory()->create(['name' => 'Unemployed Wrestler']);
+
+    $this->browse(function (Browser $browser) use ($employedWrestler, $unemployedWrestler) {
+        $indexPage = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser);
+
+        // Test employed wrestler actions
+        $employedActionsDropdown = $indexPage->assertWrestlerVisible($browser, $employedWrestler->name)
+                                             ->clickWrestlerActions($browser, $employedWrestler->id);
+        
+        $employedActionsDropdown->waitForDropdownLoad($browser)
+                                ->assertStatusSpecificActionsVisible($browser, 'employed')
+                                ->componentScreenshot($browser, 'employed-wrestler-actions')
+                                ->closeDropdown($browser);
+
+        // Test unemployed wrestler actions
+        $unemployedActionsDropdown = $indexPage->assertWrestlerVisible($browser, $unemployedWrestler->name)
+                                               ->clickWrestlerActions($browser, $unemployedWrestler->id);
+        
+        $unemployedActionsDropdown->waitForDropdownLoad($browser)
+                                  ->assertStatusSpecificActionsVisible($browser, 'unemployed')
+                                  ->componentScreenshot($browser, 'unemployed-wrestler-actions')
+                                  ->closeDropdown($browser);
+    });
+});
+
+test('wrestler action confirmations work', function () {
+    $wrestler = Wrestler::factory()->create(['name' => 'Confirmation Test Wrestler']);
+
+    $this->browse(function (Browser $browser) use ($wrestler) {
+        $browser->loginAs($this->getAdminUser())
+                ->visit('/roster/wrestlers');
+        
+        $this->waitForPageLoad($browser);
+
+        $actionSelectors = ["@wrestler-actions-button-{$wrestler->id}"];
+        if ($this->safeClick($browser, $actionSelectors)) {
+            $browser->pause(1000);
+            $this->takeScreenshot($browser, 'before-action-confirmation');
+
+            // Try to click a destructive action (retire)
+            $retireSelectors = ["@retire-wrestler-{$wrestler->id}"];
+            if ($this->safeClick($browser, $retireSelectors)) {
+                $browser->pause(1000);
+                $this->takeScreenshot($browser, 'action-confirmation-dialog');
+
+                // Look for confirmation dialog
+                $confirmationSelectors = [
+                    '.swal2-popup',
+                    '.confirm-dialog',
+                    '[role="dialog"]',
+                    '.modal',
+                    'button:contains("Confirm")'
+                ];
+
+                $confirmationFound = false;
+                foreach ($confirmationSelectors as $selector) {
+                    try {
+                        if ($browser->element($selector)) {
+                            $confirmationFound = true;
+                            $this->takeScreenshot($browser, 'confirmation-dialog-found');
+                            break;
+                        }
+                    } catch (\Exception $e) {
+                        continue;
+                    }
+                }
+
+                // If confirmation dialog found, try to cancel
+                if ($confirmationFound) {
+                    $cancelSelectors = [
+                        'button:contains("Cancel")',
+                        'button:contains("No")',
+                        '.swal2-cancel'
+                    ];
+
+                    if ($this->safeClick($browser, $cancelSelectors)) {
+                        $browser->pause(1000);
+                        $this->takeScreenshot($browser, 'action-cancelled');
+                    }
+                }
+            }
+        } else {
+            $this->takeScreenshot($browser, 'action-confirmation-error');
+        }
+    });
+});
+
+test('wrestler table pagination works', function () {
+    // Create enough wrestlers to trigger pagination
+    Wrestler::factory()->count(25)->create();
+
+    $this->browse(function (Browser $browser) {
+        $indexPage = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser);
+        
+        $indexPage->pageScreenshot($browser, 'wrestlers-table-with-pagination')
+                  ->assertPaginationWorks($browser)
+                  ->pageScreenshot($browser, 'pagination-clicked');
+    });
+});
+
+test('wrestler table sorting works', function () {
+    // Create wrestlers with different names for sorting
+    Wrestler::factory()->create(['name' => 'Alpha Wrestler']);
+    Wrestler::factory()->create(['name' => 'Beta Wrestler']);
+    Wrestler::factory()->create(['name' => 'Charlie Wrestler']);
+
+    $this->browse(function (Browser $browser) {
+        $indexPage = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser);
+        
+        $indexPage->pageScreenshot($browser, 'wrestlers-before-sorting')
+                  ->sortBy($browser, 'Name')
+                  ->pageScreenshot($browser, 'wrestlers-after-sorting');
+    });
+});
+
+test('wrestler bulk actions work', function () {
+    // Create multiple wrestlers for bulk operations
+    $wrestlers = Wrestler::factory()->count(3)->create();
+
+    $this->browse(function (Browser $browser) use ($wrestlers) {
+        $browser->loginAs($this->getAdminUser())
+                ->visit('/roster/wrestlers');
+        
+        $this->waitForPageLoad($browser);
+        $this->takeScreenshot($browser, 'wrestlers-before-bulk-selection');
+
+        // Look for checkboxes or selection mechanism
+        $selectionSelectors = [
+            'input[type="checkbox"]',
+            '.select-all',
+            '[data-select]'
+        ];
+
+        foreach ($selectionSelectors as $selector) {
+            try {
+                $elements = $browser->elements($selector);
+                if (count($elements) > 1) {
+                    // Click multiple checkboxes
+                    for ($i = 0; $i < min(2, count($elements)); $i++) {
+                        $browser->click($selector)
+                                ->pause(500);
+                    }
+                    $this->takeScreenshot($browser, 'wrestlers-bulk-selected');
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        // Look for bulk action buttons
+        $bulkActionSelectors = [
+            '.bulk-actions',
+            'button:contains("Bulk")',
+            '[data-bulk]'
+        ];
+
+        foreach ($bulkActionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $this->takeScreenshot($browser, 'bulk-actions-found');
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+    });
+});

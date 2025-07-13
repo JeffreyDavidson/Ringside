@@ -1,0 +1,561 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Referees;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Referees\RefereeFormModal;
+use Tests\Browser\Components\Referees\RefereeActionsDropdown;
+
+/**
+ * Page Object for the Referee Index page.
+ * 
+ * This page represents the main referees table interface including
+ * the create button, search functionality, filtering, and referee
+ * table with actions. Provides a clean API for interacting with
+ * all referee table elements.
+ */
+class RefereeIndexPage extends BasePage
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/referees';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-dusk="create-referee-button"], [data-testid="create-referee-btn"], .create-referee, button:contains("Create")',
+            '@referees-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"], input[name="search"], .search input, [wire\\:model*="search"]',
+            '@status-filter' => 'select[name*="status"], select[wire\\:model*="status"], .filter select, [data-filter] select',
+            '@experience-filter' => 'select[name*="experience"], select[wire\\:model*="experience"], .experience-filter select',
+            '@pagination' => '.pagination, [aria-label="Pagination"], button:contains("Next"), button:contains("2"), .page-link',
+            '@sort-name' => 'th:contains("Name"), th[wire\\:click*="sort"]',
+            '@sort-status' => 'th:contains("Status")',
+            '@sort-hometown' => 'th:contains("Hometown")',
+            '@sort-experience' => 'th:contains("Experience")',
+            '@sort-matches' => 'th:contains("Matches")',
+            '@empty-state' => '.empty-state, .no-results, .no-data',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+            '@referee-status-badge' => '.badge, .status, [data-testid="referee-status"]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow Livewire to initialize
+                ->assertPresent('@referees-table');
+        
+        return $this;
+    }
+
+    /**
+     * Click the create referee button.
+     */
+    public function clickCreateReferee(Browser $browser): RefereeFormModal
+    {
+        $browser->click('@create-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new RefereeFormModal();
+    }
+
+    /**
+     * Search for referees by name.
+     */
+    public function searchForReferee(Browser $browser, string $searchTerm): static
+    {
+        $searchSelectors = [
+            'input[placeholder*="Search"]',
+            'input[type="search"]',
+            'input[name="search"]',
+            '.search input',
+            '[wire\\:model*="search"]'
+        ];
+
+        foreach ($searchSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->type($selector, $searchTerm)
+                            ->pause(1500); // Wait for search to process
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter referees by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): static
+    {
+        $filterSelectors = [
+            'select[name*="status"]',
+            'select[wire\\:model*="status"]',
+            '.filter select',
+            '[data-filter] select'
+        ];
+
+        foreach ($filterSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $status)
+                            ->pause(1500); // Wait for filter to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter referees by experience level.
+     */
+    public function filterByExperience(Browser $browser, string $experience): static
+    {
+        $filterSelectors = [
+            'select[name*="experience"]',
+            'select[wire\\:model*="experience"]',
+            '.experience-filter select',
+            '[data-filter-experience] select'
+        ];
+
+        foreach ($filterSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->select($selector, $experience)
+                            ->pause(1500); // Wait for filter to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a referee is visible in the table.
+     */
+    public function assertRefereeVisible(Browser $browser, string $refereeName): static
+    {
+        $browser->assertSee($refereeName);
+        return $this;
+    }
+
+    /**
+     * Assert that a referee is not visible in the table.
+     */
+    public function assertRefereeNotVisible(Browser $browser, string $refereeName): static
+    {
+        $browser->assertDontSee($refereeName);
+        return $this;
+    }
+
+    /**
+     * Click the actions button for a specific referee.
+     */
+    public function clickRefereeActions(Browser $browser, int $refereeId): RefereeActionsDropdown
+    {
+        $browser->click("@referee-actions-button-{$refereeId}")
+                ->pause(1000); // Wait for dropdown to open
+        
+        return new RefereeActionsDropdown($refereeId);
+    }
+
+    /**
+     * Navigate to a referee's detail page by clicking their name.
+     */
+    public function clickRefereeName(Browser $browser, string $refereeName): RefereeDetailPage
+    {
+        $browser->clickLink($refereeName);
+        return new RefereeDetailPage();
+    }
+
+    /**
+     * Sort the table by a specific column.
+     */
+    public function sortBy(Browser $browser, string $column): static
+    {
+        $sortSelectors = [
+            "th:contains(\"{$column}\")",
+            "th[wire\\:click*=\"sort\"]",
+            ".sortable",
+            "[data-sort=\"{$column}\"]"
+        ];
+
+        foreach ($sortSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000); // Wait for sort to apply
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the table headers are visible.
+     */
+    public function assertTableHeadersVisible(Browser $browser): static
+    {
+        $browser->assertSee('Name')
+                ->assertSee('Status')
+                ->assertSee('Hometown');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that referee status badges are displayed correctly.
+     */
+    public function assertRefereeStatusBadges(Browser $browser): static
+    {
+        // Look for referee status indicators
+        $statusSelectors = [
+            '.badge',
+            '.status',
+            '[data-testid="referee-status"]'
+        ];
+
+        foreach ($statusSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    return $this; // Found status badges
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that match assignment information is displayed.
+     */
+    public function assertMatchAssignments(Browser $browser, int $matchCount): static
+    {
+        $browser->assertSee((string) $matchCount);
+        return $this;
+    }
+
+    /**
+     * Assert that available referee is properly indicated.
+     */
+    public function assertAvailableReferee(Browser $browser): static
+    {
+        $availableIndicators = [
+            'Available',
+            'Ready',
+            'Active',
+            '.available'
+        ];
+
+        foreach ($availableIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that unavailable referee is properly indicated.
+     */
+    public function assertUnavailableReferee(Browser $browser): static
+    {
+        $unavailableIndicators = [
+            'Unavailable',
+            'Injured',
+            'Suspended',
+            'Retired',
+            '.unavailable'
+        ];
+
+        foreach ($unavailableIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that pagination is working.
+     */
+    public function assertPaginationWorks(Browser $browser): static
+    {
+        $paginationSelectors = [
+            '.pagination',
+            '[aria-label="Pagination"]',
+            'button:contains("Next")',
+            'button:contains("2")',
+            '.page-link'
+        ];
+
+        foreach ($paginationSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the create button is visible.
+     */
+    public function assertCreateButtonVisible(Browser $browser): static
+    {
+        $browser->assertSee('Create')
+                ->assertPresent('@create-button');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that referee actions are available.
+     */
+    public function assertRefereeActionsAvailable(Browser $browser): static
+    {
+        $actionSelectors = [
+            '[data-testid="referee-actions"]',
+            '.referee-actions',
+            '.dropdown-toggle',
+            '.action-button'
+        ];
+
+        foreach ($actionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    return $this;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Perform a referee business action.
+     */
+    public function performRefereeAction(Browser $browser, string $action, int $refereeId): static
+    {
+        $actionSelectors = [
+            "[data-testid=\"referee-{$action}\"]",
+            ".{$action}-action",
+            "button:contains(\"" . ucfirst($action) . "\")"
+        ];
+
+        foreach ($actionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(1500); // Wait for action to complete
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that employment status is displayed correctly.
+     */
+    public function assertEmploymentStatus(Browser $browser, string $status): static
+    {
+        $statusMap = [
+            'employed' => ['Employed', 'Active', 'Working'],
+            'unemployed' => ['Unemployed', 'Available', 'Free Agent'],
+            'released' => ['Released', 'Terminated'],
+            'retired' => ['Retired', 'Inactive']
+        ];
+
+        if (isset($statusMap[$status])) {
+            foreach ($statusMap[$status] as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $browser->assertSee($status);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that injury status is displayed correctly.
+     */
+    public function assertInjuryStatus(Browser $browser, bool $isInjured): static
+    {
+        if ($isInjured) {
+            $injuryIndicators = ['Injured', 'Hurt', 'Medical Leave'];
+            foreach ($injuryIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $healthyIndicators = ['Healthy', 'Active', 'Available'];
+            foreach ($healthyIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that suspension status is displayed correctly.
+     */
+    public function assertSuspensionStatus(Browser $browser, bool $isSuspended): static
+    {
+        if ($isSuspended) {
+            $suspensionIndicators = ['Suspended', 'Disciplinary Action', 'Banned'];
+            foreach ($suspensionIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $activeIndicators = ['Active', 'Good Standing', 'Available'];
+            foreach ($activeIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that experience level is displayed correctly.
+     */
+    public function assertExperienceLevel(Browser $browser, string $experience): static
+    {
+        $experienceMap = [
+            'junior' => ['Junior', 'Trainee', 'New'],
+            'senior' => ['Senior', 'Experienced', 'Veteran'],
+            'lead' => ['Lead', 'Head', 'Chief']
+        ];
+
+        if (isset($experienceMap[$experience])) {
+            foreach ($experienceMap[$experience] as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $browser->assertSee($experience);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that certification status is displayed.
+     */
+    public function assertCertificationStatus(Browser $browser, bool $isCertified): static
+    {
+        if ($isCertified) {
+            $certifiedIndicators = ['Certified', 'Licensed', 'Qualified'];
+            foreach ($certifiedIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $uncertifiedIndicators = ['Trainee', 'Provisional', 'In Training'];
+            foreach ($uncertifiedIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+}

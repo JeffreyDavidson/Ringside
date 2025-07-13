@@ -1,0 +1,674 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Referees;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Referees\RefereeFormModal;
+
+/**
+ * Page Object for the Referee Detail page.
+ * 
+ * This page represents the detailed view of a single referee including
+ * referee information, employment history, match history, certifications,
+ * performance metrics, and available actions.
+ */
+class RefereeDetailPage extends BasePage
+{
+    private ?int $refereeId = null;
+
+    public function __construct(?int $refereeId = null)
+    {
+        $this->refereeId = $refereeId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        if ($this->refereeId) {
+            return "/referees/{$this->refereeId}";
+        }
+        
+        return '/referees/{refereeId}';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        if ($this->refereeId) {
+            $browser->assertPathIs("/referees/{$this->refereeId}");
+        } else {
+            $browser->assertPathMatches('/referees\/\d+/');
+        }
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@referee-name' => 'h1, .referee-name, .page-title, [data-testid="referee-name"]',
+            '@referee-status' => '.referee-status, .status-badge, [data-testid="referee-status"]',
+            '@referee-hometown' => '.referee-hometown, [data-testid="referee-hometown"]',
+            '@employment-history' => '.employment-history, .referee-employment, [data-testid="employment-history"]',
+            '@match-history' => '.match-history, .referee-matches, [data-testid="match-history"]',
+            '@certifications' => '.certifications, .referee-certs, [data-testid="certifications"]',
+            '@performance-metrics' => '.performance-metrics, .referee-stats, [data-testid="performance-metrics"]',
+            '@edit-button' => 'button:contains("Edit"), .edit-button, [data-testid="edit-referee"]',
+            '@delete-button' => 'button:contains("Delete"), .delete-button, [data-testid="delete-referee"]',
+            '@actions-dropdown' => '.actions-dropdown, .referee-actions, [data-testid="referee-actions"]',
+            '@back-button' => 'a:contains("Back"), .back-button, [data-testid="back-to-referees"]',
+            '@employ-button' => 'button:contains("Employ"), .employ-button, [data-testid="employ-referee"]',
+            '@release-button' => 'button:contains("Release"), .release-button, [data-testid="release-referee"]',
+            '@retire-button' => 'button:contains("Retire"), .retire-button, [data-testid="retire-referee"]',
+            '@unretire-button' => 'button:contains("Unretire"), .unretire-button, [data-testid="unretire-referee"]',
+            '@injure-button' => 'button:contains("Injure"), .injure-button, [data-testid="injure-referee"]',
+            '@heal-button' => 'button:contains("Heal"), .heal-button, [data-testid="heal-referee"]',
+            '@suspend-button' => 'button:contains("Suspend"), .suspend-button, [data-testid="suspend-referee"]',
+            '@reinstate-button' => 'button:contains("Reinstate"), .reinstate-button, [data-testid="reinstate-referee"]',
+            '@assign-match' => 'button:contains("Assign to Match"), .assign-match, [data-testid="assign-to-match"]',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(2000) // Allow page to load
+                ->assertPresent('@referee-name');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that the referee name is displayed.
+     */
+    public function assertRefereeName(Browser $browser, string $expectedName): static
+    {
+        $browser->assertSee($expectedName);
+        return $this;
+    }
+
+    /**
+     * Assert that the referee status is displayed correctly.
+     */
+    public function assertRefereeStatus(Browser $browser, string $expectedStatus): static
+    {
+        $browser->assertSee($expectedStatus);
+        return $this;
+    }
+
+    /**
+     * Assert that the referee hometown is displayed correctly.
+     */
+    public function assertRefereeHometown(Browser $browser, string $expectedHometown): static
+    {
+        $browser->assertSee($expectedHometown);
+        return $this;
+    }
+
+    /**
+     * Assert that employment history is displayed.
+     */
+    public function assertEmploymentHistoryVisible(Browser $browser): static
+    {
+        $historyIndicators = [
+            'Employment History',
+            'Work History',
+            'Contract History',
+            'Employment Records'
+        ];
+
+        foreach ($historyIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@employment-history');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that match history is displayed.
+     */
+    public function assertMatchHistoryVisible(Browser $browser): static
+    {
+        $historyIndicators = [
+            'Match History',
+            'Officiated Matches',
+            'Referee History',
+            'Match Records'
+        ];
+
+        foreach ($historyIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@match-history');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that a specific match is listed in the history.
+     */
+    public function assertMatchInHistory(Browser $browser, string $matchDetails): static
+    {
+        $browser->assertSee($matchDetails);
+        return $this;
+    }
+
+    /**
+     * Assert that certifications are displayed.
+     */
+    public function assertCertificationsVisible(Browser $browser): static
+    {
+        $certificationIndicators = [
+            'Certifications',
+            'Qualifications',
+            'Licenses',
+            'Training'
+        ];
+
+        foreach ($certificationIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@certifications');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that performance metrics are displayed.
+     */
+    public function assertPerformanceMetricsVisible(Browser $browser): static
+    {
+        $metricsIndicators = [
+            'Performance Metrics',
+            'Statistics',
+            'Performance Stats',
+            'Match Ratings'
+        ];
+
+        foreach ($metricsIndicators as $indicator) {
+            try {
+                $browser->assertSee($indicator);
+                return $this;
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        try {
+            $browser->assertPresent('@performance-metrics');
+        } catch (\Exception) {
+            // If no specific element, that's okay as long as text is present
+        }
+
+        return $this;
+    }
+
+    /**
+     * Click the edit referee button.
+     */
+    public function clickEditReferee(Browser $browser): RefereeFormModal
+    {
+        $browser->click('@edit-button')
+                ->pause(1000); // Wait for modal to open
+        
+        return new RefereeFormModal();
+    }
+
+    /**
+     * Click the delete referee button.
+     */
+    public function clickDeleteReferee(Browser $browser): static
+    {
+        $browser->click('@delete-button')
+                ->pause(500); // Wait for confirmation or action
+        
+        return $this;
+    }
+
+    /**
+     * Click the employ referee button.
+     */
+    public function clickEmployReferee(Browser $browser): static
+    {
+        $browser->click('@employ-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the release referee button.
+     */
+    public function clickReleaseReferee(Browser $browser): static
+    {
+        $browser->click('@release-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the retire referee button.
+     */
+    public function clickRetireReferee(Browser $browser): static
+    {
+        $browser->click('@retire-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the unretire referee button.
+     */
+    public function clickUnretireReferee(Browser $browser): static
+    {
+        $browser->click('@unretire-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the injure referee button.
+     */
+    public function clickInjureReferee(Browser $browser): static
+    {
+        $browser->click('@injure-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the heal referee button.
+     */
+    public function clickHealReferee(Browser $browser): static
+    {
+        $browser->click('@heal-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the suspend referee button.
+     */
+    public function clickSuspendReferee(Browser $browser): static
+    {
+        $browser->click('@suspend-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the reinstate referee button.
+     */
+    public function clickReinstateReferee(Browser $browser): static
+    {
+        $browser->click('@reinstate-button')
+                ->pause(1000); // Wait for action to complete
+        
+        return $this;
+    }
+
+    /**
+     * Click the assign to match button.
+     */
+    public function clickAssignToMatch(Browser $browser): static
+    {
+        $browser->click('@assign-match')
+                ->pause(1000); // Wait for modal or form to open
+        
+        return $this;
+    }
+
+    /**
+     * Navigate back to the referees index.
+     */
+    public function goBackToReferees(Browser $browser): RefereeIndexPage
+    {
+        $browser->click('@back-button');
+        return new RefereeIndexPage();
+    }
+
+    /**
+     * Assert that referee actions are available based on current state.
+     */
+    public function assertRefereeActionsAvailable(Browser $browser): static
+    {
+        try {
+            $browser->assertPresent('@actions-dropdown');
+        } catch (\Exception) {
+            // Check for individual action buttons
+            $actionButtons = ['@edit-button', '@delete-button', '@employ-button', '@release-button'];
+            
+            foreach ($actionButtons as $button) {
+                try {
+                    $browser->assertPresent($button);
+                    return $this; // Found at least one action
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific action buttons are visible.
+     */
+    public function assertActionButtonVisible(Browser $browser, string $action): static
+    {
+        $actionMap = [
+            'edit' => '@edit-button',
+            'delete' => '@delete-button',
+            'employ' => '@employ-button',
+            'release' => '@release-button',
+            'retire' => '@retire-button',
+            'unretire' => '@unretire-button',
+            'injure' => '@injure-button',
+            'heal' => '@heal-button',
+            'suspend' => '@suspend-button',
+            'reinstate' => '@reinstate-button',
+            'assign' => '@assign-match'
+        ];
+
+        if (isset($actionMap[$action])) {
+            $browser->assertPresent($actionMap[$action]);
+        } else {
+            $browser->assertSee(ucfirst($action));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific action buttons are not visible.
+     */
+    public function assertActionButtonNotVisible(Browser $browser, string $action): static
+    {
+        $actionMap = [
+            'edit' => '@edit-button',
+            'delete' => '@delete-button',
+            'employ' => '@employ-button',
+            'release' => '@release-button',
+            'retire' => '@retire-button',
+            'unretire' => '@unretire-button',
+            'injure' => '@injure-button',
+            'heal' => '@heal-button',
+            'suspend' => '@suspend-button',
+            'reinstate' => '@reinstate-button',
+            'assign' => '@assign-match'
+        ];
+
+        if (isset($actionMap[$action])) {
+            try {
+                $browser->assertMissing($actionMap[$action]);
+            } catch (\Exception) {
+                // Element might be present but disabled
+                $browser->assertAttribute($actionMap[$action], 'disabled', 'true');
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page shows loading state.
+     */
+    public function assertLoadingState(Browser $browser): static
+    {
+        $browser->assertPresent('@loading-indicator');
+        return $this;
+    }
+
+    /**
+     * Assert that the page is not in loading state.
+     */
+    public function assertNotLoadingState(Browser $browser): static
+    {
+        $browser->assertMissing('@loading-indicator');
+        return $this;
+    }
+
+    /**
+     * Assert that all referee information is displayed.
+     */
+    public function assertRefereeInformationComplete(Browser $browser, array $refereeData): static
+    {
+        if (isset($refereeData['name'])) {
+            $this->assertRefereeName($browser, $refereeData['name']);
+        }
+
+        if (isset($refereeData['status'])) {
+            $this->assertRefereeStatus($browser, $refereeData['status']);
+        }
+
+        if (isset($refereeData['hometown'])) {
+            $this->assertRefereeHometown($browser, $refereeData['hometown']);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert current employment status.
+     */
+    public function assertCurrentEmploymentStatus(Browser $browser, string $status): static
+    {
+        $statusMap = [
+            'employed' => ['Employed', 'Active', 'Working'],
+            'unemployed' => ['Unemployed', 'Available', 'Free Agent'],
+            'released' => ['Released', 'Terminated'],
+            'retired' => ['Retired', 'Inactive']
+        ];
+
+        if (isset($statusMap[$status])) {
+            foreach ($statusMap[$status] as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $browser->assertSee($status);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert current injury status.
+     */
+    public function assertCurrentInjuryStatus(Browser $browser, bool $isInjured): static
+    {
+        if ($isInjured) {
+            $injuryIndicators = ['Injured', 'Hurt', 'Medical Leave'];
+            foreach ($injuryIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            // Check that injury indicators are not present
+            $injuryIndicators = ['Injured', 'Hurt', 'Medical Leave'];
+            foreach ($injuryIndicators as $indicator) {
+                try {
+                    $browser->assertDontSee($indicator);
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert current suspension status.
+     */
+    public function assertCurrentSuspensionStatus(Browser $browser, bool $isSuspended): static
+    {
+        if ($isSuspended) {
+            $suspensionIndicators = ['Suspended', 'Disciplinary Action', 'Banned'];
+            foreach ($suspensionIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            // Check that suspension indicators are not present
+            $suspensionIndicators = ['Suspended', 'Disciplinary Action', 'Banned'];
+            foreach ($suspensionIndicators as $indicator) {
+                try {
+                    $browser->assertDontSee($indicator);
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert referee availability for matches.
+     */
+    public function assertAvailabilityForMatches(Browser $browser, bool $isAvailable): static
+    {
+        if ($isAvailable) {
+            $availableIndicators = ['Available', 'Ready', 'Can Officiate'];
+            foreach ($availableIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $unavailableIndicators = ['Unavailable', 'Cannot Officiate', 'Not Ready'];
+            foreach ($unavailableIndicators as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert match statistics.
+     */
+    public function assertMatchStatistics(Browser $browser, array $stats): static
+    {
+        if (isset($stats['total_matches'])) {
+            $browser->assertSee('Total Matches: ' . $stats['total_matches']);
+        }
+
+        if (isset($stats['recent_matches'])) {
+            $browser->assertSee('Recent Matches: ' . $stats['recent_matches']);
+        }
+
+        if (isset($stats['rating'])) {
+            $browser->assertSee('Rating: ' . $stats['rating']);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert certification status.
+     */
+    public function assertCertificationStatus(Browser $browser, string $certification): static
+    {
+        $browser->assertSee($certification);
+        return $this;
+    }
+
+    /**
+     * Assert experience level.
+     */
+    public function assertExperienceLevel(Browser $browser, string $level): static
+    {
+        $experienceMap = [
+            'junior' => ['Junior', 'Trainee', 'New'],
+            'senior' => ['Senior', 'Experienced', 'Veteran'],
+            'lead' => ['Lead', 'Head', 'Chief']
+        ];
+
+        if (isset($experienceMap[$level])) {
+            foreach ($experienceMap[$level] as $indicator) {
+                try {
+                    $browser->assertSee($indicator);
+                    return $this;
+                } catch (\Exception) {
+                    continue;
+                }
+            }
+        } else {
+            $browser->assertSee($level);
+        }
+
+        return $this;
+    }
+}

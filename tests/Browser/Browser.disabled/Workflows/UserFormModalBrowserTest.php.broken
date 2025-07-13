@@ -1,0 +1,509 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\Users\Role;
+use App\Enums\Users\UserStatus;
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Users\UserIndexPage;
+
+/**
+ * Browser tests for User form modal interactions.
+ * 
+ * BROWSER TEST SCOPE:
+ * - Modal form display and behavior
+ * - Form field validation and error handling
+ * - Modal state management (open, close, submit)
+ * - Create and edit modal workflows
+ * - Modal accessibility and keyboard navigation
+ * 
+ * These tests verify that user form modals work correctly
+ * through the browser interface with proper user experience
+ * and visual feedback for all modal interactions.
+ */
+
+describe('User Form Modal Browser Tests', function () {
+    beforeEach(function () {
+        $this->admin = User::factory()->administrator()->create();
+        $this->basicUser = User::factory()->create();
+
+        $this->indexPage = new UserIndexPage();
+
+        // Create test users for editing
+        $this->editableUser = User::factory()->create([
+            'first_name' => 'Editable',
+            'last_name' => 'User',
+            'email' => 'editable@example.com',
+            'role' => Role::Basic,
+            'status' => UserStatus::Active
+        ]);
+
+        $this->adminUser = User::factory()->administrator()->create([
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'email' => 'admin@example.com'
+        ]);
+
+        $this->deletedUser = User::factory()->create([
+            'first_name' => 'Deleted',
+            'last_name' => 'User'
+        ]);
+        $this->deletedUser->delete();
+    });
+
+    /** @test */
+    public function create_modal_opens_and_displays_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalTitle($browser, 'Create User')
+                           ->assertCreateFormFields($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_cancel_button(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->cancelModal($browser)
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_escape_key(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->keys('@modal', '{escape}')
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_overlay_click(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->clickModalOverlay($browser)
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_validates_required_fields(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->submitFormWithoutData($browser)
+                           ->assertValidationErrors($browser, ['first_name', 'last_name', 'email', 'role'])
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_displays_role_options(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertRoleOptions($browser, ['Administrator', 'Basic']);
+        });
+    }
+
+    /** @test */
+    public function create_modal_displays_status_options(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertStatusOptions($browser, ['Active', 'Inactive', 'Unverified']);
+        });
+    }
+
+    /** @test */
+    public function create_modal_successfully_creates_user(): void
+    {
+        $userData = [
+            'first_name' => 'New',
+            'last_name' => 'User',
+            'email' => 'newuser@example.com',
+            'role' => 'Basic',
+            'status' => 'Active',
+            'phone_number' => '1234567890'
+        ];
+
+        $this->browse(function (Browser $browser) use ($userData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, $userData)
+                           ->submitForm($browser)
+                           ->assertModalClosed($browser)
+                           ->assertUserInList($browser, $userData['first_name'] . ' ' . $userData['last_name'])
+                           ->assertSuccessMessage($browser);
+        });
+
+        // Verify user was actually created in database
+        expect(User::where('email', $userData['email'])->exists())->toBeTrue();
+    }
+
+    /** @test */
+    public function create_modal_handles_duplicate_email_validation(): void
+    {
+        $duplicateEmail = $this->editableUser->email;
+
+        $this->browse(function (Browser $browser) use ($duplicateEmail) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'first_name' => 'Duplicate',
+                               'last_name' => 'Email',
+                               'email' => $duplicateEmail,
+                               'role' => 'Basic',
+                               'status' => 'Active'
+                           ])
+                           ->submitForm($browser)
+                           ->assertValidationError($browser, 'email', 'already been taken')
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_handles_password_requirements(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'first_name' => 'Test',
+                               'last_name' => 'User',
+                               'email' => 'test@example.com',
+                               'password' => '123', // Too short
+                               'role' => 'Basic',
+                               'status' => 'Active'
+                           ])
+                           ->submitForm($browser)
+                           ->assertValidationError($browser, 'password', 'at least')
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function edit_modal_opens_with_existing_data(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, $this->editableUser)
+                           ->assertModalVisible($browser)
+                           ->assertModalTitle($browser, 'Edit User')
+                           ->assertFormPrefilledWith($browser, [
+                               'first_name' => $this->editableUser->first_name,
+                               'last_name' => $this->editableUser->last_name,
+                               'email' => $this->editableUser->email,
+                               'role' => $this->editableUser->role->label(),
+                               'status' => $this->editableUser->status->label()
+                           ]);
+        });
+    }
+
+    /** @test */
+    public function edit_modal_successfully_updates_user(): void
+    {
+        $updatedData = [
+            'first_name' => 'Updated',
+            'last_name' => 'Name',
+            'email' => 'updated@example.com',
+            'role' => 'Administrator',
+            'status' => 'Inactive',
+            'phone_number' => '9876543210'
+        ];
+
+        $this->browse(function (Browser $browser) use ($updatedData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, $this->editableUser)
+                           ->fillEditForm($browser, $updatedData)
+                           ->submitForm($browser)
+                           ->assertModalClosed($browser)
+                           ->assertUserInList($browser, $updatedData['first_name'] . ' ' . $updatedData['last_name'])
+                           ->assertSuccessMessage($browser);
+        });
+
+        // Verify user was actually updated in database
+        $this->editableUser->refresh();
+        expect($this->editableUser->first_name)->toBe($updatedData['first_name']);
+        expect($this->editableUser->last_name)->toBe($updatedData['last_name']);
+        expect($this->editableUser->email)->toBe($updatedData['email']);
+    }
+
+    /** @test */
+    public function edit_modal_validates_required_fields(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, $this->editableUser)
+                           ->clearFormFields($browser)
+                           ->submitForm($browser)
+                           ->assertValidationErrors($browser, ['first_name', 'last_name', 'email'])
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_displays_dummy_data_button(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertDummyDataButton($browser)
+                           ->clickDummyDataButton($browser)
+                           ->assertFormFieldsPopulated($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_handles_phone_number_formatting(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->type('@phone-field', '1234567890')
+                           ->assertInputValue('@phone-field', '1234567890');
+        });
+    }
+
+    /** @test */
+    public function modal_form_handles_long_names(): void
+    {
+        $longName = str_repeat('VeryLongName', 10); // Very long name
+
+        $this->browse(function (Browser $browser) use ($longName) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'first_name' => $longName,
+                               'last_name' => 'User',
+                               'email' => 'long@example.com',
+                               'role' => 'Basic',
+                               'status' => 'Active'
+                           ])
+                           ->submitForm($browser)
+                           ->assertValidationError($browser, 'first_name', 'may not be greater than')
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_accessibility_keyboard_navigation(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->keys('body', '{tab}') // Tab to first field
+                           ->assertFocused('@first-name-field')
+                           ->keys('body', '{tab}') // Tab to last name field
+                           ->assertFocused('@last-name-field')
+                           ->keys('body', '{tab}') // Tab to email field
+                           ->assertFocused('@email-field');
+        });
+    }
+
+    /** @test */
+    public function modal_displays_loading_state_during_submission(): void
+    {
+        $userData = [
+            'first_name' => 'Loading',
+            'last_name' => 'Test',
+            'email' => 'loading@example.com',
+            'role' => 'Basic',
+            'status' => 'Active'
+        ];
+
+        $this->browse(function (Browser $browser) use ($userData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, $userData)
+                           ->clickSubmitAndWait($browser)
+                           ->assertLoadingState($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_prevents_double_submission(): void
+    {
+        $userData = [
+            'first_name' => 'Double',
+            'last_name' => 'Submit',
+            'email' => 'double@example.com',
+            'role' => 'Basic',
+            'status' => 'Active'
+        ];
+
+        $this->browse(function (Browser $browser) use ($userData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, $userData)
+                           ->clickSubmitMultipleTimes($browser)
+                           ->waitForSubmissionComplete($browser);
+        });
+
+        // Verify only one user was created
+        expect(User::where('email', $userData['email'])->count())->toBe(1);
+    }
+
+    /** @test */
+    public function modal_responsive_design_mobile(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs($this->admin)
+                    ->visit('/users')
+                    ->screenshot('mobile-user-modal-before')
+                    ->pause(2000);
+
+            $this->indexPage->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalResponsive($browser)
+                           ->screenshot('mobile-user-modal-open');
+        });
+    }
+
+    /** @test */
+    public function modal_responsive_design_tablet(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->resize(768, 1024) // iPad dimensions
+                    ->loginAs($this->admin)
+                    ->visit('/users')
+                    ->screenshot('tablet-user-modal-before')
+                    ->pause(2000);
+
+            $this->indexPage->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalResponsive($browser)
+                           ->screenshot('tablet-user-modal-open');
+        });
+    }
+
+    /** @test */
+    public function modal_error_handling_network_failure(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'first_name' => 'Network',
+                               'last_name' => 'Test',
+                               'email' => 'network@example.com',
+                               'role' => 'Basic',
+                               'status' => 'Active'
+                           ]);
+
+            // Simulate network interruption (implementation dependent)
+            $browser->submitForm($browser)
+                    ->waitForErrorHandling($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_handles_unauthorized_user_gracefully(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->basicUser)
+                    ->visit('/users')
+                    ->screenshot('unauthorized-modal-access')
+                    ->pause(2000);
+
+            // Basic user should not see create button or should be redirected
+            if ($browser->element('@create-button')) {
+                $browser->screenshot('unauthorized-user-sees-create-button');
+            } else {
+                $browser->screenshot('unauthorized-user-no-create-button');
+            }
+        });
+    }
+
+    /** @test */
+    public function modal_form_field_focus_management(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertFirstNameFieldFocused($browser) // First field should be focused
+                           ->type('@first-name-field', 'Test')
+                           ->keys('@first-name-field', '{tab}')
+                           ->assertFocused('@last-name-field'); // Focus should move to next field
+        });
+    }
+
+    /** @test */
+    public function modal_real_time_validation_feedback(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->type('@email-field', 'valid@email.com')
+                           ->assertNoValidationError($browser, 'email')
+                           ->clear('@email-field')
+                           ->type('@email-field', 'invalid-email')
+                           ->click('@first-name-field') // Trigger blur event
+                           ->assertValidationError($browser, 'email');
+        });
+    }
+
+    /** @test */
+    public function modal_password_field_toggle_visibility(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->type('@password-field', 'secret123')
+                           ->assertInputType('@password-field', 'password');
+
+            // If password toggle exists
+            if ($browser->element('@password-toggle')) {
+                $browser->click('@password-toggle')
+                        ->assertInputType('@password-field', 'text');
+            }
+        });
+    }
+
+    /** @test */
+    public function modal_role_change_affects_permissions_display(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->select('@role-field', 'Administrator')
+                           ->pause(500);
+
+            // Check if any role-specific UI elements appear
+            if ($browser->element('[data-testid="admin-permissions"]')) {
+                $browser->screenshot('admin-role-selected');
+            }
+            
+            $browser->select('@role-field', 'Basic')
+                    ->pause(500);
+
+            if ($browser->element('[data-testid="basic-permissions"]')) {
+                $browser->screenshot('basic-role-selected');
+            }
+        });
+    }
+});

@@ -1,0 +1,403 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Venues;
+
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+/**
+ * Page Object for Venue Index/Management interface.
+ * 
+ * Provides methods for interacting with the venue management table,
+ * including creation, editing, deletion, and search operations.
+ * Follows the Page Object Model pattern for maintainable browser tests.
+ */
+class VenueIndexPage extends Page
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/venues';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-test="create-venue-button"]',
+            '@search-input' => '[data-test="venue-search"]',
+            '@modal' => '[data-test="venue-modal"]',
+            '@form' => '[data-test="venue-form"]',
+            '@submit-button' => '[data-test="submit-venue"]',
+            '@cancel-button' => '[data-test="cancel-venue"]',
+            '@close-button' => '[data-test="close-modal"]',
+            '@success-message' => '[data-test="success-message"]',
+            '@error-message' => '[data-test="error-message"]',
+            '@venue-table' => '[data-test="venues-table"]',
+            '@deleted-toggle' => '[data-test="show-deleted-toggle"]',
+            '@loading' => '[data-test="loading"]',
+        ];
+    }
+
+    /**
+     * Visit the page as the given user.
+     */
+    public function visit(Browser $browser, User $user): static
+    {
+        $browser->loginAs($user)
+                ->visit($this->url())
+                ->waitFor('@venue-table');
+
+        return $this;
+    }
+
+    /**
+     * Assert that a venue is visible in the table.
+     */
+    public function assertVenueVisible(Browser $browser, string $venueName): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) use ($venueName) {
+            $browser->assertSee($venueName);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that a venue is not visible in the table.
+     */
+    public function assertVenueNotVisible(Browser $browser, string $venueName): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) use ($venueName) {
+            $browser->assertDontSee($venueName);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Create a new venue through the form interface.
+     */
+    public function createVenue(Browser $browser, array $data, bool $expectSuccess = true): static
+    {
+        $this->openCreateForm($browser)
+             ->fillVenueForm($browser, $data)
+             ->submitForm($browser);
+
+        if ($expectSuccess) {
+            $browser->waitUntilMissing('@modal');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Open the create venue form.
+     */
+    public function openCreateForm(Browser $browser): static
+    {
+        $browser->click('@create-button')
+                ->waitFor('@modal')
+                ->waitFor('@form');
+
+        return $this;
+    }
+
+    /**
+     * Fill the venue form with provided data.
+     */
+    public function fillVenueForm(Browser $browser, array $data): static
+    {
+        $browser->within('@form', function (Browser $browser) use ($data) {
+            if (isset($data['name'])) {
+                $browser->type('name', $data['name']);
+            }
+            if (isset($data['street_address'])) {
+                $browser->type('street_address', $data['street_address']);
+            }
+            if (isset($data['city'])) {
+                $browser->type('city', $data['city']);
+            }
+            if (isset($data['state'])) {
+                $browser->type('state', $data['state']);
+            }
+            if (isset($data['zipcode'])) {
+                $browser->type('zipcode', $data['zipcode']);
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Submit the venue form.
+     */
+    public function submitForm(Browser $browser): static
+    {
+        $browser->within('@form', function (Browser $browser) {
+            $browser->click('@submit-button');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Submit an empty form to test validation.
+     */
+    public function submitEmptyForm(Browser $browser): static
+    {
+        $browser->within('@form', function (Browser $browser) {
+            $browser->click('@submit-button');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Edit an existing venue.
+     */
+    public function editVenue(Browser $browser, string $venueName, array $newData): static
+    {
+        $this->openEditForm($browser, $venueName)
+             ->clearAndFillVenueForm($browser, $newData)
+             ->submitForm($browser)
+             ->waitUntilMissing('@modal');
+
+        return $this;
+    }
+
+    /**
+     * Open the edit form for a specific venue.
+     */
+    public function openEditForm(Browser $browser, string $venueName): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) use ($venueName) {
+            $browser->clickLink($venueName);
+        });
+
+        $browser->waitFor('@modal')
+                ->waitFor('@form');
+
+        return $this;
+    }
+
+    /**
+     * Clear and fill the venue form with new data.
+     */
+    public function clearAndFillVenueForm(Browser $browser, array $data): static
+    {
+        $browser->within('@form', function (Browser $browser) use ($data) {
+            if (isset($data['name'])) {
+                $browser->clear('name')->type('name', $data['name']);
+            }
+            if (isset($data['street_address'])) {
+                $browser->clear('street_address')->type('street_address', $data['street_address']);
+            }
+            if (isset($data['city'])) {
+                $browser->clear('city')->type('city', $data['city']);
+            }
+            if (isset($data['state'])) {
+                $browser->clear('state')->type('state', $data['state']);
+            }
+            if (isset($data['zipcode'])) {
+                $browser->clear('zipcode')->type('zipcode', $data['zipcode']);
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Delete a venue through the table interface.
+     */
+    public function deleteVenue(Browser $browser, string $venueName): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) use ($venueName) {
+            // Find the row with the venue name and click delete button
+            $browser->with('tr', function (Browser $row) use ($venueName) {
+                if ($row->text() === $venueName || str_contains($row->text(), $venueName)) {
+                    $row->click('[data-test="delete-venue"]');
+                }
+            });
+        });
+
+        // Confirm deletion if confirmation dialog appears
+        $browser->whenAvailable('[data-test="confirm-delete"]', function (Browser $modal) {
+            $modal->click('[data-test="confirm-delete-button"]');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Restore a deleted venue.
+     */
+    public function restoreVenue(Browser $browser, string $venueName): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) use ($venueName) {
+            $browser->with('tr', function (Browser $row) use ($venueName) {
+                if ($row->text() === $venueName || str_contains($row->text(), $venueName)) {
+                    $row->click('[data-test="restore-venue"]');
+                }
+            });
+        });
+
+        return $this;
+    }
+
+    /**
+     * Search for venues by name or other criteria.
+     */
+    public function searchVenues(Browser $browser, string $searchTerm): static
+    {
+        $browser->type('@search-input', $searchTerm)
+                ->pause(500); // Allow for debounced search
+
+        return $this;
+    }
+
+    /**
+     * Clear the search input.
+     */
+    public function clearSearch(Browser $browser): static
+    {
+        $browser->clear('@search-input')
+                ->pause(500);
+
+        return $this;
+    }
+
+    /**
+     * Toggle the display of deleted venues.
+     */
+    public function toggleDeletedVenues(Browser $browser): static
+    {
+        $browser->click('@deleted-toggle')
+                ->pause(500);
+
+        return $this;
+    }
+
+    /**
+     * Close the form modal.
+     */
+    public function closeForm(Browser $browser): static
+    {
+        $browser->click('@close-button')
+                ->waitUntilMissing('@modal');
+
+        return $this;
+    }
+
+    /**
+     * Assert that a validation error is displayed for a specific field.
+     */
+    public function assertValidationError(Browser $browser, string $field): static
+    {
+        $browser->within('@form', function (Browser $browser) use ($field) {
+            $browser->assertPresent("[data-test=\"{$field}-error\"]");
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that a success message is displayed.
+     */
+    public function assertSuccessMessage(Browser $browser): static
+    {
+        $browser->waitFor('@success-message', 5);
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue address information is visible.
+     */
+    public function assertAddressVisible(Browser $browser, string $venueName, array $addressData): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) use ($venueName, $addressData) {
+            $browser->assertSee($venueName);
+            
+            if (isset($addressData['city'])) {
+                $browser->assertSee($addressData['city']);
+            }
+            if (isset($addressData['state'])) {
+                $browser->assertSee($addressData['state']);
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert the value of a form field.
+     */
+    public function assertFormFieldValue(Browser $browser, string $field, string $expectedValue): static
+    {
+        $browser->within('@form', function (Browser $browser) use ($field, $expectedValue) {
+            $browser->assertInputValue($field, $expectedValue);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert the current search value.
+     */
+    public function assertSearchValue(Browser $browser, string $expectedValue): static
+    {
+        $browser->assertInputValue('@search-input', $expectedValue);
+
+        return $this;
+    }
+
+    /**
+     * Wait for the page to finish loading.
+     */
+    public function waitForLoad(Browser $browser): static
+    {
+        $browser->waitUntilMissing('@loading', 10);
+
+        return $this;
+    }
+
+    /**
+     * Assert that the venue table is populated with data.
+     */
+    public function assertTableHasData(Browser $browser): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) {
+            $browser->assertPresent('tbody tr');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that the venue table is empty.
+     */
+    public function assertTableEmpty(Browser $browser): static
+    {
+        $browser->within('@venue-table', function (Browser $browser) {
+            $browser->assertMissing('tbody tr');
+        });
+
+        return $this;
+    }
+}

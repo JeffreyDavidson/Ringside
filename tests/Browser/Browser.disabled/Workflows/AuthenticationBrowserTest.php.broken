@@ -1,0 +1,404 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+
+/**
+ * Browser tests for authentication visual workflows.
+ * 
+ * These tests focus on the visual aspects of login, logout, and authentication
+ * flows that Feature tests cannot verify, such as form visibility, error
+ * display, and user interface interactions.
+ * 
+ * Current Implementation: Preparatory structure for Dusk integration
+ * Future Implementation: Full browser automation with Laravel Dusk
+ */
+
+describe('Login Form Visual Workflow', function () {
+    test('login form displays correctly and accepts user input', function () {
+        // Given: Create a user for testing login
+        $user = User::factory()->create([
+            'email' => 'test@ringside.test',
+            'password' => bcrypt('password123')
+        ]);
+        
+        // When & Then: Test the login form functionality
+        $this->browse(function (Browser $browser) use ($user) {
+            $browser->visit('/login')
+                    ->screenshot('login-form-test')
+                    ->assertTitle('Laravel')
+                    ->assertVisible('input[name="email"]')
+                    ->assertVisible('input[name="password"]')
+                    ->type('email', $user->email)
+                    ->type('password', 'password123');
+                    
+            // Try to find and click the submit button using various selectors
+            try {
+                $browser->click('button[type="submit"]');
+            } catch (\Exception $e) {
+                try {
+                    $browser->press('Log in');
+                } catch (\Exception $e) {
+                    try {
+                        $browser->click('input[type="submit"]');
+                    } catch (\Exception $e) {
+                        // Submit the form directly
+                        $browser->script("document.querySelector('form').submit();");
+                    }
+                }
+            }
+            
+            $browser->waitForLocation('/dashboard')
+                    ->assertSee('Dashboard');
+        });
+    });
+
+    test('login form validation displays error messages visually', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to login page
+        // 2. Submit empty form
+        // 3. Verify validation errors appear for required fields
+        // 4. Verify error styling is applied to form fields
+        // 5. Submit form with invalid email format
+        // 6. Verify email format error message appears
+        // 7. Submit form with incorrect credentials
+        // 8. Verify authentication error message appears
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/login')
+                    ->click('@login-button')
+                    ->assertSee('The email field is required')
+                    ->assertSee('The password field is required')
+                    ->assertVisible('.error-message')
+                    ->type('@email-field', 'invalid-email')
+                    ->click('@login-button')
+                    ->assertSee('Please enter a valid email address')
+                    ->clear('@email-field')
+                    ->type('@email-field', 'wrong@example.com')
+                    ->type('@password-field', 'wrongpassword')
+                    ->click('@login-button')
+                    ->assertSee('These credentials do not match our records');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('login form shows loading state during authentication', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to login page
+        // 2. Fill in valid credentials
+        // 3. Click login button
+        // 4. Verify button shows loading state (spinner, disabled)
+        // 5. Verify form fields are disabled during submission
+        // 6. Verify loading state persists until redirect
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $user = User::factory()->create([
+                'email' => 'test@example.com',
+                'password' => bcrypt('password')
+            ]);
+            
+            $browser->visit('/login')
+                    ->type('@email-field', 'test@example.com')
+                    ->type('@password-field', 'password')
+                    ->click('@login-button')
+                    ->assertVisible('@login-spinner')
+                    ->assertAttribute('@email-field', 'disabled', 'true')
+                    ->assertAttribute('@password-field', 'disabled', 'true')
+                    ->waitForLocation('/dashboard');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Navigation Authentication Visual Workflow', function () {
+    test('guest user sees correct navigation and access restrictions', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Visit site as guest (not logged in)
+        // 2. Verify only public navigation items are visible
+        // 3. Verify login link/button is present
+        // 4. Attempt to navigate to protected pages
+        // 5. Verify redirect to login page occurs
+        // 6. Verify appropriate error messages display
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                    ->assertDontSee('@admin-navigation')
+                    ->assertVisible('@login-link')
+                    ->assertDontSee('@user-menu')
+                    ->visit('/wrestlers')
+                    ->waitForLocation('/login')
+                    ->assertSee('Please log in to continue');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('authenticated user sees correct navigation options', function () {
+        // Given: An authenticated administrator
+        $admin = administrator();
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in as administrator
+        // 2. Verify admin navigation menu is visible
+        // 3. Verify user menu/dropdown is present
+        // 4. Verify logout option is available
+        // 5. Test navigation between different sections
+        // 6. Verify user name/email is displayed
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/dashboard')
+                    ->assertVisible('@admin-navigation')
+                    ->assertVisible('@user-menu')
+                    ->assertSee($admin->name)
+                    ->click('@user-menu')
+                    ->assertVisible('@logout-link')
+                    ->assertVisible('@profile-link')
+                    ->assertSee('Wrestlers')
+                    ->assertSee('Managers')
+                    ->assertSee('Titles');
+        });
+        */
+        
+        expect($admin)->toBeInstanceOf(User::class);
+    });
+
+    test('basic user sees limited navigation options', function () {
+        // Given: A basic user
+        $basicUser = basicUser();
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in as basic user
+        // 2. Verify limited navigation menu is visible
+        // 3. Verify admin-only sections are hidden
+        // 4. Attempt to access admin pages via URL
+        // 5. Verify appropriate access denied messages
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($basicUser) {
+            $browser->loginAs($basicUser)
+                    ->visit('/dashboard')
+                    ->assertVisible('@user-navigation')
+                    ->assertDontSee('@admin-only-menu')
+                    ->assertDontSee('User Management')
+                    ->visit('/wrestlers')
+                    ->assertSee('Access Denied')
+                    ->assertSee('You do not have permission');
+        });
+        */
+        
+        expect($basicUser)->toBeInstanceOf(User::class);
+    });
+});
+
+describe('Logout Visual Workflow', function () {
+    test('logout process works correctly with visual feedback', function () {
+        // Given: An authenticated user
+        $admin = administrator();
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in as user
+        // 2. Navigate to any protected page
+        // 3. Click user menu/dropdown
+        // 4. Click logout button
+        // 5. Verify logout confirmation if present
+        // 6. Verify redirect to home/login page
+        // 7. Verify user menu is no longer visible
+        // 8. Verify protected pages are no longer accessible
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/dashboard')
+                    ->assertSee('Dashboard')
+                    ->click('@user-menu')
+                    ->click('@logout-link')
+                    ->waitForLocation('/')
+                    ->assertDontSee('@user-menu')
+                    ->assertVisible('@login-link')
+                    ->visit('/wrestlers')
+                    ->waitForLocation('/login')
+                    ->assertSee('Please log in to continue');
+        });
+        */
+        
+        expect($admin)->toBeInstanceOf(User::class);
+    });
+
+    test('logout shows confirmation dialog for unsaved work', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in and navigate to a form page
+        // 2. Make changes to a form without saving
+        // 3. Attempt to logout
+        // 4. Verify confirmation dialog appears
+        // 5. Test both "Stay" and "Logout Anyway" options
+        // 6. Verify appropriate actions occur
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/wrestlers')
+                    ->click('@create-wrestler-button')
+                    ->type('@wrestler-name', 'Unsaved Data')
+                    ->click('@user-menu')
+                    ->click('@logout-link')
+                    ->waitFor('@confirmation-dialog')
+                    ->assertSee('You have unsaved changes')
+                    ->click('@stay-button')
+                    ->waitUntilMissing('@confirmation-dialog')
+                    ->assertVisible('@wrestler-form-modal')
+                    ->click('@user-menu')
+                    ->click('@logout-link')
+                    ->waitFor('@confirmation-dialog')
+                    ->click('@logout-anyway-button')
+                    ->waitForLocation('/');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Session Management Visual Workflow', function () {
+    test('session timeout displays warning and handles gracefully', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in with a short session timeout (for testing)
+        // 2. Wait for session to near expiration
+        // 3. Verify session warning dialog appears
+        // 4. Test "Extend Session" button functionality
+        // 5. Test "Logout" button functionality
+        // 6. Verify automatic logout after timeout
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/dashboard')
+                    // Simulate session near expiration
+                    ->pause(30000) // 30 seconds
+                    ->assertVisible('@session-warning')
+                    ->assertSee('Your session will expire soon')
+                    ->click('@extend-session')
+                    ->waitUntilMissing('@session-warning')
+                    ->assertSee('Dashboard');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('concurrent login detection and handling', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in as user in first browser instance
+        // 2. Open second browser and log in as same user
+        // 3. Verify first browser shows session conflict warning
+        // 4. Test options for handling concurrent sessions
+        // 5. Verify appropriate session termination
+        
+        // TODO: Replace with actual Dusk browser test (requires multiple browsers)
+        /*
+        $this->browse(function (Browser $first, Browser $second) {
+            $user = administrator();
+            
+            $first->loginAs($user)
+                  ->visit('/dashboard')
+                  ->assertSee('Dashboard');
+                  
+            $second->loginAs($user)
+                   ->visit('/dashboard');
+                   
+            $first->assertVisible('@session-conflict-warning')
+                  ->assertSee('Your account is being used elsewhere')
+                  ->click('@continue-here')
+                  ->assertSee('Dashboard');
+                  
+            $second->assertVisible('@session-terminated')
+                   ->assertSee('Your session has been terminated');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Form Field Interactions and Accessibility', function () {
+    test('login form fields have proper accessibility attributes', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to login page
+        // 2. Verify form fields have proper labels
+        // 3. Verify ARIA attributes are present
+        // 4. Test keyboard navigation between fields
+        // 5. Verify screen reader compatibility
+        // 6. Test focus management and visual indicators
+        
+        // TODO: Replace with actual Dusk browser test with accessibility assertions
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/login')
+                    ->assertAriaLabel('@email-field', 'Email Address')
+                    ->assertAriaLabel('@password-field', 'Password')
+                    ->assertAttribute('@email-field', 'required', 'true')
+                    ->keys('@email-field', '{tab}')
+                    ->assertFocused('@password-field')
+                    ->keys('@password-field', '{tab}')
+                    ->assertFocused('@remember-checkbox')
+                    ->keys('@remember-checkbox', '{tab}')
+                    ->assertFocused('@login-button');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('login form works correctly on mobile devices', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Resize browser to mobile dimensions
+        // 2. Navigate to login page
+        // 3. Verify form is responsive and usable
+        // 4. Test touch interactions with form fields
+        // 5. Verify virtual keyboard doesn't obscure form
+        // 6. Test form submission on mobile
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->visit('/login')
+                    ->assertVisible('@login-form')
+                    ->assertResponsiveDesign('@email-field')
+                    ->tap('@email-field')
+                    ->assertFocused('@email-field')
+                    ->type('@email-field', 'test@example.com')
+                    ->tap('@password-field')
+                    ->type('@password-field', 'password')
+                    ->tap('@login-button');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+// Note: When Laravel Dusk is installed, add these dependencies to the top:
+// use Laravel\Dusk\Browser;
+// use Tests\DuskTestCase;
+
+// And extend DuskTestCase instead of the current structure

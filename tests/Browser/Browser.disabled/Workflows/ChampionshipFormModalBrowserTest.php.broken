@@ -1,0 +1,471 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
+use App\Models\Wrestlers\Wrestler;
+
+/**
+ * Browser tests for TitleChampionship form modal interactions.
+ *
+ * BROWSER TEST SCOPE:
+ * - Championship creation and editing modal workflows
+ * - Form validation and error handling visuals
+ * - Polymorphic champion selection interface
+ * - Date picker interactions for championship periods
+ * - Modal state management and user experience
+ *
+ * NOTE: These tests are prepared for Laravel Dusk implementation.
+ * Currently using basic assertions as placeholder for future browser automation.
+ */
+
+describe('Championship Form Modal Browser Tests', function () {
+    beforeEach(function () {
+        $this->title = Title::factory()->create(['name' => 'Test Championship']);
+        $this->wrestler1 = Wrestler::factory()->create(['name' => 'John Wrestler']);
+        $this->wrestler2 = Wrestler::factory()->create(['name' => 'Jane Fighter']);
+        $this->tagTeam = TagTeam::factory()->create(['name' => 'Team Champions']);
+        
+        $this->currentChampionship = TitleChampionship::factory()
+            ->for($this->title, 'title')
+            ->for($this->wrestler1, 'champion')
+            ->create([
+                'won_at' => now()->subMonths(2),
+                'lost_at' => null
+            ]);
+    });
+
+    describe('Championship Creation Modal', function () {
+        test('championship creation modal opens and displays correctly', function () {
+            // Given: Title management page context
+            expect($this->title->name)->toBe('Test Championship');
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Modal trigger button visibility and accessibility
+            // 2. Modal open animation and overlay display
+            // 3. Form field layout and responsive design
+            // 4. Champion type selection interface
+            // 5. Date picker integration and calendar display
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->assertElementExists('@create-championship-button')
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->assertVisible('@modal-overlay')
+                        ->assertSeeIn('@modal-title', 'Create New Championship')
+                        ->assertElementExists('@champion-type-selector')
+                        ->assertElementExists('@champion-selection-dropdown')
+                        ->assertElementExists('@won-date-picker')
+                        ->assertElementExists('@lost-date-picker')
+                        ->assertElementExists('@event-match-selector')
+                        ->assertElementExists('@submit-championship-button')
+                        ->assertElementExists('@cancel-modal-button')
+                        ->assertSee('Champion Type')
+                        ->assertSee('Championship Date')
+                        ->assertSee('Event Match (Optional)');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->wrestler1->name)->toBe('John Wrestler');
+            expect($this->tagTeam->name)->toBe('Team Champions');
+        });
+
+        test('champion type selection updates champion dropdown options', function () {
+            // Given: Multiple champion types available
+            expect($this->wrestler1)->toBeInstanceOf(Wrestler::class);
+            expect($this->tagTeam)->toBeInstanceOf(TagTeam::class);
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Wrestler champion type selection shows individual wrestlers
+            // 2. Tag team selection shows available tag teams
+            // 3. Dynamic dropdown content updates
+            // 4. Champion search and filtering functionality
+            // 5. Champion availability status indicators
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->assertChecked('@wrestler-champion-radio') // Default selection
+                        ->assertSelectHasOptions('@champion-dropdown', [
+                            $this->wrestler1->id => 'John Wrestler',
+                            $this->wrestler2->id => 'Jane Fighter'
+                        ])
+                        ->click('@tag-team-champion-radio')
+                        ->waitFor('@champion-dropdown-update')
+                        ->assertSelectHasOptions('@champion-dropdown', [
+                            $this->tagTeam->id => 'Team Champions'
+                        ])
+                        ->click('@wrestler-champion-radio')
+                        ->waitFor('@champion-dropdown-update')
+                        ->assertSelectHasOptions('@champion-dropdown', [
+                            $this->wrestler1->id => 'John Wrestler',
+                            $this->wrestler2->id => 'Jane Fighter'
+                        ]);
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->wrestler2->name)->toBe('Jane Fighter');
+        });
+
+        test('championship date validation works in real-time', function () {
+            // Given: Date validation requirements
+            $futureDate = now()->addDays(30)->format('Y-m-d');
+            $pastDate = now()->subDays(30)->format('Y-m-d');
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Real-time date validation feedback
+            // 2. Date picker restrictions and available dates
+            // 3. Won date vs lost date logical validation
+            // 4. Championship period overlap detection
+            // 5. Visual error indicators and messages
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($futureDate, $pastDate) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->type('@won-date-input', $futureDate)
+                        ->click('@lost-date-input')
+                        ->waitFor('@date-validation-error')
+                        ->assertSee('Championship cannot start in the future')
+                        ->clear('@won-date-input')
+                        ->type('@won-date-input', $pastDate)
+                        ->waitUntilMissing('@date-validation-error')
+                        ->type('@lost-date-input', '2020-01-01') // Before won date
+                        ->click('@won-date-input')
+                        ->waitFor('@date-logic-error')
+                        ->assertSee('Lost date cannot be before won date')
+                        ->clear('@lost-date-input')
+                        ->type('@lost-date-input', now()->format('Y-m-d'))
+                        ->waitUntilMissing('@date-logic-error');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($futureDate)->toBeString();
+            expect($pastDate)->toBeString();
+        });
+
+        test('championship creation form submission handles success and errors', function () {
+            // Given: Form submission scenarios
+            expect($this->title->id)->toBeInt();
+            expect($this->wrestler2->id)->toBeInt();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Form submission loading states and spinners
+            // 2. Success notification display and auto-dismiss
+            // 3. Error message display and field highlighting
+            // 4. Modal close behavior after successful submission
+            // 5. Form reset and cleanup after operations
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->select('@champion-dropdown', $this->wrestler2->id)
+                        ->type('@won-date-input', now()->subDays(10)->format('Y-m-d'))
+                        ->type('@lost-date-input', now()->format('Y-m-d'))
+                        ->click('@submit-championship-button')
+                        ->waitFor('@form-loading-spinner')
+                        ->assertElementExists('@submit-button-disabled')
+                        ->waitFor('@success-notification')
+                        ->assertSee('Championship created successfully')
+                        ->waitUntilMissing('@championship-modal')
+                        ->assertVisible('@championship-history-table')
+                        ->assertSeeIn('@championship-history-table', 'Jane Fighter')
+                        ->waitUntilMissing('@success-notification', 5);
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->wrestler2->name)->toBe('Jane Fighter');
+        });
+    });
+
+    describe('Championship Editing Modal', function () {
+        test('championship editing modal loads existing data correctly', function () {
+            // Given: Existing championship to edit
+            expect($this->currentChampionship->champion->name)->toBe('John Wrestler');
+            expect($this->currentChampionship->lost_at)->toBeNull();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Edit button availability and context menu
+            // 2. Modal pre-population with existing championship data
+            // 3. Read-only and editable field distinctions
+            // 4. Championship status indicators in edit mode
+            // 5. Conditional field visibility based on championship state
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click("@edit-championship-{$this->currentChampionship->id}")
+                        ->waitFor('@championship-edit-modal')
+                        ->assertSeeIn('@modal-title', 'Edit Championship')
+                        ->assertInputValue('@champion-dropdown', $this->wrestler1->id)
+                        ->assertInputValue('@won-date-input', $this->currentChampionship->won_at->format('Y-m-d'))
+                        ->assertInputValue('@lost-date-input', '') // Current championship
+                        ->assertElementExists('@current-championship-indicator')
+                        ->assertSee('Currently Active Championship')
+                        ->assertElementExists('@end-championship-option')
+                        ->assertElementExists('@modify-dates-option')
+                        ->assertElementExists('@change-champion-option');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->currentChampionship->id)->toBeInt();
+        });
+
+        test('championship editing provides context-aware options', function () {
+            // Given: Current championship with edit options
+            expect($this->currentChampionship->lost_at)->toBeNull();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Current championship special editing options
+            // 2. End championship workflow and confirmation
+            // 3. Championship transfer to new champion
+            // 4. Championship date modification with validation
+            // 5. Bulk championship history updates
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click("@edit-championship-{$this->currentChampionship->id}")
+                        ->waitFor('@championship-edit-modal')
+                        ->click('@end-championship-option')
+                        ->waitFor('@end-championship-section')
+                        ->assertElementExists('@end-date-picker')
+                        ->assertElementExists('@end-reason-select')
+                        ->assertSee('End Current Championship')
+                        ->click('@change-champion-option')
+                        ->waitFor('@transfer-championship-section')
+                        ->assertElementExists('@new-champion-selector')
+                        ->assertElementExists('@transfer-date-picker')
+                        ->assertSee('Transfer to New Champion')
+                        ->click('@modify-dates-option')
+                        ->waitFor('@date-modification-section')
+                        ->assertElementExists('@new-won-date-picker')
+                        ->assertSee('Modify Championship Dates');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->title->id)->toBe($this->currentChampionship->title_id);
+        });
+
+        test('championship transfer workflow guides user through process', function () {
+            // Given: Championship transfer scenario
+            expect($this->wrestler2->name)->toBe('Jane Fighter');
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Step-by-step championship transfer wizard
+            // 2. Champion selection with availability checking
+            // 3. Transfer date selection and validation
+            // 4. Transfer summary and confirmation screen
+            // 5. Real-time championship history updates
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click("@edit-championship-{$this->currentChampionship->id}")
+                        ->waitFor('@championship-edit-modal')
+                        ->click('@transfer-championship-wizard')
+                        ->waitFor('@transfer-step-1')
+                        ->assertSee('Step 1: Select New Champion')
+                        ->select('@new-champion-select', $this->wrestler2->id)
+                        ->click('@transfer-next-step')
+                        ->waitFor('@transfer-step-2')
+                        ->assertSee('Step 2: Set Transfer Date')
+                        ->type('@transfer-date', now()->format('Y-m-d'))
+                        ->click('@transfer-next-step')
+                        ->waitFor('@transfer-step-3')
+                        ->assertSee('Step 3: Confirm Transfer')
+                        ->assertSeeIn('@transfer-summary', 'John Wrestler')
+                        ->assertSeeIn('@transfer-summary', 'Jane Fighter')
+                        ->click('@confirm-transfer-button')
+                        ->waitFor('@transfer-progress')
+                        ->waitFor('@transfer-success')
+                        ->assertSee('Championship transferred successfully');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->currentChampionship->champion_id)->toBe($this->wrestler1->id);
+        });
+    });
+
+    describe('Championship Modal User Experience', function () {
+        test('modal keyboard navigation and accessibility work correctly', function () {
+            // Given: Accessibility requirements
+            expect($this->title->name)->toBe('Test Championship');
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Keyboard navigation through modal form fields
+            // 2. Tab order and focus management
+            // 3. Escape key modal dismissal
+            // 4. Screen reader compatibility
+            // 5. ARIA labels and accessibility attributes
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->assertFocused('@champion-type-selector')
+                        ->keys('', ['{tab}'])
+                        ->assertFocused('@champion-dropdown')
+                        ->keys('', ['{tab}'])
+                        ->assertFocused('@won-date-input')
+                        ->keys('', ['{tab}'])
+                        ->assertFocused('@lost-date-input')
+                        ->keys('', ['{escape}'])
+                        ->waitUntilMissing('@championship-modal')
+                        ->assertMissing('@modal-overlay');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->wrestler1->id)->toBeInt();
+        });
+
+        test('modal responsive behavior adapts to different screen sizes', function () {
+            // Given: Responsive design requirements
+            expect($this->currentChampionship->id)->toBeInt();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Modal layout adaptation for mobile devices
+            // 2. Touch-friendly form controls on tablets
+            // 3. Desktop-optimized spacing and layout
+            // 4. Date picker mobile compatibility
+            // 5. Form validation message positioning
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->resize(375, 667) // Mobile viewport
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->assertElementExists('@mobile-modal-layout')
+                        ->assertElementExists('@mobile-date-picker')
+                        ->resize(768, 1024) // Tablet viewport
+                        ->waitFor('@tablet-modal-layout')
+                        ->assertElementExists('@tablet-form-columns')
+                        ->resize(1920, 1080) // Desktop viewport
+                        ->waitFor('@desktop-modal-layout')
+                        ->assertElementExists('@desktop-sidebar-layout')
+                        ->assertElementExists('@desktop-advanced-options');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->title->id)->toBeInt();
+        });
+
+        test('modal error handling provides clear user feedback', function () {
+            // Given: Error scenarios for testing
+            expect($this->wrestler1->name)->toBe('John Wrestler');
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Network error handling and retry mechanisms
+            // 2. Validation error highlighting and messages
+            // 3. Server error display and user guidance
+            // 4. Form field error states and recovery
+            // 5. Error message accessibility and clarity
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal')
+                        ->click('@submit-championship-button') // Submit empty form
+                        ->waitFor('@validation-errors')
+                        ->assertElementExists('@champion-field-error')
+                        ->assertElementExists('@date-field-error')
+                        ->assertSee('Champion selection is required')
+                        ->assertSee('Championship date is required')
+                        ->assertElementHasClass('@champion-dropdown', 'error-state')
+                        ->assertElementHasClass('@won-date-input', 'error-state')
+                        ->select('@champion-dropdown', $this->wrestler1->id)
+                        ->waitUntilMissing('@champion-field-error')
+                        ->assertElementDoesntHaveClass('@champion-dropdown', 'error-state')
+                        ->type('@won-date-input', now()->format('Y-m-d'))
+                        ->waitUntilMissing('@date-field-error')
+                        ->assertElementDoesntHaveClass('@won-date-input', 'error-state');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($this->tagTeam->id)->toBeInt();
+        });
+
+        test('modal performance handles large datasets efficiently', function () {
+            // Given: Large dataset scenario
+            $manyWrestlers = Wrestler::factory()->count(50)->create();
+            $manyTagTeams = TagTeam::factory()->count(25)->create();
+
+            // Browser Test Scope (Future Dusk Implementation):
+            // 1. Champion dropdown performance with many options
+            // 2. Search and filtering responsiveness
+            // 3. Modal load time optimization
+            // 4. Virtualized lists for large datasets
+            // 5. Progressive loading and lazy loading
+
+            // TODO: Replace with actual Dusk browser test when available:
+            /*
+            $this->browse(function (Browser $browser) use ($manyWrestlers) {
+                $browser->loginAs(administrator())
+                        ->visit("/titles/{$this->title->id}")
+                        ->click('@create-championship-button')
+                        ->waitFor('@championship-modal', 3) // Should load within 3 seconds
+                        ->assertElementExists('@champion-search-input')
+                        ->type('@champion-search-input', 'Test')
+                        ->waitFor('@search-results', 1) // Search should be fast
+                        ->assertElementCount('@search-result', function ($count) {
+                            return $count <= 10; // Limit displayed results
+                        })
+                        ->clear('@champion-search-input')
+                        ->click('@view-all-champions')
+                        ->waitFor('@virtualized-champion-list')
+                        ->assertElementExists('@list-pagination')
+                        ->scrollTo('@champion-list-bottom')
+                        ->waitFor('@load-more-champions')
+                        ->click('@load-more-champions')
+                        ->waitFor('@additional-champions-loaded');
+            });
+            */
+
+            // Current: Basic data verification for structure
+            expect($manyWrestlers)->toHaveCount(50);
+            expect($manyTagTeams)->toHaveCount(25);
+        });
+    });
+});

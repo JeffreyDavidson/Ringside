@@ -1,0 +1,470 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Events\Event;
+use App\Models\Shared\Venue;
+use App\Models\Titles\Title;
+
+/**
+ * Browser tests for event and title management visual workflows.
+ * 
+ * These tests focus on the visual and interactive aspects of managing
+ * events, venues, and titles that Feature tests cannot verify.
+ * 
+ * Current Implementation: Preparatory structure for Dusk integration
+ * Future Implementation: Full browser automation with Laravel Dusk
+ */
+
+describe('Event Creation Visual Workflow', function () {
+    test('event creation modal displays correctly with venue selection', function () {
+        // Given: A venue for the event
+        $venue = Venue::factory()->create(['name' => 'Madison Square Garden']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to events index page
+        // 2. Click "Create Event" button
+        // 3. Verify modal opens with correct title
+        // 4. Verify all form fields are visible and interactive
+        // 5. Test venue dropdown functionality
+        // 6. Test date picker interactions
+        // 7. Fill form and submit
+        // 8. Verify success message and table update
+        
+        // TODO: Replace with actual Dusk browser test when available:
+        /*
+        $this->browse(function (Browser $browser) use ($venue) {
+            $browser->loginAs(administrator())
+                    ->visit('/events')
+                    ->assertSee('Create Event')
+                    ->click('@create-event-button')
+                    ->waitFor('@event-form-modal')
+                    ->assertSee('Create Event')
+                    ->type('@event-name', 'WrestleMania 40')
+                    ->select('@venue-dropdown', $venue->id)
+                    ->assertSelected('@venue-dropdown', $venue->id)
+                    ->click('@date-picker')
+                    ->selectDate('2024-04-06')
+                    ->click('@submit-button')
+                    ->waitUntilMissing('@event-form-modal')
+                    ->assertSee('Event created successfully')
+                    ->assertSee('WrestleMania 40')
+                    ->assertSee('Madison Square Garden');
+        });
+        */
+        
+        expect($venue->name)->toBe('Madison Square Garden');
+    });
+
+    test('venue selection dropdown filters and searches correctly', function () {
+        // Given: Multiple venues
+        $venue1 = Venue::factory()->create(['name' => 'Arena A', 'city' => 'New York']);
+        $venue2 = Venue::factory()->create(['name' => 'Stadium B', 'city' => 'Los Angeles']);
+        $venue3 = Venue::factory()->create(['name' => 'Arena C', 'city' => 'Chicago']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Open event creation modal
+        // 2. Click venue dropdown
+        // 3. Verify all venues are listed
+        // 4. Type in search box to filter venues
+        // 5. Verify filtering works in real-time
+        // 6. Select venue and verify it appears in field
+        // 7. Test clearing selection
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($venue1, $venue2, $venue3) {
+            $browser->loginAs(administrator())
+                    ->visit('/events')
+                    ->click('@create-event-button')
+                    ->waitFor('@event-form-modal')
+                    ->click('@venue-dropdown')
+                    ->assertSee($venue1->name)
+                    ->assertSee($venue2->name)
+                    ->assertSee($venue3->name)
+                    ->type('@venue-search', 'Arena')
+                    ->pause(300)
+                    ->assertSee($venue1->name)
+                    ->assertDontSee($venue2->name)
+                    ->assertSee($venue3->name)
+                    ->click("@venue-option-{$venue1->id}")
+                    ->assertInputValue('@venue-dropdown', $venue1->name);
+        });
+        */
+        
+        expect($venue1->name)->toBe('Arena A');
+    });
+
+    test('date picker allows proper date selection with validation', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Open event creation modal
+        // 2. Click date picker field
+        // 3. Verify calendar opens correctly
+        // 4. Test navigation between months/years
+        // 5. Try selecting past dates (should show warning)
+        // 6. Select valid future date
+        // 7. Verify date appears correctly in field
+        // 8. Test keyboard input for date field
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/events')
+                    ->click('@create-event-button')
+                    ->waitFor('@event-form-modal')
+                    ->click('@date-picker-field')
+                    ->waitFor('@date-picker-calendar')
+                    ->assertVisible('@calendar-navigation')
+                    ->click('@previous-month')
+                    ->click('@calendar-day-15')
+                    ->assertSee('Past dates are not recommended')
+                    ->click('@next-month')
+                    ->click('@next-month')
+                    ->click('@calendar-day-20')
+                    ->assertInputValue('@date-picker-field', '2024-06-20');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Event Table Visual Workflow', function () {
+    test('events table displays with proper formatting and sorting', function () {
+        // Given: Events with different dates and venues
+        $venue = Venue::factory()->create(['name' => 'Test Arena']);
+        $pastEvent = Event::factory()->create([
+            'name' => 'Past Event',
+            'date' => now()->subMonths(2),
+            'venue_id' => $venue->id
+        ]);
+        $futureEvent = Event::factory()->create([
+            'name' => 'Future Event',
+            'date' => now()->addMonths(2),
+            'venue_id' => $venue->id
+        ]);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to events table
+        // 2. Verify events display with proper date formatting
+        // 3. Verify venue names are linked/clickable
+        // 4. Test sorting by date column
+        // 5. Test sorting by name column
+        // 6. Verify past events have different styling
+        // 7. Test action buttons visibility
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($pastEvent, $futureEvent) {
+            $browser->loginAs(administrator())
+                    ->visit('/events')
+                    ->assertSee($pastEvent->name)
+                    ->assertSee($futureEvent->name)
+                    ->assertSeeIn("@event-{$pastEvent->id}", 'Test Arena')
+                    ->assertElementHasClass("@event-{$pastEvent->id}", 'past-event')
+                    ->assertElementHasClass("@event-{$futureEvent->id}", 'future-event')
+                    ->click('@sort-by-date')
+                    ->pause(500)
+                    ->assertOrderedElements([
+                        "@event-{$futureEvent->id}",
+                        "@event-{$pastEvent->id}"
+                    ]);
+        });
+        */
+        
+        expect($pastEvent->name)->toBe('Past Event');
+        expect($futureEvent->name)->toBe('Future Event');
+    });
+
+    test('event filtering by venue and date range works visually', function () {
+        // Given: Events at different venues
+        $venue1 = Venue::factory()->create(['name' => 'Venue One']);
+        $venue2 = Venue::factory()->create(['name' => 'Venue Two']);
+        $event1 = Event::factory()->create(['venue_id' => $venue1->id, 'name' => 'Event One']);
+        $event2 = Event::factory()->create(['venue_id' => $venue2->id, 'name' => 'Event Two']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to events table
+        // 2. Verify filter controls are visible
+        // 3. Select venue filter
+        // 4. Verify table updates to show only matching events
+        // 5. Test date range filter
+        // 6. Verify filter combinations work
+        // 7. Test clearing filters
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($venue1, $event1, $event2) {
+            $browser->loginAs(administrator())
+                    ->visit('/events')
+                    ->assertSee($event1->name)
+                    ->assertSee($event2->name)
+                    ->select('@venue-filter', $venue1->id)
+                    ->pause(500)
+                    ->assertSee($event1->name)
+                    ->assertDontSee($event2->name)
+                    ->assertVisible('@filter-pill')
+                    ->click('@clear-filters')
+                    ->assertSee($event1->name)
+                    ->assertSee($event2->name);
+        });
+        */
+        
+        expect($event1->name)->toBe('Event One');
+        expect($event2->name)->toBe('Event Two');
+    });
+});
+
+describe('Title Management Visual Workflow', function () {
+    test('title creation modal displays with type selection', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to titles index page
+        // 2. Click "Create Title" button
+        // 3. Verify modal opens with form fields
+        // 4. Test title type dropdown (Singles, Tag Team, etc.)
+        // 5. Fill out title information
+        // 6. Submit and verify creation
+        // 7. Verify title appears in table
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/titles')
+                    ->click('@create-title-button')
+                    ->waitFor('@title-form-modal')
+                    ->assertSee('Create Title')
+                    ->type('@title-name', 'WWE Championship')
+                    ->select('@title-type', 'singles')
+                    ->click('@debut-date-picker')
+                    ->selectDate('2024-01-01')
+                    ->click('@submit-button')
+                    ->waitUntilMissing('@title-form-modal')
+                    ->assertSee('Title created successfully')
+                    ->assertSee('WWE Championship');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('title status management buttons work correctly', function () {
+        // Given: A title with various possible statuses
+        $title = Title::factory()->create(['name' => 'Test Championship']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to titles table
+        // 2. Verify title action buttons are visible
+        // 3. Test debut/activate button
+        // 4. Verify button states change after action
+        // 5. Test pull/deactivate button
+        // 6. Test retire/unretire buttons
+        // 7. Verify confirmation dialogs appear
+        // 8. Verify status updates in table
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($title) {
+            $browser->loginAs(administrator())
+                    ->visit('/titles')
+                    ->assertSee($title->name)
+                    ->within("@title-{$title->id}-actions", function ($actions) {
+                        $actions->assertVisible('@debut-button')
+                                ->click('@debut-button');
+                    })
+                    ->waitFor('@confirmation-dialog')
+                    ->assertSee('Debut this title?')
+                    ->click('@confirm-button')
+                    ->waitFor('@success-message')
+                    ->assertSee('Title debuted successfully')
+                    ->within("@title-{$title->id}-actions", function ($actions) {
+                        $actions->assertVisible('@pull-button')
+                                ->assertDontSee('@debut-button');
+                    });
+        });
+        */
+        
+        expect($title->name)->toBe('Test Championship');
+    });
+
+    test('title championship history displays correctly', function () {
+        // Given: A title with championship history
+        $title = Title::factory()->create(['name' => 'World Championship']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to title detail page
+        // 2. Verify championship history table is visible
+        // 3. Verify columns display correctly (Champion, Dates, Length)
+        // 4. Test table sorting functionality
+        // 5. Verify date formatting is consistent
+        // 6. Test pagination if many championship reigns
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($title) {
+            $browser->loginAs(administrator())
+                    ->visit("/titles/{$title->id}")
+                    ->assertSee($title->name)
+                    ->assertVisible('@championship-history-table')
+                    ->within('@championship-history-table', function ($table) {
+                        $table->assertSee('Champion')
+                              ->assertSee('Won At')
+                              ->assertSee('Lost At')
+                              ->assertSee('Days Held')
+                              ->click('@sort-by-won-date')
+                              ->pause(500)
+                              ->assertVisible('@table-rows');
+                    });
+        });
+        */
+        
+        expect($title->name)->toBe('World Championship');
+    });
+});
+
+describe('Venue Management Visual Workflow', function () {
+    test('venue creation form validates address information', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to venues page
+        // 2. Open venue creation modal
+        // 3. Fill out venue information
+        // 4. Test address autocomplete functionality
+        // 5. Verify state/city validation
+        // 6. Test form submission
+        // 7. Verify venue appears in table
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/venues')
+                    ->click('@create-venue-button')
+                    ->waitFor('@venue-form-modal')
+                    ->type('@venue-name', 'Test Arena')
+                    ->type('@venue-address', '123 Main St')
+                    ->type('@venue-city', 'New York')
+                    ->select('@venue-state', 'NY')
+                    ->assertSelected('@venue-state', 'NY')
+                    ->click('@submit-button')
+                    ->waitUntilMissing('@venue-form-modal')
+                    ->assertSee('Venue created successfully')
+                    ->assertSee('Test Arena')
+                    ->assertSee('New York, NY');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('venue event history displays with proper navigation', function () {
+        // Given: A venue with events
+        $venue = Venue::factory()->create(['name' => 'Historic Arena']);
+        $event = Event::factory()->create([
+            'name' => 'Big Event',
+            'venue_id' => $venue->id
+        ]);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to venue detail page
+        // 2. Verify venue information displays correctly
+        // 3. Verify events history table is visible
+        // 4. Click on event link to navigate to event
+        // 5. Verify navigation works properly
+        // 6. Test back navigation
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($venue, $event) {
+            $browser->loginAs(administrator())
+                    ->visit("/venues/{$venue->id}")
+                    ->assertSee($venue->name)
+                    ->assertVisible('@venue-events-table')
+                    ->within('@venue-events-table', function ($table) use ($event) {
+                        $table->assertSee($event->name)
+                              ->click("@event-{$event->id}-link");
+                    })
+                    ->waitForLocation("/events/{$event->id}")
+                    ->assertSee($event->name)
+                    ->back()
+                    ->assertSee($venue->name);
+        });
+        */
+        
+        expect($venue->name)->toBe('Historic Arena');
+        expect($event->name)->toBe('Big Event');
+    });
+});
+
+describe('Interactive Dashboard Elements', function () {
+    test('dashboard shows recent events and titles with interactive elements', function () {
+        // Given: Recent events and titles
+        $recentEvent = Event::factory()->create(['name' => 'Recent Event']);
+        $recentTitle = Title::factory()->create(['name' => 'New Title']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to dashboard
+        // 2. Verify recent events widget is visible
+        // 3. Verify recent titles widget is visible
+        // 4. Test clicking on dashboard items
+        // 5. Verify navigation to detail pages
+        // 6. Test dashboard refresh functionality
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($recentEvent, $recentTitle) {
+            $browser->loginAs(administrator())
+                    ->visit('/dashboard')
+                    ->assertVisible('@recent-events-widget')
+                    ->assertVisible('@recent-titles-widget')
+                    ->within('@recent-events-widget', function ($widget) use ($recentEvent) {
+                        $widget->assertSee($recentEvent->name)
+                               ->click("@event-{$recentEvent->id}-link");
+                    })
+                    ->waitForLocation("/events/{$recentEvent->id}")
+                    ->assertSee($recentEvent->name);
+        });
+        */
+        
+        expect($recentEvent->name)->toBe('Recent Event');
+        expect($recentTitle->name)->toBe('New Title');
+    });
+});
+
+describe('Form Interactions and Real-time Validation', function () {
+    test('event form provides real-time validation feedback', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Open event creation form
+        // 2. Start typing in name field
+        // 3. Verify character count appears
+        // 4. Test field validation as user types
+        // 5. Verify error messages appear/disappear in real-time
+        // 6. Test form submission states
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/events')
+                    ->click('@create-event-button')
+                    ->waitFor('@event-form-modal')
+                    ->type('@event-name', 'A')
+                    ->assertSee('Name too short')
+                    ->type('@event-name', 'Valid Event Name')
+                    ->assertDontSee('Name too short')
+                    ->assertSee('✓')
+                    ->clear('@event-name')
+                    ->assertSee('Name is required')
+                    ->assertVisible('.field-error');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+// Note: When Laravel Dusk is installed, add these dependencies to the top:
+// use Laravel\Dusk\Browser;
+// use Tests\DuskTestCase;
+
+// And extend DuskTestCase instead of the current structure

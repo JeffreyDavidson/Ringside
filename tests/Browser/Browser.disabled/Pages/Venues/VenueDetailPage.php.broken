@@ -1,0 +1,463 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Venues;
+
+use App\Models\Shared\Venue;
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+/**
+ * Page Object for Venue Detail/Show interface.
+ * 
+ * Provides methods for interacting with individual venue detail pages,
+ * including viewing venue information, event history, and related
+ * management operations. Follows the Page Object Model pattern.
+ */
+class VenueDetailPage extends Page
+{
+    protected Venue $venue;
+
+    public function __construct(Venue $venue)
+    {
+        $this->venue = $venue;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return "/venues/{$this->venue->id}";
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     */
+    public function elements(): array
+    {
+        return [
+            '@venue-header' => '[data-test="venue-header"]',
+            '@venue-name' => '[data-test="venue-name"]',
+            '@venue-address' => '[data-test="venue-address"]',
+            '@venue-details' => '[data-test="venue-details"]',
+            '@events-section' => '[data-test="venue-events"]',
+            '@past-events' => '[data-test="past-events"]',
+            '@future-events' => '[data-test="future-events"]',
+            '@edit-button' => '[data-test="edit-venue"]',
+            '@delete-button' => '[data-test="delete-venue"]',
+            '@restore-button' => '[data-test="restore-venue"]',
+            '@back-button' => '[data-test="back-to-venues"]',
+            '@events-table' => '[data-test="events-table"]',
+            '@no-events-message' => '[data-test="no-events"]',
+            '@venue-stats' => '[data-test="venue-statistics"]',
+            '@loading' => '[data-test="loading"]',
+            '@error-message' => '[data-test="error-message"]',
+            '@success-message' => '[data-test="success-message"]',
+        ];
+    }
+
+    /**
+     * Visit the venue detail page as the given user.
+     */
+    public function visit(Browser $browser, User $user): static
+    {
+        $browser->loginAs($user)
+                ->visit($this->url())
+                ->waitFor('@venue-header');
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue basic information is displayed correctly.
+     */
+    public function assertVenueInformation(Browser $browser): static
+    {
+        $browser->within('@venue-details', function (Browser $browser) {
+            $browser->assertSee($this->venue->name)
+                    ->assertSee($this->venue->street_address)
+                    ->assertSee($this->venue->city)
+                    ->assertSee($this->venue->state)
+                    ->assertSee($this->venue->zipcode);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue name is displayed in header.
+     */
+    public function assertVenueName(Browser $browser, string $expectedName): static
+    {
+        $browser->within('@venue-name', function (Browser $browser) use ($expectedName) {
+            $browser->assertSee($expectedName);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue address is properly formatted and displayed.
+     */
+    public function assertVenueAddress(Browser $browser, array $expectedAddress): static
+    {
+        $browser->within('@venue-address', function (Browser $browser) use ($expectedAddress) {
+            if (isset($expectedAddress['street_address'])) {
+                $browser->assertSee($expectedAddress['street_address']);
+            }
+            if (isset($expectedAddress['city'])) {
+                $browser->assertSee($expectedAddress['city']);
+            }
+            if (isset($expectedAddress['state'])) {
+                $browser->assertSee($expectedAddress['state']);
+            }
+            if (isset($expectedAddress['zipcode'])) {
+                $browser->assertSee($expectedAddress['zipcode']);
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue events section is visible.
+     */
+    public function assertEventsSection(Browser $browser): static
+    {
+        $browser->assertVisible('@events-section');
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific event is listed in past events.
+     */
+    public function assertPastEvent(Browser $browser, string $eventName): static
+    {
+        $browser->within('@past-events', function (Browser $browser) use ($eventName) {
+            $browser->assertSee($eventName);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that specific event is listed in future events.
+     */
+    public function assertFutureEvent(Browser $browser, string $eventName): static
+    {
+        $browser->within('@future-events', function (Browser $browser) use ($eventName) {
+            $browser->assertSee($eventName);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that no events message is displayed.
+     */
+    public function assertNoEvents(Browser $browser): static
+    {
+        $browser->assertVisible('@no-events-message');
+
+        return $this;
+    }
+
+    /**
+     * Assert that events table contains data.
+     */
+    public function assertHasEvents(Browser $browser): static
+    {
+        $browser->within('@events-table', function (Browser $browser) {
+            $browser->assertPresent('tbody tr');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert venue statistics are displayed.
+     */
+    public function assertVenueStatistics(Browser $browser, array $expectedStats): static
+    {
+        $browser->within('@venue-stats', function (Browser $browser) use ($expectedStats) {
+            if (isset($expectedStats['total_events'])) {
+                $browser->assertSee("Total Events: {$expectedStats['total_events']}");
+            }
+            if (isset($expectedStats['past_events'])) {
+                $browser->assertSee("Past Events: {$expectedStats['past_events']}");
+            }
+            if (isset($expectedStats['future_events'])) {
+                $browser->assertSee("Future Events: {$expectedStats['future_events']}");
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Click the edit venue button.
+     */
+    public function clickEdit(Browser $browser): static
+    {
+        $browser->click('@edit-button');
+
+        return $this;
+    }
+
+    /**
+     * Click the delete venue button.
+     */
+    public function clickDelete(Browser $browser): static
+    {
+        $browser->click('@delete-button');
+
+        // Handle confirmation dialog if present
+        $browser->whenAvailable('[data-test="confirm-delete"]', function (Browser $modal) {
+            $modal->click('[data-test="confirm-delete-button"]');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Click the restore venue button.
+     */
+    public function clickRestore(Browser $browser): static
+    {
+        $browser->click('@restore-button');
+
+        return $this;
+    }
+
+    /**
+     * Navigate back to venues list.
+     */
+    public function goBack(Browser $browser): static
+    {
+        $browser->click('@back-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that edit button is visible and enabled.
+     */
+    public function assertCanEdit(Browser $browser): static
+    {
+        $browser->assertVisible('@edit-button')
+                ->assertEnabled('@edit-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that delete button is visible and enabled.
+     */
+    public function assertCanDelete(Browser $browser): static
+    {
+        $browser->assertVisible('@delete-button')
+                ->assertEnabled('@delete-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that restore button is visible and enabled.
+     */
+    public function assertCanRestore(Browser $browser): static
+    {
+        $browser->assertVisible('@restore-button')
+                ->assertEnabled('@restore-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that management buttons are not visible.
+     */
+    public function assertCannotManage(Browser $browser): static
+    {
+        $browser->assertMissing('@edit-button')
+                ->assertMissing('@delete-button')
+                ->assertMissing('@restore-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that a success message is displayed.
+     */
+    public function assertSuccessMessage(Browser $browser, string $message = null): static
+    {
+        $browser->assertVisible('@success-message');
+
+        if ($message) {
+            $browser->within('@success-message', function (Browser $browser) use ($message) {
+                $browser->assertSee($message);
+            });
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that an error message is displayed.
+     */
+    public function assertErrorMessage(Browser $browser, string $message = null): static
+    {
+        $browser->assertVisible('@error-message');
+
+        if ($message) {
+            $browser->within('@error-message', function (Browser $browser) use ($message) {
+                $browser->assertSee($message);
+            });
+        }
+
+        return $this;
+    }
+
+    /**
+     * Wait for the page to finish loading.
+     */
+    public function waitForLoad(Browser $browser): static
+    {
+        $browser->waitUntilMissing('@loading', 10);
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue is marked as deleted.
+     */
+    public function assertVenueDeleted(Browser $browser): static
+    {
+        $browser->assertSee('Deleted')
+                ->assertVisible('@restore-button')
+                ->assertMissing('@edit-button')
+                ->assertMissing('@delete-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue is active and not deleted.
+     */
+    public function assertVenueActive(Browser $browser): static
+    {
+        $browser->assertDontSee('Deleted')
+                ->assertVisible('@edit-button')
+                ->assertVisible('@delete-button')
+                ->assertMissing('@restore-button');
+
+        return $this;
+    }
+
+    /**
+     * View event details from the events list.
+     */
+    public function viewEvent(Browser $browser, string $eventName): static
+    {
+        $browser->within('@events-table', function (Browser $browser) use ($eventName) {
+            $browser->clickLink($eventName);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Filter events by date range.
+     */
+    public function filterEventsByDate(Browser $browser, string $startDate, string $endDate): static
+    {
+        $browser->within('@events-section', function (Browser $browser) use ($startDate, $endDate) {
+            $browser->type('[data-test="start-date"]', $startDate)
+                    ->type('[data-test="end-date"]', $endDate)
+                    ->click('[data-test="apply-filter"]');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Clear event filters.
+     */
+    public function clearEventFilters(Browser $browser): static
+    {
+        $browser->within('@events-section', function (Browser $browser) {
+            $browser->click('[data-test="clear-filters"]');
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert event count in different sections.
+     */
+    public function assertEventCounts(Browser $browser, int $pastCount, int $futureCount): static
+    {
+        $browser->within('@past-events', function (Browser $browser) use ($pastCount) {
+            if ($pastCount > 0) {
+                $browser->assertSee("({$pastCount})");
+            } else {
+                $browser->assertSee('No past events');
+            }
+        });
+
+        $browser->within('@future-events', function (Browser $browser) use ($futureCount) {
+            if ($futureCount > 0) {
+                $browser->assertSee("({$futureCount})");
+            } else {
+                $browser->assertSee('No upcoming events');
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue information is read-only.
+     */
+    public function assertReadOnly(Browser $browser): static
+    {
+        $browser->assertMissing('@edit-button')
+                ->assertMissing('@delete-button');
+
+        return $this;
+    }
+
+    /**
+     * Assert that venue contact or additional information is displayed.
+     */
+    public function assertAdditionalInfo(Browser $browser, array $info): static
+    {
+        $browser->within('@venue-details', function (Browser $browser) use ($info) {
+            foreach ($info as $key => $value) {
+                $browser->assertSee($value);
+            }
+        });
+
+        return $this;
+    }
+
+    /**
+     * Navigate to related venue management actions.
+     */
+    public function navigateToManagement(Browser $browser): static
+    {
+        $browser->click('[data-test="manage-venue"]');
+
+        return $this;
+    }
+}

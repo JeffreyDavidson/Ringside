@@ -1,0 +1,393 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Titles\Title;
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Titles\TitleIndexPage;
+
+/**
+ * Browser tests for Title form modal interactions.
+ * 
+ * BROWSER TEST SCOPE:
+ * - Modal form display and behavior
+ * - Form field validation and error handling
+ * - Modal state management (open, close, submit)
+ * - Create and edit modal workflows
+ * - Modal accessibility and keyboard navigation
+ * 
+ * These tests verify that title form modals work correctly
+ * through the browser interface with proper user experience
+ * and visual feedback for all modal interactions.
+ */
+
+describe('Title Form Modal Browser Tests', function () {
+    beforeEach(function () {
+        $this->admin = User::factory()->administrator()->create();
+        $this->basicUser = User::factory()->create();
+
+        $this->indexPage = new TitleIndexPage();
+
+        // Create test titles for editing
+        $this->activeTitle = Title::factory()->active()->create([
+            'name' => 'Active Modal Championship',
+            'type' => 'singles',
+        ]);
+
+        $this->retiredTitle = Title::factory()->retired()->create([
+            'name' => 'Retired Modal Championship',
+            'type' => 'tag_team',
+        ]);
+
+        $this->deletedTitle = Title::factory()->create([
+            'name' => 'Deleted Modal Championship'
+        ]);
+        $this->deletedTitle->delete();
+    });
+
+    /** @test */
+    public function create_modal_opens_and_displays_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalTitle($browser, 'Create Title')
+                           ->assertCreateFormFields($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_cancel_button(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->cancelModal($browser)
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_escape_key(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->keys('@modal', '{escape}')
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_overlay_click(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->clickModalOverlay($browser)
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_validates_required_fields(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->submitFormWithoutData($browser)
+                           ->assertValidationErrors($browser, ['name', 'type'])
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_displays_type_options(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertTypeOptions($browser, ['singles', 'tag_team']);
+        });
+    }
+
+    /** @test */
+    public function create_modal_successfully_creates_title(): void
+    {
+        $titleData = [
+            'name' => 'Browser Test Championship',
+            'type' => 'singles'
+        ];
+
+        $this->browse(function (Browser $browser) use ($titleData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, $titleData)
+                           ->submitForm($browser)
+                           ->assertModalClosed($browser)
+                           ->assertTitleInList($browser, $titleData['name'])
+                           ->assertSuccessMessage($browser);
+        });
+
+        // Verify title was actually created in database
+        expect(Title::where('name', $titleData['name'])->exists())->toBeTrue();
+    }
+
+    /** @test */
+    public function create_modal_handles_duplicate_name_validation(): void
+    {
+        $duplicateName = $this->activeTitle->name;
+
+        $this->browse(function (Browser $browser) use ($duplicateName) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => $duplicateName,
+                               'type' => 'singles'
+                           ])
+                           ->submitForm($browser)
+                           ->assertValidationError($browser, 'name', 'already been taken')
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function edit_modal_opens_with_existing_data(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, $this->activeTitle)
+                           ->assertModalVisible($browser)
+                           ->assertModalTitle($browser, 'Edit Title')
+                           ->assertFormPrefilledWith($browser, [
+                               'name' => $this->activeTitle->name,
+                               'type' => $this->activeTitle->type
+                           ]);
+        });
+    }
+
+    /** @test */
+    public function edit_modal_successfully_updates_title(): void
+    {
+        $updatedData = [
+            'name' => 'Updated Championship Name',
+            'type' => 'tag_team'
+        ];
+
+        $this->browse(function (Browser $browser) use ($updatedData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, $this->activeTitle)
+                           ->fillEditForm($browser, $updatedData)
+                           ->submitForm($browser)
+                           ->assertModalClosed($browser)
+                           ->assertTitleInList($browser, $updatedData['name'])
+                           ->assertSuccessMessage($browser);
+        });
+
+        // Verify title was actually updated in database
+        $this->activeTitle->refresh();
+        expect($this->activeTitle->name)->toBe($updatedData['name']);
+        expect($this->activeTitle->type)->toBe($updatedData['type']);
+    }
+
+    /** @test */
+    public function edit_modal_validates_required_fields(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, $this->activeTitle)
+                           ->clearFormFields($browser)
+                           ->submitForm($browser)
+                           ->assertValidationErrors($browser, ['name', 'type'])
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_displays_dummy_data_button(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertDummyDataButton($browser)
+                           ->clickDummyDataButton($browser)
+                           ->assertFormFieldsPopulated($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_form_handles_long_title_names(): void
+    {
+        $longName = str_repeat('Championship ', 20); // Very long title name
+
+        $this->browse(function (Browser $browser) use ($longName) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => $longName,
+                               'type' => 'singles'
+                           ])
+                           ->submitForm($browser)
+                           ->assertValidationError($browser, 'name', 'may not be greater than')
+                           ->assertModalStillVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_accessibility_keyboard_navigation(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->keys('body', '{tab}') // Tab to first field
+                           ->assertFocused('@name-field')
+                           ->keys('body', '{tab}') // Tab to type field
+                           ->assertFocused('@type-field')
+                           ->keys('body', '{tab}') // Tab to submit button
+                           ->assertFocused('@submit-button');
+        });
+    }
+
+    /** @test */
+    public function modal_displays_loading_state_during_submission(): void
+    {
+        $titleData = [
+            'name' => 'Loading Test Championship',
+            'type' => 'singles'
+        ];
+
+        $this->browse(function (Browser $browser) use ($titleData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, $titleData)
+                           ->clickSubmitAndWait($browser)
+                           ->assertLoadingState($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_prevents_double_submission(): void
+    {
+        $titleData = [
+            'name' => 'Double Submit Test',
+            'type' => 'singles'
+        ];
+
+        $this->browse(function (Browser $browser) use ($titleData) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, $titleData)
+                           ->clickSubmitMultipleTimes($browser)
+                           ->waitForSubmissionComplete($browser);
+        });
+
+        // Verify only one title was created
+        expect(Title::where('name', $titleData['name'])->count())->toBe(1);
+    }
+
+    /** @test */
+    public function modal_responsive_design_mobile(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs($this->admin)
+                    ->visit('/titles')
+                    ->screenshot('mobile-title-modal-before')
+                    ->pause(2000);
+
+            $this->indexPage->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalResponsive($browser)
+                           ->screenshot('mobile-title-modal-open');
+        });
+    }
+
+    /** @test */
+    public function modal_responsive_design_tablet(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->resize(768, 1024) // iPad dimensions
+                    ->loginAs($this->admin)
+                    ->visit('/titles')
+                    ->screenshot('tablet-title-modal-before')
+                    ->pause(2000);
+
+            $this->indexPage->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalResponsive($browser)
+                           ->screenshot('tablet-title-modal-open');
+        });
+    }
+
+    /** @test */
+    public function modal_error_handling_network_failure(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Network Test Championship',
+                               'type' => 'singles'
+                           ]);
+
+            // Simulate network interruption (implementation dependent)
+            $browser->submitForm($browser)
+                    ->waitForErrorHandling($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_handles_unauthorized_user_gracefully(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs($this->basicUser)
+                    ->visit('/titles')
+                    ->screenshot('unauthorized-modal-access')
+                    ->pause(2000);
+
+            // Basic user should not see create button or should be redirected
+            if ($browser->element('@create-button')) {
+                $browser->screenshot('unauthorized-user-sees-create-button');
+            } else {
+                $browser->screenshot('unauthorized-user-no-create-button');
+            }
+        });
+    }
+
+    /** @test */
+    public function modal_form_field_focus_management(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertNameFieldFocused($browser) // First field should be focused
+                           ->type('@name-field', 'Test Title')
+                           ->keys('@name-field', '{tab}')
+                           ->assertFocused('@type-field'); // Focus should move to next field
+        });
+    }
+
+    /** @test */
+    public function modal_real_time_validation_feedback(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->type('@name-field', 'Valid Title')
+                           ->assertNoValidationError($browser, 'name')
+                           ->clear('@name-field')
+                           ->click('@type-field') // Trigger blur event
+                           ->assertValidationError($browser, 'name');
+        });
+    }
+});

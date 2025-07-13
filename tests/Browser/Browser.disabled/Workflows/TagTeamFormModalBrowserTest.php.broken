@@ -1,0 +1,462 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\TagTeams\TagTeam;
+use App\Models\Users\User;
+use App\Models\Wrestlers\Wrestler;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\TagTeams\TagTeamIndexPage;
+
+/**
+ * Browser tests for TagTeam form modal interactions.
+ * 
+ * BROWSER TEST SCOPE:
+ * - Modal form display and behavior
+ * - Form field validation and error handling
+ * - Modal state management (open, close, submit)
+ * - Create and edit modal workflows
+ * - Wrestler selection and partnership management
+ * 
+ * These tests verify that tag team form modals work correctly
+ * through the browser interface with proper user experience
+ * and visual feedback for all modal interactions.
+ */
+
+describe('TagTeam Form Modal Browser Tests', function () {
+    beforeEach(function () {
+        $this->admin = User::factory()->administrator()->create();
+        $this->basicUser = User::factory()->create();
+
+        $this->indexPage = new TagTeamIndexPage();
+
+        // Create test wrestlers for tag team partnerships
+        $this->wrestler1 = Wrestler::factory()->create(['name' => 'Modal Wrestler One']);
+        $this->wrestler2 = Wrestler::factory()->create(['name' => 'Modal Wrestler Two']);
+        $this->wrestler3 = Wrestler::factory()->create(['name' => 'Modal Wrestler Three']);
+
+        // Create test tag teams for editing
+        $this->activeTagTeam = TagTeam::factory()->employed()->create([
+            'name' => 'Active Modal Tag Team'
+        ]);
+
+        $this->retiredTagTeam = TagTeam::factory()->retired()->create([
+            'name' => 'Retired Modal Tag Team'
+        ]);
+
+        $this->deletedTagTeam = TagTeam::factory()->create([
+            'name' => 'Deleted Modal Tag Team'
+        ]);
+        $this->deletedTagTeam->delete();
+    });
+
+    /** @test */
+    public function create_modal_opens_and_displays_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalTitle($browser, 'Create Tag Team')
+                           ->assertCreateFormFields($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_cancel_button(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->cancelModal($browser)
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_closes_with_escape_key(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->keys('@modal', '{escape}')
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_validates_required_fields(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->submitEmptyCreateForm($browser)
+                           ->assertValidationError($browser, 'name')
+                           ->assertValidationError($browser, 'employed_from')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_validates_wrestler_selection(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Validation Tag Team',
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertValidationError($browser, 'wrestlers')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function create_modal_shows_success_and_closes_on_valid_submission(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Modal Created Tag Team',
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->selectWrestlers($browser, [
+                               $this->wrestler1->name,
+                               $this->wrestler2->name
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertModalClosed($browser)
+                           ->assertSuccessMessage($browser)
+                           ->assertTagTeamVisible($browser, 'Modal Created Tag Team');
+        });
+    }
+
+    /** @test */
+    public function edit_modal_opens_with_prepopulated_data(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, 'Active Modal Tag Team')
+                           ->assertModalVisible($browser)
+                           ->assertModalTitle($browser, 'Edit Tag Team')
+                           ->assertEditFormFields($browser)
+                           ->assertFormFieldValue($browser, 'name', 'Active Modal Tag Team');
+        });
+    }
+
+    /** @test */
+    public function edit_modal_updates_tag_team_successfully(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, 'Active Modal Tag Team')
+                           ->clearAndFillEditForm($browser, [
+                               'name' => 'Updated Modal Tag Team'
+                           ])
+                           ->submitEditForm($browser)
+                           ->assertModalClosed($browser)
+                           ->assertSuccessMessage($browser)
+                           ->assertTagTeamVisible($browser, 'Updated Modal Tag Team')
+                           ->assertTagTeamNotVisible($browser, 'Active Modal Tag Team');
+        });
+    }
+
+    /** @test */
+    public function edit_modal_validates_data_changes(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, 'Active Modal Tag Team')
+                           ->clearFormField($browser, 'name')
+                           ->submitEditForm($browser)
+                           ->assertValidationError($browser, 'name')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_wrestler_selection_interface_works(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertWrestlerSelectionVisible($browser)
+                           ->selectWrestler($browser, $this->wrestler1->name)
+                           ->assertWrestlerSelected($browser, $this->wrestler1->name)
+                           ->selectWrestler($browser, $this->wrestler2->name)
+                           ->assertWrestlerSelected($browser, $this->wrestler2->name)
+                           ->deselectWrestler($browser, $this->wrestler1->name)
+                           ->assertWrestlerNotSelected($browser, $this->wrestler1->name);
+        });
+    }
+
+    /** @test */
+    public function modal_prevents_selecting_more_than_required_wrestlers(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->selectWrestler($browser, $this->wrestler1->name)
+                           ->selectWrestler($browser, $this->wrestler2->name)
+                           ->selectWrestler($browser, $this->wrestler3->name)
+                           ->assertWrestlerSelectionLimited($browser, 2); // Should only allow 2 wrestlers
+        });
+    }
+
+    /** @test */
+    public function modal_form_handles_employment_date_validation(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Date Validation Tag Team',
+                               'employed_from' => 'invalid-date'
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertValidationError($browser, 'employed_from')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_form_handles_future_employment_date_validation(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Future Date Tag Team',
+                               'employed_from' => now()->addYear()->format('Y-m-d')
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertValidationError($browser, 'employed_from')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_handles_retired_tag_team_editing(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditModal($browser, 'Retired Modal Tag Team')
+                           ->assertModalVisible($browser)
+                           ->assertFormFieldValue($browser, 'name', 'Retired Modal Tag Team')
+                           ->assertRetirementFieldsVisible($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_keyboard_navigation_works_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->keys('@modal input[name="name"]', 'Modal Navigation Tag Team')
+                           ->keys('', '{tab}') // Move to date field
+                           ->keys('', now()->format('Y-m-d'))
+                           ->keys('', '{tab}') // Move to wrestler selection
+                           ->selectWrestlersByKeyboard($browser, [
+                               $this->wrestler1->name,
+                               $this->wrestler2->name
+                           ])
+                           ->keys('', '{tab}') // Move to submit button
+                           ->keys('', '{enter}') // Submit form
+                           ->assertModalClosed($browser)
+                           ->assertTagTeamVisible($browser, 'Modal Navigation Tag Team');
+        });
+    }
+
+    /** @test */
+    public function modal_maintains_focus_management(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertElementFocused($browser, 'input[name="name"]') // First field should be focused
+                           ->cancelModal($browser)
+                           ->assertModalClosed($browser)
+                           ->assertElementFocused($browser, '@create-button'); // Focus should return to trigger
+        });
+    }
+
+    /** @test */
+    public function modal_form_fields_clear_between_operations(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'First Modal Tag Team',
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->selectWrestlers($browser, [$this->wrestler1->name])
+                           ->submitCreateForm($browser)
+                           ->assertModalClosed($browser)
+                           ->openCreateModal($browser)
+                           ->assertFormFieldValue($browser, 'name', '') // Should be cleared
+                           ->assertFormFieldValue($browser, 'employed_from', '') // Should be cleared
+                           ->assertNoWrestlersSelected($browser); // Should be cleared
+        });
+    }
+
+    /** @test */
+    public function modal_wrestler_search_filters_available_wrestlers(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->searchWrestlers($browser, 'Modal Wrestler One')
+                           ->assertWrestlerVisible($browser, $this->wrestler1->name)
+                           ->assertWrestlerNotVisible($browser, $this->wrestler2->name)
+                           ->clearWrestlerSearch($browser)
+                           ->assertWrestlerVisible($browser, $this->wrestler1->name)
+                           ->assertWrestlerVisible($browser, $this->wrestler2->name);
+        });
+    }
+
+    /** @test */
+    public function modal_shows_wrestler_availability_status(): void
+    {
+        // Create an already employed wrestler
+        $employedWrestler = Wrestler::factory()->employed()->create(['name' => 'Employed Wrestler']);
+
+        $this->browse(function (Browser $browser) use ($employedWrestler) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertWrestlerAvailability($browser, $this->wrestler1->name, 'available')
+                           ->assertWrestlerAvailability($browser, $employedWrestler->name, 'employed');
+        });
+    }
+
+    /** @test */
+    public function modal_handles_network_errors_gracefully(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => str_repeat('A', 300), // Extremely long name
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertModalStaysOpen($browser)
+                           ->assertErrorMessage($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_accessibility_attributes_are_correct(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertModalAttribute($browser, 'role', 'dialog')
+                           ->assertModalAttribute($browser, 'aria-modal', 'true')
+                           ->assertModalHasLabel($browser)
+                           ->assertWrestlerSelectionAccessible($browser)
+                           ->cancelModal($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_prevents_background_interaction(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->assertModalVisible($browser)
+                           ->assertBackgroundNotInteractable($browser)
+                           ->cancelModal($browser)
+                           ->assertModalClosed($browser)
+                           ->assertBackgroundInteractable($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_form_shows_loading_state_during_submission(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Loading Test Tag Team',
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->selectWrestlers($browser, [
+                               $this->wrestler1->name,
+                               $this->wrestler2->name
+                           ])
+                           ->submitCreateForm($browser, waitForClose: false)
+                           ->assertLoadingState($browser)
+                           ->waitForModalClose($browser)
+                           ->assertModalClosed($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_validates_unique_tag_team_names(): void
+    {
+        $existingTagTeam = TagTeam::factory()->create(['name' => 'Existing Tag Team']);
+
+        $this->browse(function (Browser $browser) use ($existingTagTeam) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Existing Tag Team', // Duplicate name
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->selectWrestlers($browser, [
+                               $this->wrestler1->name,
+                               $this->wrestler2->name
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertValidationError($browser, 'name')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function modal_handles_wrestler_partnership_conflicts(): void
+    {
+        // Create a tag team with wrestler1 already
+        $existingTagTeam = TagTeam::factory()->employed()->create();
+        $existingTagTeam->wrestlers()->attach($this->wrestler1->id);
+
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateModal($browser)
+                           ->fillCreateForm($browser, [
+                               'name' => 'Conflict Test Tag Team',
+                               'employed_from' => now()->format('Y-m-d')
+                           ])
+                           ->selectWrestlers($browser, [
+                               $this->wrestler1->name, // Already in another tag team
+                               $this->wrestler2->name
+                           ])
+                           ->submitCreateForm($browser)
+                           ->assertValidationError($browser, 'wrestlers')
+                           ->assertModalStaysOpen($browser);
+        });
+    }
+
+    /** @test */
+    public function basic_user_cannot_access_modal_forms(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $response = $this->actingAs($this->basicUser)
+                            ->get('/tag-teams');
+
+            expect($response->status())->toBe(403);
+        });
+    }
+});

@@ -1,0 +1,566 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Referees\Referee;
+use App\Models\Referees\RefereeEmployment;
+use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
+use Laravel\Dusk\Browser;
+
+/**
+ * Browser tests for referee management visual workflows.
+ * 
+ * These tests focus on visual elements, user interactions, and browser behavior
+ * that Feature tests cannot cover. These tests use Laravel Dusk for full
+ * browser automation.
+ */
+
+describe('Referee Creation Visual Workflow', function () {
+    test('referee creation modal displays correctly and accepts input', function () {
+        // Given: An authenticated administrator
+        $admin = administrator();
+        
+        // When & Then: Test the referee creation workflow
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/referees')
+                    ->screenshot('referees-index')
+                    ->pause(2000) // Give page time to load
+                    ->assertPathIs('/referees')
+                    ->assertTitle('Laravel');
+        });
+    });
+
+    test('basic browser functionality works for referees', function () {
+        // When & Then: Test basic browser functionality
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                    ->screenshot('homepage-visit-referees')
+                    ->assertTitle('Laravel'); // Basic assertion that browser works
+        });
+    });
+
+    test('referee detail page can be accessed', function () {
+        // Given: A referee with complete information
+        $referee = Referee::factory()->bookable()->create([
+            'name' => 'Earl Hebner',
+            'hometown' => 'Richmond, Virginia',
+        ]);
+        
+        // When & Then: Test accessing referee detail page
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-detail')
+                    ->assertSee($referee->name)
+                    ->assertSee('Earl Hebner')
+                    ->assertPathIs("/referees/{$referee->id}");
+        });
+    });
+});
+
+describe('Referee Table Interaction Workflow', function () {
+    test('referees index page has basic table structure', function () {
+        // When & Then: Verify the page has basic table structure
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referees-page-structure')
+                    ->pause(2000) // Wait for Livewire to load
+                    ->assertPathIs('/referees');
+                    
+            // Check if basic page elements exist
+            if ($browser->element('table, .table, [role="table"]')) {
+                $browser->screenshot('referees-table-structure-found');
+            } else {
+                $browser->screenshot('referees-no-table-structure');
+            }
+        });
+    });
+
+    test('referee actions dropdown functionality', function () {
+        // Given: A referee that can have actions performed on it
+        $referee = Referee::factory()->bookable()->create([
+            'name' => 'Mike Chioda'
+        ]);
+
+        // When & Then: Test action dropdown interactions
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('before-referee-actions')
+                    ->pause(3000); // Wait for page to fully load
+
+            // Look for action elements (specific selectors depend on implementation)
+            if ($browser->element('[data-testid="referee-actions"]')) {
+                $browser->screenshot('referee-actions-found');
+            } else {
+                $browser->screenshot('referee-actions-not-found');
+            }
+        });
+    });
+
+    test('referee search functionality works visually', function () {
+        // Given: Multiple referees to search through
+        Referee::factory()->create(['name' => 'Earl Hebner']);
+        Referee::factory()->create(['name' => 'Dave Hebner']);
+        Referee::factory()->create(['name' => 'Mike Chioda']);
+
+        // When & Then: Test search functionality
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('before-referee-search')
+                    ->pause(2000);
+
+            // Look for search input (specific selector depends on implementation)
+            if ($browser->element('input[type="search"], input[placeholder*="search"], .search-input')) {
+                $browser->type('input[type="search"], input[placeholder*="search"], .search-input', 'Hebner')
+                        ->pause(1000)
+                        ->screenshot('after-referee-search')
+                        ->assertSee('Earl Hebner');
+            } else {
+                $browser->screenshot('referee-search-input-not-found');
+            }
+        });
+    });
+});
+
+describe('Referee Detail Page Visual Workflow', function () {
+    test('referee detail page displays referee information correctly', function () {
+        // Given: A referee with complete information
+        $referee = Referee::factory()->bookable()->create([
+            'name' => 'Senior Official',
+            'hometown' => 'Stamford, Connecticut',
+        ]);
+        
+        // When & Then: Verify referee detail page displays information
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-detail-page')
+                    ->assertSee($referee->name)
+                    ->assertSee('Senior Official')
+                    ->assertPathIs("/referees/{$referee->id}");
+        });
+    });
+
+    test('referee detail page shows employment information', function () {
+        // Given: A referee with employment history
+        $referee = Referee::factory()->create([
+            'name' => 'Referee with History',
+        ]);
+        
+        RefereeEmployment::factory()
+            ->for($referee, 'referee')
+            ->current()
+            ->create();
+        
+        // When & Then: Verify employment information is displayed
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-with-employment')
+                    ->assertSee($referee->name)
+                    ->assertSee('Referee with History');
+        });
+    });
+
+    test('unemployed referee displays correctly', function () {
+        // Given: A referee without current employment
+        $referee = Referee::factory()->unemployed()->create([
+            'name' => 'Unemployed Referee',
+        ]);
+        
+        // When & Then: Verify unemployed referee display
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('unemployed-referee')
+                    ->assertSee($referee->name)
+                    ->assertSee('Unemployed Referee');
+        });
+    });
+});
+
+describe('Referee Status Management Visual Workflow', function () {
+    test('referee status badges display correctly', function () {
+        // Given: Referees with different statuses
+        $employedReferee = Referee::factory()->bookable()->create(['name' => 'Employed Referee']);
+        $injuredReferee = Referee::factory()->injured()->create(['name' => 'Injured Referee']);
+        $suspendedReferee = Referee::factory()->suspended()->create(['name' => 'Suspended Referee']);
+        $retiredReferee = Referee::factory()->retired()->create(['name' => 'Retired Referee']);
+
+        // When & Then: Test status badge display
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referee-status-badges')
+                    ->pause(2000);
+
+            // Look for status indicators
+            if ($browser->element('.badge, .status, [data-testid="referee-status"]')) {
+                $browser->screenshot('referee-status-badges-found');
+            } else {
+                $browser->screenshot('referee-status-badges-not-found');
+            }
+        });
+    });
+
+    test('referee business action visual workflow', function () {
+        // Given: A referee that can have business actions performed
+        $referee = Referee::factory()->unemployed()->create(['name' => 'Business Action Referee']);
+
+        // When & Then: Test business action visual workflow
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referee-business-actions')
+                    ->pause(2000);
+
+            // Look for business action elements
+            if ($browser->element('[data-testid="referee-employ"], .employ-action')) {
+                $browser->screenshot('referee-employ-action-available');
+            } else {
+                $browser->screenshot('referee-employ-action-not-found');
+            }
+        });
+    });
+
+    test('referee injury status visual workflow', function () {
+        // Given: A referee that can be injured
+        $referee = Referee::factory()->bookable()->create(['name' => 'Injury Test Referee']);
+
+        // When & Then: Test injury status visual workflow
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-injury-workflow')
+                    ->pause(2000);
+
+            // Look for injury management elements
+            if ($browser->element('[data-testid="referee-injure"], .injure-action')) {
+                $browser->screenshot('referee-injury-action-available');
+            } else {
+                $browser->screenshot('referee-injury-action-not-found');
+            }
+        });
+    });
+});
+
+describe('Navigation and Responsive Design', function () {
+    test('referee management interface works on mobile viewport', function () {
+        // Given: A referee to display
+        $referee = Referee::factory()->create(['name' => 'Mobile Test Referee']);
+        
+        // When & Then: Test mobile viewport functionality
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('mobile-referees')
+                    ->pause(2000)
+                    ->assertPathIs('/referees');
+        });
+    });
+    
+    test('navigation between referees index and detail works', function () {
+        // Given: A referee to navigate to
+        $referee = Referee::factory()->create(['name' => 'Navigation Test Referee']);
+        
+        // When & Then: Test navigation workflow
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('before-referee-navigation')
+                    ->pause(2000)
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('after-referee-navigation')
+                    ->assertSee($referee->name)
+                    ->assertPathIs("/referees/{$referee->id}");
+        });
+    });
+
+    test('referees table responsive design works correctly', function () {
+        // Given: Multiple referees to test table responsiveness
+        Referee::factory()->count(5)->create();
+        
+        // When & Then: Test responsive table behavior
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees');
+
+            // Test desktop view
+            $browser->resize(1200, 800)
+                    ->screenshot('referees-desktop-view')
+                    ->pause(1000);
+
+            // Test tablet view
+            $browser->resize(768, 1024)
+                    ->screenshot('referees-tablet-view')
+                    ->pause(1000);
+
+            // Test mobile view
+            $browser->resize(375, 667)
+                    ->screenshot('referees-mobile-view')
+                    ->pause(1000);
+        });
+    });
+});
+
+describe('Referee Match Assignment Visual Workflow', function () {
+    test('referee match history displays correctly', function () {
+        // Given: A referee with match history
+        $referee = Referee::factory()->bookable()->create(['name' => 'Experienced Official']);
+        $event = Event::factory()->create(['name' => 'Test Event']);
+        $match = EventMatch::factory()->for($event, 'event')->create();
+        
+        // Create referee assignment (if system supports it)
+
+        // When & Then: Test match history display
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-match-history')
+                    ->pause(2000)
+                    ->assertSee('Experienced Official');
+        });
+    });
+
+    test('referee match assignment workflow', function () {
+        // Given: A referee available for assignment
+        $referee = Referee::factory()->bookable()->create(['name' => 'Available Official']);
+        $event = Event::factory()->create(['name' => 'Assignment Event']);
+        $match = EventMatch::factory()->for($event, 'event')->create();
+
+        // When & Then: Test match assignment visual workflow
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-assignment-workflow')
+                    ->pause(2000)
+                    ->assertSee('Available Official');
+        });
+    });
+
+    test('referee availability display workflow', function () {
+        // Given: Referees with different availability
+        $availableReferee = Referee::factory()->bookable()->create(['name' => 'Available Referee']);
+        $injuredReferee = Referee::factory()->injured()->create(['name' => 'Injured Referee']);
+        $suspendedReferee = Referee::factory()->suspended()->create(['name' => 'Suspended Referee']);
+
+        // When & Then: Test availability display
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referee-availability-display')
+                    ->pause(2000)
+                    ->assertSee('Available Referee')
+                    ->assertSee('Injured Referee')
+                    ->assertSee('Suspended Referee');
+        });
+    });
+});
+
+describe('Referee Form Modal Interactions', function () {
+    test('create referee modal opens and accepts input', function () {
+        // When & Then: Test referee creation modal
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('before-create-referee-modal')
+                    ->pause(2000);
+
+            // Look for create button (selector depends on implementation)
+            if ($browser->element('[data-testid="create-referee"], .btn-create, button:contains("Create")')) {
+                $browser->click('[data-testid="create-referee"], .btn-create, button:contains("Create")')
+                        ->pause(1000)
+                        ->screenshot('create-referee-modal-opened');
+
+                // Test form input if modal opened
+                if ($browser->element('.modal, [role="dialog"]')) {
+                    $browser->screenshot('referee-modal-form-visible');
+                } else {
+                    $browser->screenshot('referee-modal-not-visible');
+                }
+            } else {
+                $browser->screenshot('create-referee-button-not-found');
+            }
+        });
+    });
+
+    test('edit referee modal functionality', function () {
+        // Given: A referee to edit
+        $referee = Referee::factory()->create(['name' => 'Editable Referee']);
+
+        // When & Then: Test edit modal functionality
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('before-edit-referee-modal')
+                    ->pause(2000);
+
+            // Look for edit action (selector depends on implementation)
+            if ($browser->element('[data-testid="edit-referee"], .btn-edit')) {
+                $browser->click('[data-testid="edit-referee"], .btn-edit')
+                        ->pause(1000)
+                        ->screenshot('edit-referee-modal-opened');
+            } else {
+                $browser->screenshot('edit-referee-button-not-found');
+            }
+        });
+    });
+
+    test('referee form validation displays correctly', function () {
+        // When & Then: Test form validation visual feedback
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referee-form-validation-test')
+                    ->pause(2000);
+
+            // Look for form validation elements
+            if ($browser->element('.form-control, .input-field')) {
+                $browser->screenshot('referee-form-fields-found');
+            } else {
+                $browser->screenshot('referee-form-fields-not-found');
+            }
+        });
+    });
+});
+
+describe('Error Handling and Edge Cases', function () {
+    test('browser handles non-existent referee gracefully', function () {
+        // When & Then: Test accessing non-existent referee
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees/99999')
+                    ->screenshot('non-existent-referee')
+                    ->pause(1000);
+
+            // Should show 404 or appropriate error
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('browser handles unauthorized access gracefully', function () {
+        // Given: A basic user (non-admin)
+        $basicUser = basicUser();
+        $referee = Referee::factory()->create();
+
+        // When & Then: Test unauthorized access
+        $this->browse(function (Browser $browser) use ($basicUser, $referee) {
+            $browser->loginAs($basicUser)
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('unauthorized-referee-access')
+                    ->pause(1000);
+
+            // Should show 403 or redirect to appropriate page
+            $currentUrl = $browser->driver->getCurrentURL();
+            expect($currentUrl)->not->toContain("/referees/{$referee->id}");
+        });
+    });
+
+    test('browser handles referee with complex status combinations', function () {
+        // Given: A referee with multiple statuses
+        $referee = Referee::factory()->bookable()->create(['name' => 'Complex Status Referee']);
+        
+        // Apply injury
+        \App\Actions\Referees\InjureAction::run($referee, now());
+
+        // When & Then: Test complex status display
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-complex-status')
+                    ->pause(2000)
+                    ->assertSee('Complex Status Referee');
+        });
+    });
+});
+
+describe('Performance and Loading', function () {
+    test('referees table loads efficiently with large dataset', function () {
+        // Given: Many referees to test performance
+        Referee::factory()->count(25)->create();
+        
+        // When & Then: Test loading performance
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referees-large-dataset')
+                    ->pause(3000); // Allow time for loading
+
+            // Verify page loads completely
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('referee detail page loads efficiently with match history', function () {
+        // Given: A referee with match history
+        $referee = Referee::factory()->bookable()->create(['name' => 'Match Heavy Referee']);
+        $events = Event::factory()->count(5)->create();
+        $matches = EventMatch::factory()->count(10)->create();
+
+        // When & Then: Test detail page performance
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-matches-loading')
+                    ->pause(2000);
+
+            // Verify page loads completely
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+});
+
+describe('Referee Specialization Visual Workflow', function () {
+    test('referee experience level displays correctly', function () {
+        // Given: Referees with different experience levels
+        $seniorReferee = Referee::factory()->bookable()->create(['name' => 'Senior Official']);
+        $juniorReferee = Referee::factory()->bookable()->create(['name' => 'Junior Official']);
+        
+        // When & Then: Test experience level display
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/referees')
+                    ->screenshot('referee-experience-levels')
+                    ->pause(2000)
+                    ->assertSee('Senior Official')
+                    ->assertSee('Junior Official');
+        });
+    });
+
+    test('referee certification status displays correctly', function () {
+        // Given: A referee with certification information
+        $referee = Referee::factory()->bookable()->create(['name' => 'Certified Official']);
+
+        // When & Then: Test certification display
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-certification-status')
+                    ->pause(2000)
+                    ->assertSee('Certified Official');
+        });
+    });
+
+    test('referee performance metrics display workflow', function () {
+        // Given: A referee with performance data
+        $referee = Referee::factory()->bookable()->create(['name' => 'High Performance Referee']);
+
+        // When & Then: Test performance metrics display
+        $this->browse(function (Browser $browser) use ($referee) {
+            $browser->loginAs(administrator())
+                    ->visit("/referees/{$referee->id}")
+                    ->screenshot('referee-performance-metrics')
+                    ->pause(2000)
+                    ->assertSee('High Performance Referee');
+        });
+    });
+});

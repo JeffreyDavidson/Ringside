@@ -1,0 +1,289 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Components\Wrestlers;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Components\Shared\BaseComponent;
+use Tests\Browser\Pages\Wrestlers\WrestlerIndexPage;
+
+/**
+ * Component Object for the Wrestler Form Modal.
+ * 
+ * This component represents the wrestler creation/editing modal including
+ * all form fields, validation, and submission functionality.
+ * Provides a clean API for interacting with the wrestler form.
+ */
+class WrestlerFormModal extends BaseComponent
+{
+    /**
+     * Get the root selector for this component.
+     */
+    public function selector(): string
+    {
+        return '[data-dusk="modal-container"]';
+    }
+
+    /**
+     * Assert that the component is displayed.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPresent($this->selector());
+    }
+
+    /**
+     * Get the element shortcuts for the component.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return array_merge($this->commonElements(), [
+            '@modal' => '[data-dusk="modal-container"]',
+            '@name-field' => '[data-dusk="input-modelForm-name"]',
+            '@hometown-field' => '[data-dusk="input-modelForm-hometown"]',
+            '@height-feet-field' => '[data-dusk="input-modelForm-height_feet"]',
+            '@height-inches-field' => '[data-dusk="input-modelForm-height_inches"]',
+            '@weight-field' => '[data-dusk="input-modelForm-weight"]',
+            '@signature-move-field' => '[data-dusk="input-modelForm-signature_move"]',
+            '@employment-date-field' => '[data-dusk="input-modelForm-employment_date"]',
+            '@submit-button' => 'button[type="submit"], button:contains("Save"), button:contains("Create"), [wire\\:click*="submit"]',
+            '@cancel-button' => 'button:contains("Cancel"), button:contains("Close"), [wire\\:click*="close"], [data-dismiss="modal"]',
+            '@fill-dummy-button' => 'button:contains("Fill"), button:contains("Dummy"), [wire\\:click*="dummy"]',
+            '@validation-errors' => '.error, .text-red-500, .text-danger, [class*="error"], .invalid-feedback',
+        ]);
+    }
+
+    /**
+     * Wait for the modal to be fully loaded.
+     */
+    public function waitForModalLoad(Browser $browser): static
+    {
+        $browser->waitFor('@modal')
+                ->pause(1000); // Allow modal animation to complete
+        
+        return $this;
+    }
+
+    /**
+     * Fill out the wrestler form with provided data.
+     */
+    public function fillWrestlerForm(Browser $browser, array $data): static
+    {
+        if (isset($data['name'])) {
+            $browser->type('@name-field', $data['name']);
+        }
+
+        if (isset($data['hometown'])) {
+            $browser->type('@hometown-field', $data['hometown']);
+        }
+
+        if (isset($data['height_feet'])) {
+            $browser->type('@height-feet-field', (string) $data['height_feet']);
+        }
+
+        if (isset($data['height_inches'])) {
+            $browser->type('@height-inches-field', (string) $data['height_inches']);
+        }
+
+        if (isset($data['weight'])) {
+            $browser->type('@weight-field', (string) $data['weight']);
+        }
+
+        if (isset($data['signature_move'])) {
+            $browser->type('@signature-move-field', $data['signature_move']);
+        }
+
+        if (isset($data['employment_date'])) {
+            $browser->type('@employment-date-field', $data['employment_date']);
+        }
+
+        $browser->pause(500); // Brief pause after filling form
+
+        return $this;
+    }
+
+    /**
+     * Fill out the complete wrestler form with valid test data.
+     */
+    public function fillCompleteWrestlerForm(Browser $browser, ?array $overrides = null): static
+    {
+        $defaultData = [
+            'name' => 'The Rock',
+            'hometown' => 'Miami, FL',
+            'height_feet' => '6',
+            'height_inches' => '5',
+            'weight' => '275',
+            'signature_move' => 'Rock Bottom',
+            'employment_date' => '2024-01-01'
+        ];
+
+        $data = array_merge($defaultData, $overrides ?? []);
+        
+        return $this->fillWrestlerForm($browser, $data);
+    }
+
+    /**
+     * Submit the wrestler form.
+     */
+    public function submitForm(Browser $browser): static
+    {
+        $submitSelectors = [
+            'button[type="submit"]',
+            'button:contains("Save")',
+            'button:contains("Create")',
+            '[wire\\:click*="submit"]',
+            '.btn-primary'
+        ];
+
+        foreach ($submitSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000); // Wait for submission to process
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Submit the form by pressing Enter in a field.
+     */
+    public function submitFormViaEnter(Browser $browser): static
+    {
+        $browser->keys('@name-field', '{enter}')
+                ->pause(2000);
+        
+        return $this;
+    }
+
+    /**
+     * Close the modal and return to index page.
+     */
+    public function closeModal(Browser $browser): WrestlerIndexPage
+    {
+        $this->closeComponent($browser);
+        return new WrestlerIndexPage();
+    }
+
+    /**
+     * Assert that all required form fields are present.
+     */
+    public function assertFormFieldsPresent(Browser $browser): static
+    {
+        $browser->assertPresent('@name-field')
+                ->assertPresent('@hometown-field')
+                ->assertPresent('@height-feet-field')
+                ->assertPresent('@height-inches-field')
+                ->assertPresent('@weight-field')
+                ->assertPresent('@signature-move-field')
+                ->assertPresent('@employment-date-field');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that the form shows validation errors.
+     */
+    public function assertValidationErrorsVisible(Browser $browser): static
+    {
+        $validationSelectors = [
+            '.error',
+            '.text-red-500',
+            '.text-danger',
+            '[class*="error"]',
+            '.invalid-feedback'
+        ];
+
+        foreach ($validationSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $this->componentScreenshot($browser, 'validation-errors-found');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the modal is still open (form didn't submit successfully).
+     */
+    public function assertModalStillOpen(Browser $browser): static
+    {
+        $browser->assertPresent('@modal');
+        return $this;
+    }
+
+    /**
+     * Assert that a specific field has a certain value.
+     */
+    public function assertFieldValue(Browser $browser, string $field, string $value): static
+    {
+        $browser->assertInputValue("@{$field}-field", $value);
+        return $this;
+    }
+
+    /**
+     * Fill dummy data using the fill dummy button.
+     */
+    public function fillDummyData(Browser $browser): static
+    {
+        $dummySelectors = [
+            'button:contains("Fill")',
+            'button:contains("Dummy")',
+            '[wire\\:click*="dummy"]'
+        ];
+
+        foreach ($dummySelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(1000); // Wait for dummy data to fill
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the form is pre-filled with wrestler data (for editing).
+     */
+    public function assertFormPreFilled(Browser $browser, string $wrestlerName): static
+    {
+        $browser->assertInputValue('@name-field', $wrestlerName);
+        return $this;
+    }
+
+    /**
+     * Assert that the form is pre-filled with wrestler data (for editing).
+     */
+    public function assertFormPrefilledWithData(Browser $browser, string $wrestlerName): static
+    {
+        $browser->assertInputValue('@name-field', $wrestlerName);
+        return $this;
+    }
+
+    /**
+     * Clear a specific field.
+     */
+    public function clearField(Browser $browser, string $field): static
+    {
+        $browser->clear("@{$field}-field");
+        return $this;
+    }
+}

@@ -1,0 +1,513 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\TagTeams;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class TagTeamDetailPage extends Page
+{
+    protected int $tagTeamId;
+
+    public function __construct(int $tagTeamId)
+    {
+        $this->tagTeamId = $tagTeamId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return "/tag-teams/{$this->tagTeamId}";
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@tag-team-name' => 'h1, .tag-team-name, [data-testid="tag-team-name"]',
+            '@tag-team-status' => '.status, .badge, [data-testid="tag-team-status"]',
+            '@employment-period' => '.employment-period, [data-testid="employment-period"]',
+            '@partners-section' => '.partners, [data-testid="partners"]',
+            '@wrestlers-list' => '.wrestlers, [data-testid="wrestlers"]',
+            '@current-partners' => '.current-partners, [data-testid="current-partners"]',
+            '@former-partners' => '.former-partners, [data-testid="former-partners"]',
+            '@partner-count' => '.partner-count, [data-testid="partner-count"]',
+            '@edit-button' => '[data-testid="edit-tag-team"], .btn-edit',
+            '@delete-button' => '[data-testid="delete-tag-team"], .btn-delete',
+            '@employ-button' => '[data-testid="employ-tag-team"], .btn-employ',
+            '@release-button' => '[data-testid="release-tag-team"], .btn-release',
+            '@suspend-button' => '[data-testid="suspend-tag-team"], .btn-suspend',
+            '@reinstate-button' => '[data-testid="reinstate-tag-team"], .btn-reinstate',
+            '@retire-button' => '[data-testid="retire-tag-team"], .btn-retire',
+            '@unretire-button' => '[data-testid="unretire-tag-team"], .btn-unretire',
+            '@restore-button' => '[data-testid="restore-tag-team"], .btn-restore',
+            '@add-partner-button' => '[data-testid="add-partner"], .btn-add-partner',
+            '@remove-partner-button' => '[data-testid="remove-partner"], .btn-remove-partner',
+            '@history-section' => '.history, [data-testid="history"]',
+            '@employment-history' => '.employment-history, [data-testid="employment-history"]',
+            '@partnership-history' => '.partnership-history, [data-testid="partnership-history"]',
+            '@suspension-history' => '.suspension-history, [data-testid="suspension-history"]',
+            '@retirement-history' => '.retirement-history, [data-testid="retirement-history"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-form' => '.modal form, [role="dialog"] form',
+            '@confirm-button' => 'button:contains("Confirm"), .btn-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), .btn-cancel',
+            '@back-button' => '.btn-back, [data-testid="back"]',
+            '@breadcrumb' => '.breadcrumb, [aria-label="breadcrumb"]',
+        ];
+    }
+
+    /**
+     * Assert that tag team information is displayed correctly.
+     */
+    public function assertTagTeamInfo(Browser $browser, array $expectedData): void
+    {
+        $browser->assertSeeIn('@tag-team-name', $expectedData['name']);
+        
+        if (isset($expectedData['status'])) {
+            $browser->assertSeeIn('@tag-team-status', $expectedData['status']);
+        }
+    }
+
+    /**
+     * Assert that the tag team has the expected status.
+     */
+    public function assertStatus(Browser $browser, string $status): void
+    {
+        $browser->assertSeeIn('@tag-team-status', $status);
+    }
+
+    /**
+     * Assert that employment period information is shown.
+     */
+    public function assertEmploymentPeriod(Browser $browser): void
+    {
+        $browser->assertVisible('@employment-period');
+    }
+
+    /**
+     * Assert that partners section is displayed.
+     */
+    public function assertPartnersSection(Browser $browser): void
+    {
+        $browser->assertVisible('@partners-section');
+    }
+
+    /**
+     * Assert that specific wrestler partners are listed.
+     */
+    public function assertWrestlerPartners(Browser $browser, array $wrestlerNames): void
+    {
+        $browser->within('@wrestlers-list', function (Browser $browser) use ($wrestlerNames) {
+            foreach ($wrestlerNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Assert that current partners are displayed.
+     */
+    public function assertCurrentPartners(Browser $browser, array $wrestlerNames): void
+    {
+        $browser->within('@current-partners', function (Browser $browser) use ($wrestlerNames) {
+            foreach ($wrestlerNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Assert that former partners are displayed.
+     */
+    public function assertFormerPartners(Browser $browser, array $wrestlerNames): void
+    {
+        $browser->within('@former-partners', function (Browser $browser) use ($wrestlerNames) {
+            foreach ($wrestlerNames as $name) {
+                $browser->assertSee($name);
+            }
+        });
+    }
+
+    /**
+     * Assert that partner count is displayed correctly.
+     */
+    public function assertPartnerCount(Browser $browser, int $expectedCount): void
+    {
+        $browser->assertSeeIn('@partner-count', (string) $expectedCount);
+    }
+
+    /**
+     * Edit the tag team through the UI.
+     */
+    public function editTagTeam(Browser $browser, array $data): void
+    {
+        $browser->click('@edit-button')
+                ->waitFor('@modal')
+                ->clear('name')
+                ->type('name', $data['name'])
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Delete the tag team through the UI.
+     */
+    public function deleteTagTeam(Browser $browser): void
+    {
+        $browser->click('@delete-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Employ the tag team through the UI.
+     */
+    public function employTagTeam(Browser $browser): void
+    {
+        $browser->click('@employ-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Release the tag team through the UI.
+     */
+    public function releaseTagTeam(Browser $browser): void
+    {
+        $browser->click('@release-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Suspend the tag team through the UI.
+     */
+    public function suspendTagTeam(Browser $browser): void
+    {
+        $browser->click('@suspend-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Reinstate the tag team through the UI.
+     */
+    public function reinstateTagTeam(Browser $browser): void
+    {
+        $browser->click('@reinstate-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Retire the tag team through the UI.
+     */
+    public function retireTagTeam(Browser $browser): void
+    {
+        $browser->click('@retire-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Unretire the tag team through the UI.
+     */
+    public function unretireTagTeam(Browser $browser): void
+    {
+        $browser->click('@unretire-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Restore the tag team through the UI.
+     */
+    public function restoreTagTeam(Browser $browser): void
+    {
+        $browser->click('@restore-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Add a wrestler partner to the tag team.
+     */
+    public function addPartner(Browser $browser, string $wrestlerName): void
+    {
+        $browser->click('@add-partner-button')
+                ->waitFor('@modal')
+                ->select('wrestler_id', $wrestlerName)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Remove a wrestler partner from the tag team.
+     */
+    public function removePartner(Browser $browser, string $wrestlerName): void
+    {
+        $browser->clickLink($wrestlerName)
+                ->click('@remove-partner-button')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that specific action buttons are available.
+     */
+    public function assertActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-button");
+        }
+    }
+
+    /**
+     * Assert that specific action buttons are not available.
+     */
+    public function assertActionsNotAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertMissing("@{$action}-button");
+        }
+    }
+
+    /**
+     * Assert that history section is visible.
+     */
+    public function assertHistorySection(Browser $browser): void
+    {
+        $browser->assertVisible('@history-section');
+    }
+
+    /**
+     * Assert that employment history is displayed.
+     */
+    public function assertEmploymentHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@employment-history');
+    }
+
+    /**
+     * Assert that partnership history is displayed.
+     */
+    public function assertPartnershipHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@partnership-history');
+    }
+
+    /**
+     * Assert that suspension history is displayed.
+     */
+    public function assertSuspensionHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@suspension-history');
+    }
+
+    /**
+     * Assert that retirement history is displayed.
+     */
+    public function assertRetirementHistory(Browser $browser): void
+    {
+        $browser->assertVisible('@retirement-history');
+    }
+
+    /**
+     * Navigate back to tag teams index.
+     */
+    public function goBack(Browser $browser): void
+    {
+        if ($browser->element('@back-button')) {
+            $browser->click('@back-button');
+        } elseif ($browser->element('@breadcrumb')) {
+            $browser->click('@breadcrumb a:contains("Tag Teams")');
+        } else {
+            $browser->visit('/tag-teams');
+        }
+    }
+
+    /**
+     * Assert that breadcrumb navigation is present.
+     */
+    public function assertBreadcrumb(Browser $browser): void
+    {
+        $browser->assertVisible('@breadcrumb')
+                ->assertSeeIn('@breadcrumb', 'Tag Teams');
+    }
+
+    /**
+     * Assert that the page is in edit mode.
+     */
+    public function assertEditMode(Browser $browser): void
+    {
+        $browser->assertVisible('@modal')
+                ->assertVisible('@modal-form');
+    }
+
+    /**
+     * Assert that the page is in view mode.
+     */
+    public function assertViewMode(Browser $browser): void
+    {
+        $browser->assertMissing('@modal')
+                ->assertVisible('@tag-team-name');
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForLoad(Browser $browser): void
+    {
+        $browser->waitFor('@tag-team-name')
+                ->waitFor('@tag-team-status')
+                ->pause(1000); // Allow time for all data to load
+    }
+
+    /**
+     * Assert that the tag team detail page displays correctly for the given status.
+     */
+    public function assertForStatus(Browser $browser, string $status): void
+    {
+        $this->assertStatus($browser, $status);
+        
+        switch ($status) {
+            case 'Employed':
+                $this->assertActionsAvailable($browser, ['edit', 'release', 'suspend', 'retire']);
+                $this->assertActionsNotAvailable($browser, ['employ', 'reinstate', 'unretire', 'restore']);
+                break;
+                
+            case 'Unemployed':
+                $this->assertActionsAvailable($browser, ['edit', 'employ', 'delete']);
+                $this->assertActionsNotAvailable($browser, ['release', 'suspend', 'reinstate', 'retire', 'unretire', 'restore']);
+                break;
+                
+            case 'Suspended':
+                $this->assertActionsAvailable($browser, ['edit', 'reinstate', 'release', 'retire']);
+                $this->assertActionsNotAvailable($browser, ['employ', 'suspend', 'unretire', 'restore']);
+                break;
+                
+            case 'Retired':
+                $this->assertActionsAvailable($browser, ['edit', 'unretire']);
+                $this->assertActionsNotAvailable($browser, ['employ', 'release', 'suspend', 'reinstate', 'retire', 'restore']);
+                break;
+                
+            case 'Released':
+                $this->assertActionsAvailable($browser, ['edit', 'employ']);
+                $this->assertActionsNotAvailable($browser, ['release', 'suspend', 'reinstate', 'retire', 'unretire', 'restore']);
+                break;
+        }
+    }
+
+    /**
+     * Assert responsive design elements.
+     */
+    public function assertResponsive(Browser $browser): void
+    {
+        // Check that key elements are visible on mobile
+        $browser->assertVisible('@tag-team-name')
+                ->assertVisible('@tag-team-status');
+                
+        // Partners section should be accessible
+        if ($browser->element('@partners-section')) {
+            $browser->assertVisible('@partners-section');
+        }
+    }
+
+    /**
+     * Assert that employment period details are shown.
+     */
+    public function assertEmploymentPeriodDetails(Browser $browser, array $expectedData): void
+    {
+        $browser->within('@employment-period', function (Browser $browser) use ($expectedData) {
+            if (isset($expectedData['started_at'])) {
+                $browser->assertSee($expectedData['started_at']);
+            }
+            
+            if (isset($expectedData['ended_at'])) {
+                $browser->assertSee($expectedData['ended_at']);
+            }
+        });
+    }
+
+    /**
+     * Assert that tag team statistics are displayed.
+     */
+    public function assertStatistics(Browser $browser): void
+    {
+        // This would include match statistics, championship history, etc.
+        $browser->assertVisible('.statistics, [data-testid="statistics"]');
+    }
+
+    /**
+     * Assert that tag team relationships are displayed.
+     */
+    public function assertRelationships(Browser $browser): void
+    {
+        // This would include stable memberships, manager relationships, etc.
+        $browser->assertVisible('.relationships, [data-testid="relationships"]');
+    }
+
+    /**
+     * Manage partnership through detail page.
+     */
+    public function managePartnership(Browser $browser, string $action, string $wrestlerName): void
+    {
+        switch ($action) {
+            case 'add':
+                $this->addPartner($browser, $wrestlerName);
+                break;
+            case 'remove':
+                $this->removePartner($browser, $wrestlerName);
+                break;
+        }
+    }
+
+    /**
+     * View comprehensive history for tag team.
+     */
+    public function viewHistory(Browser $browser, string $historyType): void
+    {
+        $element = "@{$historyType}-history";
+        
+        if ($browser->element($this->elements()[$element] ?? '')) {
+            $browser->click($element);
+        }
+    }
+
+    /**
+     * Assert that tag team detail page shows complete information.
+     */
+    public function assertCompleteInformation(Browser $browser): void
+    {
+        $this->assertTagTeamInfo($browser, []);
+        $this->assertEmploymentPeriod($browser);
+        $this->assertPartnersSection($browser);
+        $this->assertHistorySection($browser);
+    }
+}

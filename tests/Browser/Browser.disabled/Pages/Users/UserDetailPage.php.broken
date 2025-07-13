@@ -1,0 +1,357 @@
+<?php
+
+namespace Tests\Browser\Pages\Users;
+
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class UserDetailPage extends Page
+{
+    protected $user;
+
+    public function __construct(User $user = null)
+    {
+        $this->user = $user;
+    }
+
+    public function url(): string
+    {
+        return $this->user ? "/users/{$this->user->id}" : '/users/{id}';
+    }
+
+    public function elements(): array
+    {
+        return [
+            '@user-name' => '[data-testid="user-name"], .user-name, h1',
+            '@user-email' => '[data-testid="user-email"], .user-email',
+            '@user-phone' => '[data-testid="user-phone"], .user-phone',
+            '@user-role' => '[data-testid="user-role"], .user-role',
+            '@user-status' => '[data-testid="user-status"], .user-status',
+            '@user-avatar' => '[data-testid="user-avatar"], .user-avatar, img',
+            '@edit-button' => '[data-testid="edit-user"], .btn-edit, button:contains("Edit")',
+            '@delete-button' => '[data-testid="delete-user"], .btn-delete',
+            '@back-button' => '[data-testid="back"], .btn-back, a:contains("Back")',
+            '@action-dropdown' => '[data-testid="actions"], .dropdown',
+            '@breadcrumbs' => '.breadcrumb, [data-testid="breadcrumbs"]',
+            '@user-info-section' => '[data-testid="user-info"], .user-details',
+            '@user-activity-section' => '[data-testid="user-activity"], .activity-section',
+            '@role-badge' => '.badge-role, [data-testid="role-badge"]',
+            '@status-badge' => '.badge-status, [data-testid="status-badge"]',
+            '@created-date' => '[data-testid="created-date"], .created-date',
+            '@last-login' => '[data-testid="last-login"], .last-login',
+            '@user-preferences' => '[data-testid="preferences"], .preferences-section',
+        ];
+    }
+
+    public function visit(Browser $browser, User $user): self
+    {
+        $this->user = $user;
+        $browser->visit($this->url());
+        return $this;
+    }
+
+    public function visitAsUser(Browser $browser, User $authenticatedUser, User $viewedUser): self
+    {
+        $this->user = $viewedUser;
+        $browser->loginAs($authenticatedUser)->visit($this->url());
+        return $this;
+    }
+
+    public function assertUserInformation(Browser $browser, User $user): self
+    {
+        $browser->assertSeeIn('@user-name', $user->first_name . ' ' . $user->last_name)
+                ->assertSeeIn('@user-email', $user->email);
+
+        if ($user->phone_number) {
+            $browser->assertSeeIn('@user-phone', $user->formatted_phone_number);
+        }
+
+        return $this;
+    }
+
+    public function assertUserRole(Browser $browser, string $expectedRole): self
+    {
+        $browser->assertSeeIn('@user-role', $expectedRole);
+        return $this;
+    }
+
+    public function assertUserStatus(Browser $browser, string $expectedStatus): self
+    {
+        $browser->assertSeeIn('@user-status', $expectedStatus);
+        return $this;
+    }
+
+    public function assertRoleBadge(Browser $browser, string $roleColor = null): self
+    {
+        $browser->assertVisible('@role-badge');
+        
+        if ($roleColor) {
+            $browser->assertAttribute('@role-badge', 'class', $roleColor);
+        }
+        
+        return $this;
+    }
+
+    public function assertStatusBadge(Browser $browser, string $statusColor = null): self
+    {
+        $browser->assertVisible('@status-badge');
+        
+        if ($statusColor) {
+            $browser->assertAttribute('@status-badge', 'class', $statusColor);
+        }
+        
+        return $this;
+    }
+
+    public function assertUserAvatar(Browser $browser, bool $hasCustomAvatar = false): self
+    {
+        $browser->assertVisible('@user-avatar');
+        
+        if (!$hasCustomAvatar) {
+            // Check for default avatar
+            $browser->assertAttribute('@user-avatar', 'src', '/blank.png');
+        }
+        
+        return $this;
+    }
+
+    public function assertEditButtonVisible(Browser $browser): self
+    {
+        $browser->assertVisible('@edit-button');
+        return $this;
+    }
+
+    public function assertEditButtonHidden(Browser $browser): self
+    {
+        $browser->assertMissing('@edit-button');
+        return $this;
+    }
+
+    public function clickEditButton(Browser $browser): self
+    {
+        $browser->click('@edit-button');
+        return $this;
+    }
+
+    public function assertDeleteButtonVisible(Browser $browser): self
+    {
+        $browser->assertVisible('@delete-button');
+        return $this;
+    }
+
+    public function assertDeleteButtonHidden(Browser $browser): self
+    {
+        $browser->assertMissing('@delete-button');
+        return $this;
+    }
+
+    public function clickDeleteButton(Browser $browser): self
+    {
+        $browser->click('@delete-button');
+        return $this;
+    }
+
+    public function assertActionDropdownVisible(Browser $browser): self
+    {
+        $browser->assertVisible('@action-dropdown');
+        return $this;
+    }
+
+    public function clickActionDropdown(Browser $browser): self
+    {
+        $browser->click('@action-dropdown');
+        return $this;
+    }
+
+    public function assertBreadcrumbs(Browser $browser, array $expectedCrumbs): self
+    {
+        $browser->assertVisible('@breadcrumbs');
+        
+        foreach ($expectedCrumbs as $crumb) {
+            $browser->assertSeeIn('@breadcrumbs', $crumb);
+        }
+        
+        return $this;
+    }
+
+    public function clickBackButton(Browser $browser): self
+    {
+        $browser->click('@back-button');
+        return $this;
+    }
+
+    public function assertUserInfoSection(Browser $browser): self
+    {
+        $browser->assertVisible('@user-info-section');
+        return $this;
+    }
+
+    public function assertUserActivitySection(Browser $browser): self
+    {
+        $browser->assertVisible('@user-activity-section');
+        return $this;
+    }
+
+    public function assertCreatedDate(Browser $browser, string $expectedDate = null): self
+    {
+        $browser->assertVisible('@created-date');
+        
+        if ($expectedDate) {
+            $browser->assertSeeIn('@created-date', $expectedDate);
+        }
+        
+        return $this;
+    }
+
+    public function assertLastLogin(Browser $browser, string $expectedDate = null): self
+    {
+        $browser->assertVisible('@last-login');
+        
+        if ($expectedDate) {
+            $browser->assertSeeIn('@last-login', $expectedDate);
+        }
+        
+        return $this;
+    }
+
+    public function assertUserPreferences(Browser $browser): self
+    {
+        $browser->assertVisible('@user-preferences');
+        return $this;
+    }
+
+    public function assertPageTitle(Browser $browser, string $expectedTitle): self
+    {
+        $browser->assertTitle($expectedTitle);
+        return $this;
+    }
+
+    public function assertPageHeader(Browser $browser, string $expectedHeader): self
+    {
+        $browser->assertSee($expectedHeader);
+        return $this;
+    }
+
+    public function assertNoAccessMessage(Browser $browser): self
+    {
+        $browser->assertSee('403')
+                ->orWhere('@content', fn($browser) => $browser->assertSee('Forbidden'))
+                ->orWhere('@content', fn($browser) => $browser->assertSee('Access Denied'));
+        return $this;
+    }
+
+    public function assertNotFoundMessage(Browser $browser): self
+    {
+        $browser->assertSee('404')
+                ->orWhere('@content', fn($browser) => $browser->assertSee('Not Found'))
+                ->orWhere('@content', fn($browser) => $browser->assertSee('User not found'));
+        return $this;
+    }
+
+    public function assertResponsiveLayout(Browser $browser): self
+    {
+        // Check that essential elements are visible on current screen size
+        $browser->assertVisible('@user-name')
+                ->assertVisible('@user-email')
+                ->assertVisible('@user-role')
+                ->assertVisible('@user-status');
+        return $this;
+    }
+
+    public function assertMobileLayout(Browser $browser): self
+    {
+        // Check mobile-specific layout elements
+        $browser->assertVisible('@user-info-section');
+        
+        // Action buttons might be in a different location on mobile
+        if ($browser->element('@action-dropdown')) {
+            $browser->assertVisible('@action-dropdown');
+        }
+        
+        return $this;
+    }
+
+    public function assertTabletLayout(Browser $browser): self
+    {
+        // Check tablet-specific layout elements
+        $browser->assertVisible('@user-info-section')
+                ->assertVisible('@user-activity-section');
+        return $this;
+    }
+
+    public function assertDesktopLayout(Browser $browser): self
+    {
+        // Check desktop-specific layout elements
+        $browser->assertVisible('@user-info-section')
+                ->assertVisible('@user-activity-section')
+                ->assertVisible('@breadcrumbs');
+        return $this;
+    }
+
+    public function assertUserCanEdit(Browser $browser): self
+    {
+        $this->assertEditButtonVisible($browser);
+        return $this;
+    }
+
+    public function assertUserCannotEdit(Browser $browser): self
+    {
+        $this->assertEditButtonHidden($browser);
+        return $this;
+    }
+
+    public function assertUserCanDelete(Browser $browser): self
+    {
+        $this->assertDeleteButtonVisible($browser);
+        return $this;
+    }
+
+    public function assertUserCannotDelete(Browser $browser): self
+    {
+        $this->assertDeleteButtonHidden($browser);
+        return $this;
+    }
+
+    public function assertAdministratorView(Browser $browser): self
+    {
+        // Administrators should see all management options
+        $this->assertEditButtonVisible($browser)
+             ->assertActionDropdownVisible($browser);
+        return $this;
+    }
+
+    public function assertBasicUserView(Browser $browser): self
+    {
+        // Basic users should have limited options
+        $this->assertEditButtonHidden($browser);
+        return $this;
+    }
+
+    public function assertOwnProfileView(Browser $browser): self
+    {
+        // Users viewing their own profile should see edit options
+        $this->assertEditButtonVisible($browser);
+        return $this;
+    }
+
+    public function assertOtherUserProfileView(Browser $browser): self
+    {
+        // Users viewing others' profiles should have restricted access
+        $this->assertEditButtonHidden($browser);
+        return $this;
+    }
+
+    public function waitForPageLoad(Browser $browser): self
+    {
+        $browser->waitFor('@user-name', 10)
+                ->waitFor('@user-email', 5);
+        return $this;
+    }
+
+    public function takeScreenshot(Browser $browser, string $name): self
+    {
+        $browser->screenshot($name);
+        return $this;
+    }
+}

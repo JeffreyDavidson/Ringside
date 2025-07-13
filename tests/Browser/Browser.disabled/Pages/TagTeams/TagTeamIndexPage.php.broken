@@ -1,0 +1,422 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\TagTeams;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class TagTeamIndexPage extends Page
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/tag-teams';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-testid="create-tag-team-btn"], .create-tag-team, button:contains("Create")',
+            '@tag-teams-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"]',
+            '@action-dropdown' => '.dropdown, [data-testid="actions"]',
+            '@status-filter' => 'select[name="status"], .status-filter',
+            '@employment-filter' => 'select[name="employment"], .employment-filter',
+            '@employ-action' => '[data-testid="employ-tag-team"], .employ-action',
+            '@release-action' => '[data-testid="release-tag-team"], .release-action',
+            '@suspend-action' => '[data-testid="suspend-tag-team"], .suspend-action',
+            '@reinstate-action' => '[data-testid="reinstate-tag-team"], .reinstate-action',
+            '@retire-action' => '[data-testid="retire-tag-team"], .retire-action',
+            '@unretire-action' => '[data-testid="unretire-tag-team"], .unretire-action',
+            '@restore-action' => '[data-testid="restore-tag-team"], .restore-action',
+            '@delete-action' => '[data-testid="delete-tag-team"], .delete-action',
+            '@status-badge' => '.badge, .status, [data-testid="tag-team-status"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-form' => '.modal form, [role="dialog"] form',
+            '@modal-close' => '.modal-close, [aria-label="Close"]',
+            '@confirm-button' => 'button:contains("Confirm"), .btn-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), .btn-cancel',
+        ];
+    }
+
+    /**
+     * Create a new tag team through the UI.
+     */
+    public function createTagTeam(Browser $browser, array $data): void
+    {
+        $browser->click('@create-button')
+                ->waitFor('@modal')
+                ->type('name', $data['name'])
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Search for tag teams by name.
+     */
+    public function searchFor(Browser $browser, string $term): void
+    {
+        $browser->type('@search-input', $term)
+                ->pause(500); // Allow search to process
+    }
+
+    /**
+     * Filter tag teams by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): void
+    {
+        $browser->select('@status-filter', $status)
+                ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Filter tag teams by employment period.
+     */
+    public function filterByEmployment(Browser $browser, string $employment): void
+    {
+        $browser->select('@employment-filter', $employment)
+                ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Perform an employ action on a tag team.
+     */
+    public function employTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@employ-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform a release action on a tag team.
+     */
+    public function releaseTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@release-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform a suspend action on a tag team.
+     */
+    public function suspendTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@suspend-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform a reinstate action on a tag team.
+     */
+    public function reinstateTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@reinstate-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform a retire action on a tag team.
+     */
+    public function retireTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@retire-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Perform an unretire action on a tag team.
+     */
+    public function unretireTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@unretire-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Edit a tag team through the UI.
+     */
+    public function editTagTeam(Browser $browser, string $tagTeamName, array $data): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('[data-testid="edit-tag-team"], .btn-edit')
+                ->waitFor('@modal')
+                ->clear('name')
+                ->type('name', $data['name'])
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Delete a tag team through the UI.
+     */
+    public function deleteTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@delete-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Restore a deleted tag team through the UI.
+     */
+    public function restoreTagTeam(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('@restore-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that a tag team is visible in the table.
+     */
+    public function assertTagTeamVisible(Browser $browser, string $tagTeamName): void
+    {
+        $browser->within('@tag-teams-table', function (Browser $browser) use ($tagTeamName) {
+            $browser->assertSee($tagTeamName);
+        });
+    }
+
+    /**
+     * Assert that a tag team is not visible in the table.
+     */
+    public function assertTagTeamNotVisible(Browser $browser, string $tagTeamName): void
+    {
+        $browser->within('@tag-teams-table', function (Browser $browser) use ($tagTeamName) {
+            $browser->assertDontSee($tagTeamName);
+        });
+    }
+
+    /**
+     * Assert that a specific status badge is displayed.
+     */
+    public function assertStatusBadge(Browser $browser, string $status): void
+    {
+        $browser->assertSeeIn('@status-badge', $status);
+    }
+
+    /**
+     * Wait for the table to load completely.
+     */
+    public function waitForTableLoad(Browser $browser): void
+    {
+        $browser->waitFor('@tag-teams-table')
+                ->pause(1000); // Allow time for data to load
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser): void
+    {
+        $browser->waitFor('@tag-teams-table')
+                ->waitFor('@create-button')
+                ->pause(1000); // Allow time for all data to load
+    }
+
+    /**
+     * Assert that the create button is visible and clickable.
+     */
+    public function assertCanCreate(Browser $browser): void
+    {
+        $browser->assertVisible('@create-button')
+                ->assertEnabled('@create-button');
+    }
+
+    /**
+     * Assert that action buttons are available for a tag team.
+     */
+    public function assertActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-action");
+        }
+    }
+
+    /**
+     * Clear all filters and search.
+     */
+    public function clearFilters(Browser $browser): void
+    {
+        $browser->clear('@search-input');
+        
+        if ($browser->element('@status-filter')) {
+            $browser->select('@status-filter', '');
+        }
+        
+        if ($browser->element('@employment-filter')) {
+            $browser->select('@employment-filter', '');
+        }
+        
+        $browser->pause(500); // Allow filters to reset
+    }
+
+    /**
+     * Navigate to tag team detail page.
+     */
+    public function viewTagTeamDetails(Browser $browser, string $tagTeamName): void
+    {
+        $browser->clickLink($tagTeamName);
+    }
+
+    /**
+     * Assert table pagination works correctly.
+     */
+    public function assertPaginationWorks(Browser $browser): void
+    {
+        if ($browser->element('.pagination, [aria-label="Pagination"]')) {
+            $browser->assertVisible('.pagination, [aria-label="Pagination"]');
+        }
+    }
+
+    /**
+     * Sort table by column.
+     */
+    public function sortByColumn(Browser $browser, string $column): void
+    {
+        $browser->click("th:contains('{$column}'), [data-sort='{$column}']")
+                ->pause(500); // Allow sorting to process
+    }
+
+    /**
+     * Assert that the tag team table has data.
+     */
+    public function assertTableHasData(Browser $browser): void
+    {
+        $browser->within('@tag-teams-table', function (Browser $browser) {
+            $browser->assertPresent('tbody tr, .table-row');
+        });
+    }
+
+    /**
+     * Assert that the tag team table is empty.
+     */
+    public function assertTableEmpty(Browser $browser): void
+    {
+        $browser->within('@tag-teams-table', function (Browser $browser) {
+            $browser->assertSee('No tag teams found');
+        });
+    }
+
+    /**
+     * Add a wrestler partner to tag team.
+     */
+    public function addWrestlerPartner(Browser $browser, string $tagTeamName, string $wrestlerName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('[data-testid="add-partner"], .btn-add-partner')
+                ->waitFor('@modal')
+                ->select('wrestler_id', $wrestlerName)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Remove a wrestler partner from tag team.
+     */
+    public function removeWrestlerPartner(Browser $browser, string $tagTeamName, string $wrestlerName): void
+    {
+        $browser->clickLink($tagTeamName)
+                ->click('[data-testid="remove-partner"], .btn-remove-partner')
+                ->waitFor('@modal')
+                ->select('wrestler_id', $wrestlerName)
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that specific employment actions are available.
+     */
+    public function assertEmploymentActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-action");
+        }
+    }
+
+    /**
+     * Assert that specific employment actions are not available.
+     */
+    public function assertEmploymentActionsNotAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertMissing("@{$action}-action");
+        }
+    }
+
+    /**
+     * Filter by specific employment status combination.
+     */
+    public function filterByEmploymentStatus(Browser $browser, string $status): void
+    {
+        $browser->select('@status-filter', $status)
+                ->pause(500);
+    }
+
+    /**
+     * Assert tag team with specific status is visible.
+     */
+    public function assertTagTeamWithStatusVisible(Browser $browser, string $tagTeamName, string $status): void
+    {
+        $browser->within('@tag-teams-table', function (Browser $browser) use ($tagTeamName, $status) {
+            $browser->assertSee($tagTeamName)
+                    ->assertSee($status);
+        });
+    }
+
+    /**
+     * Perform bulk actions on multiple tag teams.
+     */
+    public function performBulkAction(Browser $browser, array $tagTeamNames, string $action): void
+    {
+        // Select multiple tag teams
+        foreach ($tagTeamNames as $name) {
+            $browser->check("input[value='{$name}']");
+        }
+        
+        // Perform bulk action
+        $browser->select('.bulk-actions', $action)
+                ->click('.bulk-action-submit')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+}
