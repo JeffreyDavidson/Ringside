@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\Referees\UpdateAction;
+use App\Data\Referees\RefereeData;
+use App\Models\Referees\Referee;
+use App\Repositories\RefereeRepository;
+
+beforeEach(function () {
+    $this->refereeRepository = $this->mock(RefereeRepository::class);
+});
+
+test('it can update a referee', function () {
+    $data = new RefereeData('Taylor', 'Otwell', null);
+    $referee = Referee::factory()->create();
+
+    $this->refereeRepository
+        ->shouldReceive('update')
+        ->once()
+        ->with($referee, $data)
+        ->andReturns($referee);
+
+    $this->refereeRepository
+        ->shouldNotReceive('employ');
+
+    resolve(UpdateAction::class)->handle($referee, $data);
+});
+
+test('it employs an employable referee if start date is filled in request', function () {
+    $datetime = now();
+    $data = new RefereeData('Taylor', 'Otwell', $datetime);
+    $referee = Referee::factory()->create();
+
+    $this->refereeRepository
+        ->shouldReceive('update')
+        ->once()
+        ->with($referee, $data)
+        ->andReturns($referee);
+
+    $this->refereeRepository
+        ->shouldReceive('createEmployment')
+        ->with($referee, $data->employment_date)
+        ->once()
+        ->andReturn($referee);
+
+    resolve(UpdateAction::class)->handle($referee, $data);
+});
+
+test('it updates a future employed referee employment date if start date is filled in request', function () {
+    $datetime = now()->addDays(2);
+    $data = new RefereeData('Taylor', 'Otwell', $datetime);
+    $referee = Referee::factory()->withFutureEmployment()->create();
+
+    $this->refereeRepository
+        ->shouldReceive('update')
+        ->once()
+        ->with($referee, $data)
+        ->andReturns($referee);
+
+    $this->refereeRepository
+        ->shouldReceive('createEmployment')
+        ->with($referee, $data->employment_date)
+        ->once()
+        ->andReturn($referee);
+
+    resolve(UpdateAction::class)->handle($referee, $data);
+});
