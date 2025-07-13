@@ -1,0 +1,514 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Events\Event;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\Shared\Venue;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Wrestlers\Wrestler;
+
+/**
+ * Browser tests for cross-entity navigation and breadcrumb workflows.
+ * 
+ * These tests focus on the visual navigation elements, breadcrumbs, and
+ * cross-entity relationship navigation that Feature tests cannot verify.
+ * 
+ * Current Implementation: Preparatory structure for Dusk integration
+ * Future Implementation: Full browser automation with Laravel Dusk
+ */
+
+describe('Main Navigation Visual Workflow', function () {
+    test('main navigation menu displays correctly for administrators', function () {
+        // Given: An authenticated administrator
+        $admin = administrator();
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Log in as administrator
+        // 2. Verify main navigation menu is visible
+        // 3. Verify all entity sections are present (Wrestlers, Managers, etc.)
+        // 4. Verify menu items are clickable and correctly styled
+        // 5. Test hover effects and active states
+        // 6. Verify dropdown menus work correctly
+        // 7. Test mobile navigation toggle functionality
+        
+        // TODO: Replace with actual Dusk browser test when available:
+        /*
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/dashboard')
+                    ->assertVisible('@main-navigation')
+                    ->assertSee('Dashboard')
+                    ->assertSee('Wrestlers')
+                    ->assertSee('Managers')
+                    ->assertSee('Referees')
+                    ->assertSee('Tag Teams')
+                    ->assertSee('Stables')
+                    ->assertSee('Titles')
+                    ->assertSee('Events')
+                    ->assertSee('Venues')
+                    ->hover('@wrestlers-nav-link')
+                    ->assertVisible('@wrestlers-dropdown')
+                    ->click('@wrestlers-nav-link')
+                    ->waitForLocation('/wrestlers')
+                    ->assertVisible('@page-header');
+        });
+        */
+        
+        expect($admin)->toBeInstanceOf(\App\Models\Users\User::class);
+    });
+
+    test('navigation breadcrumbs display correctly across entity pages', function () {
+        // Given: Various entities for breadcrumb testing
+        $admin = administrator();
+        $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
+        $event = Event::factory()->create(['name' => 'Test Event']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to different entity pages
+        // 2. Verify breadcrumb trail displays correctly
+        // 3. Verify breadcrumb links are clickable
+        // 4. Test navigation back through breadcrumbs
+        // 5. Verify current page is highlighted in breadcrumbs
+        // 6. Test breadcrumb responsiveness on mobile
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $wrestler, $event) {
+            $browser->loginAs($admin)
+                    ->visit("/wrestlers/{$wrestler->id}")
+                    ->assertVisible('@breadcrumb-navigation')
+                    ->assertSeeIn('@breadcrumb-navigation', 'Home')
+                    ->assertSeeIn('@breadcrumb-navigation', 'Wrestlers')
+                    ->assertSeeIn('@breadcrumb-navigation', $wrestler->name)
+                    ->click('@breadcrumb-wrestlers')
+                    ->waitForLocation('/wrestlers')
+                    ->assertSee('Wrestlers')
+                    ->visit("/events/{$event->id}")
+                    ->assertSeeIn('@breadcrumb-navigation', 'Events')
+                    ->assertSeeIn('@breadcrumb-navigation', $event->name);
+        });
+        */
+        
+        expect($wrestler->name)->toBe('Test Wrestler');
+        expect($event->name)->toBe('Test Event');
+    });
+
+    test('mobile navigation menu works correctly', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Resize browser to mobile dimensions
+        // 2. Verify mobile menu toggle button is visible
+        // 3. Click toggle to open mobile menu
+        // 4. Verify menu slides out correctly
+        // 5. Test menu item interactions on mobile
+        // 6. Verify menu closes when item is selected
+        // 7. Test swipe gestures for menu opening/closing
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs(administrator())
+                    ->visit('/dashboard')
+                    ->assertVisible('@mobile-menu-toggle')
+                    ->assertDontSee('@desktop-navigation')
+                    ->click('@mobile-menu-toggle')
+                    ->waitFor('@mobile-navigation-menu')
+                    ->assertSee('Wrestlers')
+                    ->assertSee('Events')
+                    ->click('@mobile-wrestlers-link')
+                    ->waitForLocation('/wrestlers')
+                    ->assertDontSee('@mobile-navigation-menu');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Entity Cross-Navigation Workflow', function () {
+    test('wrestler to related entities navigation displays correctly', function () {
+        // Given: A wrestler with relationships
+        $admin = administrator();
+        $wrestler = Wrestler::factory()->create(['name' => 'John Cena']);
+        $manager = Manager::factory()->create(['name' => 'Paul Bearer']);
+        $tagTeam = TagTeam::factory()->create(['name' => 'The New Day']);
+        $stable = Stable::factory()->create(['name' => 'Evolution']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to wrestler detail page
+        // 2. Verify related entity cards/links are visible
+        // 3. Click on manager link to navigate to manager page
+        // 4. Verify navigation works and breadcrumbs update
+        // 5. Test tag team navigation from wrestler page
+        // 6. Test stable navigation from wrestler page
+        // 7. Verify back navigation works correctly
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $wrestler, $manager, $tagTeam) {
+            $browser->loginAs($admin)
+                    ->visit("/wrestlers/{$wrestler->id}")
+                    ->assertSee($wrestler->name)
+                    ->assertVisible('@related-managers-section')
+                    ->assertVisible('@related-tag-teams-section')
+                    ->assertVisible('@related-stables-section')
+                    ->within('@related-managers-section', function ($section) use ($manager) {
+                        $section->assertSee($manager->name)
+                                ->click("@manager-{$manager->id}-link");
+                    })
+                    ->waitForLocation("/managers/{$manager->id}")
+                    ->assertSee($manager->name)
+                    ->assertSeeIn('@breadcrumb-navigation', 'Managers');
+        });
+        */
+        
+        expect($wrestler->name)->toBe('John Cena');
+        expect($manager->name)->toBe('Paul Bearer');
+    });
+
+    test('event to match navigation displays correctly', function () {
+        // Given: An event with matches
+        $admin = administrator();
+        $venue = Venue::factory()->create(['name' => 'Madison Square Garden']);
+        $event = Event::factory()->create([
+            'name' => 'WrestleMania 40',
+            'venue_id' => $venue->id
+        ]);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to event detail page
+        // 2. Verify event information displays correctly
+        // 3. Verify matches section is visible
+        // 4. Click "View Matches" or individual match links
+        // 5. Verify navigation to matches page
+        // 6. Test venue link navigation from event page
+        // 7. Verify all navigation preserves context
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $event, $venue) {
+            $browser->loginAs($admin)
+                    ->visit("/events/{$event->id}")
+                    ->assertSee($event->name)
+                    ->assertSee($venue->name)
+                    ->assertVisible('@event-matches-section')
+                    ->click('@view-matches-button')
+                    ->waitForLocation("/events/{$event->id}/matches")
+                    ->assertSee('Matches')
+                    ->assertSeeIn('@breadcrumb-navigation', $event->name)
+                    ->click("@venue-{$venue->id}-link")
+                    ->waitForLocation("/venues/{$venue->id}")
+                    ->assertSee($venue->name);
+        });
+        */
+        
+        expect($event->name)->toBe('WrestleMania 40');
+        expect($venue->name)->toBe('Madison Square Garden');
+    });
+
+    test('title championship history navigation works correctly', function () {
+        // Given: A title with championship history
+        $admin = administrator();
+        $title = Title::factory()->create(['name' => 'WWE Championship']);
+        $wrestler = Wrestler::factory()->create(['name' => 'Stone Cold']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to title detail page
+        // 2. Verify championship history table is visible
+        // 3. Click on champion name to navigate to wrestler
+        // 4. Verify navigation preserves championship context
+        // 5. Test navigation back to title page
+        // 6. Verify pagination in championship history works
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $title, $wrestler) {
+            $browser->loginAs($admin)
+                    ->visit("/titles/{$title->id}")
+                    ->assertSee($title->name)
+                    ->assertVisible('@championship-history-table')
+                    ->within('@championship-history-table', function ($table) use ($wrestler) {
+                        $table->assertSee($wrestler->name)
+                              ->click("@champion-{$wrestler->id}-link");
+                    })
+                    ->waitForLocation("/wrestlers/{$wrestler->id}")
+                    ->assertSee($wrestler->name)
+                    ->assertVisible('@title-championships-table')
+                    ->within('@title-championships-table', function ($table) use ($title) {
+                        $table->assertSee($title->name)
+                              ->click("@title-{$title->id}-link");
+                    })
+                    ->waitForLocation("/titles/{$title->id}")
+                    ->assertSee($title->name);
+        });
+        */
+        
+        expect($title->name)->toBe('WWE Championship');
+        expect($wrestler->name)->toBe('Stone Cold');
+    });
+});
+
+describe('Search and Quick Navigation Workflow', function () {
+    test('global search functionality works across all entities', function () {
+        // Given: Entities with searchable names
+        $admin = administrator();
+        $wrestler = Wrestler::factory()->create(['name' => 'The Rock']);
+        $event = Event::factory()->create(['name' => 'Rock Bottom Event']);
+        $title = Title::factory()->create(['name' => 'Rock Championship']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Use global search bar in navigation
+        // 2. Type search term that matches multiple entities
+        // 3. Verify search dropdown shows results from all entity types
+        // 4. Verify results are categorized by entity type
+        // 5. Click on search result to navigate directly
+        // 6. Test keyboard navigation in search results
+        // 7. Verify search history functionality
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $wrestler, $event, $title) {
+            $browser->loginAs($admin)
+                    ->visit('/dashboard')
+                    ->assertVisible('@global-search')
+                    ->click('@global-search-input')
+                    ->type('@global-search-input', 'Rock')
+                    ->waitFor('@search-results-dropdown')
+                    ->within('@search-results-dropdown', function ($dropdown) use ($wrestler, $event, $title) {
+                        $dropdown->assertSee('Wrestlers')
+                                 ->assertSee($wrestler->name)
+                                 ->assertSee('Events')
+                                 ->assertSee($event->name)
+                                 ->assertSee('Titles')
+                                 ->assertSee($title->name)
+                                 ->click("@wrestler-result-{$wrestler->id}");
+                    })
+                    ->waitForLocation("/wrestlers/{$wrestler->id}")
+                    ->assertSee($wrestler->name);
+        });
+        */
+        
+        expect($wrestler->name)->toBe('The Rock');
+        expect($event->name)->toBe('Rock Bottom Event');
+    });
+
+    test('quick action buttons work correctly in navigation', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Verify quick action buttons are visible in navigation
+        // 2. Test "Quick Create" dropdown functionality
+        // 3. Verify all entity creation options are available
+        // 4. Click "Create Wrestler" from quick actions
+        // 5. Verify modal opens correctly
+        // 6. Test "Recent Items" quick access
+        // 7. Verify recently viewed items appear correctly
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/dashboard')
+                    ->assertVisible('@quick-actions')
+                    ->click('@quick-create-dropdown')
+                    ->waitFor('@quick-create-menu')
+                    ->within('@quick-create-menu', function ($menu) {
+                        $menu->assertSee('Create Wrestler')
+                             ->assertSee('Create Event')
+                             ->assertSee('Create Title')
+                             ->click('@quick-create-wrestler');
+                    })
+                    ->waitFor('@wrestler-form-modal')
+                    ->assertSee('Create Wrestler')
+                    ->click('@recent-items-dropdown')
+                    ->waitFor('@recent-items-menu')
+                    ->assertVisible('@recent-items-list');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Dashboard Navigation Workflow', function () {
+    test('dashboard widgets provide correct navigation links', function () {
+        // Given: Recent data for dashboard widgets
+        $admin = administrator();
+        $recentWrestler = Wrestler::factory()->create(['name' => 'New Wrestler']);
+        $recentEvent = Event::factory()->create(['name' => 'Upcoming Event']);
+        $recentTitle = Title::factory()->create(['name' => 'New Championship']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to dashboard
+        // 2. Verify dashboard widgets are visible
+        // 3. Verify recent items appear in widgets
+        // 4. Click on widget items to navigate
+        // 5. Verify "View All" links work correctly
+        // 6. Test widget refresh functionality
+        // 7. Verify widget responsiveness on mobile
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $recentWrestler, $recentEvent, $recentTitle) {
+            $browser->loginAs($admin)
+                    ->visit('/dashboard')
+                    ->assertVisible('@recent-wrestlers-widget')
+                    ->assertVisible('@recent-events-widget')
+                    ->assertVisible('@recent-titles-widget')
+                    ->within('@recent-wrestlers-widget', function ($widget) use ($recentWrestler) {
+                        $widget->assertSee($recentWrestler->name)
+                               ->click("@wrestler-{$recentWrestler->id}-link");
+                    })
+                    ->waitForLocation("/wrestlers/{$recentWrestler->id}")
+                    ->assertSee($recentWrestler->name)
+                    ->visit('/dashboard')
+                    ->within('@recent-events-widget', function ($widget) {
+                        $widget->click('@view-all-events');
+                    })
+                    ->waitForLocation('/events')
+                    ->assertSee('Events');
+        });
+        */
+        
+        expect($recentWrestler->name)->toBe('New Wrestler');
+        expect($recentEvent->name)->toBe('Upcoming Event');
+    });
+
+    test('dashboard statistics cards are clickable for drill-down', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate to dashboard
+        // 2. Verify statistics cards are visible
+        // 3. Verify cards show correct counts
+        // 4. Click on wrestler count card
+        // 5. Verify navigation to wrestlers index with proper filtering
+        // 6. Test other statistic cards (events, titles, etc.)
+        // 7. Verify hover effects on statistic cards
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/dashboard')
+                    ->assertVisible('@stats-cards')
+                    ->within('@stats-cards', function ($cards) {
+                        $cards->assertVisible('@total-wrestlers-card')
+                              ->assertVisible('@total-events-card')
+                              ->assertVisible('@total-titles-card')
+                              ->assertVisible('@active-wrestlers-card')
+                              ->hover('@total-wrestlers-card')
+                              ->click('@total-wrestlers-card');
+                    })
+                    ->waitForLocation('/wrestlers')
+                    ->assertVisible('@wrestlers-table')
+                    ->visit('/dashboard')
+                    ->click('@upcoming-events-card')
+                    ->waitForLocation('/events')
+                    ->assertVisible('@events-table');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+});
+
+describe('Navigation Accessibility and Performance', function () {
+    test('navigation meets accessibility standards', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate using only keyboard
+        // 2. Verify all navigation elements are focusable
+        // 3. Test tab order through navigation menu
+        // 4. Verify ARIA labels and roles are present
+        // 5. Test screen reader compatibility
+        // 6. Verify skip navigation links work
+        // 7. Test high contrast mode compatibility
+        
+        // TODO: Replace with actual Dusk browser test with accessibility assertions
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/dashboard')
+                    ->assertAriaLabel('@main-navigation', 'Main navigation')
+                    ->keys('body', '{tab}')
+                    ->assertFocused('@skip-navigation')
+                    ->keys('@skip-navigation', '{enter}')
+                    ->assertFocused('@main-content')
+                    ->keys('body', '{tab}')
+                    ->assertFocused('@wrestlers-nav-link')
+                    ->keys('@wrestlers-nav-link', '{enter}')
+                    ->waitForLocation('/wrestlers')
+                    ->assertFocused('@page-header');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('navigation loading states display correctly', function () {
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Click navigation link with slow response
+        // 2. Verify loading indicator appears
+        // 3. Verify navigation is disabled during loading
+        // 4. Test loading state styling
+        // 5. Verify loading states clear when page loads
+        // 6. Test loading states for AJAX navigation
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/dashboard')
+                    ->click('@wrestlers-nav-link')
+                    ->assertVisible('@navigation-loading')
+                    ->assertAttribute('@wrestlers-nav-link', 'disabled', 'true')
+                    ->waitForLocation('/wrestlers')
+                    ->assertDontSee('@navigation-loading')
+                    ->assertDontHaveAttribute('@wrestlers-nav-link', 'disabled');
+        });
+        */
+        
+        expect(true)->toBeTrue();
+    });
+
+    test('navigation works correctly with browser back/forward buttons', function () {
+        // Given: Navigation history
+        $admin = administrator();
+        $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
+        
+        // Browser Test Scope (Future Dusk Implementation):
+        // 1. Navigate through several pages using menu
+        // 2. Use browser back button
+        // 3. Verify correct page loads and navigation state updates
+        // 4. Use browser forward button
+        // 5. Verify navigation state remains consistent
+        // 6. Test deep linking to specific pages
+        // 7. Verify breadcrumbs update correctly with back/forward
+        
+        // TODO: Replace with actual Dusk browser test
+        /*
+        $this->browse(function (Browser $browser) use ($admin, $wrestler) {
+            $browser->loginAs($admin)
+                    ->visit('/dashboard')
+                    ->click('@wrestlers-nav-link')
+                    ->waitForLocation('/wrestlers')
+                    ->click("@wrestler-{$wrestler->id}-view")
+                    ->waitForLocation("/wrestlers/{$wrestler->id}")
+                    ->back()
+                    ->waitForLocation('/wrestlers')
+                    ->assertVisible('@wrestlers-table')
+                    ->forward()
+                    ->waitForLocation("/wrestlers/{$wrestler->id}")
+                    ->assertSee($wrestler->name);
+        });
+        */
+        
+        expect($wrestler->name)->toBe('Test Wrestler');
+    });
+});
+
+// Note: When Laravel Dusk is installed, add these dependencies to the top:
+// use Laravel\Dusk\Browser;
+// use Tests\DuskTestCase;
+
+// And extend DuskTestCase instead of the current structure

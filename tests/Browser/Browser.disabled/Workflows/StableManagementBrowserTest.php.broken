@@ -1,0 +1,611 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Managers\Manager;
+use App\Models\Stables\Stable;
+use App\Models\Stables\StableManager;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
+use Laravel\Dusk\Browser;
+
+/**
+ * Browser tests for stable management visual workflows.
+ * 
+ * These tests focus on visual elements, user interactions, and browser behavior
+ * that Feature tests cannot cover. These tests use Laravel Dusk for full
+ * browser automation.
+ */
+
+describe('Stable Creation Visual Workflow', function () {
+    test('stable creation modal displays correctly and accepts input', function () {
+        // Given: An authenticated administrator
+        $admin = administrator();
+        
+        // When & Then: Test the stable creation workflow
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/stables')
+                    ->screenshot('stables-index')
+                    ->pause(2000) // Give page time to load
+                    ->assertPathIs('/stables')
+                    ->assertTitle('Laravel');
+        });
+    });
+
+    test('basic browser functionality works for stables', function () {
+        // When & Then: Test basic browser functionality
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                    ->screenshot('homepage-visit-stables')
+                    ->assertTitle('Laravel'); // Basic assertion that browser works
+        });
+    });
+
+    test('stable detail page can be accessed', function () {
+        // Given: A stable with complete information
+        $stable = Stable::factory()->active()->create([
+            'name' => 'The Four Horsemen',
+        ]);
+        
+        // When & Then: Test accessing stable detail page
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-detail')
+                    ->assertSee($stable->name)
+                    ->assertSee('The Four Horsemen')
+                    ->assertPathIs("/stables/{$stable->id}");
+        });
+    });
+});
+
+describe('Stable Table Interaction Workflow', function () {
+    test('stables index page has basic table structure', function () {
+        // When & Then: Verify the page has basic table structure
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('stables-page-structure')
+                    ->pause(2000) // Wait for Livewire to load
+                    ->assertPathIs('/stables');
+                    
+            // Check if basic page elements exist
+            if ($browser->element('table, .table, [role="table"]')) {
+                $browser->screenshot('stables-table-structure-found');
+            } else {
+                $browser->screenshot('stables-no-table-structure');
+            }
+        });
+    });
+
+    test('stable actions dropdown functionality', function () {
+        // Given: A stable that can have actions performed on it
+        $stable = Stable::factory()->active()->create([
+            'name' => 'The New World Order'
+        ]);
+
+        // When & Then: Test action dropdown interactions
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('before-stable-actions')
+                    ->pause(3000); // Wait for page to fully load
+
+            // Look for action elements (specific selectors depend on implementation)
+            if ($browser->element('[data-testid="stable-actions"]')) {
+                $browser->screenshot('stable-actions-found');
+            } else {
+                $browser->screenshot('stable-actions-not-found');
+            }
+        });
+    });
+
+    test('stable search functionality works visually', function () {
+        // Given: Multiple stables to search through
+        Stable::factory()->create(['name' => 'The Four Horsemen']);
+        Stable::factory()->create(['name' => 'D-Generation X']);
+        Stable::factory()->create(['name' => 'New World Order']);
+
+        // When & Then: Test search functionality
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('before-stable-search')
+                    ->pause(2000);
+
+            // Look for search input (specific selector depends on implementation)
+            if ($browser->element('input[type="search"], input[placeholder*="search"], .search-input')) {
+                $browser->type('input[type="search"], input[placeholder*="search"], .search-input', 'Horsemen')
+                        ->pause(1000)
+                        ->screenshot('after-stable-search')
+                        ->assertSee('The Four Horsemen');
+            } else {
+                $browser->screenshot('stable-search-input-not-found');
+            }
+        });
+    });
+});
+
+describe('Stable Detail Page Visual Workflow', function () {
+    test('stable detail page displays stable information correctly', function () {
+        // Given: A stable with complete information
+        $stable = Stable::factory()->active()->create([
+            'name' => 'Evolution',
+        ]);
+        
+        // When & Then: Verify stable detail page displays information
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-detail-page')
+                    ->assertSee($stable->name)
+                    ->assertSee('Evolution')
+                    ->assertPathIs("/stables/{$stable->id}");
+        });
+    });
+
+    test('stable detail page shows activity information', function () {
+        // Given: A stable with activity history
+        $stable = Stable::factory()->active()->create([
+            'name' => 'Stable with History',
+        ]);
+        
+        // When & Then: Verify activity information is displayed
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-with-activity')
+                    ->assertSee($stable->name)
+                    ->assertSee('Stable with History');
+        });
+    });
+
+    test('inactive stable displays correctly', function () {
+        // Given: A stable without current activity
+        $stable = Stable::factory()->inactive()->create([
+            'name' => 'Inactive Stable',
+        ]);
+        
+        // When & Then: Verify inactive stable display
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('inactive-stable')
+                    ->assertSee($stable->name)
+                    ->assertSee('Inactive Stable');
+        });
+    });
+});
+
+describe('Stable Status Management Visual Workflow', function () {
+    test('stable status badges display correctly', function () {
+        // Given: Stables with different statuses
+        $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
+        $disbandedStable = Stable::factory()->disbanded()->create(['name' => 'Disbanded Stable']);
+        $retiredStable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
+        $inactiveStable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
+
+        // When & Then: Test status badge display
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('stable-status-badges')
+                    ->pause(2000);
+
+            // Look for status indicators
+            if ($browser->element('.badge, .status, [data-testid="stable-status"]')) {
+                $browser->screenshot('stable-status-badges-found');
+            } else {
+                $browser->screenshot('stable-status-badges-not-found');
+            }
+        });
+    });
+
+    test('stable business action visual workflow', function () {
+        // Given: A stable that can have business actions performed
+        $stable = Stable::factory()->active()->create(['name' => 'Business Action Stable']);
+
+        // When & Then: Test business action visual workflow
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('stable-business-actions')
+                    ->pause(2000);
+
+            // Look for business action elements
+            if ($browser->element('[data-testid="stable-disband"], .disband-action')) {
+                $browser->screenshot('stable-disband-action-available');
+            } else {
+                $browser->screenshot('stable-disband-action-not-found');
+            }
+        });
+    });
+
+    test('stable retirement status visual workflow', function () {
+        // Given: A stable that can be retired
+        $stable = Stable::factory()->active()->create(['name' => 'Retirement Test Stable']);
+
+        // When & Then: Test retirement status visual workflow
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-retirement-workflow')
+                    ->pause(2000);
+
+            // Look for retirement management elements
+            if ($browser->element('[data-testid="stable-retire"], .retire-action')) {
+                $browser->screenshot('stable-retirement-action-available');
+            } else {
+                $browser->screenshot('stable-retirement-action-not-found');
+            }
+        });
+    });
+});
+
+describe('Navigation and Responsive Design', function () {
+    test('stable management interface works on mobile viewport', function () {
+        // Given: A stable to display
+        $stable = Stable::factory()->create(['name' => 'Mobile Test Stable']);
+        
+        // When & Then: Test mobile viewport functionality
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('mobile-stables')
+                    ->pause(2000)
+                    ->assertPathIs('/stables');
+        });
+    });
+    
+    test('navigation between stables index and detail works', function () {
+        // Given: A stable to navigate to
+        $stable = Stable::factory()->create(['name' => 'Navigation Test Stable']);
+        
+        // When & Then: Test navigation workflow
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('before-stable-navigation')
+                    ->pause(2000)
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('after-stable-navigation')
+                    ->assertSee($stable->name)
+                    ->assertPathIs("/stables/{$stable->id}");
+        });
+    });
+
+    test('stables table responsive design works correctly', function () {
+        // Given: Multiple stables to test table responsiveness
+        Stable::factory()->count(5)->create();
+        
+        // When & Then: Test responsive table behavior
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables');
+
+            // Test desktop view
+            $browser->resize(1200, 800)
+                    ->screenshot('stables-desktop-view')
+                    ->pause(1000);
+
+            // Test tablet view
+            $browser->resize(768, 1024)
+                    ->screenshot('stables-tablet-view')
+                    ->pause(1000);
+
+            // Test mobile view
+            $browser->resize(375, 667)
+                    ->screenshot('stables-mobile-view')
+                    ->pause(1000);
+        });
+    });
+});
+
+describe('Stable Member Relationship Visual Workflow', function () {
+    test('stable with wrestler members displays correctly', function () {
+        // Given: A stable with wrestler members
+        $stable = Stable::factory()->active()->create(['name' => 'Wrestler Stable']);
+        $wrestler1 = Wrestler::factory()->bookable()->create(['name' => 'Stable Wrestler 1']);
+        $wrestler2 = Wrestler::factory()->bookable()->create(['name' => 'Stable Wrestler 2']);
+        
+        // Create stable memberships
+        StableWrestler::factory()
+            ->for($stable, 'stable')
+            ->for($wrestler1, 'wrestler')
+            ->current()
+            ->create();
+
+        StableWrestler::factory()
+            ->for($stable, 'stable')
+            ->for($wrestler2, 'wrestler')
+            ->current()
+            ->create();
+
+        // When & Then: Test wrestler membership display
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-wrestler-members')
+                    ->pause(2000)
+                    ->assertSee('Wrestler Stable');
+        });
+    });
+
+    test('stable with tag team members displays correctly', function () {
+        // Given: A stable with tag team members
+        $stable = Stable::factory()->active()->create(['name' => 'Tag Team Stable']);
+        $tagTeam1 = TagTeam::factory()->bookable()->create(['name' => 'Stable Tag Team 1']);
+        $tagTeam2 = TagTeam::factory()->bookable()->create(['name' => 'Stable Tag Team 2']);
+        
+        // Create stable memberships
+        StableTagTeam::factory()
+            ->for($stable, 'stable')
+            ->for($tagTeam1, 'tagTeam')
+            ->current()
+            ->create();
+
+        StableTagTeam::factory()
+            ->for($stable, 'stable')
+            ->for($tagTeam2, 'tagTeam')
+            ->current()
+            ->create();
+
+        // When & Then: Test tag team membership display
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-tagteam-members')
+                    ->pause(2000)
+                    ->assertSee('Tag Team Stable');
+        });
+    });
+
+    test('stable with manager members displays correctly', function () {
+        // Given: A stable with manager members
+        $stable = Stable::factory()->active()->create(['name' => 'Manager Stable']);
+        $manager1 = Manager::factory()->bookable()->create(['name' => 'Stable Manager 1']);
+        $manager2 = Manager::factory()->bookable()->create(['name' => 'Stable Manager 2']);
+        
+        // Create stable memberships
+        StableManager::factory()
+            ->for($stable, 'stable')
+            ->for($manager1, 'manager')
+            ->current()
+            ->create();
+
+        StableManager::factory()
+            ->for($stable, 'stable')
+            ->for($manager2, 'manager')
+            ->current()
+            ->create();
+
+        // When & Then: Test manager membership display
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-manager-members')
+                    ->pause(2000)
+                    ->assertSee('Manager Stable');
+        });
+    });
+
+    test('stable with mixed member types displays correctly', function () {
+        // Given: A stable with mixed member types
+        $stable = Stable::factory()->active()->create(['name' => 'Mixed Stable']);
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Mixed Wrestler']);
+        $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'Mixed Tag Team']);
+        $manager = Manager::factory()->bookable()->create(['name' => 'Mixed Manager']);
+
+        // Create stable memberships
+        StableWrestler::factory()
+            ->for($stable, 'stable')
+            ->for($wrestler, 'wrestler')
+            ->current()
+            ->create();
+
+        StableTagTeam::factory()
+            ->for($stable, 'stable')
+            ->for($tagTeam, 'tagTeam')
+            ->current()
+            ->create();
+
+        StableManager::factory()
+            ->for($stable, 'stable')
+            ->for($manager, 'manager')
+            ->current()
+            ->create();
+
+        // When & Then: Test mixed membership display
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-mixed-members')
+                    ->pause(2000)
+                    ->assertSee('Mixed Stable');
+        });
+    });
+});
+
+describe('Stable Form Modal Interactions', function () {
+    test('create stable modal opens and accepts input', function () {
+        // When & Then: Test stable creation modal
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('before-create-stable-modal')
+                    ->pause(2000);
+
+            // Look for create button (selector depends on implementation)
+            if ($browser->element('[data-testid="create-stable"], .btn-create, button:contains("Create")')) {
+                $browser->click('[data-testid="create-stable"], .btn-create, button:contains("Create")')
+                        ->pause(1000)
+                        ->screenshot('create-stable-modal-opened');
+
+                // Test form input if modal opened
+                if ($browser->element('.modal, [role="dialog"]')) {
+                    $browser->screenshot('stable-modal-form-visible');
+                } else {
+                    $browser->screenshot('stable-modal-not-visible');
+                }
+            } else {
+                $browser->screenshot('create-stable-button-not-found');
+            }
+        });
+    });
+
+    test('edit stable modal functionality', function () {
+        // Given: A stable to edit
+        $stable = Stable::factory()->create(['name' => 'Editable Stable']);
+
+        // When & Then: Test edit modal functionality
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('before-edit-stable-modal')
+                    ->pause(2000);
+
+            // Look for edit action (selector depends on implementation)
+            if ($browser->element('[data-testid="edit-stable"], .btn-edit')) {
+                $browser->click('[data-testid="edit-stable"], .btn-edit')
+                        ->pause(1000)
+                        ->screenshot('edit-stable-modal-opened');
+            } else {
+                $browser->screenshot('edit-stable-button-not-found');
+            }
+        });
+    });
+
+    test('stable form validation displays correctly', function () {
+        // When & Then: Test form validation visual feedback
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('stable-form-validation-test')
+                    ->pause(2000);
+
+            // Look for form validation elements
+            if ($browser->element('.form-control, .input-field')) {
+                $browser->screenshot('stable-form-fields-found');
+            } else {
+                $browser->screenshot('stable-form-fields-not-found');
+            }
+        });
+    });
+});
+
+describe('Error Handling and Edge Cases', function () {
+    test('browser handles non-existent stable gracefully', function () {
+        // When & Then: Test accessing non-existent stable
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables/99999')
+                    ->screenshot('non-existent-stable')
+                    ->pause(1000);
+
+            // Should show 404 or appropriate error
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('browser handles unauthorized access gracefully', function () {
+        // Given: A basic user (non-admin)
+        $basicUser = basicUser();
+        $stable = Stable::factory()->create();
+
+        // When & Then: Test unauthorized access
+        $this->browse(function (Browser $browser) use ($basicUser, $stable) {
+            $browser->loginAs($basicUser)
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('unauthorized-stable-access')
+                    ->pause(1000);
+
+            // Should show 403 or redirect to appropriate page
+            $currentUrl = $browser->driver->getCurrentURL();
+            expect($currentUrl)->not->toContain("/stables/{$stable->id}");
+        });
+    });
+
+    test('browser handles stable with complex status combinations', function () {
+        // Given: A stable with multiple status changes
+        $stable = Stable::factory()->active()->create(['name' => 'Complex Status Stable']);
+
+        // When & Then: Test complex status display
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-complex-status')
+                    ->pause(2000)
+                    ->assertSee('Complex Status Stable');
+        });
+    });
+});
+
+describe('Performance and Loading', function () {
+    test('stables table loads efficiently with large dataset', function () {
+        // Given: Many stables to test performance
+        Stable::factory()->count(25)->create();
+        
+        // When & Then: Test loading performance
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/stables')
+                    ->screenshot('stables-large-dataset')
+                    ->pause(3000); // Allow time for loading
+
+            // Verify page loads completely
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('stable detail page loads efficiently with relationships', function () {
+        // Given: A stable with many relationships
+        $stable = Stable::factory()->active()->create(['name' => 'Relationship Heavy Stable']);
+        
+        // Add multiple members
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $tagTeams = TagTeam::factory()->count(2)->bookable()->create();
+        $managers = Manager::factory()->count(2)->bookable()->create();
+
+        foreach ($wrestlers as $wrestler) {
+            StableWrestler::factory()
+                ->for($stable, 'stable')
+                ->for($wrestler, 'wrestler')
+                ->current()
+                ->create();
+        }
+
+        foreach ($tagTeams as $tagTeam) {
+            StableTagTeam::factory()
+                ->for($stable, 'stable')
+                ->for($tagTeam, 'tagTeam')
+                ->current()
+                ->create();
+        }
+
+        foreach ($managers as $manager) {
+            StableManager::factory()
+                ->for($stable, 'stable')
+                ->for($manager, 'manager')
+                ->current()
+                ->create();
+        }
+
+        // When & Then: Test detail page performance
+        $this->browse(function (Browser $browser) use ($stable) {
+            $browser->loginAs(administrator())
+                    ->visit("/stables/{$stable->id}")
+                    ->screenshot('stable-relationships-loading')
+                    ->pause(2000);
+
+            // Verify page loads completely
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+});

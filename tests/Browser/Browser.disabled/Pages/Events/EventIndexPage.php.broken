@@ -1,0 +1,505 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Events;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+class EventIndexPage extends Page
+{
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return '/events';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url());
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@create-button' => '[data-testid="create-event-btn"], .create-event, button:contains("Create")',
+            '@events-table' => 'table, .table, [role="table"]',
+            '@search-input' => 'input[placeholder*="Search"], input[type="search"]',
+            '@action-dropdown' => '.dropdown, [data-testid="actions"]',
+            '@status-filter' => 'select[name="status"], .status-filter',
+            '@venue-filter' => 'select[name="venue"], .venue-filter',
+            '@date-filter' => 'input[name="date"], .date-filter',
+            '@date-range-filter' => '.date-range-filter, [data-testid="date-range"]',
+            '@schedule-action' => '[data-testid="schedule-event"], .schedule-action',
+            '@unschedule-action' => '[data-testid="unschedule-event"], .unschedule-action',
+            '@delete-action' => '[data-testid="delete-event"], .delete-action',
+            '@restore-action' => '[data-testid="restore-event"], .restore-action',
+            '@status-badge' => '.badge, .status, [data-testid="event-status"]',
+            '@venue-link' => '.venue-link, [data-testid="venue-link"]',
+            '@modal' => '.modal, [role="dialog"]',
+            '@modal-form' => '.modal form, [role="dialog"] form',
+            '@modal-close' => '.modal-close, [aria-label="Close"]',
+            '@confirm-button' => 'button:contains("Confirm"), .btn-confirm',
+            '@cancel-button' => 'button:contains("Cancel"), .btn-cancel',
+        ];
+    }
+
+    /**
+     * Create a new event through the UI.
+     */
+    public function createEvent(Browser $browser, array $data): void
+    {
+        $browser->click('@create-button')
+                ->waitFor('@modal')
+                ->type('name', $data['name']);
+        
+        if (isset($data['preview'])) {
+            $browser->type('preview', $data['preview']);
+        }
+        
+        if (isset($data['date'])) {
+            $browser->type('date', $data['date']);
+        }
+        
+        if (isset($data['venue'])) {
+            $browser->select('venue_id', $data['venue']);
+        }
+        
+        $browser->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Create event with invalid data for error testing.
+     */
+    public function createEventWithInvalidData(Browser $browser, array $data): void
+    {
+        $browser->click('@create-button')
+                ->waitFor('@modal')
+                ->type('name', $data['name'] ?? '')
+                ->click('button[type="submit"]');
+        // Don't wait for modal to close since validation errors should prevent it
+    }
+
+    /**
+     * Search for events by name.
+     */
+    public function searchFor(Browser $browser, string $term): void
+    {
+        $browser->type('@search-input', $term)
+                ->pause(500); // Allow search to process
+    }
+
+    /**
+     * Filter events by status.
+     */
+    public function filterByStatus(Browser $browser, string $status): void
+    {
+        $browser->select('@status-filter', $status)
+                ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Filter events by venue.
+     */
+    public function filterByVenue(Browser $browser, string $venue): void
+    {
+        $browser->select('@venue-filter', $venue)
+                ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Filter events by date range.
+     */
+    public function filterByDateRange(Browser $browser, string $startDate, string $endDate): void
+    {
+        $browser->within('@date-range-filter', function (Browser $browser) use ($startDate, $endDate) {
+            $browser->type('input[name="minDate"]', $startDate)
+                    ->type('input[name="maxDate"]', $endDate);
+        })
+        ->pause(500); // Allow filter to process
+    }
+
+    /**
+     * Schedule an event through the UI.
+     */
+    public function scheduleEvent(Browser $browser, string $eventName, array $data): void
+    {
+        $browser->clickLink($eventName)
+                ->click('@schedule-action')
+                ->waitFor('@modal');
+        
+        if (isset($data['date'])) {
+            $browser->type('date', $data['date']);
+        }
+        
+        if (isset($data['venue'])) {
+            $browser->select('venue_id', $data['venue']);
+        }
+        
+        $browser->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Unschedule an event through the UI.
+     */
+    public function unscheduleEvent(Browser $browser, string $eventName): void
+    {
+        $browser->clickLink($eventName)
+                ->click('@unschedule-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Change venue for an event.
+     */
+    public function changeVenue(Browser $browser, string $eventName, string $venueName): void
+    {
+        $browser->clickLink($eventName)
+                ->click('[data-testid="change-venue"], .btn-change-venue')
+                ->waitFor('@modal')
+                ->select('venue_id', $venueName)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Edit an event through the UI.
+     */
+    public function editEvent(Browser $browser, string $eventName, array $data): void
+    {
+        $browser->clickLink($eventName)
+                ->click('[data-testid="edit-event"], .btn-edit')
+                ->waitFor('@modal')
+                ->clear('name')
+                ->type('name', $data['name']);
+        
+        if (isset($data['preview'])) {
+            $browser->clear('preview')
+                    ->type('preview', $data['preview']);
+        }
+        
+        $browser->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Delete an event through the UI.
+     */
+    public function deleteEvent(Browser $browser, string $eventName): void
+    {
+        $browser->clickLink($eventName)
+                ->click('@delete-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Restore a deleted event through the UI.
+     */
+    public function restoreEvent(Browser $browser, string $eventName): void
+    {
+        $browser->clickLink($eventName)
+                ->click('@restore-action')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert that an event is visible in the table.
+     */
+    public function assertEventVisible(Browser $browser, string $eventName): void
+    {
+        $browser->within('@events-table', function (Browser $browser) use ($eventName) {
+            $browser->assertSee($eventName);
+        });
+    }
+
+    /**
+     * Assert that an event is not visible in the table.
+     */
+    public function assertEventNotVisible(Browser $browser, string $eventName): void
+    {
+        $browser->within('@events-table', function (Browser $browser) use ($eventName) {
+            $browser->assertDontSee($eventName);
+        });
+    }
+
+    /**
+     * Assert that a specific status badge is displayed.
+     */
+    public function assertStatusBadge(Browser $browser, string $status): void
+    {
+        $browser->assertSeeIn('@status-badge', $status);
+    }
+
+    /**
+     * Assert that a venue is displayed.
+     */
+    public function assertVenueDisplayed(Browser $browser, string $venueName): void
+    {
+        $browser->assertSeeIn('@venue-link', $venueName);
+    }
+
+    /**
+     * Wait for the table to load completely.
+     */
+    public function waitForTableLoad(Browser $browser): void
+    {
+        $browser->waitFor('@events-table')
+                ->pause(1000); // Allow time for data to load
+    }
+
+    /**
+     * Wait for the page to load completely.
+     */
+    public function waitForPageLoad(Browser $browser): void
+    {
+        $browser->waitFor('@events-table')
+                ->waitFor('@create-button')
+                ->pause(1000); // Allow time for all data to load
+    }
+
+    /**
+     * Assert that the create button is visible and clickable.
+     */
+    public function assertCanCreate(Browser $browser): void
+    {
+        $browser->assertVisible('@create-button')
+                ->assertEnabled('@create-button');
+    }
+
+    /**
+     * Assert that action buttons are available for an event.
+     */
+    public function assertActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-action");
+        }
+    }
+
+    /**
+     * Clear all filters and search.
+     */
+    public function clearFilters(Browser $browser): void
+    {
+        $browser->clear('@search-input');
+        
+        if ($browser->element('@status-filter')) {
+            $browser->select('@status-filter', '');
+        }
+        
+        if ($browser->element('@venue-filter')) {
+            $browser->select('@venue-filter', '');
+        }
+        
+        if ($browser->element('@date-range-filter')) {
+            $browser->within('@date-range-filter', function (Browser $browser) {
+                $browser->clear('input[name="minDate"]')
+                        ->clear('input[name="maxDate"]');
+            });
+        }
+        
+        $browser->pause(500); // Allow filters to reset
+    }
+
+    /**
+     * Navigate to event detail page.
+     */
+    public function viewEventDetails(Browser $browser, string $eventName): void
+    {
+        $browser->clickLink($eventName);
+    }
+
+    /**
+     * Assert table pagination works correctly.
+     */
+    public function assertPaginationWorks(Browser $browser): void
+    {
+        if ($browser->element('.pagination, [aria-label="Pagination"]')) {
+            $browser->assertVisible('.pagination, [aria-label="Pagination"]');
+        }
+    }
+
+    /**
+     * Sort table by column.
+     */
+    public function sortByColumn(Browser $browser, string $column): void
+    {
+        $browser->click("th:contains('{$column}'), [data-sort='{$column}']")
+                ->pause(500); // Allow sorting to process
+    }
+
+    /**
+     * Assert that the events table has data.
+     */
+    public function assertTableHasData(Browser $browser): void
+    {
+        $browser->within('@events-table', function (Browser $browser) {
+            $browser->assertPresent('tbody tr, .table-row');
+        });
+    }
+
+    /**
+     * Assert that the events table is empty.
+     */
+    public function assertTableEmpty(Browser $browser): void
+    {
+        $browser->within('@events-table', function (Browser $browser) {
+            $browser->assertSee('No events found');
+        });
+    }
+
+    /**
+     * Assert that specific scheduling actions are available.
+     */
+    public function assertSchedulingActionsAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertVisible("@{$action}-action");
+        }
+    }
+
+    /**
+     * Assert that specific scheduling actions are not available.
+     */
+    public function assertSchedulingActionsNotAvailable(Browser $browser, array $actions): void
+    {
+        foreach ($actions as $action) {
+            $browser->assertMissing("@{$action}-action");
+        }
+    }
+
+    /**
+     * Filter by specific scheduling status.
+     */
+    public function filterBySchedulingStatus(Browser $browser, string $status): void
+    {
+        $browser->select('@status-filter', $status)
+                ->pause(500);
+    }
+
+    /**
+     * Assert event with specific status is visible.
+     */
+    public function assertEventWithStatusVisible(Browser $browser, string $eventName, string $status): void
+    {
+        $browser->within('@events-table', function (Browser $browser) use ($eventName, $status) {
+            $browser->assertSee($eventName)
+                    ->assertSee($status);
+        });
+    }
+
+    /**
+     * Perform bulk actions on multiple events.
+     */
+    public function performBulkAction(Browser $browser, array $eventNames, string $action): void
+    {
+        // Select multiple events
+        foreach ($eventNames as $name) {
+            $browser->check("input[value='{$name}']");
+        }
+        
+        // Perform bulk action
+        $browser->select('.bulk-actions', $action)
+                ->click('.bulk-action-submit')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Set event date through quick action.
+     */
+    public function setEventDate(Browser $browser, string $eventName, string $date): void
+    {
+        $browser->clickLink($eventName)
+                ->click('[data-testid="set-date"], .btn-set-date')
+                ->waitFor('@modal')
+                ->type('date', $date)
+                ->click('button[type="submit"]')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Remove event date through quick action.
+     */
+    public function removeEventDate(Browser $browser, string $eventName): void
+    {
+        $browser->clickLink($eventName)
+                ->click('[data-testid="remove-date"], .btn-remove-date')
+                ->waitFor('@modal')
+                ->click('@confirm-button')
+                ->waitUntilMissing('@modal');
+    }
+
+    /**
+     * Assert event scheduling status in table.
+     */
+    public function assertEventSchedulingStatus(Browser $browser, string $eventName, string $status): void
+    {
+        $browser->within('@events-table', function (Browser $browser) use ($eventName, $status) {
+            // Look for the event row and verify it contains the expected status
+            $browser->assertSeeIn("tr:contains('{$eventName}')", $status);
+        });
+    }
+
+    /**
+     * Assert that date information is displayed correctly.
+     */
+    public function assertDateDisplayed(Browser $browser, string $date): void
+    {
+        $browser->assertSee($date);
+    }
+
+    /**
+     * Assert that venue information is displayed correctly.
+     */
+    public function assertVenueInfo(Browser $browser, string $venueName): void
+    {
+        $browser->assertSee($venueName);
+    }
+
+    /**
+     * Filter events by multiple criteria.
+     */
+    public function filterBy(Browser $browser, array $filters): void
+    {
+        if (isset($filters['status'])) {
+            $this->filterByStatus($browser, $filters['status']);
+        }
+        
+        if (isset($filters['venue'])) {
+            $this->filterByVenue($browser, $filters['venue']);
+        }
+        
+        if (isset($filters['search'])) {
+            $this->searchFor($browser, $filters['search']);
+        }
+        
+        if (isset($filters['dateRange'])) {
+            $this->filterByDateRange(
+                $browser, 
+                $filters['dateRange']['start'], 
+                $filters['dateRange']['end']
+            );
+        }
+    }
+}

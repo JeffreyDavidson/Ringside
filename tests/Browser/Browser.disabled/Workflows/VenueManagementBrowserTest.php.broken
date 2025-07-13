@@ -1,0 +1,383 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Events\Event;
+use App\Models\Shared\Venue;
+use App\Models\Users\User;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Venues\VenueIndexPage;
+
+/**
+ * Browser tests for venue management workflows.
+ * 
+ * BROWSER TEST SCOPE:
+ * - End-to-end venue management through browser interface
+ * - Form interactions and validation
+ * - Table operations (create, update, delete, restore)
+ * - Address management and location handling
+ * - Event relationship management through UI
+ * 
+ * These tests verify that venue management works correctly
+ * through the actual browser interface with real user
+ * interactions and visual feedback.
+ */
+
+describe('Venue Management Browser Tests', function () {
+    beforeEach(function () {
+        $this->admin = User::factory()->administrator()->create();
+        $this->basicUser = User::factory()->create();
+
+        $this->indexPage = new VenueIndexPage();
+
+        // Create test venues with various characteristics
+        $this->activeVenue = Venue::factory()->create([
+            'name' => 'Active Browser Venue',
+            'street_address' => '123 Active Street',
+            'city' => 'Active City',
+            'state' => 'AC',
+            'zipcode' => '12345'
+        ]);
+
+        $this->venueWithEvents = Venue::factory()->create([
+            'name' => 'Events Browser Venue',
+            'street_address' => '456 Events Avenue',
+            'city' => 'Events City',
+            'state' => 'EC',
+            'zipcode' => '54321'
+        ]);
+
+        $this->deletedVenue = Venue::factory()->create([
+            'name' => 'Deleted Browser Venue',
+            'street_address' => '789 Deleted Drive',
+            'city' => 'Deleted City',
+            'state' => 'DC',
+            'zipcode' => '67890'
+        ]);
+
+        // Create events for testing
+        Event::factory()->count(2)->atVenue($this->venueWithEvents)->create();
+        Event::factory()->atVenue($this->venueWithEvents)->create([
+            'name' => 'Browser Test Event',
+            'date' => now()->subDay()
+        ]);
+
+        // Soft delete one venue
+        $this->deletedVenue->delete();
+    });
+
+    /** @test */
+    public function administrator_can_view_venue_list_through_browser(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->assertVenueVisible($browser, 'Active Browser Venue')
+                           ->assertVenueVisible($browser, 'Events Browser Venue')
+                           ->assertVenueNotVisible($browser, 'Deleted Browser Venue');
+        });
+    }
+
+    /** @test */
+    public function administrator_can_create_venue_through_form(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->createVenue($browser, [
+                               'name' => 'Browser Created Arena',
+                               'street_address' => '123 Browser Street',
+                               'city' => 'Browser City',
+                               'state' => 'BC',
+                               'zipcode' => '12345'
+                           ])
+                           ->assertVenueVisible($browser, 'Browser Created Arena');
+
+            // Verify venue was actually created in database
+            $venue = Venue::where('name', 'Browser Created Arena')->first();
+            expect($venue)->not->toBeNull();
+            expect($venue->street_address)->toBe('123 Browser Street');
+            expect($venue->city)->toBe('Browser City');
+            expect($venue->state)->toBe('BC');
+            expect($venue->zipcode)->toBe('12345');
+        });
+    }
+
+    /** @test */
+    public function administrator_can_update_venue_through_form(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->editVenue($browser, 'Active Browser Venue', [
+                               'name' => 'Updated Browser Arena',
+                               'street_address' => '456 Updated Street',
+                               'city' => 'Updated City',
+                               'state' => 'UC',
+                               'zipcode' => '54321'
+                           ])
+                           ->assertVenueVisible($browser, 'Updated Browser Arena')
+                           ->assertVenueNotVisible($browser, 'Active Browser Venue');
+
+            // Verify venue was actually updated in database
+            $updatedVenue = Venue::find($this->activeVenue->id);
+            expect($updatedVenue->name)->toBe('Updated Browser Arena');
+            expect($updatedVenue->street_address)->toBe('456 Updated Street');
+            expect($updatedVenue->city)->toBe('Updated City');
+            expect($updatedVenue->state)->toBe('UC');
+            expect($updatedVenue->zipcode)->toBe('54321');
+        });
+    }
+
+    /** @test */
+    public function administrator_can_delete_venue_through_interface(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->deleteVenue($browser, 'Active Browser Venue')
+                           ->assertVenueNotVisible($browser, 'Active Browser Venue');
+
+            // Verify venue was soft deleted in database
+            expect(Venue::find($this->activeVenue->id))->toBeNull();
+            expect(Venue::onlyTrashed()->find($this->activeVenue->id))->not->toBeNull();
+        });
+    }
+
+    /** @test */
+    public function administrator_can_restore_deleted_venue(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->toggleDeletedVenues($browser)
+                           ->assertVenueVisible($browser, 'Deleted Browser Venue')
+                           ->restoreVenue($browser, 'Deleted Browser Venue')
+                           ->toggleDeletedVenues($browser) // Hide deleted venues again
+                           ->assertVenueVisible($browser, 'Deleted Browser Venue');
+
+            // Verify venue was restored in database
+            expect(Venue::find($this->deletedVenue->id))->not->toBeNull();
+        });
+    }
+
+    /** @test */
+    public function venue_creation_validates_required_fields(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openCreateForm($browser)
+                           ->submitEmptyForm($browser)
+                           ->assertValidationError($browser, 'name')
+                           ->assertValidationError($browser, 'street_address')
+                           ->assertValidationError($browser, 'city')
+                           ->assertValidationError($browser, 'state')
+                           ->assertValidationError($browser, 'zipcode');
+        });
+    }
+
+    /** @test */
+    public function venue_form_handles_special_characters_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->createVenue($browser, [
+                               'name' => 'O\'Malley\'s Arena & Entertainment Center',
+                               'street_address' => '123 O\'Connor St.',
+                               'city' => 'St. Louis',
+                               'state' => 'MO',
+                               'zipcode' => '63101'
+                           ])
+                           ->assertVenueVisible($browser, 'O\'Malley\'s Arena & Entertainment Center');
+
+            // Verify special characters were saved correctly
+            $venue = Venue::where('name', 'O\'Malley\'s Arena & Entertainment Center')->first();
+            expect($venue)->not->toBeNull();
+            expect($venue->street_address)->toBe('123 O\'Connor St.');
+            expect($venue->city)->toBe('St. Louis');
+        });
+    }
+
+    /** @test */
+    public function venue_search_filters_results_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->searchVenues($browser, 'Active')
+                           ->assertVenueVisible($browser, 'Active Browser Venue')
+                           ->assertVenueNotVisible($browser, 'Events Browser Venue')
+                           ->clearSearch($browser)
+                           ->assertVenueVisible($browser, 'Active Browser Venue')
+                           ->assertVenueVisible($browser, 'Events Browser Venue');
+        });
+    }
+
+    /** @test */
+    public function venue_address_search_works_correctly(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->searchVenues($browser, 'Active City')
+                           ->assertVenueVisible($browser, 'Active Browser Venue')
+                           ->assertVenueNotVisible($browser, 'Events Browser Venue')
+                           ->searchVenues($browser, 'AC') // Search by state
+                           ->assertVenueVisible($browser, 'Active Browser Venue')
+                           ->assertVenueNotVisible($browser, 'Events Browser Venue');
+        });
+    }
+
+    /** @test */
+    public function venue_deletion_preserves_event_relationships(): void
+    {
+        $event = Event::factory()->atVenue($this->venueWithEvents)->create([
+            'name' => 'Relationship Test Event'
+        ]);
+
+        $this->browse(function (Browser $browser) use ($event) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->deleteVenue($browser, 'Events Browser Venue')
+                           ->assertVenueNotVisible($browser, 'Events Browser Venue');
+
+            // Verify event still exists with venue reference
+            expect(Event::find($event->id))->not->toBeNull();
+            expect($event->fresh()->venue_id)->toBe($this->venueWithEvents->id);
+        });
+    }
+
+    /** @test */
+    public function venue_restoration_maintains_event_relationships(): void
+    {
+        $event = Event::factory()->atVenue($this->deletedVenue)->create([
+            'name' => 'Restoration Test Event'
+        ]);
+
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->toggleDeletedVenues($browser)
+                           ->restoreVenue($browser, 'Deleted Browser Venue')
+                           ->toggleDeletedVenues($browser);
+
+            // Verify venue and event relationship is restored
+            $restoredVenue = Venue::find($this->deletedVenue->id);
+            expect($restoredVenue)->not->toBeNull();
+            expect($restoredVenue->events)->toContain($event);
+        });
+    }
+
+    /** @test */
+    public function venue_form_validation_shows_helpful_messages(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->createVenue($browser, [
+                               'name' => '', // Empty name
+                               'street_address' => '123 Test St',
+                               'city' => 'Test City',
+                               'state' => 'TS',
+                               'zipcode' => '12345'
+                           ], expectSuccess: false)
+                           ->assertValidationError($browser, 'name');
+        });
+    }
+
+    /** @test */
+    public function venue_management_handles_concurrent_operations(): void
+    {
+        $concurrentVenue = Venue::factory()->create([
+            'name' => 'Concurrent Test Venue'
+        ]);
+
+        $this->browse(function (Browser $browser1, Browser $browser2) use ($concurrentVenue) {
+            // First browser deletes venue
+            $this->indexPage->visit($browser1, $this->admin)
+                           ->deleteVenue($browser1, 'Concurrent Test Venue');
+
+            // Second browser attempts same operation
+            $this->indexPage->visit($browser2, $this->admin);
+
+            // Should handle gracefully without errors
+            expect(Venue::find($concurrentVenue->id))->toBeNull();
+        });
+    }
+
+    /** @test */
+    public function basic_user_cannot_access_venue_management(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $response = $this->actingAs($this->basicUser)
+                            ->get('/venues');
+
+            expect($response->status())->toBe(403);
+        });
+    }
+
+    /** @test */
+    public function guest_is_redirected_to_login_for_venue_access(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/venues')
+                    ->assertPathIs('/login');
+        });
+    }
+
+    /** @test */
+    public function venue_table_displays_complete_address_information(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->assertAddressVisible($browser, 'Active Browser Venue', [
+                               'street_address' => '123 Active Street',
+                               'city' => 'Active City',
+                               'state' => 'AC',
+                               'zipcode' => '12345'
+                           ]);
+        });
+    }
+
+    /** @test */
+    public function venue_update_form_pre_populates_existing_data(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->openEditForm($browser, 'Active Browser Venue')
+                           ->assertFormFieldValue($browser, 'name', 'Active Browser Venue')
+                           ->assertFormFieldValue($browser, 'street_address', '123 Active Street')
+                           ->assertFormFieldValue($browser, 'city', 'Active City')
+                           ->assertFormFieldValue($browser, 'state', 'AC')
+                           ->assertFormFieldValue($browser, 'zipcode', '12345')
+                           ->closeForm($browser);
+        });
+    }
+
+    /** @test */
+    public function venue_operations_provide_visual_feedback(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->createVenue($browser, [
+                               'name' => 'Feedback Test Arena',
+                               'street_address' => '123 Feedback St',
+                               'city' => 'Feedback City',
+                               'state' => 'FC',
+                               'zipcode' => '12345'
+                           ])
+                           ->assertSuccessMessage($browser)
+                           ->deleteVenue($browser, 'Feedback Test Arena')
+                           ->assertSuccessMessage($browser);
+        });
+    }
+
+    /** @test */
+    public function venue_interface_maintains_state_during_operations(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->indexPage->visit($browser, $this->admin)
+                           ->searchVenues($browser, 'Active')
+                           ->createVenue($browser, [
+                               'name' => 'State Test Arena',
+                               'street_address' => '123 State St',
+                               'city' => 'State City',
+                               'state' => 'SC',
+                               'zipcode' => '12345'
+                           ])
+                           // Search should still be active after creation
+                           ->assertSearchValue($browser, 'Active')
+                           ->assertVenueVisible($browser, 'Active Browser Venue');
+        });
+    }
+});

@@ -1,0 +1,448 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages;
+
+use Laravel\Dusk\Browser;
+use Laravel\Dusk\Page;
+
+/**
+ * Page Object for Championship Detail/Show page.
+ *
+ * Provides reusable methods for interacting with individual championship
+ * detail pages, including championship information, history, and management.
+ *
+ * USAGE: Used by browser tests for championship detail view workflows.
+ */
+class ChampionshipDetailPage extends Page
+{
+    /**
+     * Championship ID for this page instance.
+     *
+     * @var int
+     */
+    protected int $championshipId;
+
+    /**
+     * Create a new championship detail page instance.
+     *
+     * @param int $championshipId
+     */
+    public function __construct(int $championshipId)
+    {
+        $this->championshipId = $championshipId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        return "/championships/{$this->championshipId}";
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assert(Browser $browser): void
+    {
+        $browser->assertPathIs($this->url())
+                ->assertSee('Championship Details');
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            // Page Header and Navigation
+            '@page-title' => 'h1, .page-title, [data-test="page-title"]',
+            '@back-to-list-button' => '[data-test="back-to-list"], .back-button, a:contains("Back")',
+            '@championship-breadcrumb' => '.breadcrumb, [data-test="breadcrumb"]',
+            
+            // Championship Information Section
+            '@championship-info-card' => '[data-test="championship-info"], .championship-info, .info-card',
+            '@champion-name' => '[data-test="champion-name"], .champion-name',
+            '@champion-type' => '[data-test="champion-type"], .champion-type',
+            '@champion-avatar' => '[data-test="champion-avatar"], .champion-avatar, .champion-photo',
+            '@title-name' => '[data-test="title-name"], .title-name',
+            '@championship-status' => '[data-test="championship-status"], .championship-status',
+            '@current-championship-badge' => '[data-test="current-badge"], .current-championship, .badge-current',
+            '@previous-championship-badge' => '[data-test="previous-badge"], .previous-championship, .badge-previous',
+            
+            // Championship Dates and Duration
+            '@championship-dates-section' => '[data-test="championship-dates"], .championship-dates',
+            '@won-date' => '[data-test="won-date"], .won-date',
+            '@lost-date' => '[data-test="lost-date"], .lost-date',
+            '@championship-duration' => '[data-test="championship-duration"], .championship-duration',
+            '@reign-length-display' => '[data-test="reign-length"], .reign-length',
+            '@duration-breakdown' => '[data-test="duration-breakdown"], .duration-breakdown',
+            
+            // Event Match Information
+            '@event-match-section' => '[data-test="event-matches"], .event-matches',
+            '@won-event-match' => '[data-test="won-event-match"], .won-event-match',
+            '@lost-event-match' => '[data-test="lost-event-match"], .lost-event-match',
+            '@event-match-link' => '[data-test="event-match-link"], .event-match-link, a[href*="matches"]',
+            '@no-event-match-note' => '[data-test="no-event-match"], .no-event-match',
+            
+            // Championship Actions
+            '@championship-actions' => '[data-test="championship-actions"], .championship-actions',
+            '@edit-championship-button' => '[data-test="edit-championship"], .edit-championship, button:contains("Edit")',
+            '@delete-championship-button' => '[data-test="delete-championship"], .delete-championship, button:contains("Delete")',
+            '@end-championship-button' => '[data-test="end-championship"], .end-championship, button:contains("End")',
+            '@transfer-championship-button' => '[data-test="transfer-championship"], .transfer-championship, button:contains("Transfer")',
+            '@championship-timeline-button' => '[data-test="view-timeline"], .view-timeline, button:contains("Timeline")',
+            
+            // Championship Statistics
+            '@championship-statistics' => '[data-test="championship-stats"], .championship-statistics',
+            '@reign-rank-display' => '[data-test="reign-rank"], .reign-rank',
+            '@title-history-position' => '[data-test="history-position"], .history-position',
+            '@championship-milestones' => '[data-test="milestones"], .milestones',
+            '@comparison-with-average' => '[data-test="comparison"], .comparison-stats',
+            
+            // Related Championships Section
+            '@related-championships' => '[data-test="related-championships"], .related-championships',
+            '@title-championship-history' => '[data-test="title-history"], .title-history',
+            '@champion-other-titles' => '[data-test="champion-titles"], .champion-titles',
+            '@previous-champion-link' => '[data-test="previous-champion"], .previous-champion-link',
+            '@next-champion-link' => '[data-test="next-champion"], .next-champion-link',
+            
+            // Championship Timeline
+            '@championship-timeline' => '[data-test="championship-timeline"], .championship-timeline',
+            '@timeline-container' => '[data-test="timeline-container"], .timeline-container',
+            '@timeline-current-marker' => '[data-test="timeline-current"], .timeline-current',
+            '@timeline-previous-marker' => '[data-test="timeline-previous"], .timeline-previous',
+            '@timeline-zoom-controls' => '[data-test="timeline-zoom"], .timeline-zoom',
+            '@timeline-tooltip' => '[data-test="timeline-tooltip"], .timeline-tooltip',
+            
+            // Modal and Form Elements
+            '@modal-overlay' => '.modal, [role="dialog"], [data-test="modal"]',
+            '@edit-championship-modal' => '[data-test="edit-modal"], .edit-championship-modal',
+            '@transfer-championship-modal' => '[data-test="transfer-modal"], .transfer-championship-modal',
+            '@confirmation-modal' => '[data-test="confirmation-modal"], .confirmation-dialog',
+            '@form-loading-spinner' => '[data-test="form-loading"], .form-loading, .spinner',
+            
+            // Notification and Feedback
+            '@success-notification' => '[data-test="success-notification"], .alert-success, .notification-success',
+            '@error-notification' => '[data-test="error-notification"], .alert-error, .notification-error',
+            '@warning-notification' => '[data-test="warning-notification"], .alert-warning, .notification-warning',
+            '@notification-close' => '[data-test="notification-close"], .notification-close, .alert-close',
+            
+            // Loading States
+            '@page-loading' => '[data-test="page-loading"], .page-loading, .loading',
+            '@content-skeleton' => '[data-test="content-skeleton"], .content-skeleton, .skeleton',
+            '@data-loading' => '[data-test="data-loading"], .data-loading',
+        ];
+    }
+
+    /**
+     * Edit the current championship.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function editChampionship(Browser $browser): void
+    {
+        $browser->click('@edit-championship-button')
+                ->waitFor('@edit-championship-modal');
+    }
+
+    /**
+     * End the current championship.
+     *
+     * @param Browser $browser
+     * @param string $endDate
+     * @return void
+     */
+    public function endChampionship(Browser $browser, string $endDate): void
+    {
+        $browser->click('@end-championship-button')
+                ->waitFor('@modal-overlay')
+                ->type('@end-date-input', $endDate)
+                ->click('@confirm-end-championship')
+                ->waitFor('@success-notification');
+    }
+
+    /**
+     * Transfer championship to new champion.
+     *
+     * @param Browser $browser
+     * @param int $newChampionId
+     * @param string $transferDate
+     * @return void
+     */
+    public function transferChampionship(Browser $browser, int $newChampionId, string $transferDate): void
+    {
+        $browser->click('@transfer-championship-button')
+                ->waitFor('@transfer-championship-modal')
+                ->select('@new-champion-select', (string) $newChampionId)
+                ->type('@transfer-date-input', $transferDate)
+                ->click('@confirm-transfer-button')
+                ->waitFor('@success-notification');
+    }
+
+    /**
+     * Delete the championship with confirmation.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function deleteChampionship(Browser $browser): void
+    {
+        $browser->click('@delete-championship-button')
+                ->waitFor('@confirmation-modal')
+                ->type('@delete-confirmation-input', 'DELETE')
+                ->click('@confirm-delete-button')
+                ->waitFor('@success-notification');
+    }
+
+    /**
+     * View championship timeline.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function viewTimeline(Browser $browser): void
+    {
+        $browser->click('@championship-timeline-button')
+                ->waitFor('@championship-timeline')
+                ->assertVisible('@timeline-container');
+    }
+
+    /**
+     * Navigate to related event match.
+     *
+     * @param Browser $browser
+     * @param string $matchType 'won' or 'lost'
+     * @return void
+     */
+    public function viewEventMatch(Browser $browser, string $matchType): void
+    {
+        $element = $matchType === 'won' ? '@won-event-match' : '@lost-event-match';
+        $browser->click("{$element} @event-match-link")
+                ->waitForLocation('/matches/*');
+    }
+
+    /**
+     * Navigate to previous championship in title history.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function goToPreviousChampionship(Browser $browser): void
+    {
+        $browser->click('@previous-champion-link')
+                ->waitFor('@championship-info-card');
+    }
+
+    /**
+     * Navigate to next championship in title history.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function goToNextChampionship(Browser $browser): void
+    {
+        $browser->click('@next-champion-link')
+                ->waitFor('@championship-info-card');
+    }
+
+    /**
+     * View all championships for this title.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function viewTitleHistory(Browser $browser): void
+    {
+        $browser->click('@title-history-link')
+                ->waitForLocation('/titles/*/championships');
+    }
+
+    /**
+     * View all championships for this champion.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function viewChampionHistory(Browser $browser): void
+    {
+        $browser->click('@champion-history-link')
+                ->waitForLocation('/champions/*/championships');
+    }
+
+    /**
+     * Verify championship information is displayed correctly.
+     *
+     * @param Browser $browser
+     * @param string $championName
+     * @param string $titleName
+     * @return void
+     */
+    public function assertChampionshipInfo(Browser $browser, string $championName, string $titleName): void
+    {
+        $browser->assertSeeIn('@champion-name', $championName)
+                ->assertSeeIn('@title-name', $titleName)
+                ->assertVisible('@championship-dates-section')
+                ->assertVisible('@championship-duration');
+    }
+
+    /**
+     * Verify current championship status is displayed.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assertCurrentChampionship(Browser $browser): void
+    {
+        $browser->assertVisible('@current-championship-badge')
+                ->assertSee('Current Champion')
+                ->assertVisible('@reign-length-display')
+                ->assertMissing('@lost-date');
+    }
+
+    /**
+     * Verify previous championship status is displayed.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assertPreviousChampionship(Browser $browser): void
+    {
+        $browser->assertVisible('@previous-championship-badge')
+                ->assertSee('Former Champion')
+                ->assertVisible('@won-date')
+                ->assertVisible('@lost-date');
+    }
+
+    /**
+     * Verify championship statistics are shown.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function assertStatisticsVisible(Browser $browser): void
+    {
+        $browser->assertVisible('@championship-statistics')
+                ->assertVisible('@reign-rank-display')
+                ->assertVisible('@title-history-position');
+    }
+
+    /**
+     * Verify event match information is displayed.
+     *
+     * @param Browser $browser
+     * @param bool $hasWonMatch
+     * @param bool $hasLostMatch
+     * @return void
+     */
+    public function assertEventMatchInfo(Browser $browser, bool $hasWonMatch, bool $hasLostMatch): void
+    {
+        $browser->assertVisible('@event-match-section');
+
+        if ($hasWonMatch) {
+            $browser->assertVisible('@won-event-match')
+                    ->assertVisible('@event-match-link');
+        } else {
+            $browser->assertVisible('@no-event-match-note');
+        }
+
+        if ($hasLostMatch) {
+            $browser->assertVisible('@lost-event-match');
+        }
+    }
+
+    /**
+     * Interact with championship timeline.
+     *
+     * @param Browser $browser
+     * @param string $action 'zoom_in', 'zoom_out', 'scroll_left', 'scroll_right'
+     * @return void
+     */
+    public function interactWithTimeline(Browser $browser, string $action): void
+    {
+        match ($action) {
+            'zoom_in' => $browser->click('@timeline-zoom-in'),
+            'zoom_out' => $browser->click('@timeline-zoom-out'),
+            'scroll_left' => $browser->drag('@timeline-container', -100, 0),
+            'scroll_right' => $browser->drag('@timeline-container', 100, 0),
+            default => throw new \InvalidArgumentException("Invalid timeline action: {$action}")
+        };
+
+        $browser->pause(300); // Allow animation to complete
+    }
+
+    /**
+     * Hover over timeline element to show tooltip.
+     *
+     * @param Browser $browser
+     * @param string $element 'current', 'previous', 'specific'
+     * @return void
+     */
+    public function hoverTimelineElement(Browser $browser, string $element): void
+    {
+        $selector = match ($element) {
+            'current' => '@timeline-current-marker',
+            'previous' => '@timeline-previous-marker',
+            default => '@timeline-marker'
+        };
+
+        $browser->hover($selector)
+                ->waitFor('@timeline-tooltip');
+    }
+
+    /**
+     * Verify championship actions are available based on permissions.
+     *
+     * @param Browser $browser
+     * @param array $availableActions
+     * @return void
+     */
+    public function assertAvailableActions(Browser $browser, array $availableActions): void
+    {
+        $browser->assertVisible('@championship-actions');
+
+        foreach (['edit', 'delete', 'end', 'transfer'] as $action) {
+            $element = "@{$action}-championship-button";
+            
+            if (in_array($action, $availableActions)) {
+                $browser->assertVisible($element);
+            } else {
+                $browser->assertMissing($element);
+            }
+        }
+    }
+
+    /**
+     * Wait for page to fully load.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function waitForPageLoad(Browser $browser): void
+    {
+        $browser->waitUntilMissing('@page-loading')
+                ->waitUntilMissing('@content-skeleton')
+                ->waitFor('@championship-info-card');
+    }
+
+    /**
+     * Dismiss notification message.
+     *
+     * @param Browser $browser
+     * @return void
+     */
+    public function dismissNotification(Browser $browser): void
+    {
+        $browser->click('@notification-close')
+                ->waitUntilMissing('@success-notification')
+                ->waitUntilMissing('@error-notification');
+    }
+}

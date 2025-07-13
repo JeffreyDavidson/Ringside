@@ -1,0 +1,526 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Managers\Manager;
+use App\Models\Managers\ManagerEmployment;
+use App\Models\Stables\Stable;
+use App\Models\Wrestlers\Wrestler;
+use App\Models\TagTeams\TagTeam;
+use Laravel\Dusk\Browser;
+
+/**
+ * Browser tests for manager management visual workflows.
+ * 
+ * These tests focus on visual elements, user interactions, and browser behavior
+ * that Feature tests cannot cover. These tests use Laravel Dusk for full
+ * browser automation.
+ */
+
+describe('Manager Creation Visual Workflow', function () {
+    test('manager creation modal displays correctly and accepts input', function () {
+        // Given: An authenticated administrator
+        $admin = administrator();
+        
+        // When & Then: Test the manager creation workflow
+        $this->browse(function (Browser $browser) use ($admin) {
+            $browser->loginAs($admin)
+                    ->visit('/managers')
+                    ->screenshot('managers-index')
+                    ->pause(2000) // Give page time to load
+                    ->assertPathIs('/managers')
+                    ->assertTitle('Laravel');
+        });
+    });
+
+    test('basic browser functionality works for managers', function () {
+        // When & Then: Test basic browser functionality
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                    ->screenshot('homepage-visit-managers')
+                    ->assertTitle('Laravel'); // Basic assertion that browser works
+        });
+    });
+
+    test('manager detail page can be accessed', function () {
+        // Given: A manager with complete information
+        $manager = Manager::factory()->bookable()->create([
+            'name' => 'Paul Bearer',
+            'hometown' => 'Death Valley',
+        ]);
+        
+        // When & Then: Test accessing manager detail page
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-detail')
+                    ->assertSee($manager->name)
+                    ->assertSee('Paul Bearer')
+                    ->assertPathIs("/managers/{$manager->id}");
+        });
+    });
+});
+
+describe('Manager Table Interaction Workflow', function () {
+    test('managers index page has basic table structure', function () {
+        // When & Then: Verify the page has basic table structure
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('managers-page-structure')
+                    ->pause(2000) // Wait for Livewire to load
+                    ->assertPathIs('/managers');
+                    
+            // Check if basic page elements exist
+            if ($browser->element('table, .table, [role="table"]')) {
+                $browser->screenshot('managers-table-structure-found');
+            } else {
+                $browser->screenshot('managers-no-table-structure');
+            }
+        });
+    });
+
+    test('manager actions dropdown functionality', function () {
+        // Given: A manager that can have actions performed on it
+        $manager = Manager::factory()->bookable()->create([
+            'name' => 'Jimmy Hart'
+        ]);
+
+        // When & Then: Test action dropdown interactions
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('before-manager-actions')
+                    ->pause(3000); // Wait for page to fully load
+
+            // Look for action elements (specific selectors depend on implementation)
+            if ($browser->element('[data-testid="manager-actions"]')) {
+                $browser->screenshot('manager-actions-found');
+            } else {
+                $browser->screenshot('manager-actions-not-found');
+            }
+        });
+    });
+
+    test('manager search functionality works visually', function () {
+        // Given: Multiple managers to search through
+        Manager::factory()->create(['name' => 'Paul Bearer']);
+        Manager::factory()->create(['name' => 'Jimmy Hart']);
+        Manager::factory()->create(['name' => 'Bobby Heenan']);
+
+        // When & Then: Test search functionality
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('before-manager-search')
+                    ->pause(2000);
+
+            // Look for search input (specific selector depends on implementation)
+            if ($browser->element('input[type="search"], input[placeholder*="search"], .search-input')) {
+                $browser->type('input[type="search"], input[placeholder*="search"], .search-input', 'Paul')
+                        ->pause(1000)
+                        ->screenshot('after-manager-search')
+                        ->assertSee('Paul Bearer');
+            } else {
+                $browser->screenshot('manager-search-input-not-found');
+            }
+        });
+    });
+});
+
+describe('Manager Detail Page Visual Workflow', function () {
+    test('manager detail page displays manager information correctly', function () {
+        // Given: A manager with complete information
+        $manager = Manager::factory()->bookable()->create([
+            'name' => 'The Mouth of the South',
+            'hometown' => 'Nashville, Tennessee',
+        ]);
+        
+        // When & Then: Verify manager detail page displays information
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-detail-page')
+                    ->assertSee($manager->name)
+                    ->assertSee('The Mouth of the South')
+                    ->assertPathIs("/managers/{$manager->id}");
+        });
+    });
+
+    test('manager detail page shows employment information', function () {
+        // Given: A manager with employment history
+        $manager = Manager::factory()->create([
+            'name' => 'Manager with History',
+        ]);
+        
+        ManagerEmployment::factory()
+            ->for($manager, 'manager')
+            ->current()
+            ->create();
+        
+        // When & Then: Verify employment information is displayed
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-with-employment')
+                    ->assertSee($manager->name)
+                    ->assertSee('Manager with History');
+        });
+    });
+
+    test('unemployed manager displays correctly', function () {
+        // Given: A manager without current employment
+        $manager = Manager::factory()->unemployed()->create([
+            'name' => 'Unemployed Manager',
+        ]);
+        
+        // When & Then: Verify unemployed manager display
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('unemployed-manager')
+                    ->assertSee($manager->name)
+                    ->assertSee('Unemployed Manager');
+        });
+    });
+});
+
+describe('Manager Status Management Visual Workflow', function () {
+    test('manager status badges display correctly', function () {
+        // Given: Managers with different statuses
+        $employedManager = Manager::factory()->bookable()->create(['name' => 'Employed Manager']);
+        $injuredManager = Manager::factory()->injured()->create(['name' => 'Injured Manager']);
+        $suspendedManager = Manager::factory()->suspended()->create(['name' => 'Suspended Manager']);
+        $retiredManager = Manager::factory()->retired()->create(['name' => 'Retired Manager']);
+
+        // When & Then: Test status badge display
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('manager-status-badges')
+                    ->pause(2000);
+
+            // Look for status indicators
+            if ($browser->element('.badge, .status, [data-testid="manager-status"]')) {
+                $browser->screenshot('manager-status-badges-found');
+            } else {
+                $browser->screenshot('manager-status-badges-not-found');
+            }
+        });
+    });
+
+    test('manager business action visual workflow', function () {
+        // Given: A manager that can have business actions performed
+        $manager = Manager::factory()->unemployed()->create(['name' => 'Business Action Manager']);
+
+        // When & Then: Test business action visual workflow
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('manager-business-actions')
+                    ->pause(2000);
+
+            // Look for business action elements
+            if ($browser->element('[data-testid="manager-employ"], .employ-action')) {
+                $browser->screenshot('manager-employ-action-available');
+            } else {
+                $browser->screenshot('manager-employ-action-not-found');
+            }
+        });
+    });
+
+    test('manager injury status visual workflow', function () {
+        // Given: A manager that can be injured
+        $manager = Manager::factory()->bookable()->create(['name' => 'Injury Test Manager']);
+
+        // When & Then: Test injury status visual workflow
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-injury-workflow')
+                    ->pause(2000);
+
+            // Look for injury management elements
+            if ($browser->element('[data-testid="manager-injure"], .injure-action')) {
+                $browser->screenshot('manager-injury-action-available');
+            } else {
+                $browser->screenshot('manager-injury-action-not-found');
+            }
+        });
+    });
+});
+
+describe('Navigation and Responsive Design', function () {
+    test('manager management interface works on mobile viewport', function () {
+        // Given: A manager to display
+        $manager = Manager::factory()->create(['name' => 'Mobile Test Manager']);
+        
+        // When & Then: Test mobile viewport functionality
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->resize(375, 667) // iPhone SE dimensions
+                    ->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('mobile-managers')
+                    ->pause(2000)
+                    ->assertPathIs('/managers');
+        });
+    });
+    
+    test('navigation between managers index and detail works', function () {
+        // Given: A manager to navigate to
+        $manager = Manager::factory()->create(['name' => 'Navigation Test Manager']);
+        
+        // When & Then: Test navigation workflow
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('before-manager-navigation')
+                    ->pause(2000)
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('after-manager-navigation')
+                    ->assertSee($manager->name)
+                    ->assertPathIs("/managers/{$manager->id}");
+        });
+    });
+
+    test('managers table responsive design works correctly', function () {
+        // Given: Multiple managers to test table responsiveness
+        Manager::factory()->count(5)->create();
+        
+        // When & Then: Test responsive table behavior
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers');
+
+            // Test desktop view
+            $browser->resize(1200, 800)
+                    ->screenshot('managers-desktop-view')
+                    ->pause(1000);
+
+            // Test tablet view
+            $browser->resize(768, 1024)
+                    ->screenshot('managers-tablet-view')
+                    ->pause(1000);
+
+            // Test mobile view
+            $browser->resize(375, 667)
+                    ->screenshot('managers-mobile-view')
+                    ->pause(1000);
+        });
+    });
+});
+
+describe('Manager Relationship Visual Workflow', function () {
+    test('manager stable membership displays correctly', function () {
+        // Given: A manager with stable membership
+        $manager = Manager::factory()->bookable()->create(['name' => 'Stable Manager']);
+        $stable = Stable::factory()->active()->create(['name' => 'Manager Stable']);
+        
+        // Create stable membership
+        \App\Models\Stables\StableManager::factory()
+            ->for($stable, 'stable')
+            ->for($manager, 'manager')
+            ->current()
+            ->create();
+
+        // When & Then: Test stable membership display
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-stable-membership')
+                    ->pause(2000)
+                    ->assertSee('Stable Manager');
+        });
+    });
+
+    test('manager managed entities display workflow', function () {
+        // Given: A manager managing wrestlers and tag teams
+        $manager = Manager::factory()->bookable()->create(['name' => 'Managing Manager']);
+        $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Managed Wrestler']);
+        $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'Managed Tag Team']);
+
+        // When & Then: Test managed entities display
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-managed-entities')
+                    ->pause(2000)
+                    ->assertSee('Managing Manager');
+        });
+    });
+
+    test('independent manager displays correctly', function () {
+        // Given: A manager without relationships
+        $manager = Manager::factory()->bookable()->create(['name' => 'Independent Manager']);
+
+        // When & Then: Test independent manager display
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('independent-manager')
+                    ->pause(2000)
+                    ->assertSee('Independent Manager');
+        });
+    });
+});
+
+describe('Manager Form Modal Interactions', function () {
+    test('create manager modal opens and accepts input', function () {
+        // When & Then: Test manager creation modal
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('before-create-manager-modal')
+                    ->pause(2000);
+
+            // Look for create button (selector depends on implementation)
+            if ($browser->element('[data-testid="create-manager"], .btn-create, button:contains("Create")')) {
+                $browser->click('[data-testid="create-manager"], .btn-create, button:contains("Create")')
+                        ->pause(1000)
+                        ->screenshot('create-manager-modal-opened');
+
+                // Test form input if modal opened
+                if ($browser->element('.modal, [role="dialog"]')) {
+                    $browser->screenshot('manager-modal-form-visible');
+                } else {
+                    $browser->screenshot('manager-modal-not-visible');
+                }
+            } else {
+                $browser->screenshot('create-manager-button-not-found');
+            }
+        });
+    });
+
+    test('edit manager modal functionality', function () {
+        // Given: A manager to edit
+        $manager = Manager::factory()->create(['name' => 'Editable Manager']);
+
+        // When & Then: Test edit modal functionality
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('before-edit-manager-modal')
+                    ->pause(2000);
+
+            // Look for edit action (selector depends on implementation)
+            if ($browser->element('[data-testid="edit-manager"], .btn-edit')) {
+                $browser->click('[data-testid="edit-manager"], .btn-edit')
+                        ->pause(1000)
+                        ->screenshot('edit-manager-modal-opened');
+            } else {
+                $browser->screenshot('edit-manager-button-not-found');
+            }
+        });
+    });
+
+    test('manager form validation displays correctly', function () {
+        // When & Then: Test form validation visual feedback
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('manager-form-validation-test')
+                    ->pause(2000);
+
+            // Look for form validation elements
+            if ($browser->element('.form-control, .input-field')) {
+                $browser->screenshot('manager-form-fields-found');
+            } else {
+                $browser->screenshot('manager-form-fields-not-found');
+            }
+        });
+    });
+});
+
+describe('Error Handling and Edge Cases', function () {
+    test('browser handles non-existent manager gracefully', function () {
+        // When & Then: Test accessing non-existent manager
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers/99999')
+                    ->screenshot('non-existent-manager')
+                    ->pause(1000);
+
+            // Should show 404 or appropriate error
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('browser handles unauthorized access gracefully', function () {
+        // Given: A basic user (non-admin)
+        $basicUser = basicUser();
+        $manager = Manager::factory()->create();
+
+        // When & Then: Test unauthorized access
+        $this->browse(function (Browser $browser) use ($basicUser, $manager) {
+            $browser->loginAs($basicUser)
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('unauthorized-manager-access')
+                    ->pause(1000);
+
+            // Should show 403 or redirect to appropriate page
+            $currentUrl = $browser->driver->getCurrentURL();
+            expect($currentUrl)->not->toContain("/managers/{$manager->id}");
+        });
+    });
+
+    test('browser handles manager with complex status combinations', function () {
+        // Given: A manager with multiple statuses
+        $manager = Manager::factory()->bookable()->create(['name' => 'Complex Status Manager']);
+        
+        // Apply injury
+        \App\Actions\Managers\InjureAction::run($manager, now());
+
+        // When & Then: Test complex status display
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-complex-status')
+                    ->pause(2000)
+                    ->assertSee('Complex Status Manager');
+        });
+    });
+});
+
+describe('Performance and Loading', function () {
+    test('managers table loads efficiently with large dataset', function () {
+        // Given: Many managers to test performance
+        Manager::factory()->count(25)->create();
+        
+        // When & Then: Test loading performance
+        $this->browse(function (Browser $browser) {
+            $browser->loginAs(administrator())
+                    ->visit('/managers')
+                    ->screenshot('managers-large-dataset')
+                    ->pause(3000); // Allow time for loading
+
+            // Verify page loads completely
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+
+    test('manager detail page loads efficiently with relationships', function () {
+        // Given: A manager with many relationships
+        $manager = Manager::factory()->bookable()->create(['name' => 'Relationship Heavy Manager']);
+        $stable = Stable::factory()->active()->create();
+        
+        \App\Models\Stables\StableManager::factory()
+            ->for($stable, 'stable')
+            ->for($manager, 'manager')
+            ->current()
+            ->create();
+
+        // When & Then: Test detail page performance
+        $this->browse(function (Browser $browser) use ($manager) {
+            $browser->loginAs(administrator())
+                    ->visit("/managers/{$manager->id}")
+                    ->screenshot('manager-relationships-loading')
+                    ->pause(2000);
+
+            // Verify page loads completely
+            $status = $browser->driver->executeScript('return document.readyState');
+            expect($status)->toBe('complete');
+        });
+    });
+});

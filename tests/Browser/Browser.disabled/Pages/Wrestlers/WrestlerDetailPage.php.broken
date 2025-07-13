@@ -1,0 +1,343 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Browser\Pages\Wrestlers;
+
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Shared\BasePage;
+use Tests\Browser\Components\Wrestlers\WrestlerFormModal;
+
+/**
+ * Page Object for the Wrestler Detail page.
+ * 
+ * This page represents the individual wrestler profile page including
+ * wrestler information, statistics, match history, and all related
+ * Livewire table components. Provides methods for interacting with
+ * wrestler-specific data and navigation.
+ */
+class WrestlerDetailPage extends BasePage
+{
+    private ?int $wrestlerId = null;
+
+    public function __construct(?int $wrestlerId = null)
+    {
+        $this->wrestlerId = $wrestlerId;
+    }
+
+    /**
+     * Get the URL for the page.
+     */
+    public function url(): string
+    {
+        if ($this->wrestlerId) {
+            return "/roster/wrestlers/{$this->wrestlerId}";
+        }
+        
+        return '/roster/wrestlers/{id}';
+    }
+
+    /**
+     * Assert that the browser is on the page.
+     */
+    public function assert(Browser $browser): void
+    {
+        if ($this->wrestlerId) {
+            $browser->assertPathIs("/roster/wrestlers/{$this->wrestlerId}");
+        } else {
+            $browser->assertPathBeginsWith('/roster/wrestlers/');
+        }
+    }
+
+    /**
+     * Get the element shortcuts for the page.
+     *
+     * @return array<string, string>
+     */
+    public function elements(): array
+    {
+        return [
+            '@wrestler-name' => 'h1, .wrestler-name, .page-title, [data-wrestler-name]',
+            '@wrestler-info' => '.wrestler-info, .wrestler-details, .info-section',
+            '@hometown' => '.hometown, [data-hometown]',
+            '@height' => '.height, [data-height]',
+            '@weight' => '.weight, [data-weight]',
+            '@signature-move' => '.signature-move, [data-signature-move]',
+            '@employment-status' => '.employment-status, .status, [data-status]',
+            '@employment-date' => '.employment-date, [data-employment-date]',
+            
+            // Navigation elements
+            '@back-to-index' => 'a[href="/roster/wrestlers"], button:contains("Back"), .back-link',
+            '@edit-wrestler' => 'button:contains("Edit"), .edit-button, [data-edit]',
+            '@wrestler-actions' => '.wrestler-actions, .action-buttons, [data-actions]',
+            
+            // Livewire table sections
+            '@matches-section' => '.matches-section, [data-section="matches"]',
+            '@tag-teams-section' => '.tag-teams-section, [data-section="tag-teams"]',
+            '@championships-section' => '.championships-section, [data-section="championships"]',
+            '@managers-section' => '.managers-section, [data-section="managers"]',
+            '@stables-section' => '.stables-section, [data-section="stables"]',
+            
+            // Livewire components
+            '@livewire-component' => '[wire\\:id], div[x-data*="livewire"]',
+            '@loading-indicator' => '.loading, .spinner, [wire\\:loading]',
+        ];
+    }
+
+    /**
+     * Wait for the page to load completely including all Livewire components.
+     */
+    public function waitForPageLoad(Browser $browser, int $timeout = 10000): static
+    {
+        $browser->pause(3000) // Allow Livewire components to initialize
+                ->assertPresent('@wrestler-name');
+        
+        return $this;
+    }
+
+    /**
+     * Assert that wrestler basic information is displayed.
+     */
+    public function assertWrestlerInfoVisible(Browser $browser, string $wrestlerName): static
+    {
+        $browser->assertSee($wrestlerName);
+        
+        // Check for presence of info sections
+        $infoElements = [
+            '@hometown',
+            '@height', 
+            '@weight',
+            '@signature-move',
+            '@employment-status'
+        ];
+        
+        foreach ($infoElements as $element) {
+            try {
+                $browser->assertPresent($element);
+            } catch (\Exception) {
+                // Continue if element not found - some may be optional
+            }
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Assert that Livewire components are loaded.
+     */
+    public function assertLivewireComponentsLoaded(Browser $browser): static
+    {
+        $browser->assertPresent('@livewire-component');
+        return $this;
+    }
+
+    /**
+     * Navigate back to the wrestlers index page.
+     */
+    public function navigateBackToIndex(Browser $browser): WrestlerIndexPage
+    {
+        $backSelectors = [
+            'a[href="/roster/wrestlers"]',
+            'button:contains("Back")',
+            '.back-link',
+            '.breadcrumb a:contains("Wrestlers")'
+        ];
+
+        foreach ($backSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(2000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        // Fallback: navigate directly
+        if (!str_contains($browser->driver->getCurrentURL(), '/roster/wrestlers') || 
+            str_contains($browser->driver->getCurrentURL(), '/roster/wrestlers/')) {
+            $browser->visit('/roster/wrestlers')
+                    ->pause(2000);
+        }
+
+        return new WrestlerIndexPage();
+    }
+
+    /**
+     * Click the edit wrestler button.
+     */
+    public function clickEditWrestler(Browser $browser): WrestlerFormModal
+    {
+        $editSelectors = [
+            'button:contains("Edit")',
+            '.edit-button',
+            '[data-edit]',
+            '[wire\\:click*="edit"]'
+        ];
+
+        foreach ($editSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $browser->click($selector)
+                            ->pause(1000);
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return new WrestlerFormModal();
+    }
+
+    /**
+     * Assert that specific wrestler data is displayed correctly.
+     */
+    public function assertWrestlerData(Browser $browser, array $expectedData): static
+    {
+        if (isset($expectedData['name'])) {
+            $browser->assertSee($expectedData['name']);
+        }
+        
+        if (isset($expectedData['hometown'])) {
+            $browser->assertSee($expectedData['hometown']);
+        }
+        
+        if (isset($expectedData['signature_move'])) {
+            $browser->assertSee($expectedData['signature_move']);
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Check if a specific section is visible on the page.
+     */
+    public function assertSectionVisible(Browser $browser, string $section): static
+    {
+        $sectionSelector = "@{$section}-section";
+        
+        try {
+            $browser->assertPresent($sectionSelector);
+        } catch (\Exception) {
+            // Section might not be present if no data
+            $this->pageScreenshot($browser, "section-{$section}-check");
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Assert that wrestler actions are available.
+     */
+    public function assertActionsAvailable(Browser $browser): static
+    {
+        $actionSelectors = [
+            '@wrestler-actions',
+            '@edit-wrestler',
+            'button',
+            '.action-buttons',
+            '[data-actions]'
+        ];
+
+        $actionsFound = false;
+        foreach ($actionSelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $actionsFound = true;
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        if ($actionsFound) {
+            $this->pageScreenshot($browser, 'wrestler-actions-available');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Scroll to a specific section of the page.
+     */
+    public function scrollToSection(Browser $browser, string $section): static
+    {
+        $sectionSelector = "@{$section}-section";
+        
+        try {
+            $browser->scrollIntoView($sectionSelector)
+                    ->pause(1000);
+        } catch (\Exception) {
+            // Continue if section not found
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Assert that the page shows wrestler employment history.
+     */
+    public function assertEmploymentHistoryVisible(Browser $browser): static
+    {
+        $historySelectors = [
+            '.employment-history',
+            '.history-section',
+            '[data-history]',
+            'table:contains("Employment")',
+            '.timeline'
+        ];
+
+        foreach ($historySelectors as $selector) {
+            try {
+                if ($browser->element($selector)) {
+                    $this->pageScreenshot($browser, 'employment-history-found');
+                    break;
+                }
+            } catch (\Exception) {
+                continue;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that the page handles missing data gracefully.
+     */
+    public function assertHandlesMissingDataGracefully(Browser $browser): static
+    {
+        // Page should not show error messages for missing optional data
+        $errorSelectors = [
+            '.error',
+            '.alert-danger',
+            '.text-red-500',
+            '[class*="error"]'
+        ];
+
+        foreach ($errorSelectors as $selector) {
+            try {
+                $browser->assertMissing($selector);
+            } catch (\Exception) {
+                // Continue checking other selectors
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Assert that responsive design works on the detail page.
+     */
+    public function assertResponsiveDesign(Browser $browser): static
+    {
+        // Check that key elements are still visible on smaller screens
+        $browser->assertPresent('@wrestler-name')
+                ->assertPresent('@wrestler-info');
+        
+        return $this;
+    }
+}

@@ -1,0 +1,162 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\Wrestlers\Wrestler;
+use Laravel\Dusk\Browser;
+use Tests\Browser\Pages\Wrestlers\WrestlerIndexPage;
+
+/**
+ * Dusk tests for wrestler creation workflow.
+ * 
+ * These tests focus specifically on the wrestler creation process including
+ * modal interactions, form validation, and successful wrestler creation.
+ * Tests the complete user journey from clicking create to wrestler being
+ * saved and displayed.
+ */
+
+test('create wrestler button opens modal', function () {
+    $this->browse(function (Browser $browser) {
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+                             
+        $formModal->waitForModalLoad($browser)
+                  ->assertComponentVisible($browser)
+                  ->componentScreenshot($browser, 'opened');
+    });
+});
+
+test('wrestler creation form has all required fields', function () {
+    $this->browse(function (Browser $browser) {
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+                             
+        $formModal->waitForModalLoad($browser)
+                  ->assertFormFieldsPresent($browser)
+                  ->componentScreenshot($browser, 'all-fields-present');
+    });
+});
+
+test('can create wrestler with valid data', function () {
+    $this->browse(function (Browser $browser) {
+        // Open the wrestler creation form
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+
+        // Fill and submit the form
+        $formModal->waitForModalLoad($browser)
+                               ->fillCompleteWrestlerForm($browser, [
+                                   'name' => 'The Rock',
+                                   'hometown' => 'Miami, FL',
+                                   'signature_move' => 'Rock Bottom'
+                               ])
+                               ->componentScreenshot($browser, 'form-filled')
+                               ->submitForm($browser)
+                               ->waitForNoLoading($browser);
+
+        // Verify wrestler was created and is visible
+        $wrestler = Wrestler::where('name', 'The Rock')->first();
+        expect($wrestler)->not->toBeNull('Wrestler should be created in database');
+        
+        // Should return to index page and show the new wrestler
+        $browser->assertSee('The Rock');
+        $this->takeScreenshot($browser, 'wrestler-successfully-created');
+    });
+});
+
+test('form validation works for required fields', function () {
+    $this->browse(function (Browser $browser) {
+        // Open the wrestler creation form (empty)
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+
+        // Try to submit empty form and verify validation
+        $formModal->waitForModalLoad($browser)
+                  ->componentScreenshot($browser, 'empty-form-before-validation')
+                  ->submitForm($browser)
+                  ->waitForComponentLoad($browser)
+                  ->assertValidationErrorsVisible($browser)
+                  ->assertModalStillOpen($browser)
+                  ->componentScreenshot($browser, 'validation-complete');
+    });
+});
+
+test('can close wrestler creation modal', function () {
+    $this->browse(function (Browser $browser) {
+        // Open the wrestler creation form
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+
+        // Close the modal and return to index page
+        $indexPage = $formModal->waitForModalLoad($browser)
+                               ->componentScreenshot($browser, 'before-close')
+                               ->closeModal($browser);
+
+        // Verify we're back on the index page
+        $indexPage->waitForPageLoad($browser)
+                  ->assertPageLoaded($browser)
+                  ->pageScreenshot($browser, 'modal-closed-back-to-index');
+    });
+});
+
+test('wrestler height validation works correctly', function () {
+    $this->browse(function (Browser $browser) {
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+        
+        $formModal->waitForModalLoad($browser)
+                  ->fillWrestlerForm($browser, [
+                      'name' => 'Height Test',
+                      'hometown' => 'Test City',
+                      'height_feet' => '10', // Too tall
+                      'height_inches' => '15', // Invalid inches
+                      'weight' => '200'
+                  ])
+                  ->componentScreenshot($browser, 'invalid-height-entered')
+                  ->submitForm($browser)
+                  ->waitForComponentLoad($browser)
+                  ->componentScreenshot($browser, 'height-validation-result');
+
+        $this->takeScreenshot($browser, 'height-validation-complete');
+    });
+});
+
+test('unique wrestler name validation works', function () {
+    // Given: An existing wrestler
+    Wrestler::factory()->create(['name' => 'Existing Wrestler']);
+
+    $this->browse(function (Browser $browser) {
+        $formModal = $browser->loginAs($this->getAdminUser())
+                             ->visit(new WrestlerIndexPage())
+                             ->waitForPageLoad($browser)
+                             ->clickCreateWrestler($browser);
+        
+        $formModal->waitForModalLoad($browser)
+                  ->fillWrestlerForm($browser, [
+                      'name' => 'Existing Wrestler',
+                      'hometown' => 'Test City',
+                      'height_feet' => '6',
+                      'height_inches' => '0',
+                      'weight' => '200'
+                  ])
+                  ->componentScreenshot($browser, 'duplicate-name-entered')
+                  ->submitForm($browser)
+                  ->waitForComponentLoad($browser)
+                  ->assertModalStillOpen($browser)
+                  ->componentScreenshot($browser, 'unique-name-validation-result');
+
+        $this->takeScreenshot($browser, 'unique-name-validation-complete');
+    });
+});
