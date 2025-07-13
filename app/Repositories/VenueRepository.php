@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Data\VenueData;
-use App\Models\Venue;
+use App\Data\Shared\VenueData;
+use App\Models\Shared\Venue;
+use App\Repositories\Contracts\VenueRepositoryInterface;
+use App\Repositories\Support\BaseRepository;
+use Tests\Unit\Repositories\VenueRepositoryTest;
 
-class VenueRepository
+/**
+ * Repository for Venue model business operations and data persistence.
+ *
+ * Handles all venue related database operations including CRUD operations
+ * and address management functionality.
+ *
+ * @see VenueRepositoryTest
+ */
+class VenueRepository extends BaseRepository implements VenueRepositoryInterface
 {
     /**
-     * Create a new venue with the given data.
+     * Create a new venue.
      */
     public function create(VenueData $venueData): Venue
     {
@@ -24,9 +35,7 @@ class VenueRepository
     }
 
     /**
-     * Update the given venue with the given data.
-     *
-     * @return Venue $venue
+     * Update a venue.
      */
     public function update(Venue $venue, VenueData $venueData): Venue
     {
@@ -42,15 +51,7 @@ class VenueRepository
     }
 
     /**
-     * Delete a given venue.
-     */
-    public function delete(Venue $venue): void
-    {
-        $venue->delete();
-    }
-
-    /**
-     * Restore a given venue.
+     * Restore a soft-deleted venue.
      */
     public function restore(Venue $venue): void
     {

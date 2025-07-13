@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Tests\Feature\Http\Controllers\TitlesControllerTest;
 
+/**
+ * Controller for managing titles.
+ *
+ * @see TitlesControllerTest
+ */
 class TitlesController
 {
+    /**
+     * View a list of titles.
+     *
+     * @see TitlesControllerTest::test_index_returns_a_view()
+     */
     public function index(): View
     {
         Gate::authorize('viewList', Title::class);
@@ -18,7 +29,9 @@ class TitlesController
     }
 
     /**
-     * Display the specified resource.
+     * Show the profile of a title.
+     *
+     * @see TitlesControllerTest::test_show_returns_a_view()
      */
     public function show(Title $title): View
     {

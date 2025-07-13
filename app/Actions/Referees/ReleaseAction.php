@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\CannotBeReleasedException;
-use App\Models\Referee;
+use App\Exceptions\Status\CannotBeReleasedException;
+use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction extends BaseRefereeAction
@@ -14,48 +15,43 @@ class ReleaseAction extends BaseRefereeAction
     use AsAction;
 
     /**
-     * Release a referee.
+     * Release a referee from employment.
      *
-     * @throws CannotBeReleasedException
+     * This handles the complete referee release workflow:
+     * - Validates the referee can be released (currently employed)
+     * - Ends suspension and injury if active
+     * - Ends employment period with the specified date
+     * - Maintains all historical records for tracking purposes
+     *
+     * @param  Referee  $referee  The referee to release
+     * @param  Carbon|null  $releaseDate  The release date (defaults to now)
+     *
+     * @throws CannotBeReleasedException When referee cannot be released due to business rules
+     *
+     * @example
+     * ```php
+     * // Release referee immediately
+     * ReleaseAction::run($referee);
+     *
+     * // Release with specific date
+     * ReleaseAction::run($referee, Carbon::parse('2024-12-31'));
+     * ```
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
-        $this->ensureCanBeReleased($referee);
+        $referee->ensureCanBeReleased();
 
-        $releaseDate ??= now();
+        $releaseDate = $this->getEffectiveDate($releaseDate);
 
-        if ($referee->isSuspended()) {
-            $this->refereeRepository->reinstate($referee, $releaseDate);
-        }
+        DB::transaction(function () use ($referee, $releaseDate): void {
+            // End suspension or injury if active (referee cannot be both suspended and injured)
+            if ($referee->isSuspended()) {
+                $this->refereeRepository->endSuspension($referee, $releaseDate);
+            } elseif ($referee->isInjured()) {
+                $this->refereeRepository->endInjury($referee, $releaseDate);
+            }
 
-        if ($referee->isInjured()) {
-            $this->refereeRepository->clearInjury($referee, $releaseDate);
-        }
-
-        $this->refereeRepository->release($referee, $releaseDate);
-    }
-
-    /**
-     * Ensure a referee can be released.
-     *
-     * @throws CannotBeReleasedException
-     */
-    private function ensureCanBeReleased(Referee $referee): void
-    {
-        if ($referee->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed();
-        }
-
-        if ($referee->isReleased()) {
-            throw CannotBeReleasedException::released();
-        }
-
-        if ($referee->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment();
-        }
-
-        if ($referee->isRetired()) {
-            throw CannotBeReleasedException::retired();
-        }
+            $this->refereeRepository->endEmployment($referee, $releaseDate);
+        });
     }
 }

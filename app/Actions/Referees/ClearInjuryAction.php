@@ -4,38 +4,34 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
+/**
+ * Clear injury action for referees.
+ *
+ * This is an alias for HealAction to maintain backward compatibility with tests.
+ * Use HealAction for new code.
+ */
 class ClearInjuryAction extends BaseRefereeAction
 {
     use AsAction;
 
-    /**
-     * Clear an injury of a referee.
-     *
-     * @throws CannotBeClearedFromInjuryException
-     */
-    public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
-    {
-        $this->ensureCanBeClearedFromInjury($referee);
-
-        $recoveryDate ??= now();
-
-        $this->refereeRepository->clearInjury($referee, $recoveryDate);
+    public function __construct(
+        private HealAction $healAction
+    ) {
+        parent::__construct($this->healAction->refereeRepository);
     }
 
     /**
-     * Ensure a referee can be cleared from an injury.
+     * Clear injury from a referee.
      *
-     * @throws CannotBeClearedFromInjuryException
+     * @param  Referee  $referee  The referee to heal
+     * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
      */
-    private function ensureCanBeClearedFromInjury(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
-        if (! $referee->isInjured()) {
-            throw CannotBeClearedFromInjuryException::notInjured();
-        }
+        $this->healAction->handle($referee, $recoveryDate);
     }
 }

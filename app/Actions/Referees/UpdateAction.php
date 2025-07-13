@@ -4,33 +4,58 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Data\RefereeData;
-use App\Models\Referee;
+use App\Data\Referees\RefereeData;
+use App\Models\Referees\Referee;
+use App\Repositories\RefereeRepository;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseRefereeAction
 {
     use AsAction;
 
-    /**
-     * Update a referee.
-     */
-    public function handle(Referee $referee, RefereeData $refereeData): Referee
-    {
-        $this->refereeRepository->update($referee, $refereeData);
-
-        if (! is_null($refereeData->start_date) && $this->shouldBeEmployed($referee)) {
-            $this->refereeRepository->employ($referee, $refereeData->start_date);
-        }
-
-        return $referee;
+    public function __construct(
+        RefereeRepository $refereeRepository
+    ) {
+        parent::__construct($refereeRepository);
     }
 
     /**
-     * Find out if the referee can be employed.
+     * Update a referee.
+     *
+     * This handles the complete referee update workflow:
+     * - Updates referee personal and professional information
+     * - Handles conditional employment if employment_date is modified
+     * - Maintains data integrity throughout the update process
+     *
+     * @param  Referee  $referee  The referee to update
+     * @param  RefereeData  $refereeData  The updated referee information
+     * @return Referee The updated referee instance
+     *
+     * @example
+     * ```php
+     * $refereeData = new RefereeData([
+     *     'name' => 'Updated Name',
+     *     'hometown' => 'New Hometown'
+     * ]);
+     * $updatedReferee = UpdateAction::run($referee, $refereeData);
+     * ```
      */
-    private function shouldBeEmployed(Referee $referee): bool
+    public function handle(Referee $referee, RefereeData $refereeData): Referee
     {
-        return ! $referee->isCurrentlyEmployed();
+        return DB::transaction(function () use ($referee, $refereeData): Referee {
+            // Update the referee's basic information
+            $this->refereeRepository->update($referee, $refereeData);
+
+            // Track if referee was just employed
+            $wasEmployed = $referee->isEmployed();
+
+            // Create employment record if employment_date is provided and referee is eligible
+            if (! is_null($refereeData->employment_date) && ! $referee->isEmployed()) {
+                $this->refereeRepository->createEmployment($referee, $refereeData->employment_date);
+            }
+
+            return $referee;
+        });
     }
 }

@@ -4,90 +4,135 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Users\User;
+use Tests\Unit\Policies\TitlePolicyTest;
 
+/**
+ * Simplified TitlePolicy using before hook pattern.
+ *
+ * All repetitive administrator checks are handled by the before hook.
+ * Business validation is handled in Actions using custom exceptions.
+ *
+ * @see TitlePolicyTest
+ */
 class TitlePolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can create a title.
+     * Administrator bypass for all actions.
+     *
+     * This before hook allows administrators to perform any action without
+     * further permission checks, dramatically simplifying policy logic.
      */
-    public function create(User $user): bool
+    public function before(User $user, string $ability): ?bool
     {
-        return $user->isAdministrator();
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return null; // Continue to individual method checks
     }
 
     /**
-     * Determine whether the user can update a title.
-     */
-    public function update(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can delete a title.
-     */
-    public function delete(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can restore a title.
-     */
-    public function restore(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can retire a title.
-     */
-    public function retire(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can unretire a title.
-     */
-    public function unretire(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can activate a title.
-     */
-    public function activate(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can deactivate a title.
-     */
-    public function deactivate(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can view a list of titles.
+     * Only administrators can view entity lists (handled by before hook).
      */
     public function viewList(User $user): bool
     {
-        return $user->isAdministrator();
+        return false; // Will be bypassed by before hook for administrators
     }
 
     /**
-     * Determine whether the user can view a title.
+     * Only administrators can view individual entities (handled by before hook).
      */
     public function view(User $user): bool
     {
-        return $user->isAdministrator();
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can create entities (handled by before hook).
+     */
+    public function create(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can update entities (handled by before hook).
+     */
+    public function update(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can delete entities (handled by before hook).
+     */
+    public function delete(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can restore entities (handled by before hook).
+     */
+    public function restore(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can debut titles (handled by before hook).
+     */
+    public function debut(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can pull titles (handled by before hook).
+     */
+    public function pull(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can reinstate titles (handled by before hook).
+     */
+    public function reinstate(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can retire titles (handled by before hook).
+     */
+    public function retire(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can unretire titles (handled by before hook).
+     */
+    public function unretire(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can activate titles (handled by before hook).
+     */
+    public function activate(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can deactivate titles (handled by before hook).
+     */
+    public function deactivate(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
     }
 }
