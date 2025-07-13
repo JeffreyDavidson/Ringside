@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Models\Shared;
+namespace App\Models\Events;
 
-use App\Builders\Shared\VenueBuilder;
+use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HoldsEvents;
 use App\Models\Events\Event;
-use Database\Factories\Shared\VenueFactory;
+use Database\Factories\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;

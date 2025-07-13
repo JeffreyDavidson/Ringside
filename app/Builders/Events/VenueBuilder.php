@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Builders\Shared;
+namespace App\Builders\Events;
 
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
