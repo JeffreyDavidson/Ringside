@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
