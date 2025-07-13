@@ -4,25 +4,62 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Data\RefereeData;
-use App\Models\Referee;
-use Illuminate\Support\Carbon;
+use App\Data\Referees\RefereeData;
+use App\Models\Referees\Referee;
+use App\Models\Referees\RefereeEmployment;
+use App\Models\Referees\RefereeInjury;
+use App\Models\Referees\RefereeRetirement;
+use App\Models\Referees\RefereeSuspension;
+use App\Repositories\Concerns\ManagesEmployment;
+use App\Repositories\Concerns\ManagesInjury;
+use App\Repositories\Concerns\ManagesRetirement;
+use App\Repositories\Concerns\ManagesSuspension;
+use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
+use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
+use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
+use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
+use App\Repositories\Contracts\RefereeRepositoryInterface;
+use App\Repositories\Support\BaseRepository;
+use Tests\Unit\Repositories\RefereeRepositoryTest;
 
-class RefereeRepository
+/**
+ * Repository for Referee model business operations and data persistence.
+ *
+ * Handles all referee related database operations including CRUD operations,
+ * employment/retirement/suspension/injury management functionality.
+ *
+ * @see RefereeRepositoryTest
+ */
+class RefereeRepository extends BaseRepository implements ManagesEmploymentContract, ManagesInjuryContract, ManagesRetirementContract, ManagesSuspensionContract, RefereeRepositoryInterface
 {
+    /** @use ManagesEmployment<RefereeEmployment, Referee> */
+    use ManagesEmployment;
+
+    /** @use ManagesInjury<RefereeInjury, Referee> */
+    use ManagesInjury;
+
+    /** @use ManagesRetirement<RefereeRetirement, Referee> */
+    use ManagesRetirement;
+
+    /** @use ManagesSuspension<RefereeSuspension, Referee> */
+    use ManagesSuspension;
+
     /**
-     * Create a new referee with the given data.
+     * Create a new referee.
      */
     public function create(RefereeData $refereeData): Referee
     {
-        return Referee::query()->create([
+        /** @var Referee $referee */
+        $referee = Referee::query()->create([
             'first_name' => $refereeData->first_name,
             'last_name' => $refereeData->last_name,
         ]);
+
+        return $referee;
     }
 
     /**
-     * Update a given referee with the given data.
+     * Update a referee.
      */
     public function update(Referee $referee, RefereeData $refereeData): Referee
     {
@@ -35,101 +72,10 @@ class RefereeRepository
     }
 
     /**
-     * Delete a given referee.
-     */
-    public function delete(Referee $referee): void
-    {
-        $referee->delete();
-    }
-
-    /**
-     * Restore a given referee.
+     * Restore a soft-deleted referee.
      */
     public function restore(Referee $referee): void
     {
         $referee->restore();
-    }
-
-    /**
-     * Employ a given referee on a given date.
-     */
-    public function employ(Referee $referee, Carbon $employmentDate): Referee
-    {
-        $referee->employments()->updateOrCreate(
-            ['ended_at' => null],
-            ['started_at' => $employmentDate->toDateTimeString()]
-        );
-
-        return $referee;
-    }
-
-    /**
-     * Release a given referee on a given date.
-     */
-    public function release(Referee $referee, Carbon $releaseDate): Referee
-    {
-        $referee->currentEmployment()->update(['ended_at' => $releaseDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Injure a given referee on a given date.
-     */
-    public function injure(Referee $referee, Carbon $injureDate): Referee
-    {
-        $referee->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Clear the current injury of a given referee on a given date.
-     */
-    public function clearInjury(Referee $referee, Carbon $recoveryDate): Referee
-    {
-        $referee->currentInjury()->update(['ended_at' => $recoveryDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Retire a given referee on a given date.
-     */
-    public function retire(Referee $referee, Carbon $retirementDate): Referee
-    {
-        $referee->retirements()->create(['started_at' => $retirementDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Unretire a given referee on a given date.
-     */
-    public function unretire(Referee $referee, Carbon $unretireDate): Referee
-    {
-        $referee->currentRetirement()->update(['ended_at' => $unretireDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Suspend a given referee on a given date.
-     */
-    public function suspend(Referee $referee, Carbon $suspensionDate): Referee
-    {
-        $referee->suspensions()->create(['started_at' => $suspensionDate->toDateTimeString()]);
-
-        return $referee;
-    }
-
-    /**
-     * Reinstate a given referee on a given date.
-     */
-    public function reinstate(Referee $referee, Carbon $reinstateDate): Referee
-    {
-        $referee->currentSuspension()->update(['ended_at' => $reinstateDate->toDateTimeString()]);
-
-        return $referee;
     }
 }

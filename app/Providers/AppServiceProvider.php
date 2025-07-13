@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Console\Commands\EnhancedTestMakeCommand;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Users\User;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -26,7 +34,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void {}
+    public function register(): void
+    {
+        // Replace Laravel's default make:test command with our enhanced version
+        $this->app->singleton('command.test.make', function ($app) {
+            return new EnhancedTestMakeCommand($app['files']);
+        });
+    }
 
     /**
      * Bootstrap any application services.
@@ -55,12 +69,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Relation::morphMap([
-            'wrestler' => \App\Models\Wrestler::class,
-            'manager' => \App\Models\Manager::class,
-            'title' => \App\Models\Title::class,
-            'tagTeam' => \App\Models\TagTeam::class,
-            'referee' => \App\Models\Referee::class,
-            'stable' => \App\Models\Stable::class,
+            'wrestler' => Wrestler::class,
+            'manager' => Manager::class,
+            'title' => Title::class,
+            'tagTeam' => TagTeam::class,
+            'referee' => Referee::class,
+            'stable' => Stable::class,
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/images/{$asset}"));
@@ -71,7 +85,10 @@ class AppServiceProvider extends ServiceProvider
     public function bootRoute(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            /** @var User|null $user */
+            $user = $request->user();
+
+            return Limit::perMinute(60)->by($user?->id ?: $request->ip());
         });
     }
 }

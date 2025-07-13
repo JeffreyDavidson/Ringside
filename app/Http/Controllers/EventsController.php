@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
+use App\Models\Events\Event;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
+use Tests\Feature\Http\Controllers\EventsControllerTest;
 
+/**
+ * Controller for managing events.
+ *
+ * @see EventsControllerTest
+ */
 class EventsController
 {
     /**
      * View a list of events.
+     *
+     * @see EventsControllerTest::test_index_returns_a_view()
      */
     public function index(): View
     {
@@ -22,6 +30,8 @@ class EventsController
 
     /**
      * Show the event.
+     *
+     * @see EventsControllerTest::test_show_returns_a_view()
      */
     public function show(Event $event): View
     {

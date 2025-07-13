@@ -4,111 +4,127 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\TagTeam;
-use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\Users\User;
+use Tests\Unit\Policies\TagTeamPolicyTest;
 
+/**
+ * Simplified TagTeamPolicy using before hook pattern.
+ *
+ * All repetitive administrator checks are handled by the before hook.
+ * Business validation is handled in Actions using custom exceptions.
+ *
+ * @see TagTeamPolicyTest
+ */
 class TagTeamPolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can create tag teams.
+     * Administrator bypass for all actions.
+     *
+     * This before hook allows administrators to perform any action without
+     * further permission checks, dramatically simplifying policy logic.
      */
-    public function create(User $user): bool
+    public function before(User $user, string $ability): ?bool
     {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can update a tag team.
-     */
-    public function update(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can delete a tag team.
-     */
-    public function delete(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can restore a tag team.
-     */
-    public function restore(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can suspend a tag team.
-     */
-    public function suspend(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can reinstate a tag team.
-     */
-    public function reinstate(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can employ a tag team.
-     */
-    public function employ(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can release a tag team.
-     */
-    public function release(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can retire a tag team.
-     */
-    public function retire(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can unretire a tag team.
-     */
-    public function unretire(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can view a list of tag teams.
-     */
-    public function viewList(User $user): bool
-    {
-        return $user->isAdministrator();
-    }
-
-    /**
-     * Determine whether the user can view a profile for a tag team.
-     */
-    public function view(User $user, TagTeam $tagTeam): bool
-    {
-        if ($tagTeam->user !== null && $tagTeam->user->is($user)) {
+        if ($user->isAdministrator()) {
             return true;
         }
 
-        return $user->isAdministrator();
+        return null; // Continue to individual method checks
+    }
+
+    /**
+     * Only administrators can view entity lists (handled by before hook).
+     */
+    public function viewList(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can view individual entities (handled by before hook).
+     */
+    public function view(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can create entities (handled by before hook).
+     */
+    public function create(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can update entities (handled by before hook).
+     */
+    public function update(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can delete entities (handled by before hook).
+     */
+    public function delete(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can restore entities (handled by before hook).
+     */
+    public function restore(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can employ tag teams (handled by before hook).
+     */
+    public function employ(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can release tag teams (handled by before hook).
+     */
+    public function release(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can suspend tag teams (handled by before hook).
+     */
+    public function suspend(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can reinstate tag teams (handled by before hook).
+     */
+    public function reinstate(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can retire tag teams (handled by before hook).
+     */
+    public function retire(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can unretire tag teams (handled by before hook).
+     */
+    public function unretire(User $user, $tagTeam = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
     }
 }
