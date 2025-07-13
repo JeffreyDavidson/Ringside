@@ -6,7 +6,7 @@ namespace App\Livewire\Referees\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Referees\RefereeForm;
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 
 /**

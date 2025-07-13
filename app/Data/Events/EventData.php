@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Events;
 
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Support\Carbon;
 
 readonly class EventData

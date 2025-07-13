@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

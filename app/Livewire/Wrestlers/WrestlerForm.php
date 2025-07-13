@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use App\ValueObjects\Height;
 use Illuminate\Support\Carbon;

@@ -8,7 +8,7 @@ use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;

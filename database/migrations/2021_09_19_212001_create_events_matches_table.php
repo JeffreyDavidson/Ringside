@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Event;
-use App\Models\MatchType;
+use App\Models\Events\Event;
+use App\Models\Matches\MatchType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

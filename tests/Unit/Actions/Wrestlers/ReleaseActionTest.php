@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Events\Wrestlers\WrestlerReleased;
 use App\Exceptions\CannotBeReleasedException;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;

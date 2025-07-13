@@ -100,7 +100,7 @@ class EnhancedTestMakeCommand extends TestMakeCommand
             "App\\Models\\Events\\{$modelName}",
             "App\\Models\\Stables\\{$modelName}",
             "App\\Models\\Shared\\{$modelName}",
-            "App\\Models\\Users\\{$modelName}",
+            "App\\Models\\Users\\Users\\{$modelName}",
             "App\\Models\\Matches\\{$modelName}",
         ];
 

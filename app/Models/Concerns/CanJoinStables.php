@@ -50,13 +50,19 @@ trait CanJoinStables
     /**
      * Get the name of the pivot table for the stable relationship.
      *
-     * Returns the polymorphic stable members table that handles all member types.
+     * Returns the appropriate pivot table based on the model type.
+     * Uses separate tables for wrestlers and tag teams.
      *
      * @return string The pivot table name
      */
     protected function getStablePivotTable(): string
     {
-        return 'stables_members';
+        $morphClass = $this->getMorphClass();
+        return match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'stables_wrestlers',
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'stables_tag_teams',
+            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
     }
 
     /**
@@ -77,15 +83,21 @@ trait CanJoinStables
      */
     public function stables(): BelongsToMany
     {
-        /** @var BelongsToMany<Stable, static, TPivotModel> $relation */
+        $table = $this->getStablePivotTable();
+        $morphClass = $this->getMorphClass();
+        $foreignKey = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
+            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+        
+        /** @var BelongsToMany<Stable, static> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
-            'stables_members',
-            'member_id',
+            $table,
+            $foreignKey,
             'stable_id'
         )
-            ->where('stables_members.member_type', $this->getMorphClass())
-            ->using($this->resolveStablePivotModel())
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
 
@@ -113,14 +125,20 @@ trait CanJoinStables
      */
     public function currentStable(): BelongsToOne
     {
+        $table = $this->getStablePivotTable();
+        $morphClass = $this->getMorphClass();
+        $foreignKey = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
+            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+        
         return $this->belongsToOne(
             Stable::class,
-            'stables_members',
-            'member_id',
+            $table,
+            $foreignKey,
             'stable_id'
         )
-            ->where('stables_members.member_type', $this->getMorphClass())
-            ->using($this->resolveStablePivotModel())
             ->wherePivotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
@@ -144,18 +162,23 @@ trait CanJoinStables
      */
     public function previousStables(): BelongsToMany
     {
-        /** @var BelongsToMany<Stable, static, TPivotModel> $relation */
+        $table = $this->getStablePivotTable();
+        $morphClass = $this->getMorphClass();
+        $foreignKey = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
+            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+        
+        /** @var BelongsToMany<Stable, static> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
-            'stables_members',
-            'member_id',
+            $table,
+            $foreignKey,
             'stable_id'
         )
-            ->where('stables_members.member_type', $this->getMorphClass())
-            ->using($this->resolveStablePivotModel())
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
-            ->wherePivot('joined_at', '<', now())
             ->wherePivotNotNull('left_at');
 
         return $relation;
@@ -192,39 +215,4 @@ trait CanJoinStables
         return method_exists($currentStable, 'isNot') && $currentStable->isNot($stable);
     }
 
-    /**
-     * Resolve the pivot model class for stable relationships.
-     *
-     * All models now use the polymorphic 'StableMember' pivot model class.
-     *
-     * @return class-string<TPivotModel> The fully qualified class name of the pivot model
-     *
-     * @example
-     * For any model, this will resolve to 'App\\Models\\Stables\\StableMember'
-     */
-    protected function resolveStablePivotModel(): string
-    {
-        if (static::$resolvedStablePivotModel !== null) {
-            return static::$resolvedStablePivotModel;
-        }
-
-        /** @var class-string<TPivotModel> */
-        return 'App\\Models\\Stables\\StableMember';
-    }
-
-    /**
-     * Override the resolved pivot model class for testing or customization.
-     *
-     * @param  class-string<TPivotModel>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Wrestler::fakeStablePivotModel(MockStableMember::class);
-     * ```
-     */
-    public static function fakeStablePivotModel(string $class): void
-    {
-        static::$resolvedStablePivotModel = $class;
-    }
 }

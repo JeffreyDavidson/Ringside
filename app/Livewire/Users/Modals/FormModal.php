@@ -6,7 +6,7 @@ namespace App\Livewire\Users\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Users\UserForm;
-use App\Models\User;
+use App\Models\Users\User;
 
 /**
  * @extends BaseModal<UserForm, User>

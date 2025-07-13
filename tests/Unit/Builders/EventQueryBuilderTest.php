@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Event;
+use App\Models\Events\Event;
 
 test('scheduled events can be retrieved', function () {
     $scheduledEvent = Event::factory()->scheduled()->create();

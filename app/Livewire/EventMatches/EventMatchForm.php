@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\EventMatches;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\EventMatch;
+use App\Models\Matches\EventMatch;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 

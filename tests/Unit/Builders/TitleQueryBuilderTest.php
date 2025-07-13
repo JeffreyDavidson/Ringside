@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Title;
+use App\Models\Titles\Title;
 
 test('active titles can be retrieved', function () {
     $activeTitle = Title::factory()->active()->create();

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Builders\TitleBuilder;
 use App\Enums\ActivationStatus;
 use App\Models\Concerns\HasChampionships;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

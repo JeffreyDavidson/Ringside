@@ -27,7 +27,7 @@ abstract class BasePreviousStablesTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('stables.name'), 'stable.name')
+            Column::make(__('stables.name'), 'name')
                 ->searchable(),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),

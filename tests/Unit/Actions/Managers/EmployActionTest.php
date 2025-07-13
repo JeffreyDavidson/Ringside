@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 

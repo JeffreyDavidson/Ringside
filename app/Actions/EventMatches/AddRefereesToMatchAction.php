@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\EventMatches;
 
-use App\Models\EventMatch;
-use App\Models\Referee;
+use App\Models\Matches\EventMatch;
+use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 

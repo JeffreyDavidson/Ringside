@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Livewire\Attributes\Computed;
 
 trait PresentsTitlesList

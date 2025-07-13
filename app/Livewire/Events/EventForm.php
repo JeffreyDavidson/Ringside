@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Events;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Event;
+use App\Models\Events\Event;
 use App\Rules\EventDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;

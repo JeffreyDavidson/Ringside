@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\EmploymentStatus;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Builder;
 
 /**

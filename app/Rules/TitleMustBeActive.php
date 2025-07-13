@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

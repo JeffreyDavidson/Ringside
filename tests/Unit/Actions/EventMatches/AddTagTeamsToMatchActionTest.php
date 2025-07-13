@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\EventMatches\AddTagTeamsToMatchAction;
-use App\Models\EventMatch;
-use App\Models\TagTeam;
+use App\Models\Matches\EventMatch;
+use App\Models\TagTeams\TagTeam;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 

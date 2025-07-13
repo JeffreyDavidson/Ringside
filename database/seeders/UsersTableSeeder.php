@@ -6,7 +6,7 @@ namespace Database\Seeders;
 
 use App\Enums\Role;
 use App\Enums\UserStatus;
-use App\Models\User;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Number;

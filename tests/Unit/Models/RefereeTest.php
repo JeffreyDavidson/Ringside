@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Builders\RefereeBuilder;
 use App\Enums\EmploymentStatus;
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

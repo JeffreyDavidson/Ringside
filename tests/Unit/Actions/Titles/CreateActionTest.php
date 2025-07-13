@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\CreateAction;
 use App\Data\TitleData;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 
 use function Spatie\PestPluginTestTime\testTime;

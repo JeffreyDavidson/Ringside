@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
 

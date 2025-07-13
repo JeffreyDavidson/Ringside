@@ -7,9 +7,9 @@ namespace App\Actions\Stables;
 use App\Actions\TagTeams\EmployAction as TagTeamEmployAction;
 use App\Actions\Wrestlers\EmployAction as WrestlerEmployAction;
 use App\Exceptions\CannotBeActivatedException;
-use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 

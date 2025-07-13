@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\RetireAction;
 use App\Exceptions\CannotBeRetiredException;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
 

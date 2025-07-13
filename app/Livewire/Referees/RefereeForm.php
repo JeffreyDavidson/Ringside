@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Referees;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Validate;

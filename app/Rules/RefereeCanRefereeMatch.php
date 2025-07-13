@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

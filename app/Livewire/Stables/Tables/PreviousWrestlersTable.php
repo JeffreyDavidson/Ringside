@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\Stables\StableMember;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
@@ -15,16 +15,15 @@ use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class PreviousWrestlersTable extends DataTableComponent
 {
-    use ShowTableTrait;
 
     protected string $resourceName = 'wrestlers';
 
-    protected string $databaseTableName = 'stables_members';
+    protected string $databaseTableName = 'wrestlers';
 
     public ?int $stableId;
 
     /**
-     * @return Builder<StableMember>
+     * @return Builder<Wrestler>
      */
     public function builder(): Builder
     {
@@ -32,12 +31,16 @@ class PreviousWrestlersTable extends DataTableComponent
             throw new Exception("You didn't specify a stable");
         }
 
-        return StableMember::query()
-            ->with('member')
-            ->where('stables_members.stable_id', $this->stableId)
-            ->where('stables_members.member_type', 'wrestler')
-            ->whereNotNull('stables_members.left_at')
-            ->orderByDesc('stables_members.joined_at');
+        return Wrestler::query()
+            ->whereHas('stables', function ($query) {
+                $query->where('stable_id', $this->stableId)
+                      ->whereNotNull('left_at');
+            })
+            ->with(['stables' => function ($query) {
+                $query->where('stable_id', $this->stableId)
+                      ->whereNotNull('left_at')
+                      ->withPivot(['joined_at', 'left_at']);
+            }]);
     }
 
     /**
@@ -47,18 +50,32 @@ class PreviousWrestlersTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('wrestlers.name'))
-                ->title(fn (StableMember $row) => $row->member?->name ?? 'Unknown')
-                ->location(fn (StableMember $row) => $row->member ? route('wrestlers.show', $row->member) : '#'),
-            DateColumn::make(__('stables.date_joined'), 'joined_at')
-                ->outputFormat('Y-m-d'),
-            DateColumn::make(__('stables.date_left'), 'left_at')
-                ->outputFormat('Y-m-d'),
+                ->title(fn (Wrestler $row) => $row->name ?? 'Unknown')
+                ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
+            Column::make(__('stables.date_joined'))
+                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->joined_at ? 
+                    (is_string($row->stables->first()->pivot->joined_at) ? 
+                        \Carbon\Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
+                        $row->stables->first()->pivot->joined_at->format('Y-m-d')
+                    ) : ''),
+            Column::make(__('stables.date_left'))
+                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->left_at ? 
+                    (is_string($row->stables->first()->pivot->left_at) ? 
+                        \Carbon\Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
+                        $row->stables->first()->pivot->left_at->format('Y-m-d')
+                    ) : ''),
         ];
     }
 
     public function configure(): void
     {
-        // Removed additional selects that were causing SQL conflicts
-        // The polymorphic relationship handles member selection automatically
+        $this->setPrimaryKey('id')
+            ->setColumnSelectDisabled()
+            ->setSearchPlaceholder('Search '.$this->resourceName)
+            ->setPaginationEnabled()
+            ->setPerPageAccepted([5, 10, 25, 50, 100])
+            ->setLoadingPlaceholderContent('Loading')
+            ->setLoadingPlaceholderEnabled();
     }
+
 }

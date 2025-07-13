@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Builders;
 
 use App\Enums\ActivationStatus;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 
 /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\UpdateAction;
 use App\Data\ManagerData;
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 
 beforeEach(function () {

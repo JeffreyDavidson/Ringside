@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Models\Event;
-use App\Models\EventMatch;
-use App\Models\MatchType;
+use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchType;
 use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

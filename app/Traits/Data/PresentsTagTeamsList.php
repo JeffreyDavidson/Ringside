@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use Livewire\Attributes\Computed;
 
 trait PresentsTagTeamsList

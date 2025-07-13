@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stables\AddMembersAction;
 use App\Actions\Stables\CreateAction;
 use App\Data\StableData;
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
 

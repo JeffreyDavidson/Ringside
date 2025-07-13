@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\EventMatches\AddTitlesToMatchAction;
-use App\Models\EventMatch;
-use App\Models\Title;
+use App\Models\Matches\EventMatch;
+use App\Models\Titles\Title;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 

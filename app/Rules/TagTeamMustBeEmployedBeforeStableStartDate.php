@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;

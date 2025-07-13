@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories;
 
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 
 /**
  * Unit tests for EventFactory data generation and state management.

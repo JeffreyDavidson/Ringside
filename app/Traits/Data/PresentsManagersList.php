@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\Manager;
+use App\Models\Managers\Manager;
 use Livewire\Attributes\Computed;
 
 trait PresentsManagersList

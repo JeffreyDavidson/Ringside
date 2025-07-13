@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Traits\Data;
 
-use App\Models\Venue;
+use App\Models\Events\Venue;
 use Livewire\Attributes\Computed;
 
 trait PresentsVenuesList

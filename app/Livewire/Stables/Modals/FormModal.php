@@ -6,7 +6,7 @@ namespace App\Livewire\Stables\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Stables\StableForm;
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use App\Traits\Data\PresentsManagersList;
 use App\Traits\Data\PresentsTagTeamsList;
 use App\Traits\Data\PresentsWrestlersList;

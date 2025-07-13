@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Venues;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;

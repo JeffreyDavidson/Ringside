@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Events\DeleteAction;
-use App\Models\Event;
+use App\Models\Events\Event;
 use App\Repositories\EventRepository;
 
 beforeEach(function () {

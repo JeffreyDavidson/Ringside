@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\ClearInjuryAction;
 use App\Events\Wrestlers\WrestlerClearedFromInjury;
 use App\Exceptions\CannotBeClearedFromInjuryException;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;

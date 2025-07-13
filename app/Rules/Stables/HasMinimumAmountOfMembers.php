@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Rules\Stables;
 
-use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Collection;

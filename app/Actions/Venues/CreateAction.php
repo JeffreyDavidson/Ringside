@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
-use App\Data\Shared\VenueData;
-use App\Models\Shared\Venue;
+use App\Data\Events\VenueData;
+use App\Models\Events\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction extends BaseVenueAction

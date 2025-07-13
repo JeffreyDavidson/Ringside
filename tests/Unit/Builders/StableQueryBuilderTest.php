@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 
 test('active stables can be retrieved', function () {
     $activeStable = Stable::factory()->active()->create();

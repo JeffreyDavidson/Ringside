@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Seeder;
 
 class WrestlersTableSeeder extends Seeder

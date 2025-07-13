@@ -7,7 +7,7 @@ namespace App\Models\Events;
 use App\Builders\Events\EventBuilder;
 use App\Models\Concerns\HasEventMatches;
 use App\Models\Matches\EventMatch;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;

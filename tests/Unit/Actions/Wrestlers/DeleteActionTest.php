@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\DeleteAction;
-use App\Models\Wrestler;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 
 beforeEach(function () {

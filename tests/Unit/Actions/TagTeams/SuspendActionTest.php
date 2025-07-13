@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\SuspendAction;
 use App\Exceptions\CannotBeSuspendedException;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 

@@ -7,7 +7,7 @@ namespace App\Livewire\Events\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Events\Forms\EventForm;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Livewire\Attributes\Computed;
 
 /**

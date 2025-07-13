@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use Exception;
 
 class NotEnoughMembersException extends Exception

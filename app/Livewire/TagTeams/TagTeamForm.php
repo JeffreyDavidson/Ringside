@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use App\Rules\EmploymentStartDateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;

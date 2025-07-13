@@ -6,7 +6,7 @@ namespace App\Livewire\Venues\Modals;
 
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\VenueForm;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Livewire\Form;
 
 /**

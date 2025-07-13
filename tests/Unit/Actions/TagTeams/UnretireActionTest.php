@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UnretireAction;
 use App\Exceptions\CannotBeUnretiredException;
-use App\Models\TagTeam;
+use App\Models\TagTeams\TagTeam;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 

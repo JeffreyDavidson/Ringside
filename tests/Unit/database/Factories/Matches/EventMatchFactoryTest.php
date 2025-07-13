@@ -9,7 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 
 /**
  * Unit tests for EventMatchFactory data generation and state management.

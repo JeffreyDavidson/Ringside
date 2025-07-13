@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Stables;
 
 use App\Livewire\Base\LivewireBaseForm;
-use App\Models\Stable;
+use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Validate;
 

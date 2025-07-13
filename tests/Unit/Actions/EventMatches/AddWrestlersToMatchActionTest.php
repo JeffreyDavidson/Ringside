@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\EventMatches\AddWrestlersToMatchAction;
-use App\Models\EventMatch;
-use App\Models\Wrestler;
+use App\Models\Matches\EventMatch;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\EventMatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(./vendor/bin/pest:*)",
+      "Bash(mv:*)",
+      "Bash(git add:*)",
+      "Bash(sed:*)"
+    ],
+    "deny": []
+  }
+}

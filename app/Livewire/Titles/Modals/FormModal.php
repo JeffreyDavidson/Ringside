@@ -6,7 +6,7 @@ namespace App\Livewire\Titles\Modals;
 
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Titles\TitleForm;
-use App\Models\Title;
+use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 

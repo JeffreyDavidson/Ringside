@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Manager;
-use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\Managers\Manager;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Seeder;
 
 class ManagersTableSeeder extends Seeder

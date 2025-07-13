@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\UpdateAction;
 use App\Data\RefereeData;
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 
 beforeEach(function () {
