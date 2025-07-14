@@ -9,7 +9,8 @@
       "Bash(sed:*)",
       "Bash(gh pr create:*)",
       "Bash(git cherry-pick:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
