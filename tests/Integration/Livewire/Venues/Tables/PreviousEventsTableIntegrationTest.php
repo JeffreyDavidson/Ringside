@@ -6,7 +6,7 @@ use App\Builders\Events\EventBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Venues\Tables\PreviousEventsTable;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Models\Users\User;
 use Livewire\Livewire;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;

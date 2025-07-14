@@ -8,7 +8,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;

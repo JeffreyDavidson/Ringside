@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Models\Users\User;
 use Laravel\Dusk\Browser;
 use Tests\Browser\Pages\Venues\VenueIndexPage;

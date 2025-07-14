@@ -19,7 +19,7 @@ use App\Models\Events\Venue;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Shared\VenueFactory
+ * @see \Database\Factories\Events\VenueFactory
  */
 describe('VenueFactory Unit Tests', function () {
     describe('default attribute generation', function () {

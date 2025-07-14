@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Data\Events\EventData;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Repositories\Contracts\EventRepositoryInterface;
 use App\Repositories\EventRepository;
 use Illuminate\Support\Carbon;

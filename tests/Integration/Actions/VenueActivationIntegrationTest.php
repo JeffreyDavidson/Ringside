@@ -8,7 +8,7 @@ use App\Actions\Venues\RestoreAction;
 use App\Actions\Venues\UpdateAction;
 use App\Data\Shared\VenueData;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Models\Users\User;
 
 /**

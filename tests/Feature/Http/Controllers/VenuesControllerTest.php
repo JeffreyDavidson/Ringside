@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\VenuesController;
 use App\Livewire\Venues\Tables\PreviousEventsTable;
 use App\Livewire\Venues\Tables\VenuesTable;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
