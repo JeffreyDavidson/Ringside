@@ -139,7 +139,7 @@ test('event scheduling constraint validation')
 ### Test Organization Structure
 
 ```
-tests/Integration/Actions/EventMatches/
+tests/Integration/Actions/Matches/
 ├── Workflows/
 │   ├── CompleteMatchCreationWorkflowTest.php
 │   ├── ChampionshipMatchWorkflowTest.php

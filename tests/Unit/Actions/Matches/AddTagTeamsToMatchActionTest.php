@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\EventMatches\AddTagTeamsToMatchAction;
+use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Repositories\EventMatchRepository;

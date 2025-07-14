@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\EventMatches\AddWrestlersToMatchAction;
+use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\EventMatchRepository;
