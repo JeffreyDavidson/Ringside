@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\EventMatches\AddTitlesToMatchAction;
+use App\Actions\Matches\AddTitlesToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use App\Repositories\EventMatchRepository;

@@ -4,157 +4,64 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Models\Contracts\Bookable;
 use App\Models\Matches\EventMatch;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use LogicException;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Provides match-related relationship and status logic for models that can participate
- * in event matches (e.g., Wrestlers, Tag Teams).
+ * Provides match relationships for models that can have matches.
  *
- * This trait assumes the consuming model implements the Bookable interface
- * and provides concrete implementations of match-related methods.
- *
- * @template TMatchCompetitor of Model
- *
- * @phpstan-require-implements Bookable<TMatchCompetitor>
+ * This trait provides methods for accessing matches associated with
+ * a model. It's designed to be used by models that have a direct relationship
+ * with matches, such as Event models.
  *
  * @example
  * ```php
- * class Wrestler extends Model implements Bookable
+ * class Event extends Model
  * {
  *     use HasMatches;
  * }
  *
- * $wrestler = Wrestler::find(1);
- * $allMatches = $wrestler->matches;
- * $pastMatches = $wrestler->previousMatches;
+ * $event = Event::find(1);
+ * $allMatches = $event->matches;
+ * $matchCount = $event->matches()->count();
  * ```
  */
 trait HasMatches
 {
     /**
-     * Retrieve all event matches this model has participated in.
+     * Get all event matches associated with this model.
      *
-     * This method provides the polymorphic many-to-many relationship
-     * to EventMatch through the EventMatchCompetitor pivot model.
+     * Returns all event matches regardless of their status or outcome.
      *
-     * @return MorphToMany<EventMatch, Model>
-     *                                        A relationship instance for accessing all matches
+     * @return HasMany<EventMatch, $this>
+     *                                    A relationship instance for accessing all matches
      *
      * @example
      * ```php
-     * $wrestler = Wrestler::find(1);
-     * $allMatches = $wrestler->matches;
-     * $matchCount = $wrestler->matches()->count();
+     * $event = Event::find(1);
+     * $allMatches = $event->matches;
+     * $matchCount = $event->matches()->count();
      * ```
      */
-    public function matches(): MorphToMany
+    public function matches(): HasMany
     {
-        /** @var MorphToMany<EventMatch, Model> $relation */
-        $relation = $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
-
-        return $relation;
+        return $this->hasMany(EventMatch::class);
     }
 
     /**
-     * Retrieve matches that have already occurred (past event date).
+     * Get event matches for a specific model that has matches.
      *
-     * This filters matches where the associated event's date is before today.
-     * Uses a join with the events table to filter by event date.
+     * This method is designed to be overridden by models that need to specify
+     * a different foreign key or table name for the matches relationship.
      *
-     * @return MorphToMany<EventMatch, Model>
-     *                                        A relationship instance for accessing previous matches
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     * $pastMatches = $wrestler->previousMatches;
-     * $recentMatches = $wrestler->previousMatches()->orderBy('events.date', 'desc')->get();
-     * ```
+     * @param  string  $foreignKey  The foreign key to use for the relationship
+     * @return HasMany<EventMatch, $this>
+     *                                    A relationship instance for accessing matches
      */
-    public function previousMatches(): MorphToMany
+    protected function getMatchesRelation(?string $foreignKey = null): HasMany
     {
-        /** @var MorphToMany<EventMatch, Model> $relation */
-        $relation = $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors')
-            ->join('events', 'event_matches.event_id', '=', 'events.id')
-            ->where('events.date', '<', today());
+        $key = $foreignKey ?? $this->getForeignKey();
 
-        return $relation;
-    }
-
-    /**
-     * Check if the model can be booked for matches.
-     *
-     * This method checks the model's bookability status. The actual logic
-     * should be implemented in the model itself, typically checking various
-     * status conditions like employment, injuries, suspensions, etc.
-     *
-     * @return bool True if the model can be booked, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * if ($wrestler->canBeBooked()) {
-     *     echo "Wrestler is available for booking";
-     * }
-     * ```
-     */
-    public function canBeBooked(): bool
-    {
-        if (! $this instanceof Bookable) {
-            throw new LogicException(static::class.' must implement Bookable to use HasMatches trait');
-        }
-
-        // Delegate to the model's isBookable method
-        return $this->isBookable();
-    }
-
-    /**
-     * Check if the model cannot be booked for matches.
-     *
-     * Convenience method that returns the opposite of canBeBooked().
-     *
-     * @return bool True if the model cannot be booked, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * if ($wrestler->cannotBeBooked()) {
-     *     echo "Wrestler is not available for booking";
-     * }
-     * ```
-     */
-    public function cannotBeBooked(): bool
-    {
-        return ! $this->canBeBooked();
-    }
-
-    /**
-     * Get the polymorphic relationship to EventMatch.
-     *
-     * This method provides access to the underlying polymorphic relationship
-     * and can be used for more complex queries or relationship manipulation.
-     *
-     * @return MorphToMany<EventMatch, Model>
-     *                                        The base polymorphic relationship
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * // More complex query using the base relationship
-     * $recentMatches = $wrestler->morphMatches()
-     *     ->wherePivot('created_at', '>', now()->subMonths(3))
-     *     ->get();
-     * ```
-     */
-    protected function morphMatches(): MorphToMany
-    {
-        return $this->matches();
+        return $this->hasMany(EventMatch::class, $key);
     }
 }

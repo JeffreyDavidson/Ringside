@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Events\EventBuilder;
-use App\Models\Concerns\HasEventMatches;
+use App\Models\Concerns\HasMatches;
 use App\Models\Events\Event;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -60,7 +60,7 @@ describe('Event Model Unit Tests', function () {
     describe('trait integration', function () {
         test('uses all required traits', function () {
             expect(Event::class)->usesTrait(HasFactory::class);
-            expect(Event::class)->usesTrait(HasEventMatches::class);
+            expect(Event::class)->usesTrait(HasMatches::class);
             expect(Event::class)->usesTrait(SoftDeletes::class);
         });
     });

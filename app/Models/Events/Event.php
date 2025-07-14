@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\EventBuilder;
-use App\Models\Concerns\HasEventMatches;
+use App\Models\Concerns\HasMatches;
 use App\Models\Matches\EventMatch;
 use App\Models\Events\Venue;
 use Database\Factories\Events\EventFactory;
@@ -50,7 +50,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(EventBuilder::class)]
 class Event extends Model
 {
-    use HasEventMatches;
+    use HasMatches;
     use HasFactory;
     use SoftDeletes;
 
