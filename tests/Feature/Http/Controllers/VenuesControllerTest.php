@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\VenuesController;
+use App\Http\Controllers\Venues\IndexController;
+use App\Http\Controllers\Venues\ShowController;
 use App\Livewire\Venues\Tables\PreviousEventsTable;
 use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Events\Venue;
@@ -11,36 +12,37 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for VenuesController.
+ * Feature tests for Venues Controllers.
  *
- * @see VenuesController
+ * @see IndexController
+ * @see ShowController
  */
 describe('index', function () {
     /**
-     * @see VenuesController::index()
+     * @see IndexController::__invoke()
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([VenuesController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('venues.index')
             ->assertSeeLivewire(VenuesTable::class);
     });
 
     /**
-     * @see VenuesController::index()
+     * @see IndexController::__invoke()
      */
     test('a basic user cannot view venues index page', function () {
         actingAs(basicUser())
-            ->get(action([VenuesController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertForbidden();
     });
 
     /**
-     * @see VenuesController::index()
+     * @see IndexController::__invoke()
      */
     test('a guest cannot view venues index page', function () {
-        get(action([VenuesController::class, 'index']))
+        get(action(IndexController::class))
             ->assertRedirect(route('login'));
     });
 
@@ -52,11 +54,11 @@ describe('show', function () {
     });
 
     /**
-     * @see VenuesController::show()
+     * @see ShowController::__invoke()
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([VenuesController::class, 'show'], $this->venue))
+            ->get(action(ShowController::class, $this->venue))
             ->assertOk()
             ->assertViewIs('venues.show')
             ->assertViewHas('venue', $this->venue)
@@ -64,28 +66,28 @@ describe('show', function () {
     });
 
     /**
-     * @see VenuesController::show()
+     * @see ShowController::__invoke()
      */
     test('a basic user cannot view a venue', function () {
         actingAs(basicUser())
-            ->get(action([VenuesController::class, 'show'], $this->venue))
+            ->get(action(ShowController::class, $this->venue))
             ->assertForbidden();
     });
 
     /**
-     * @see VenuesController::show()
+     * @see ShowController::__invoke()
      */
     test('a guest cannot view a venue', function () {
-        get(action([VenuesController::class, 'show'], $this->venue))
+        get(action(ShowController::class, $this->venue))
             ->assertRedirect(route('login'));
     });
 
     /**
-     * @see VenuesController::show()
+     * @see ShowController::__invoke()
      */
     test('returns 404 when venue does not exist', function () {
         actingAs(administrator())
-            ->get(action([VenuesController::class, 'show'], 999999))
+            ->get(action(ShowController::class, 999999))
             ->assertNotFound();
     });
 });

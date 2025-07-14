@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\TitlesController;
+use App\Http\Controllers\Titles\IndexController;
+use App\Http\Controllers\Titles\ShowController;
 use App\Livewire\Titles\Tables\PreviousTitleChampionshipsTable;
 use App\Livewire\Titles\Tables\TitlesTable;
 use App\Models\Titles\Title;
@@ -11,36 +12,37 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for TitlesController.
+ * Feature tests for Titles Controllers.
  *
- * @see TitlesController
+ * @see IndexController
+ * @see ShowController
  */
 describe('index', function () {
     /**
-     * @see TitlesController::index()
+     * @see IndexController::__invoke()
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('titles.index')
             ->assertSeeLivewire(TitlesTable::class);
     });
 
     /**
-     * @see TitlesController::index()
+     * @see IndexController::__invoke()
      */
     test('a basic user cannot view titles index page', function () {
         actingAs(basicUser())
-            ->get(action([TitlesController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertForbidden();
     });
 
     /**
-     * @see TitlesController::index()
+     * @see IndexController::__invoke()
      */
     test('a guest cannot view titles index page', function () {
-        get(action([TitlesController::class, 'index']))
+        get(action(IndexController::class))
             ->assertRedirect(route('login'));
     });
 });
@@ -51,11 +53,11 @@ describe('show', function () {
     });
 
     /**
-     * @see TitlesController::show()
+     * @see ShowController::__invoke()
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'show'], $this->title))
+            ->get(action(ShowController::class, $this->title))
             ->assertOk()
             ->assertViewIs('titles.show')
             ->assertViewHas('title', $this->title)
@@ -63,28 +65,28 @@ describe('show', function () {
     });
 
     /**
-     * @see TitlesController::show()
+     * @see ShowController::__invoke()
      */
     test('a basic user cannot view a title', function () {
         actingAs(basicUser())
-            ->get(action([TitlesController::class, 'show'], $this->title))
+            ->get(action(ShowController::class, $this->title))
             ->assertForbidden();
     });
 
     /**
-     * @see TitlesController::show()
+     * @see ShowController::__invoke()
      */
     test('a guest cannot view a title', function () {
-        get(action([TitlesController::class, 'show'], $this->title))
+        get(action(ShowController::class, $this->title))
             ->assertRedirect(route('login'));
     });
 
     /**
-     * @see TitlesController::show()
+     * @see ShowController::__invoke()
      */
     test('returns 404 when title does not exist', function () {
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'show'], 999999))
+            ->get(action(ShowController::class, 999999))
             ->assertNotFound();
     });
 });

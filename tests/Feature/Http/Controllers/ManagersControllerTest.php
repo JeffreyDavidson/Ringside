@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ManagersController;
+use App\Http\Controllers\Managers\IndexController;
+use App\Http\Controllers\Managers\ShowController;
 use App\Livewire\Managers\Tables\ManagersTable;
 use App\Livewire\Managers\Tables\PreviousTagTeamsTable;
 use App\Livewire\Managers\Tables\PreviousWrestlersTable;
@@ -12,36 +13,37 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for ManagersController.
+ * Feature tests for Managers Controllers.
  *
- * @see ManagersController
+ * @see IndexController
+ * @see ShowController
  */
 describe('index', function () {
     /**
-     * @see ManagersController::index()
+     * @see IndexController::__invoke()
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('managers.index')
             ->assertSeeLivewire(ManagersTable::class);
     });
 
     /**
-     * @see ManagersController::index()
+     * @see IndexController::__invoke()
      */
     test('a basic user cannot view managers index page', function () {
         actingAs(basicUser())
-            ->get(action([ManagersController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertForbidden();
     });
 
     /**
-     * @see ManagersController::index()
+     * @see IndexController::__invoke()
      */
     test('a guest cannot view managers index page', function () {
-        get(action([ManagersController::class, 'index']))
+        get(action(IndexController::class))
             ->assertRedirect(route('login'));
     });
 });
@@ -52,11 +54,11 @@ describe('show', function () {
     });
 
     /**
-     * @see ManagersController::show()
+     * @see ShowController::__invoke()
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'show'], $this->manager))
+            ->get(action(ShowController::class, $this->manager))
             ->assertOk()
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $this->manager)
@@ -65,28 +67,28 @@ describe('show', function () {
     });
 
     /**
-     * @see ManagersController::show()
+     * @see ShowController::__invoke()
      */
     test('a basic user cannot view manager profiles', function () {
         actingAs(basicUser())
-            ->get(action([ManagersController::class, 'show'], $this->manager))
+            ->get(action(ShowController::class, $this->manager))
             ->assertForbidden();
     });
 
     /**
-     * @see ManagersController::show()
+     * @see ShowController::__invoke()
      */
     test('a guest cannot view a manager profile', function () {
-        get(action([ManagersController::class, 'show'], $this->manager))
+        get(action(ShowController::class, $this->manager))
             ->assertRedirect(route('login'));
     });
 
     /**
-     * @see ManagersController::show()
+     * @see ShowController::__invoke()
      */
     test('returns 404 when manager does not exist', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'show'], 999999))
+            ->get(action(ShowController::class, 999999))
             ->assertNotFound();
     });
 });

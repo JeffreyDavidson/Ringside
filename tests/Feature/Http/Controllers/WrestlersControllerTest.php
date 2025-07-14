@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\WrestlersController;
+use App\Http\Controllers\Wrestlers\IndexController;
+use App\Http\Controllers\Wrestlers\ShowController;
 use App\Livewire\Wrestlers\Tables\PreviousManagersTable;
 use App\Livewire\Wrestlers\Tables\PreviousMatchesTable;
 use App\Livewire\Wrestlers\Tables\PreviousStablesTable;
@@ -15,36 +16,37 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for WrestlersController.
+ * Feature tests for Wrestlers Controllers.
  *
- * @see WrestlersController
+ * @see IndexController
+ * @see ShowController
  */
 describe('index', function () {
     /**
-     * @see WrestlersController::index()
+     * @see IndexController::__invoke()
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
             ->assertSeeLivewire(WrestlersTable::class);
     });
 
     /**
-     * @see WrestlersController::index()
+     * @see IndexController::__invoke()
      */
     test('a basic user cannot view wrestlers index page', function () {
         actingAs(basicUser())
-            ->get(action([WrestlersController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertForbidden();
     });
 
     /**
-     * @see WrestlersController::index()
+     * @see IndexController::__invoke()
      */
     test('a guest cannot view wrestlers index page', function () {
-        get(action([WrestlersController::class, 'index']))
+        get(action(IndexController::class))
             ->assertRedirect(route('login'));
     });
 });
@@ -55,11 +57,11 @@ describe('show', function () {
     });
 
     /**
-     * @see WrestlersController::show()
+     * @see ShowController::__invoke()
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'show'], $this->wrestler))
+            ->get(action(ShowController::class, $this->wrestler))
             ->assertOk()
             ->assertViewIs('wrestlers.show')
             ->assertViewHas('wrestler', $this->wrestler)
@@ -71,28 +73,28 @@ describe('show', function () {
     });
 
     /**
-     * @see WrestlersController::show()
+     * @see ShowController::__invoke()
      */
     test('a basic user cannot view wrestler profiles', function () {
         actingAs(basicUser())
-            ->get(action([WrestlersController::class, 'show'], $this->wrestler))
+            ->get(action(ShowController::class, $this->wrestler))
             ->assertForbidden();
     });
 
     /**
-     * @see WrestlersController::show()
+     * @see ShowController::__invoke()
      */
     test('a guest cannot view a wrestler profile', function () {
-        get(action([WrestlersController::class, 'show'], $this->wrestler))
+        get(action(ShowController::class, $this->wrestler))
             ->assertRedirect(route('login'));
     });
 
     /**
-     * @see WrestlersController::show()
+     * @see ShowController::__invoke()
      */
     test('returns 404 when wrestler does not exist', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'show'], 999999))
+            ->get(action(ShowController::class, 999999))
             ->assertNotFound();
     });
 });

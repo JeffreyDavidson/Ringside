@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\TagTeamsController;
+use App\Http\Controllers\TagTeams\IndexController;
+use App\Http\Controllers\TagTeams\ShowController;
 use App\Livewire\TagTeams\Tables\PreviousManagersTable;
 use App\Livewire\TagTeams\Tables\PreviousMatchesTable;
 use App\Livewire\TagTeams\Tables\PreviousStablesTable;
@@ -15,36 +16,37 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for TagTeamsController.
+ * Feature tests for TagTeams Controllers.
  *
- * @see TagTeamsController
+ * @see IndexController
+ * @see ShowController
  */
 describe('index', function () {
     /**
-     * @see TagTeamsController::index()
+     * @see IndexController::__invoke()
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('tag-teams.index')
             ->assertSeeLivewire(TagTeamsTable::class);
     });
 
     /**
-     * @see TagTeamsController::index()
+     * @see IndexController::__invoke()
      */
     test('a basic user cannot view tag teams index page', function () {
         actingAs(basicUser())
-            ->get(action([TagTeamsController::class, 'index']))
+            ->get(action(IndexController::class))
             ->assertForbidden();
     });
 
     /**
-     * @see TagTeamsController::index()
+     * @see IndexController::__invoke()
      */
     test('a guest cannot view tag teams index page', function () {
-        get(action([TagTeamsController::class, 'index']))
+        get(action(IndexController::class))
             ->assertRedirect(route('login'));
     });
 });
@@ -55,11 +57,11 @@ describe('show', function () {
     });
 
     /**
-     * @see TagTeamsController::show()
+     * @see ShowController::__invoke()
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
+            ->get(action(ShowController::class, $this->tagTeam))
             ->assertOk()
             ->assertViewIs('tag-teams.show')
             ->assertViewHas('tagTeam', $this->tagTeam)
@@ -71,30 +73,30 @@ describe('show', function () {
     });
 
     /**
-     * @see TagTeamsController::show()
+     * @see ShowController::__invoke()
      */
     test('a basic user cannot view tag team profiles', function () {
         actingAs(basicUser())
-            ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
+            ->get(action(ShowController::class, $this->tagTeam))
             ->assertForbidden();
     });
 
     /**
-     * @see TagTeamsController::show()
+     * @see ShowController::__invoke()
      */
     test('a guest cannot view a tag team profile', function () {
         $tagTeam = TagTeam::factory()->create();
 
-        get(action([TagTeamsController::class, 'show'], $tagTeam))
+        get(action(ShowController::class, $tagTeam))
             ->assertRedirect(route('login'));
     });
 
     /**
-     * @see TagTeamsController::show()
+     * @see ShowController::__invoke()
      */
     test('returns 404 when tag team does not exist', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'show'], 999999))
+            ->get(action(ShowController::class, 999999))
             ->assertNotFound();
     });
 });
