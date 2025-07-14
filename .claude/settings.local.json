@@ -6,7 +6,8 @@
       "Bash(./vendor/bin/pest:*)",
       "Bash(mv:*)",
       "Bash(git add:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": []
   }
