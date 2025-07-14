@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle activation and deactivation operations.
  */
-interface ManagesActivity
+interface ManagesActivityInterface
 {
     /**
      * End activity for the given model.

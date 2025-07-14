@@ -19,10 +19,10 @@ use App\Repositories\Concerns\ManagesMembers;
 use App\Repositories\Concerns\ManagesRetirement;
 use App\Repositories\Concerns\ManagesSuspension;
 use App\Repositories\Contracts\ManagerRepositoryInterface;
-use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
-use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
+use App\Repositories\Contracts\ManagesEmploymentInterface;
+use App\Repositories\Contracts\ManagesInjuryInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesSuspensionInterface;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Support\Carbon;
 use Tests\Unit\Repositories\ManagerRepositoryTest;
@@ -35,7 +35,7 @@ use Tests\Unit\Repositories\ManagerRepositoryTest;
  *
  * @see ManagerRepositoryTest
  */
-class ManagerRepository extends BaseRepository implements ManagerRepositoryInterface, ManagesEmploymentContract, ManagesInjuryContract, ManagesRetirementContract, ManagesSuspensionContract
+class ManagerRepository extends BaseRepository implements ManagerRepositoryInterface, ManagesEmploymentInterface, ManagesInjuryInterface, ManagesRetirementInterface, ManagesSuspensionInterface
 {
     /** @use ManagesEmployment<ManagerEmployment, Manager> */
     use ManagesEmployment;

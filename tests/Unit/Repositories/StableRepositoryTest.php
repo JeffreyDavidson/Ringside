@@ -12,9 +12,9 @@ use App\Models\Wrestlers\Wrestler;
 use App\Repositories\Concerns\ManagesActivity;
 use App\Repositories\Concerns\ManagesMembers;
 use App\Repositories\Concerns\ManagesRetirement;
-use App\Repositories\Contracts\ManagesActivity as ManagesActivityContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesStableMembers;
+use App\Repositories\Contracts\ManagesActivityInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesStableMembersInterface;
 use App\Repositories\Contracts\StableRepositoryInterface;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -62,9 +62,9 @@ describe('StableRepository Unit Tests', function () {
         });
 
         test('repository implements all required contracts', function () {
-            expect($this->repository)->toBeInstanceOf(ManagesActivityContract::class);
-            expect($this->repository)->toBeInstanceOf(ManagesRetirementContract::class);
-            expect($this->repository)->toBeInstanceOf(ManagesStableMembers::class);
+            expect($this->repository)->toBeInstanceOf(ManagesActivityInterface::class);
+            expect($this->repository)->toBeInstanceOf(ManagesRetirementInterface::class);
+            expect($this->repository)->toBeInstanceOf(ManagesStableMembersInterface::class);
         });
 
         test('repository uses all required traits', function () {

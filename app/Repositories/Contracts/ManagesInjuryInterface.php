@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle injury and recovery operations.
  */
-interface ManagesInjury
+interface ManagesInjuryInterface
 {
     /**
      * End injury for the given model.
