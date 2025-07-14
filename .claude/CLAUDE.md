@@ -1,6 +1,21 @@
 # Claude Code Documentation
 
-## Git Commit Message Format
+## Git Workflow Requirements
+
+### **CRITICAL: Always Use Feature Branches**
+- **NEVER commit directly to development branch**
+- **ALL code changes must be on properly named feature branches**
+- **ALL changes require PR approval before merging**
+
+### Branch Naming Convention
+- `feat/feature-name` - New features
+- `fix/bug-description` - Bug fixes
+- `chore/task-description` - Maintenance tasks
+- `docs/documentation-update` - Documentation changes
+- `refactor/code-improvement` - Code refactoring
+- `test/testing-improvement` - Test additions/improvements
+
+### Git Commit Message Format
 
 When suggesting git commit commands, use this exact format:
 
