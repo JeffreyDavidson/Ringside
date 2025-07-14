@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Titles\TitleBuilder;
-use App\Enums\Shared\ActivationStatus;
+use App\Enums\Titles\TitleStatus;
 use App\Models\Concerns\HasChampionships;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,13 +18,13 @@ test('a title has a name', function () {
 test('a title has a status', function () {
     $title = Title::factory()->create();
 
-    expect($title)->status->toBeInstanceOf(ActivationStatus::class);
+    expect($title)->status->toBeInstanceOf(TitleStatus::class);
 });
 
 test('a title is unactivated by default', function () {
     $title = Title::factory()->create();
 
-    expect($title->status->value)->toBe(ActivationStatus::Unactivated->value);
+    expect($title->status->value)->toBe(TitleStatus::Undebuted->value);
 });
 
 test('a title uses has championships trait', function () {
