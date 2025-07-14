@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Policies\EventMatchPolicy;
+use App\Policies\MatchPolicy;
 use App\Policies\EventPolicy;
 use App\Policies\ManagerPolicy;
 use App\Policies\RefereePolicy;
@@ -24,7 +24,7 @@ describe('Policy Before Hook Pattern', function () {
 
     beforeEach(function () {
         $this->policies = [
-            new EventMatchPolicy(),
+            new MatchPolicy(),
             new EventPolicy(),
             new ManagerPolicy(),
             new RefereePolicy(),
