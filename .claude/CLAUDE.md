@@ -19,14 +19,25 @@ git commit -m "type: brief description
 - Keep the format clean and professional
 - Use conventional commit types (feat, fix, docs, style, refactor, test, chore, etc.)
 
-## Relationship Patterns
+## Architecture Documentation
 
-### Employment Relationships (hired/fired)
+For detailed architecture information, see the documentation in `docs/architecture/`:
+
+- **[Builders](docs/architecture/builders.md)**: Query builder patterns and domain organization
+- **[Enums](docs/architecture/enums.md)**: Enum organization standards and usage guidelines
+- **[Business Rules](docs/architecture/business-rules.md)**: Wrestling business logic and constraints
+- **[Match Generation](docs/architecture/match-generation.md)**: Match creation and validation
+
+## Quick Reference
+
+### Relationship Patterns
+
+#### Employment Relationships (hired/fired)
 - Managers ↔ Wrestlers: `managers_wrestlers` table with `hired_at`/`fired_at`
 - Managers ↔ Tag Teams: `managers_tag_teams` table with `hired_at`/`fired_at`
 - These represent business employment contracts
 
-### Stable Membership (joined/left)  
+#### Stable Membership (joined/left)  
 - Stables ↔ Wrestlers: `stables_wrestlers` table with `joined_at`/`left_at`
 - Stables ↔ Tag Teams: `stables_tag_teams` table with `joined_at`/`left_at`
 - These represent stable membership relationships
@@ -36,16 +47,10 @@ git commit -m "type: brief description
 - Separate tables approach over polymorphic for better performance
 - Employment status uses `App\Enums\Shared\EmploymentStatus`
 - Domain-organized builders in `app/Builders/{Domain}/`
+- Domain-organized enums in `app/Enums/{Domain}/`
 
-## Enum Organization Standards
-
-### Domain-Organized Enums
-- All enums follow domain structure in `app/Enums/{Domain}/`
-- Shared enums in `app/Enums/Shared/` for cross-domain usage
-- NO root-level enums in `app/Enums/` (removed during cleanup)
-
-### Enum Usage Guidelines
-- **Employment Status**: Use `App\Enums\Shared\EmploymentStatus` for pure employment states
-- **Activation Status**: Use `App\Enums\Shared\ActivationStatus` for general activation
-- **Title Status**: Use `App\Enums\Titles\TitleStatus` for title-specific states
-- **User Enums**: Use `App\Enums\Users\Role` and `App\Enums\Users\UserStatus`
+### Essential Enum Usage
+- **Employment Status**: `App\Enums\Shared\EmploymentStatus` for pure employment states
+- **Activation Status**: `App\Enums\Shared\ActivationStatus` for general activation
+- **Title Status**: `App\Enums\Titles\TitleStatus` for title-specific states
+- **User Enums**: `App\Enums\Users\Role` and `App\Enums\Users\UserStatus`
