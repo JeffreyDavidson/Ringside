@@ -47,6 +47,8 @@ Split each resource controller into separate invokable controllers:
 - ✅ **Easier Testing** - Focused test classes
 - ✅ **Better Route Definition** - Clear route-to-controller mapping
 - ✅ **Consistent with DashboardController** - Already uses invokable pattern
+- ✅ **Proper Directory Structure** - Controllers organized by domain/resource
+- ✅ **Cleaner Namespacing** - Each resource has its own namespace
 
 ### Implementation
 ```php
@@ -58,12 +60,14 @@ class WrestlersController
 }
 
 // After  
-class WrestlersIndexController
+namespace App\Http\Controllers\Wrestlers;
+
+class IndexController
 {
     public function __invoke(): View { ... }
 }
 
-class WrestlersShowController  
+class ShowController  
 {
     public function __invoke(Wrestler $wrestler): View { ... }
 }
@@ -75,8 +79,8 @@ class WrestlersShowController
 Route::resource('wrestlers', WrestlersController::class)->only(['index', 'show']);
 
 // After
-Route::get('wrestlers', WrestlersIndexController::class)->name('wrestlers.index');
-Route::get('wrestlers/{wrestler}', WrestlersShowController::class)->name('wrestlers.show');
+Route::get('wrestlers', \App\Http\Controllers\Wrestlers\IndexController::class)->name('wrestlers.index');
+Route::get('wrestlers/{wrestler}', \App\Http\Controllers\Wrestlers\ShowController::class)->name('wrestlers.show');
 ```
 
 ## Option 2: Full Livewire Page Components
@@ -169,34 +173,34 @@ Route::get('wrestlers/{wrestler}', WrestlersShow::class)->name('wrestlers.show')
 ```
 app/Http/Controllers/
 ├── Events/
-│   ├── EventsIndexController.php
-│   └── EventsShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Wrestlers/
-│   ├── WrestlersIndexController.php
-│   └── WrestlersShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Titles/
-│   ├── TitlesIndexController.php
-│   └── TitlesShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Stables/
-│   ├── StablesIndexController.php
-│   └── StablesShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Managers/
-│   ├── ManagersIndexController.php
-│   └── ManagersShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Referees/
-│   ├── RefereesIndexController.php
-│   └── RefereesShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── TagTeams/
-│   ├── TagTeamsIndexController.php
-│   └── TagTeamsShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Venues/
-│   ├── VenuesIndexController.php
-│   └── VenuesShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Users/
-│   ├── UsersIndexController.php
-│   └── UsersShowController.php
+│   ├── IndexController.php
+│   └── ShowController.php
 ├── Matches/
-│   └── MatchesIndexController.php
+│   └── IndexController.php
 ```
 
 ## Alternative: Livewire Page Components
