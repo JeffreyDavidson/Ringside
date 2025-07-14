@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle adding/removing wrestlers from tag teams.
  */
-interface ManagesTagTeamMembers
+interface ManagesTagTeamMembersInterface
 {
     /**
      * Add a wrestler to the tag team.

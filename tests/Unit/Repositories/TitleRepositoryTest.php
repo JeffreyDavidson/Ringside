@@ -13,8 +13,8 @@ use App\Models\Titles\TitleRetirement;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\Concerns\ManagesActivity;
 use App\Repositories\Concerns\ManagesRetirement;
-use App\Repositories\Contracts\ManagesActivity as ManagesActivityContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
+use App\Repositories\Contracts\ManagesActivityInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
 use App\Repositories\Contracts\TitleRepositoryInterface;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
@@ -50,8 +50,8 @@ describe('TitleRepository Unit Tests', function () {
         });
 
         test('repository implements all required contracts', function () {
-            expect($this->repository)->toBeInstanceOf(ManagesActivityContract::class);
-            expect($this->repository)->toBeInstanceOf(ManagesRetirementContract::class);
+            expect($this->repository)->toBeInstanceOf(ManagesActivityInterface::class);
+            expect($this->repository)->toBeInstanceOf(ManagesRetirementInterface::class);
         });
 
         test('repository uses all required traits', function () {

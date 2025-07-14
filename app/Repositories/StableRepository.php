@@ -17,16 +17,16 @@ use App\Models\Contracts\HasActivityPeriods;
 use App\Repositories\Concerns\ManagesActivity;
 use App\Repositories\Concerns\ManagesMembers;
 use App\Repositories\Concerns\ManagesRetirement;
-use App\Repositories\Contracts\ManagesActivity as ManagesActivityContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesStableMembers;
+use App\Repositories\Contracts\ManagesActivityInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesStableMembersInterface;
 use App\Repositories\Contracts\StableRepositoryInterface;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
-class StableRepository extends BaseRepository implements ManagesActivityContract, ManagesRetirementContract, ManagesStableMembers, StableRepositoryInterface
+class StableRepository extends BaseRepository implements ManagesActivityInterface, ManagesRetirementInterface, ManagesStableMembersInterface, StableRepositoryInterface
 {
     /** @use ManagesActivity<StableActivityPeriod, Stable> */
     use ManagesActivity;

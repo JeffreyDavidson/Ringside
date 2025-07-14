@@ -16,10 +16,10 @@ use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesMembers;
 use App\Repositories\Concerns\ManagesRetirement;
 use App\Repositories\Concerns\ManagesSuspension;
-use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
-use App\Repositories\Contracts\ManagesTagTeamMembers;
+use App\Repositories\Contracts\ManagesEmploymentInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesSuspensionInterface;
+use App\Repositories\Contracts\ManagesTagTeamMembersInterface;
 use App\Repositories\Contracts\TagTeamRepositoryInterface;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -34,7 +34,7 @@ use Tests\Unit\Repositories\TagTeamRepositoryTest;
  *
  * @see TagTeamRepositoryTest
  */
-class TagTeamRepository extends BaseRepository implements ManagesEmploymentContract, ManagesRetirementContract, ManagesSuspensionContract, ManagesTagTeamMembers, TagTeamRepositoryInterface
+class TagTeamRepository extends BaseRepository implements ManagesEmploymentInterface, ManagesRetirementInterface, ManagesSuspensionInterface, ManagesTagTeamMembersInterface, TagTeamRepositoryInterface
 {
     /** @use ManagesEmployment<TagTeamEmployment, TagTeam> */
     use ManagesEmployment;

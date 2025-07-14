@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * that handle adding/removing members from stables. Members can be
  * wrestlers, tag teams, or managers.
  */
-interface ManagesStableMembers
+interface ManagesStableMembersInterface
 {
     /**
      * Add a member to the stable.

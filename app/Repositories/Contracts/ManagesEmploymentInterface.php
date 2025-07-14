@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle employment, release, and reinstatement operations.
  */
-interface ManagesEmployment
+interface ManagesEmploymentInterface
 {
     /**
      * End employment for the given model.

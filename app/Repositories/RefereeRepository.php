@@ -14,10 +14,10 @@ use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Concerns\ManagesRetirement;
 use App\Repositories\Concerns\ManagesSuspension;
-use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
-use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
+use App\Repositories\Contracts\ManagesEmploymentInterface;
+use App\Repositories\Contracts\ManagesInjuryInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesSuspensionInterface;
 use App\Repositories\Contracts\RefereeRepositoryInterface;
 use App\Repositories\Support\BaseRepository;
 use Tests\Unit\Repositories\RefereeRepositoryTest;
@@ -30,7 +30,7 @@ use Tests\Unit\Repositories\RefereeRepositoryTest;
  *
  * @see RefereeRepositoryTest
  */
-class RefereeRepository extends BaseRepository implements ManagesEmploymentContract, ManagesInjuryContract, ManagesRetirementContract, ManagesSuspensionContract, RefereeRepositoryInterface
+class RefereeRepository extends BaseRepository implements ManagesEmploymentInterface, ManagesInjuryInterface, ManagesRetirementInterface, ManagesSuspensionInterface, RefereeRepositoryInterface
 {
     /** @use ManagesEmployment<RefereeEmployment, Referee> */
     use ManagesEmployment;

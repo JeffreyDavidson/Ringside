@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle suspension and reinstatement operations.
  */
-interface ManagesSuspension
+interface ManagesSuspensionInterface
 {
     /**
      * End suspension for the given model.

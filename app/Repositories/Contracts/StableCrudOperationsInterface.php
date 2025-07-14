@@ -10,7 +10,7 @@ use App\Models\Stables\Stable;
 /**
  * Interface for stable CRUD operations.
  */
-interface StableCrudOperations
+interface StableCrudOperationsInterface
 {
     /**
      * Create a new stable.

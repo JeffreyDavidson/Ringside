@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle retirement and unretirement operations.
  */
-interface ManagesRetirement
+interface ManagesRetirementInterface
 {
     /**
      * End retirement for the given model.

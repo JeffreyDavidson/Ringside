@@ -21,11 +21,11 @@ use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Concerns\ManagesMembers;
 use App\Repositories\Concerns\ManagesRetirement;
 use App\Repositories\Concerns\ManagesSuspension;
-use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
-use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
-use App\Repositories\Contracts\ManagesWrestlerRelations;
+use App\Repositories\Contracts\ManagesEmploymentInterface;
+use App\Repositories\Contracts\ManagesInjuryInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesSuspensionInterface;
+use App\Repositories\Contracts\ManagesWrestlerRelationsInterface;
 use App\Repositories\Contracts\WrestlerRepositoryInterface;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +48,7 @@ use Tests\Unit\Repositories\WrestlerRepositoryTest;
  *
  * @since 1.0.0
  */
-class WrestlerRepository extends BaseRepository implements ManagesEmploymentContract, ManagesInjuryContract, ManagesRetirementContract, ManagesSuspensionContract, ManagesWrestlerRelations, WrestlerRepositoryInterface
+class WrestlerRepository extends BaseRepository implements ManagesEmploymentInterface, ManagesInjuryInterface, ManagesRetirementInterface, ManagesSuspensionInterface, ManagesWrestlerRelationsInterface, WrestlerRepositoryInterface
 {
     /** @use ManagesDates<Wrestler, WrestlerEmployment> */
     use ManagesDates;

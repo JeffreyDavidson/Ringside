@@ -15,8 +15,8 @@ use App\Models\Titles\TitleRetirement;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\Concerns\ManagesActivity;
 use App\Repositories\Concerns\ManagesRetirement;
-use App\Repositories\Contracts\ManagesActivity as ManagesActivityContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
+use App\Repositories\Contracts\ManagesActivityInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
 use App\Repositories\Contracts\TitleRepositoryInterface;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Support\Carbon;
@@ -31,7 +31,7 @@ use Tests\Unit\Repositories\TitleRepositoryTest;
  *
  * @see TitleRepositoryTest
  */
-class TitleRepository extends BaseRepository implements ManagesActivityContract, ManagesRetirementContract, TitleRepositoryInterface
+class TitleRepository extends BaseRepository implements ManagesActivityInterface, ManagesRetirementInterface, TitleRepositoryInterface
 {
     /** @use ManagesActivity<TitleActivityPeriod, Title> */
     use ManagesActivity;
