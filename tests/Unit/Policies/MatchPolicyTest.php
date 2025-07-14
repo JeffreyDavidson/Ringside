@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 use App\Models\Matches\EventMatch;
 use App\Models\Users\User;
-use App\Policies\EventMatchPolicy;
+use App\Policies\MatchPolicy;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Unit tests for EventMatchPolicy authorization logic.
+ * Unit tests for MatchPolicy authorization logic.
  *
  * These tests focus on the authorization logic in isolation,
  * testing each permission method independently.
  *
- * @see EventMatchPolicy
+ * @see MatchPolicy
  */
-describe('EventMatchPolicy Unit Tests', function () {
+describe('MatchPolicy Unit Tests', function () {
 
     beforeEach(function () {
-        $this->policy = new EventMatchPolicy();
+        $this->policy = new MatchPolicy();
         $this->admin = administrator();
         $this->basicUser = basicUser();
         $this->eventMatch = EventMatch::factory()->create();
@@ -146,8 +146,8 @@ describe('EventMatchPolicy Unit Tests', function () {
         });
 
         test('policy is consistent across multiple instances', function () {
-            $policy1 = new EventMatchPolicy();
-            $policy2 = new EventMatchPolicy();
+            $policy1 = new MatchPolicy();
+            $policy2 = new MatchPolicy();
 
             expect($policy1->before($this->admin, 'create'))->toBe($policy2->before($this->admin, 'create'));
             expect($policy1->viewList($this->basicUser))->toBe($policy2->viewList($this->basicUser));

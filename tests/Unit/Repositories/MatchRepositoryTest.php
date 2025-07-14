@@ -10,15 +10,15 @@ use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\Contracts\EventMatchRepositoryInterface;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\Contracts\MatchRepositoryInterface;
+use App\Repositories\MatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Database\Eloquent\Collection;
 
 use function Spatie\PestPluginTestTime\testTime;
 
 /**
- * Unit tests for EventMatchRepository business logic and data operations.
+ * Unit tests for MatchRepository business logic and data operations.
  *
  * UNIT TEST SCOPE:
  * - Repository configuration and structure verification
@@ -27,22 +27,22 @@ use function Spatie\PestPluginTestTime\testTime;
  * - Side number assignment for competitors
  * - Match data handling and persistence
  *
- * These tests verify that the EventMatchRepository correctly implements
+ * These tests verify that the MatchRepository correctly implements
  * all business operations and data persistence requirements.
  *
- * @see EventMatchRepository
+ * @see MatchRepository
  */
-describe('EventMatchRepository Unit Tests', function () {
+describe('MatchRepository Unit Tests', function () {
     beforeEach(function () {
         testTime()->freeze();
-        $this->repository = app(EventMatchRepository::class);
+        $this->repository = app(MatchRepository::class);
         $this->seed(MatchTypesTableSeeder::class);
     });
 
     describe('repository configuration', function () {
         test('repository can be resolved from container', function () {
-            expect($this->repository)->toBeInstanceOf(EventMatchRepository::class);
-            expect($this->repository)->toBeInstanceOf(EventMatchRepositoryInterface::class);
+            expect($this->repository)->toBeInstanceOf(MatchRepository::class);
+            expect($this->repository)->toBeInstanceOf(MatchRepositoryInterface::class);
         });
 
         test('repository has all expected methods', function () {
