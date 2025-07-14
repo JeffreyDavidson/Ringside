@@ -121,6 +121,11 @@ arch('interfaces namespace only contains interfaces')
     ->expect('App\\Interfaces')
     ->toBeInterfaces();
 
+arch('contracts directories only contain interfaces with Interface suffix')
+    ->expect('App\\*\\Contracts')
+    ->toBeInterfaces()
+    ->toHaveSuffix('Interface');
+
 // =============================================================================
 // SECURITY & DEBUGGING RULES
 // =============================================================================
