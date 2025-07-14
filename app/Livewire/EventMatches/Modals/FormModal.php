@@ -10,11 +10,11 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
-use App\Traits\Data\PresentsMatchTypesList;
-use App\Traits\Data\PresentsRefereesList;
-use App\Traits\Data\PresentsTagTeamsList;
-use App\Traits\Data\PresentsTitlesList;
-use App\Traits\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\Data\PresentsMatchTypesList;
+use App\Livewire\Concerns\Data\PresentsRefereesList;
+use App\Livewire\Concerns\Data\PresentsTagTeamsList;
+use App\Livewire\Concerns\Data\PresentsTitlesList;
+use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use Illuminate\Support\Str;
 
 /**
