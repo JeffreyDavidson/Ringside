@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Venues\CreateAction;
 use App\Data\Shared\VenueData;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Repositories\VenueRepository;
 
 beforeEach(function () {

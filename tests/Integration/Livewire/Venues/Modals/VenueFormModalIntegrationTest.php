@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\VenueForm;
 use App\Livewire\Venues\Modals\VenueFormModal;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Livewire\Component;
 
 /**

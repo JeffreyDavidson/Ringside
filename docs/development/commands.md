@@ -50,7 +50,7 @@ php artisan ringside:make:test --unit --model="TitleChampionship"
 # Creates: tests/Unit/Models/TitleChampionshipTest.php
 
 # Generate test with full namespace
-php artisan ringside:make:test --unit --model="App\Models\Shared\Venue"
+php artisan ringside:make:test --unit --model="App\Models\Events\Venue"
 # Creates: tests/Unit/Models/VenueTest.php
 ```
 

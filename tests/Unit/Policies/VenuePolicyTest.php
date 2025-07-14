@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use App\Models\Users\User;
 use App\Policies\VenuePolicy;
 

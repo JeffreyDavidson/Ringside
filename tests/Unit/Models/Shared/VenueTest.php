@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Builders\Shared\VenueBuilder;
+use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HoldsEvents;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

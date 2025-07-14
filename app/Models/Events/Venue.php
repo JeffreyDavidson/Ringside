@@ -7,7 +7,7 @@ namespace App\Models\Events;
 use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HoldsEvents;
 use App\Models\Events\Event;
-use Database\Factories\VenueFactory;
+use Database\Factories\Events\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Event> $previousEvents
  * @property-read Collection<int, Event> $futureEvents
  *
- * @method static \Database\Factories\Shared\VenueFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\Events\VenueFactory factory($count = null, $state = [])
  * @method static VenueBuilder<static>|Venue newModelQuery()
  * @method static VenueBuilder<static>|Venue newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue onlyTrashed()

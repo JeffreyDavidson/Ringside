@@ -7,7 +7,7 @@ use App\Livewire\Events\Tables\EventsTable;
 use App\Livewire\Venues\Modals\VenueFormModal;
 use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;

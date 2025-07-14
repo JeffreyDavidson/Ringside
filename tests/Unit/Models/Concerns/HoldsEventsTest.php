@@ -6,7 +6,7 @@ namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\HoldsEvents;
 use App\Models\Events\Event;
-use App\Models\Shared\Venue;
+use App\Models\Events\Venue;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use ReflectionClass;
