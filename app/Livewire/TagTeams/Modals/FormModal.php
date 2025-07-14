@@ -8,7 +8,7 @@ use App\Livewire\Concerns\BaseModal;
 use App\Livewire\TagTeams\TagTeamForm;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Traits\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;

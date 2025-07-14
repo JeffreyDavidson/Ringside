@@ -7,9 +7,9 @@ namespace App\Livewire\Stables\Modals;
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Stables\StableForm;
 use App\Models\Stables\Stable;
-use App\Traits\Data\PresentsManagersList;
-use App\Traits\Data\PresentsTagTeamsList;
-use App\Traits\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\Data\PresentsManagersList;
+use App\Livewire\Concerns\Data\PresentsTagTeamsList;
+use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
