@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EventMatchesController;
+use App\Http\Controllers\MatchesController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ManagersController;
 use App\Http\Controllers\RefereesController;
@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('titles', TitlesController::class)->only(['index', 'show']);
 
-    Route::get('events/{event}/matches', [EventMatchesController::class, 'index'])->name('events.matches');
+    Route::get('events/{event}/matches', [MatchesController::class, 'index'])->name('events.matches');
     Route::resource('events', EventsController::class)->only(['index', 'show']);
 
     Route::resource('venues', VenuesController::class)->only(['index', 'show']);
