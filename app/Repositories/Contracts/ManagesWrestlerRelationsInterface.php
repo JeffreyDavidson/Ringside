@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * This interface defines the methods required for repositories
  * that handle wrestler-manager relationships.
  */
-interface ManagesWrestlerRelations
+interface ManagesWrestlerRelationsInterface
 {
     /**
      * Add a manager to the wrestler.

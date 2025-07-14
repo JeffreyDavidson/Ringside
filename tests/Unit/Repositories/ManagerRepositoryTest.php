@@ -11,10 +11,10 @@ use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Concerns\ManagesRetirement;
 use App\Repositories\Concerns\ManagesSuspension;
-use App\Repositories\Contracts\ManagesEmployment as ManagesEmploymentContract;
-use App\Repositories\Contracts\ManagesInjury as ManagesInjuryContract;
-use App\Repositories\Contracts\ManagesRetirement as ManagesRetirementContract;
-use App\Repositories\Contracts\ManagesSuspension as ManagesSuspensionContract;
+use App\Repositories\Contracts\ManagesEmploymentInterface;
+use App\Repositories\Contracts\ManagesInjuryInterface;
+use App\Repositories\Contracts\ManagesRetirementInterface;
+use App\Repositories\Contracts\ManagesSuspensionInterface;
 use App\Repositories\Contracts\ManagerRepositoryInterface;
 use App\Repositories\ManagerRepository;
 
@@ -48,10 +48,10 @@ describe('ManagerRepository Unit Tests', function () {
         });
 
         test('repository implements all required contracts', function () {
-            expect($this->repository)->toBeInstanceOf(ManagesEmploymentContract::class);
-            expect($this->repository)->toBeInstanceOf(ManagesInjuryContract::class);
-            expect($this->repository)->toBeInstanceOf(ManagesRetirementContract::class);
-            expect($this->repository)->toBeInstanceOf(ManagesSuspensionContract::class);
+            expect($this->repository)->toBeInstanceOf(ManagesEmploymentInterface::class);
+            expect($this->repository)->toBeInstanceOf(ManagesInjuryInterface::class);
+            expect($this->repository)->toBeInstanceOf(ManagesRetirementInterface::class);
+            expect($this->repository)->toBeInstanceOf(ManagesSuspensionInterface::class);
         });
 
         test('repository uses all required traits', function () {
