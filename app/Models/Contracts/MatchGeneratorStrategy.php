@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts;
+namespace App\Models\Contracts;
 
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchType;
