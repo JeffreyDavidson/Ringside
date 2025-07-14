@@ -63,6 +63,30 @@ class WrestlerRepo {}                     // Abbreviated
 class WrestlerService {}                  // Wrong suffix
 ```
 
+#### Controllers
+- **Invokable Pattern**: Use invokable controllers with single responsibility
+- **Domain Organization**: Group controllers by domain/entity
+- **Descriptive Names**: Use IndexController and ShowController for resource endpoints
+
+```php
+// ✅ CORRECT
+namespace App\Http\Controllers\Events;
+class IndexController { public function __invoke(): View {} }
+class ShowController { public function __invoke(Event $event): View {} }
+
+namespace App\Http\Controllers\Wrestlers;
+class IndexController { public function __invoke(): View {} }
+class ShowController { public function __invoke(Wrestler $wrestler): View {} }
+
+// ❌ INCORRECT
+class EventsController {                  // Resource controller pattern
+    public function index(): View {}
+    public function show(Event $event): View {}
+}
+class EventController {}                  // Singular controller name
+class EventsIndexController {}            // Redundant domain prefix
+```
+
 #### Validation Rules
 - **Descriptive Names**: Clearly indicate validation purpose
 - **Domain Context**: Include domain context when needed
@@ -328,6 +352,126 @@ class EmployAction
 3. **Handle Method**: Main action logic
 4. **Validation Methods**: Private validation logic
 5. **Helper Methods**: Supporting functionality
+
+### Controller Structure
+
+#### Standard Controller Layout
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Events;
+
+use App\Models\Events\Event;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
+
+/**
+ * Controller for displaying events index page.
+ */
+class IndexController
+{
+    /**
+     * Display the events index page.
+     */
+    public function __invoke(): View
+    {
+        Gate::authorize('viewList', Event::class);
+        
+        return view('events.index');
+    }
+}
+
+/**
+ * Controller for displaying individual event details.
+ */
+class ShowController
+{
+    /**
+     * Display the event details page.
+     */
+    public function __invoke(Event $event): View
+    {
+        Gate::authorize('view', $event);
+        
+        return view('events.show', [
+            'event' => $event->load([
+                'venue',
+                'matches.matchType',
+                'matches.referees',
+                'matches.titles',
+                'matches.competitors.competitor',
+            ]),
+        ]);
+    }
+}
+```
+
+#### Controller Organization Patterns
+- **Domain Directories**: Controllers organized by domain (`Events/`, `Wrestlers/`, etc.)
+- **Invokable Classes**: Single `__invoke()` method per controller
+- **Clear Authorization**: Gate authorization at method start
+- **Explicit View Data**: Pass required data to views explicitly
+- **Eager Loading**: Load relationships needed by views
+
+#### Controller Test Structure
+```php
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Controllers\Events\IndexController;
+use App\Http\Controllers\Events\ShowController;
+use App\Models\Events\Event;
+
+describe('Events Index Controller', function () {
+    it('returns events index view for administrators', function () {
+        $response = $this->actingAs($this->admin)
+            ->get(action(IndexController::class));
+        
+        $response->assertOk()
+            ->assertViewIs('events.index')
+            ->assertSeeLivewire('events.tables.events-table');
+    });
+});
+
+describe('Events Show Controller', function () {
+    it('returns event details view for administrators', function () {
+        $event = Event::factory()->create();
+        
+        $response = $this->actingAs($this->admin)
+            ->get(action(ShowController::class, $event));
+        
+        $response->assertOk()
+            ->assertViewIs('events.show')
+            ->assertViewHas('event', $event);
+    });
+});
+```
+
+#### Controller Directory Structure
+```
+app/Http/Controllers/
+├── Events/
+│   ├── IndexController.php
+│   └── ShowController.php
+├── Wrestlers/
+│   ├── IndexController.php
+│   └── ShowController.php
+└── Matches/
+    └── IndexController.php          # No show method for matches
+
+tests/Feature/Http/Controllers/
+├── Events/
+│   ├── IndexControllerTest.php
+│   └── ShowControllerTest.php
+├── Wrestlers/
+│   ├── IndexControllerTest.php
+│   └── ShowControllerTest.php
+└── Matches/
+    └── IndexControllerTest.php
+```
 
 ### Repository Structure
 

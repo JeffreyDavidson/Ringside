@@ -22,6 +22,89 @@ The application follows a modular domain-driven approach:
 
 ## Key Architectural Patterns
 
+### Invokable Controller Architecture
+
+Controllers follow a domain-organized invokable pattern with directory structure mirroring tests:
+
+```
+app/Http/Controllers/
+├── Events/
+│   ├── IndexController.php
+│   └── ShowController.php
+├── Wrestlers/
+│   ├── IndexController.php
+│   └── ShowController.php
+├── Managers/
+│   ├── IndexController.php
+│   └── ShowController.php
+└── ... (other domains)
+
+tests/Feature/Http/Controllers/
+├── Events/
+│   ├── IndexControllerTest.php
+│   └── ShowControllerTest.php
+├── Wrestlers/
+│   ├── IndexControllerTest.php
+│   └── ShowControllerTest.php
+├── Managers/
+│   ├── IndexControllerTest.php
+│   └── ShowControllerTest.php
+└── ... (other domains)
+```
+
+**Controller Structure:**
+```php
+namespace App\Http\Controllers\Events;
+
+class IndexController
+{
+    public function __invoke(): View
+    {
+        Gate::authorize('viewList', Event::class);
+        return view('events.index');
+    }
+}
+
+class ShowController
+{
+    public function __invoke(Event $event): View
+    {
+        Gate::authorize('view', $event);
+        return view('events.show', ['event' => $event]);
+    }
+}
+```
+
+**Route Configuration:**
+```php
+// Explicit invokable routes instead of resource routes
+Route::get('events', EventsIndexController::class)->name('events.index');
+Route::get('events/{event}', EventsShowController::class)->name('events.show');
+```
+
+**Key Benefits:**
+- **Single Responsibility**: Each controller has one specific purpose
+- **Domain Organization**: Controllers grouped by business domain
+- **Consistent Testing**: Test structure mirrors controller structure
+- **Clear Routing**: Explicit route definitions for better maintainability
+- **Type Safety**: Clear controller-to-route mapping
+
+**Testing Pattern:**
+```php
+// tests/Feature/Http/Controllers/Events/IndexControllerTest.php
+use App\Http\Controllers\Events\IndexController;
+
+describe('Events Index Controller', function () {
+    it('returns events index view', function () {
+        $response = $this->actingAs($this->user)
+            ->get(action(IndexController::class));
+        
+        $response->assertOk()
+            ->assertViewIs('events.index');
+    });
+});
+```
+
 ### Repository Pattern with Traits
 
 Each entity has a repository implementing an interface with common functionality shared via traits:
