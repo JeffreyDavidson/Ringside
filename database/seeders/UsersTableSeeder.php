@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\Role;
-use App\Enums\UserStatus;
+use App\Enums\Users\Role;
+use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;

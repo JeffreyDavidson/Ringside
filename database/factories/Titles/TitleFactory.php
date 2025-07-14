@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Titles;
 
-use App\Enums\Shared\ActivationStatus;
+use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleActivation;
@@ -30,7 +30,7 @@ class TitleFactory extends Factory
 
         return [
             'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
-            'status' => ActivationStatus::Unactivated,
+            'status' => TitleStatus::Undebuted,
             'type' => $titleType,
             'current_champion_id' => null,
             'previous_champion_id' => null,
@@ -41,7 +41,7 @@ class TitleFactory extends Factory
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->state(fn () => ['status' => ActivationStatus::Active])
+        return $this->state(fn () => ['status' => TitleStatus::Active])
             ->has(TitleActivation::factory()->started($activationDate), 'activations');
     }
 
@@ -51,13 +51,13 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => ActivationStatus::Inactive])
+        return $this->state(fn () => ['status' => TitleStatus::Inactive])
             ->has(TitleActivation::factory()->started($start)->ended($end), 'activations');
     }
 
     public function withFutureActivation(): static
     {
-        return $this->state(fn () => ['status' => ActivationStatus::FutureActivation])
+        return $this->state(fn () => ['status' => TitleStatus::PendingDebut])
             ->has(TitleActivation::factory()->started(Carbon::tomorrow()), 'activations');
     }
 
@@ -67,14 +67,14 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => ActivationStatus::Retired])
+        return $this->state(fn () => ['status' => TitleStatus::Inactive])
             ->has(TitleActivation::factory()->started($start)->ended($end), 'activations')
             ->has(TitleRetirement::factory()->started($end), 'retirements');
     }
 
     public function unactivated(): static
     {
-        return $this->state(fn () => ['status' => ActivationStatus::Unactivated]);
+        return $this->state(fn () => ['status' => TitleStatus::Undebuted]);
     }
 
     public function withChampion($champion): static

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\EmploymentStatus;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 
 test('a tag team has a name', function () {
