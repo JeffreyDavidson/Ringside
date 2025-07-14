@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\EventMatches\AddRefereesToMatchAction;
+use App\Actions\Matches\AddRefereesToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Repositories\EventMatchRepository;

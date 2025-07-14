@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Actions\EventMatches\AddCompetitorsToMatchAction;
-use App\Actions\EventMatches\AddTagTeamsToMatchAction;
-use App\Actions\EventMatches\AddWrestlersToMatchAction;
+use App\Actions\Matches\AddCompetitorsToMatchAction;
+use App\Actions\Matches\AddTagTeamsToMatchAction;
+use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

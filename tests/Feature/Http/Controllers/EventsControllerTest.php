@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\EventsController;
 use App\Livewire\Events\Tables\EventsTable;
-use App\Livewire\Matches\Tables\EventMatchesTable;
+use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 
 use function Pest\Laravel\actingAs;
@@ -58,7 +58,7 @@ describe('show', function () {
             ->get(action([EventsController::class, 'show'], $this->event))
             ->assertViewIs('events.show')
             ->assertViewHas('event', $this->event)
-            ->assertSeeLivewire(EventMatchesTable::class);
+            ->assertSeeLivewire(MatchesTable::class);
     });
 
     /**

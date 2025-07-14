@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Actions\EventMatches\AddCompetitorsToMatchAction;
-use App\Actions\EventMatches\AddMatchForEventAction;
-use App\Actions\EventMatches\AddRefereesToMatchAction;
-use App\Actions\EventMatches\AddTitlesToMatchAction;
+use App\Actions\Matches\AddCompetitorsToMatchAction;
+use App\Actions\Matches\AddMatchForEventAction;
+use App\Actions\Matches\AddRefereesToMatchAction;
+use App\Actions\Matches\AddTitlesToMatchAction;
 use App\Data\EventMatchData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

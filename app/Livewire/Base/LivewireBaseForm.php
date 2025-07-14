@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use EventMatches\EventMatchForm;
+use Matches\MatchForm;
 use Events\EventForm;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
