@@ -10,7 +10,10 @@
       "Bash(gh pr create:*)",
       "Bash(git cherry-pick:*)",
       "Bash(git checkout:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(php artisan test:*)",
+      "Bash(php artisan:*)",
+      "Bash(php -l:*)"
     ],
     "deny": []
   }
