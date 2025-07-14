@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\ActivationStatus;
+use App\Enums\Shared\ActivationStatus;
 use App\Models\Concerns\OwnedByUser;
 use App\Models\Contracts\Activatable;
 use App\Models\Contracts\Retirable;

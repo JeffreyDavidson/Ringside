@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Titles\TitleBuilder;
-use App\Enums\ActivationStatus;
+use App\Enums\Shared\ActivationStatus;
 use App\Models\Concerns\HasChampionships;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
