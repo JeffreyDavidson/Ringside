@@ -2,52 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Referees\IndexController;
 use App\Http\Controllers\Referees\ShowController;
 use App\Livewire\Referees\Tables\PreviousMatchesTable;
-use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Referees\Referee;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for Referees Controllers.
+ * Feature tests for Referees Show Controller.
  *
- * @see IndexController
  * @see ShowController
  */
-describe('index', function () {
-    /**
-     * @see IndexController::__invoke()
-     */
-    test('index returns a view', function () {
-        actingAs(administrator())
-            ->get(action(IndexController::class))
-            ->assertOk()
-            ->assertViewIs('referees.index')
-            ->assertSeeLivewire(RefereesTable::class);
-    });
-
-    /**
-     * @see IndexController::__invoke()
-     */
-    test('a basic user cannot view referees index page', function () {
-        actingAs(basicUser())
-            ->get(action(IndexController::class))
-            ->assertForbidden();
-    });
-
-    /**
-     * @see IndexController::__invoke()
-     */
-    test('a guest cannot view referees index page', function () {
-        get(action(IndexController::class))
-            ->assertRedirect(route('login'));
-    });
-});
-
-describe('show', function () {
+describe('Referees Show Controller', function () {
     beforeEach(function () {
         $this->referee = Referee::factory()->create();
     });

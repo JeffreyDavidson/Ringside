@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Managers\IndexController;
 use App\Http\Controllers\Managers\ShowController;
-use App\Livewire\Managers\Tables\ManagersTable;
 use App\Livewire\Managers\Tables\PreviousTagTeamsTable;
 use App\Livewire\Managers\Tables\PreviousWrestlersTable;
 use App\Models\Managers\Manager;
@@ -13,42 +11,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 /**
- * Feature tests for Managers Controllers.
+ * Feature tests for Managers Show Controller.
  *
- * @see IndexController
  * @see ShowController
  */
-describe('index', function () {
-    /**
-     * @see IndexController::__invoke()
-     */
-    test('index returns a view', function () {
-        actingAs(administrator())
-            ->get(action(IndexController::class))
-            ->assertOk()
-            ->assertViewIs('managers.index')
-            ->assertSeeLivewire(ManagersTable::class);
-    });
-
-    /**
-     * @see IndexController::__invoke()
-     */
-    test('a basic user cannot view managers index page', function () {
-        actingAs(basicUser())
-            ->get(action(IndexController::class))
-            ->assertForbidden();
-    });
-
-    /**
-     * @see IndexController::__invoke()
-     */
-    test('a guest cannot view managers index page', function () {
-        get(action(IndexController::class))
-            ->assertRedirect(route('login'));
-    });
-});
-
-describe('show', function () {
+describe('Managers Show Controller', function () {
     beforeEach(function () {
         $this->manager = Manager::factory()->create();
     });
