@@ -35,7 +35,7 @@ use Livewire\Component;
  * detail pages, cards, etc.) while maintaining consistent authorization and
  * error handling patterns.
  */
-class ManagerActionsComponent extends Component
+class ActionsComponent extends Component
 {
     public Manager $manager;
 
@@ -186,6 +186,6 @@ class ManagerActionsComponent extends Component
 
     public function render(): View
     {
-        return view('livewire.managers.components.manager-actions-component');
+        return view('livewire.managers.components.actions-component');
     }
 }
