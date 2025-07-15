@@ -8,7 +8,7 @@
             </div>
             <div class="col-span-2">
                 <div class="flex flex-col gap-5 lg:gap-7.5">
-                    <livewire:matches.tables.event-matches-table :eventId="$event->id" />
+                    <livewire:matches.tables.matches-table :eventId="$event->id" />
                 </div>
             </div>
         </div>
