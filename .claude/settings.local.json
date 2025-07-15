@@ -13,7 +13,8 @@
       "Bash(mkdir:*)",
       "Bash(php artisan test:*)",
       "Bash(php artisan:*)",
-      "Bash(php -l:*)"
+      "Bash(php -l:*)",
+      "Bash(git branch:*)"
     ],
     "deny": []
   }
