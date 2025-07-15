@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\RetireAction;
 use App\Events\Managers\ManagerRetired;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
@@ -97,7 +97,7 @@ test('it retires a suspended manager at the current datetime by default', functi
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('createReinstatement')
         ->once()
         ->withArgs(function (Manager $reinstatableManager, Carbon $retirementDate) use ($manager, $datetime) {
             expect($reinstatableManager->is($manager))->toBeTrue()
@@ -147,7 +147,7 @@ test('it retires a suspended manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('createReinstatement')
         ->once()
         ->with($manager, $datetime)
         ->andReturns($manager);

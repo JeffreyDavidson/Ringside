@@ -53,7 +53,7 @@ abstract class BaseModal extends ModalComponent
             return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
         }
 
-        return 'Add '.class_basename($this->modelType);
+        return 'Add '.(isset($this->modelType) ? class_basename($this->modelType) : 'Record');
     }
 
     public function clear(): void

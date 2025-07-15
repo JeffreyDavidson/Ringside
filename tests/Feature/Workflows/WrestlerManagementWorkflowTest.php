@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Wrestlers\Modals\WrestlerFormModal;
+use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Livewire\Wrestlers\Tables\WrestlersTable;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
@@ -26,7 +26,7 @@ describe('Wrestler Creation Journey', function () {
 
         // And: Creating wrestler through modal workflow
         $modalComponent = Livewire::actingAs($admin)
-            ->test(WrestlerFormModal::class)
+            ->test(FormModal::class)
             ->call('openModal') // Open for creation
             ->assertSet('isModalOpen', true);
 
@@ -74,7 +74,7 @@ describe('Wrestler Creation Journey', function () {
 
         // When: Opening create modal and using dummy data
         $component = Livewire::actingAs($admin)
-            ->test(WrestlerFormModal::class)
+            ->test(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -189,7 +189,7 @@ describe('Wrestler Profile Management Journey', function () {
 
         // When: Opening edit modal for the wrestler
         $component = Livewire::actingAs($admin)
-            ->test(WrestlerFormModal::class)
+            ->test(FormModal::class)
             ->call('openModal', $wrestler->id)
             ->assertSet('isModalOpen', true);
 

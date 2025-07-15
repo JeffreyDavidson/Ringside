@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Wrestlers\Forms\WrestlerForm;
-use App\Livewire\Wrestlers\Modals\WrestlerFormModal;
+use App\Livewire\Wrestlers\Forms\Form;
+use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Component;
 
 /**
- * Integration tests for WrestlerFormModal component behavior and functionality.
+ * Integration tests for FormModal component behavior and functionality.
  *
  * INTEGRATION TEST SCOPE:
  * - Component instantiation and inheritance behavior
@@ -19,19 +19,19 @@ use Livewire\Component;
  * - Method invocation and business logic validation
  * - Component property management and types
  *
- * These tests verify that the WrestlerFormModal correctly integrates its
+ * These tests verify that the FormModal correctly integrates its
  * various components and provides the expected business functionality.
  *
- * @see WrestlerFormModal
+ * @see FormModal
  */
-describe('WrestlerFormModal Integration Tests', function () {
+describe('FormModal Integration Tests', function () {
     beforeEach(function () {
-        $this->modal = new WrestlerFormModal();
+        $this->modal = new FormModal();
     });
 
     describe('component integration and structure', function () {
         test('can be instantiated successfully', function () {
-            expect($this->modal)->toBeInstanceOf(WrestlerFormModal::class);
+            expect($this->modal)->toBeInstanceOf(FormModal::class);
         });
 
         test('extends BaseFormModal with proper inheritance', function () {
@@ -60,12 +60,12 @@ describe('WrestlerFormModal Integration Tests', function () {
     });
 
     describe('abstract method implementations', function () {
-        test('getFormClass returns correct WrestlerForm class', function () {
+        test('getFormClass returns correct Form class', function () {
             $reflection = new ReflectionMethod($this->modal, 'getFormClass');
             $reflection->setAccessible(true);
             $formClass = $reflection->invoke($this->modal);
 
-            expect($formClass)->toBe(WrestlerForm::class);
+            expect($formClass)->toBe(Form::class);
         });
 
         test('getModelClass returns correct Wrestler class', function () {
@@ -190,20 +190,20 @@ describe('WrestlerFormModal Integration Tests', function () {
 
     describe('component property management', function () {
         test('has correct property types for form integration', function () {
-            $formProperty = new ReflectionProperty(WrestlerFormModal::class, 'form');
+            $formProperty = new ReflectionProperty(FormModal::class, 'form');
             expect($formProperty->isPublic())->toBeTrue();
 
-            $modalOpenProperty = new ReflectionProperty(WrestlerFormModal::class, 'isModalOpen');
+            $modalOpenProperty = new ReflectionProperty(FormModal::class, 'isModalOpen');
             expect($modalOpenProperty->isPublic())->toBeTrue();
 
-            $modalPathProperty = new ReflectionProperty(WrestlerFormModal::class, 'modalFormPath');
+            $modalPathProperty = new ReflectionProperty(FormModal::class, 'modalFormPath');
             expect($modalPathProperty->isProtected())->toBeTrue();
         });
     });
 
     describe('trait integration', function () {
         test('uses GeneratesDummyData trait for functionality', function () {
-            $traits = class_uses_recursive(WrestlerFormModal::class);
+            $traits = class_uses_recursive(FormModal::class);
 
             expect($traits)->toContain('App\Livewire\Concerns\GeneratesDummyData');
         });

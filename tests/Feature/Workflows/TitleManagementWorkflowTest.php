@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Titles\Modals\TitleFormModal;
+use App\Livewire\Titles\Modals\FormModal;
 use App\Livewire\Titles\Tables\TitlesTable;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -27,7 +27,7 @@ describe('Title Creation and Setup Workflow', function () {
 
         // And: Creating title through modal workflow
         $modalComponent = Livewire::actingAs($admin)
-            ->test(TitleFormModal::class)
+            ->test(FormModal::class)
             ->call('openModal')
             ->assertSet('isModalOpen', true);
 
@@ -67,7 +67,7 @@ describe('Title Creation and Setup Workflow', function () {
 
         // When: Opening create modal and using dummy data
         $component = Livewire::actingAs($admin)
-            ->test(TitleFormModal::class)
+            ->test(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -209,7 +209,7 @@ describe('Title Editing Workflow', function () {
 
         // When: Opening edit modal for the title
         $component = Livewire::actingAs($admin)
-            ->test(TitleFormModal::class)
+            ->test(FormModal::class)
             ->call('openModal', $title->id)
             ->assertSet('isModalOpen', true);
 
