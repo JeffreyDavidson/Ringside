@@ -133,6 +133,7 @@ For detailed architecture information, see the documentation in `docs/architectu
 - Stables ↔ Wrestlers: `stables_wrestlers` table with `joined_at`/`left_at`
 - Stables ↔ Tag Teams: `stables_tag_teams` table with `joined_at`/`left_at`
 - These represent stable membership relationships
+- **DECISION: Use separate tables (not polymorphic)** for type safety and clear relationships
 
 ### Key Architecture Decisions
 - NO direct stable-manager relationships
@@ -234,6 +235,12 @@ app/Rules/Events/ → tests/Unit/Rules/Events/
 - Class: `EventMatchesTable` → Component: `matches.tables.event-matches-table`
 - **Pattern:** PascalCase class → kebab-case with namespace dots
 
+**Avoid Redundant Domain Prefixes:**
+- ❌ `WrestlerActionsComponent` (inside `app/Livewire/Wrestlers/Components/`)
+- ✅ `ActionsComponent` (directory context makes domain clear)
+- ❌ `WrestlerFormModal` → ✅ `FormModal` (when inside Wrestlers directory)
+- **Rule:** Domain context from directory structure eliminates need for domain prefix in class names
+
 ### Interface Implementation Strategy
 
 **When to use traits vs direct implementation:**
@@ -264,6 +271,16 @@ app/Rules/Events/ → tests/Unit/Rules/Events/
 - Avoid being overwhelmed by multiple issues  
 - Ensure each fix is complete before moving on
 - Maintain clear focus on current problem
+
+**CRITICAL: When Tests Fail - App Directory is Authoritative**
+
+**IMPORTANT:** If tests fail and expect different behavior than the app directory implementation:
+1. **DO NOT automatically fix code to match test expectations**
+2. **Discuss with the user before making changes** 
+3. **The app directory structure is considered the authoritative source**
+4. **Update tests to match the correct app implementation**
+
+At this point in development, the application structure is well-established, so failing tests likely need to be updated rather than the application code being "wrong".
 
 ### Debugging Strategy
 

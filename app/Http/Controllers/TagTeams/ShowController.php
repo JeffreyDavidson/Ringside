@@ -14,7 +14,7 @@ class ShowController
     {
         Gate::authorize('view', $tagTeam);
 
-        return view('tagteams.show', [
+        return view('tag-teams.show', [
             'tagTeam' => $tagTeam,
         ]);
     }

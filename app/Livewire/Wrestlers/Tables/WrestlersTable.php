@@ -10,7 +10,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Wrestlers\Components\WrestlerActionsComponent;
+use App\Livewire\Wrestlers\Components\ActionsComponent;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -125,8 +125,8 @@ class WrestlersTable extends BaseTableWithActions
     {
         $wrestler = Wrestler::findOrFail($wrestlerId);
 
-        // Delegate to the WrestlerActionsComponent
-        $actionsComponent = new WrestlerActionsComponent();
+        // Delegate to the ActionsComponent
+        $actionsComponent = new ActionsComponent();
         $actionsComponent->wrestler = $wrestler;
 
         match ($action) {

@@ -30,7 +30,7 @@ describe('PreviousStablesTable Configuration', function () {
     it('has correct database table name', function () {
         $component = Livewire::test(PreviousStablesTable::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->databaseTableName)->toBe('stables_members');
+        expect($component->instance()->databaseTableName)->toBe('stables_wrestlers');
     });
 });
 
@@ -40,10 +40,9 @@ describe('PreviousStablesTable Query Building', function () {
 
         $builder = $component->instance()->builder();
 
-        expect($builder->toSql())->toContain('where "member_id" = ? and "member_type" = ?');
-        expect($builder->toSql())->toContain('"left_at" is not null');
+        expect($builder->toSql())->toContain('where "stables_wrestlers"."wrestler_id" = ?');
+        expect($builder->toSql())->toContain('"stables_wrestlers"."left_at" is not null');
         expect($builder->getBindings())->toContain($this->wrestler->id);
-        expect($builder->getBindings())->toContain('wrestler');
     });
 
     it('filters by wrestler id correctly', function () {

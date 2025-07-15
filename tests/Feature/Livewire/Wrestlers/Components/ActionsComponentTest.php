@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Wrestlers\Components\WrestlerActionsComponent;
+use App\Livewire\Wrestlers\Components\ActionsComponent;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
@@ -13,22 +13,22 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 });
 
-describe('WrestlerActionsComponent Basic Functionality', function () {
+describe('ActionsComponent Basic Functionality', function () {
     it('can be instantiated', function () {
-        $component = Livewire::test(WrestlerActionsComponent::class, ['wrestler' => $this->wrestler]);
+        $component = Livewire::test(ActionsComponent::class, ['wrestler' => $this->wrestler]);
 
-        expect($component->instance())->toBeInstanceOf(WrestlerActionsComponent::class);
+        expect($component->instance())->toBeInstanceOf(ActionsComponent::class);
         expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
     });
 
     it('can mount with wrestler', function () {
-        $component = Livewire::test(WrestlerActionsComponent::class, ['wrestler' => $this->wrestler]);
+        $component = Livewire::test(ActionsComponent::class, ['wrestler' => $this->wrestler]);
 
         expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
     });
 
     it('has required action methods', function () {
-        $component = new WrestlerActionsComponent();
+        $component = new ActionsComponent();
 
         expect(method_exists($component, 'employ'))->toBeTrue();
         expect(method_exists($component, 'release'))->toBeTrue();
@@ -41,7 +41,7 @@ describe('WrestlerActionsComponent Basic Functionality', function () {
     });
 
     it('can render successfully', function () {
-        $component = Livewire::test(WrestlerActionsComponent::class, ['wrestler' => $this->wrestler]);
+        $component = Livewire::test(ActionsComponent::class, ['wrestler' => $this->wrestler]);
 
         $component->assertSuccessful();
     });
