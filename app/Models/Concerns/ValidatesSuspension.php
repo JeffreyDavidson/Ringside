@@ -115,8 +115,7 @@ trait ValidatesSuspension
     {
         $type = RosterMemberType::fromModel($this);
 
-        return ! $this->isUnemployed()
-            && ! $this->isReleased()
+        return ! $this->isNotInEmployment()
             && ! $this->hasFutureEmployment()
             && (! $type->canBeInjured() || ! ($this instanceof Injurable) || ! $this->isInjured())
             && ! $this->isRetired()
@@ -144,12 +143,8 @@ trait ValidatesSuspension
             throw CannotBeReinstatedException::available();
         }
 
-        if ($this->isUnemployed()) {
+        if ($this->isNotInEmployment()) {
             throw CannotBeReinstatedException::unemployed();
-        }
-
-        if ($this->isReleased()) {
-            throw CannotBeReinstatedException::released();
         }
 
         if ($this->hasFutureEmployment()) {
@@ -184,13 +179,4 @@ trait ValidatesSuspension
         return RosterMemberType::getValidationStrategy($this, 'suspension');
     }
 
-    /**
-     * Check if the model is unemployed.
-     *
-     * @return bool True if unemployed, false otherwise
-     */
-    private function isUnemployed(): bool
-    {
-        return $this->hasStatus(EmploymentStatus::Unemployed);
-    }
 }

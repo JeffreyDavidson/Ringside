@@ -64,8 +64,8 @@ test('it throws exception for suspending a non suspendable manager', function ($
 ]);
 
 test('manager suspension status checks work correctly', function () {
-    $employedManager = Manager::factory()->employed()->make();
-    $suspendedManager = Manager::factory()->unemployed()->make(); // Use unemployed as a stand-in for not suspendable
+    $employedManager = Manager::factory()->employed()->create();
+    $suspendedManager = Manager::factory()->unemployed()->create(); // Use unemployed as a stand-in for not suspendable
 
     expect($employedManager->canBeSuspended())->toBeTrue();
     expect($suspendedManager->canBeSuspended())->toBeFalse();

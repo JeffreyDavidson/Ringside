@@ -60,9 +60,8 @@ trait ManagesRetirement
             'started_at' => $startDate,
         ]);
 
-        // Update the status field to reflect retirement
-        $retiredStatus = $this->getRetiredStatus($model);
-        $model->update(['status' => $retiredStatus]);
+        // Status is now computed from relationships - no need to update manually
+        // The computed status will automatically reflect the retirement state
     }
 
     /**
@@ -93,11 +92,8 @@ trait ManagesRetirement
                 'ended_at' => $endDate,
             ]);
 
-            // Update the status field to reflect comeback from retirement
-            // Note: We set to Released as the default post-retirement status
-            // The calling action should handle setting the correct employment status
-            $comebackStatus = $this->getComebackStatus($model);
-            $model->update(['status' => $comebackStatus]);
+            // Status is now computed from relationships - no need to update manually
+            // The computed status will automatically reflect the correct state
         }
     }
 

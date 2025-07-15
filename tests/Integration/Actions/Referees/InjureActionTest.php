@@ -59,8 +59,8 @@ test('it throws exception for injuring a non injurable referee', function ($fact
 ]);
 
 test('referee injury status checks work correctly', function () {
-    $employedReferee = Referee::factory()->employed()->make();
-    $injuredReferee = Referee::factory()->unemployed()->make(); // Use unemployed as a stand-in for not injurable
+    $employedReferee = Referee::factory()->employed()->create();
+    $injuredReferee = Referee::factory()->unemployed()->create(); // Use unemployed as a stand-in for not injurable
 
     expect($employedReferee->canBeInjured())->toBeTrue();
     expect($injuredReferee->canBeInjured())->toBeFalse();

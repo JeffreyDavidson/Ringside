@@ -64,8 +64,8 @@ test('it throws exception for injuring a non injurable manager', function ($fact
 ]);
 
 test('manager injury status checks work correctly', function () {
-    $employedManager = Manager::factory()->employed()->make();
-    $injuredManager = Manager::factory()->unemployed()->make(); // Use unemployed as a stand-in for not injurable
+    $employedManager = Manager::factory()->employed()->create();
+    $injuredManager = Manager::factory()->unemployed()->create(); // Use unemployed as a stand-in for not injurable
 
     expect($employedManager->canBeInjured())->toBeTrue();
     expect($injuredManager->canBeInjured())->toBeFalse();

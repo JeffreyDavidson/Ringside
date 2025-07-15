@@ -175,8 +175,8 @@ test('it throws exception for retiring a non retirable referee', function ($fact
 ]);
 
 test('referee retirement status checks work correctly', function () {
-    $employedReferee = Referee::factory()->employed()->make();
-    $retiredReferee = Referee::factory()->unemployed()->make(); // Use unemployed as a stand-in for not retirable
+    $employedReferee = Referee::factory()->employed()->create();
+    $retiredReferee = Referee::factory()->unemployed()->create(); // Use unemployed as a stand-in for not retirable
 
     expect($employedReferee->canBeRetired())->toBeTrue();
     expect($retiredReferee->canBeRetired())->toBeFalse();

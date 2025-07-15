@@ -22,6 +22,7 @@ use App\Models\Contracts\Retirable;
 use Database\Factories\Titles\TitleFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -126,7 +127,6 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
      */
     protected $fillable = [
         'name',
-        'status',
         'type',
     ];
 
@@ -136,8 +136,44 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => TitleStatus::Undebuted->value,
+        // Status is now computed from activity periods and retirement state
     ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the title status based on activity periods and retirement state:
+     * - Active: Has current activity period
+     * - PendingDebut: Has future activity period
+     * - Inactive: Has previous activity periods but no current activity
+     * - Undebuted: No activity periods at all
+     *
+     * @return Attribute<TitleStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): TitleStatus {
+                // Check for current activity first
+                if ($this->isCurrentlyActive()) {
+                    return TitleStatus::Active;
+                }
+                
+                // Check for future activity
+                if ($this->hasFutureActivity()) {
+                    return TitleStatus::PendingDebut;
+                }
+                
+                // Check for previous activity periods
+                if ($this->hasActivityPeriods()) {
+                    return TitleStatus::Inactive;
+                }
+                
+                // No activity periods at all
+                return TitleStatus::Undebuted;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.

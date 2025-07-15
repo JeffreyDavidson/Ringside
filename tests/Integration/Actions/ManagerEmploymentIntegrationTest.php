@@ -126,7 +126,7 @@ describe('Manager Employment Action Integration', function () {
             EmployAction::run($manager, $futureDate);
 
             $refreshedManager = $manager->fresh();
-            expect($refreshedManager->status)->toBe(EmploymentStatus::Employed);
+            expect($refreshedManager->status)->toBe(EmploymentStatus::FutureEmployment);
             expect($refreshedManager->currentEmployment)->toBeNull(); // Future employment not yet current
             
             // Verify the future employment record exists

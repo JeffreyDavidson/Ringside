@@ -33,8 +33,16 @@ class WrestlerFactory extends Factory
             'weight' => fake()->numberBetween(180, 500),
             'hometown' => fake()->city().', '.fake()->state(),
             'signature_move' => null,
-            'status' => EmploymentStatus::Unemployed,
+            // Status is now computed from employment relationships
         ];
+    }
+
+    /**
+     * Set the wrestler as employed.
+     */
+    public function employed(): static
+    {
+        return $this->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments');
     }
 
     /**
@@ -42,8 +50,7 @@ class WrestlerFactory extends Factory
      */
     public function bookable(): static
     {
-        return $this->state(fn () => ['status' => EmploymentStatus::Employed])
-            ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments');
+        return $this->employed();
     }
 
     /**
@@ -51,8 +58,7 @@ class WrestlerFactory extends Factory
      */
     public function withFutureEmployment(): static
     {
-        return $this->state(fn () => ['status' => EmploymentStatus::FutureEmployment])
-            ->has(WrestlerEmployment::factory()->started(Carbon::tomorrow()), 'employments');
+        return $this->has(WrestlerEmployment::factory()->started(Carbon::tomorrow()), 'employments');
     }
 
     /**
@@ -60,7 +66,7 @@ class WrestlerFactory extends Factory
      */
     public function unemployed(): static
     {
-        return $this->state(fn () => ['status' => EmploymentStatus::Unemployed]);
+        return $this->state(fn () => []);
     }
 
     /**
@@ -72,8 +78,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => EmploymentStatus::Retired])
-            ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
+        return $this->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
             ->has(WrestlerRetirement::factory()->started($end), 'retirements');
     }
 
@@ -86,8 +91,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => EmploymentStatus::Released])
-            ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments');
+        return $this->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments');
     }
 
     /**
@@ -99,8 +103,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => EmploymentStatus::Employed])
-            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+        return $this->has(WrestlerEmployment::factory()->started($start), 'employments')
             ->has(WrestlerSuspension::factory()->started($end), 'suspensions');
     }
 
@@ -112,8 +115,7 @@ class WrestlerFactory extends Factory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->state(fn () => ['status' => EmploymentStatus::Employed])
-            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+        return $this->has(WrestlerEmployment::factory()->started($start), 'employments')
             ->has(WrestlerInjury::factory()->started($now), 'injuries');
     }
 

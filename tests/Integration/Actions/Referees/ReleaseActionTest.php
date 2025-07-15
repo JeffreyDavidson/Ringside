@@ -16,8 +16,8 @@ beforeEach(function () {
 });
 
 test('referee release status checks work correctly', function () {
-    $employedReferee = Referee::factory()->employed()->make();
-    $unemployedReferee = Referee::factory()->unemployed()->make();
+    $employedReferee = Referee::factory()->employed()->create();
+    $unemployedReferee = Referee::factory()->unemployed()->create();
 
     expect($employedReferee->canBeReleased())->toBeTrue();
     expect($unemployedReferee->canBeReleased())->toBeFalse();
