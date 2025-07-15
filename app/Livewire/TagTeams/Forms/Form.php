@@ -44,7 +44,7 @@ use Illuminate\Validation\Rule;
  * @property array<int, int> $managers Array of manager IDs assigned to the tag team
  * @property Carbon|string|null $employment_date Employment start date
  */
-class TagTeamForm extends LivewireBaseForm
+class Form extends LivewireBaseForm
 {
     use ManagesEmployment;
 

@@ -40,7 +40,7 @@ use Illuminate\Support\Carbon;
  * @property string $last_name Manager's last name for identification
  * @property Carbon|string|null $employment_date Employment start date
  */
-class ManagerForm extends LivewireBaseForm
+class Form extends LivewireBaseForm
 {
     use ManagesEmployment;
 
