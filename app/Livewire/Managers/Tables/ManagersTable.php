@@ -26,7 +26,7 @@ use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Managers\Components\ManagerActionsComponent;
+use App\Livewire\Managers\Components\ActionsComponent;
 use App\Models\Managers\Manager;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -263,8 +263,8 @@ class ManagersTable extends BaseTableWithActions
     {
         $manager = Manager::findOrFail($managerId);
 
-        // Delegate to the ManagerActionsComponent
-        $actionsComponent = new ManagerActionsComponent();
+        // Delegate to the ActionsComponent
+        $actionsComponent = new ActionsComponent();
         $actionsComponent->manager = $manager;
 
         match ($action) {

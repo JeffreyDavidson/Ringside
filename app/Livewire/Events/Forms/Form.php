@@ -43,7 +43,7 @@ use Illuminate\Validation\Rule;
  * @property int $venue Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
-class EventForm extends LivewireBaseForm
+class Form extends LivewireBaseForm
 {
     use PresentsVenuesList;
 

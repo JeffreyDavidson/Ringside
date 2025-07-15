@@ -26,7 +26,7 @@ use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Referees\Components\RefereeActionsComponent;
+use App\Livewire\Referees\Components\ActionsComponent;
 use App\Models\Referees\Referee;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -263,8 +263,8 @@ class RefereesTable extends BaseTableWithActions
     {
         $referee = Referee::findOrFail($refereeId);
 
-        // Delegate to the RefereeActionsComponent
-        $actionsComponent = new RefereeActionsComponent();
+        // Delegate to the ActionsComponent
+        $actionsComponent = new ActionsComponent();
         $actionsComponent->referee = $referee;
 
         match ($action) {
