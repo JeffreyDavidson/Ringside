@@ -41,7 +41,7 @@ use Livewire\Form;
  * @see BaseFormModal For modal functionality and patterns
  * @see EventMatch For the underlying match model structure
  */
-class EventMatchFormModal extends BaseFormModal
+class FormModal extends BaseFormModal
 {
     use PresentsMatchTypesList;
     use PresentsRefereesList;

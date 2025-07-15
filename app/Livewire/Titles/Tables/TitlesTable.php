@@ -13,7 +13,7 @@ use App\Builders\Titles\TitleBuilder;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
-use App\Livewire\Titles\Components\TitleActionsComponent;
+use App\Livewire\Titles\Components\ActionsComponent;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -271,8 +271,8 @@ class TitlesTable extends BaseTableWithActions
     {
         $title = Title::findOrFail($titleId);
 
-        // Delegate to the TitleActionsComponent
-        $actionsComponent = new TitleActionsComponent();
+        // Delegate to the ActionsComponent
+        $actionsComponent = new ActionsComponent();
         $actionsComponent->title = $title;
 
         match ($action) {
