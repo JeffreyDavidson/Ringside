@@ -276,8 +276,8 @@ class EventMatchCompetitorsCollection extends Collection
         return $this->groupBy('side_number')
             ->map(function ($competitorsOnSide) {
                 return collect($competitorsOnSide)
-                    ->filter(fn (mixed $competitor) => $competitor instanceof EventMatchCompetitor)
-                    ->map(fn (EventMatchCompetitor $competitor) => $competitor->getCompetitor())
+                    ->filter(fn (\App\Models\Matches\EventMatchCompetitor $competitor) => $competitor instanceof EventMatchCompetitor)
+                    ->map(fn (\App\Models\Matches\EventMatchCompetitor $competitor) => $competitor->getCompetitor())
                     ->values(); // Reset keys to sequential integers
             });
     }

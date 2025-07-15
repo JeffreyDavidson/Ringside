@@ -21,7 +21,7 @@ class RingsideMakeTest extends Command
      *
      * @var string
      */
-    protected $signature = 'ringside:make:test 
+    protected $signature = 'ringside:make:test
                            {name? : The name of the test (optional)}
                            {--unit : Create a unit test}
                            {--feature : Create a feature test}
@@ -344,7 +344,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
     describe(\'{{ modelVariable }} attributes and configuration\', function () {
         test(\'{{ modelVariable }} has correct fillable properties\', function () {
             ${{ modelVariable }} = new {{ modelClass }}();
-            
+
             expect(${{ modelVariable }}->getFillable())->toEqual([
                 // TODO: Add your model\'s fillable properties here
             ]);
@@ -353,7 +353,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
         test(\'{{ modelVariable }} has correct casts configuration\', function () {
             ${{ modelVariable }} = new {{ modelClass }}();
             $casts = ${{ modelVariable }}->getCasts();
-            
+
             // TODO: Add specific cast assertions here
             expect($casts)->toBeArray();
         });
@@ -379,7 +379,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
 
         test(\'{{ modelVariable }} implements all required interfaces\', function () {
             $interfaces = class_implements({{ modelClass }}::class);
-            
+
             // TODO: Add specific interface assertions here
             expect($interfaces)->toBeArray();
         });
@@ -423,7 +423,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
 
     /**
      * Analyze a model to generate smart test content.
-     * 
+     *
      * @return array<string, mixed>
      */
     protected function analyzeModel(string $modelClass, object $modelInstance): array
@@ -493,7 +493,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             return '// Model has no fillable properties';
         }
 
-        $formattedFillable = array_map(function ($property) {
+        $formattedFillable = array_map(function (string $property) {
             return "                '{$property}',";
         }, $fillable);
 
@@ -619,7 +619,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
 
         if (empty($interfaces)) {
             return '$interfaces = class_implements('.$reflection->getShortName().'::class);
-            
+
             // Model implements no custom interfaces
             expect($interfaces)->toBeArray();';
         }
@@ -834,7 +834,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
 
     /**
      * Generate constants section for the test.
-     * 
+     *
      * @param ReflectionClass<object> $reflection
      */
     protected function generateConstantsSection(ReflectionClass $reflection): string

@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Replace Laravel's default make:test command with our enhanced version
-        $this->app->singleton('command.test.make', function ($app) {
+        $this->app->singleton('command.test.make', function (\Illuminate\Contracts\Foundation\Application $app) {
             return new EnhancedTestMakeCommand($app['files']);
         });
     }
