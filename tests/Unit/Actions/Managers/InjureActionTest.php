@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\InjureAction;
-use App\Exceptions\CannotBeInjuredException;
+use App\Exceptions\Status\CannotBeInjuredException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
@@ -24,7 +24,7 @@ test('it injures an available manager at the current datetime by default', funct
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('injure')
+        ->shouldReceive('createInjury')
         ->once()
         ->withArgs(function (Manager $injurableManager, Carbon $injuryDate) use ($manager, $datetime) {
             expect($injurableManager->is($manager))->toBeTrue()
@@ -42,7 +42,7 @@ test('it injures an available manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('injure')
+        ->shouldReceive('createInjury')
         ->once()
         ->with($manager, $datetime)
         ->andReturn($manager);
