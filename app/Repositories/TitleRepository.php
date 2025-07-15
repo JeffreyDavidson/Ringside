@@ -110,9 +110,8 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
     {
         $this->createActivity($title, $debutDate);
         
-        // Update the title status based on debut date
-        $status = $debutDate->isFuture() ? TitleStatus::PendingDebut : TitleStatus::Active;
-        $title->update(['status' => $status]);
+        // Status is now computed from relationships - no need to update manually
+        // The computed status will automatically reflect the correct state based on activity periods
         
         // TODO: Add notes handling if TitleActivityPeriod model supports notes column
     }
@@ -124,8 +123,8 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
     {
         $this->endActivity($title, $pullDate);
         
-        // Update the title status to Inactive when pulled
-        $title->update(['status' => TitleStatus::Inactive]);
+        // Status is now computed from relationships - no need to update manually
+        // The computed status will automatically reflect the correct state based on activity periods
         
         // TODO: Add notes handling if TitleActivityPeriod model supports notes column
     }
@@ -137,8 +136,8 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
     {
         $this->createActivity($title, $reinstateDate);
         
-        // Update the title status to Active when reinstated
-        $title->update(['status' => TitleStatus::Active]);
+        // Status is now computed from relationships - no need to update manually
+        // The computed status will automatically reflect the correct state based on activity periods
         
         // TODO: Add notes handling if TitleActivityPeriod model supports notes column
     }
