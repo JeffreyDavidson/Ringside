@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\UnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
@@ -32,7 +32,7 @@ test('it unretires a retired manager at the current datetime by default', functi
         ->andReturn($manager);
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Manager $employableManager, Carbon $unretireDate) use ($manager, $datetime) {
             expect($employableManager->is($manager))->toBeTrue()
@@ -56,7 +56,7 @@ test('it unretires a retired manager at a specific datetime', function () {
         ->andReturn($manager);
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($manager, $datetime)
         ->andReturn($manager);
