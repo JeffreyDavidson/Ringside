@@ -4,31 +4,44 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Modals;
 
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Managers\ManagerForm;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Managers\Forms\Form;
 use App\Models\Managers\Manager;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
- * @extends BaseModal<ManagerForm, Manager>
+ * @extends BaseFormModal<Form, Manager>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
-    protected string $modalFormPath = 'managers.modals.form-modal';
+    public Form $form;
 
-    protected string $modelTitleField = 'full_name';
-
-    protected $modelForm;
-
-    protected $modelType;
-
-    public function fillDummyFields(): void
+    protected function getFormClass(): string
     {
-        /** @var Carbon|null $datetime */
-        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
+        return Form::class;
+    }
 
-        $this->modelForm->first_name = fake()->firstName();
-        $this->modelForm->last_name = fake()->lastName();
-        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
+    protected function getModelClass(): string
+    {
+        return Manager::class;
+    }
+
+    protected function getModalPath(): string
+    {
+        return 'livewire.managers.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
+    {
+        return [
+            'first_name' => fn() => fake()->firstName(),
+            'last_name' => fn() => fake()->lastName(),
+            'start_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view($this->modalFormPath ?? 'livewire.managers.modals.form-modal');
     }
 }

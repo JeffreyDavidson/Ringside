@@ -10,6 +10,7 @@ use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\Injurable;
+use App\Models\Contracts\Suspendable;
 use App\Models\Contracts\SuspensionValidationStrategy;
 use App\Models\TagTeams\TagTeam;
 use Exception;
@@ -139,6 +140,10 @@ trait ValidatesSuspension
      */
     public function ensureCanBeReinstated(): void
     {
+        if ($this instanceof Suspendable && !$this->isSuspended()) {
+            throw CannotBeReinstatedException::available();
+        }
+
         if ($this->isUnemployed()) {
             throw CannotBeReinstatedException::unemployed();
         }

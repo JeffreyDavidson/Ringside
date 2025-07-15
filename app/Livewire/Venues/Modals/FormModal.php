@@ -4,23 +4,34 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Modals;
 
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Venues\VenueForm;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Venues\Forms\Form;
 use App\Models\Events\Venue;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseModal<VenueForm, Venue>
+ * @extends BaseFormModal<Form, Venue>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
-    protected string $modalFormPath = 'venues.modals.form-modal';
+    public Form $form;
 
-    protected $modelForm;
+    protected function getFormClass(): string
+    {
+        return Form::class;
+    }
 
-    protected $modelType;
+    protected function getModelClass(): string
+    {
+        return Venue::class;
+    }
 
-    public function fillDummyFields(): void
+    protected function getModalPath(): string
+    {
+        return 'livewire.venues.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
     {
         /**
          * @var string $state
@@ -29,10 +40,17 @@ class FormModal extends BaseModal
          */
         $state = fake('en_US')->state();
 
-        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->append(' Arena')->value();
-        $this->modelForm->street_address = fake()->streetAddress();
-        $this->modelForm->city = fake()->city();
-        $this->modelForm->state = $state;
-        $this->modelForm->zipcode = (int) Str::of(fake()->postcode())->limit(5)->value();
+        return [
+            'name' => fn() => Str::of(fake()->sentence(2))->title()->append(' Arena')->value(),
+            'street_address' => fn() => fake()->streetAddress(),
+            'city' => fn() => fake()->city(),
+            'state' => fn() => $state,
+            'zipcode' => fn() => (int) Str::of(fake()->postcode())->limit(5)->value(),
+        ];
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view($this->modalFormPath ?? 'livewire.venues.modals.form-modal');
     }
 }

@@ -29,7 +29,7 @@ use Illuminate\Validation\Rule;
  * - Integration with stable activation relationship system
  * - Wrestling storyline and faction management support
  *
- * @extends LivewireBaseForm<StableForm, Stable>
+ * @extends LivewireBaseForm<Form, Stable>
  *
  * @author Your Name
  *
@@ -41,7 +41,7 @@ use Illuminate\Validation\Rule;
  * @property string $name Stable's official name for storylines and promotion
  * @property Carbon|string|null $start_date Stable activation start date
  */
-class StableForm extends LivewireBaseForm
+class Form extends LivewireBaseForm
 {
     use ManagesActivityPeriods;
 
