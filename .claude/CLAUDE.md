@@ -34,6 +34,27 @@ git commit -m "type: brief description
 - Keep the format clean and professional
 - Use conventional commit types (feat, fix, docs, style, refactor, test, chore, etc.)
 
+### TodoList Management Workflow
+
+**CRITICAL: Commit and PR Before Context Switches**
+
+When managing todos:
+1. **Complete related tasks together** - Finish all tasks that are logically related
+2. **Commit and PR before context switches** - When the next todo is unrelated to current work, commit current changes and create PR
+3. **Resource-specific evaluation** - Before proceeding, evaluate if todos pertain to specific resources and should be organized differently
+4. **Clean separation** - Don't mix unrelated changes in the same branch/PR
+
+**Example Decision Points:**
+- Just finished Rules organization → Next todo is Builders restructure = **COMMIT & PR**
+- Just finished Repository work → Next todo is Policy cleanup = **COMMIT & PR** 
+- Working on multiple Model tests → Next todo is also Model tests = **CONTINUE**
+
+**Benefits:**
+- Cleaner git history with focused PRs
+- Easier code review and rollback
+- Logical separation of concerns
+- Better tracking of architectural changes
+
 ## Architecture Documentation
 
 For detailed architecture information, see the documentation in `docs/architecture/`:
