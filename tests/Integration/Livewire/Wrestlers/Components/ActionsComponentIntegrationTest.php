@@ -10,14 +10,14 @@ use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
-use App\Livewire\Wrestlers\Components\WrestlerActionsComponent;
+use App\Livewire\Wrestlers\Components\ActionsComponent;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 
 /**
- * Integration tests for WrestlerActionsComponent business actions and authorization.
+ * Integration tests for ActionsComponent business actions and authorization.
  *
  * INTEGRATION TEST SCOPE:
  * - Business action integration with Action classes
@@ -27,12 +27,12 @@ use Livewire\Livewire;
  * - Error handling and exception management
  * - Wrestler entity lifecycle management
  *
- * These tests verify that the WrestlerActionsComponent correctly implements
+ * These tests verify that the ActionsComponent correctly implements
  * wrestler business operations with proper authorization and state management.
  *
- * @see WrestlerActionsComponent
+ * @see ActionsComponent
  */
-describe('WrestlerActionsComponent Integration Tests', function () {
+describe('ActionsComponent Integration Tests', function () {
     beforeEach(function () {
         $this->admin = User::factory()->administrator()->create();
         $this->basicUser = User::factory()->create();
@@ -62,20 +62,20 @@ describe('WrestlerActionsComponent Integration Tests', function () {
     describe('component initialization and authorization', function () {
         test('renders successfully with wrestler entity', function () {
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->assertOk();
         });
 
         test('basic users cannot access wrestler actions', function () {
             $component = Livewire::actingAs($this->basicUser)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->assertForbidden();
         });
 
         test('guests cannot access wrestler actions', function () {
-            $component = Livewire::test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+            $component = Livewire::test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->assertForbidden();
         });
@@ -96,7 +96,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('employ', $this->availableWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->call('employ', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -116,7 +116,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('release', $this->employedWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->employedWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->employedWrestler]);
 
             $component->call('release', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -138,7 +138,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('suspend', $this->employedWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->employedWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->employedWrestler]);
 
             $component->call('suspend', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -158,7 +158,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('reinstate', $this->suspendedWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->suspendedWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->suspendedWrestler]);
 
             $component->call('reinstate', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -180,7 +180,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('injure', $this->employedWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->employedWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->employedWrestler]);
 
             $component->call('injure', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -200,7 +200,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('clearFromInjury', $this->injuredWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->injuredWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->injuredWrestler]);
 
             $component->call('clearFromInjury', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -222,7 +222,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('retire', $this->availableWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->call('retire', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -242,7 +242,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->with('unretire', $this->retiredWrestler);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->retiredWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->retiredWrestler]);
 
             $component->call('unretire', now()->format('Y-m-d'))
                 ->assertDispatched('wrestler-updated');
@@ -257,7 +257,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->andReturn(true);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             expect($component->instance()->canEmploy())->toBeTrue();
         });
@@ -269,7 +269,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->andReturn(true);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->employedWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->employedWrestler]);
 
             expect($component->instance()->canRelease())->toBeTrue();
         });
@@ -281,7 +281,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->andReturn(true);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             expect($component->instance()->canRetire())->toBeTrue();
         });
@@ -315,7 +315,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 app()->instance($actionClass, $mockAction);
 
                 $component = Livewire::actingAs($this->admin)
-                    ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                    ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
                 $component->call($method, now()->format('Y-m-d'))
                     ->assertDispatched('wrestler-updated');
@@ -335,7 +335,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
             Gate::shouldReceive('authorize')->once();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->call('employ', now()->format('Y-m-d'))
                 ->assertHasNoErrors();
@@ -348,7 +348,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
             app()->instance(EmployAction::class, $mockAction);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             // Valid date format should work
             $component->call('employ', '2024-01-01')
@@ -368,7 +368,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
             Gate::shouldReceive('authorize')->once();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->call('employ', now()->format('Y-m-d'))
                 ->assertHasNoErrors(); // Component should handle exception gracefully
@@ -381,7 +381,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
                 ->andThrow(new \Illuminate\Auth\Access\AuthorizationException('Unauthorized'));
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             expect(function () use ($component) {
                 $component->call('employ', now()->format('Y-m-d'));
@@ -392,7 +392,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
     describe('component state management', function () {
         test('wrestler property is correctly managed', function () {
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             expect($component->instance()->wrestler->id)->toBe($this->availableWrestler->id);
             expect($component->instance()->wrestler->name)->toBe('Available Wrestler');
@@ -405,7 +405,7 @@ describe('WrestlerActionsComponent Integration Tests', function () {
             app()->instance(EmployAction::class, $mockAction);
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlerActionsComponent::class, ['wrestler' => $this->availableWrestler]);
+                ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             $component->call('employ', now()->format('Y-m-d'));
 
