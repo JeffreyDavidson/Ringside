@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\SuspendAction;
-use App\Exceptions\CannotBeSuspendedException;
+use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
@@ -24,7 +24,7 @@ test('it suspends an available manager at the current datetime by default', func
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('suspend')
+        ->shouldReceive('createSuspension')
         ->once()
         ->withArgs(function (Manager $suspendableManager, Carbon $suspensionDate) use ($manager, $datetime) {
             expect($suspendableManager->is($manager))->toBeTrue()
@@ -42,7 +42,7 @@ test('it suspends an available manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('suspend')
+        ->shouldReceive('createSuspension')
         ->once()
         ->with($manager, $datetime)
         ->andReturn($manager);

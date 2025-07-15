@@ -49,7 +49,7 @@ use Illuminate\Database\Eloquent\Model;
  * @example
  * ```php
  * // Creating a wrestler form modal
- * class WrestlerFormModal extends BaseFormModal
+ * class FormModal extends BaseFormModal
  * {
  *     protected function getFormClass(): string
  *     {
@@ -80,7 +80,7 @@ use Illuminate\Database\Eloquent\Model;
  * // Usage in a Livewire component
  * class ManageWrestlers extends Component
  * {
- *     public WrestlerFormModal $modal;
+ *     public FormModal $modal;
  *
  *     public function createWrestler(): void
  *     {
@@ -314,8 +314,11 @@ abstract class BaseFormModal extends BaseModal
         $modelClass = $this->getModelClass();
         $this->modelType = new $modelClass();
 
-        // Use the existing form property (Livewire manages this automatically)
-        // Don't create a new instance - use what Livewire provided
+        // Initialize the form if it doesn't exist (Livewire auto-initialization)
+        if (!isset($this->form)) {
+            $formClass = $this->getFormClass();
+            $this->form = new $formClass();
+        }
 
         // Set the form as the modelForm for BaseModal compatibility
         // IMPORTANT: Ensure both properties reference the same instance

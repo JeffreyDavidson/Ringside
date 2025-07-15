@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\ReleaseAction;
 use App\Events\Managers\ManagerReleased;
-use App\Exceptions\CannotBeReleasedException;
+use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
@@ -25,7 +25,7 @@ test('it releases an available manager at the current datetime by default', func
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('reinstate');
+        ->shouldReceive('createReinstatement');
 
     $this->managerRepository
         ->shouldNotReceive('clearInjury');
@@ -56,7 +56,7 @@ test('it releases an available manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('reinstate');
+        ->shouldReceive('createReinstatement');
 
     $this->managerRepository
         ->shouldNotReceive('clearInjury');
@@ -82,7 +82,7 @@ test('it releases a suspended manager at the current datetime by default', funct
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('createReinstatement')
         ->once()
         ->withArgs(function (Manager $reinstatableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($reinstatableManager->is($manager))->toBeTrue()
@@ -121,7 +121,7 @@ test('it releases a suspended manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('createReinstatement')
         ->once()
         ->with($manager, $datetime)
         ->andReturn($manager);
@@ -150,7 +150,7 @@ test('it releases an injured manager at the current datetime by default', functi
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('reinstate');
+        ->shouldReceive('createReinstatement');
 
     $this->managerRepository
         ->shouldReceive('clearInjury')
@@ -189,7 +189,7 @@ test('it releases an injured manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('reinstate');
+        ->shouldReceive('createReinstatement');
 
     $this->managerRepository
         ->shouldReceive('clearInjury')

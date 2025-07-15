@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Events\Modals\EventFormModal;
+use App\Livewire\Events\Modals\FormModal as EventFormModal;
 use App\Livewire\Events\Tables\EventsTable;
-use App\Livewire\Venues\Modals\VenueFormModal;
+use App\Livewire\Venues\Modals\FormModal as VenueFormModal;
 use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;

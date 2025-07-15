@@ -4,36 +4,50 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Modals;
 
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Stables\StableForm;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Stables\Forms\Form;
 use App\Models\Stables\Stable;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseModal<StableForm, Stable>
+ * @extends BaseFormModal<Form, Stable>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
     use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
-    protected string $modalFormPath = 'stables.modals.form-modal';
+    public Form $form;
 
-    protected $modelForm;
-
-    protected $modelType;
-
-    public function fillDummyFields(): void
+    protected function getFormClass(): string
     {
-        /** @var Carbon|null $datetime */
-        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
+        return Form::class;
+    }
 
-        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->value();
-        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
+    protected function getModelClass(): string
+    {
+        return Stable::class;
+    }
+
+    protected function getModalPath(): string
+    {
+        return 'livewire.stables.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
+    {
+        return [
+            'name' => fn() => Str::of(fake()->sentence(2))->title()->value(),
+            'start_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view($this->modalFormPath ?? 'livewire.stables.modals.form-modal');
     }
 }

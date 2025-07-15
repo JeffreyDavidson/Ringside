@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
-use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\Status\CannotBeEmployedException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
@@ -24,7 +24,7 @@ test('it employs an employable manager at the current datetime by default', func
         ->shouldNotReceive('unretire');
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Manager $employableManager, Carbon $employmentDate) use ($manager, $datetime) {
             expect($employableManager->is($manager))->toBeTrue()
@@ -49,7 +49,7 @@ test('it employs an employable manager at a specific datetime', function ($facto
         ->shouldNotReceive('unretire');
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($manager, $datetime)
         ->andReturns($manager);
@@ -66,18 +66,17 @@ test('it employs a retired manager at the current datetime by default', function
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('unretire')
-        ->withArgs(function (Manager $unretirableManager, Carbon $unretireDate) use ($manager, $datetime) {
-            expect($unretirableManager->is($manager))->toBeTrue()
-                ->and($unretireDate->eq($datetime))->toBeTrue();
+        ->shouldReceive('endRetirement')
+        ->withArgs(function (Manager $retiredManager, Carbon $endDate) use ($manager, $datetime) {
+            expect($retiredManager->is($manager))->toBeTrue()
+                ->and($endDate->eq($datetime))->toBeTrue();
 
             return true;
         })
-        ->once()
-        ->andReturn($manager);
+        ->once();
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Manager $employedManager, Carbon $employmentDate) use ($manager, $datetime) {
             expect($employedManager->is($manager))->toBeTrue()
@@ -95,13 +94,12 @@ test('it employs a retired manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->with($manager, $datetime)
-        ->once()
-        ->andReturn($manager);
+        ->once();
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($manager, $datetime)
         ->andReturns($manager);

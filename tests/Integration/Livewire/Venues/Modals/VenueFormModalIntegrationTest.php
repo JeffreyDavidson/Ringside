@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\VenueForm;
-use App\Livewire\Venues\Modals\VenueFormModal;
+use App\Livewire\Venues\Modals\FormModal as VenueFormModal;
 use App\Models\Events\Venue;
 use Livewire\Component;
 
 /**
- * Integration tests for VenueFormModal component behavior and functionality.
+ * Integration tests for FormModal component behavior and functionality.
  *
  * INTEGRATION TEST SCOPE:
  * - Modal state management and lifecycle
@@ -19,12 +19,12 @@ use Livewire\Component;
  * - Component property management
  * - Modal path configuration
  *
- * These tests verify that the VenueFormModal correctly integrates
+ * These tests verify that the FormModal correctly integrates
  * venue-specific functionality with the base modal pattern.
  *
- * @see VenueFormModal
+ * @see FormModal
  */
-describe('VenueFormModal Integration Tests', function () {
+describe('Venue FormModal Integration Tests', function () {
     beforeEach(function () {
         $this->modal = new VenueFormModal();
     });

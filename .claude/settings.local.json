@@ -15,7 +15,8 @@
       "Bash(php artisan:*)",
       "Bash(php -l:*)",
       "Bash(git branch:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
