@@ -26,6 +26,7 @@ use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -126,7 +127,6 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     protected $fillable = [
         'first_name',
         'last_name',
-        'status',
     ];
 
     /**
@@ -135,8 +135,44 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => EmploymentStatus::Unemployed->value,
+        // Status is now computed from employment relationships
     ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the employment status based on the referee's current relationships:
+     * - Retired: Has active retirement record
+     * - Employed: Has active employment (started <= now)
+     * - FutureEmployment: Has employment starting in future
+     * - Released: Has previous employment but no current employment
+     * - Unemployed: No employment history
+     *
+     * @return Attribute<EmploymentStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): EmploymentStatus {
+                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
+                if ($this->isRetired()) {
+                    return EmploymentStatus::Retired;
+                }
+                
+                if ($this->currentEmployment) {
+                    return $this->currentEmployment->started_at > now() 
+                        ? EmploymentStatus::FutureEmployment 
+                        : EmploymentStatus::Employed;
+                }
+                
+                if ($this->previousEmployments()->exists()) {
+                    return EmploymentStatus::Released;
+                }
+                
+                return EmploymentStatus::Unemployed;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.

@@ -28,6 +28,7 @@ use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Managers\ManagerFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -135,7 +136,6 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     protected $fillable = [
         'first_name',
         'last_name',
-        'status',
     ];
 
     /**
@@ -144,8 +144,44 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => EmploymentStatus::Unemployed->value,
+        // Status is now computed from employment relationships
     ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the employment status based on the manager's current relationships:
+     * - Retired: Has active retirement record
+     * - Employed: Has active employment (started <= now)
+     * - FutureEmployment: Has employment starting in future
+     * - Released: Has previous employment but no current employment
+     * - Unemployed: No employment history
+     *
+     * @return Attribute<EmploymentStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): EmploymentStatus {
+                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
+                if ($this->isRetired()) {
+                    return EmploymentStatus::Retired;
+                }
+                
+                if ($this->currentEmployment) {
+                    return $this->currentEmployment->started_at > now() 
+                        ? EmploymentStatus::FutureEmployment 
+                        : EmploymentStatus::Employed;
+                }
+                
+                if ($this->previousEmployments()->exists()) {
+                    return EmploymentStatus::Released;
+                }
+                
+                return EmploymentStatus::Unemployed;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -155,7 +191,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     protected function casts(): array
     {
         return [
-            'status' => EmploymentStatus::class,
+            // Status is now computed from employment relationships
         ];
     }
 }

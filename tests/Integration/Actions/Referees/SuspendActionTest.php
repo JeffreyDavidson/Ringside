@@ -59,8 +59,8 @@ test('invoke throws exception for suspending a non suspendable referee', functio
 ]);
 
 test('referee suspension status checks work correctly', function () {
-    $employedReferee = Referee::factory()->employed()->make();
-    $suspendedReferee = Referee::factory()->unemployed()->make(); // Use unemployed as a stand-in for not suspendable
+    $employedReferee = Referee::factory()->employed()->create();
+    $suspendedReferee = Referee::factory()->unemployed()->create(); // Use unemployed as a stand-in for not suspendable
 
     expect($employedReferee->canBeSuspended())->toBeTrue();
     expect($suspendedReferee->canBeSuspended())->toBeFalse();
