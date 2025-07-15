@@ -23,22 +23,56 @@
 
 ### Git Commit Message Format
 
-When suggesting git commit commands, use this exact format:
+**Always create focused, logical commits separated by concern rather than bundling unrelated changes.**
+
+Use this exact format:
 
 ```
-git commit -m "type: brief description
+type: brief description
 
 - Detailed change 1
-- Detailed change 2
-- Detailed change 3
-- Additional context or reasoning"
+- Detailed change 2  
+- Additional context or reasoning
+```
+
+**Conventional Commit Types for Subject Line:**
+- `fix:` - Bug fixes
+- `feat:` - New features  
+- `docs:` - Documentation updates
+- `chore:` - Maintenance tasks
+- `refactor:` - Code refactoring
+- `test:` - Test additions/improvements
+- `style:` - Code formatting changes
+- `perf:` - Performance improvements
+- `ci:` - CI/CD changes
+
+**Example Commits:**
+```bash
+git commit -m "fix: correct TagTeams IndexController view name
+
+- Change 'tagteams.index' to 'tag-teams.index' to match actual view file location
+- Resolves test failure where view was not found
+- Follows kebab-case naming convention for view directories"
+```
+
+```bash
+git commit -m "docs: enhance CLAUDE.md with comprehensive development patterns
+
+- Add Code Organization Patterns section with Bookable interface guidelines
+- Document Policy Pattern with before hook examples  
+- Add Controller Patterns and View Naming Convention guidelines
+- Include Trait Naming Guidelines and Interface Implementation Strategy
+- Add Testing and Debugging Workflow with systematic failure resolution
+
+These additions capture architectural decisions and patterns established
+during test failure resolution and code organization work."
 ```
 
 **Important Notes:**
 - Do NOT include "🤖 Generated with [Claude Code](https://claude.ai/code)" 
 - Do NOT include "Co-Authored-By: Claude <noreply@anthropic.com>"
 - Keep the format clean and professional
-- Use conventional commit types (feat, fix, docs, style, refactor, test, chore, etc.)
+- Each commit should focus on a single concern or related group of changes
 
 ### TodoList Management Workflow
 
@@ -49,6 +83,22 @@ When managing todos:
 2. **Commit and PR before context switches** - When the next todo is unrelated to current work, commit current changes and create PR
 3. **Resource-specific evaluation** - Before proceeding, evaluate if todos pertain to specific resources and should be organized differently
 4. **Clean separation** - Don't mix unrelated changes in the same branch/PR
+
+### Pull Request Creation Requirements
+
+**MANDATORY: Always ask for explicit approval before creating PRs**
+
+Before creating any pull request:
+1. **Ask the user**: "Is it okay for me to create a PR for these changes?"
+2. **Wait for explicit "Yes"** - Do not proceed without clear approval
+3. **Only create PR after receiving approval** - Never assume permission
+
+**Example:**
+```
+The work is complete. Is it okay for me to create a PR for these changes?
+```
+
+**Wait for user response before using `gh pr create` command.**
 
 **Example Decision Points:**
 - Just finished Rules organization → Next todo is Builders restructure = **COMMIT & PR**
