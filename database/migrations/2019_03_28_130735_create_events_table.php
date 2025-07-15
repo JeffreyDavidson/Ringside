@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->datetime('date')->nullable();
             $table->foreignIdFor(Venue::class)->nullable();
             $table->text('preview')->nullable();
-            $table->string('status');
             $table->timestamps();
             $table->softDeletes();
         });
