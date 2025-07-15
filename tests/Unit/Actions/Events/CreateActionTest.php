@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Events\CreateAction;
-use App\Data\EventData;
+use App\Data\Events\EventData;
 use App\Repositories\EventRepository;
 
 beforeEach(function () {
@@ -17,7 +17,7 @@ test('it creates an event', function () {
         ->shouldReceive('create')
         ->once()
         ->with($data)
-        ->andReturns(new App\Models\Event());
+        ->andReturns(new App\Models\Events\Event());
 
     resolve(CreateAction::class)->handle($data);
 });
