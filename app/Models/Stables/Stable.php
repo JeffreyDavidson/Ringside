@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Stables;
 
 use App\Builders\Roster\StableBuilder;
-use App\Database\Query\Concerns\HasStatusScopes;
+use App\Builders\Concerns\HasStatusScopes;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
