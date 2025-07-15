@@ -37,13 +37,13 @@ class FormModal extends BaseFormModal
 
     protected function getDummyDataFields(): array
     {
-        /** @var Venue $venue */
+        /** @var Venue|null $venue */
         $venue = Venue::query()->inRandomOrder()->first();
 
         return [
             'name' => fn() => Str::of(fake()->sentence(2))->title()->value(),
-            'date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
-            'venue' => fn() => $venue->id,
+            'date' => fn() => fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s'),
+            'venue' => fn() => $venue?->id ?? Venue::factory()->create()->id,
             'preview' => fn() => Str::of(fake()->text())->value(),
         ];
     }

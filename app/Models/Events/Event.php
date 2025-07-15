@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\EventBuilder;
+use App\Enums\EventStatus;
 use App\Models\Concerns\HasMatches;
 use App\Models\Matches\EventMatch;
 use App\Models\Events\Venue;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,10 +26,10 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $date
  * @property int|null $venue_id
  * @property string|null $preview
- * @property string|null $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ * @property-read EventStatus $status
  * @property-read Venue|null $venue
  * @property-read Collection<int, EventMatch> $matches
  *
@@ -118,5 +120,21 @@ class Event extends Model
     public function hasPastDate(): bool
     {
         return $this->isScheduled() && $this->date?->isPast();
+    }
+
+    /**
+     * Get the computed status of the event based on its date.
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): EventStatus {
+                if ($this->isUnscheduled()) {
+                    return EventStatus::Unscheduled;
+                }
+
+                return $this->hasPastDate() ? EventStatus::Past : EventStatus::Scheduled;
+            }
+        );
     }
 }
