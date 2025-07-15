@@ -6,7 +6,7 @@ namespace App\Livewire\Wrestlers;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Wrestlers\Wrestler;
-use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -80,7 +80,7 @@ class WrestlerForm extends LivewireBaseForm
     }
 
     /**
-     * @return array<string, list<EmploymentStartDateCanBeChanged|Unique|string>>
+     * @return array<string, list<CanChangeEmploymentDate|Unique|string>>
      */
     protected function rules(): array
     {
@@ -91,7 +91,7 @@ class WrestlerForm extends LivewireBaseForm
             'height_inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
             'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->formModel ?? '')],
-            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
+            'start_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
         ];
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rules;
+namespace App\Rules\Shared;
 
 use App\Models\Stables\Stable;
 use App\Models\Titles\Title;
@@ -11,7 +11,7 @@ use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
-class ActivationStartDateCanBeChanged implements ValidationRule
+class CanChangeActivationDate implements ValidationRule
 {
     public function __construct(private Title|Stable|null $model) {}
 

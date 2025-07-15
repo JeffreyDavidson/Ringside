@@ -6,7 +6,7 @@ namespace App\Livewire\TagTeams;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\TagTeams\TagTeam;
-use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
@@ -59,14 +59,14 @@ class TagTeamForm extends LivewireBaseForm
     }
 
     /**
-     * @return array<string, list<Unique|Exists|EmploymentStartDateCanBeChanged|string>>
+     * @return array<string, list<Unique|Exists|CanChangeEmploymentDate|string>>
      */
     protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')],
             'signature_move' => ['nullable', 'string', 'max:255'],
-            'start_date' => ['nullable', 'string', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
+            'start_date' => ['nullable', 'string', 'date', new CanChangeEmploymentDate($this->formModel)],
             'wrestlerA' => [
                 'nullable',
                 'bail',
