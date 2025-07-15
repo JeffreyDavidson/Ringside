@@ -74,9 +74,9 @@ class UnretireAction extends BaseStableAction
             // Attempt to unretire former members who retired with the stable
             // Note: Managers are not direct stable members and are not unretired with the stable
             $wrestlersToUnretire = $stable->currentWrestlers
-                ->filter(fn ($wrestler) => $wrestler->isRetired());
+                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isRetired());
             $tagTeamsToUnretire = $stable->currentTagTeams
-                ->filter(fn ($tagTeam) => $tagTeam->isRetired());
+                ->filter(fn (\App\Models\TagTeams\TagTeam $tagTeam) => $tagTeam->isRetired());
 
             $this->unretireMembers(
                 $wrestlersToUnretire,

@@ -101,13 +101,13 @@ abstract class BaseStableAction
         ManagersRetireAction $managersRetireAction
     ): void {
         // Retire the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
+        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
 
         // Retire the provided tag teams
-        $tagTeams->each(fn ($tagTeam) => $tagTeamsRetireAction->handle($tagTeam, $retirementDate));
+        $tagTeams->each(fn (\App\Models\TagTeams\TagTeam $tagTeam) => $tagTeamsRetireAction->handle($tagTeam, $retirementDate));
 
         // Retire the provided managers
-        $managers->each(fn ($manager) => $managersRetireAction->handle($manager, $retirementDate));
+        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersRetireAction->handle($manager, $retirementDate));
     }
 
     /**
@@ -131,12 +131,12 @@ abstract class BaseStableAction
         ManagersUnretireAction $managersUnretireAction
     ): void {
         // Unretire the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
+        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
 
         // Unretire the provided tag teams
-        $tagTeams->each(fn ($tagTeam) => $tagTeamsUnretireAction->handle($tagTeam, $unretirementDate));
+        $tagTeams->each(fn (\App\Models\TagTeams\TagTeam $tagTeam) => $tagTeamsUnretireAction->handle($tagTeam, $unretirementDate));
 
         // Unretire the provided managers
-        $managers->each(fn ($manager) => $managersUnretireAction->handle($manager, $unretirementDate));
+        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersUnretireAction->handle($manager, $unretirementDate));
     }
 }

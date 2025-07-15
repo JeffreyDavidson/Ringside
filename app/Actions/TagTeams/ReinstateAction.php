@@ -64,9 +64,9 @@ class ReinstateAction extends BaseTagTeamAction
 
             // Reinstate suspended wrestlers and managers who were suspended with this team
             $wrestlersToReinstate = $tagTeam->currentWrestlers
-                ->filter(fn ($wrestler) => $wrestler->isSuspended());
+                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isSuspended());
             $managersToReinstate = $tagTeam->currentManagers
-                ->filter(fn ($manager) => $manager->isSuspended());
+                ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isSuspended());
 
             $this->reinstateMembers($wrestlersToReinstate, $managersToReinstate, $reinstatementDate, $this->wrestlersReinstateAction, $this->managersReinstateAction);
         });

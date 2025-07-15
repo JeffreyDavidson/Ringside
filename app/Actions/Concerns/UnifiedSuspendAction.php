@@ -121,7 +121,7 @@ class UnifiedSuspendAction
             if ($entity instanceof Manageable) {
                 $managersToSuspend = $entity->currentManagers()
                     ->get()
-                    ->filter(fn ($manager) => $manager->isEmployed() && ! $manager->isSuspended());
+                    ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
 
                 foreach ($managersToSuspend as $manager) {
                     StatusTransitionPipeline::suspend($manager, $date)->execute();
@@ -144,7 +144,7 @@ class UnifiedSuspendAction
             if ($entity instanceof HasTagTeamWrestlers) {
                 $wrestlersToSuspend = $entity->currentWrestlers()
                     ->get()
-                    ->filter(fn ($wrestler) => $wrestler->isEmployed() && ! $wrestler->isSuspended());
+                    ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isEmployed() && ! $wrestler->isSuspended());
 
                 foreach ($wrestlersToSuspend as $wrestler) {
                     StatusTransitionPipeline::suspend($wrestler, $date)->execute();
@@ -155,7 +155,7 @@ class UnifiedSuspendAction
             if ($entity instanceof Manageable) {
                 $managersToSuspend = $entity->currentManagers()
                     ->get()
-                    ->filter(fn ($manager) => $manager->isEmployed() && ! $manager->isSuspended());
+                    ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
 
                 foreach ($managersToSuspend as $manager) {
                     StatusTransitionPipeline::suspend($manager, $date)->execute();
@@ -251,7 +251,7 @@ class UnifiedSuspendAction
             if ($hasMethod) {
                 $members = $entity->{$relationshipMethod}()
                     ->get()
-                    ->filter(fn ($member) => $member->isEmployed() && ! $member->isSuspended());
+                    ->filter(fn (\Illuminate\Database\Eloquent\Model $member) => $member->isEmployed() && ! $member->isSuspended());
 
                 foreach ($members as $member) {
                     static::run($member, $suspensionDate, $notes);
