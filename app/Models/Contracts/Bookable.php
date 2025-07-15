@@ -6,7 +6,7 @@ namespace App\Models\Contracts;
 
 use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @template TMatchCompetitor of Model
@@ -14,16 +14,16 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 interface Bookable
 {
     /**
-     * Retrieve the matches this competitor is involved in.
+     * Retrieve the matches this entity is involved in.
      *
-     * @return MorphToMany<EventMatch, Model>
+     * @return Relation<EventMatch>
      */
-    public function matches(): MorphToMany;
+    public function matches(): Relation;
 
     /**
-     * @return MorphToMany<EventMatch, Model>
+     * @return Relation<EventMatch>
      */
-    public function previousMatches(): MorphToMany;
+    public function previousMatches(): Relation;
 
     /**
      * Determine if the competitor is eligible to be booked.
