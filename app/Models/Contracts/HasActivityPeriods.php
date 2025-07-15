@@ -61,14 +61,14 @@ interface HasActivityPeriods
     /**
      * Get all activity periods for this model.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<*, *>
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function activityPeriods();
+    public function activityPeriods(): \Illuminate\Database\Eloquent\Relations\HasMany;
 
     /**
      * Get the current activity period.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<*, *>
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function currentActivityPeriod();
+    public function currentActivityPeriod(): \Illuminate\Database\Eloquent\Relations\HasOne;
 }

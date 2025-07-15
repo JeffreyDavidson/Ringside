@@ -32,11 +32,11 @@ class PreviousWrestlersTable extends DataTableComponent
         }
 
         return Wrestler::query()
-            ->whereHas('stables', function ($query) {
+            ->whereHas('stables', function (Builder $query) {
                 $query->where('stable_id', $this->stableId)
                       ->whereNotNull('left_at');
             })
-            ->with(['stables' => function ($query) {
+            ->with(['stables' => function (Builder $query) {
                 $query->where('stable_id', $this->stableId)
                       ->whereNotNull('left_at')
                       ->withPivot(['joined_at', 'left_at']);
@@ -53,14 +53,14 @@ class PreviousWrestlersTable extends DataTableComponent
                 ->title(fn (Wrestler $row) => $row->name ?? 'Unknown')
                 ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
             Column::make(__('stables.date_joined'))
-                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->joined_at ? 
-                    (is_string($row->stables->first()->pivot->joined_at) ? 
+                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->joined_at ?
+                    (is_string($row->stables->first()->pivot->joined_at) ?
                         \Carbon\Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
                         $row->stables->first()->pivot->joined_at->format('Y-m-d')
                     ) : ''),
             Column::make(__('stables.date_left'))
-                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->left_at ? 
-                    (is_string($row->stables->first()->pivot->left_at) ? 
+                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->left_at ?
+                    (is_string($row->stables->first()->pivot->left_at) ?
                         \Carbon\Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
                         $row->stables->first()->pivot->left_at->format('Y-m-d')
                     ) : ''),

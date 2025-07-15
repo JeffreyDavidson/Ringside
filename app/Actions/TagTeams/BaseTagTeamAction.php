@@ -69,11 +69,11 @@ abstract class BaseTagTeamAction
      * @param  ManagersEmployAction  $managersEmployAction  Action to employ managers
      */
     protected function employMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $employmentDate,
-        $wrestlersEmployAction,
-        $managersEmployAction
+        WrestlersEmployAction $wrestlersEmployAction,
+        ManagersEmployAction $managersEmployAction
     ): void {
         // Employ the provided wrestlers
         $wrestlers->each(fn ($wrestler) => $wrestlersEmployAction->handle($wrestler, $employmentDate));
@@ -92,11 +92,11 @@ abstract class BaseTagTeamAction
      * @param  ManagersReinstateAction  $managersReinstateAction  Action to reinstate managers
      */
     protected function reinstateMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $reinstatementDate,
-        $wrestlersReinstateAction,
-        $managersReinstateAction
+        WrestlersReinstateAction $wrestlersReinstateAction,
+        ManagersReinstateAction $managersReinstateAction
     ): void {
         // Reinstate the provided wrestlers
         $wrestlers->each(fn ($wrestler) => $wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
@@ -115,11 +115,11 @@ abstract class BaseTagTeamAction
      * @param  ManagersSuspendAction  $managersSuspendAction  Action to suspend managers
      */
     protected function suspendMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $suspensionDate,
-        $wrestlersSuspendAction,
-        $managersSuspendAction
+        WrestlersSuspendAction $wrestlersSuspendAction,
+        ManagersSuspendAction $managersSuspendAction
     ): void {
         // Suspend the provided wrestlers
         $wrestlers->each(fn ($wrestler) => $wrestlersSuspendAction->handle($wrestler, $suspensionDate));
@@ -138,11 +138,11 @@ abstract class BaseTagTeamAction
      * @param  ManagersUnretireAction  $managersUnretireAction  Action to unretire managers
      */
     protected function unretireMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $unretirementDate,
-        $wrestlersUnretireAction,
-        $managersUnretireAction
+        WrestlersUnretireAction $wrestlersUnretireAction,
+        ManagersUnretireAction $managersUnretireAction
     ): void {
         // Unretire the provided wrestlers
         $wrestlers->each(fn ($wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
@@ -254,11 +254,11 @@ abstract class BaseTagTeamAction
      * @param  ManagersRetireAction  $managersRetireAction  Action to retire managers
      */
     protected function retireMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $retirementDate,
-        $wrestlersRetireAction,
-        $managersRetireAction
+        WrestlersRetireAction $wrestlersRetireAction,
+        ManagersRetireAction $managersRetireAction
     ): void {
         // Retire the provided wrestlers
         $wrestlers->each(fn ($wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));

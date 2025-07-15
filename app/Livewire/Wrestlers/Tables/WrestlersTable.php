@@ -47,7 +47,7 @@ class WrestlersTable extends BaseTableWithActions
             Column::make(__('wrestlers.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Wrestler $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             Column::make(__('wrestlers.height'), 'height'),
             Column::make(__('wrestlers.weight'), 'weight'),
@@ -72,8 +72,7 @@ class WrestlersTable extends BaseTableWithActions
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function ($builder, string $value) {
-                    /** @var WrestlerBuilder $builder */
+                ->filter(function (WrestlerBuilder $builder, string $value) {
                     match ($value) {
                         'employed' => $builder->employed(),
                         'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
@@ -114,7 +113,7 @@ class WrestlersTable extends BaseTableWithActions
     protected function getDefaultActionColumn(): Column
     {
         return Column::make(__('core.actions'))
-            ->label(fn ($row) => view('components.tables.columns.wrestler-actions', [
+            ->label(fn (Wrestler $row) => view('components.tables.columns.wrestler-actions', [
                 'wrestler' => $row,
             ])->render())
             ->html()

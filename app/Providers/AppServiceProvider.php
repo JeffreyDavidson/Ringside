@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Builder::macro('orderByNullsLast', function (Expression|string $column, string $direction = 'asc') {
-            /** @var Builder $builder */
+            /** @var Builder $this */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);
             $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';
