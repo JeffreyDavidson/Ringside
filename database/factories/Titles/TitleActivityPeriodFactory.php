@@ -12,7 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * @extends Factory<TitleActivityPeriod>
  */
-class TitleActivationFactory extends Factory
+class TitleActivityPeriodFactory extends Factory
 {
     protected $model = TitleActivityPeriod::class;
     /**

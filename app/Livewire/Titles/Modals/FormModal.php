@@ -4,29 +4,40 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Modals;
 
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Titles\TitleForm;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Titles\Forms\Form;
 use App\Models\Titles\Title;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseModal<TitleForm, Title>
+ * @extends BaseFormModal<Form, Title>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
-    protected string $modalFormPath = 'titles.modals.form-modal';
+    public Form $form;
 
-    protected $modelForm;
-
-    protected $modelType;
-
-    public function fillDummyFields(): void
+    protected function getFormClass(): string
     {
-        /** @var Carbon|null $datetime */
-        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
-
-        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->append(' Title')->value();
-        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
+        return Form::class;
     }
+
+    protected function getModelClass(): string
+    {
+        return Title::class;
+    }
+
+    protected function getModalPath(): string
+    {
+        return 'titles.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
+    {
+        return [
+            'name' => fn() => Str::of(fake()->words(3, true))->title()->value(),
+            'introduction' => fn() => fake()->optional(0.8)->paragraphs(2, true),
+            'active_at' => fn() => fake()->optional(0.6)->dateTimeBetween('-1 year', 'now')?->format('Y-m-d H:i:s'),
+        ];
+    }
+
 }

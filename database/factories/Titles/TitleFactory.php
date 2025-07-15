@@ -52,13 +52,13 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => TitleStatus::Inactive])
-            ->has(TitleActivation::factory()->started($start)->ended($end), 'activations');
+            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations');
     }
 
     public function withFutureActivation(): static
     {
         return $this->state(fn () => ['status' => TitleStatus::PendingDebut])
-            ->has(TitleActivation::factory()->started(Carbon::tomorrow()), 'activations');
+            ->has(TitleActivityPeriod::factory()->started(Carbon::tomorrow()), 'activations');
     }
 
     public function retired(): static
@@ -68,7 +68,7 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->state(fn () => ['status' => TitleStatus::Inactive])
-            ->has(TitleActivation::factory()->started($start)->ended($end), 'activations')
+            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations')
             ->has(TitleRetirement::factory()->started($end), 'retirements');
     }
 
