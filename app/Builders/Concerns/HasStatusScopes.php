@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Database\Query\Concerns;
+namespace App\Builders\Concerns;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;

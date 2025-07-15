@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleBuilder;
-use App\Database\Query\Concerns\HasStatusScopes;
+use App\Builders\Concerns\HasStatusScopes;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasActivityPeriods;
