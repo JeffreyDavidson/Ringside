@@ -196,9 +196,11 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
                 }
                 
                 if ($this->currentEmployment) {
-                    return $this->currentEmployment->started_at > now() 
-                        ? EmploymentStatus::FutureEmployment 
-                        : EmploymentStatus::Employed;
+                    return EmploymentStatus::Employed;
+                }
+                
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
                 }
                 
                 if ($this->previousEmployments()->exists()) {

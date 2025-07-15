@@ -124,9 +124,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     use ValidatesInjury;
     use ValidatesRestoration;
     use ValidatesRetirement;
-    use ValidatesSuspension {
-        ValidatesSuspension::isUnemployed insteadof ValidatesInjury;
-    }
+    use ValidatesSuspension;
 
     /**
      * The attributes that are mass assignable.
@@ -169,9 +167,11 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
                 }
                 
                 if ($this->currentEmployment) {
-                    return $this->currentEmployment->started_at > now() 
-                        ? EmploymentStatus::FutureEmployment 
-                        : EmploymentStatus::Employed;
+                    return EmploymentStatus::Employed;
+                }
+                
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
                 }
                 
                 if ($this->previousEmployments()->exists()) {

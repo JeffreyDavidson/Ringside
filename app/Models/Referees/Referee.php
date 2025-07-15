@@ -115,9 +115,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     use ValidatesEmployment;
     use ValidatesInjury;
     use ValidatesRetirement;
-    use ValidatesSuspension {
-        ValidatesSuspension::isUnemployed insteadof ValidatesInjury;
-    }
+    use ValidatesSuspension;
 
     /**
      * The attributes that are mass assignable.
@@ -160,9 +158,11 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
                 }
                 
                 if ($this->currentEmployment) {
-                    return $this->currentEmployment->started_at > now() 
-                        ? EmploymentStatus::FutureEmployment 
-                        : EmploymentStatus::Employed;
+                    return EmploymentStatus::Employed;
+                }
+                
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
                 }
                 
                 if ($this->previousEmployments()->exists()) {

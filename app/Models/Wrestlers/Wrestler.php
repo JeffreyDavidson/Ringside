@@ -183,9 +183,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use ValidatesInjury;
     use ValidatesRestoration;
     use ValidatesRetirement;
-    use ValidatesSuspension {
-        ValidatesSuspension::isUnemployed insteadof ValidatesInjury;
-    }
+    use ValidatesSuspension;
 
     /**
      * The attributes that are mass assignable.
@@ -231,9 +229,11 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
                 }
                 
                 if ($this->currentEmployment) {
-                    return $this->currentEmployment->started_at > now() 
-                        ? EmploymentStatus::FutureEmployment 
-                        : EmploymentStatus::Employed;
+                    return EmploymentStatus::Employed;
+                }
+                
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
                 }
                 
                 if ($this->previousEmployments()->exists()) {

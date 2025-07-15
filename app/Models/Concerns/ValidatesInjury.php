@@ -55,8 +55,7 @@ trait ValidatesInjury
      */
     public function canBeInjured(): bool
     {
-        return ! $this->isUnemployed()
-            && ! $this->isReleased()
+        return ! $this->isNotInEmployment()
             && ! $this->isRetired()
             && ! $this->hasFutureEmployment()
             && ! $this->isInjured()
@@ -83,12 +82,8 @@ trait ValidatesInjury
      */
     public function ensureCanBeInjured(): void
     {
-        if ($this->isUnemployed()) {
+        if ($this->isNotInEmployment()) {
             throw CannotBeInjuredException::unemployed();
-        }
-
-        if ($this->isReleased()) {
-            throw CannotBeInjuredException::released();
         }
 
         if ($this->isRetired()) {
@@ -193,13 +188,4 @@ trait ValidatesInjury
         $this->ensureCanBeClearedFromInjury();
     }
 
-    /**
-     * Check if the model is unemployed.
-     *
-     * @return bool True if unemployed, false otherwise
-     */
-    private function isUnemployed(): bool
-    {
-        return $this->hasStatus(EmploymentStatus::Unemployed);
-    }
 }
