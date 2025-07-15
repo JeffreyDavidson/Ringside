@@ -7,7 +7,7 @@ namespace Database\Factories\Titles;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
-use App\Models\Titles\TitleActivation;
+use App\Models\Titles\TitleActivityPeriod;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Titles\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -42,7 +42,7 @@ class TitleFactory extends Factory
         $activationDate = Carbon::yesterday();
 
         return $this->state(fn () => ['status' => TitleStatus::Active])
-            ->has(TitleActivation::factory()->started($activationDate), 'activations');
+            ->has(TitleActivityPeriod::factory()->started($activationDate), 'activations');
     }
 
     public function inactive(): static
