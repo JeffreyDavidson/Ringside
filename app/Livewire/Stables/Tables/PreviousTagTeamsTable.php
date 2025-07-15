@@ -36,7 +36,7 @@ class PreviousTagTeamsTable extends DataTableComponent
                 $query->where('stable_id', $this->stableId)
                       ->whereNotNull('left_at');
             })
-            ->with(['stables' => function (Builder $query) {
+            ->with(['stables' => function (\Illuminate\Database\Eloquent\Relations\BelongsToMany $query) {
                 $query->where('stable_id', $this->stableId)
                       ->whereNotNull('left_at')
                       ->withPivot(['joined_at', 'left_at']);
