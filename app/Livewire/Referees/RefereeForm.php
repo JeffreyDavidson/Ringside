@@ -6,7 +6,7 @@ namespace App\Livewire\Referees;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Referees\Referee;
-use App\Rules\EmploymentStartDateCanBeChanged;
+use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Validate;
 
@@ -52,14 +52,14 @@ class RefereeForm extends LivewireBaseForm
     }
 
     /**
-     * @return array<string, list<EmploymentStartDateCanBeChanged|string>>
+     * @return array<string, list<CanChangeEmploymentDate|string>>
      */
     protected function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'start_date' => ['nullable', 'date', new EmploymentStartDateCanBeChanged($this->formModel)],
+            'start_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
         ];
     }
 

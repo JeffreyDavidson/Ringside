@@ -6,7 +6,7 @@ namespace App\Livewire\Titles;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Titles\Title;
-use App\Rules\ActivationStartDateCanBeChanged;
+use App\Rules\Shared\CanChangeDebutDate;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -49,13 +49,13 @@ class TitleForm extends LivewireBaseForm
     }
 
     /**
-     * @return array<string, list<Unique|ActivationStartDateCanBeChanged|string>>
+     * @return array<string, list<Unique|CanChangeDebutDate|string>>
      */
     protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel)],
-            'start_date' => ['nullable', 'date', new ActivationStartDateCanBeChanged($this->formModel)],
+            'start_date' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
         ];
     }
 

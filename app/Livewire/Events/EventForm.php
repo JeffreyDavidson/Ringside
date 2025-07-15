@@ -6,7 +6,7 @@ namespace App\Livewire\Events;
 
 use App\Livewire\Base\LivewireBaseForm;
 use App\Models\Events\Event;
-use App\Rules\EventDateCanBeChanged;
+use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
@@ -57,13 +57,13 @@ class EventForm extends LivewireBaseForm
     }
 
     /**
-     * @return array<string, list<Unique|Exists|EventDateCanBeChanged|string>>
+     * @return array<string, list<Unique|Exists|DateCanBeChanged|string>>
      */
     protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel)],
-            'date' => ['nullable', 'date', new EventDateCanBeChanged($this->formModel)],
+            'date' => ['nullable', 'date', new DateCanBeChanged($this->formModel)],
             'venue' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['required', 'string'],
         ];
