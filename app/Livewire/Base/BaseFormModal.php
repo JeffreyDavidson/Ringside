@@ -49,7 +49,7 @@ use Illuminate\Database\Eloquent\Model;
  * @example
  * ```php
  * // Creating a wrestler form modal
- * class WrestlerFormModal extends BaseFormModal
+ * class FormModal extends BaseFormModal
  * {
  *     protected function getFormClass(): string
  *     {
@@ -80,7 +80,7 @@ use Illuminate\Database\Eloquent\Model;
  * // Usage in a Livewire component
  * class ManageWrestlers extends Component
  * {
- *     public WrestlerFormModal $modal;
+ *     public FormModal $modal;
  *
  *     public function createWrestler(): void
  *     {
