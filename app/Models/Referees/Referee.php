@@ -6,11 +6,11 @@ namespace App\Models\Referees;
 
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\HasMatches;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesInjury;
@@ -95,7 +95,7 @@ use Illuminate\Support\Carbon;
 class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
     use HasFactory;
-    use HasMatches;
+    use OfficiatesMatches;
 
     /** @use IsEmployable<RefereeEmployment, static> */
     use IsEmployable;

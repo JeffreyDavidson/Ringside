@@ -9,7 +9,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanWinTitles;
-use App\Models\Concerns\HasMatches;
+use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -130,8 +130,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
 
     use HasFactory;
 
-    /** @use HasMatches<EventMatchCompetitor> */
-    use HasMatches;
+    use IsBookableCompetitor;
 
     /** @use IsEmployable<TagTeamEmployment, static> */
     use IsEmployable;

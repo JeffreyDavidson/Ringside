@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:matches.tables.event-matches-table :eventId="$event->id" />
+    <livewire:matches.tables.matches-table :eventId="$event->id" />
 </x-layouts.app>

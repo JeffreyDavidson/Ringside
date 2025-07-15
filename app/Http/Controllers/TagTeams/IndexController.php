@@ -14,6 +14,6 @@ class IndexController
     {
         Gate::authorize('viewList', TagTeam::class);
 
-        return view('tagteams.index');
+        return view('tag-teams.index');
     }
 }

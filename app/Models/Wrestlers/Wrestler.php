@@ -13,7 +13,7 @@ use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasEnumStatus;
-use App\Models\Concerns\HasMatches;
+use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
@@ -162,8 +162,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use HasEnumStatus;
     use HasFactory;
 
-    /** @use HasMatches<EventMatchCompetitor> */
-    use HasMatches;
+    use IsBookableCompetitor;
 
     /** @use IsEmployable<WrestlerEmployment, static> */
     use IsEmployable;
