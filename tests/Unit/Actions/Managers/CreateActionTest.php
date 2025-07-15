@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\CreateAction;
-use App\Data\ManagerData;
+use App\Data\Managers\ManagerData;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 
@@ -25,7 +25,7 @@ test('it creates a manager', function () {
         ->andReturns(new Manager());
 
     $this->managerRepository
-        ->shouldNotReceive('employ');
+        ->shouldNotReceive('createEmployment');
 
     resolve(CreateAction::class)->handle($data);
 });
@@ -42,9 +42,9 @@ test('an employment is created for the manager if start date is filled in reques
         ->andReturn($manager);
 
     $this->managerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
-        ->with($manager, $data->start_date);
+        ->with($manager, $data->employment_date);
 
     resolve(CreateAction::class)->handle($data);
 });

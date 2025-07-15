@@ -35,7 +35,7 @@ use Livewire\Component;
  * detail pages, cards, etc.) while maintaining consistent authorization and
  * error handling patterns.
  */
-class WrestlerActionsComponent extends Component
+class ActionsComponent extends Component
 {
     public Wrestler $wrestler;
 
@@ -186,6 +186,6 @@ class WrestlerActionsComponent extends Component
 
     public function render(): View
     {
-        return view('livewire.wrestlers.components.wrestler-actions-component');
+        return view('livewire.wrestlers.components.actions-component');
     }
 }

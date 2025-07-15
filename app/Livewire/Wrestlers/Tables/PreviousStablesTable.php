@@ -17,7 +17,7 @@ class PreviousStablesTable extends BasePreviousStablesTable
      */
     public ?int $wrestlerId;
 
-    public string $databaseTableName = 'stables';
+    public string $databaseTableName = 'stables_wrestlers';
 
     /**
      * @return Builder<Stable>
