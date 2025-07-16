@@ -646,7 +646,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
         $traits = array_keys($reflection->getTraits());
 
         // Filter to only include meaningful traits that we test for
-        $meaningfulTraits = array_filter($traits, function ($trait) {
+        $meaningfulTraits = array_filter($traits, function (string $trait) {
             return $this->isMeaningfulTrait($trait);
         });
 
@@ -740,7 +740,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
         $interfaces = array_keys($reflection->getInterfaces());
 
         // Filter to only include our custom interfaces
-        $meaningfulInterfaces = array_filter($interfaces, function ($interface) {
+        $meaningfulInterfaces = array_filter($interfaces, function (string $interface) {
             return $this->isMeaningfulInterface($interface);
         });
 

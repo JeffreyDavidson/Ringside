@@ -35,7 +35,7 @@ abstract class BaseModal extends ModalComponent
 
     protected string $titleField;
 
-    public function mount(mixed $modelId = null): void
+    public function mount(int|string|null $modelId = null): void
     {
         if (isset($modelId)) {
             try {
