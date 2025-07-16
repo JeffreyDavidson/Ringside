@@ -4,114 +4,106 @@ declare(strict_types=1);
 
 use App\Models\Referees\Referee;
 
-test('bookable referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
+/**
+ * Unit tests for RefereeQueryBuilder query scopes and methods.
+ *
+ * UNIT TEST SCOPE:
+ * - Builder class structure and scope functionality
+ * - Employment status filtering scopes (bookable, futureEmployed, unemployed, released)
+ * - Individual roster member status scopes (suspended, retired, injured)
+ * - Query scope accuracy and entity isolation
+ *
+ * These tests verify that the RefereeQueryBuilder correctly implements
+ * all query scopes for filtering referees by their various statuses.
+ * Referees are individual roster members who can be injured.
+ *
+ * @see App\Builders\Roster\RefereeBuilder
+ */
+describe('RefereeQueryBuilder Unit Tests', function () {
+    beforeEach(function () {
+        // Create referees in all possible states for comprehensive scope testing
+        $this->futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
+        $this->bookableReferee = Referee::factory()->bookable()->create();
+        $this->suspendedReferee = Referee::factory()->suspended()->create();
+        $this->retiredReferee = Referee::factory()->retired()->create();
+        $this->releasedReferee = Referee::factory()->released()->create();
+        $this->unemployedReferee = Referee::factory()->unemployed()->create();
+        $this->injuredReferee = Referee::factory()->injured()->create();
+    });
 
-    $bookableReferees = Referee::bookable()->get();
+    describe('availability status scopes', function () {
+        test('bookable referees can be retrieved', function () {
+            // Act
+            $bookableReferees = Referee::bookable()->get();
 
-    expect($bookableReferees)
-        ->toHaveCount(1)
-        ->collectionHas($bookableReferee);
-});
+            // Assert
+            expect($bookableReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->bookableReferee);
+        });
+    });
 
-test('future employed referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
+    describe('employment status scopes', function () {
+        test('future employed referees can be retrieved', function () {
+            // Act
+            $futureEmployedReferees = Referee::futureEmployed()->get();
 
-    $futureEmployedReferees = Referee::futureEmployed()->get();
+            // Assert
+            expect($futureEmployedReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->futureEmployedReferee);
+        });
 
-    expect($futureEmployedReferees)
-        ->toHaveCount(1)
-        ->collectionHas($futureEmployedReferee);
-});
+        test('unemployed referees can be retrieved', function () {
+            // Act
+            $unemployedReferees = Referee::unemployed()->get();
 
-test('suspended referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
+            // Assert
+            expect($unemployedReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->unemployedReferee);
+        });
 
-    $suspendedReferees = Referee::suspended()->get();
+        test('released referees can be retrieved', function () {
+            // Act
+            $releasedReferees = Referee::released()->get();
 
-    expect($suspendedReferees)
-        ->toHaveCount(1)
-        ->collectionHas($suspendedReferee);
-});
+            // Assert
+            expect($releasedReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->releasedReferee);
+        });
+    });
 
-test('released referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
+    describe('individual roster member status scopes', function () {
+        test('suspended referees can be retrieved', function () {
+            // Act
+            $suspendedReferees = Referee::suspended()->get();
 
-    $releasedReferees = Referee::released()->get();
+            // Assert
+            expect($suspendedReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->suspendedReferee);
+        });
 
-    expect($releasedReferees)
-        ->toHaveCount(1)
-        ->collectionHas($releasedReferee);
-});
+        test('retired referees can be retrieved', function () {
+            // Act
+            $retiredReferees = Referee::retired()->get();
 
-test('retired referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
+            // Assert
+            expect($retiredReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->retiredReferee);
+        });
 
-    $retiredReferees = Referee::retired()->get();
+        test('injured referees can be retrieved', function () {
+            // Act
+            $injuredReferees = Referee::injured()->get();
 
-    expect($retiredReferees)
-        ->toHaveCount(1)
-        ->collectionHas($retiredReferee);
-});
-
-test('unemployed referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
-
-    $unemployedReferees = Referee::unemployed()->get();
-
-    expect($unemployedReferees)
-        ->toHaveCount(1)
-        ->collectionHas($unemployedReferee);
-});
-
-test('injured referees can be retrieved', function () {
-    $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
-    $suspendedReferee = Referee::factory()->suspended()->create();
-    $retiredReferee = Referee::factory()->retired()->create();
-    $releasedReferee = Referee::factory()->released()->create();
-    $unemployedReferee = Referee::factory()->unemployed()->create();
-    $injuredReferee = Referee::factory()->injured()->create();
-
-    $injuredReferees = Referee::injured()->get();
-
-    expect($injuredReferees)
-        ->toHaveCount(1)
-        ->collectionHas($injuredReferee);
+            // Assert
+            expect($injuredReferees)
+                ->toHaveCount(1)
+                ->collectionHas($this->injuredReferee);
+        });
+    });
 });
