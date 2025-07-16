@@ -128,6 +128,9 @@ For detailed architecture information, see the documentation in `docs/architectu
 - Managers ↔ Wrestlers: `managers_wrestlers` table with `hired_at`/`fired_at`
 - Managers ↔ Tag Teams: `managers_tag_teams` table with `hired_at`/`fired_at`
 - These represent business employment contracts
+- **Business Rule**: Both entities must be employed, but managed entity doesn't need to be bookable
+  - Injured/suspended wrestlers can still have managers
+  - Managers provide career guidance regardless of competition availability
 
 #### Stable Membership (joined/left)  
 - Stables ↔ Wrestlers: `stables_wrestlers` table with `joined_at`/`left_at`
@@ -141,6 +144,21 @@ For detailed architecture information, see the documentation in `docs/architectu
 - Employment status uses `App\Enums\Shared\EmploymentStatus`
 - Domain-organized builders in `app/Builders/{Domain}/`
 - Domain-organized enums in `app/Enums/{Domain}/`
+
+### Computed Status Pattern
+- **Status fields are computed, not stored** - eliminates data inconsistency
+- Models use computed attributes: `protected function status(): Attribute`
+- Factory methods NEVER set status fields manually
+- Status computed from relationships (employment, retirement, injury, suspension)
+- Priority order: Retired > Employed > FutureEmployment > Released > Unemployed
+
+### Factory Method Patterns
+- **Employable entities**: `employed()`, `unemployed()`, `retired()`, `released()`, `suspended()`, `injured()`
+- **Bookable entities**: `bookable()` (alias for employed() for competitors and officials)
+- **Non-bookable entities**: NO `bookable()` method (Managers, Stables, etc.)
+- **Activation entities**: `active()`, `inactive()`, `unactivated()`
+- **User entities**: `verified()`, `unverified()`
+- **Relationships**: Set via `has()` relationships, never direct field assignment
 
 ### Essential Enum Usage
 - **Employment Status**: `App\Enums\Shared\EmploymentStatus` for pure employment states
@@ -165,6 +183,15 @@ For detailed architecture information, see the documentation in `docs/architectu
 - Method: `$this->belongsToMany(EventMatch::class, 'events_matches_referees')`
 
 **Key Principle:** Different entity types have different relationships with matches - competitors participate, officials officiate.
+
+#### Non-Bookable Entities (Managers)
+- **Managers are NOT bookable** - they manage other entities but don't participate in matches
+- Factory pattern: Use `employed()`, `suspended()`, `injured()`, etc., but NO `bookable()` method
+- Relationship pattern: Managers have employment relationships with wrestlers/tag teams, not match participation
+- **Key Business Rule**: Wrestlers don't need to be bookable to have a manager - only employed
+  - Manager ↔ Wrestler relationship requires both to be employed
+  - Wrestler bookability is separate (affected by injury, suspension, etc.)
+  - An injured wrestler can still have a manager managing their career
 
 ### Policy Pattern
 

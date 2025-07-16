@@ -92,4 +92,5 @@ class RefereeFactory extends Factory
         return $this->has(RefereeEmployment::factory()->started($start), 'employments')
             ->has(RefereeInjury::factory()->started($now), 'injuries');
     }
+
 }

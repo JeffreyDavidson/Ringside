@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Models\Managers\Manager;
 
-test('available managers can be retrieved', function () {
+test('employed managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();
@@ -22,7 +22,7 @@ test('available managers can be retrieved', function () {
 
 test('future employed managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();
@@ -38,7 +38,7 @@ test('future employed managers can be retrieved', function () {
 
 test('suspended managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();
@@ -54,7 +54,7 @@ test('suspended managers can be retrieved', function () {
 
 test('released managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();
@@ -70,7 +70,7 @@ test('released managers can be retrieved', function () {
 
 test('retired managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();
@@ -86,7 +86,7 @@ test('retired managers can be retrieved', function () {
 
 test('unemployed managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();
@@ -102,7 +102,7 @@ test('unemployed managers can be retrieved', function () {
 
 test('injured managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-    $availableManager = Manager::factory()->available()->create();
+    $availableManager = Manager::factory()->employed()->create();
     $suspendedManager = Manager::factory()->suspended()->create();
     $retiredManager = Manager::factory()->retired()->create();
     $releasedManager = Manager::factory()->released()->create();

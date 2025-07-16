@@ -165,7 +165,7 @@ describe('ManagerRepository Unit Tests', function () {
 
         test('can release employed manager', function () {
             // Arrange
-            $manager = Manager::factory()->available()->create();
+            $manager = Manager::factory()->employed()->create();
             $releaseDate = now();
 
             // Act
@@ -239,7 +239,7 @@ describe('ManagerRepository Unit Tests', function () {
     describe('retirement management', function () {
         test('can retire manager', function () {
             // Arrange
-            $manager = Manager::factory()->available()->create();
+            $manager = Manager::factory()->employed()->create();
             $retirementDate = now();
 
             // Act
@@ -278,7 +278,7 @@ describe('ManagerRepository Unit Tests', function () {
     describe('suspension management', function () {
         test('can suspend manager', function () {
             // Arrange
-            $manager = Manager::factory()->available()->create();
+            $manager = Manager::factory()->employed()->create();
             $suspensionDate = now();
 
             // Act

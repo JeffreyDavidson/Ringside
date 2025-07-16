@@ -18,8 +18,8 @@ beforeEach(function () {
     $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
-test('it retires a available manager at the current datetime by default', function () {
-    $manager = Manager::factory()->available()->create();
+test('it retires an employed manager at the current datetime by default', function () {
+    $manager = Manager::factory()->employed()->create();
     $datetime = now();
 
     $this->managerRepository
@@ -43,8 +43,8 @@ test('it retires a available manager at the current datetime by default', functi
     resolve(RetireAction::class)->handle($manager);
 });
 
-test('it retires a available manager at a specific datetime', function () {
-    $manager = Manager::factory()->available()->create();
+test('it retires an employed manager at a specific datetime', function () {
+    $manager = Manager::factory()->employed()->create();
     $datetime = now()->addDays(2);
 
     $this->managerRepository
