@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -30,6 +31,26 @@ class MatchDecision extends Model
     use HasFactory;
 
     /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($matchDecision) {
+            if (empty($matchDecision->slug) && !empty($matchDecision->name)) {
+                $matchDecision->slug = Str::slug($matchDecision->name);
+            }
+        });
+
+        static::updating(function ($matchDecision) {
+            if ($matchDecision->isDirty('name') && !$matchDecision->isDirty('slug')) {
+                $matchDecision->slug = Str::slug($matchDecision->name);
+            }
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -45,9 +66,9 @@ class MatchDecision extends Model
      * @var array<int, string>
      */
     protected const NO_OUTCOME_DECISIONS = [
-        'draw',        // Time Limit Draw
-        'nodecision',  // No Decision
-        'revdecision', // Reverse Decision
+        'time-limit-draw', // Time Limit Draw
+        'no-decision',     // No Decision
+        'reverse-decision', // Reverse Decision
     ];
 
     /**

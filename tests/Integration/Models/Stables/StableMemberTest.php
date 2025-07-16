@@ -71,7 +71,7 @@ describe('StableMember Model', function () {
 
             // Verify pivot data is correct
             $pivotData = $this->wrestler->stables()->first()->pivot;
-            expect($pivotData->joined_at->equalTo($joinedDate))->toBeTrue();
+            expect(Carbon::parse($pivotData->joined_at)->equalTo($joinedDate))->toBeTrue();
             expect($pivotData->left_at)->toBeNull();
             expect($pivotData->member_id)->toBe($this->wrestler->id);
             expect($pivotData->member_type)->toBe('wrestler');
@@ -95,7 +95,7 @@ describe('StableMember Model', function () {
 
             // Verify pivot data is correct
             $pivotData = $this->tagTeam->stables()->first()->pivot;
-            expect($pivotData->joined_at->equalTo($joinedDate))->toBeTrue();
+            expect(Carbon::parse($pivotData->joined_at)->equalTo($joinedDate))->toBeTrue();
             expect($pivotData->left_at)->toBeNull();
             expect($pivotData->member_id)->toBe($this->tagTeam->id);
             expect($pivotData->member_type)->toBe('tagTeam');

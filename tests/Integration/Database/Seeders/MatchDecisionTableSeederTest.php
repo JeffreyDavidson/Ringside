@@ -52,18 +52,18 @@ describe('MatchDecisionsTableSeeder Integration Tests', function () {
         });
 
         test('creates disqualification and forfeit conditions', function () {
-            // Assert
-            assertDatabaseHas('match_decisions', ['name' => 'Disqualification', 'slug' => 'dq']);
+            // Assert - Using auto-generated slugs from Str::slug()
+            assertDatabaseHas('match_decisions', ['name' => 'Disqualification', 'slug' => 'disqualification']);
             assertDatabaseHas('match_decisions', ['name' => 'Countout', 'slug' => 'countout']);
             assertDatabaseHas('match_decisions', ['name' => 'Forfeit', 'slug' => 'forfeit']);
         });
 
         test('creates special match conditions', function () {
-            // Assert
+            // Assert - Using auto-generated slugs from Str::slug()
             assertDatabaseHas('match_decisions', ['name' => 'Stipulation', 'slug' => 'stipulation']);
-            assertDatabaseHas('match_decisions', ['name' => 'Time Limit Draw', 'slug' => 'draw']);
-            assertDatabaseHas('match_decisions', ['name' => 'No Decision', 'slug' => 'nodecision']);
-            assertDatabaseHas('match_decisions', ['name' => 'Reverse Decision', 'slug' => 'rev-decision']);
+            assertDatabaseHas('match_decisions', ['name' => 'Time Limit Draw', 'slug' => 'time-limit-draw']);
+            assertDatabaseHas('match_decisions', ['name' => 'No Decision', 'slug' => 'no-decision']);
+            assertDatabaseHas('match_decisions', ['name' => 'Reverse Decision', 'slug' => 'reverse-decision']);
         });
     });
 

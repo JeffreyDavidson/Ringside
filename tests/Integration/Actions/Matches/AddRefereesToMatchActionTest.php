@@ -11,11 +11,12 @@ use Database\Seeders\MatchTypesTableSeeder;
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
+    $this->app->instance(EventMatchRepository::class, $this->eventMatchRepository);
 });
 
 test('it adds referees to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    $referees = Referee::factory()->available()->count(1)->create();
+    $referees = Referee::factory()->bookable()->count(1)->create();
 
     $this->eventMatchRepository
         ->shouldReceive('addRefereeToMatch')
