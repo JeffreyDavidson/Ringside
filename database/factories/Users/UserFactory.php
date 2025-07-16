@@ -52,4 +52,14 @@ class UserFactory extends Factory
             'role' => Role::Basic,
         ]);
     }
+
+    /**
+     * Indicates the user should be unverified.
+     */
+    public function unverified(): static
+    {
+        return $this->state([
+            'email_verified_at' => null,
+        ]);
+    }
 }
