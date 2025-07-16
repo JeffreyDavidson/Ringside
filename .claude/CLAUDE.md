@@ -219,14 +219,30 @@ app/Builders/Events/ → tests/Unit/Builders/Events/
 app/Rules/Events/ → tests/Unit/Rules/Events/
 ```
 
+#### Integration Test Structure
+```
+app/Models/Wrestlers/WrestlerManager.php → tests/Integration/Models/Wrestlers/WrestlerManagerTest.php
+app/Models/TagTeams/TagTeamWrestler.php → tests/Integration/Models/TagTeams/TagTeamWrestlerTest.php
+app/Models/Stables/StableMember.php → tests/Integration/Models/Stables/StableMemberTest.php
+app/Models/Titles/TitleChampionship.php → tests/Integration/Models/Titles/TitleChampionshipTest.php
+```
+
 #### Test Types
 - **Structural Tests** (preferred): Test model configuration, traits, relationships
 - **Functional Tests**: Test business logic and behavior
-- **Integration Tests**: Test component interactions
+- **Integration Tests**: Test component interactions with real database
+- **Relationship Tests**: Test pivot models and complex relationships
+
+#### Directory Consolidation
+- **Remove redundant directories**: `tests/Integration/Relationships/` → `tests/Integration/Models/{Domain}/`
+- **Consolidate scattered tests**: Multiple championship directories → Single `Models/Titles/` location  
+- **Focus on primary model**: Test the actual model class, not the relationship description
+- **Maintain UI separation**: Livewire tests stay in `tests/Integration/Livewire/{Domain}/`
 
 #### Remove Duplicates
 - Keep comprehensive domain-organized tests
 - Remove simple functional tests that duplicate structural coverage
+- Consolidate similar tests using parameterization
 
 ### Livewire Component Naming
 
@@ -306,6 +322,26 @@ At this point in development, the application structure is well-established, so 
 - **Wrong view names**: Controller returns `tag-teams.index` → file at `tag-teams/index.blade.php`
 - **Missing variables**: Controller must pass data that view expects
 - **Component naming**: Livewire class `MatchesTable` → component `matches.tables.matches-table`
+
+### Test Helper Functions
+
+**Integration Test Helpers (`tests/Helpers/IntegrationTestHelpers.php`):**
+- `createManagementRelationship()` - Set up manager-wrestler relationships
+- `createTagTeamMembership()` - Set up tag team memberships  
+- `createManagementHistory()` - Multiple management periods
+- `createTagTeamHistory()` - Multiple tag team periods
+- `createOverlappingManagementPeriods()` - For validation testing
+- `createComplexRelationshipScenario()` - Comprehensive setups
+
+**Status Test Expectations (`tests/Helpers/StatusTestExpectations.php`):**
+- `expectRelationshipCounts()` - Validate relationship counts
+- `expectManagerRelationship()` - Validate manager relationship data
+- `expectTagTeamMembership()` - Validate tag team membership data
+- `expectCurrentRelationshipsActive()` - Ensure current relationships have no end dates
+- `expectValidRelationshipDates()` - Validate chronological order
+- `expectNoOverlappingRelationships()` - Business rule validation
+
+**Pattern:** Create helpers for repetitive operations, use expectations for complex validations.
 
 ### TodoList for Test Fixing
 
