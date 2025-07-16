@@ -174,12 +174,24 @@ trait ResolvesRelatedModels
     private function performModelResolution(string $suffix): string
     {
         $declaringClass = static::class;
+        
+        // Handle Mockery mock classes - extract the original class name
+        if (str_starts_with($declaringClass, 'Mockery_')) {
+            // Extract original class from Mockery mock class name
+            $parts = explode('_', $declaringClass);
+            if (count($parts) >= 3) {
+                // Reconstruct the original class name from Mockery_#_Original_Class_Name format
+                $declaringClass = implode('\\', array_slice($parts, 2));
+            }
+        }
+        
         $baseModelName = class_basename($declaringClass);
 
         // Build the related model class name by replacing only the class name, not the namespace
         $relatedModelName = $baseModelName.$suffix;
-        $namespace = mb_substr($declaringClass, 0, mb_strrpos($declaringClass, '\\'));
-        $resolvedClass = $namespace.'\\'.$relatedModelName;
+        $lastBackslashPos = mb_strrpos($declaringClass, '\\');
+        $namespace = $lastBackslashPos !== false ? mb_substr($declaringClass, 0, $lastBackslashPos) : '';
+        $resolvedClass = $namespace ? $namespace.'\\'.$relatedModelName : $relatedModelName;
 
         // Validate that the resolved class exists
         if (! class_exists($resolvedClass)) {

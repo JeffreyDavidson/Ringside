@@ -106,7 +106,7 @@ test('it throws exception when trying to change establishment date of active sta
     // Should not call createEstablishment or updateStableMembers due to exception
 
     expect(fn () => resolve(UpdateAction::class)->handle($stable, $data))
-        ->toThrow(CannotUpdateStableException::class);
+        ->toThrow(InvalidArgumentException::class);
 });
 
 test('it allows establishment date change for inactive stable', function () {

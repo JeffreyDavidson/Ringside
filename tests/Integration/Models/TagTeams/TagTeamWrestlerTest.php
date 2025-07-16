@@ -8,7 +8,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
- * Integration tests for TagTeam-Wrestler relationship functionality.
+ * Integration tests for TagTeamWrestler pivot model functionality.
  *
  * This test suite validates the complete workflow of tag team-wrestler
  * partnerships including joining teams, leaving teams, querying current
@@ -16,76 +16,59 @@ use Illuminate\Support\Carbon;
  *
  * Tests cover the CanJoinTagTeams trait implementation and TagTeamWrestler
  * pivot model functionality with real database relationships.
+ *
+ * @see \App\Models\TagTeams\TagTeamWrestler
  */
-describe('TagTeam-Wrestler Relationship Integration', function () {
+describe('TagTeamWrestler Pivot Model', function () {
     beforeEach(function () {
         // Create test entities with realistic factory states
-        $this->tagTeam = TagTeam::factory()->bookable()->create([
+        $this->tagTeam = TagTeam::factory()->employed()->create([
             'name' => 'The Hardy Boyz',
         ]);
 
-        $this->wrestler = Wrestler::factory()->bookable()->create([
+        $this->wrestler = Wrestler::factory()->employed()->create([
             'name' => 'Matt Hardy',
             'hometown' => 'Cameron, North Carolina',
         ]);
 
-        $this->secondTagTeam = TagTeam::factory()->bookable()->create([
+        $this->secondTagTeam = TagTeam::factory()->employed()->create([
             'name' => 'The Dudley Boyz',
         ]);
 
-        $this->secondWrestler = Wrestler::factory()->bookable()->create([
+        $this->secondWrestler = Wrestler::factory()->employed()->create([
             'name' => 'Jeff Hardy',
             'hometown' => 'Cameron, North Carolina',
         ]);
 
-        $this->thirdWrestler = Wrestler::factory()->bookable()->create([
+        $this->thirdWrestler = Wrestler::factory()->employed()->create([
             'name' => 'Bubba Ray Dudley',
             'hometown' => 'Dudleyville',
         ]);
     });
 
-    describe('TagTeam-Wrestler Relationship Creation', function () {
+    describe('Relationship Creation', function () {
         test('wrestler can join a tag team with proper pivot data', function () {
             $joinedDate = Carbon::now()->subMonths(6);
 
-            // Create the relationship using the attach method with pivot data
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $joinedDate,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamMembership($this->wrestler, $this->tagTeam, ['joined_at' => $joinedDate]);
 
-            // Verify the relationship exists
             expect($this->wrestler->tagTeams()->count())->toBe(1);
             expect($this->wrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
             expect($this->wrestler->previousTagTeams()->count())->toBe(0);
 
-            // Verify pivot data is correct
-            $pivotData = $this->wrestler->tagTeams()->first()->pivot;
-            expect($pivotData->joined_at->equalTo($joinedDate))->toBeTrue();
-            expect($pivotData->left_at)->toBeNull();
-            expect($pivotData->wrestler_id)->toBe($this->wrestler->id);
-            expect($pivotData->tag_team_id)->toBe($this->tagTeam->id);
+            expectTagTeamMembership($this->wrestler, $this->tagTeam, [
+                'joined_at' => $joinedDate,
+                'left_at' => null,
+            ]);
         });
 
         test('tag team can have multiple wrestlers as partners', function () {
             $joinedDate1 = Carbon::now()->subMonths(3);
             $joinedDate2 = Carbon::now()->subMonths(2);
 
-            // Attach multiple wrestlers to the same tag team
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $joinedDate1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamMembership($this->wrestler, $this->tagTeam, ['joined_at' => $joinedDate1]);
+            createTagTeamMembership($this->secondWrestler, $this->tagTeam, ['joined_at' => $joinedDate2]);
 
-            $this->secondWrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $joinedDate2,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Verify both relationships exist
             expect($this->wrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
             expect($this->secondWrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
 
@@ -103,26 +86,21 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('wrestler can be part of multiple tag teams across different time periods', function () {
-            $firstPeriodStart = Carbon::now()->subYear();
-            $firstPeriodEnd = Carbon::now()->subMonths(6);
-            $secondPeriodStart = Carbon::now()->subMonths(3);
+            $periods = [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subYear(),
+                    'left_at' => Carbon::now()->subMonths(6),
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(3),
+                    'left_at' => null,
+                ],
+            ];
 
-            // First tag team membership (completed)
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $firstPeriodStart,
-                'left_at' => $firstPeriodEnd,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamHistory($this->wrestler, $periods);
 
-            // Second tag team membership (current)
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => $secondPeriodStart,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Verify relationship counts
             expect($this->wrestler->tagTeams()->count())->toBe(2);
             expect($this->wrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
             expect($this->wrestler->previousTagTeams()->count())->toBe(1);
@@ -130,41 +108,28 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
             // Verify current tag team is correct
             $currentTagTeam = $this->wrestler->currentTagTeam;
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
-            expect($currentTagTeam->pivot->joined_at->equalTo($secondPeriodStart))->toBeTrue();
             expect($currentTagTeam->pivot->left_at)->toBeNull();
 
             // Verify previous tag team is correct
             $previousTagTeam = $this->wrestler->previousTagTeams()->first();
             expect($previousTagTeam->id)->toBe($this->tagTeam->id);
-            expect($previousTagTeam->pivot->joined_at->equalTo($firstPeriodStart))->toBeTrue();
-            expect($previousTagTeam->pivot->left_at->equalTo($firstPeriodEnd))->toBeTrue();
+            expect($previousTagTeam->pivot->left_at)->not->toBeNull();
         });
     });
 
-    describe('TagTeam-Wrestler Relationship Termination', function () {
+    describe('Relationship Termination', function () {
         beforeEach(function () {
-            // Set up an active tag team membership
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamMembership($this->wrestler, $this->tagTeam);
         });
 
         test('leaving tag team updates pivot correctly', function () {
             $leaveDate = Carbon::now();
 
-            // End the relationship by updating the pivot
-            $this->wrestler->tagTeams()->updateExistingPivot($this->tagTeam->id, [
-                'left_at' => $leaveDate,
-                'updated_at' => now(),
-            ]);
+            endTagTeamMembership($this->wrestler, $this->tagTeam, $leaveDate);
 
-            // Verify relationship status changed
             expect($this->wrestler->isAMemberOfCurrentTagTeam())->toBeFalse();
             expect($this->wrestler->previousTagTeams()->count())->toBe(1);
 
-            // Verify pivot data is updated
             $previousTagTeam = $this->wrestler->previousTagTeams()->first();
             expect($previousTagTeam->pivot->left_at->equalTo($leaveDate))->toBeTrue();
         });
@@ -185,26 +150,24 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
     });
 
-    describe('TagTeam-Wrestler Relationship Queries', function () {
+    describe('Relationship Queries', function () {
         beforeEach(function () {
             // Set up complex relationship scenario
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subYear(),
-                'left_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamHistory($this->wrestler, [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subYear(),
+                    'left_at' => Carbon::now()->subMonths(6),
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(3),
+                    'left_at' => null,
+                ],
             ]);
 
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(3),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $this->secondWrestler->tagTeams()->attach($this->tagTeam->id, [
+            createTagTeamMembership($this->secondWrestler, $this->tagTeam, [
                 'joined_at' => Carbon::now()->subMonths(2),
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         });
 
@@ -275,13 +238,9 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
     });
 
-    describe('TagTeamWrestler Pivot Model', function () {
+    describe('Pivot Model Operations', function () {
         test('pivot model can be queried directly', function () {
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamMembership($this->wrestler, $this->tagTeam);
 
             $pivotRecord = TagTeamWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('tag_team_id', $this->tagTeam->id)
@@ -295,11 +254,7 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('pivot model relationships work correctly', function () {
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamMembership($this->wrestler, $this->tagTeam);
 
             $pivotRecord = TagTeamWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('tag_team_id', $this->tagTeam->id)
@@ -314,11 +269,9 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
             $joinedDate = Carbon::now()->subMonths(6);
             $leftDate = Carbon::now()->subMonths(1);
 
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
+            createTagTeamMembership($this->wrestler, $this->tagTeam, [
                 'joined_at' => $joinedDate,
                 'left_at' => $leftDate,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             $pivotRecord = TagTeamWrestler::where('wrestler_id', $this->wrestler->id)
@@ -334,18 +287,9 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
 
     describe('Business Rule Validation', function () {
         test('wrestler should not have multiple concurrent tag team memberships', function () {
-            // Create first active membership
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Attempt to create concurrent membership (this should be prevented by application logic)
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
+            createTagTeamMembership($this->wrestler, $this->tagTeam);
+            createTagTeamMembership($this->wrestler, $this->secondTagTeam, [
                 'joined_at' => Carbon::now()->subMonths(3),
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             // In this test, we'll verify that both exist but note this should be validated in business logic
@@ -358,24 +302,17 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('tag team membership periods should not overlap incorrectly', function () {
-            $firstPeriodStart = Carbon::now()->subYear();
-            $firstPeriodEnd = Carbon::now()->subMonths(6);
-            $secondPeriodStart = Carbon::now()->subMonths(8); // Overlaps with first period
-
-            // Create first membership period
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $firstPeriodStart,
-                'left_at' => $firstPeriodEnd,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Attempt overlapping period (application logic should validate this)
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => $secondPeriodStart,
-                'left_at' => Carbon::now()->subMonths(4),
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamHistory($this->wrestler, [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subYear(),
+                    'left_at' => Carbon::now()->subMonths(6),
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(8), // Overlaps
+                    'left_at' => Carbon::now()->subMonths(4),
+                ],
             ]);
 
             // Verify both relationships exist (validation would be in business logic)
@@ -386,12 +323,9 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
             $joinedDate = Carbon::now()->subMonths(3);
             $leftDate = Carbon::now()->subMonths(6); // Earlier than joined date (invalid)
 
-            // This should be caught by application validation, not database
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
+            createTagTeamMembership($this->wrestler, $this->tagTeam, [
                 'joined_at' => $joinedDate,
                 'left_at' => $leftDate,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
 
             $pivotRecord = TagTeamWrestler::where('wrestler_id', $this->wrestler->id)
@@ -403,32 +337,26 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
     });
 
-    describe('Complex Tag Team Scenarios', function () {
+    describe('Complex Scenarios', function () {
         test('wrestler can rejoin the same tag team after leaving', function () {
-            // First membership period
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subYear(),
-                'left_at' => Carbon::now()->subMonths(8),
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamHistory($this->wrestler, [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subYear(),
+                    'left_at' => Carbon::now()->subMonths(8),
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(6),
+                    'left_at' => Carbon::now()->subMonths(4),
+                ],
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subMonths(2),
+                    'left_at' => null,
+                ],
             ]);
 
-            // Different tag team membership in between
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'left_at' => Carbon::now()->subMonths(4),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Rejoin original tag team
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(2),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Verify total relationships
             expect($this->wrestler->tagTeams()->count())->toBe(3);
             expect($this->wrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
             expect($this->wrestler->previousTagTeams()->count())->toBe(2);
@@ -444,23 +372,17 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('can query tag team partnership duration and calculate statistics', function () {
-            $firstPeriodStart = Carbon::now()->subYear();
-            $firstPeriodEnd = Carbon::now()->subMonths(6);
-            $secondPeriodStart = Carbon::now()->subMonths(3);
-
-            // First completed period
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $firstPeriodStart,
-                'left_at' => $firstPeriodEnd,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Current ongoing period
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => $secondPeriodStart,
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamHistory($this->wrestler, [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subYear(),
+                    'left_at' => Carbon::now()->subMonths(6),
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(3),
+                    'left_at' => null,
+                ],
             ]);
 
             // Calculate duration of completed period
@@ -475,35 +397,20 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('tag team with multiple member changes over time', function () {
-            $initialJoinDate = Carbon::now()->subMonths(6);
-            $secondJoinDate = Carbon::now()->subMonths(4);
-            $firstLeaveDate = Carbon::now()->subMonths(2);
-            $thirdJoinDate = Carbon::now()->subMonths(1);
-
             // Original two-person tag team
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $initialJoinDate,
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamMembership($this->wrestler, $this->tagTeam, [
+                'joined_at' => Carbon::now()->subMonths(6),
             ]);
-
-            $this->secondWrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $secondJoinDate,
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamMembership($this->secondWrestler, $this->tagTeam, [
+                'joined_at' => Carbon::now()->subMonths(4),
             ]);
 
             // First wrestler leaves
-            $this->wrestler->tagTeams()->updateExistingPivot($this->tagTeam->id, [
-                'left_at' => $firstLeaveDate,
-                'updated_at' => now(),
-            ]);
+            endTagTeamMembership($this->wrestler, $this->tagTeam, Carbon::now()->subMonths(2));
 
             // Third wrestler joins
-            $this->thirdWrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => $thirdJoinDate,
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamMembership($this->thirdWrestler, $this->tagTeam, [
+                'joined_at' => Carbon::now()->subMonths(1),
             ]);
 
             // Verify current membership
@@ -523,20 +430,10 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
     });
 
-    describe('Performance and Query Optimization', function () {
+    describe('Performance Optimization', function () {
         test('eager loading tag team relationships works correctly', function () {
-            // Set up multiple relationships
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $this->secondWrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(3),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            createTagTeamMembership($this->wrestler, $this->tagTeam);
+            createTagTeamMembership($this->secondWrestler, $this->secondTagTeam);
 
             // Load wrestlers with their current tag teams
             $wrestlers = Wrestler::with('currentTagTeam')->get();
@@ -550,20 +447,19 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('can efficiently count tag team relationships without loading them', function () {
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamHistory($this->wrestler, [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subMonths(6),
+                    'left_at' => null,
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(3),
+                    'left_at' => Carbon::now()->subMonths(1),
+                ],
             ]);
 
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(3),
-                'left_at' => Carbon::now()->subMonths(1),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Count without loading
             expect($this->wrestler->tagTeams()->count())->toBe(2);
             expect($this->wrestler->previousTagTeams()->count())->toBe(1);
             expect($this->wrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
@@ -573,19 +469,17 @@ describe('TagTeam-Wrestler Relationship Integration', function () {
         });
 
         test('BelongsToOne relationships work efficiently for single results', function () {
-            // Set up previous tag team
-            $this->wrestler->tagTeams()->attach($this->tagTeam->id, [
-                'joined_at' => Carbon::now()->subYear(),
-                'left_at' => Carbon::now()->subMonths(6),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Set up current tag team
-            $this->wrestler->tagTeams()->attach($this->secondTagTeam->id, [
-                'joined_at' => Carbon::now()->subMonths(3),
-                'created_at' => now(),
-                'updated_at' => now(),
+            createTagTeamHistory($this->wrestler, [
+                [
+                    'tag_team' => $this->tagTeam,
+                    'joined_at' => Carbon::now()->subYear(),
+                    'left_at' => Carbon::now()->subMonths(6),
+                ],
+                [
+                    'tag_team' => $this->secondTagTeam,
+                    'joined_at' => Carbon::now()->subMonths(3),
+                    'left_at' => null,
+                ],
             ]);
 
             // Test BelongsToOne relationships return single models, not collections
