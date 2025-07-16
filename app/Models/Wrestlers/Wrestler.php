@@ -38,7 +38,7 @@ use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\EventMatchCompetitor;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableMember;
+use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
@@ -58,7 +58,7 @@ use Tests\Unit\Models\Wrestlers\WrestlerTest;
 /**
  * @implements Bookable<EventMatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
- * @implements CanBeAStableMember<StableMember, static>
+ * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>
  * @implements Employable<WrestlerEmployment, static>
  * @implements Injurable<WrestlerInjury, static>
@@ -151,7 +151,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableMember, static> */
+    /** @use CanJoinStables<StableWrestler, static> */
     use CanJoinStables;
 
     /** @use CanJoinTagTeams<TagTeamWrestler, static> */
