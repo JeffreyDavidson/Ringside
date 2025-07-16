@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchDecision query()
  *
  * @mixin \Eloquent
- * @property string $slug
  */
 #[UseFactory(MatchDecisionFactory::class)]
 class MatchDecision extends Model
