@@ -9,7 +9,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
- * Integration tests for Stable-Member relationship functionality.
+ * Integration tests for StableMember model functionality.
  *
  * This test suite validates the complete workflow of stable memberships
  * including wrestlers and tag teams joining stables, leaving stables,
@@ -19,20 +19,22 @@ use Illuminate\Support\Carbon;
  * Tests cover the CanJoinStables trait implementation and the polymorphic
  * StableMember model with real database relationships. Note: Managers are
  * not direct stable members - they are associated through wrestlers/tag teams.
+ *
+ * @see \App\Models\Stables\StableMember
  */
-describe('Stable-Member Relationship Integration', function () {
+describe('StableMember Model', function () {
     beforeEach(function () {
         // Create test entities with realistic factory states
         $this->stable = Stable::factory()->active()->create([
             'name' => 'The Four Horsemen',
         ]);
 
-        $this->wrestler = Wrestler::factory()->bookable()->create([
+        $this->wrestler = Wrestler::factory()->employed()->create([
             'name' => 'Ric Flair',
             'hometown' => 'Charlotte, North Carolina',
         ]);
 
-        $this->tagTeam = TagTeam::factory()->bookable()->create([
+        $this->tagTeam = TagTeam::factory()->employed()->create([
             'name' => 'The Brain Busters',
         ]);
 
@@ -40,12 +42,12 @@ describe('Stable-Member Relationship Integration', function () {
             'name' => 'D-Generation X',
         ]);
 
-        $this->secondWrestler = Wrestler::factory()->bookable()->create([
+        $this->secondWrestler = Wrestler::factory()->employed()->create([
             'name' => 'Tully Blanchard',
             'hometown' => 'San Antonio, Texas',
         ]);
 
-        $this->secondTagTeam = TagTeam::factory()->bookable()->create([
+        $this->secondTagTeam = TagTeam::factory()->employed()->create([
             'name' => 'The New Age Outlaws',
         ]);
 
