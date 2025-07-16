@@ -5,94 +5,48 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\EmployAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeEmployedException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
- * Integration tests for Wrestler Employment Actions.
+ * Workflow tests for Wrestler Employment multi-action scenarios.
  *
- * INTEGRATION TEST SCOPE:
- * - Complete action workflows from start to finish
- * - Status synchronization across multiple components
- * - Repository and action integration
- * - Pipeline and cascade strategy integration
- * - Transaction integrity across components
+ * WORKFLOW TEST SCOPE:
+ * - Multi-action employment workflows
+ * - Cross-action data consistency  
+ * - Transaction integrity across multiple actions
+ * - Complex business process validation
  */
-describe('Wrestler Employment Action Integration', function () {
+describe('Wrestler Employment Workflows', function () {
 
     beforeEach(function () {
         $this->wrestler = Wrestler::factory()->released()->create();
     });
 
-    describe('EmployAction integration', function () {
-        test('complete employment workflow synchronizes all state', function () {
-            $employmentDate = Carbon::now();
-
-            // Verify initial state
-            expect($this->wrestler->isReleased())->toBeTrue();
-            expect($this->wrestler->isEmployed())->toBeFalse();
-            expect($this->wrestler->status)->toBe(EmploymentStatus::Released);
-
-            // Execute complete employment workflow
-            EmployAction::run($this->wrestler, $employmentDate);
-
-            // Verify complete state synchronization
-            $refreshedWrestler = $this->wrestler->fresh();
-            expect($refreshedWrestler->isEmployed())->toBeTrue();
-            expect($refreshedWrestler->isReleased())->toBeFalse();
-            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-            expect($refreshedWrestler->currentEmployment)->not->toBeNull();
-            expect($refreshedWrestler->currentEmployment->started_at->toDateTimeString())
-                ->toBe($employmentDate->toDateTimeString());
-        });
-
-        test('employing already employed wrestler throws validation error', function () {
-            $wrestler = Wrestler::factory()->bookable()->create();
-
-            // Verify initial employed state
-            expect($wrestler->isEmployed())->toBeTrue();
-            expect($wrestler->status)->toBe(EmploymentStatus::Employed);
-
-            // Attempt to employ again should throw validation error
-            expect(fn () => EmployAction::run($wrestler, Carbon::now()))
-                ->toThrow(CannotBeEmployedException::class);
-        });
-
-        test('employing retired wrestler handles status transition', function () {
-            $wrestler = Wrestler::factory()->retired()->create();
-
-            // Verify initial retired state
-            expect($wrestler->isRetired())->toBeTrue();
-            expect($wrestler->status)->toBe(EmploymentStatus::Retired);
-
-            // Employ the retired wrestler
-            EmployAction::run($wrestler, Carbon::now());
-
-            // Verify employment takes precedence over retirement in status field
-            $refreshedWrestler = $wrestler->fresh();
-            expect($refreshedWrestler->isEmployed())->toBeTrue();
-            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-            // Note: isRetired() might still be true due to retirement relationship
-        });
-
-        test('employment action integrates with status transition pipeline', function () {
+    describe('multi-action employment workflows', function () {
+        test('employ then release then re-employ workflow maintains consistency', function () {
             $wrestler = Wrestler::factory()->unemployed()->create();
 
-            expect($wrestler->status)->toBe(EmploymentStatus::Unemployed);
-            expect($wrestler->isEmployed())->toBeFalse();
-
-            // Test that the full pipeline handles the transition
+            // Initial employ
             EmployAction::run($wrestler, Carbon::now());
+            $employed = $wrestler->fresh();
+            expect($employed->isEmployed())->toBeTrue();
 
-            $refreshedWrestler = $wrestler->fresh();
-            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-            expect($refreshedWrestler->isEmployed())->toBeTrue();
-            expect($refreshedWrestler->currentEmployment)->not->toBeNull();
+            // Release
+            ReleaseAction::run($employed, Carbon::now());
+            $released = $wrestler->fresh();
+            expect($released->isReleased())->toBeTrue();
+            expect($released->isEmployed())->toBeFalse();
+
+            // Re-employ
+            EmployAction::run($released, Carbon::now());
+            $reEmployed = $wrestler->fresh();
+            expect($reEmployed->isEmployed())->toBeTrue();
+            expect($reEmployed->isReleased())->toBeFalse();
         });
     });
 
-    describe('multiple action integration', function () {
+    describe('complex wrestling career workflows', function () {
         test('employ then release workflow maintains data consistency', function () {
             $wrestler = Wrestler::factory()->unemployed()->create();
 
