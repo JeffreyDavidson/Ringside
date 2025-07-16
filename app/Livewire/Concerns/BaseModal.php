@@ -39,7 +39,7 @@ abstract class BaseModal extends ModalComponent
     {
         if (isset($modelId)) {
             try {
-                $this->model = $this->modelType::findOrFail($modelId);
+                $this->model = $this->modelType::findOrFail((int) $modelId);
                 $this->modelForm->setModel($this->model);
             } catch (Exception $e) {
                 Log::error($e->getMessage());

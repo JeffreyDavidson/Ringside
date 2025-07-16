@@ -116,7 +116,7 @@ class CreateAction extends BaseTagTeamAction
             ->ensure(Manager::class)
             ->values(); // Reset keys to be sequential integers
 
-        $managersCollection->whenNotEmpty(fn ($managers) => $this->tagTeamRepository->addManagers($tagTeam, $managers, $datetime));
+        $managersCollection->whenNotEmpty(fn (\Illuminate\Support\Collection $managers) => $this->tagTeamRepository->addManagers($tagTeam, $managers, $datetime));
     }
 
     /**

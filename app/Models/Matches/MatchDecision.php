@@ -43,7 +43,7 @@ class MatchDecision extends Model
     /**
      * Decisions that result in no winners or losers.
      *
-     * @var array<string>
+     * @var array<int, string>
      */
     protected const NO_OUTCOME_DECISIONS = [
         'draw',        // Time Limit Draw
