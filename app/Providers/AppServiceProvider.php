@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Replace Laravel's default make:test command with our enhanced version
-        $this->app->singleton('command.test.make', function ($app) {
+        $this->app->singleton('command.test.make', function (\Illuminate\Contracts\Foundation\Application $app) {
             return new EnhancedTestMakeCommand($app['files']);
         });
     }
@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Builder::macro('orderByNullsLast', function (Expression|string $column, string $direction = 'asc') {
-            /** @var Builder $builder */
+            /** @var Builder $this */
             $builder = $this;
             $column = $builder->getGrammar()->wrap($column);
             $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';

@@ -17,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
  * - Array type annotations
  *
  * @see BaseTableTrait
- * @see \Tests\Integration\Livewire\Concerns\BaseTableTraitTest
+ * @see Tests\Integration\Livewire\Concerns\BaseTableTraitTest
  */
 describe('BaseTableTrait Unit Tests', function () {
     describe('trait integration', function () {
@@ -29,9 +29,9 @@ describe('BaseTableTrait Unit Tests', function () {
     describe('property structure', function () {
         test('has actionLinksToDisplay property with correct type', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            
+
             expect($reflection->hasProperty('actionLinksToDisplay'))->toBeTrue();
-            
+
             $property = $reflection->getProperty('actionLinksToDisplay');
             expect($property->isProtected())->toBeTrue();
             expect($property->getType()->getName())->toBe('array');
@@ -42,9 +42,9 @@ describe('BaseTableTrait Unit Tests', function () {
 
         test('has showActionColumn property', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            
+
             expect($reflection->hasProperty('showActionColumn'))->toBeTrue();
-            
+
             $property = $reflection->getProperty('showActionColumn');
             expect($property->isProtected())->toBeTrue();
             expect($property->getType()->getName())->toBe('bool');
@@ -54,12 +54,12 @@ describe('BaseTableTrait Unit Tests', function () {
 
         test('has configuration string properties', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            
+
             $stringProperties = ['databaseTableName', 'routeBasePath', 'resourceName'];
-            
+
             foreach ($stringProperties as $propertyName) {
                 expect($reflection->hasProperty($propertyName))->toBeTrue();
-                
+
                 $property = $reflection->getProperty($propertyName);
                 expect($property->isProtected())->toBeTrue();
                 expect($property->getType()->getName())->toBe('string');
@@ -72,9 +72,9 @@ describe('BaseTableTrait Unit Tests', function () {
     describe('method signatures', function () {
         test('has configuringBaseTableTrait method', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            
+
             expect($reflection->hasMethod('configuringBaseTableTrait'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('configuringBaseTableTrait');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('void');
@@ -83,9 +83,9 @@ describe('BaseTableTrait Unit Tests', function () {
 
         test('has appendColumns method', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            
+
             expect($reflection->hasMethod('appendColumns'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('appendColumns');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('array');
@@ -95,14 +95,14 @@ describe('BaseTableTrait Unit Tests', function () {
 
         test('has private helper methods', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            
+
             expect($reflection->hasMethod('setupTableStructure'))->toBeTrue();
             expect($reflection->hasMethod('setSearchAttributes'))->toBeTrue();
-            
+
             $setupMethod = $reflection->getMethod('setupTableStructure');
             expect($setupMethod->isPrivate())->toBeTrue();
             expect($setupMethod->getReturnType()->getName())->toBe('void');
-            
+
             $searchMethod = $reflection->getMethod('setSearchAttributes');
             expect($searchMethod->isPrivate())->toBeTrue();
             expect($searchMethod->getReturnType()->getName())->toBe('void');
@@ -130,7 +130,7 @@ describe('BaseTableTrait Unit Tests', function () {
         test('imports required dependencies', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('use App\\Livewire\\Concerns\\Columns\\HasActionColumn;');
             expect($source)->toContain('use Rappasoft\\LaravelLivewireTables\\Views\\Column;');
         });
@@ -140,7 +140,7 @@ describe('BaseTableTrait Unit Tests', function () {
         test('configuringBaseTableTrait contains expected method calls', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for expected configuration calls
             expect($source)->toContain('->setPrimaryKey(\'id\')');
             expect($source)->toContain('->setColumnSelectDisabled()');
@@ -153,7 +153,7 @@ describe('BaseTableTrait Unit Tests', function () {
         test('appendColumns method structure', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for conditional action column logic
             expect($source)->toContain('$this->showActionColumn');
             expect($source)->toContain('$this->getDefaultActionColumn()');
@@ -164,14 +164,14 @@ describe('BaseTableTrait Unit Tests', function () {
         test('uses Laravel Livewire Tables components', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('Rappasoft\\LaravelLivewireTables\\Views\\Column');
         });
 
         test('follows Laravel Livewire Tables patterns', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for standard table configuration patterns
             expect($source)->toContain('configuringBaseTableTrait');
             expect($source)->toContain('appendColumns');
@@ -185,11 +185,11 @@ describe('BaseTableTrait Unit Tests', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $publicMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
-                fn($method) => $method->getDeclaringClass()->getName() === BaseTableTrait::class
+                fn ($method) => $method->getDeclaringClass()->getName() === BaseTableTrait::class
             );
-            
-            $publicMethodNames = array_map(fn($method) => $method->getName(), $publicMethods);
-            
+
+            $publicMethodNames = array_map(fn ($method) => $method->getName(), $publicMethods);
+
             expect($publicMethodNames)->toContain('configuringBaseTableTrait');
             expect($publicMethodNames)->toContain('appendColumns');
         });
@@ -198,11 +198,11 @@ describe('BaseTableTrait Unit Tests', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $privateMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PRIVATE),
-                fn($method) => $method->getDeclaringClass()->getName() === BaseTableTrait::class
+                fn ($method) => $method->getDeclaringClass()->getName() === BaseTableTrait::class
             );
-            
-            $privateMethodNames = array_map(fn($method) => $method->getName(), $privateMethods);
-            
+
+            $privateMethodNames = array_map(fn ($method) => $method->getName(), $privateMethods);
+
             expect($privateMethodNames)->toContain('setupTableStructure');
             expect($privateMethodNames)->toContain('setSearchAttributes');
         });

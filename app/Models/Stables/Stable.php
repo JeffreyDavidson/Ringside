@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
-use App\Builders\Roster\StableBuilder;
 use App\Builders\Concerns\HasStatusScopes;
+use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
@@ -170,22 +170,22 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
                 if ($this->isRetired()) {
                     return StableStatus::Retired;
                 }
-                
+
                 // Check for current activity
                 if ($this->isCurrentlyActive()) {
                     return StableStatus::Active;
                 }
-                
+
                 // Check for future activity
                 if ($this->hasFutureActivity()) {
                     return StableStatus::PendingEstablishment;
                 }
-                
+
                 // Check for previous activity periods
                 if ($this->hasActivityPeriods()) {
                     return StableStatus::Inactive;
                 }
-                
+
                 // No activity periods at all
                 return StableStatus::Unformed;
             }

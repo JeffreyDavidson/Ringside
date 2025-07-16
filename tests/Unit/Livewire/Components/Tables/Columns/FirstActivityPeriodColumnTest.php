@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
-use App\Models\Stables\Stable;
-use App\Models\Titles\Title;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 /**
@@ -18,7 +16,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
  * - Label callback functionality
  *
  * @see FirstActivityPeriodColumn
- * @see \Tests\Integration\Livewire\Components\Tables\Columns\FirstActivityPeriodColumnTest
+ * @see Tests\Integration\Livewire\Components\Tables\Columns\FirstActivityPeriodColumnTest
  */
 describe('FirstActivityPeriodColumn Unit Tests', function () {
     describe('class structure and inheritance', function () {
@@ -37,16 +35,16 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
         test('accepts title and from parameters', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $constructor = $reflection->getConstructor();
-            
+
             expect($constructor)->not->toBeNull();
             expect($constructor->getNumberOfParameters())->toBe(2);
             expect($constructor->getNumberOfRequiredParameters())->toBe(1);
-            
+
             $parameters = $constructor->getParameters();
             expect($parameters[0]->getName())->toBe('title');
             expect($parameters[0]->getType()->getName())->toBe('string');
             expect($parameters[0]->isOptional())->toBeFalse();
-            
+
             expect($parameters[1]->getName())->toBe('from');
             expect($parameters[1]->getType()->getName())->toBe('string');
             expect($parameters[1]->isOptional())->toBeTrue();
@@ -56,7 +54,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
         test('calls parent constructor', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $constructor = $reflection->getConstructor();
-            
+
             expect($constructor)->not->toBeNull();
             expect($constructor->isPublic())->toBeTrue();
         });
@@ -79,7 +77,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $constructor = $reflection->getConstructor();
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check that the label callback has proper type hints
             expect($source)->toContain('Stable|Title $row');
             expect($source)->toContain('Column $column');
@@ -88,7 +86,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
         test('uses expected model classes', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('use App\\Models\\Stables\\Stable;');
             expect($source)->toContain('use App\\Models\\Titles\\Title;');
         });
@@ -99,7 +97,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $constructor = $reflection->getConstructor();
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check that the constructor sets up label callback
             expect($source)->toContain('$this->label(');
             expect($source)->toContain('getFormattedFirstActivity()');
@@ -108,7 +106,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
         test('uses proper callback structure', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for proper callback structure with type hints
             expect($source)->toContain('fn (Stable|Title $row, Column $column): string =>');
         });
@@ -118,14 +116,14 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
         test('relies on getFormattedFirstActivity method', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('$row->getFormattedFirstActivity()');
         });
 
         test('expects string return type from model method', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check that the callback returns string
             expect($source)->toContain('): string =>');
         });
@@ -135,7 +133,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
         test('uses correct Column base class', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('use Rappasoft\\LaravelLivewireTables\\Views\\Column;');
         });
 
@@ -143,7 +141,7 @@ describe('FirstActivityPeriodColumn Unit Tests', function () {
             $reflection = new ReflectionClass(FirstActivityPeriodColumn::class);
             $constructor = $reflection->getConstructor();
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check that it calls parent constructor and sets up label
             expect($source)->toContain('parent::__construct($title, $from);');
             expect($source)->toContain('$this->label(');

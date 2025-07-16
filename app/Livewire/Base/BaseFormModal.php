@@ -315,7 +315,7 @@ abstract class BaseFormModal extends BaseModal
         $this->modelType = new $modelClass();
 
         // Initialize the form if it doesn't exist (Livewire auto-initialization)
-        if (!isset($this->form)) {
+        if (! isset($this->form)) {
             $formClass = $this->getFormClass();
             $this->form = new $formClass();
         }

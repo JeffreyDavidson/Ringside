@@ -5,9 +5,6 @@ declare(strict_types=1);
 use App\Data\Referees\RefereeData;
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeEmployment;
-use App\Models\Referees\RefereeInjury;
-use App\Models\Referees\RefereeRetirement;
-use App\Models\Referees\RefereeSuspension;
 use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Concerns\ManagesRetirement;
@@ -62,7 +59,7 @@ describe('RefereeRepository Unit Tests', function () {
             $methods = [
                 'create', 'update', 'restore',
                 'createEmployment', 'createRelease', 'createRetirement', 'endRetirement',
-                'createSuspension', 'endSuspension', 'createInjury', 'endInjury'
+                'createSuspension', 'endSuspension', 'createInjury', 'endInjury',
             ];
 
             foreach ($methods as $method) {

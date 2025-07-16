@@ -127,7 +127,7 @@ describe('Referee Employment Action Integration', function () {
             $refreshedReferee = $referee->fresh();
             expect($refreshedReferee->status)->toBe(EmploymentStatus::Employed);
             expect($refreshedReferee->currentEmployment)->toBeNull(); // Future employment not yet current
-            
+
             // Verify the future employment record exists
             $futureEmployment = $refreshedReferee->employments()->latest()->first();
             expect($futureEmployment->started_at->toDateTimeString())

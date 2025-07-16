@@ -7,15 +7,12 @@ namespace App\Livewire\Stables\Tables;
 use App\Models\TagTeams\TagTeam;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class PreviousTagTeamsTable extends DataTableComponent
 {
-
     protected string $resourceName = 'tag teams';
 
     protected string $databaseTableName = 'tag_teams';
@@ -32,14 +29,14 @@ class PreviousTagTeamsTable extends DataTableComponent
         }
 
         return TagTeam::query()
-            ->whereHas('stables', function ($query) {
+            ->whereHas('stables', function (Builder $query) {
                 $query->where('stable_id', $this->stableId)
-                      ->whereNotNull('left_at');
+                    ->whereNotNull('left_at');
             })
-            ->with(['stables' => function ($query) {
+            ->with(['stables' => function (\Illuminate\Database\Eloquent\Relations\BelongsToMany $query) {
                 $query->where('stable_id', $this->stableId)
-                      ->whereNotNull('left_at')
-                      ->withPivot(['joined_at', 'left_at']);
+                    ->whereNotNull('left_at')
+                    ->withPivot(['joined_at', 'left_at']);
             }]);
     }
 
@@ -53,14 +50,14 @@ class PreviousTagTeamsTable extends DataTableComponent
                 ->title(fn (TagTeam $row) => $row->name ?? 'Unknown')
                 ->location(fn (TagTeam $row) => route('tag-teams.show', $row)),
             Column::make(__('stables.date_joined'))
-                ->label(fn (TagTeam $row) => $row->stables->first()?->pivot?->joined_at ? 
-                    (is_string($row->stables->first()->pivot->joined_at) ? 
+                ->label(fn (TagTeam $row) => $row->stables->first()?->pivot?->joined_at ?
+                    (is_string($row->stables->first()->pivot->joined_at) ?
                         \Carbon\Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
                         $row->stables->first()->pivot->joined_at->format('Y-m-d')
                     ) : ''),
             Column::make(__('stables.date_left'))
-                ->label(fn (TagTeam $row) => $row->stables->first()?->pivot?->left_at ? 
-                    (is_string($row->stables->first()->pivot->left_at) ? 
+                ->label(fn (TagTeam $row) => $row->stables->first()?->pivot?->left_at ?
+                    (is_string($row->stables->first()->pivot->left_at) ?
                         \Carbon\Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
                         $row->stables->first()->pivot->left_at->format('Y-m-d')
                     ) : ''),
@@ -77,5 +74,4 @@ class PreviousTagTeamsTable extends DataTableComponent
             ->setLoadingPlaceholderContent('Loading')
             ->setLoadingPlaceholderEnabled();
     }
-
 }

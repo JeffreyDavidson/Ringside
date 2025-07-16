@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Data\Stables\StableData;
 use App\Enums\Stables\StableStatus;
+use App\Models\Contracts\HasActivityPeriods;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivityPeriod;
@@ -13,7 +14,6 @@ use App\Models\Stables\StableMember;
 use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Contracts\HasActivityPeriods;
 use App\Repositories\Concerns\ManagesActivity;
 use App\Repositories\Concerns\ManagesMembers;
 use App\Repositories\Concerns\ManagesRetirement;
@@ -252,7 +252,7 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     public function createDebut(Stable $stable, Carbon $debutDate): void
     {
         $this->createActivity($stable, $debutDate);
-        
+
         // Update the stable status based on debut date
         $status = $debutDate->isFuture() ? StableStatus::PendingEstablishment : StableStatus::Active;
         $stable->update(['status' => $status]);
@@ -265,7 +265,7 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     {
         // Call the trait method to end the activity period
         $model->currentActivityPeriod()->update(['ended_at' => $endDate->toDateTimeString()]);
-        
+
         // Update the stable status to Inactive when disbanded
         if ($model instanceof Stable) {
             $model->update(['status' => StableStatus::Inactive]);
@@ -278,7 +278,7 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     public function pull(Stable $stable, Carbon $pullDate): void
     {
         $this->endActivity($stable, $pullDate);
-        
+
         // Update the stable status to Inactive when pulled
         $stable->update(['status' => StableStatus::Inactive]);
     }
@@ -289,7 +289,7 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     public function createReinstatement(Stable $stable, Carbon $reinstatementDate): void
     {
         $this->createActivity($stable, $reinstatementDate);
-        
+
         // Update the stable status based on reinstatement date
         $status = $reinstatementDate->isFuture() ? StableStatus::PendingEstablishment : StableStatus::Active;
         $stable->update(['status' => $status]);

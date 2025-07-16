@@ -87,7 +87,7 @@ describe('Venue FormModal Integration Tests', function () {
 
             expect($dummyFields)->toBeArray();
             expect($dummyFields)->toHaveKeys([
-                'name', 'street_address', 'city', 'state', 'zipcode'
+                'name', 'street_address', 'city', 'state', 'zipcode',
             ]);
         });
 
@@ -117,10 +117,10 @@ describe('Venue FormModal Integration Tests', function () {
         test('generates consistent address data through optimized approach', function () {
             $reflection = new ReflectionMethod($this->modal, 'generateRandomData');
             $reflection->setAccessible(true);
-            
+
             // Execute the generateRandomData method
             $reflection->invoke($this->modal);
-            
+
             // Verify that form fields are populated
             expect($this->modal->form)->not->toBeNull();
         });
@@ -134,7 +134,7 @@ describe('Venue FormModal Integration Tests', function () {
             $addressFields = ['street_address', 'city', 'state', 'zipcode'];
             foreach ($addressFields as $field) {
                 expect($dummyFields)->toHaveKey($field);
-                
+
                 $value = $dummyFields[$field]();
                 expect($value)->toBeString();
                 expect(mb_strlen($value))->toBeGreaterThan(0);
@@ -146,12 +146,12 @@ describe('Venue FormModal Integration Tests', function () {
         test('generateRandomData creates consistent address from single source', function () {
             $reflection = new ReflectionMethod($this->modal, 'generateRandomData');
             $reflection->setAccessible(true);
-            
+
             // Mock the form to capture filled data
             $mockForm = mock(VenueForm::class);
-            $mockForm->shouldReceive('fill')->once()->with(\Mockery::type('array'));
+            $mockForm->shouldReceive('fill')->once()->with(Mockery::type('array'));
             $this->modal->form = $mockForm;
-            
+
             $reflection->invoke($this->modal);
         });
 
@@ -159,10 +159,10 @@ describe('Venue FormModal Integration Tests', function () {
             // This test ensures the documented optimization approach
             // where address data is generated once and reused
             expect(method_exists($this->modal, 'generateRandomData'))->toBeTrue();
-            
+
             $reflection = new ReflectionClass($this->modal);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Should contain the consistency optimization
             expect($source)->toContain('generateUSAddress()');
         });
@@ -174,7 +174,7 @@ describe('Venue FormModal Integration Tests', function () {
 
             foreach ($modalMethods as $method) {
                 expect(method_exists($this->modal, $method))->toBeTrue("Method {$method} should exist");
-                
+
                 $reflection = new ReflectionMethod($this->modal, $method);
                 expect($reflection->getReturnType()->getName())->toBe('void');
             }
@@ -198,7 +198,7 @@ describe('Venue FormModal Integration Tests', function () {
         test('focuses on wrestling venue management functionality', function () {
             $reflection = new ReflectionClass($this->modal);
             $docComment = $reflection->getDocComment();
-            
+
             // Should be documented for venue-specific use
             expect($docComment)->toContain('venue');
         });

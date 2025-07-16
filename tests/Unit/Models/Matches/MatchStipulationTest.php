@@ -72,10 +72,11 @@ describe('MatchStipulation Model Unit Tests', function () {
         test('has required constants defined', function () {
             $reflection = new ReflectionClass(MatchStipulation::class);
             $constants = $reflection->getConstants();
-            
+
             // Filter out inherited constants from parent classes
             $modelConstants = array_filter($constants, function ($value, $key) use ($reflection) {
                 $constant = $reflection->getReflectionConstant($key);
+
                 return $constant && $constant->getDeclaringClass()->getName() === MatchStipulation::class;
             }, ARRAY_FILTER_USE_BOTH);
 

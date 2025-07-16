@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Builders\Roster\StableBuilder;
 use App\Builders\Concerns\HasStatusScopes;
+use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;

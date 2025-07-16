@@ -19,13 +19,13 @@ use Illuminate\Database\Eloquent\Model;
  * These tests verify the CanChangeEmploymentDate rule logic independently
  * of models, database, or Laravel's validation framework.
  *
- * @see \App\Rules\Shared\CanChangeEmploymentDate
+ * @see CanChangeEmploymentDate
  */
 describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('model validation with employment methods', function () {
         test('validation passes when model is not employed', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isEmployed')->andReturn(false);
 
             $rule = new CanChangeEmploymentDate($model);
@@ -43,11 +43,23 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
         test('validation fails when model is employed and employedOn returns false', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
                 public function getAttribute(
-                    $key) { return $key === 'name' ? 'Test Wrestler' : null; }
+                    $key)
+                {
+                    return $key === 'name' ? 'Test Wrestler' : null;
+                }
             };
 
             $rule = new CanChangeEmploymentDate($model);
@@ -68,10 +80,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model is employed and employedOn returns true', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return true; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Wrestler' : null; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return true;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Wrestler' : null;
+                }
             };
 
             $rule = new CanChangeEmploymentDate($model);
@@ -89,7 +113,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model is employed but lacks employedOn method', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isEmployed')->andReturn(true);
             $model->shouldReceive('getAttribute')->with('name')->andReturn('Test Model');
 
@@ -110,7 +134,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('method existence checking logic', function () {
         test('validation passes when model lacks isEmployed method', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             // Note: No isEmployed method mocked - simulates method_exists() returning false
 
             $rule = new CanChangeEmploymentDate($model);
@@ -145,10 +169,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('model name resolution strategies', function () {
         test('uses model name property when available', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Custom Model Name' : null; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Custom Model Name' : null;
+                }
             };
 
             $rule = new CanChangeEmploymentDate($model);
@@ -166,10 +202,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
         test('uses class basename when name property missing', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return null; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return null;
+                }
             };
 
             $rule = new CanChangeEmploymentDate($model);
@@ -189,10 +237,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('date parsing and handling', function () {
         test('handles Carbon date instances', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Model' : null; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Model' : null;
+                }
             };
 
             $rule = new CanChangeEmploymentDate($model);
@@ -210,10 +270,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
         test('handles string date values', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Model' : null; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Model' : null;
+                }
             };
 
             $rule = new CanChangeEmploymentDate($model);
@@ -232,14 +304,14 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
         test('correctly passes parsed date to employedOn method', function () {
             // Arrange
             $targetDate = now()->addWeek();
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isEmployed')->andReturn(true);
             $model->shouldReceive('employedOn')
-                  ->with(\Mockery::on(function ($date) use ($targetDate) {
-                      return $date instanceof \Illuminate\Support\Carbon &&
-                             $date->equalTo($targetDate);
-                  }))
-                  ->andReturn(true);
+                ->with(Mockery::on(function ($date) use ($targetDate) {
+                    return $date instanceof Illuminate\Support\Carbon &&
+                           $date->equalTo($targetDate);
+                }))
+                ->andReturn(true);
             $model->shouldReceive('getAttribute')->with('name')->andReturn('Test Model');
 
             $rule = new CanChangeEmploymentDate($model);
@@ -262,13 +334,13 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             $rule = new CanChangeEmploymentDate(null);
 
             // Assert
-            expect($rule)->toBeInstanceOf(\Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
         });
 
         test('validate method signature matches interface', function () {
             // Arrange
             $rule = new CanChangeEmploymentDate(null);
-            $reflection = new \ReflectionMethod($rule, 'validate');
+            $reflection = new ReflectionMethod($rule, 'validate');
 
             // Assert
             expect($reflection->getParameters())->toHaveCount(3);
@@ -281,15 +353,39 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('error message consistency', function () {
         test('error message format is consistent across different models', function () {
             // Arrange
-            $model1 = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Model One' : null; }
+            $model1 = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Model One' : null;
+                }
             };
-            $model2 = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Model Two' : null; }
+            $model2 = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Model Two' : null;
+                }
             };
             $messages = [];
             $failCallback = function (string $message) use (&$messages) {
@@ -305,10 +401,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
         });
         test('attribute name does not affect validation logic', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isEmployed() { return true; }
-                public function employedOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Model' : null; }
+            $model = new class extends Model
+            {
+                public function isEmployed()
+                {
+                    return true;
+                }
+
+                public function employedOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Model' : null;
+                }
             };
             $rule = new CanChangeEmploymentDate($model);
             $failCallCount = 0;
@@ -325,6 +433,6 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     });
 
     afterEach(function () {
-        \Mockery::close();
+        Mockery::close();
     });
 });

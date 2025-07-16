@@ -16,7 +16,7 @@ use Livewire\Form;
  * - Generic type annotations
  *
  * @see LivewireBaseForm
- * @see \Tests\Integration\Livewire\Base\LivewireBaseFormTest
+ * @see Tests\Integration\Livewire\Base\LivewireBaseFormTest
  */
 describe('LivewireBaseForm Unit Tests', function () {
     describe('class structure and inheritance', function () {
@@ -33,10 +33,10 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('abstract methods', function () {
         test('has required abstract methods', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
-            $abstractMethodNames = array_map(fn($method) => $method->getName(), $abstractMethods);
-            
+            $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
+
             expect($abstractMethodNames)->toContain('rules');
             expect($abstractMethodNames)->toContain('getModelData');
         });
@@ -45,13 +45,13 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('method signatures', function () {
         test('abstract methods have correct signatures', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             // rules method
             $rules = $reflection->getMethod('rules');
             expect($rules->isAbstract())->toBeTrue();
             expect($rules->isProtected())->toBeTrue();
             expect($rules->getReturnType()->getName())->toBe('array');
-            
+
             // getModelData method
             $getModelData = $reflection->getMethod('getModelData');
             expect($getModelData->isAbstract())->toBeTrue();
@@ -63,10 +63,10 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('concrete methods', function () {
         test('has concrete methods for common functionality', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
-            $concreteMethodNames = array_map(fn($method) => $method->getName(), $concreteMethods);
-            
+            $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
+
             expect($concreteMethodNames)->toContain('fill');
             expect($concreteMethodNames)->toContain('submit');
             expect($concreteMethodNames)->toContain('validationAttributes');
@@ -76,9 +76,9 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('property structure', function () {
         test('has formModel property', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             expect($reflection->hasProperty('formModel'))->toBeTrue();
-            
+
             $formModelProperty = $reflection->getProperty('formModel');
             expect($formModelProperty->isProtected())->toBeTrue();
             expect($formModelProperty->hasType())->toBeTrue();
@@ -90,17 +90,17 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('template method pattern', function () {
         test('implements template method pattern', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
-            
+
             // Should have abstract methods for child configuration
             $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
             expect($abstractMethods)->not->toBeEmpty();
-            
+
             // Should have concrete methods for common workflow
             $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
-            $concreteMethodNames = array_map(fn($method) => $method->getName(), $concreteMethods);
+            $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
             expect($concreteMethodNames)->toContain('submit');
             expect($concreteMethodNames)->toContain('fill');
         });
@@ -109,11 +109,11 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('method visibility', function () {
         test('protected methods are properly encapsulated', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             // Abstract methods should be protected
             $rules = $reflection->getMethod('rules');
             expect($rules->isProtected())->toBeTrue();
-            
+
             $getModelData = $reflection->getMethod('getModelData');
             expect($getModelData->isProtected())->toBeTrue();
         });
@@ -123,13 +123,14 @@ describe('LivewireBaseForm Unit Tests', function () {
         test('has no class-specific constants', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
             $constants = $reflection->getConstants();
-            
+
             // Filter out inherited constants
             $classConstants = array_filter($constants, function ($value, $key) use ($reflection) {
                 $constant = $reflection->getReflectionConstant($key);
+
                 return $constant && $constant->getDeclaringClass()->getName() === LivewireBaseForm::class;
             }, ARRAY_FILTER_USE_BOTH);
-            
+
             expect($classConstants)->toBeEmpty();
         });
     });
@@ -138,7 +139,7 @@ describe('LivewireBaseForm Unit Tests', function () {
         test('has proper PHPDoc annotations', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
             $docComment = $reflection->getDocComment();
-            
+
             expect($docComment)->toContain('@template');
             expect($docComment)->toContain('TForm of LivewireBaseForm');
             expect($docComment)->toContain('TFormModel of Model');
@@ -166,7 +167,7 @@ describe('LivewireBaseForm Unit Tests', function () {
         test('provides type safety through generics', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
             $docComment = $reflection->getDocComment();
-            
+
             // Should use template generics for type safety
             expect($docComment)->toContain('@template TForm');
             expect($docComment)->toContain('@template TFormModel');
@@ -176,11 +177,11 @@ describe('LivewireBaseForm Unit Tests', function () {
     describe('extensibility hooks', function () {
         test('provides hooks for custom implementations', function () {
             $reflection = new ReflectionClass(LivewireBaseForm::class);
-            
+
             // Check if loadExtraData method exists as extensibility hook
             $methods = $reflection->getMethods();
-            $methodNames = array_map(fn($method) => $method->getName(), $methods);
-            
+            $methodNames = array_map(fn ($method) => $method->getName(), $methods);
+
             // Should have some mechanism for extensibility
             expect($methodNames)->toContain('loadExtraData');
         });

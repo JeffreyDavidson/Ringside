@@ -48,7 +48,7 @@ describe('MatchRepository Unit Tests', function () {
         test('repository has all expected methods', function () {
             $methods = [
                 'createForEvent', 'addTitleToMatch', 'addRefereeToMatch',
-                'addWrestlerToMatch', 'addTagTeamToMatch'
+                'addWrestlerToMatch', 'addTagTeamToMatch',
             ];
 
             foreach ($methods as $method) {

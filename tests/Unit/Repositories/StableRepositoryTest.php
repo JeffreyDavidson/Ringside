@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Data\Stables\StableData;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableActivityPeriod;
-use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\Concerns\ManagesActivity;
@@ -18,7 +16,6 @@ use App\Repositories\Contracts\ManagesStableMembersInterface;
 use App\Repositories\Contracts\StableRepositoryInterface;
 use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as SupportCollection;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -81,7 +78,7 @@ describe('StableRepository Unit Tests', function () {
                 'addWrestler', 'removeWrestler', 'addWrestlers', 'removeWrestlers',
                 'addTagTeam', 'removeTagTeam', 'addTagTeams', 'removeTagTeams',
                 'addMember', 'removeMember', 'disassembleAllMembers', 'disbandMembers',
-                'updateStableMembers', 'getAllAssociatedManagers'
+                'updateStableMembers', 'getAllAssociatedManagers',
             ];
 
             foreach ($methods as $method) {

@@ -155,7 +155,7 @@ class StableBuilder extends Builder implements HasAvailability
                 COALESCE((SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id AND fired_at IS NULL), 0)
             ) >= ?
         ', [Stable::MIN_MEMBERS_COUNT]);
-        
+
         return $result;
     }
 
@@ -178,7 +178,7 @@ class StableBuilder extends Builder implements HasAvailability
                 COALESCE((SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id AND fired_at IS NULL), 0)
             ) < ?
         ', [Stable::MIN_MEMBERS_COUNT]);
-        
+
         return $result;
     }
 

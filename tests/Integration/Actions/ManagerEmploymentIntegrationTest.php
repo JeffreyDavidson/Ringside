@@ -10,7 +10,6 @@ use App\Actions\Managers\SuspendAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeEmployedException;
 use App\Models\Managers\Manager;
-use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 
 /**
@@ -128,7 +127,7 @@ describe('Manager Employment Action Integration', function () {
             $refreshedManager = $manager->fresh();
             expect($refreshedManager->status)->toBe(EmploymentStatus::FutureEmployment);
             expect($refreshedManager->currentEmployment)->toBeNull(); // Future employment not yet current
-            
+
             // Verify the future employment record exists
             $futureEmployment = $refreshedManager->employments()->latest()->first();
             expect($futureEmployment->started_at->toDateTimeString())
@@ -247,7 +246,6 @@ describe('Manager Employment Action Integration', function () {
             expect($retiredManager->status)->toBe(EmploymentStatus::Retired);
         });
     });
-
 
     describe('management relationship integration', function () {
         test('employed manager can manage wrestlers and tag teams', function () {

@@ -182,7 +182,7 @@ describe('Title Search and Filtering Workflow', function () {
             ->set('filterComponents.status', 'active')
             ->assertSee('WWE Championship Title');
 
-        // When: Filtering by retired status  
+        // When: Filtering by retired status
         Livewire::actingAs($admin)
             ->test(TitlesTable::class)
             ->set('filterComponents.status', 'retired')

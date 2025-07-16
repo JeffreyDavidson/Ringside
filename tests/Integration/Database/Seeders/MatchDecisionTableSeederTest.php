@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use function Pest\Laravel\assertDatabaseCount;
-
-use function Pest\Laravel\assertDatabaseHas;
 use Illuminate\Support\Facades\Artisan;
+
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
 
 /**
  * Integration tests for MatchDecisionsTableSeeder data seeding and validation.
@@ -20,13 +20,13 @@ use Illuminate\Support\Facades\Artisan;
  * the database with all required match decision types needed for the
  * wrestling application business logic.
  *
- * @see \Database\Seeders\MatchDecisionsTableSeeder
+ * @see Database\Seeders\MatchDecisionsTableSeeder
  */
 describe('MatchDecisionsTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'MatchDecisionsTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchDecisionsTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -74,7 +74,7 @@ describe('MatchDecisionsTableSeeder Integration Tests', function () {
 
         test('all match decisions have unique names', function () {
             // Arrange
-            $matchDecisions = \App\Models\Matches\MatchDecision::all();
+            $matchDecisions = App\Models\Matches\MatchDecision::all();
 
             // Assert
             expect($matchDecisions->pluck('name')->unique())->toHaveCount(10);
@@ -82,7 +82,7 @@ describe('MatchDecisionsTableSeeder Integration Tests', function () {
 
         test('all match decisions have unique slugs', function () {
             // Arrange
-            $matchDecisions = \App\Models\Matches\MatchDecision::all();
+            $matchDecisions = App\Models\Matches\MatchDecision::all();
 
             // Assert
             expect($matchDecisions->pluck('slug')->unique())->toHaveCount(10);

@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * These tests verify that the IndividualRetirementValidation strategy
  * works correctly with real database data and model relationships.
  *
- * @see \App\Models\Validation\Strategies\IndividualRetirementValidation
+ * @see IndividualRetirementValidation
  */
 describe('IndividualRetirementValidation Integration Tests', function () {
     beforeEach(function () {
@@ -73,7 +73,7 @@ describe('IndividualRetirementValidation Integration Tests', function () {
             $wrestler = Wrestler::factory()->unemployed()->create();
 
             // Act & Assert
-            expect(fn() => $this->strategy->validate($wrestler))
+            expect(fn () => $this->strategy->validate($wrestler))
                 ->toThrow(CannotBeRetiredException::class);
         });
 
@@ -82,7 +82,7 @@ describe('IndividualRetirementValidation Integration Tests', function () {
             $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
             // Act & Assert
-            expect(fn() => $this->strategy->validate($wrestler))
+            expect(fn () => $this->strategy->validate($wrestler))
                 ->toThrow(CannotBeRetiredException::class);
         });
 
@@ -91,7 +91,7 @@ describe('IndividualRetirementValidation Integration Tests', function () {
             $wrestler = Wrestler::factory()->retired()->create();
 
             // Act & Assert
-            expect(fn() => $this->strategy->validate($wrestler))
+            expect(fn () => $this->strategy->validate($wrestler))
                 ->toThrow(CannotBeRetiredException::class);
         });
     });
@@ -99,15 +99,18 @@ describe('IndividualRetirementValidation Integration Tests', function () {
     describe('method existence handling', function () {
         test('handles entity without hasFutureEmployment method', function () {
             // Arrange
-            $mockEntity = new class extends Model {
-                public function hasStatus(EmploymentStatus $status): bool {
+            $mockEntity = new class extends Model
+            {
+                public function hasStatus(EmploymentStatus $status): bool
+                {
                     return false; // Not unemployed
                 }
-                
-                public function isRetired(): bool {
+
+                public function isRetired(): bool
+                {
                     return false; // Not retired
                 }
-                
+
                 // Note: No hasFutureEmployment method
             };
 
@@ -118,15 +121,18 @@ describe('IndividualRetirementValidation Integration Tests', function () {
 
         test('handles entity without isRetired method', function () {
             // Arrange
-            $mockEntity = new class extends Model {
-                public function hasStatus(EmploymentStatus $status): bool {
+            $mockEntity = new class extends Model
+            {
+                public function hasStatus(EmploymentStatus $status): bool
+                {
                     return false; // Not unemployed
                 }
-                
-                public function hasFutureEmployment(): bool {
+
+                public function hasFutureEmployment(): bool
+                {
                     return false; // No future employment
                 }
-                
+
                 // Note: No isRetired method
             };
 
@@ -137,7 +143,8 @@ describe('IndividualRetirementValidation Integration Tests', function () {
 
         test('handles entity without hasStatus method', function () {
             // Arrange
-            $mockEntity = new class extends Model {
+            $mockEntity = new class extends Model
+            {
                 // Note: No hasStatus method - should default to false for unemployment check
             };
 
@@ -154,9 +161,9 @@ describe('IndividualRetirementValidation Integration Tests', function () {
             $bookableWrestler = Wrestler::factory()->bookable()->create();
 
             // Act & Assert
-            expect(fn() => $this->strategy->validate($unemployedWrestler))
+            expect(fn () => $this->strategy->validate($unemployedWrestler))
                 ->toThrow(CannotBeRetiredException::class);
-            
+
             // Should not throw for bookable wrestler
             $this->strategy->validate($bookableWrestler);
             expect(true)->toBeTrue();
@@ -168,9 +175,9 @@ describe('IndividualRetirementValidation Integration Tests', function () {
             $currentEmployedWrestler = Wrestler::factory()->bookable()->create();
 
             // Act & Assert
-            expect(fn() => $this->strategy->validate($futureEmployedWrestler))
+            expect(fn () => $this->strategy->validate($futureEmployedWrestler))
                 ->toThrow(CannotBeRetiredException::class);
-            
+
             // Should not throw for currently employed wrestler
             $this->strategy->validate($currentEmployedWrestler);
             expect(true)->toBeTrue();
@@ -182,9 +189,9 @@ describe('IndividualRetirementValidation Integration Tests', function () {
             $activeWrestler = Wrestler::factory()->bookable()->create();
 
             // Act & Assert
-            expect(fn() => $this->strategy->validate($retiredWrestler))
+            expect(fn () => $this->strategy->validate($retiredWrestler))
                 ->toThrow(CannotBeRetiredException::class);
-            
+
             // Should not throw for active wrestler
             $this->strategy->validate($activeWrestler);
             expect(true)->toBeTrue();

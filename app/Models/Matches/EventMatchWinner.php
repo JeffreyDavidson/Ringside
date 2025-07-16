@@ -85,7 +85,6 @@ class EventMatchWinner extends Model
     /**
      * Get the winner entity with type safety.
      *
-     * @return Wrestler|TagTeam
      * @throws Exception
      */
     public function getWinner(): Wrestler|TagTeam

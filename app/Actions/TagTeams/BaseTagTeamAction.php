@@ -69,17 +69,17 @@ abstract class BaseTagTeamAction
      * @param  ManagersEmployAction  $managersEmployAction  Action to employ managers
      */
     protected function employMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $employmentDate,
-        $wrestlersEmployAction,
-        $managersEmployAction
+        WrestlersEmployAction $wrestlersEmployAction,
+        ManagersEmployAction $managersEmployAction
     ): void {
         // Employ the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersEmployAction->handle($wrestler, $employmentDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersEmployAction->handle($wrestler, $employmentDate));
 
         // Employ the provided managers
-        $managers->each(fn ($manager) => $managersEmployAction->handle($manager, $employmentDate));
+        $managers->each(fn (Manager $manager) => $managersEmployAction->handle($manager, $employmentDate));
     }
 
     /**
@@ -92,17 +92,17 @@ abstract class BaseTagTeamAction
      * @param  ManagersReinstateAction  $managersReinstateAction  Action to reinstate managers
      */
     protected function reinstateMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $reinstatementDate,
-        $wrestlersReinstateAction,
-        $managersReinstateAction
+        WrestlersReinstateAction $wrestlersReinstateAction,
+        ManagersReinstateAction $managersReinstateAction
     ): void {
         // Reinstate the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
 
         // Reinstate the provided managers
-        $managers->each(fn ($manager) => $managersReinstateAction->handle($manager, $reinstatementDate));
+        $managers->each(fn (Manager $manager) => $managersReinstateAction->handle($manager, $reinstatementDate));
     }
 
     /**
@@ -115,17 +115,17 @@ abstract class BaseTagTeamAction
      * @param  ManagersSuspendAction  $managersSuspendAction  Action to suspend managers
      */
     protected function suspendMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $suspensionDate,
-        $wrestlersSuspendAction,
-        $managersSuspendAction
+        WrestlersSuspendAction $wrestlersSuspendAction,
+        ManagersSuspendAction $managersSuspendAction
     ): void {
         // Suspend the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersSuspendAction->handle($wrestler, $suspensionDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersSuspendAction->handle($wrestler, $suspensionDate));
 
         // Suspend the provided managers
-        $managers->each(fn ($manager) => $managersSuspendAction->handle($manager, $suspensionDate));
+        $managers->each(fn (Manager $manager) => $managersSuspendAction->handle($manager, $suspensionDate));
     }
 
     /**
@@ -138,17 +138,17 @@ abstract class BaseTagTeamAction
      * @param  ManagersUnretireAction  $managersUnretireAction  Action to unretire managers
      */
     protected function unretireMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $unretirementDate,
-        $wrestlersUnretireAction,
-        $managersUnretireAction
+        WrestlersUnretireAction $wrestlersUnretireAction,
+        ManagersUnretireAction $managersUnretireAction
     ): void {
         // Unretire the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
 
         // Unretire the provided managers
-        $managers->each(fn ($manager) => $managersUnretireAction->handle($manager, $unretirementDate));
+        $managers->each(fn (Manager $manager) => $managersUnretireAction->handle($manager, $unretirementDate));
     }
 
     /**
@@ -203,9 +203,9 @@ abstract class BaseTagTeamAction
         TagTeamRepository $tagTeamRepository
     ): void {
         // Remove wrestlers from any current tag teams
-        $formerWrestlers->each(function ($wrestler) use ($restorationDate) {
+        $formerWrestlers->each(function (Wrestler $wrestler) use ($restorationDate) {
             $currentTagTeams = $wrestler->currentTagTeams; // @phpstan-ignore-line property.notFound
-            $currentTagTeams->each(function ($currentTeam) use ($wrestler, $restorationDate) {
+            $currentTagTeams->each(function (TagTeam $currentTeam) use ($wrestler, $restorationDate) {
                 $this->tagTeamRepository->removeWrestler($currentTeam, $wrestler, $restorationDate);
             });
         });
@@ -231,7 +231,7 @@ abstract class BaseTagTeamAction
         TagTeamRepository $tagTeamRepository
     ): void {
         // Only restore wrestlers who are not currently in other tag teams
-        $availableWrestlers = $formerWrestlers->filter(function ($wrestler) {
+        $availableWrestlers = $formerWrestlers->filter(function (Wrestler $wrestler) {
             return $wrestler->currentTagTeams->isEmpty(); // @phpstan-ignore-line property.notFound
         });
 
@@ -254,16 +254,16 @@ abstract class BaseTagTeamAction
      * @param  ManagersRetireAction  $managersRetireAction  Action to retire managers
      */
     protected function retireMembers(
-        $wrestlers,
-        $managers,
+        Collection $wrestlers,
+        Collection $managers,
         Carbon $retirementDate,
-        $wrestlersRetireAction,
-        $managersRetireAction
+        WrestlersRetireAction $wrestlersRetireAction,
+        ManagersRetireAction $managersRetireAction
     ): void {
         // Retire the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
 
         // Retire the provided managers
-        $managers->each(fn ($manager) => $managersRetireAction->handle($manager, $retirementDate));
+        $managers->each(fn (Manager $manager) => $managersRetireAction->handle($manager, $retirementDate));
     }
 }

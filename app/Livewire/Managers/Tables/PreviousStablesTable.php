@@ -9,7 +9,6 @@ use App\Models\Stables\Stable;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
 class PreviousStablesTable extends BasePreviousStablesTable
 {

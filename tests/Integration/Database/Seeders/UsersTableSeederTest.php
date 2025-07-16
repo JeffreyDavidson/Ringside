@@ -23,13 +23,13 @@ use function Pest\Laravel\assertDatabaseHas;
  * the database with the required user accounts for development and
  * testing purposes.
  *
- * @see \Database\Seeders\UsersTableSeeder
+ * @see Database\Seeders\UsersTableSeeder
  */
 describe('UsersTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'UsersTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'UsersTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 

@@ -21,14 +21,15 @@ use function Spatie\PestPluginTestTime\testTime;
  * This test ensures the ManagesActivity trait is completely agnostic and reusable
  * across any repository that manages activity periods and activation/deactivation workflows.
  *
- * @see \App\Repositories\Concerns\ManagesActivity
+ * @see ManagesActivity
  */
 describe('ManagesActivity Trait', function () {
     beforeEach(function () {
         testTime()->freeze();
-        
+
         // Create anonymous repository class for trait testing
-        $this->repository = new class extends BaseRepository {
+        $this->repository = new class extends BaseRepository
+        {
             use ManagesActivity;
         };
     });
@@ -37,16 +38,16 @@ describe('ManagesActivity Trait', function () {
         test('creates activity period record', function () {
             // Arrange
             $activityDate = Carbon::now();
-            
+
             // Mock the activityPeriods relationship
             $activityPeriodsMock = Mockery::mock();
             $activityPeriodsMock->shouldReceive('updateOrCreate')
                 ->once()
                 ->with(['ended_at' => null], ['started_at' => $activityDate->toDateTimeString()])
                 ->andReturn((object) ['id' => 1, 'started_at' => $activityDate, 'ended_at' => null]);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $model->shouldReceive('activityPeriods')->andReturn($activityPeriodsMock);
 
             // Act
@@ -58,16 +59,16 @@ describe('ManagesActivity Trait', function () {
         test('sets activity start date correctly', function () {
             // Arrange
             $activityDate = Carbon::parse('2024-01-15 10:00:00');
-            
+
             // Mock the activityPeriods relationship
             $activityPeriodsMock = Mockery::mock();
             $activityPeriodsMock->shouldReceive('updateOrCreate')
                 ->once()
                 ->with(['ended_at' => null], ['started_at' => $activityDate->toDateTimeString()])
                 ->andReturn((object) ['started_at' => $activityDate]);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $model->shouldReceive('activityPeriods')->andReturn($activityPeriodsMock);
 
             // Act
@@ -79,16 +80,16 @@ describe('ManagesActivity Trait', function () {
         test('creates activity period with null end date by default', function () {
             // Arrange
             $activityDate = Carbon::now();
-            
+
             // Mock the activityPeriods relationship
             $activityPeriodsMock = Mockery::mock();
             $activityPeriodsMock->shouldReceive('updateOrCreate')
                 ->once()
                 ->with(['ended_at' => null], ['started_at' => $activityDate->toDateTimeString()])
                 ->andReturn((object) ['started_at' => $activityDate, 'ended_at' => null]);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $model->shouldReceive('activityPeriods')->andReturn($activityPeriodsMock);
 
             // Act & Assert
@@ -99,24 +100,24 @@ describe('ManagesActivity Trait', function () {
             // Arrange
             $firstDate = Carbon::now()->subDays(10);
             $secondDate = Carbon::now();
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
-            
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
+
             // Mock first call
             $activityPeriods1 = Mockery::mock();
             $activityPeriods1->shouldReceive('updateOrCreate')
                 ->once()
                 ->with(['ended_at' => null], ['started_at' => $firstDate->toDateTimeString()])
                 ->andReturn((object) ['started_at' => $firstDate]);
-            
+
             // Mock second call
             $activityPeriods2 = Mockery::mock();
             $activityPeriods2->shouldReceive('updateOrCreate')
                 ->once()
                 ->with(['ended_at' => null], ['started_at' => $secondDate->toDateTimeString()])
                 ->andReturn((object) ['started_at' => $secondDate]);
-            
+
             $model->shouldReceive('activityPeriods')->twice()->andReturn($activityPeriods1, $activityPeriods2);
 
             // Act - Create first activity then second activity
@@ -131,15 +132,15 @@ describe('ManagesActivity Trait', function () {
         test('ends current activity period when it exists', function () {
             // Arrange
             $endDate = Carbon::now();
-            
+
             $currentActivityPeriodQuery = Mockery::mock();
             $currentActivityPeriodQuery->shouldReceive('update')
                 ->once()
                 ->with(['ended_at' => $endDate->toDateTimeString()])
                 ->andReturn(1);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $model->shouldReceive('currentActivityPeriod')->andReturn($currentActivityPeriodQuery);
 
             // Act
@@ -151,15 +152,15 @@ describe('ManagesActivity Trait', function () {
         test('sets activity end date correctly', function () {
             // Arrange
             $endDate = Carbon::parse('2024-12-31 15:30:00');
-            
+
             $currentActivityPeriodQuery = Mockery::mock();
             $currentActivityPeriodQuery->shouldReceive('update')
                 ->once()
                 ->with(['ended_at' => $endDate->toDateTimeString()])
                 ->andReturn(1);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $model->shouldReceive('currentActivityPeriod')->andReturn($currentActivityPeriodQuery);
 
             // Act
@@ -171,15 +172,15 @@ describe('ManagesActivity Trait', function () {
         test('handles update operation correctly', function () {
             // Arrange
             $endDate = Carbon::parse('2024-06-15 12:00:00');
-            
+
             $currentActivityPeriodQuery = Mockery::mock();
             $currentActivityPeriodQuery->shouldReceive('update')
                 ->once()
                 ->with(['ended_at' => $endDate->toDateTimeString()])
                 ->andReturn(1);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $model->shouldReceive('currentActivityPeriod')->andReturn($currentActivityPeriodQuery);
 
             // Act
@@ -199,16 +200,16 @@ describe('ManagesActivity Trait', function () {
         test('trait is model agnostic', function () {
             // Arrange
             $activityDate = Carbon::now();
-            
+
             // Create two different mock models
-            /** @var \App\Models\Contracts\HasActivityPeriods $model1 */
-            $model1 = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+            /** @var App\Models\Contracts\HasActivityPeriods $model1 */
+            $model1 = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $activityPeriods1 = Mockery::mock();
             $activityPeriods1->shouldReceive('updateOrCreate')->once()->andReturn((object) []);
             $model1->shouldReceive('activityPeriods')->andReturn($activityPeriods1);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model2 */
-            $model2 = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model2 */
+            $model2 = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $activityPeriods2 = Mockery::mock();
             $activityPeriods2->shouldReceive('updateOrCreate')->once()->andReturn((object) []);
             $model2->shouldReceive('activityPeriods')->andReturn($activityPeriods2);
@@ -224,15 +225,15 @@ describe('ManagesActivity Trait', function () {
             // Arrange
             $activityDate = Carbon::now();
             $endDate = Carbon::now()->addDays(30);
-            
+
             // Test with multiple models using same trait methods
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
-            
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
+
             $activityPeriods = Mockery::mock();
             $activityPeriods->shouldReceive('updateOrCreate')->once()->andReturn((object) []);
             $model->shouldReceive('activityPeriods')->andReturn($activityPeriods);
-            
+
             $currentActivityPeriod = Mockery::mock();
             $currentActivityPeriod->shouldReceive('update')->once()->andReturn(1);
             $model->shouldReceive('currentActivityPeriod')->andReturn($currentActivityPeriod);
@@ -250,16 +251,16 @@ describe('ManagesActivity Trait', function () {
             // Arrange
             $activityDate = Carbon::now();
             $endDate = Carbon::now()->addDays(30);
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $activityPeriods = Mockery::mock();
             $activityPeriods->shouldReceive('updateOrCreate')
                 ->once()
                 ->with(['ended_at' => null], ['started_at' => $activityDate->toDateTimeString()])
                 ->andReturn((object) []);
             $model->shouldReceive('activityPeriods')->andReturn($activityPeriods);
-            
+
             $currentActivityPeriod = Mockery::mock();
             $currentActivityPeriod->shouldReceive('update')
                 ->once()
@@ -268,20 +269,21 @@ describe('ManagesActivity Trait', function () {
             $model->shouldReceive('currentActivityPeriod')->andReturn($currentActivityPeriod);
 
             // Act & Assert - Should not throw exception
-            expect(fn() => $this->repository->createActivity($model, $activityDate))->not->toThrow(Exception::class);
-            expect(fn() => $this->repository->endActivity($model, $endDate))->not->toThrow(Exception::class);
+            expect(fn () => $this->repository->createActivity($model, $activityDate))->not->toThrow(Exception::class);
+            expect(fn () => $this->repository->endActivity($model, $endDate))->not->toThrow(Exception::class);
         });
 
         test('trait is reusable across multiple repository instances', function () {
             // Arrange
-            $anotherRepository = new class extends BaseRepository {
+            $anotherRepository = new class extends BaseRepository
+            {
                 use ManagesActivity;
             };
-            
+
             $activityDate = Carbon::now();
-            
-            /** @var \App\Models\Contracts\HasActivityPeriods $model */
-            $model = Mockery::mock(\App\Models\Contracts\HasActivityPeriods::class);
+
+            /** @var App\Models\Contracts\HasActivityPeriods $model */
+            $model = Mockery::mock(App\Models\Contracts\HasActivityPeriods::class);
             $activityPeriods = Mockery::mock();
             $activityPeriods->shouldReceive('updateOrCreate')->twice()->andReturn((object) []);
             $model->shouldReceive('activityPeriods')->andReturn($activityPeriods);

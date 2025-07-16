@@ -6,8 +6,8 @@ use App\Actions\Stables\CreateAction;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use App\Repositories\StableRepository;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 

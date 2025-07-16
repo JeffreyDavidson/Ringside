@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for RefereesTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the RefereesTableSeeder correctly populates
  * the database with referee records for development and testing purposes.
  *
- * @see \Database\Seeders\RefereesTableSeeder
+ * @see Database\Seeders\RefereesTableSeeder
  */
 describe('RefereesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'RefereesTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'RefereesTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -53,7 +51,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
                 expect($referee->first_name)->not->toBeEmpty();
                 expect($referee->last_name)->toBeString();
                 expect($referee->last_name)->not->toBeEmpty();
-                expect($referee->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($referee->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 
@@ -63,8 +61,8 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect(strlen($referee->first_name))->toBeGreaterThan(2);
-                expect(strlen($referee->last_name))->toBeGreaterThan(2);
+                expect(mb_strlen($referee->first_name))->toBeGreaterThan(2);
+                expect(mb_strlen($referee->last_name))->toBeGreaterThan(2);
                 expect($referee->first_name)->not->toContain('Test');
                 expect($referee->last_name)->not->toContain('Test');
             }
@@ -79,7 +77,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
         test('referees have unique name combinations', function () {
             // Arrange
             $referees = Referee::all();
-            $fullNames = $referees->map(fn($referee) => $referee->first_name . ' ' . $referee->last_name);
+            $fullNames = $referees->map(fn ($referee) => $referee->first_name.' '.$referee->last_name);
 
             // Assert
             expect($fullNames->unique())->toHaveCount($referees->count());
@@ -91,7 +89,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect($referee->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($referee->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 

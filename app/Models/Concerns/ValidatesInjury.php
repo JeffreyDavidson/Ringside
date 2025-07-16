@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeClearedFromInjuryException;
 use App\Exceptions\Status\CannotBeInjuredException;
 
@@ -187,5 +186,4 @@ trait ValidatesInjury
     {
         $this->ensureCanBeClearedFromInjury();
     }
-
 }

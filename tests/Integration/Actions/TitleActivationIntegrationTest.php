@@ -6,7 +6,6 @@ use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\PullAction;
 use App\Actions\Titles\ReinstateAction;
 use App\Enums\Titles\TitleStatus;
-use App\Exceptions\Status\CannotBeActivatedException;
 use App\Exceptions\Status\CannotBeDebutedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;

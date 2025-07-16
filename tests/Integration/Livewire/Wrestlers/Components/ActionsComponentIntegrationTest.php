@@ -36,24 +36,24 @@ describe('ActionsComponent Integration Tests', function () {
     beforeEach(function () {
         $this->admin = User::factory()->administrator()->create();
         $this->basicUser = User::factory()->create();
-        
+
         // Create test wrestlers in various states
         $this->availableWrestler = Wrestler::factory()->create([
             'name' => 'Available Wrestler',
         ]);
-        
+
         $this->employedWrestler = Wrestler::factory()->employed()->create([
             'name' => 'Employed Wrestler',
         ]);
-        
+
         $this->suspendedWrestler = Wrestler::factory()->suspended()->create([
             'name' => 'Suspended Wrestler',
         ]);
-        
+
         $this->injuredWrestler = Wrestler::factory()->injured()->create([
             'name' => 'Injured Wrestler',
         ]);
-        
+
         $this->retiredWrestler = Wrestler::factory()->retired()->create([
             'name' => 'Retired Wrestler',
         ]);
@@ -87,7 +87,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(EmployAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->availableWrestler, \Mockery::type('string'));
+                ->with($this->availableWrestler, Mockery::type('string'));
             app()->instance(EmployAction::class, $mockAction);
 
             // Mock authorization
@@ -107,7 +107,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(ReleaseAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->employedWrestler, \Mockery::type('string'));
+                ->with($this->employedWrestler, Mockery::type('string'));
             app()->instance(ReleaseAction::class, $mockAction);
 
             // Mock authorization
@@ -129,7 +129,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(SuspendAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->employedWrestler, \Mockery::type('string'));
+                ->with($this->employedWrestler, Mockery::type('string'));
             app()->instance(SuspendAction::class, $mockAction);
 
             // Mock authorization
@@ -149,7 +149,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(ReinstateAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->suspendedWrestler, \Mockery::type('string'));
+                ->with($this->suspendedWrestler, Mockery::type('string'));
             app()->instance(ReinstateAction::class, $mockAction);
 
             // Mock authorization
@@ -171,7 +171,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(InjureAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->employedWrestler, \Mockery::type('string'));
+                ->with($this->employedWrestler, Mockery::type('string'));
             app()->instance(InjureAction::class, $mockAction);
 
             // Mock authorization
@@ -191,7 +191,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(ClearInjuryAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->injuredWrestler, \Mockery::type('string'));
+                ->with($this->injuredWrestler, Mockery::type('string'));
             app()->instance(ClearInjuryAction::class, $mockAction);
 
             // Mock authorization
@@ -213,7 +213,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(RetireAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->availableWrestler, \Mockery::type('string'));
+                ->with($this->availableWrestler, Mockery::type('string'));
             app()->instance(RetireAction::class, $mockAction);
 
             // Mock authorization
@@ -233,7 +233,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(UnretireAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->retiredWrestler, \Mockery::type('string'));
+                ->with($this->retiredWrestler, Mockery::type('string'));
             app()->instance(UnretireAction::class, $mockAction);
 
             // Mock authorization
@@ -290,8 +290,8 @@ describe('ActionsComponent Integration Tests', function () {
     describe('event dispatching and component communication', function () {
         test('all action methods dispatch wrestler-updated event', function () {
             $actionMethods = [
-                'employ', 'release', 'suspend', 'reinstate', 
-                'injure', 'clearFromInjury', 'retire', 'unretire'
+                'employ', 'release', 'suspend', 'reinstate',
+                'injure', 'clearFromInjury', 'retire', 'unretire',
             ];
 
             foreach ($actionMethods as $method) {
@@ -299,9 +299,9 @@ describe('ActionsComponent Integration Tests', function () {
                 Gate::shouldReceive('authorize')->once();
                 $mockAction = mock();
                 $mockAction->shouldReceive('handle')->once();
-                
+
                 // Map method to appropriate action class
-                $actionClass = match($method) {
+                $actionClass = match ($method) {
                     'employ' => EmployAction::class,
                     'release' => ReleaseAction::class,
                     'suspend' => SuspendAction::class,
@@ -311,7 +311,7 @@ describe('ActionsComponent Integration Tests', function () {
                     'retire' => RetireAction::class,
                     'unretire' => UnretireAction::class,
                 };
-                
+
                 app()->instance($actionClass, $mockAction);
 
                 $component = Livewire::actingAs($this->admin)
@@ -329,7 +329,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(EmployAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->with($this->availableWrestler, \Mockery::type('string'));
+                ->with($this->availableWrestler, Mockery::type('string'));
             app()->instance(EmployAction::class, $mockAction);
 
             Gate::shouldReceive('authorize')->once();
@@ -362,7 +362,7 @@ describe('ActionsComponent Integration Tests', function () {
             $mockAction = mock(EmployAction::class);
             $mockAction->shouldReceive('handle')
                 ->once()
-                ->andThrow(new \Exception('Business rule violation'));
+                ->andThrow(new Exception('Business rule violation'));
             app()->instance(EmployAction::class, $mockAction);
 
             Gate::shouldReceive('authorize')->once();
@@ -378,14 +378,14 @@ describe('ActionsComponent Integration Tests', function () {
             Gate::shouldReceive('authorize')
                 ->once()
                 ->with('employ', $this->availableWrestler)
-                ->andThrow(new \Illuminate\Auth\Access\AuthorizationException('Unauthorized'));
+                ->andThrow(new Illuminate\Auth\Access\AuthorizationException('Unauthorized'));
 
             $component = Livewire::actingAs($this->admin)
                 ->test(ActionsComponent::class, ['wrestler' => $this->availableWrestler]);
 
             expect(function () use ($component) {
                 $component->call('employ', now()->format('Y-m-d'));
-            })->toThrow(\Illuminate\Auth\Access\AuthorizationException::class);
+            })->toThrow(Illuminate\Auth\Access\AuthorizationException::class);
         });
     });
 

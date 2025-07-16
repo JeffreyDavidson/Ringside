@@ -14,7 +14,7 @@ use App\Livewire\Concerns\ShowTableTrait;
  * - Trait naming and namespace
  *
  * @see ShowTableTrait
- * @see \Tests\Integration\Livewire\Concerns\ShowTableTraitTest
+ * @see Tests\Integration\Livewire\Concerns\ShowTableTraitTest
  */
 describe('ShowTableTrait Unit Tests', function () {
     describe('trait structure', function () {
@@ -32,9 +32,9 @@ describe('ShowTableTrait Unit Tests', function () {
     describe('method signatures', function () {
         test('has configuringShowTableTrait method', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
-            
+
             expect($reflection->hasMethod('configuringShowTableTrait'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('configuringShowTableTrait');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('void');
@@ -58,7 +58,7 @@ describe('ShowTableTrait Unit Tests', function () {
         test('configuringShowTableTrait contains expected method calls', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for expected configuration calls
             expect($source)->toContain('->setPrimaryKey(\'id\')');
             expect($source)->toContain('->setColumnSelectDisabled()');
@@ -75,7 +75,7 @@ describe('ShowTableTrait Unit Tests', function () {
         test('uses fluent interface pattern', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for method chaining pattern
             expect($source)->toContain('$this->setPrimaryKey(\'id\')');
             expect($source)->toContain('->setColumnSelectDisabled()');
@@ -86,7 +86,7 @@ describe('ShowTableTrait Unit Tests', function () {
         test('references expected properties', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for property references
             expect($source)->toContain('$this->resourceName');
             expect($source)->toContain('$this->databaseTableName');
@@ -97,7 +97,7 @@ describe('ShowTableTrait Unit Tests', function () {
         test('follows Laravel Livewire Tables configuration pattern', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for standard table configuration methods
             expect($source)->toContain('setPrimaryKey');
             expect($source)->toContain('setColumnSelectDisabled');
@@ -113,9 +113,9 @@ describe('ShowTableTrait Unit Tests', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $publicMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
-                fn($method) => $method->getDeclaringClass()->getName() === ShowTableTrait::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ShowTableTrait::class
             );
-            
+
             expect($publicMethods)->toHaveCount(1);
             expect($publicMethods[0]->getName())->toBe('configuringShowTableTrait');
         });
@@ -124,9 +124,9 @@ describe('ShowTableTrait Unit Tests', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $privateMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PRIVATE),
-                fn($method) => $method->getDeclaringClass()->getName() === ShowTableTrait::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ShowTableTrait::class
             );
-            
+
             expect($privateMethods)->toHaveCount(0);
         });
     });
@@ -134,13 +134,13 @@ describe('ShowTableTrait Unit Tests', function () {
     describe('trait simplicity', function () {
         test('is minimal focused trait', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
-            
+
             // Should have minimal methods (just the configuring method)
             $methods = array_filter(
                 $reflection->getMethods(),
-                fn($method) => $method->getDeclaringClass()->getName() === ShowTableTrait::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ShowTableTrait::class
             );
-            
+
             expect($methods)->toHaveCount(1);
         });
 
@@ -148,9 +148,9 @@ describe('ShowTableTrait Unit Tests', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
             $properties = array_filter(
                 $reflection->getProperties(),
-                fn($property) => $property->getDeclaringClass()->getName() === ShowTableTrait::class
+                fn ($property) => $property->getDeclaringClass()->getName() === ShowTableTrait::class
             );
-            
+
             expect($properties)->toHaveCount(0);
         });
     });

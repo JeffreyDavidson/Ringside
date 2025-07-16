@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Policies\MatchPolicy;
 use App\Policies\EventPolicy;
 use App\Policies\ManagerPolicy;
+use App\Policies\MatchPolicy;
 use App\Policies\RefereePolicy;
 use App\Policies\StablePolicy;
 use App\Policies\TagTeamPolicy;

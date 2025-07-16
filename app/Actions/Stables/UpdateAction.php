@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
-use InvalidArgumentException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction extends BaseStableAction

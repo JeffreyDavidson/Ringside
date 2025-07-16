@@ -96,8 +96,6 @@ use Illuminate\Support\Carbon;
 class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
     use HasFactory;
-    use OfficiatesMatches;
-
     /** @use IsEmployable<RefereeEmployment, static> */
     use IsEmployable;
 
@@ -109,6 +107,8 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
 
     /** @use IsSuspendable<RefereeSuspension, static> */
     use IsSuspendable;
+
+    use OfficiatesMatches;
 
     use ProvidesDisplayName;
     use SoftDeletes;
@@ -156,19 +156,19 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
                 if ($this->isRetired()) {
                     return EmploymentStatus::Retired;
                 }
-                
+
                 if ($this->currentEmployment) {
                     return EmploymentStatus::Employed;
                 }
-                
+
                 if ($this->futureEmployment) {
                     return EmploymentStatus::FutureEmployment;
                 }
-                
+
                 if ($this->previousEmployments()->exists()) {
                     return EmploymentStatus::Released;
                 }
-                
+
                 return EmploymentStatus::Unemployed;
             }
         );

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Base\LivewireBaseForm;
 use App\Livewire\Wrestlers\Forms\WrestlerForm;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
@@ -39,7 +38,7 @@ describe('WrestlerForm Integration Tests', function () {
 
             expect($rules)->toBeArray();
             expect($rules)->toHaveKeys([
-                'name', 'hometown', 'height_feet', 'height_inches', 'weight'
+                'name', 'hometown', 'height_feet', 'height_inches', 'weight',
             ]);
         });
 
@@ -51,10 +50,10 @@ describe('WrestlerForm Integration Tests', function () {
             expect($rules['name'])->toContain('required');
             expect($rules['name'])->toContain('string');
             expect($rules['name'])->toContain('max:255');
-            
+
             // Should contain Rule::unique validation
             $hasUniqueRule = collect($rules['name'])->contains(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
             expect($hasUniqueRule)->toBeTrue();
         });
@@ -101,19 +100,19 @@ describe('WrestlerForm Integration Tests', function () {
         test('getModelData transforms form data correctly', function () {
             $reflection = new ReflectionMethod($this->form, 'getModelData');
             $reflection->setAccessible(true);
-            
+
             // Set test data
             $this->form->name = 'Test Wrestler';
             $this->form->hometown = 'Test City, TX';
             $this->form->height_feet = 6;
             $this->form->height_inches = 2;
             $this->form->weight = 225;
-            
+
             $data = $reflection->invoke($this->form);
-            
+
             expect($data)->toBeArray();
             expect($data)->toHaveKeys([
-                'name', 'hometown', 'height_feet', 'height_inches', 'weight'
+                'name', 'hometown', 'height_feet', 'height_inches', 'weight',
             ]);
             expect($data['name'])->toBe('Test Wrestler');
             expect($data['hometown'])->toBe('Test City, TX');
@@ -131,7 +130,7 @@ describe('WrestlerForm Integration Tests', function () {
 
             expect($attributes)->toBeArray();
             expect($attributes)->toHaveKeys([
-                'height_feet', 'height_inches', 'signature_move'
+                'height_feet', 'height_inches', 'signature_move',
             ]);
             expect($attributes['height_feet'])->toBe('height (feet)');
             expect($attributes['height_inches'])->toBe('height (inches)');
@@ -169,7 +168,7 @@ describe('WrestlerForm Integration Tests', function () {
 
             // Check that unique rule is configured for wrestlers table
             $uniqueRule = collect($rules['name'])->first(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
 
             expect($uniqueRule)->not->toBeNull();
@@ -179,7 +178,7 @@ describe('WrestlerForm Integration Tests', function () {
             // Test that validation allows realistic height combinations
             $this->form->height_feet = 6;
             $this->form->height_inches = 0;
-            
+
             $reflection = new ReflectionMethod($this->form, 'rules');
             $reflection->setAccessible(true);
             $rules = $reflection->invoke($this->form);
@@ -206,7 +205,7 @@ describe('WrestlerForm Integration Tests', function () {
     describe('extra data loading', function () {
         test('loadExtraData method exists for extensibility', function () {
             expect(method_exists($this->form, 'loadExtraData'))->toBeTrue();
-            
+
             $reflection = new ReflectionMethod($this->form, 'loadExtraData');
             expect($reflection->getReturnType()->getName())->toBe('void');
         });

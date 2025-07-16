@@ -160,7 +160,7 @@ class MembershipConflictException extends BaseBusinessException
      */
     public static function circularDependency(array $membershipChain): static
     {
-        $chainDescription = implode(' -> ', array_map(function ($entity) {
+        $chainDescription = implode(' -> ', array_map(function (array $entity) {
             return ($entity['name'] ?? "ID: {$entity['id']}")." ({$entity['type']})";
         }, $membershipChain));
 

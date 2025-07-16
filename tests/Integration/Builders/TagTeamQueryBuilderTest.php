@@ -18,7 +18,7 @@ use App\Models\TagTeams\TagTeam;
  * all query scopes for filtering tag teams by their various statuses.
  * Note: TagTeams cannot be injured (individual people only).
  *
- * @see \App\Builders\TagTeamBuilder
+ * @see App\Builders\TagTeamBuilder
  */
 describe('TagTeamQueryBuilder Unit Tests', function () {
     beforeEach(function () {

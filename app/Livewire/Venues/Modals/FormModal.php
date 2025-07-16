@@ -41,11 +41,11 @@ class FormModal extends BaseFormModal
         $state = fake('en_US')->state();
 
         return [
-            'name' => fn() => Str::of(fake()->sentence(2))->title()->append(' Arena')->value(),
-            'street_address' => fn() => fake()->streetAddress(),
-            'city' => fn() => fake()->city(),
-            'state' => fn() => $state,
-            'zipcode' => fn() => (int) Str::of(fake()->postcode())->limit(5)->value(),
+            'name' => fn () => Str::of(fake()->sentence(2))->title()->append(' Arena')->value(),
+            'street_address' => fn () => fake()->streetAddress(),
+            'city' => fn () => fake()->city(),
+            'state' => fn () => $state,
+            'zipcode' => fn () => (int) Str::of(fake()->postcode())->limit(5)->value(),
         ];
     }
 

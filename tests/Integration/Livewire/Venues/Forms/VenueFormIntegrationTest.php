@@ -39,7 +39,7 @@ describe('VenueForm Integration Tests', function () {
 
             expect($rules)->toBeArray();
             expect($rules)->toHaveKeys([
-                'name', 'street_address', 'city', 'state', 'zipcode'
+                'name', 'street_address', 'city', 'state', 'zipcode',
             ]);
         });
 
@@ -51,10 +51,10 @@ describe('VenueForm Integration Tests', function () {
             expect($rules['name'])->toContain('required');
             expect($rules['name'])->toContain('string');
             expect($rules['name'])->toContain('max:255');
-            
+
             // Should contain Rule::unique validation for venues table
             $hasUniqueRule = collect($rules['name'])->contains(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
             expect($hasUniqueRule)->toBeTrue();
         });
@@ -82,10 +82,10 @@ describe('VenueForm Integration Tests', function () {
 
             expect($rules['state'])->toContain('required');
             expect($rules['state'])->toContain('string');
-            
+
             // Should validate against states table
             $hasExistsRule = collect($rules['state'])->contains(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Exists;
+                return $rule instanceof Illuminate\Validation\Rules\Exists;
             });
             expect($hasExistsRule)->toBeTrue();
         });
@@ -112,19 +112,19 @@ describe('VenueForm Integration Tests', function () {
         test('getModelData transforms complete venue data correctly', function () {
             $reflection = new ReflectionMethod($this->form, 'getModelData');
             $reflection->setAccessible(true);
-            
+
             // Set complete test data
             $this->form->name = 'Madison Square Garden';
             $this->form->street_address = '4 Pennsylvania Plaza';
             $this->form->city = 'New York';
             $this->form->state = 'New York';
             $this->form->zipcode = '10001';
-            
+
             $data = $reflection->invoke($this->form);
-            
+
             expect($data)->toBeArray();
             expect($data)->toHaveKeys([
-                'name', 'street_address', 'city', 'state', 'zipcode'
+                'name', 'street_address', 'city', 'state', 'zipcode',
             ]);
             expect($data['name'])->toBe('Madison Square Garden');
             expect($data['street_address'])->toBe('4 Pennsylvania Plaza');
@@ -155,7 +155,7 @@ describe('VenueForm Integration Tests', function () {
 
             // Check that unique rule is configured for venues table
             $uniqueRule = collect($rules['name'])->first(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
 
             expect($uniqueRule)->not->toBeNull();
@@ -177,7 +177,7 @@ describe('VenueForm Integration Tests', function () {
 
             // Should validate that state exists in states table
             $existsRule = collect($rules['state'])->first(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Exists;
+                return $rule instanceof Illuminate\Validation\Rules\Exists;
             });
 
             expect($existsRule)->not->toBeNull();
@@ -209,7 +209,7 @@ describe('VenueForm Integration Tests', function () {
     describe('extra data loading', function () {
         test('loadExtraData method exists but has minimal implementation', function () {
             expect(method_exists($this->form, 'loadExtraData'))->toBeTrue();
-            
+
             $reflection = new ReflectionMethod($this->form, 'loadExtraData');
             expect($reflection->getReturnType()->getName())->toBe('void');
         });

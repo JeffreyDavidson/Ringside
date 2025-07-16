@@ -18,7 +18,7 @@ interface MatchGeneratorStrategy
     /**
      * Generate a complete event match based on the provided configuration.
      *
-     * @param array<string, mixed> $config Match generation configuration
+     * @param  array<string, mixed>  $config  Match generation configuration
      * @return EventMatch The generated match with all relationships
      */
     public function generateMatch(array $config): EventMatch;
@@ -31,7 +31,7 @@ interface MatchGeneratorStrategy
     /**
      * Validate that the provided competitors are valid for the match type.
      *
-     * @param array<mixed> $competitors Array of competitor models or types
+     * @param  array<mixed>  $competitors  Array of competitor models or types
      */
     public function validateCompetitors(MatchType $matchType, array $competitors): bool;
 
@@ -53,8 +53,8 @@ interface MatchGeneratorStrategy
     /**
      * Validate title compatibility with competitors.
      *
-     * @param array<mixed> $titles Array of title models
-     * @param array<mixed> $competitors Array of competitor models
+     * @param  array<mixed>  $titles  Array of title models
+     * @param  array<mixed>  $competitors  Array of competitor models
      */
     public function validateTitleCompatibility(array $titles, array $competitors): bool;
 }

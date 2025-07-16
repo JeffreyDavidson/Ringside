@@ -304,7 +304,7 @@ trait IsEmployable
      */
     public function isNotInEmployment(): bool
     {
-        return !$this->isEmployed() && !$this->hasFutureEmployment();
+        return ! $this->isEmployed() && ! $this->hasFutureEmployment();
     }
 
     /**
@@ -326,7 +326,7 @@ trait IsEmployable
      */
     public function isReleased(): bool
     {
-        return !$this->isEmployed() && !$this->isRetired() && $this->previousEmployments()->exists();
+        return ! $this->isEmployed() && ! $this->isRetired() && $this->previousEmployments()->exists();
     }
 
     /**

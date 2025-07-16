@@ -19,13 +19,13 @@ use Illuminate\Database\Eloquent\Model;
  * These tests verify the CanChangeDebutDate rule logic independently
  * of models, database, or Laravel's validation framework.
  *
- * @see \App\Rules\Shared\CanChangeDebutDate
+ * @see CanChangeDebutDate
  */
 describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('model validation with activity methods', function () {
         test('validation passes when model is not currently active', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isCurrentlyActive')->andReturn(false);
             $model->shouldReceive('wasActiveOn')->andReturn(true);
 
@@ -44,10 +44,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation fails when model is currently active and was not active on target date', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Championship Belt' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Championship Belt' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -68,10 +80,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model is currently active and was active on target date', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return true; }
-                public function getAttribute($key) { return $key === 'name' ? 'Championship Belt' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return true;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Championship Belt' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -89,7 +113,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model is currently active but lacks wasActiveOn method', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isCurrentlyActive')->andReturn(true);
             $model->shouldReceive('getAttribute')->with('name')->andReturn('Test Model');
 
@@ -110,7 +134,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('method existence checking logic', function () {
         test('validation passes when model lacks isCurrentlyActive method', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             // Note: No isCurrentlyActive method mocked - simulates method_exists() returning false
 
             $rule = new CanChangeDebutDate($model);
@@ -128,7 +152,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model lacks wasActiveOn method', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isCurrentlyActive')->andReturn(true);
             // Note: No wasActiveOn method mocked - simulates method_exists() returning false
 
@@ -147,7 +171,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model lacks both activity methods', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             // Note: No activity methods mocked - simulates method_exists() returning false for both
 
             $rule = new CanChangeDebutDate($model);
@@ -182,11 +206,27 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('model name resolution strategies', function () {
         test('uses getDisplayName when available', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getDisplayName() { return 'Custom Display Name'; }
-                public function getAttribute($key) { return $key === 'name' ? 'Regular Name' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getDisplayName()
+                {
+                    return 'Custom Display Name';
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Regular Name' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -204,10 +244,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('uses name property when getDisplayName not available', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Model Name Property' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Model Name Property' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -225,10 +277,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('uses class basename when no name methods available', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -248,10 +312,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('date parsing and handling', function () {
         test('handles Carbon date instances', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Model' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Model' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -269,10 +345,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('handles string date values', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Model' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Model' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -291,14 +379,14 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
         test('correctly passes parsed date to wasActiveOn method', function () {
             // Arrange
             $targetDate = now()->addWeek();
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isCurrentlyActive')->andReturn(true);
             $model->shouldReceive('wasActiveOn')
-                  ->with(\Mockery::on(function ($date) use ($targetDate) {
-                      return $date instanceof \Illuminate\Support\Carbon &&
-                             $date->equalTo($targetDate);
-                  }))
-                  ->andReturn(true);
+                ->with(Mockery::on(function ($date) use ($targetDate) {
+                    return $date instanceof Illuminate\Support\Carbon &&
+                           $date->equalTo($targetDate);
+                }))
+                ->andReturn(true);
 
             $rule = new CanChangeDebutDate($model);
             $failCalled = false;
@@ -320,13 +408,13 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             $rule = new CanChangeDebutDate(null);
 
             // Assert
-            expect($rule)->toBeInstanceOf(\Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
         });
 
         test('validate method signature matches interface', function () {
             // Arrange
             $rule = new CanChangeDebutDate(null);
-            $reflection = new \ReflectionMethod($rule, 'validate');
+            $reflection = new ReflectionMethod($rule, 'validate');
 
             // Assert
             expect($reflection->getParameters())->toHaveCount(3);
@@ -339,15 +427,39 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('error message consistency', function () {
         test('error message format is consistent across different models', function () {
             // Arrange
-            $model1 = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'First Title' : null; }
+            $model1 = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'First Title' : null;
+                }
             };
-            $model2 = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Second Title' : null; }
+            $model2 = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Second Title' : null;
+                }
             };
             $messages = [];
             $failCallback = function (string $message) use (&$messages) {
@@ -363,10 +475,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
         });
         test('attribute name does not affect validation logic', function () {
             // Arrange
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Model' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Model' : null;
+                }
             };
             $rule = new CanChangeDebutDate($model);
             $failCallCount = 0;
@@ -385,7 +509,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('combined validation logic edge cases', function () {
         test('validation handles complex method existence scenarios', function () {
             // Arrange - Model has isCurrentlyActive but not wasActiveOn
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('isCurrentlyActive')->andReturn(true);
             // Note: wasActiveOn method not mocked to simulate method_exists() returning false
 
@@ -404,10 +528,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation correctly evaluates combined boolean conditions', function () {
             // Arrange - Model is active AND was not active on target date (both conditions true for failure)
-            $model = new class extends Model {
-                public function isCurrentlyActive() { return true; }
-                public function wasActiveOn($date = null) { return false; }
-                public function getAttribute($key) { return $key === 'name' ? 'Test Title' : null; }
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive()
+                {
+                    return true;
+                }
+
+                public function wasActiveOn($date = null)
+                {
+                    return false;
+                }
+
+                public function getAttribute($key)
+                {
+                    return $key === 'name' ? 'Test Title' : null;
+                }
             };
 
             $rule = new CanChangeDebutDate($model);
@@ -425,6 +561,6 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     });
 
     afterEach(function () {
-        \Mockery::close();
+        Mockery::close();
     });
 });

@@ -165,19 +165,19 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
                 if ($this->isRetired()) {
                     return EmploymentStatus::Retired;
                 }
-                
+
                 if ($this->currentEmployment) {
                     return EmploymentStatus::Employed;
                 }
-                
+
                 if ($this->futureEmployment) {
                     return EmploymentStatus::FutureEmployment;
                 }
-                
+
                 if ($this->previousEmployments()->exists()) {
                     return EmploymentStatus::Released;
                 }
-                
+
                 return EmploymentStatus::Unemployed;
             }
         );

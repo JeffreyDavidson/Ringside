@@ -59,7 +59,7 @@ class EmploymentCascadeStrategy
 
             $unemployedManagers = $entity->currentManagers()
                 ->get()
-                ->filter(fn ($manager) => ! $manager->isEmployed());
+                ->filter(fn (\App\Models\Managers\Manager $manager) => ! $manager->isEmployed());
 
             foreach ($unemployedManagers as $manager) {
                 StatusTransitionPipeline::employ($manager, $date)->execute();
@@ -87,7 +87,7 @@ class EmploymentCascadeStrategy
 
             $unemployedWrestlers = $entity->currentWrestlers()
                 ->get()
-                ->filter(fn ($wrestler) => ! $wrestler->isEmployed());
+                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => ! $wrestler->isEmployed());
 
             foreach ($unemployedWrestlers as $wrestler) {
                 StatusTransitionPipeline::employ($wrestler, $date)->execute();
@@ -115,7 +115,7 @@ class EmploymentCascadeStrategy
 
             $unemployedTagTeams = $entity->currentTagTeams()
                 ->get()
-                ->filter(fn ($tagTeam) => ! $tagTeam->isEmployed());
+                ->filter(fn (\App\Models\TagTeams\TagTeam $tagTeam) => ! $tagTeam->isEmployed());
 
             foreach ($unemployedTagTeams as $tagTeam) {
                 StatusTransitionPipeline::employ($tagTeam, $date)
@@ -153,7 +153,7 @@ class EmploymentCascadeStrategy
             if (method_exists($entity, 'currentWrestlers')) {
                 $unemployedWrestlers = $entity->currentWrestlers()
                     ->get()
-                    ->filter(fn ($wrestler) => ! $wrestler->isEmployed());
+                    ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => ! $wrestler->isEmployed());
 
                 foreach ($unemployedWrestlers as $wrestler) {
                     StatusTransitionPipeline::employ($wrestler, $date)
@@ -166,7 +166,7 @@ class EmploymentCascadeStrategy
             if (method_exists($entity, 'currentTagTeams')) {
                 $unemployedTagTeams = $entity->currentTagTeams()
                     ->get()
-                    ->filter(fn ($tagTeam) => ! $tagTeam->isEmployed());
+                    ->filter(fn (\App\Models\TagTeams\TagTeam $tagTeam) => ! $tagTeam->isEmployed());
 
                 foreach ($unemployedTagTeams as $tagTeam) {
                     StatusTransitionPipeline::employ($tagTeam, $date)
@@ -180,7 +180,7 @@ class EmploymentCascadeStrategy
             if (method_exists($entity, 'currentManagers')) {
                 $unemployedManagers = $entity->currentManagers()
                     ->get()
-                    ->filter(fn ($manager) => ! $manager->isEmployed());
+                    ->filter(fn (\App\Models\Managers\Manager $manager) => ! $manager->isEmployed());
 
                 foreach ($unemployedManagers as $manager) {
                     StatusTransitionPipeline::employ($manager, $date)->execute();
@@ -219,7 +219,7 @@ class EmploymentCascadeStrategy
                 }
 
                 $unemployedEntities = $entity->{$relationship}
-                    ->filter(fn ($relatedEntity) => ! $relatedEntity->isEmployed());
+                    ->filter(fn (Model $relatedEntity) => ! $relatedEntity->isEmployed());
 
                 foreach ($unemployedEntities as $relatedEntity) {
                     StatusTransitionPipeline::employ($relatedEntity, $date)->execute();

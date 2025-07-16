@@ -11,11 +11,11 @@ use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Concerns\ManagesRetirement;
 use App\Repositories\Concerns\ManagesSuspension;
+use App\Repositories\Contracts\ManagerRepositoryInterface;
 use App\Repositories\Contracts\ManagesEmploymentInterface;
 use App\Repositories\Contracts\ManagesInjuryInterface;
 use App\Repositories\Contracts\ManagesRetirementInterface;
 use App\Repositories\Contracts\ManagesSuspensionInterface;
-use App\Repositories\Contracts\ManagerRepositoryInterface;
 use App\Repositories\ManagerRepository;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -66,7 +66,7 @@ describe('ManagerRepository Unit Tests', function () {
                 'create', 'update', 'restore',
                 'createEmployment', 'createRelease', 'createRetirement', 'endRetirement',
                 'createSuspension', 'endSuspension', 'createInjury', 'endInjury',
-                'removeFromCurrentTagTeams', 'removeFromCurrentWrestlers'
+                'removeFromCurrentTagTeams', 'removeFromCurrentWrestlers',
             ];
 
             foreach ($methods as $method) {

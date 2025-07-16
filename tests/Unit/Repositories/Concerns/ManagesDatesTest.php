@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Repositories\Concerns\ManagesDates;
 use App\Repositories\Support\BaseRepository;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -26,14 +25,15 @@ use function Spatie\PestPluginTestTime\testTime;
  * This test ensures the ManagesDates trait is completely agnostic and reusable
  * across any repository that handles time-based relationships and temporal workflows.
  *
- * @see \App\Repositories\Concerns\ManagesDates
+ * @see ManagesDates
  */
 describe('ManagesDates Trait', function () {
     beforeEach(function () {
         testTime()->freeze();
 
         // Create anonymous repository class for trait testing
-        $this->repository = new class extends BaseRepository {
+        $this->repository = new class extends BaseRepository
+        {
             use ManagesDates;
 
             // Expose protected methods for testing
@@ -70,10 +70,14 @@ describe('ManagesDates Trait', function () {
             $relationshipMock->shouldReceive('create')
                 ->once()
                 ->with($expectedData)
-                ->andReturn(new class extends Model {
+                ->andReturn(new class extends Model
+                {
                     public $id = 1;
+
                     public $started_at;
-                    public function __construct() {
+
+                    public function __construct()
+                    {
                         $this->started_at = Carbon::now();
                     }
                 });
@@ -98,9 +102,12 @@ describe('ManagesDates Trait', function () {
             $relationshipMock->shouldReceive('create')
                 ->once()
                 ->with($expectedData)
-                ->andReturn(new class($startDate) extends Model {
+                ->andReturn(new class($startDate) extends Model
+                {
                     public $started_at;
-                    public function __construct($startDate) {
+
+                    public function __construct($startDate)
+                    {
                         $this->started_at = $startDate;
                     }
                 });
@@ -126,10 +133,14 @@ describe('ManagesDates Trait', function () {
             $relationshipMock->shouldReceive('create')
                 ->once()
                 ->with($expectedData)
-                ->andReturn(new class extends Model {
+                ->andReturn(new class extends Model
+                {
                     public $notes;
+
                     public $type;
-                    public function __construct() {
+
+                    public function __construct()
+                    {
                         $this->notes = 'Special contract terms';
                         $this->type = 'temporary';
                     }
@@ -154,7 +165,8 @@ describe('ManagesDates Trait', function () {
             foreach ($relationshipNames as $relationshipName) {
                 $model = Mockery::mock(Model::class);
                 $relationship = Mockery::mock(HasMany::class);
-                $relationship->shouldReceive('create')->once()->andReturn(new class extends Model {
+                $relationship->shouldReceive('create')->once()->andReturn(new class extends Model
+                {
                     public $id = 1;
                 });
                 $model->shouldReceive($relationshipName)->andReturn($relationship);
@@ -354,9 +366,12 @@ describe('ManagesDates Trait', function () {
             // Arrange - 12 hours ago (0.5 days, should be cast to int as 0)
             $startDate = Carbon::now()->subHours(12);
 
-            $currentPeriod = new class {
+            $currentPeriod = new class
+            {
                 public $started_at;
-                public function __construct() {
+
+                public function __construct()
+                {
                     $this->started_at = Carbon::now()->subHours(12);
                 }
             };
@@ -428,7 +443,8 @@ describe('ManagesDates Trait', function () {
     describe('trait integration safety', function () {
         test('trait is reusable across multiple repository instances', function () {
             // Arrange
-            $anotherRepository = new class extends BaseRepository {
+            $anotherRepository = new class extends BaseRepository
+            {
                 use ManagesDates;
 
                 public function testStartPeriod($model, $relationship, $startDate, $additionalData = [])
@@ -465,7 +481,7 @@ describe('ManagesDates Trait', function () {
             $model->shouldReceive('employments')->andReturn($relationship);
 
             // Act & Assert - Should not throw exception
-            expect(fn() => $this->repository->testStartPeriod($model, 'employments', $startDate, $emptyData))
+            expect(fn () => $this->repository->testStartPeriod($model, 'employments', $startDate, $emptyData))
                 ->not->toThrow(Exception::class);
         });
     });

@@ -32,7 +32,7 @@ class PreviousStablesTable extends BasePreviousStablesTable
             ->select('stables.*')
             ->addSelect([
                 'joined_at' => DB::raw('stables_tag_teams.joined_at'),
-                'left_at' => DB::raw('stables_tag_teams.left_at')
+                'left_at' => DB::raw('stables_tag_teams.left_at'),
             ])
             ->orderByDesc('stables_tag_teams.joined_at');
     }

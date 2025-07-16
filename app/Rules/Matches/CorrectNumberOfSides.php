@@ -24,7 +24,7 @@ class CorrectNumberOfSides implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!isset($this->data['match_type_id'])) {
+        if (! isset($this->data['match_type_id'])) {
             return; // No match type to validate against
         }
 

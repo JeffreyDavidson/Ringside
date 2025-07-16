@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for VenueBuilder query scopes.

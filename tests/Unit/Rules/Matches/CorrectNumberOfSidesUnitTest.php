@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\Matches\MatchType;
 use App\Rules\Matches\CorrectNumberOfSides;
 
 /**
@@ -18,7 +17,7 @@ use App\Rules\Matches\CorrectNumberOfSides;
  * These tests verify the CorrectNumberOfSides rule logic independently
  * of models, database, or Laravel's validation framework.
  *
- * @see \App\Rules\Matches\CorrectNumberOfSides
+ * @see CorrectNumberOfSides
  */
 describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
     describe('DataAwareRule implementation', function () {
@@ -27,8 +26,8 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             $rule = new CorrectNumberOfSides();
 
             // Assert
-            expect($rule)->toBeInstanceOf(\Illuminate\Contracts\Validation\DataAwareRule::class);
-            expect($rule)->toBeInstanceOf(\Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\DataAwareRule::class);
+            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
         });
 
         test('setData method stores data correctly', function () {
@@ -251,6 +250,6 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
     });
 
     afterEach(function () {
-        \Mockery::close();
+        Mockery::close();
     });
 });

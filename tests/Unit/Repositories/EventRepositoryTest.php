@@ -35,7 +35,7 @@ describe('EventRepository Unit Tests', function () {
 
         test('repository has all expected methods', function () {
             $methods = [
-                'create', 'update', 'delete', 'restore'
+                'create', 'update', 'delete', 'restore',
             ];
 
             foreach ($methods as $method) {

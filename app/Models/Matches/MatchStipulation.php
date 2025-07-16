@@ -150,6 +150,6 @@ class MatchStipulation extends Model
      */
     public function getMatchPreview(): string
     {
-        return $this->name . ' Match';
+        return $this->name.' Match';
     }
 }

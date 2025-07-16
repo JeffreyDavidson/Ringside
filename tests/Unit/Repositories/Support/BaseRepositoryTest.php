@@ -17,12 +17,13 @@ use Illuminate\Database\Eloquent\Model;
  * This test ensures the BaseRepository provides a solid foundation
  * for all domain repositories with consistent CRUD patterns.
  *
- * @see \App\Repositories\Support\BaseRepository
+ * @see BaseRepository
  */
 describe('BaseRepository Unit Tests', function () {
     beforeEach(function () {
         // Create concrete implementation of abstract BaseRepository for testing
-        $this->repository = new class extends BaseRepository {
+        $this->repository = new class extends BaseRepository
+        {
             // Concrete implementation for testing abstract base class
         };
     });
@@ -48,7 +49,7 @@ describe('BaseRepository Unit Tests', function () {
     describe('delete method', function () {
         test('calls delete on provided model', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('delete')
                 ->once()
                 ->andReturn(true);
@@ -61,10 +62,10 @@ describe('BaseRepository Unit Tests', function () {
 
         test('works with any model instance', function () {
             // Arrange - Test with different mock models
-            $model1 = \Mockery::mock(Model::class);
+            $model1 = Mockery::mock(Model::class);
             $model1->shouldReceive('delete')->once()->andReturn(true);
 
-            $model2 = \Mockery::mock(Model::class);
+            $model2 = Mockery::mock(Model::class);
             $model2->shouldReceive('delete')->once()->andReturn(true);
 
             // Act
@@ -76,7 +77,7 @@ describe('BaseRepository Unit Tests', function () {
 
         test('handles soft delete models correctly', function () {
             // Arrange
-            $softDeleteModel = \Mockery::mock(Model::class);
+            $softDeleteModel = Mockery::mock(Model::class);
             $softDeleteModel->shouldReceive('delete')
                 ->once()
                 ->andReturn(true); // Soft delete returns true
@@ -89,7 +90,7 @@ describe('BaseRepository Unit Tests', function () {
 
         test('delegates delete operation to model', function () {
             // Arrange
-            $model = \Mockery::mock(Model::class);
+            $model = Mockery::mock(Model::class);
             $model->shouldReceive('delete')
                 ->once()
                 ->andReturn(true);
@@ -105,7 +106,8 @@ describe('BaseRepository Unit Tests', function () {
     describe('repository inheritance patterns', function () {
         test('repository can be extended by concrete implementations', function () {
             // Arrange
-            $concreteRepository = new class extends BaseRepository {
+            $concreteRepository = new class extends BaseRepository
+            {
                 public function customMethod(): string
                 {
                     return 'custom functionality';
@@ -121,12 +123,20 @@ describe('BaseRepository Unit Tests', function () {
 
         test('repository provides consistent foundation for all repositories', function () {
             // Arrange
-            $repository1 = new class extends BaseRepository {
-                public function getType(): string { return 'Type1'; }
+            $repository1 = new class extends BaseRepository
+            {
+                public function getType(): string
+                {
+                    return 'Type1';
+                }
             };
 
-            $repository2 = new class extends BaseRepository {
-                public function getType(): string { return 'Type2'; }
+            $repository2 = new class extends BaseRepository
+            {
+                public function getType(): string
+                {
+                    return 'Type2';
+                }
             };
 
             // Assert - Both have access to base functionality
@@ -144,7 +154,7 @@ describe('BaseRepository Unit Tests', function () {
             $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
             // Assert - Should have minimal public interface
-            $publicMethodNames = array_map(fn($method) => $method->getName(), $methods);
+            $publicMethodNames = array_map(fn ($method) => $method->getName(), $methods);
             expect($publicMethodNames)->toContain('delete');
 
             // Should not have too many methods (thin abstraction)
@@ -165,7 +175,8 @@ describe('BaseRepository Unit Tests', function () {
 
         test('repository provides extensible foundation', function () {
             // Arrange
-            $extendedRepository = new class extends BaseRepository {
+            $extendedRepository = new class extends BaseRepository
+            {
                 public function create(array $data): Model
                 {
                     // Example extension method

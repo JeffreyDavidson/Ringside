@@ -92,9 +92,9 @@ expect()->extend('usesTrait', function ($trait) {
 |
 */
 
-require_once __DIR__ . '/Expectations/WrestlingExpectations.php';
-require_once __DIR__ . '/Expectations/DatabaseExpectations.php';
-require_once __DIR__ . '/Expectations/ModelExpectations.php';
+require_once __DIR__.'/Expectations/WrestlingExpectations.php';
+require_once __DIR__.'/Expectations/DatabaseExpectations.php';
+require_once __DIR__.'/Expectations/ModelExpectations.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -128,4 +128,4 @@ function basicUser()
 |
 */
 
-require_once __DIR__ . '/Helpers/TestHelpers.php';
+require_once __DIR__.'/Helpers/TestHelpers.php';

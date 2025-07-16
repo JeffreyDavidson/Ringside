@@ -109,10 +109,10 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
     public function createDebut(Title $title, Carbon $debutDate, ?string $notes = null): void
     {
         $this->createActivity($title, $debutDate);
-        
+
         // Status is now computed from relationships - no need to update manually
         // The computed status will automatically reflect the correct state based on activity periods
-        
+
         // TODO: Add notes handling if TitleActivityPeriod model supports notes column
     }
 
@@ -122,10 +122,10 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
     public function pull(Title $title, Carbon $pullDate, ?string $notes = null): void
     {
         $this->endActivity($title, $pullDate);
-        
+
         // Status is now computed from relationships - no need to update manually
         // The computed status will automatically reflect the correct state based on activity periods
-        
+
         // TODO: Add notes handling if TitleActivityPeriod model supports notes column
     }
 
@@ -135,10 +135,10 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
     public function createReinstatement(Title $title, Carbon $reinstateDate, ?string $notes = null): void
     {
         $this->createActivity($title, $reinstateDate);
-        
+
         // Status is now computed from relationships - no need to update manually
         // The computed status will automatically reflect the correct state based on activity periods
-        
+
         // TODO: Add notes handling if TitleActivityPeriod model supports notes column
     }
 

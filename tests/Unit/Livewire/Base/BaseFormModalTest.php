@@ -18,7 +18,7 @@ use Livewire\Component;
  * - Class constants and configuration
  *
  * @see BaseFormModal
- * @see \Tests\Integration\Livewire\Base\BaseFormModalTest
+ * @see Tests\Integration\Livewire\Base\BaseFormModalTest
  */
 describe('BaseFormModal Unit Tests', function () {
     describe('class structure and inheritance', function () {
@@ -40,12 +40,12 @@ describe('BaseFormModal Unit Tests', function () {
     describe('abstract methods', function () {
         test('has required abstract methods', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
-            
+
             expect($reflection->isAbstract())->toBeTrue();
-            
+
             $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
-            $abstractMethodNames = array_map(fn($method) => $method->getName(), $abstractMethods);
-            
+            $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
+
             expect($abstractMethodNames)->toContain('getFormClass');
             expect($abstractMethodNames)->toContain('getModelClass');
             expect($abstractMethodNames)->toContain('getModalPath');
@@ -55,19 +55,19 @@ describe('BaseFormModal Unit Tests', function () {
     describe('method signatures', function () {
         test('abstract methods have correct signatures', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
-            
+
             // getFormClass method
             $getFormClass = $reflection->getMethod('getFormClass');
             expect($getFormClass->isAbstract())->toBeTrue();
             expect($getFormClass->isProtected())->toBeTrue();
             expect($getFormClass->getReturnType()->getName())->toBe('string');
-            
+
             // getModelClass method
             $getModelClass = $reflection->getMethod('getModelClass');
             expect($getModelClass->isAbstract())->toBeTrue();
             expect($getModelClass->isProtected())->toBeTrue();
             expect($getModelClass->getReturnType()->getName())->toBe('string');
-            
+
             // getModalPath method
             $getModalPath = $reflection->getMethod('getModalPath');
             expect($getModalPath->isAbstract())->toBeTrue();
@@ -79,17 +79,17 @@ describe('BaseFormModal Unit Tests', function () {
     describe('template method pattern', function () {
         test('class is designed as template method pattern', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
-            
+
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
-            
+
             // Should have abstract methods for child configuration
             $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
             expect($abstractMethods)->not->toBeEmpty();
-            
+
             // Should have concrete methods for common functionality
             $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
-            $concreteMethodNames = array_map(fn($method) => $method->getName(), $concreteMethods);
+            $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
             expect($concreteMethodNames)->toContain('mount');
         });
     });
@@ -98,13 +98,14 @@ describe('BaseFormModal Unit Tests', function () {
         test('has no class-specific constants', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
             $constants = $reflection->getConstants();
-            
+
             // Filter out inherited constants
             $classConstants = array_filter($constants, function ($value, $key) use ($reflection) {
                 $constant = $reflection->getReflectionConstant($key);
+
                 return $constant && $constant->getDeclaringClass()->getName() === BaseFormModal::class;
             }, ARRAY_FILTER_USE_BOTH);
-            
+
             expect($classConstants)->toBeEmpty();
         });
     });
@@ -113,7 +114,7 @@ describe('BaseFormModal Unit Tests', function () {
         test('has proper PHPDoc annotations', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
             $docComment = $reflection->getDocComment();
-            
+
             expect($docComment)->toContain('@template');
             expect($docComment)->toContain('TForm of LivewireBaseForm');
             expect($docComment)->toContain('TModel of Model');
@@ -140,7 +141,7 @@ describe('BaseFormModal Unit Tests', function () {
         test('provides type safety through generics', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
             $docComment = $reflection->getDocComment();
-            
+
             // Should use template generics for type safety
             expect($docComment)->toContain('@template TForm');
             expect($docComment)->toContain('@template TModel');
@@ -151,7 +152,7 @@ describe('BaseFormModal Unit Tests', function () {
     describe('composition over inheritance', function () {
         test('uses traits for specialized functionality', function () {
             $traits = class_uses_recursive(BaseFormModal::class);
-            
+
             expect($traits)->toContain('App\\Livewire\\Concerns\\GeneratesDummyData');
         });
     });

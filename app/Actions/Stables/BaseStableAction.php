@@ -67,9 +67,9 @@ abstract class BaseStableAction
      * @param  Carbon  $effectiveDate  The employment date for the stable debut
      */
     protected function employMembersForDebut(
-        $wrestlers,
-        $tagTeams,
-        $managers,
+        Collection $wrestlers,
+        Collection $tagTeams,
+        Collection $managers,
         Carbon $effectiveDate
     ): void {
         // Note: Since only Titles can be debuted, we employ members instead
@@ -92,22 +92,22 @@ abstract class BaseStableAction
      * @param  ManagersRetireAction  $managersRetireAction  Action to retire managers
      */
     protected function retireMembers(
-        $wrestlers,
-        $tagTeams,
-        $managers,
+        Collection $wrestlers,
+        Collection $tagTeams,
+        Collection $managers,
         Carbon $retirementDate,
-        $wrestlersRetireAction,
-        $tagTeamsRetireAction,
-        $managersRetireAction
+        WrestlersRetireAction $wrestlersRetireAction,
+        TagTeamsRetireAction $tagTeamsRetireAction,
+        ManagersRetireAction $managersRetireAction
     ): void {
         // Retire the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
 
         // Retire the provided tag teams
-        $tagTeams->each(fn ($tagTeam) => $tagTeamsRetireAction->handle($tagTeam, $retirementDate));
+        $tagTeams->each(fn (TagTeam $tagTeam) => $tagTeamsRetireAction->handle($tagTeam, $retirementDate));
 
         // Retire the provided managers
-        $managers->each(fn ($manager) => $managersRetireAction->handle($manager, $retirementDate));
+        $managers->each(fn (Manager $manager) => $managersRetireAction->handle($manager, $retirementDate));
     }
 
     /**
@@ -122,21 +122,21 @@ abstract class BaseStableAction
      * @param  ManagersUnretireAction  $managersUnretireAction  Action to unretire managers
      */
     protected function unretireMembers(
-        $wrestlers,
-        $tagTeams,
-        $managers,
+        Collection $wrestlers,
+        Collection $tagTeams,
+        Collection $managers,
         Carbon $unretirementDate,
-        $wrestlersUnretireAction,
-        $tagTeamsUnretireAction,
-        $managersUnretireAction
+        WrestlersUnretireAction $wrestlersUnretireAction,
+        TagTeamsUnretireAction $tagTeamsUnretireAction,
+        ManagersUnretireAction $managersUnretireAction
     ): void {
         // Unretire the provided wrestlers
-        $wrestlers->each(fn ($wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
 
         // Unretire the provided tag teams
-        $tagTeams->each(fn ($tagTeam) => $tagTeamsUnretireAction->handle($tagTeam, $unretirementDate));
+        $tagTeams->each(fn (TagTeam $tagTeam) => $tagTeamsUnretireAction->handle($tagTeam, $unretirementDate));
 
         // Unretire the provided managers
-        $managers->each(fn ($manager) => $managersUnretireAction->handle($manager, $unretirementDate));
+        $managers->each(fn (Manager $manager) => $managersUnretireAction->handle($manager, $unretirementDate));
     }
 }
