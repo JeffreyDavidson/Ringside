@@ -90,4 +90,10 @@ class RefereeFactory extends Factory
             ->has(RefereeEmployment::factory()->started($start), 'employments')
             ->has(RefereeInjury::factory()->started($now), 'injuries');
     }
+
+    public function employed(): static
+    {
+        return $this->state(fn () => ['status' => EmploymentStatus::Employed])
+            ->has(RefereeEmployment::factory()->started(Carbon::yesterday()), 'employments');
+    }
 }

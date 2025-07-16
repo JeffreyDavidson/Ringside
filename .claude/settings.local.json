@@ -16,7 +16,8 @@
       "Bash(php -l:*)",
       "Bash(git branch:*)",
       "Bash(timeout:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }

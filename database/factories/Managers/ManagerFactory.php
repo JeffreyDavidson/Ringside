@@ -37,12 +37,6 @@ class ManagerFactory extends Factory
             ->has(ManagerEmployment::factory()->started(Carbon::yesterday()), 'employments');
     }
 
-    public function available(): static
-    {
-        return $this->state(fn () => ['status' => EmploymentStatus::Employed])
-            ->has(ManagerEmployment::factory()->started(Carbon::yesterday()), 'employments');
-    }
-
     public function withFutureEmployment(): static
     {
         return $this->state(fn () => ['status' => EmploymentStatus::FutureEmployment])

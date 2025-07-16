@@ -20,8 +20,8 @@ beforeEach(function () {
     $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
-test('it releases an available manager at the current datetime by default', function () {
-    $manager = Manager::factory()->available()->create();
+test('it releases an employed manager at the current datetime by default', function () {
+    $manager = Manager::factory()->employed()->create();
     $datetime = now();
 
     $this->managerRepository
@@ -51,8 +51,8 @@ test('it releases an available manager at the current datetime by default', func
     });
 });
 
-test('it releases an available manager at a specific datetime', function () {
-    $manager = Manager::factory()->available()->create();
+test('it releases an employed manager at a specific datetime', function () {
+    $manager = Manager::factory()->employed()->create();
     $datetime = now()->addDays(2);
 
     $this->managerRepository

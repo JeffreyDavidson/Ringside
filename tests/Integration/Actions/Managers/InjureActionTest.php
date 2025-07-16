@@ -19,8 +19,8 @@ beforeEach(function () {
     $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
-test('it injures an available manager at the current datetime by default', function () {
-    $manager = Manager::factory()->available()->create();
+test('it injures an employed manager at the current datetime by default', function () {
+    $manager = Manager::factory()->employed()->create();
     $datetime = now();
 
     $this->managerRepository
@@ -37,8 +37,8 @@ test('it injures an available manager at the current datetime by default', funct
     resolve(InjureAction::class)->handle($manager);
 });
 
-test('it injures an available manager at a specific datetime', function () {
-    $manager = Manager::factory()->available()->create();
+test('it injures an employed manager at a specific datetime', function () {
+    $manager = Manager::factory()->employed()->create();
     $datetime = now()->addDays(2);
 
     $this->managerRepository

@@ -110,7 +110,7 @@ test('it retires an inactive stable at a specific datetime', function () {
 test('it retires the current tag teams and current wrestlers and current managers of a stable', function () {
     $tagTeams = TagTeam::factory()->bookable()->count(1)->create();
     $wrestlers = Wrestler::factory()->bookable()->count(1)->create();
-    $managers = Manager::factory()->available()->count(1)->create();
+    $managers = Manager::factory()->employed()->count(1)->create();
     $datetime = now();
 
     $stable = Stable::factory()

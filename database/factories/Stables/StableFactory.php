@@ -164,6 +164,11 @@ class StableFactory extends Factory
             });
     }
 
+    public function disbanded(): static
+    {
+        return $this->inactive();
+    }
+
     public function withUnemployedDefaultMembers(): static
     {
         return $this
