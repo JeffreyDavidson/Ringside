@@ -18,6 +18,7 @@ beforeEach(function () {
     testTime()->freeze();
 
     $this->stableRepository = $this->mock(StableRepository::class);
+    $this->app->instance(StableRepository::class, $this->stableRepository);
 });
 
 test('it retires an active stable at the current datetime by default', function () {

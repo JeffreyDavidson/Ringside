@@ -49,8 +49,8 @@ describe('EventMatchSeeder Integration Tests', function () {
             foreach ($eventMatches as $eventMatch) {
                 expect($eventMatch->event_id)->toBeInt();
                 expect($eventMatch->match_type_id)->toBeInt();
-                expect($eventMatch->order)->toBeInt();
-                expect($eventMatch->order)->toBeGreaterThan(0);
+                expect($eventMatch->match_number)->toBeInt();
+                expect($eventMatch->match_number)->toBeGreaterThan(0);
             }
         });
 
@@ -60,7 +60,7 @@ describe('EventMatchSeeder Integration Tests', function () {
 
             // Assert
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->order)->toBeBetween(1, 20); // Reasonable match order range
+                expect($eventMatch->match_number)->toBeBetween(1, 20); // Reasonable match number range
             }
         });
 

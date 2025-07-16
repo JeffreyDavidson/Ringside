@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -30,6 +31,26 @@ use Illuminate\Support\Carbon;
 class MatchType extends Model
 {
     use HasFactory;
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($matchType) {
+            if (empty($matchType->slug) && !empty($matchType->name)) {
+                $matchType->slug = Str::slug($matchType->name);
+            }
+        });
+
+        static::updating(function ($matchType) {
+            if ($matchType->isDirty('name') && !$matchType->isDirty('slug')) {
+                $matchType->slug = Str::slug($matchType->name);
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
