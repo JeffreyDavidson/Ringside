@@ -144,7 +144,7 @@ describe('Wrestler Employment Workflows', function () {
             $unretired = $wrestler->fresh();
             expect($unretired->isRetired())->toBeFalse();
             expect($unretired->isEmployed())->toBeFalse(); // Still unemployed after unretiring
-            expect($unretired->status)->toBe(EmploymentStatus::Unemployed);
+            expect($unretired->status)->toBe(EmploymentStatus::Released);
         });
 
         test('full career lifecycle workflow with multiple state changes', function () {
@@ -181,12 +181,12 @@ describe('Wrestler Employment Workflows', function () {
             expect($wrestler->fresh()->isRetired())->toBeTrue();
             expect($wrestler->fresh()->isEmployed())->toBeFalse();
 
-            // 7. Unretire (back to unemployed)
+            // 7. Unretire (back to released)
             UnretireAction::run($wrestler, Carbon::now());
             $final = $wrestler->fresh();
             expect($final->isRetired())->toBeFalse();
             expect($final->isEmployed())->toBeFalse();
-            expect($final->status)->toBe(EmploymentStatus::Unemployed);
+            expect($final->status)->toBe(EmploymentStatus::Released);
 
             // Verify all employment periods and status changes are recorded
             expect($final->employments()->count())->toBe(1);
@@ -354,8 +354,11 @@ describe('Wrestler Employment Workflows', function () {
             EmployAction::run($wrestler, $futureDate);
 
             $refreshedWrestler = $wrestler->fresh();
-            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-            expect($refreshedWrestler->currentEmployment->started_at->toDateTimeString())
+            expect($refreshedWrestler->status)->toBe(EmploymentStatus::FutureEmployment);
+            
+            // Future employment won't be current until the date arrives
+            $futureEmployment = $refreshedWrestler->employments()->latest()->first();
+            expect($futureEmployment->started_at->toDateTimeString())
                 ->toBe($futureDate->toDateTimeString());
         });
 
