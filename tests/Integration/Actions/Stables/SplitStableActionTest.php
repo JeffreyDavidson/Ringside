@@ -97,8 +97,8 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify exact members were transferred
-            $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('id');
-            $newStableTagTeamIds = $newStable->currentTagTeams()->pluck('id');
+            $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
+            $newStableTagTeamIds = $newStable->currentTagTeams()->pluck('tag_teams.id');
 
             expect($newStableWrestlerIds->sort()->values())->toBe($transferWrestlerIds->sort()->values());
             expect($newStableTagTeamIds->sort()->values())->toBe($transferTagTeamIds->sort()->values());
@@ -106,11 +106,11 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify members are no longer in original stable
             $refreshedOriginal = $this->originalStable->fresh();
             foreach ($transferWrestlerIds as $wrestlerId) {
-                expect($refreshedOriginal->currentWrestlers()->where('id', $wrestlerId)->exists())->toBeFalse();
+                expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestlerId)->exists())->toBeFalse();
             }
 
             foreach ($transferTagTeamIds as $tagTeamId) {
-                expect($refreshedOriginal->currentTagTeams()->where('id', $tagTeamId)->exists())->toBeFalse();
+                expect($refreshedOriginal->currentTagTeams()->where('tag_teams.id', $tagTeamId)->exists())->toBeFalse();
             }
         });
 
@@ -143,7 +143,7 @@ describe('SplitStableAction Integration Tests', function () {
             // Check that transferred wrestlers are no longer current members
             $refreshedOriginal = $this->originalStable->fresh();
             foreach ($this->transferWrestlers as $wrestler) {
-                expect($refreshedOriginal->currentWrestlers()->where('id', $wrestler->id)->exists())->toBeFalse();
+                expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestler->id)->exists())->toBeFalse();
             }
         });
 
@@ -322,7 +322,7 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify unemployed wrestler was not transferred (or handled per business rules)
-            $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('id');
+            $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
             expect($newStableWrestlerIds->contains($unemployedWrestler->id))->toBeFalse();
         });
 
