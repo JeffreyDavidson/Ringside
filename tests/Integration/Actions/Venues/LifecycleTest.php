@@ -6,7 +6,7 @@ use App\Actions\Venues\CreateAction;
 use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Actions\Venues\UpdateAction;
-use App\Data\Shared\VenueData;
+use App\Data\Events\VenueData;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;

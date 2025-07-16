@@ -4,47 +4,42 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
 /**
- * Polymorphic pivot model for stable memberships.
+ * Pivot model for stable-tag team relationships.
  *
- * This model handles the many-to-many polymorphic relationship between
- * stables and their members (wrestlers and tag teams only). It tracks
- * when members join and leave stables through timestamp fields.
- *
- * Note: Managers are NOT directly associated with stables. They are
- * associated with wrestlers and tag teams who may be in stables.
+ * This model handles the many-to-many relationship between
+ * stables and tag teams. It tracks when tag teams join and 
+ * leave stables through timestamp fields.
  *
  * @property int $id
  * @property int $stable_id
- * @property int $member_id
- * @property string $member_type
+ * @property int $tag_team_id
  * @property Carbon $joined_at
  * @property Carbon|null $left_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Stable $stable
- * @property-read Model $member
+ * @property-read TagTeam $tagTeam
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|StableMember query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableTagTeam newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableTagTeam newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StableTagTeam query()
  *
  * @mixin \Eloquent
  */
-class StableMember extends MorphPivot
+class StableTagTeam extends Pivot
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'stables_members';
+    protected $table = 'stables_tag_teams';
 
     /**
      * The attributes that are mass assignable.
@@ -53,8 +48,7 @@ class StableMember extends MorphPivot
      */
     protected $fillable = [
         'stable_id',
-        'member_id',
-        'member_type',
+        'tag_team_id',
         'joined_at',
         'left_at',
     ];
@@ -83,19 +77,19 @@ class StableMember extends MorphPivot
     }
 
     /**
-     * Get the member (wrestler, tag team, manager, etc.) for this membership.
+     * Get the tag team for this membership.
      *
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<TagTeam, $this>
      */
-    public function member(): MorphTo
+    public function tagTeam(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(TagTeam::class);
     }
 
     /**
      * Determine if this membership is currently active.
      *
-     * A membership is active if the member has not left the stable
+     * A membership is active if the tag team has not left the stable
      * (left_at is null).
      */
     public function isActive(): bool
@@ -106,7 +100,7 @@ class StableMember extends MorphPivot
     /**
      * Determine if this membership has ended.
      *
-     * A membership has ended if the member has left the stable
+     * A membership has ended if the tag team has left the stable
      * (left_at is not null).
      */
     public function hasEnded(): bool

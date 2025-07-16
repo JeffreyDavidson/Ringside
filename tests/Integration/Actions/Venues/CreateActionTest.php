@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Venues\CreateAction;
-use App\Data\Shared\VenueData;
+use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
 use App\Repositories\VenueRepository;
 
 beforeEach(function () {
     $this->venueRepository = $this->mock(VenueRepository::class);
+    $this->app->instance(VenueRepository::class, $this->venueRepository);
 });
 
 test('it creates a venue', function () {

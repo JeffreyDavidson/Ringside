@@ -8,6 +8,8 @@ use Ankurk91\Eloquent\HasBelongsToOne;
 use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -93,6 +95,12 @@ trait CanJoinStables
             default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
+        $pivotClass = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+
         /** @var BelongsToMany<Stable, static> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
@@ -100,6 +108,7 @@ trait CanJoinStables
             $foreignKey,
             'stable_id'
         )
+            ->using($pivotClass)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
 
@@ -135,12 +144,19 @@ trait CanJoinStables
             default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
+        $pivotClass = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+
         return $this->belongsToOne(
             Stable::class,
             $table,
             $foreignKey,
             'stable_id'
         )
+            ->using($pivotClass)
             ->wherePivotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
@@ -172,6 +188,12 @@ trait CanJoinStables
             default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
+        $pivotClass = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+
         /** @var BelongsToMany<Stable, static> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
@@ -179,6 +201,7 @@ trait CanJoinStables
             $foreignKey,
             'stable_id'
         )
+            ->using($pivotClass)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
             ->wherePivotNotNull('left_at');
