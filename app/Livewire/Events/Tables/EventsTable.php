@@ -11,7 +11,6 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -134,7 +133,7 @@ class EventsTable extends BaseTableWithActions
     /**
      * Restore a deleted scheduled event.
      */
-    public function restore(int $eventId): RedirectResponse
+    public function restore(int $eventId): void
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 
@@ -142,10 +141,10 @@ class EventsTable extends BaseTableWithActions
 
         try {
             resolve(RestoreAction::class)->handle($event);
+            session()->flash('status', 'Event successfully restored.');
+            $this->redirect(route('events.index'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('status', $e->getMessage());
         }
-
-        return back();
     }
 }

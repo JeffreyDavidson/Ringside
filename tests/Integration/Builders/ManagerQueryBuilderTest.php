@@ -23,7 +23,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
     beforeEach(function () {
         // Create managers in all possible states for comprehensive scope testing
         $this->futureEmployedManager = Manager::factory()->withFutureEmployment()->create();
-        $this->availableManager = Manager::factory()->available()->create();
+        $this->availableManager = Manager::factory()->employed()->create();
         $this->suspendedManager = Manager::factory()->suspended()->create();
         $this->retiredManager = Manager::factory()->retired()->create();
         $this->releasedManager = Manager::factory()->released()->create();
@@ -32,7 +32,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
     });
 
     describe('availability status scopes', function () {
-        test('available managers can be retrieved', function () {
+        test('employed managers can be retrieved', function () {
             // Act
             $availableManagers = Manager::available()->get();
 

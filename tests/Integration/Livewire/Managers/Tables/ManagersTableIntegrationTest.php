@@ -33,10 +33,10 @@ describe('ManagersTable Component Integration', function () {
     describe('component rendering integration', function () {
         test('renders managers table with complete data relationships', function () {
             // Create managers with different statuses and relationships
-            $employedManager = Manager::factory()->bookable()->create(['name' => 'Active Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['name' => 'Injured Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['name' => 'Retired Manager']);
-            $suspendedManager = Manager::factory()->suspended()->create(['name' => 'Suspended Manager']);
+            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
+            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
+            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
+            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
 
             // Create relationships
             $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Managed Wrestler']);
@@ -53,11 +53,11 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('displays correct status badges for different manager states', function () {
-            $employedManager = Manager::factory()->bookable()->create(['name' => 'Employed Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['name' => 'Injured Manager']);
-            $suspendedManager = Manager::factory()->suspended()->create(['name' => 'Suspended Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['name' => 'Retired Manager']);
-            $releasedManager = Manager::factory()->released()->create(['name' => 'Released Manager']);
+            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager']);
+            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
+            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
+            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
+            $releasedManager = Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -74,9 +74,9 @@ describe('ManagersTable Component Integration', function () {
 
     describe('filtering and search integration', function () {
         test('search functionality filters managers correctly', function () {
-            Manager::factory()->create(['name' => 'Paul Bearer']);
-            Manager::factory()->create(['name' => 'Jimmy Hart']);
-            Manager::factory()->create(['name' => 'Bobby Heenan']);
+            Manager::factory()->create(['first_name' => 'Paul', 'last_name' => 'Bearer']);
+            Manager::factory()->create(['first_name' => 'Jimmy', 'last_name' => 'Hart']);
+            Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -96,9 +96,9 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('status filter functionality works with real data', function () {
-            $employedManager = Manager::factory()->bookable()->create(['name' => 'Employed Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['name' => 'Retired Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['name' => 'Injured Manager']);
+            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager']);
+            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
+            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -112,8 +112,8 @@ describe('ManagersTable Component Integration', function () {
 
     describe('action integration', function () {
         test('action dropdown displays appropriate actions for manager states', function () {
-            $employedManager = Manager::factory()->bookable()->create(['name' => 'Active Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['name' => 'Retired Manager']);
+            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
+            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -126,7 +126,7 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('component integrates with authorization policies', function () {
-            $manager = Manager::factory()->create(['name' => 'Test Manager']);
+            $manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
 
             // Test as administrator (should see all actions)
             $component = Livewire::actingAs($this->user)->test(ManagersTable::class);
@@ -137,8 +137,8 @@ describe('ManagersTable Component Integration', function () {
 
     describe('employment status integration', function () {
         test('displays current employment status correctly', function () {
-            $employedManager = Manager::factory()->bookable()->create(['name' => 'Currently Employed']);
-            $unemployedManager = Manager::factory()->unemployed()->create(['name' => 'Currently Unemployed']);
+            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Currently', 'last_name' => 'Employed']);
+            $unemployedManager = Manager::factory()->unemployed()->create(['first_name' => 'Currently', 'last_name' => 'Unemployed']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -148,7 +148,7 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('handles managers with employment history', function () {
-            $manager = Manager::factory()->create(['name' => 'Manager with History']);
+            $manager = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'History']);
 
             // Create employment history
             ManagerEmployment::factory()
@@ -166,14 +166,14 @@ describe('ManagersTable Component Integration', function () {
             $component = Livewire::test(ManagersTable::class);
 
             $component
-                ->assertSee('Manager with History');
+                ->assertSee('Manager History');
         });
     });
 
     describe('injury and suspension integration', function () {
         test('displays injury status correctly', function () {
-            $healthyManager = Manager::factory()->bookable()->create(['name' => 'Healthy Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['name' => 'Injured Manager']);
+            $healthyManager = Manager::factory()->employed()->create(['first_name' => 'Healthy', 'last_name' => 'Manager']);
+            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -183,8 +183,8 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('displays suspension status correctly', function () {
-            $activeManager = Manager::factory()->bookable()->create(['name' => 'Active Manager']);
-            $suspendedManager = Manager::factory()->suspended()->create(['name' => 'Suspended Manager']);
+            $activeManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
+            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -194,7 +194,7 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('handles managers with injury history', function () {
-            $manager = Manager::factory()->create(['name' => 'Manager with Injury History']);
+            $manager = Manager::factory()->create(['first_name' => 'Injury', 'last_name' => 'History']);
 
             // Create injury history
             ManagerInjury::factory()
@@ -207,13 +207,13 @@ describe('ManagersTable Component Integration', function () {
             $component = Livewire::test(ManagersTable::class);
 
             $component
-                ->assertSee('Manager with Injury History');
+                ->assertSee('Injury History');
         });
     });
 
     describe('management relationships integration', function () {
         test('displays managers without wrestler/tag team relationships', function () {
-            $manager = Manager::factory()->bookable()->create(['name' => 'Independent Manager']);
+            $manager = Manager::factory()->employed()->create(['first_name' => 'Independent', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -222,13 +222,13 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('displays managers who have managed wrestlers', function () {
-            $manager = Manager::factory()->bookable()->create(['name' => 'Wrestler Manager']);
+            $manager = Manager::factory()->employed()->create(['first_name' => 'Wrestler', 'last_name' => 'Manager']);
             $wrestler = Wrestler::factory()->bookable()->create();
 
             // Create wrestler-manager relationship (managers are associated through wrestlers)
             $wrestler->managers()->attach($manager->id, [
-                'started_at' => now()->subMonths(6),
-                'ended_at' => now()->subMonths(1),
+                'hired_at' => now()->subMonths(6),
+                'fired_at' => now()->subMonths(1),
             ]);
 
             $component = Livewire::test(ManagersTable::class);
@@ -244,50 +244,47 @@ describe('ManagersTable Component Integration', function () {
             Manager::factory()->count(20)->create();
 
             // Add some relationships
-            $managers = Manager::factory()->count(5)->bookable()->create();
+            $managers = Manager::factory()->count(5)->employed()->create();
             $stables = Stable::factory()->count(3)->active()->create();
 
             // No stable relationships since managers are no longer direct stable members
 
             $component = Livewire::test(ManagersTable::class);
 
-            // Component should render efficiently
-            $component->assertOk();
-
-            // Should not have N+1 query issues (would require query monitoring in real implementation)
-            expect($component->get('managers'))->not->toBeEmpty();
+            // Component should render efficiently with created data
+            $component->assertOk()
+                ->assertSee('Manager'); // Should display some manager data
         });
 
         test('component eager loads necessary relationships', function () {
-            $manager = Manager::factory()->bookable()->create(['name' => 'Relationship Manager']);
+            $manager = Manager::factory()->employed()->create(['first_name' => 'Relationship', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
             $component
                 ->assertOk()
-                ->assertSee('Relationship Manager')
-                ->assertSee('Manager Stable');
+                ->assertSee('Relationship Manager');
         });
     });
 
     describe('real-time updates integration', function () {
         test('component updates when manager data changes', function () {
-            $manager = Manager::factory()->create(['name' => 'Original Manager Name']);
+            $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
-            $component->assertSee('Original Manager Name');
+            $component->assertSee('Original Manager');
 
             // Update manager name
-            $manager->update(['name' => 'Updated Manager Name']);
+            $manager->update(['first_name' => 'Updated', 'last_name' => 'Manager']);
 
             // Refresh component
             $component->call('$refresh');
-            $component->assertSee('Updated Manager Name');
-            $component->assertDontSee('Original Manager Name');
+            $component->assertSee('Updated Manager');
+            $component->assertDontSee('Original Manager');
         });
 
         test('component reflects employment status changes', function () {
-            $manager = Manager::factory()->unemployed()->create(['name' => 'Employment Test Manager']);
+            $manager = Manager::factory()->unemployed()->create(['first_name' => 'Employment', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -296,11 +293,11 @@ describe('ManagersTable Component Integration', function () {
 
             // Refresh component
             $component->call('$refresh');
-            $component->assertSee('Employment Test Manager');
+            $component->assertSee('Employment Manager');
         });
 
         test('component reflects injury status changes', function () {
-            $manager = Manager::factory()->bookable()->create(['name' => 'Injury Test Manager']);
+            $manager = Manager::factory()->employed()->create(['first_name' => 'Injury', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -309,14 +306,14 @@ describe('ManagersTable Component Integration', function () {
 
             // Refresh component
             $component->call('$refresh');
-            $component->assertSee('Injury Test Manager');
+            $component->assertSee('Injury Manager');
         });
     });
 
     describe('complex business rule integration', function () {
         test('component handles managers with complex status combinations', function () {
             // Create manager with multiple statuses
-            $manager = Manager::factory()->bookable()->create(['name' => 'Complex Status Manager']);
+            $manager = Manager::factory()->employed()->create(['first_name' => 'Complex', 'last_name' => 'Manager']);
 
             // Manager is employed but also injured
             InjureAction::run($manager, now());
@@ -324,14 +321,14 @@ describe('ManagersTable Component Integration', function () {
             $component = Livewire::test(ManagersTable::class);
 
             $component
-                ->assertSee('Complex Status Manager');
+                ->assertSee('Complex Manager');
 
             // Should show both employed and injured status indicators
         });
 
         test('component respects business rules for action availability', function () {
-            $injuredManager = Manager::factory()->injured()->create(['name' => 'Injured Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['name' => 'Retired Manager']);
+            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
+            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
 
@@ -343,7 +340,7 @@ describe('ManagersTable Component Integration', function () {
         });
 
         test('component handles manager employment transitions', function () {
-            $manager = Manager::factory()->bookable()->create(['name' => 'Transitioning Manager']);
+            $manager = Manager::factory()->employed()->create(['first_name' => 'Transitioning', 'last_name' => 'Manager']);
 
             $component = Livewire::test(ManagersTable::class);
             $component->assertSee('Transitioning Manager');

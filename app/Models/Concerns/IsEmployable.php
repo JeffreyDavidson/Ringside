@@ -265,6 +265,18 @@ trait IsEmployable
     }
 
     /**
+     * Check if the model is currently unemployed.
+     *
+     * This method provides the opposite of isEmployed() for clearer test logic.
+     *
+     * @return bool True if currently unemployed, false otherwise
+     */
+    public function isUnemployed(): bool
+    {
+        return !$this->isEmployed();
+    }
+
+    /**
      * Determine if the model has a future employment scheduled.
      *
      * Checks if there is a scheduled employment that hasn't started yet.

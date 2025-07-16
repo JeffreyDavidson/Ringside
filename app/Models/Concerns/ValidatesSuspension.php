@@ -115,6 +115,7 @@ trait ValidatesSuspension
         $type = RosterMemberType::fromModel($this);
 
         return ! $this->isNotInEmployment()
+            && ! $this->isReleased()
             && ! $this->hasFutureEmployment()
             && (! $type->canBeInjured() || ! ($this instanceof Injurable) || ! $this->isInjured())
             && ! $this->isRetired()
