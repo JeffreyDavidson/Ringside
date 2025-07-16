@@ -122,19 +122,6 @@ class TagTeamFactory extends Factory
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
-    public function employed(): static
-    {
-        $now = now();
-        $employmentStartDate = $now->copy()->subDays(3);
-
-        $wrestlers = Wrestler::factory()->count(2)
-            ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
-            ->create();
-
-        return $this->state(fn () => ['status' => EmploymentStatus::Employed])
-            ->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
-            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
-    }
 
     public function withCurrentWrestlers($wrestler, $joinDate = null): static
     {
