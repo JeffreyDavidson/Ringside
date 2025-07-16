@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Matches\EventMatch;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for EventMatchSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the EventMatchSeeder correctly populates
  * the database with event match records for development and testing purposes.
  *
- * @see \Database\Seeders\EventMatchSeeder
+ * @see Database\Seeders\EventMatchSeeder
  */
 describe('EventMatchSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -51,8 +49,8 @@ describe('EventMatchSeeder Integration Tests', function () {
             foreach ($eventMatches as $eventMatch) {
                 expect($eventMatch->event_id)->toBeInt();
                 expect($eventMatch->match_type_id)->toBeInt();
-                expect($eventMatch->order)->toBeInt();
-                expect($eventMatch->order)->toBeGreaterThan(0);
+                expect($eventMatch->match_number)->toBeInt();
+                expect($eventMatch->match_number)->toBeGreaterThan(0);
             }
         });
 
@@ -62,7 +60,7 @@ describe('EventMatchSeeder Integration Tests', function () {
 
             // Assert
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->order)->toBeBetween(1, 20); // Reasonable match order range
+                expect($eventMatch->match_number)->toBeBetween(1, 20); // Reasonable match number range
             }
         });
 

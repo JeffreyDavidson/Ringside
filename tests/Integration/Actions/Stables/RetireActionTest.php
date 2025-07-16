@@ -18,27 +18,22 @@ beforeEach(function () {
     testTime()->freeze();
 
     $this->stableRepository = $this->mock(StableRepository::class);
+    $this->app->instance(StableRepository::class, $this->stableRepository);
 });
 
 test('it retires an active stable at the current datetime by default', function () {
-    $stable = $this->partialMock(Stable::class);
+    $stable = Stable::factory()->active()->create();
     $datetime = now();
 
-    // Mock the stable to return empty collections for current members
-    $stable->shouldReceive('hasDebuted')->andReturn(false);
-    $stable->shouldReceive('ensureCanBeRetired')->andReturn(null);
-    $stable->shouldReceive('isRetired')->andReturn(false);
-    $stable->shouldReceive('currentRetirement')->andReturn(collect());
+    // Mock repository calls
+    $this->stableRepository->shouldReceive('endActivity')->with($stable, $datetime)->andReturn($stable);
+    $this->stableRepository->shouldReceive('deactivate')->with($stable)->andReturn($stable);
+    $this->stableRepository->shouldReceive('retire')->with($stable)->andReturn($stable);
+    $this->stableRepository->shouldReceive('removeWrestlers')->with($stable)->andReturn(null);
+    $this->stableRepository->shouldReceive('removeTagTeams')->with($stable)->andReturn(null);
+    $this->stableRepository->shouldReceive('createRetirement')->with($stable, $datetime)->andReturn(null);
 
-    // Don't expect any repository calls for now - just see if the action runs
-    $this->stableRepository->shouldReceive('deactivate')->andReturn($stable);
-    $this->stableRepository->shouldReceive('retire')->andReturn($stable);
-    $this->stableRepository->shouldReceive('removeWrestlers')->andReturn(null);
-    $this->stableRepository->shouldReceive('removeTagTeams')->andReturn(null);
-    // Note: Managers are not direct stable members, so removeManagers is not called
-    $this->stableRepository->shouldReceive('createRetirement')->andReturn(null);
-
-    // Just call the action and see what happens
+    // Call the action
     resolve(RetireAction::class)->handle($stable);
 
     // If we get here, the action ran successfully
@@ -46,24 +41,18 @@ test('it retires an active stable at the current datetime by default', function 
 });
 
 test('it retires an active stable at a specific datetime', function () {
-    $stable = $this->partialMock(Stable::class);
+    $stable = Stable::factory()->active()->create();
     $datetime = now()->addDays(2);
 
-    // Mock the stable to return empty collections for current members
-    $stable->shouldReceive('hasDebuted')->andReturn(false);
-    $stable->shouldReceive('ensureCanBeRetired')->andReturn(null);
-    $stable->shouldReceive('isRetired')->andReturn(false);
-    $stable->shouldReceive('currentRetirement')->andReturn(collect());
+    // Mock repository calls
+    $this->stableRepository->shouldReceive('endActivity')->with($stable, $datetime)->andReturn($stable);
+    $this->stableRepository->shouldReceive('deactivate')->with($stable)->andReturn($stable);
+    $this->stableRepository->shouldReceive('retire')->with($stable)->andReturn($stable);
+    $this->stableRepository->shouldReceive('removeWrestlers')->with($stable)->andReturn(null);
+    $this->stableRepository->shouldReceive('removeTagTeams')->with($stable)->andReturn(null);
+    $this->stableRepository->shouldReceive('createRetirement')->with($stable, $datetime)->andReturn(null);
 
-    // Don't expect any repository calls for now - just see if the action runs
-    $this->stableRepository->shouldReceive('deactivate')->andReturn($stable);
-    $this->stableRepository->shouldReceive('retire')->andReturn($stable);
-    $this->stableRepository->shouldReceive('removeWrestlers')->andReturn(null);
-    $this->stableRepository->shouldReceive('removeTagTeams')->andReturn(null);
-    // Note: Managers are not direct stable members, so removeManagers is not called
-    $this->stableRepository->shouldReceive('createRetirement')->andReturn(null);
-
-    // Just call the action and see what happens
+    // Call the action
     resolve(RetireAction::class)->handle($stable, $datetime);
 
     // If we get here, the action ran successfully

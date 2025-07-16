@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -30,6 +31,26 @@ use Illuminate\Support\Carbon;
 class MatchType extends Model
 {
     use HasFactory;
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($matchType) {
+            if (empty($matchType->slug) && !empty($matchType->name)) {
+                $matchType->slug = Str::slug($matchType->name);
+            }
+        });
+
+        static::updating(function ($matchType) {
+            if ($matchType->isDirty('name') && !$matchType->isDirty('slug')) {
+                $matchType->slug = Str::slug($matchType->name);
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -72,8 +93,6 @@ class MatchType extends Model
 
     /**
      * Check if this match type allows wrestler competitors.
-     *
-     * @return bool
      */
     public function allowsWrestlers(): bool
     {
@@ -82,8 +101,6 @@ class MatchType extends Model
 
     /**
      * Check if this match type allows tag team competitors.
-     *
-     * @return bool
      */
     public function allowsTagTeams(): bool
     {
@@ -92,9 +109,6 @@ class MatchType extends Model
 
     /**
      * Check if a specific competitor type is allowed in this match type.
-     *
-     * @param string $competitorType
-     * @return bool
      */
     public function allowsCompetitorType(string $competitorType): bool
     {
@@ -103,8 +117,6 @@ class MatchType extends Model
 
     /**
      * Get the minimum number of competitors required for this match type.
-     *
-     * @return int
      */
     public function getMinimumCompetitors(): int
     {
@@ -113,8 +125,6 @@ class MatchType extends Model
 
     /**
      * Get the maximum number of competitors allowed for this match type.
-     *
-     * @return int
      */
     public function getMaximumCompetitors(): int
     {

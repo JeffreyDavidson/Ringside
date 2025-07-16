@@ -6,7 +6,6 @@ namespace App\Models\Events;
 
 use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HoldsEvents;
-use App\Models\Events\Event;
 use Database\Factories\Events\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;

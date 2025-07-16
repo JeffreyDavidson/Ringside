@@ -316,12 +316,7 @@ trait IsEmployable
      */
     public function isNotInEmployment(): bool
     {
-        if ($this->hasAnyStatus([EmploymentStatus::Unemployed, EmploymentStatus::Released])) {
-            return true;
-        }
-
-        // Check if the model is retired (assuming it implements IsRetirable)
-        return $this->isRetired();
+        return ! $this->isEmployed() && ! $this->hasFutureEmployment();
     }
 
     /**
@@ -343,7 +338,7 @@ trait IsEmployable
      */
     public function isReleased(): bool
     {
-        return $this->hasStatus(EmploymentStatus::Released);
+        return ! $this->isEmployed() && ! $this->isRetired() && $this->previousEmployments()->exists();
     }
 
     /**

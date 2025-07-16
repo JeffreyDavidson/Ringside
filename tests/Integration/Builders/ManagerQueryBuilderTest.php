@@ -8,7 +8,7 @@ use App\Models\Managers\Manager;
  * Unit tests for ManagerQueryBuilder query scopes and methods.
  *
  * UNIT TEST SCOPE:
- * - Builder class structure and scope functionality  
+ * - Builder class structure and scope functionality
  * - Employment status filtering scopes (available, futureEmployed, unemployed, released)
  * - Individual roster member status scopes (suspended, retired, injured)
  * - Query scope accuracy and entity isolation
@@ -17,7 +17,7 @@ use App\Models\Managers\Manager;
  * all query scopes for filtering managers by their various statuses.
  * Managers are individual roster members who can be injured.
  *
- * @see \App\Builders\Roster\ManagerBuilder
+ * @see App\Builders\Roster\ManagerBuilder
  */
 describe('ManagerQueryBuilder Unit Tests', function () {
     beforeEach(function () {

@@ -11,6 +11,7 @@ use Database\Seeders\MatchTypesTableSeeder;
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
+    $this->app->instance(EventMatchRepository::class, $this->eventMatchRepository);
 });
 
 test('it adds referees to a match', function () {

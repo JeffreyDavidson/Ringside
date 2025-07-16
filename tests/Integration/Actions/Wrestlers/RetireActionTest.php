@@ -23,7 +23,7 @@ use function Spatie\PestPluginTestTime\testTime;
  * These tests verify that the RetireAction correctly orchestrates
  * the complete retirement business process with real dependencies.
  *
- * @see \App\Actions\Wrestlers\RetireAction
+ * @see RetireAction
  */
 describe('RetireAction Integration Tests', function () {
     beforeEach(function () {
@@ -40,7 +40,7 @@ describe('RetireAction Integration Tests', function () {
         test('retires bookable wrestler at current datetime by default', function () {
             // Arrange
             $datetime = now();
-            
+
             $this->wrestlerRepository
                 ->shouldReceive('endEmployment')
                 ->once()
@@ -95,7 +95,7 @@ describe('RetireAction Integration Tests', function () {
         test('retires bookable wrestler at specific datetime', function () {
             // Arrange
             $datetime = now()->addDays(2);
-            $this->setupBookableWrestlerMocks($this->bookableWrestler, $datetime);
+            setupBookableWrestlerMocks($this, $this->bookableWrestler, $datetime);
 
             // Act
             resolve(RetireAction::class)->handle($this->bookableWrestler, $datetime);
@@ -112,7 +112,7 @@ describe('RetireAction Integration Tests', function () {
         test('retires suspended wrestler at current datetime by default', function () {
             // Arrange
             $datetime = now();
-            $this->setupSuspendedWrestlerMocks($this->suspendedWrestler, $datetime);
+            setupSuspendedWrestlerMocks($this, $this->suspendedWrestler, $datetime);
 
             // Act
             resolve(RetireAction::class)->handle($this->suspendedWrestler);
@@ -123,7 +123,7 @@ describe('RetireAction Integration Tests', function () {
         test('retires suspended wrestler at specific datetime', function () {
             // Arrange
             $datetime = now()->addDays(2);
-            $this->setupSuspendedWrestlerMocks($this->suspendedWrestler, $datetime);
+            setupSuspendedWrestlerMocks($this, $this->suspendedWrestler, $datetime);
 
             // Act
             resolve(RetireAction::class)->handle($this->suspendedWrestler, $datetime);
@@ -140,7 +140,7 @@ describe('RetireAction Integration Tests', function () {
         test('retires injured wrestler at current datetime by default', function () {
             // Arrange
             $datetime = now();
-            $this->setupInjuredWrestlerMocks($this->injuredWrestler, $datetime);
+            setupInjuredWrestlerMocks($this, $this->injuredWrestler, $datetime);
 
             // Act
             resolve(RetireAction::class)->handle($this->injuredWrestler);
@@ -151,7 +151,7 @@ describe('RetireAction Integration Tests', function () {
         test('retires injured wrestler at specific datetime', function () {
             // Arrange
             $datetime = now()->addDays(2);
-            $this->setupInjuredWrestlerMocks($this->injuredWrestler, $datetime);
+            setupInjuredWrestlerMocks($this, $this->injuredWrestler, $datetime);
 
             // Act
             resolve(RetireAction::class)->handle($this->injuredWrestler, $datetime);
@@ -190,7 +190,7 @@ describe('RetireAction Integration Tests', function () {
         test('can retire released wrestler', function () {
             // Arrange
             $wrestler = Wrestler::factory()->released()->create();
-            $this->setupReleasedWrestlerMocks($wrestler);
+            setupReleasedWrestlerMocks($this, $wrestler);
 
             // Act
             resolve(RetireAction::class)->handle($wrestler);
@@ -200,8 +200,9 @@ describe('RetireAction Integration Tests', function () {
     });
 
     // Helper methods for mock setup
-    function setupBookableWrestlerMocks($wrestler, $datetime) {
-        $this->wrestlerRepository
+    function setupBookableWrestlerMocks($testContext, $wrestler, $datetime)
+    {
+        $testContext->wrestlerRepository
             ->shouldReceive('endEmployment')
             ->once()
             ->with(
@@ -210,11 +211,12 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->setupCommonRemovalMocks($wrestler, $datetime);
+        setupCommonRemovalMocks($testContext, $wrestler, $datetime);
     }
 
-    function setupSuspendedWrestlerMocks($wrestler, $datetime) {
-        $this->wrestlerRepository
+    function setupSuspendedWrestlerMocks($testContext, $wrestler, $datetime)
+    {
+        $testContext->wrestlerRepository
             ->shouldReceive('endEmployment')
             ->once()
             ->with(
@@ -223,7 +225,7 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('endSuspension')
             ->once()
             ->with(
@@ -232,11 +234,12 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->setupCommonRemovalMocks($wrestler, $datetime);
+        setupCommonRemovalMocks($testContext, $wrestler, $datetime);
     }
 
-    function setupInjuredWrestlerMocks($wrestler, $datetime) {
-        $this->wrestlerRepository
+    function setupInjuredWrestlerMocks($testContext, $wrestler, $datetime)
+    {
+        $testContext->wrestlerRepository
             ->shouldReceive('endEmployment')
             ->once()
             ->with(
@@ -245,7 +248,7 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('endInjury')
             ->once()
             ->with(
@@ -254,11 +257,12 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->setupCommonRemovalMocks($wrestler, $datetime);
+        setupCommonRemovalMocks($testContext, $wrestler, $datetime);
     }
 
-    function setupReleasedWrestlerMocks($wrestler) {
-        $this->wrestlerRepository
+    function setupReleasedWrestlerMocks($testContext, $wrestler)
+    {
+        $testContext->wrestlerRepository
             ->shouldReceive('removeFromCurrentTagTeam')
             ->once()
             ->with(
@@ -266,7 +270,7 @@ describe('RetireAction Integration Tests', function () {
                 Mockery::any()
             );
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('removeFromCurrentStable')
             ->once()
             ->with(
@@ -274,7 +278,7 @@ describe('RetireAction Integration Tests', function () {
                 Mockery::any()
             );
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('removeFromCurrentManagers')
             ->once()
             ->with(
@@ -282,7 +286,7 @@ describe('RetireAction Integration Tests', function () {
                 Mockery::any()
             );
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('createRetirement')
             ->once()
             ->with(
@@ -291,8 +295,9 @@ describe('RetireAction Integration Tests', function () {
             );
     }
 
-    function setupCommonRemovalMocks($wrestler, $datetime) {
-        $this->wrestlerRepository
+    function setupCommonRemovalMocks($testContext, $wrestler, $datetime)
+    {
+        $testContext->wrestlerRepository
             ->shouldReceive('removeFromCurrentManagers')
             ->once()
             ->with(
@@ -301,7 +306,7 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('removeFromCurrentTagTeam')
             ->once()
             ->with(
@@ -310,7 +315,7 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('removeFromCurrentStable')
             ->once()
             ->with(
@@ -319,7 +324,7 @@ describe('RetireAction Integration Tests', function () {
             )
             ->andReturn($wrestler);
 
-        $this->wrestlerRepository
+        $testContext->wrestlerRepository
             ->shouldReceive('createRetirement')
             ->once()
             ->with(

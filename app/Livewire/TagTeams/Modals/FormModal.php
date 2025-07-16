@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Modals;
 
 use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\TagTeams\Forms\Form;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use Illuminate\Support\Str;
 
 /**
@@ -42,11 +42,11 @@ class FormModal extends BaseFormModal
         [$wrestlerA, $wrestlerB] = Wrestler::factory()->count(2)->create();
 
         return [
-            'name' => fn() => Str::of(fake()->sentence(2))->title()->value(),
-            'signature_move' => fn() => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
-            'start_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
-            'wrestlerA' => fn() => $wrestlerA->id,
-            'wrestlerB' => fn() => $wrestlerB->id,
+            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
+            'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
+            'start_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'wrestlerA' => fn () => $wrestlerA->id,
+            'wrestlerB' => fn () => $wrestlerB->id,
         ];
     }
 

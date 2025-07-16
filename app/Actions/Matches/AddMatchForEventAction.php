@@ -140,24 +140,24 @@ class AddMatchForEventAction extends BaseEventMatchAction
 
     /**
      * Transform competitors from type-grouped to side-grouped structure.
-     * 
-     * @param Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>> $competitors
+     *
+     * @param  Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>>  $competitors
      * @return Collection<int, array<string, array<int, Wrestler|TagTeam>>>
      */
     private function transformCompetitorsStructure(Collection $competitors): Collection
     {
         // For now, assume single side (side 1) for all competitors
-        // This is a simplified transformation - a more complex implementation 
+        // This is a simplified transformation - a more complex implementation
         // would need to handle side assignment based on match type and strategy
-        
+
         /** @var array<int, array<string, array<int, Wrestler|TagTeam>>> $transformedData */
         $transformedData = [
             1 => [
                 'wrestlers' => $competitors->get('wrestlers', []),
                 'tag_teams' => $competitors->get('tag_teams', []),
-            ]
+            ],
         ];
-        
+
         return collect($transformedData);
     }
 

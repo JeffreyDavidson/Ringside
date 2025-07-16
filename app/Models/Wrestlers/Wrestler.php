@@ -38,7 +38,7 @@ use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\EventMatchCompetitor;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableMember;
+use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
@@ -47,6 +47,7 @@ use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -57,7 +58,7 @@ use Tests\Unit\Models\Wrestlers\WrestlerTest;
 /**
  * @implements Bookable<EventMatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
- * @implements CanBeAStableMember<StableMember, static>
+ * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>
  * @implements Employable<WrestlerEmployment, static>
  * @implements Injurable<WrestlerInjury, static>
@@ -150,7 +151,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableMember, static> */
+    /** @use CanJoinStables<StableWrestler, static> */
     use CanJoinStables;
 
     /** @use CanJoinTagTeams<TagTeamWrestler, static> */
@@ -161,7 +162,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
 
     use HasEnumStatus;
     use HasFactory;
-
     use IsBookableCompetitor;
 
     /** @use IsEmployable<WrestlerEmployment, static> */
@@ -182,9 +182,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use ValidatesInjury;
     use ValidatesRestoration;
     use ValidatesRetirement;
-    use ValidatesSuspension {
-        ValidatesSuspension::isUnemployed insteadof ValidatesInjury;
-    }
+    use ValidatesSuspension;
 
     /**
      * The attributes that are mass assignable.
@@ -197,7 +195,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
         'weight',
         'hometown',
         'signature_move',
-        'status',
     ];
 
     /**
@@ -206,8 +203,46 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => EmploymentStatus::Unemployed->value,
+        // Status is now computed from employment relationships
     ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the employment status based on the wrestler's current relationships:
+     * - Retired: Has active retirement record
+     * - Employed: Has active employment (started <= now)
+     * - FutureEmployment: Has employment starting in future
+     * - Released: Has previous employment but no current employment
+     * - Unemployed: No employment history
+     *
+     * @return Attribute<EmploymentStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): EmploymentStatus {
+                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
+                if ($this->isRetired()) {
+                    return EmploymentStatus::Retired;
+                }
+
+                if ($this->currentEmployment) {
+                    return EmploymentStatus::Employed;
+                }
+
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
+                }
+
+                if ($this->previousEmployments()->exists()) {
+                    return EmploymentStatus::Released;
+                }
+
+                return EmploymentStatus::Unemployed;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.

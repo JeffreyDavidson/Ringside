@@ -17,7 +17,12 @@
       "Bash(git branch:*)",
       "Bash(timeout:*)",
       "Bash(grep:*)",
-      "Bash(git merge:*)"
+      "Bash(vendor/bin/pest:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git rm:*)",
+      "Bash(ls:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

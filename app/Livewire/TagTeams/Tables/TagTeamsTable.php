@@ -64,7 +64,7 @@ class TagTeamsTable extends BaseTableWithActions
             Column::make(__('tag-teams.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (TagTeam $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
@@ -88,8 +88,8 @@ class TagTeamsTable extends BaseTableWithActions
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function ($builder, string $value) {
-                    /** @var WrestlerBuilder $builder */
+                ->filter(function (TagTeamBuilder $builder, string $value) {
+                    /** @var TagTeamBuilder $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
                         'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),

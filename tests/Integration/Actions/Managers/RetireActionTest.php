@@ -247,8 +247,8 @@ test('it throws exception for retiring a non retirable manager', function ($fact
 ]);
 
 test('manager retirement status checks work correctly', function () {
-    $employedManager = Manager::factory()->employed()->make();
-    $retiredManager = Manager::factory()->unemployed()->make(); // Use unemployed as a stand-in for not retirable
+    $employedManager = Manager::factory()->employed()->create();
+    $retiredManager = Manager::factory()->unemployed()->create(); // Use unemployed as a stand-in for not retirable
 
     expect($employedManager->canBeRetired())->toBeTrue();
     expect($retiredManager->canBeRetired())->toBeFalse();

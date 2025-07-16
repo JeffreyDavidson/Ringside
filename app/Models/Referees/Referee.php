@@ -26,6 +26,7 @@ use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -95,8 +96,6 @@ use Illuminate\Support\Carbon;
 class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
     use HasFactory;
-    use OfficiatesMatches;
-
     /** @use IsEmployable<RefereeEmployment, static> */
     use IsEmployable;
 
@@ -109,14 +108,14 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     /** @use IsSuspendable<RefereeSuspension, static> */
     use IsSuspendable;
 
+    use OfficiatesMatches;
+
     use ProvidesDisplayName;
     use SoftDeletes;
     use ValidatesEmployment;
     use ValidatesInjury;
     use ValidatesRetirement;
-    use ValidatesSuspension {
-        ValidatesSuspension::isUnemployed insteadof ValidatesInjury;
-    }
+    use ValidatesSuspension;
 
     /**
      * The attributes that are mass assignable.
@@ -126,7 +125,6 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     protected $fillable = [
         'first_name',
         'last_name',
-        'status',
     ];
 
     /**
@@ -135,8 +133,46 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => EmploymentStatus::Unemployed->value,
+        // Status is now computed from employment relationships
     ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the employment status based on the referee's current relationships:
+     * - Retired: Has active retirement record
+     * - Employed: Has active employment (started <= now)
+     * - FutureEmployment: Has employment starting in future
+     * - Released: Has previous employment but no current employment
+     * - Unemployed: No employment history
+     *
+     * @return Attribute<EmploymentStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): EmploymentStatus {
+                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
+                if ($this->isRetired()) {
+                    return EmploymentStatus::Retired;
+                }
+
+                if ($this->currentEmployment) {
+                    return EmploymentStatus::Employed;
+                }
+
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
+                }
+
+                if ($this->previousEmployments()->exists()) {
+                    return EmploymentStatus::Released;
+                }
+
+                return EmploymentStatus::Unemployed;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.

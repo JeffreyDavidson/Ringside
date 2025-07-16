@@ -8,9 +8,12 @@ use Ankurk91\Eloquent\HasBelongsToOne;
 use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use InvalidArgumentException;
 
 /**
  * Provides relationship accessors and utilities for models that can belong to one or more stables.
@@ -58,10 +61,11 @@ trait CanJoinStables
     protected function getStablePivotTable(): string
     {
         $morphClass = $this->getMorphClass();
+
         return match ($morphClass) {
             'wrestler', 'App\Models\Wrestlers\Wrestler' => 'stables_wrestlers',
             'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'stables_tag_teams',
-            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
     }
 
@@ -88,9 +92,15 @@ trait CanJoinStables
         $foreignKey = match ($morphClass) {
             'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
             'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
-            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
-        
+
+        $pivotClass = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+
         /** @var BelongsToMany<Stable, static> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
@@ -98,6 +108,7 @@ trait CanJoinStables
             $foreignKey,
             'stable_id'
         )
+            ->using($pivotClass)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
 
@@ -130,15 +141,22 @@ trait CanJoinStables
         $foreignKey = match ($morphClass) {
             'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
             'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
-            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
-        
+
+        $pivotClass = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+
         return $this->belongsToOne(
             Stable::class,
             $table,
             $foreignKey,
             'stable_id'
         )
+            ->using($pivotClass)
             ->wherePivotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
@@ -167,9 +185,15 @@ trait CanJoinStables
         $foreignKey = match ($morphClass) {
             'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
             'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
-            default => throw new \InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
-        
+
+        $pivotClass = match ($morphClass) {
+            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
+            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            default => throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
+        };
+
         /** @var BelongsToMany<Stable, static> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
@@ -177,6 +201,7 @@ trait CanJoinStables
             $foreignKey,
             'stable_id'
         )
+            ->using($pivotClass)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
             ->wherePivotNotNull('left_at');
@@ -214,5 +239,4 @@ trait CanJoinStables
         /** @phpstan-ignore-next-line */
         return method_exists($currentStable, 'isNot') && $currentStable->isNot($stable);
     }
-
 }

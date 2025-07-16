@@ -175,6 +175,7 @@ trait CanJoinTagTeams
         return $this->belongsToOne(TagTeam::class, $this->getTagTeamPivotTable())
             ->wherePivotNull('left_at')
             ->withPivot(['joined_at', 'left_at'])
+            ->using($this->resolveTagTeamPivotModel())
             ->withTimestamps();
     }
 

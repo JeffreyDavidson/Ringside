@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -38,7 +40,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 trait HasMembers
 {
-
     // ==================== WRESTLER RELATIONSHIPS ====================
 
     /**
@@ -58,6 +59,7 @@ trait HasMembers
     {
         /** @var BelongsToMany<Wrestler, static> $relation */
         $relation = $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
+            ->using(StableWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
 
@@ -86,6 +88,7 @@ trait HasMembers
     {
         /** @var BelongsToMany<Wrestler, static> $relation */
         $relation = $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
+            ->using(StableWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
             ->wherePivotNull('left_at');
@@ -112,6 +115,7 @@ trait HasMembers
     {
         /** @var BelongsToMany<Wrestler, static> $relation */
         $relation = $this->belongsToMany(Wrestler::class, 'stables_wrestlers')
+            ->using(StableWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
             ->wherePivotNotNull('left_at');
@@ -138,6 +142,7 @@ trait HasMembers
     {
         /** @var BelongsToMany<TagTeam, static> $relation */
         $relation = $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
+            ->using(StableTagTeam::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
 
@@ -166,6 +171,7 @@ trait HasMembers
     {
         /** @var BelongsToMany<TagTeam, static> $relation */
         $relation = $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
+            ->using(StableTagTeam::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
             ->wherePivotNull('left_at');
@@ -192,11 +198,11 @@ trait HasMembers
     {
         /** @var BelongsToMany<TagTeam, static> $relation */
         $relation = $this->belongsToMany(TagTeam::class, 'stables_tag_teams')
+            ->using(StableTagTeam::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps()
             ->wherePivotNotNull('left_at');
 
         return $relation;
     }
-
 }

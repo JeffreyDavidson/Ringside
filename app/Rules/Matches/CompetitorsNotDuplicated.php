@@ -13,7 +13,7 @@ class CompetitorsNotDuplicated implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Handle non-array values gracefully
-        if (!is_array($value) || empty($value)) {
+        if (! is_array($value) || empty($value)) {
             return;
         }
 

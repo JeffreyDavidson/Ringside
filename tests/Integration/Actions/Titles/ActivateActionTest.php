@@ -145,11 +145,11 @@ test('it throws exception for activating a non activatable title', function ($fa
         $this->titleRepository
             ->shouldReceive('createDebut')
             ->once()
-            ->andThrow(new CannotBeDebutedException());
+            ->andThrow(new CannotBeActivatedException());
     }
 
     resolve(ActivateAction::class)->handle($title);
-})->throws(CannotBeDebutedException::class)->with([
+})->throws(CannotBeActivatedException::class)->with([
     'active',
     'withFutureActivation',
 ]);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
-use App\Builders\Roster\StableBuilder;
 use App\Builders\Concerns\HasStatusScopes;
+use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
@@ -21,6 +21,7 @@ use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Stables\StableFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -138,8 +139,58 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
      */
     protected $fillable = [
         'name',
-        'status',
     ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        // Status is now computed from activity periods and retirement state
+    ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the stable status based on activity periods and retirement state:
+     * - Retired: Has active retirement record
+     * - Active: Has current activity period
+     * - PendingEstablishment: Has future activity period
+     * - Inactive: Has previous activity periods but no current activity
+     * - Unformed: No activity periods at all
+     *
+     * @return Attribute<StableStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): StableStatus {
+                // Check for retirement first
+                if ($this->isRetired()) {
+                    return StableStatus::Retired;
+                }
+
+                // Check for current activity
+                if ($this->isCurrentlyActive()) {
+                    return StableStatus::Active;
+                }
+
+                // Check for future activity
+                if ($this->hasFutureActivity()) {
+                    return StableStatus::PendingEstablishment;
+                }
+
+                // Check for previous activity periods
+                if ($this->hasActivityPeriods()) {
+                    return StableStatus::Inactive;
+                }
+
+                // No activity periods at all
+                return StableStatus::Unformed;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -152,13 +203,4 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
             'status' => StableStatus::class,
         ];
     }
-
-    /**
-     * The model's default values for attributes.
-     *
-     * @var array<string, string>
-     */
-    protected $attributes = [
-        'status' => StableStatus::Unformed->value,
-    ];
 }

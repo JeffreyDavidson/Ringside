@@ -74,7 +74,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     public static function invalidSideDistribution(array $sides, string $matchType): static
     {
         $sideCount = count($sides);
-        $distribution = implode(', ', array_map(fn ($side, $count) => "Side {$side}: {$count}", array_keys($sides), $sides));
+        $distribution = implode(', ', array_map(fn (int $side, int $count) => "Side {$side}: {$count}", array_keys($sides), $sides));
 
         return new self(
             "Invalid side distribution for {$matchType}. {$sideCount} sides with distribution [{$distribution}]. Check match type requirements for proper competitor allocation."

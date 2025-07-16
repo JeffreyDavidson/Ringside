@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for WrestlersTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the WrestlersTableSeeder correctly populates
  * the database with wrestler records for development and testing purposes.
  *
- * @see \Database\Seeders\WrestlersTableSeeder
+ * @see Database\Seeders\WrestlersTableSeeder
  */
 describe('WrestlersTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'WrestlersTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'WrestlersTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -53,8 +51,8 @@ describe('WrestlersTableSeeder Integration Tests', function () {
                 expect($wrestler->name)->not->toBeEmpty();
                 expect($wrestler->hometown)->toBeString();
                 expect($wrestler->hometown)->not->toBeEmpty();
-                expect($wrestler->height_feet)->toBeInt();
-                expect($wrestler->height_inches)->toBeInt();
+                expect($wrestler->height->feet)->toBeInt();
+                expect($wrestler->height->inches)->toBeInt();
                 expect($wrestler->weight)->toBeInt();
             }
         });
@@ -65,8 +63,8 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($wrestlers as $wrestler) {
-                expect($wrestler->height_feet)->toBeBetween(4, 8);
-                expect($wrestler->height_inches)->toBeBetween(0, 11);
+                expect($wrestler->height->feet)->toBeBetween(4, 8);
+                expect($wrestler->height->inches)->toBeBetween(0, 11);
                 expect($wrestler->weight)->toBeBetween(100, 500);
             }
         });
@@ -101,7 +99,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($wrestlers as $wrestler) {
-                expect($wrestler->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($wrestler->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 

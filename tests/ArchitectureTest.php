@@ -146,6 +146,6 @@ arch('do not access session/auth/request in async jobs')
         'Illuminate\\Support\\Facades\\Auth',
         'Illuminate\\Support\\Facades\\Session',
         'Illuminate\\Http\\Request',
-        'Illuminate\\Support\\Facades\\Request'
+        'Illuminate\\Support\\Facades\\Request',
     ])
     ->each->not->toBeUsedIn('App\\Jobs');

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Enums\Shared\RosterMemberType;
 use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Exceptions\Status\CannotBeSuspendedException;
@@ -115,7 +114,7 @@ trait ValidatesSuspension
     {
         $type = RosterMemberType::fromModel($this);
 
-        return $this->isEmployed()
+        return ! $this->isNotInEmployment()
             && ! $this->isReleased()
             && ! $this->hasFutureEmployment()
             && (! $type->canBeInjured() || ! ($this instanceof Injurable) || ! $this->isInjured())
@@ -140,16 +139,12 @@ trait ValidatesSuspension
      */
     public function ensureCanBeReinstated(): void
     {
-        if ($this instanceof Suspendable && !$this->isSuspended()) {
+        if ($this instanceof Suspendable && ! $this->isSuspended()) {
             throw CannotBeReinstatedException::available();
         }
 
-        if (!$this->isEmployed()) {
+        if ($this->isNotInEmployment()) {
             throw CannotBeReinstatedException::unemployed();
-        }
-
-        if ($this->isReleased()) {
-            throw CannotBeReinstatedException::released();
         }
 
         if ($this->hasFutureEmployment()) {
@@ -183,5 +178,4 @@ trait ValidatesSuspension
     {
         return RosterMemberType::getValidationStrategy($this, 'suspension');
     }
-
 }

@@ -69,7 +69,7 @@ class RefereesTable extends BaseTableWithActions
             Column::make(__('referees.name'), 'full_name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Referee $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
@@ -93,7 +93,7 @@ class RefereesTable extends BaseTableWithActions
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function ($builder, string $value) {
+                ->filter(function (RefereeBuilder $builder, string $value) {
                     /** @var RefereeBuilder $builder */
                     match ($value) {
                         'employed' => $builder->employed(),

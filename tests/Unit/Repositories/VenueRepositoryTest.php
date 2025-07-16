@@ -36,7 +36,7 @@ describe('VenueRepository Unit Tests', function () {
 
         test('repository has all expected methods', function () {
             $methods = [
-                'create', 'update', 'delete', 'restore'
+                'create', 'update', 'delete', 'restore',
             ];
 
             foreach ($methods as $method) {
@@ -274,7 +274,7 @@ describe('VenueRepository Unit Tests', function () {
             expect($updatedVenue)
                 ->id->toBe($originalId)
                 ->created_at->eq($originalCreatedAt);
-            
+
             // Verify updated_at timestamp
             expect($updatedVenue->updated_at)->not->toBeNull();
             expect($updatedVenue->updated_at->greaterThanOrEqualTo($originalCreatedAt))->toBeTrue();

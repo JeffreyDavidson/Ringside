@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Models\Matches\MatchType;
+use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
-use Illuminate\Support\Facades\Artisan;
 
 /**
  * Integration tests for MatchTypesTableSeeder data seeding and validation.
@@ -21,13 +21,13 @@ use Illuminate\Support\Facades\Artisan;
  * the database with all required match types needed for the
  * wrestling application business logic.
  *
- * @see \Database\Seeders\MatchTypesTableSeeder
+ * @see Database\Seeders\MatchTypesTableSeeder
  */
 describe('MatchTypesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -56,16 +56,16 @@ describe('MatchTypesTableSeeder Integration Tests', function () {
         test('creates tag team match types', function () {
             // Assert
             assertDatabaseHas('match_types', ['name' => 'Tag Team', 'slug' => 'tag-team']);
-            assertDatabaseHas('match_types', ['name' => '6 Man Tag Team', 'slug' => '6-man']);
-            assertDatabaseHas('match_types', ['name' => '8 Man Tag Team', 'slug' => '8-man']);
-            assertDatabaseHas('match_types', ['name' => '10 Man Tag Team', 'slug' => '10-man']);
-            assertDatabaseHas('match_types', ['name' => 'Tornado Tag Team', 'slug' => 'tornado-tag']);
+            assertDatabaseHas('match_types', ['name' => '6 Man Tag Team', 'slug' => '6-man-tag-team']);
+            assertDatabaseHas('match_types', ['name' => '8 Man Tag Team', 'slug' => '8-man-tag-team']);
+            assertDatabaseHas('match_types', ['name' => '10 Man Tag Team', 'slug' => '10-man-tag-team']);
+            assertDatabaseHas('match_types', ['name' => 'Tornado Tag Team', 'slug' => 'tornado-tag-team']);
         });
 
         test('creates handicap match types', function () {
             // Assert
-            assertDatabaseHas('match_types', ['name' => 'Two On One Handicap', 'slug' => '2-1-handicap']);
-            assertDatabaseHas('match_types', ['name' => 'Three On Two Handicap', 'slug' => '3-2-handicap']);
+            assertDatabaseHas('match_types', ['name' => 'Two On One Handicap', 'slug' => 'two-on-one-handicap']);
+            assertDatabaseHas('match_types', ['name' => 'Three On Two Handicap', 'slug' => 'three-on-two-handicap']);
         });
 
         test('creates multi-person match types', function () {

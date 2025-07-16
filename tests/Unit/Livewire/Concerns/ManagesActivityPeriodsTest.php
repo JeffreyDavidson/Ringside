@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\ManagesActivityPeriods;
-use Illuminate\Database\QueryException;
 
 /**
  * Unit tests for ManagesActivityPeriods trait structure.
@@ -16,7 +15,7 @@ use Illuminate\Database\QueryException;
  * - Exception handling annotations
  *
  * @see ManagesActivityPeriods
- * @see \Tests\Integration\Livewire\Concerns\ManagesActivityPeriodsTest
+ * @see Tests\Integration\Livewire\Concerns\ManagesActivityPeriodsTest
  */
 describe('ManagesActivityPeriods Unit Tests', function () {
     describe('trait structure', function () {
@@ -33,7 +32,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('has comprehensive documentation', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $docComment = $reflection->getDocComment();
-            
+
             expect($docComment)->toContain('Trait for managing activity period operations');
             expect($docComment)->toContain('@requires HasActivityPeriods');
             expect($docComment)->toContain('@author');
@@ -45,9 +44,9 @@ describe('ManagesActivityPeriods Unit Tests', function () {
     describe('method signatures', function () {
         test('has handleActivityPeriodCreation method', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            
+
             expect($reflection->hasMethod('handleActivityPeriodCreation'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('handleActivityPeriodCreation');
             expect($method->isProtected())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('void');
@@ -60,7 +59,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $method = $reflection->getMethod('handleActivityPeriodCreation');
             $docComment = $method->getDocComment();
-            
+
             expect($docComment)->toContain('Handle activity period creation when creating a new model');
             expect($docComment)->toContain('@throws QueryException');
             expect($docComment)->toContain('@example');
@@ -84,7 +83,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('imports QueryException', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('use Illuminate\\Database\\QueryException;');
         });
     });
@@ -93,7 +92,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('handleActivityPeriodCreation contains expected logic', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for expected implementation details
             expect($source)->toContain('if (! empty($this->start_date))');
             expect($source)->toContain('$this->formModel->activityPeriods()->create([');
@@ -105,7 +104,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('expects start_date property', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for property references
             expect($source)->toContain('$this->start_date');
         });
@@ -113,7 +112,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('expects formModel property', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for formModel reference
             expect($source)->toContain('$this->formModel');
         });
@@ -124,9 +123,9 @@ describe('ManagesActivityPeriods Unit Tests', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $methods = array_filter(
                 $reflection->getMethods(),
-                fn($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
             );
-            
+
             expect($methods)->toHaveCount(1);
             expect($methods[0]->getName())->toBe('handleActivityPeriodCreation');
             expect($methods[0]->isProtected())->toBeTrue();
@@ -136,9 +135,9 @@ describe('ManagesActivityPeriods Unit Tests', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $publicMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
-                fn($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
             );
-            
+
             expect($publicMethods)->toHaveCount(0);
         });
 
@@ -146,9 +145,9 @@ describe('ManagesActivityPeriods Unit Tests', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $privateMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PRIVATE),
-                fn($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
             );
-            
+
             expect($privateMethods)->toHaveCount(0);
         });
     });
@@ -156,13 +155,13 @@ describe('ManagesActivityPeriods Unit Tests', function () {
     describe('trait simplicity', function () {
         test('is minimal focused trait', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            
+
             // Should have minimal methods (just the handler)
             $methods = array_filter(
                 $reflection->getMethods(),
-                fn($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
+                fn ($method) => $method->getDeclaringClass()->getName() === ManagesActivityPeriods::class
             );
-            
+
             expect($methods)->toHaveCount(1);
         });
 
@@ -170,9 +169,9 @@ describe('ManagesActivityPeriods Unit Tests', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $properties = array_filter(
                 $reflection->getProperties(),
-                fn($property) => $property->getDeclaringClass()->getName() === ManagesActivityPeriods::class
+                fn ($property) => $property->getDeclaringClass()->getName() === ManagesActivityPeriods::class
             );
-            
+
             expect($properties)->toHaveCount(0);
         });
     });
@@ -181,7 +180,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('uses conditional activity period creation', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for conditional creation pattern
             expect($source)->toContain('if (! empty($this->start_date))');
         });
@@ -189,7 +188,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('creates activity period with started_at field', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for correct field mapping
             expect($source)->toContain('\'started_at\' => $this->start_date');
         });
@@ -197,7 +196,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
         test('uses activityPeriods relationship', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for correct relationship usage
             expect($source)->toContain('$this->formModel->activityPeriods()');
         });
@@ -208,7 +207,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
             $method = $reflection->getMethod('handleActivityPeriodCreation');
             $docComment = $method->getDocComment();
-            
+
             expect($docComment)->toContain('@throws QueryException');
         });
     });

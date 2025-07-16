@@ -51,7 +51,7 @@ describe('TitleForm Integration Tests', function () {
             expect($rules['name'])->toContain('required');
             expect($rules['name'])->toContain('string');
             expect($rules['name'])->toContain('max:255');
-            
+
             // Should enforce title suffix
             $hasEndsWithRule = collect($rules['name'])->contains(function ($rule) {
                 return is_string($rule) && str_contains($rule, 'ends_with');
@@ -60,7 +60,7 @@ describe('TitleForm Integration Tests', function () {
 
             // Should have uniqueness constraint
             $hasUniqueRule = collect($rules['name'])->contains(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
             expect($hasUniqueRule)->toBeTrue();
         });
@@ -71,10 +71,10 @@ describe('TitleForm Integration Tests', function () {
             $rules = $reflection->invoke($this->form);
 
             expect($rules['type'])->toContain('required');
-            
+
             // Should validate against TitleType enum
             $hasEnumRule = collect($rules['type'])->contains(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Enum;
+                return $rule instanceof Illuminate\Validation\Rules\Enum;
             });
             expect($hasEnumRule)->toBeTrue();
         });
@@ -115,14 +115,14 @@ describe('TitleForm Integration Tests', function () {
         test('getModelData transforms title data correctly', function () {
             $reflection = new ReflectionMethod($this->form, 'getModelData');
             $reflection->setAccessible(true);
-            
+
             // Set championship test data
             $this->form->name = 'World Heavyweight Championship';
             $this->form->type = TitleType::SINGLES;
             $this->form->activation_date = '2024-01-01';
-            
+
             $data = $reflection->invoke($this->form);
-            
+
             expect($data)->toBeArray();
             expect($data)->toHaveKeys(['name', 'type', 'activation_date']);
             expect($data['name'])->toBe('World Heavyweight Championship');
@@ -152,7 +152,7 @@ describe('TitleForm Integration Tests', function () {
 
             // Should enforce TitleType enum (SINGLES, TAG_TEAM, etc.)
             $enumRule = collect($rules['type'])->first(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Enum;
+                return $rule instanceof Illuminate\Validation\Rules\Enum;
             });
 
             expect($enumRule)->not->toBeNull();
@@ -165,7 +165,7 @@ describe('TitleForm Integration Tests', function () {
 
             // Check that unique rule is configured for titles table
             $uniqueRule = collect($rules['name'])->first(function ($rule) {
-                return $rule instanceof \Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
 
             expect($uniqueRule)->not->toBeNull();
@@ -176,21 +176,21 @@ describe('TitleForm Integration Tests', function () {
         test('getModelActivityPeriods returns correct relationship', function () {
             $reflection = new ReflectionMethod($this->form, 'getModelActivityPeriods');
             $reflection->setAccessible(true);
-            
+
             // Mock a title model for testing
             $mockTitle = mock(Title::class);
             $this->form->formModel = $mockTitle;
-            
+
             $mockTitle->shouldReceive('activityPeriods')->once()->andReturn(collect());
-            
+
             $periods = $reflection->invoke($this->form);
-            expect($periods)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+            expect($periods)->toBeInstanceOf(Illuminate\Support\Collection::class);
         });
 
         test('getActivityPeriodsRelationshipName returns correct relationship name', function () {
             $reflection = new ReflectionMethod($this->form, 'getActivityPeriodsRelationshipName');
             $reflection->setAccessible(true);
-            
+
             $relationshipName = $reflection->invoke($this->form);
             expect($relationshipName)->toBe('activityPeriods');
         });

@@ -162,8 +162,8 @@ test('it throws an exception for releasing a non releasable manager', function (
 ]);
 
 test('manager release status checks work correctly', function () {
-    $employedManager = Manager::factory()->employed()->make();
-    $unemployedManager = Manager::factory()->unemployed()->make();
+    $employedManager = Manager::factory()->employed()->create();
+    $unemployedManager = Manager::factory()->unemployed()->create();
 
     expect($employedManager->canBeReleased())->toBeTrue();
     expect($unemployedManager->canBeReleased())->toBeFalse();

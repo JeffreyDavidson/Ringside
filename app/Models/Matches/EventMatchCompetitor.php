@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
 class EventMatchCompetitor extends MorphPivot
 {
     use HasFactory;
+
     /**
      * The table associated with the model.
      *

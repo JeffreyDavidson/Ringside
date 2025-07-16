@@ -29,12 +29,13 @@ use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\EventMatchCompetitor;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableMember;
+use App\Models\Stables\StableTagTeam;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,7 +45,7 @@ use Illuminate\Support\Carbon;
 /**
  * @implements Bookable<EventMatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
- * @implements CanBeAStableMember<StableMember, static>
+ * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
  * @implements HasTagTeamWrestlers<static, TagTeamWrestler>
  * @implements Manageable<TagTeamManager, static>
@@ -122,14 +123,13 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableMember, static> */
+    /** @use CanJoinStables<StableTagTeam, static> */
     use CanJoinStables;
 
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
 
     use HasFactory;
-
     use IsBookableCompetitor;
 
     /** @use IsEmployable<TagTeamEmployment, static> */
@@ -162,7 +162,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     protected $fillable = [
         'name',
         'signature_move',
-        'status',
     ];
 
     /**
@@ -171,8 +170,46 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
      * @var array<string, string>
      */
     protected $attributes = [
-        'status' => EmploymentStatus::Unemployed->value,
+        // Status is now computed from employment relationships
     ];
+
+    /**
+     * Get the computed status attribute.
+     *
+     * Computes the employment status based on the tag team's current relationships:
+     * - Retired: Has active retirement record
+     * - Employed: Has active employment (started <= now)
+     * - FutureEmployment: Has employment starting in future
+     * - Released: Has previous employment but no current employment
+     * - Unemployed: No employment history
+     *
+     * @return Attribute<EmploymentStatus, never>
+     */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: function (): EmploymentStatus {
+                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
+                if ($this->isRetired()) {
+                    return EmploymentStatus::Retired;
+                }
+
+                if ($this->currentEmployment) {
+                    return EmploymentStatus::Employed;
+                }
+
+                if ($this->futureEmployment) {
+                    return EmploymentStatus::FutureEmployment;
+                }
+
+                if ($this->previousEmployments()->exists()) {
+                    return EmploymentStatus::Released;
+                }
+
+                return EmploymentStatus::Unemployed;
+            }
+        );
+    }
 
     /**
      * Get the attributes that should be cast.
