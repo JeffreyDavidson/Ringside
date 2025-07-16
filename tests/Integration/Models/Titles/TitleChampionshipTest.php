@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Actions\Titles\RetireAction;
+use App\Actions\Wrestlers\InjureAction;
+use App\Actions\Wrestlers\ReleaseAction;
+use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
@@ -435,6 +439,149 @@ describe('TitleChampionship Model', function () {
             expect($championships)->toHaveCount(2);
             expect($championships->first()->champion)->toBeInstanceOf(Wrestler::class);
             expect($championships->last()->champion)->toBeInstanceOf(TagTeam::class);
+        });
+    });
+
+    describe('Championship Business Rules and Lifecycle', function () {
+        test('wrestler retirement while holding championship', function () {
+            // Create championship
+            $championship = TitleChampionship::factory()
+                ->for($this->title, 'title')
+                ->for($this->wrestler, 'champion')
+                ->create([
+                    'lost_at' => null,
+                ]);
+
+            // Verify wrestler is champion
+            expect($this->wrestler->fresh()->titleChampionships)->toHaveCount(1);
+            expect($this->title->fresh()->currentChampionship)->not->toBeNull();
+
+            // Retire wrestler
+            WrestlerRetireAction::run($this->wrestler, Carbon::now());
+
+            // Business rule: Champion retirement should vacate title
+            $refreshedWrestler = $this->wrestler->fresh();
+            $refreshedTitle = $this->title->fresh();
+
+            expect($refreshedWrestler->isRetired())->toBeTrue();
+
+            // Championship should be ended when wrestler retires
+            $championship->refresh();
+            expect($championship->lost_at)->not->toBeNull();
+
+            // Title should be vacant
+            expect($refreshedTitle->currentChampionship)->toBeNull();
+        });
+
+        test('wrestler injury while holding championship', function () {
+            // Create championship
+            TitleChampionship::factory()
+                ->for($this->title, 'title')
+                ->for($this->wrestler, 'champion')
+                ->create([
+                    'lost_at' => null,
+                ]);
+
+            // Injure wrestler
+            InjureAction::run($this->wrestler, Carbon::now());
+
+            $refreshedWrestler = $this->wrestler->fresh();
+
+            expect($refreshedWrestler->isInjured())->toBeTrue();
+            expect($refreshedWrestler->isBookable())->toBeFalse();
+
+            // Business rule: Injured champion may keep title or be stripped depending on promotion rules
+            // For this test, assume they keep the title but can't defend it
+            expect($refreshedWrestler->titleChampionships()->whereNull('lost_at'))->toHaveCount(1);
+        });
+
+        test('wrestler employment loss while holding championship', function () {
+            // Create championship
+            $championship = TitleChampionship::factory()
+                ->for($this->title, 'title')
+                ->for($this->wrestler, 'champion')
+                ->create([
+                    'lost_at' => null,
+                ]);
+
+            // Release wrestler from employment
+            ReleaseAction::run($this->wrestler, Carbon::now());
+
+            $refreshedWrestler = $this->wrestler->fresh();
+
+            expect($refreshedWrestler->isReleased())->toBeTrue();
+            expect($refreshedWrestler->isBookable())->toBeFalse();
+
+            // Business rule: Released wrestler should be stripped of championship
+            $championship->refresh();
+            expect($championship->lost_at)->not->toBeNull();
+        });
+
+        test('title retirement while championship is active', function () {
+            // Create championship
+            $championship = TitleChampionship::factory()
+                ->for($this->title, 'title')
+                ->for($this->wrestler, 'champion')
+                ->create([
+                    'lost_at' => null,
+                ]);
+
+            // Retire title
+            RetireAction::run($this->title, Carbon::now());
+
+            $refreshedTitle = $this->title->fresh();
+
+            expect($refreshedTitle->isRetired())->toBeTrue();
+
+            // Championship should end when title is retired
+            $championship->refresh();
+            expect($championship->lost_at)->not->toBeNull();
+
+            // Wrestler should no longer have current championships for this title
+            $refreshedWrestler = $this->wrestler->fresh();
+            expect($refreshedWrestler->titleChampionships()->where('title_id', $this->title->id)->whereNull('lost_at')->count())->toBe(0);
+        });
+
+        test('championship unification scenario', function () {
+            // Create two titles that will be unified
+            $title2 = Title::factory()->active()->create(['name' => 'Secondary Championship']);
+
+            $champion1 = $this->wrestler;
+            $champion2 = Wrestler::factory()->employed()->create(['name' => 'Champion 2']);
+
+            // Each holds one title
+            TitleChampionship::factory()
+                ->for($this->title, 'title')
+                ->for($champion1, 'champion')
+                ->create([
+                    'lost_at' => null,
+                ]);
+
+            TitleChampionship::factory()
+                ->for($title2, 'title')
+                ->for($champion2, 'champion')
+                ->create([
+                    'lost_at' => null,
+                ]);
+
+            // Champion 1 wins unification match, becomes champion of both titles
+            $unificationDate = Carbon::now();
+
+            // End champion2's reign
+            $title2->currentChampionship->update(['lost_at' => $unificationDate]);
+
+            // Champion1 wins the second title
+            TitleChampionship::factory()
+                ->for($title2, 'title')
+                ->for($champion1, 'champion')
+                ->create([
+                    'won_at' => $unificationDate,
+                    'lost_at' => null,
+                ]);
+
+            // Verify unification
+            expect($champion1->fresh()->titleChampionships()->whereNull('lost_at'))->toHaveCount(2);
+            expect($title2->fresh()->currentChampionship->champion->id)->toBe($champion1->id);
         });
     });
 });
