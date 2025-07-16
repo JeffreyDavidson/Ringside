@@ -584,4 +584,96 @@ describe('TitleChampionship Model', function () {
             expect($title2->fresh()->currentChampionship->champion->id)->toBe($champion1->id);
         });
     });
+
+    describe('Edge Cases and Data Integrity', function () {
+        test('handles wrestler with zero championships', function () {
+            $wrestler = Wrestler::factory()->employed()->create(['name' => 'Never Champion']);
+
+            // Verify proper handling of wrestler with no championships
+            expect($wrestler->titleChampionships)->toHaveCount(0);
+            expect($wrestler->titleChampionships()->whereNull('lost_at'))->toHaveCount(0);
+            expect($wrestler->titleChampionships()->count())->toBe(0);
+        });
+
+        test('handles title with no championship history', function () {
+            $title = Title::factory()->active()->create(['name' => 'Never Held Title']);
+
+            // Verify proper handling of title with no championships
+            expect($title->titleChampionships)->toHaveCount(0);
+            expect($title->currentChampionship)->toBeNull();
+            expect($title->titleChampionships()->count())->toBe(0);
+        });
+
+        test('handles championship reign ending in the past without replacement', function () {
+            $title = Title::factory()->active()->create(['name' => 'Vacant Title']);
+            $wrestler = Wrestler::factory()->employed()->create(['name' => 'Former Champion']);
+
+            // Create ended championship with no replacement
+            TitleChampionship::factory()
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
+                ->create([
+                    'won_at' => Carbon::now()->subDays(100),
+                    'lost_at' => Carbon::now()->subDays(30),
+                ]);
+
+            // Title should be vacant
+            expect($title->fresh()->currentChampionship)->toBeNull();
+
+            // Verify championship history exists
+            expect($title->titleChampionships)->toHaveCount(1);
+            expect($title->titleChampionships->first()->lost_at)->not->toBeNull();
+        });
+
+        test('handles championship on exact same timestamp', function () {
+            $title = Title::factory()->active()->create(['name' => 'Timestamp Test Title']);
+            $wrestler1 = Wrestler::factory()->employed()->create(['name' => 'Wrestler 1']);
+            $wrestler2 = Wrestler::factory()->employed()->create(['name' => 'Wrestler 2']);
+
+            $exactTime = Carbon::now();
+
+            // End first championship and start second at exact same time
+            $championship1 = TitleChampionship::factory()
+                ->for($title, 'title')
+                ->for($wrestler1, 'champion')
+                ->create([
+                    'won_at' => $exactTime->copy()->subDays(30),
+                    'lost_at' => $exactTime,
+                ]);
+
+            $championship2 = TitleChampionship::factory()
+                ->for($title, 'title')
+                ->for($wrestler2, 'champion')
+                ->create([
+                    'won_at' => $exactTime,
+                    'lost_at' => null,
+                ]);
+
+            // Verify proper handling of exact timestamps
+            expect($title->fresh()->currentChampionship->champion->id)->toBe($wrestler2->id);
+            expect($championship1->fresh()->lost_at->eq($championship2->fresh()->won_at))->toBeTrue();
+        });
+
+        test('handles extremely long championship reigns', function () {
+            $title = Title::factory()->active()->create(['name' => 'Long Reign Title']);
+            $wrestler = Wrestler::factory()->employed()->create(['name' => 'Long Reigning Champion']);
+
+            // Create 10-year championship reign
+            $championship = TitleChampionship::factory()
+                ->for($title, 'title')
+                ->for($wrestler, 'champion')
+                ->create([
+                    'won_at' => Carbon::now()->subYears(10),
+                    'lost_at' => null,
+                ]);
+
+            // Calculate reign length
+            $reignLength = Carbon::now()->diffInDays($championship->won_at);
+            expect($reignLength)->toBeGreaterThan(3650); // More than 10 years
+
+            // Verify current championship is still valid
+            expect($title->fresh()->currentChampionship)->not->toBeNull();
+            expect($title->currentChampionship->champion->id)->toBe($wrestler->id);
+        });
+    });
 });
