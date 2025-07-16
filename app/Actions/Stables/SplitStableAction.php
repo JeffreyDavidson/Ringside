@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -38,11 +39,14 @@ class SplitStableAction extends BaseStableAction
                 new StableData(
                     name: $newStableName,
                     start_date: null,
-                    tagTeams: collect(),
-                    wrestlers: collect(),
-                    managers: collect()
+                    tagTeams: new Collection(),
+                    wrestlers: new Collection(),
+                    managers: new Collection()
                 )
             );
+
+            // Create activity period to make the stable active
+            $this->stableRepository->createDebut($newStable, $date);
 
             // Transfer wrestlers
             if (isset($membersForNewStable['wrestlers'])) {
@@ -60,13 +64,8 @@ class SplitStableAction extends BaseStableAction
                 }
             }
 
-            // Transfer managers
-            if (isset($membersForNewStable['managers'])) {
-                foreach ($membersForNewStable['managers'] as $manager) {
-                    $this->stableRepository->removeManager($originalStable, $manager, $date);
-                    $this->stableRepository->addManager($newStable, $manager, $date);
-                }
-            }
+            // Note: Managers are not directly associated with stables
+            // They are managed through their wrestlers/tag teams
 
             return $newStable;
         });
