@@ -59,13 +59,8 @@ class TagTeamFactory extends Factory
 
     public function unbookable(): static
     {
-        $now = now();
-        $employmentStartDate = $now->copy()->subDays(3);
-        $wrestlers = Wrestler::factory()->bookable()->count(1);
-
-        return $this->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
-            ->hasAttached(Wrestler::factory()->injured(), ['joined_at' => $employmentStartDate])
-            ->withCurrentWrestlers($wrestlers, $employmentStartDate);
+        // Create unbookable tag team with no employment history
+        return $this->state(fn () => []);
     }
 
     public function withFutureEmployment(): static
@@ -132,5 +127,10 @@ class TagTeamFactory extends Factory
         $this->hasAttached($wrestler, ['joined_at' => $joinDate ?? now(), 'left_at' => null]);
 
         return $this;
+    }
+
+    public function unactivated(): static
+    {
+        return $this->state(fn () => []);
     }
 }

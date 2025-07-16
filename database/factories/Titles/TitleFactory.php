@@ -94,4 +94,19 @@ class TitleFactory extends Factory
     {
         return $this->state(fn () => ['type' => TitleType::TagTeam]);
     }
+
+    public function undebuted(): static
+    {
+        return $this->state(fn () => ['status' => TitleStatus::Undebuted]);
+    }
+
+    public function withFutureDebut(): static
+    {
+        return $this->withFutureActivation();
+    }
+
+    public function withCurrentChampion($champion): static
+    {
+        return $this->withChampion($champion);
+    }
 }
