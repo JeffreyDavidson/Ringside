@@ -143,7 +143,7 @@ class ActionPipeline
             'original' => $originalStable,
             'newName' => $newStableName,
             'members' => $membersForNewStable,
-            'rollback' => function ($result) {
+            'rollback' => function (array $result) {
                 // Rollback would delete the new stable and restore members to original
                 if (isset($result['newStable'])) {
                     $this->rollbackOperations[] = ['type' => 'delete_stable', 'stable' => $result['newStable']];

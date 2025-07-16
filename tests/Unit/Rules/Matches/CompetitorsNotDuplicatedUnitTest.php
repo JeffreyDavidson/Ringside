@@ -17,7 +17,7 @@ use App\Rules\Matches\CompetitorsNotDuplicated;
  * These tests verify the CompetitorsNotDuplicated rule logic independently
  * of models, database, or Laravel's validation framework.
  *
- * @see \App\Rules\Matches\CompetitorsNotDuplicated
+ * @see CompetitorsNotDuplicated
  */
 describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
     describe('wrestler duplication detection', function () {
@@ -28,7 +28,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [1, 2]],
                 ['wrestlers' => [3, 4]],
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -48,7 +48,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [1, 2]],
                 ['wrestlers' => [2, 3]], // Wrestler 2 appears twice
             ];
-            
+
             $failCalled = false;
             $failMessage = '';
             $failCallback = function (string $message) use (&$failCalled, &$failMessage) {
@@ -71,7 +71,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [1, 1, 2]], // Wrestler 1 appears twice in same side
                 ['wrestlers' => [3, 4]],
             ];
-            
+
             $failCalled = false;
             $failMessage = '';
             $failCallback = function (string $message) use (&$failCalled, &$failMessage) {
@@ -96,7 +96,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['tagteams' => [1, 2]],
                 ['tagteams' => [3, 4]],
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -116,7 +116,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['tagteams' => [1, 2]],
                 ['tagteams' => [2, 3]], // Tag team 2 appears twice
             ];
-            
+
             $failCalled = false;
             $failMessage = '';
             $failCallback = function (string $message) use (&$failCalled, &$failMessage) {
@@ -141,7 +141,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [1, 2], 'tagteams' => [1]],
                 ['wrestlers' => [3], 'tagteams' => [2, 3]],
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -162,7 +162,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [2], 'tagteams' => [2]],
             ];
             // Wrestler 1 and tag team 1 can coexist (different types)
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -181,7 +181,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -202,7 +202,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [3, 4]],
                 // No tagteams key
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -223,7 +223,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['tagteams' => [3, 4]],
                 // No wrestlers key
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -243,7 +243,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [], 'tagteams' => []],
                 ['wrestlers' => [], 'tagteams' => []],
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -261,7 +261,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
         test('handles null value gracefully', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -277,7 +277,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
         test('handles string value gracefully', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -293,7 +293,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
         test('handles integer value gracefully', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -315,7 +315,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [[1, 2], [3]]],  // Nested arrays
                 ['wrestlers' => [4]],
             ];
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -335,7 +335,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
                 ['wrestlers' => [[1, 2], [3]]],  // Nested arrays: [1, 2, 3]
                 ['wrestlers' => [2]],            // Duplicate of 2
             ];
-            
+
             $failCalled = false;
             $failMessage = '';
             $failCallback = function (string $message) use (&$failCalled, &$failMessage) {

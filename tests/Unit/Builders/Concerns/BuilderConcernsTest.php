@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Roster\WrestlerBuilder;
 use App\Builders\Roster\TagTeamBuilder;
+use App\Builders\Roster\WrestlerBuilder;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Unit tests for Builder Concerns/Traits.
@@ -25,20 +24,20 @@ use Illuminate\Database\Eloquent\Model;
  * shared functionality across different builder implementations.
  * Tests focus on trait functionality rather than business logic outcomes.
  *
- * @see \App\Builders\Concerns\HasAvailabilityScopes
- * @see \App\Builders\Concerns\HasRetirementScopes
+ * @see HasAvailabilityScopes
+ * @see HasRetirementScopes
  */
 describe('Builder Concerns Unit Tests', function () {
     describe('HasAvailabilityScopes trait functionality', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
             // SingleRosterMemberBuilder uses the trait, and other builders inherit from it
-            expect(\App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasAvailabilityScopes::class);
-            expect(\App\Builders\TagTeamBuilder::class)->usesTrait(HasAvailabilityScopes::class);
-            
+            expect(App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasAvailabilityScopes::class);
+            expect(App\Builders\TagTeamBuilder::class)->usesTrait(HasAvailabilityScopes::class);
+
             // Verify that methods are available on concrete builders
             $builder = Wrestler::query();
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
             expect($reflection->hasMethod('whereNotRetired'))->toBeTrue();
             expect($reflection->hasMethod('whereEmployed'))->toBeTrue();
         });
@@ -48,7 +47,7 @@ describe('Builder Concerns Unit Tests', function () {
             $builder = Wrestler::query();
 
             // Act - Access protected method via reflection for unit testing
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
             $method = $reflection->getMethod('whereNotRetired');
             $method->setAccessible(true);
             $method->invoke($builder);
@@ -65,7 +64,7 @@ describe('Builder Concerns Unit Tests', function () {
             $builder = Wrestler::query();
 
             // Act - Access protected method via reflection
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
             $method = $reflection->getMethod('whereNotSuspended');
             $method->setAccessible(true);
             $method->invoke($builder);
@@ -82,7 +81,7 @@ describe('Builder Concerns Unit Tests', function () {
             $builder = Wrestler::query();
 
             // Act - Access protected method via reflection
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
             $method = $reflection->getMethod('whereNotInjured');
             $method->setAccessible(true);
             $method->invoke($builder);
@@ -99,7 +98,7 @@ describe('Builder Concerns Unit Tests', function () {
             $builder = Wrestler::query();
 
             // Act - Access protected method via reflection
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
             $method = $reflection->getMethod('whereEmployed');
             $method->setAccessible(true);
             $method->invoke($builder);
@@ -107,7 +106,7 @@ describe('Builder Concerns Unit Tests', function () {
             // Assert
             $sql = $builder->toSql();
             $bindings = $builder->getBindings();
-            
+
             expect($sql)->toContain('where exists');
             expect($sql)->toContain('wrestlers_employments');
             expect($sql)->toContain('started_at" <= ?');
@@ -120,7 +119,7 @@ describe('Builder Concerns Unit Tests', function () {
             $builder = Wrestler::query();
 
             // Act - Access protected method via reflection
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
             $method = $reflection->getMethod('whereBasicUnavailabilityConditions');
             $method->setAccessible(true);
             $method->invoke($builder);
@@ -138,16 +137,16 @@ describe('Builder Concerns Unit Tests', function () {
         test('trait methods return builder instance for method chaining', function () {
             // Arrange
             $builder = Wrestler::query();
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
 
             // Act & Assert - Test each protected method returns static
             $methods = ['whereNotRetired', 'whereNotSuspended', 'whereNotInjured', 'whereEmployed', 'whereBasicUnavailabilityConditions'];
-            
+
             foreach ($methods as $methodName) {
                 $method = $reflection->getMethod($methodName);
                 $method->setAccessible(true);
                 $result = $method->invoke($builder);
-                
+
                 expect($result)->toBeInstanceOf(WrestlerBuilder::class);
             }
         });
@@ -158,12 +157,12 @@ describe('Builder Concerns Unit Tests', function () {
             $wrestlerBuilder = Wrestler::query();
 
             // Act - Apply whereNotRetired to both builders
-            $reflection1 = new \ReflectionClass($tagTeamBuilder);
+            $reflection1 = new ReflectionClass($tagTeamBuilder);
             $method1 = $reflection1->getMethod('whereNotRetired');
             $method1->setAccessible(true);
             $method1->invoke($tagTeamBuilder);
 
-            $reflection2 = new \ReflectionClass($wrestlerBuilder);
+            $reflection2 = new ReflectionClass($wrestlerBuilder);
             $method2 = $reflection2->getMethod('whereNotRetired');
             $method2->setAccessible(true);
             $method2->invoke($wrestlerBuilder);
@@ -182,10 +181,10 @@ describe('Builder Concerns Unit Tests', function () {
     describe('HasRetirementScopes trait functionality', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
-            expect(\App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasRetirementScopes::class);
-            expect(\App\Builders\TagTeamBuilder::class)->usesTrait(HasRetirementScopes::class);
-            expect(\App\Builders\Titles\TitleBuilder::class)->usesTrait(HasRetirementScopes::class);
-            
+            expect(App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(App\Builders\TagTeamBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(App\Builders\Titles\TitleBuilder::class)->usesTrait(HasRetirementScopes::class);
+
             // Verify that methods are available on concrete builders
             $builder = Wrestler::query();
             expect(method_exists($builder, 'retired'))->toBeTrue();
@@ -230,10 +229,10 @@ describe('Builder Concerns Unit Tests', function () {
             foreach ($builders as $builderData) {
                 $builder = $builderData['builder'];
                 $expectedTable = $builderData['table'];
-                
+
                 $retiredBuilder = $builder->retired();
                 $sql = $retiredBuilder->toSql();
-                
+
                 expect($sql)->toContain('where exists');
                 expect($sql)->toContain($expectedTable);
                 expect($sql)->toContain('ended_at" is null');
@@ -252,7 +251,7 @@ describe('Builder Concerns Unit Tests', function () {
 
             // Assert
             expect($chainedBuilder)->toBeInstanceOf(WrestlerBuilder::class);
-            
+
             $sql = $chainedBuilder->toSql();
             expect($sql)->toContain('where exists');
             expect($sql)->toContain('wrestlers_retirements');
@@ -273,14 +272,14 @@ describe('Builder Concerns Unit Tests', function () {
             foreach ($builders as $builder) {
                 // Test HasRetirementScopes trait methods
                 expect(method_exists($builder, 'retired'))->toBeTrue();
-                
+
                 // Test HasAvailabilityScopes trait protected methods
-                $reflection = new \ReflectionClass($builder);
+                $reflection = new ReflectionClass($builder);
                 expect($reflection->hasMethod('whereNotRetired'))->toBeTrue();
                 expect($reflection->hasMethod('whereNotSuspended'))->toBeTrue();
                 expect($reflection->hasMethod('whereEmployed'))->toBeTrue();
                 expect($reflection->hasMethod('whereBasicUnavailabilityConditions'))->toBeTrue();
-                
+
                 $method = $reflection->getMethod('whereNotRetired');
                 expect($method->isProtected())->toBeTrue();
             }
@@ -289,15 +288,15 @@ describe('Builder Concerns Unit Tests', function () {
         test('trait methods maintain proper visibility levels', function () {
             // Arrange
             $builder = Wrestler::query();
-            $reflection = new \ReflectionClass($builder);
+            $reflection = new ReflectionClass($builder);
 
             // Act & Assert - Test protected method visibility
             $protectedMethods = [
                 'whereNotRetired',
-                'whereNotSuspended', 
+                'whereNotSuspended',
                 'whereNotInjured',
                 'whereEmployed',
-                'whereBasicUnavailabilityConditions'
+                'whereBasicUnavailabilityConditions',
             ];
 
             foreach ($protectedMethods as $methodName) {
@@ -320,10 +319,10 @@ describe('Builder Concerns Unit Tests', function () {
 
             // Act
             $retiredBuilder = $builder->retired();
-            
+
             // Assert - Test that generated SQL uses standard patterns
             $sql = $retiredBuilder->toSql();
-            
+
             // Should use standard SQL patterns that work across databases
             expect($sql)->toContain('where exists');
             expect($sql)->toContain('is null');

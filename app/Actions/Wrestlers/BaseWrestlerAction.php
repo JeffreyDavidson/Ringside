@@ -38,8 +38,8 @@ abstract class BaseWrestlerAction
     protected function employCurrentManagers(Wrestler $wrestler, Carbon $employmentDate, ManagersEmployAction $managersEmployAction): void
     {
         $wrestler->currentManagers
-            ->filter(fn ($manager) => ! $manager->isEmployed())
-            ->each(fn ($manager) => $managersEmployAction->handle($manager, $employmentDate));
+            ->filter(fn (\App\Models\Managers\Manager $manager) => ! $manager->isEmployed())
+            ->each(fn (\App\Models\Managers\Manager $manager) => $managersEmployAction->handle($manager, $employmentDate));
     }
 
     /**

@@ -128,7 +128,7 @@ class TitlesTable extends BaseTableWithActions
             Column::make(__('titles.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Title $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             // Column::make(__('titles.current_champion'), 'champion_name'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),

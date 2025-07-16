@@ -28,7 +28,7 @@ class EnhancedTestMakeCommand extends TestMakeCommand
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $name = $this->getNameInput();
 
@@ -52,14 +52,14 @@ class EnhancedTestMakeCommand extends TestMakeCommand
                         '--unit' => $this->option('unit'),
                         '--model' => $modelName,
                     ]);
-                    
-                    return $result === 0;
+
+                    return $result === 0 ? 0 : 1;
                 }
             }
         }
 
         // Fall back to Laravel's default behavior
-        return parent::handle();
+        return (int) parent::handle();
     }
 
     /**

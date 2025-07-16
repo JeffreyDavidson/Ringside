@@ -35,11 +35,12 @@ abstract class BaseModal extends ModalComponent
 
     protected string $titleField;
 
-    public function mount(mixed $modelId = null): void
+    public function mount(int|string|null $modelId = null): void
     {
         if (isset($modelId)) {
             try {
-                $this->model = $this->modelType::findOrFail($modelId);
+                $id = is_numeric($modelId) ? (int) $modelId : $modelId;
+                $this->model = $this->modelType::findOrFail($id);
                 $this->modelForm->setModel($this->model);
             } catch (Exception $e) {
                 Log::error($e->getMessage());

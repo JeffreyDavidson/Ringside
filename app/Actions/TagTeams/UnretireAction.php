@@ -67,9 +67,9 @@ class UnretireAction extends BaseTagTeamAction
 
             // Unretire current wrestlers and managers who were retired with the team
             $wrestlersToUnretire = $tagTeam->currentWrestlers
-                ->filter(fn ($wrestler) => $wrestler->isRetired());
+                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isRetired());
             $managersToUnretire = $tagTeam->currentManagers
-                ->filter(fn ($manager) => $manager->isRetired());
+                ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isRetired());
 
             $this->unretireMembers($wrestlersToUnretire, $managersToUnretire, $unretiredDate, $this->wrestlersUnretireAction, $this->managersUnretireAction);
 

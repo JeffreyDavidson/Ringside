@@ -3,22 +3,21 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
-use App\Models\Events\Venue;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
-use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
 /**
  * Test helper functions for common testing scenarios.
- * 
+ *
  * These functions provide convenient methods for creating test data,
  * setting up common test scenarios, and performing repetitive test operations.
  */
@@ -172,14 +171,14 @@ function createEventWithMatches(int $matchCount = 3): array
 {
     $event = createEvent();
     $matches = [];
-    
+
     for ($i = 0; $i < $matchCount; $i++) {
         $matches[] = createMatch([
             'event_id' => $event->id,
             'match_number' => $i + 1,
         ]);
     }
-    
+
     return [
         'event' => $event,
         'matches' => collect($matches),
@@ -193,13 +192,13 @@ function createTagTeamWithWrestlers(int $wrestlerCount = 2): array
 {
     $tagTeam = createTagTeam();
     $wrestlers = createWrestlers($wrestlerCount);
-    
+
     foreach ($wrestlers as $wrestler) {
         $tagTeam->wrestlers()->attach($wrestler->id, [
             'joined_at' => now(),
         ]);
     }
-    
+
     return [
         'tag_team' => $tagTeam,
         'wrestlers' => $wrestlers,
@@ -214,19 +213,19 @@ function createStableWithMembers(int $wrestlerCount = 3, int $tagTeamCount = 1):
     $stable = createStable();
     $wrestlers = createWrestlers($wrestlerCount);
     $tagTeams = TagTeam::factory()->count($tagTeamCount)->create();
-    
+
     foreach ($wrestlers as $wrestler) {
         $stable->wrestlers()->attach($wrestler->id, [
             'joined_at' => now(),
         ]);
     }
-    
+
     foreach ($tagTeams as $tagTeam) {
         $stable->tagTeams()->attach($tagTeam->id, [
             'joined_at' => now(),
         ]);
     }
-    
+
     return [
         'stable' => $stable,
         'wrestlers' => $wrestlers,
@@ -241,11 +240,11 @@ function createWrestlerWithManager(): array
 {
     $wrestler = createWrestler();
     $manager = createManager();
-    
+
     $wrestler->managers()->attach($manager->id, [
         'hired_at' => now(),
     ]);
-    
+
     return [
         'wrestler' => $wrestler,
         'manager' => $manager,
@@ -258,24 +257,24 @@ function createWrestlerWithManager(): array
 function createChampionshipScenario(string $championType = 'wrestler'): array
 {
     $title = createTitle();
-    
+
     $champion = match ($championType) {
         'wrestler' => createWrestler(),
         'tag_team' => createTagTeam(),
         default => throw new InvalidArgumentException("Invalid champion type: {$championType}"),
     };
-    
+
     // Create a basic event match for the championship
     $event = createEvent();
     $match = createMatch(['event_id' => $event->id]);
-    
+
     $championship = $title->championships()->create([
         'champion_id' => $champion->id,
         'champion_type' => $championType,
         'won_at' => now(),
         'won_event_match_id' => $match->id,
     ]);
-    
+
     return [
         'title' => $title,
         'champion' => $champion,
@@ -313,19 +312,19 @@ function createRetiredWrestler(array $attributes = []): Wrestler
 function createWrestlerWithEmploymentHistory(): Wrestler
 {
     $wrestler = createWrestler();
-    
+
     // Create past employment
     $wrestler->employments()->create([
         'started_at' => now()->subYears(2),
         'ended_at' => now()->subYear(),
     ]);
-    
+
     // Create current employment
     $wrestler->employments()->create([
         'started_at' => now()->subMonths(6),
         'ended_at' => null,
     ]);
-    
+
     return $wrestler;
 }
 
@@ -337,7 +336,7 @@ function seedBasicLookupData(): void
     if (MatchType::count() === 0) {
         Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']);
     }
-    
+
     if (MatchDecision::count() === 0) {
         Artisan::call('db:seed', ['--class' => 'MatchDecisionsTableSeeder']);
     }
@@ -346,7 +345,7 @@ function seedBasicLookupData(): void
 /**
  * Create a realistic wrestling date (not too far in past or future).
  */
-function wrestlingDate(string $period = 'recent'): \Carbon\Carbon
+function wrestlingDate(string $period = 'recent'): Carbon\Carbon
 {
     return match ($period) {
         'recent' => now()->subDays(rand(1, 30)),
@@ -369,7 +368,7 @@ function wrestlingTimePeriod(string $type = 'employment'): array
         'retirement' => now()->subYears(rand(1, 5)),
         default => now()->subMonths(rand(1, 12)),
     };
-    
+
     $end = match ($type) {
         'employment' => rand(0, 1) ? $start->copy()->addMonths(rand(1, 12)) : null,
         'injury' => rand(0, 1) ? $start->copy()->addWeeks(rand(1, 8)) : null,
@@ -377,7 +376,7 @@ function wrestlingTimePeriod(string $type = 'employment'): array
         'retirement' => rand(0, 1) ? $start->copy()->addYears(rand(1, 3)) : null,
         default => rand(0, 1) ? $start->copy()->addMonths(rand(1, 6)) : null,
     };
-    
+
     return [
         'started_at' => $start,
         'ended_at' => $end,

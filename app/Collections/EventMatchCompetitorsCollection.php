@@ -274,9 +274,9 @@ class EventMatchCompetitorsCollection extends Collection
     public function pluckCompetitorsBySide(): BaseCollection
     {
         return $this->groupBy('side_number')
-            ->map(function ($competitorsOnSide) {
+            ->map(function (BaseCollection $competitorsOnSide) {
                 return collect($competitorsOnSide)
-                    ->filter(fn (mixed $competitor) => $competitor instanceof EventMatchCompetitor)
+                    ->filter(fn (EventMatchCompetitor $competitor) => $competitor instanceof EventMatchCompetitor)
                     ->map(fn (EventMatchCompetitor $competitor) => $competitor->getCompetitor())
                     ->values(); // Reset keys to sequential integers
             });

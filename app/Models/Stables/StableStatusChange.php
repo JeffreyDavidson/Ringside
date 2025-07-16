@@ -34,6 +34,7 @@ use Illuminate\Support\Carbon;
 class StableStatusChange extends Model
 {
     use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *

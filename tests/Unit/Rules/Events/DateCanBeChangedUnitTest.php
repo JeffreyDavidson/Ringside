@@ -18,15 +18,15 @@ use App\Rules\Events\DateCanBeChanged;
  * These tests verify the DateCanBeChanged rule logic independently
  * of models, database, or Laravel's validation framework.
  *
- * @see \App\Rules\Events\DateCanBeChanged
+ * @see DateCanBeChanged
  */
 describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     describe('rule logic with event instances', function () {
         test('validation passes when event has future date', function () {
             // Arrange
-            $futureEvent = \Mockery::mock(Event::class);
+            $futureEvent = Mockery::mock(Event::class);
             $futureEvent->shouldReceive('hasPastDate')->andReturn(false);
-            
+
             $rule = new DateCanBeChanged($futureEvent);
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
@@ -42,9 +42,9 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
 
         test('validation fails when event has past date', function () {
             // Arrange
-            $pastEvent = \Mockery::mock(Event::class);
+            $pastEvent = Mockery::mock(Event::class);
             $pastEvent->shouldReceive('hasPastDate')->andReturn(true);
-            
+
             $rule = new DateCanBeChanged($pastEvent);
             $failCalled = false;
             $failMessage = '';
@@ -80,7 +80,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     describe('rule construction and data handling', function () {
         test('rule can be constructed with event', function () {
             // Arrange
-            $event = \Mockery::mock(Event::class);
+            $event = Mockery::mock(Event::class);
 
             // Act
             $rule = new DateCanBeChanged($event);
@@ -99,10 +99,10 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
 
         test('rule handles various date value types', function () {
             // Arrange
-            $futureEvent = \Mockery::mock(Event::class);
+            $futureEvent = Mockery::mock(Event::class);
             $futureEvent->shouldReceive('hasPastDate')->andReturn(false);
             $rule = new DateCanBeChanged($futureEvent);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -124,13 +124,13 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             $rule = new DateCanBeChanged(null);
 
             // Assert
-            expect($rule)->toBeInstanceOf(\Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
         });
 
         test('validate method signature matches interface', function () {
             // Arrange
             $rule = new DateCanBeChanged(null);
-            $reflection = new \ReflectionMethod($rule, 'validate');
+            $reflection = new ReflectionMethod($rule, 'validate');
 
             // Assert
             expect($reflection->getParameters())->toHaveCount(3);
@@ -143,10 +143,10 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     describe('error message consistency', function () {
         test('error message is consistent across calls', function () {
             // Arrange
-            $pastEvent = \Mockery::mock(Event::class);
+            $pastEvent = Mockery::mock(Event::class);
             $pastEvent->shouldReceive('hasPastDate')->andReturn(true);
             $rule = new DateCanBeChanged($pastEvent);
-            
+
             $messages = [];
             $failCallback = function (string $message) use (&$messages) {
                 $messages[] = $message;
@@ -164,10 +164,10 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
 
         test('attribute name does not affect validation logic', function () {
             // Arrange
-            $pastEvent = \Mockery::mock(Event::class);
+            $pastEvent = Mockery::mock(Event::class);
             $pastEvent->shouldReceive('hasPastDate')->andReturn(true);
             $rule = new DateCanBeChanged($pastEvent);
-            
+
             $failCallCount = 0;
             $failCallback = function () use (&$failCallCount) {
                 $failCallCount++;
@@ -184,6 +184,6 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     });
 
     afterEach(function () {
-        \Mockery::close();
+        Mockery::close();
     });
 });

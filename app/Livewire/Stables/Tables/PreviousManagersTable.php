@@ -7,7 +7,6 @@ namespace App\Livewire\Stables\Tables;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
-use App\Repositories\StableRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;

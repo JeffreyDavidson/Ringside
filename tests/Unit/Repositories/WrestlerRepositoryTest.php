@@ -6,9 +6,6 @@ use App\Data\Wrestlers\WrestlerData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
-use App\Models\Wrestlers\WrestlerInjury;
-use App\Models\Wrestlers\WrestlerRetirement;
-use App\Models\Wrestlers\WrestlerSuspension;
 use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Concerns\ManagesRetirement;
@@ -66,7 +63,7 @@ describe('WrestlerRepository Unit Tests', function () {
                 'create', 'update', 'restore',
                 'createEmployment', 'createRelease', 'createRetirement', 'endRetirement',
                 'createSuspension', 'endSuspension', 'createInjury', 'endInjury',
-                'removeFromCurrentTagTeam', 'getAvailableForNewTagTeam', 'getAvailableForExistingTagTeam'
+                'removeFromCurrentTagTeam', 'getAvailableForNewTagTeam', 'getAvailableForExistingTagTeam',
             ];
 
             foreach ($methods as $method) {
@@ -185,7 +182,7 @@ describe('WrestlerRepository Unit Tests', function () {
             // Assert
             expect($wrestler->fresh()->employments)->toHaveCount(1);
             expect($wrestler->fresh()->employments->first()->started_at)->eq($employmentDate);
-            
+
             $this->assertDatabaseHas('wrestlers_employments', [
                 'wrestler_id' => $wrestler->id,
                 'started_at' => $employmentDate,
@@ -203,7 +200,7 @@ describe('WrestlerRepository Unit Tests', function () {
 
             // Assert
             expect($wrestler->fresh()->employments->first()->ended_at)->eq($releaseDate);
-            
+
             $this->assertDatabaseHas('wrestlers_employments', [
                 'wrestler_id' => $wrestler->id,
                 'ended_at' => $releaseDate,
@@ -238,7 +235,7 @@ describe('WrestlerRepository Unit Tests', function () {
             // Assert
             expect($wrestler->fresh()->injuries)->toHaveCount(1);
             expect($wrestler->fresh()->injuries->first()->started_at)->eq($injuryDate);
-            
+
             $this->assertDatabaseHas('wrestlers_injuries', [
                 'wrestler_id' => $wrestler->id,
                 'started_at' => $injuryDate,
@@ -256,7 +253,7 @@ describe('WrestlerRepository Unit Tests', function () {
 
             // Assert
             expect($wrestler->fresh()->injuries->first()->ended_at)->eq($clearDate);
-            
+
             $this->assertDatabaseHas('wrestlers_injuries', [
                 'wrestler_id' => $wrestler->id,
                 'ended_at' => $clearDate,
@@ -276,7 +273,7 @@ describe('WrestlerRepository Unit Tests', function () {
             // Assert
             expect($wrestler->fresh()->retirements)->toHaveCount(1);
             expect($wrestler->fresh()->retirements->first()->started_at)->eq($retirementDate);
-            
+
             $this->assertDatabaseHas('wrestlers_retirements', [
                 'wrestler_id' => $wrestler->id,
                 'started_at' => $retirementDate,
@@ -294,7 +291,7 @@ describe('WrestlerRepository Unit Tests', function () {
 
             // Assert
             expect($wrestler->fresh()->retirements->first()->ended_at)->eq($unretirementDate);
-            
+
             $this->assertDatabaseHas('wrestlers_retirements', [
                 'wrestler_id' => $wrestler->id,
                 'ended_at' => $unretirementDate,
@@ -314,7 +311,7 @@ describe('WrestlerRepository Unit Tests', function () {
             // Assert
             expect($wrestler->fresh()->suspensions)->toHaveCount(1);
             expect($wrestler->fresh()->suspensions->first()->started_at)->eq($suspensionDate);
-            
+
             $this->assertDatabaseHas('wrestlers_suspensions', [
                 'wrestler_id' => $wrestler->id,
                 'started_at' => $suspensionDate,
@@ -332,7 +329,7 @@ describe('WrestlerRepository Unit Tests', function () {
 
             // Assert
             expect($wrestler->fresh()->suspensions->first()->ended_at)->eq($reinstatementDate);
-            
+
             $this->assertDatabaseHas('wrestlers_suspensions', [
                 'wrestler_id' => $wrestler->id,
                 'ended_at' => $reinstatementDate,

@@ -69,7 +69,7 @@ class ManagersTable extends BaseTableWithActions
             Column::make(__('managers.name'), 'full_name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn ($row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Manager $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
@@ -93,7 +93,7 @@ class ManagersTable extends BaseTableWithActions
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function ($builder, string $value) {
+                ->filter(function (ManagerBuilder $builder, string $value) {
                     /** @var ManagerBuilder<Manager> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),

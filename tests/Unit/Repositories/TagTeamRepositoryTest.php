@@ -6,8 +6,6 @@ use App\Data\TagTeams\TagTeamData;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamEmployment;
-use App\Models\TagTeams\TagTeamRetirement;
-use App\Models\TagTeams\TagTeamSuspension;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\Concerns\ManagesEmployment;
 use App\Repositories\Concerns\ManagesMembers;
@@ -19,7 +17,6 @@ use App\Repositories\Contracts\ManagesSuspensionInterface;
 use App\Repositories\Contracts\ManagesTagTeamMembersInterface;
 use App\Repositories\Contracts\TagTeamRepositoryInterface;
 use App\Repositories\TagTeamRepository;
-use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for TagTeamRepository business logic and data operations.
@@ -64,11 +61,11 @@ describe('TagTeamRepository Unit Tests', function () {
         test('repository has all expected methods', function () {
             $methods = [
                 'create', 'update', 'restore',
-                'addWrestler', 'removeWrestler', 'addWrestlers', 'removeWrestlers', 
+                'addWrestler', 'removeWrestler', 'addWrestlers', 'removeWrestlers',
                 'syncWrestlers', 'updateTagTeamPartners',
                 'addManager', 'removeManager', 'addManagers', 'removeManagers',
                 'createEmployment', 'createRelease', 'createRetirement', 'endRetirement',
-                'createSuspension', 'endSuspension'
+                'createSuspension', 'endSuspension',
             ];
 
             foreach ($methods as $method) {
@@ -159,7 +156,7 @@ describe('TagTeamRepository Unit Tests', function () {
             // Assert
             expect($tagTeam->fresh()->employments)->toHaveCount(1);
             expect($tagTeam->fresh()->employments->first()->started_at)->eq($employmentDate);
-            
+
             $this->assertDatabaseHas('tag_teams_employments', [
                 'tag_team_id' => $tagTeam->id,
                 'started_at' => $employmentDate,
@@ -177,7 +174,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->employments->first()->ended_at)->eq($releaseDate);
-            
+
             $this->assertDatabaseHas('tag_teams_employments', [
                 'tag_team_id' => $tagTeam->id,
                 'ended_at' => $releaseDate,
@@ -212,7 +209,7 @@ describe('TagTeamRepository Unit Tests', function () {
             // Assert
             expect($tagTeam->fresh()->retirements)->toHaveCount(1);
             expect($tagTeam->fresh()->retirements->first()->started_at)->eq($retirementDate);
-            
+
             $this->assertDatabaseHas('tag_teams_retirements', [
                 'tag_team_id' => $tagTeam->id,
                 'started_at' => $retirementDate,
@@ -230,7 +227,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->retirements->first()->ended_at)->eq($unretirementDate);
-            
+
             $this->assertDatabaseHas('tag_teams_retirements', [
                 'tag_team_id' => $tagTeam->id,
                 'ended_at' => $unretirementDate,
@@ -250,7 +247,7 @@ describe('TagTeamRepository Unit Tests', function () {
             // Assert
             expect($tagTeam->fresh()->suspensions)->toHaveCount(1);
             expect($tagTeam->fresh()->suspensions->first()->started_at)->eq($suspensionDate);
-            
+
             $this->assertDatabaseHas('tag_teams_suspensions', [
                 'tag_team_id' => $tagTeam->id,
                 'started_at' => $suspensionDate,
@@ -268,7 +265,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->suspensions->first()->ended_at)->eq($reinstatementDate);
-            
+
             $this->assertDatabaseHas('tag_teams_suspensions', [
                 'tag_team_id' => $tagTeam->id,
                 'ended_at' => $reinstatementDate,
@@ -289,7 +286,7 @@ describe('TagTeamRepository Unit Tests', function () {
             // Assert
             expect($tagTeam->fresh()->wrestlers)->toHaveCount(1);
             expect($tagTeam->fresh()->wrestlers->first()->id)->toBe($wrestler->id);
-            
+
             $this->assertDatabaseHas('tag_teams_wrestlers', [
                 'tag_team_id' => $tagTeam->id,
                 'wrestler_id' => $wrestler->id,
@@ -328,7 +325,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->wrestlers)->toHaveCount(2);
-            
+
             foreach ($wrestlers as $wrestler) {
                 $this->assertDatabaseHas('tag_teams_wrestlers', [
                     'tag_team_id' => $tagTeam->id,
@@ -365,7 +362,7 @@ describe('TagTeamRepository Unit Tests', function () {
             $oldWrestlers = Wrestler::factory()->count(2)->create();
             $newWrestlers = Wrestler::factory()->count(2)->create();
             $syncDate = now();
-            
+
             // Add old wrestlers first
             $this->repository->addWrestlers($tagTeam, $oldWrestlers, now()->subDays(30));
 
@@ -404,7 +401,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->currentWrestlers)->toHaveCount(2);
-            
+
             foreach ($wrestlers as $wrestler) {
                 $this->assertDatabaseHas('tag_teams_wrestlers', [
                     'tag_team_id' => $tagTeam->id,
@@ -422,7 +419,7 @@ describe('TagTeamRepository Unit Tests', function () {
             $newWrestlers = Wrestler::factory()->count(2)->create();
             $initialDate = now()->subDays(30);
             $updateDate = now();
-            
+
             // Add old wrestlers first
             $this->repository->addWrestlers($tagTeam, $oldWrestlers, $initialDate);
 
@@ -431,7 +428,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->currentWrestlers)->toHaveCount(2);
-            
+
             // Old wrestlers should be removed
             foreach ($oldWrestlers as $wrestler) {
                 $this->assertDatabaseHas('tag_teams_wrestlers', [
@@ -466,7 +463,7 @@ describe('TagTeamRepository Unit Tests', function () {
             // Assert
             expect($tagTeam->fresh()->managers)->toHaveCount(1);
             expect($tagTeam->fresh()->managers->first()->id)->toBe($manager->id);
-            
+
             $this->assertDatabaseHas('tag_teams_managers', [
                 'tag_team_id' => $tagTeam->id,
                 'manager_id' => $manager->id,
@@ -505,7 +502,7 @@ describe('TagTeamRepository Unit Tests', function () {
 
             // Assert
             expect($tagTeam->fresh()->managers)->toHaveCount(2);
-            
+
             foreach ($managers as $manager) {
                 $this->assertDatabaseHas('tag_teams_managers', [
                     'tag_team_id' => $tagTeam->id,

@@ -17,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  * - Abstract class requirements
  *
  * @see BasePreviousWrestlersTable
- * @see \Tests\Integration\Livewire\Base\Tables\BasePreviousWrestlersTableTest
+ * @see Tests\Integration\Livewire\Base\Tables\BasePreviousWrestlersTableTest
  */
 describe('BasePreviousWrestlersTable Unit Tests', function () {
     describe('class structure and inheritance', function () {
@@ -40,9 +40,9 @@ describe('BasePreviousWrestlersTable Unit Tests', function () {
     describe('property structure', function () {
         test('has resourceName property with correct value', function () {
             $reflection = new ReflectionClass(BasePreviousWrestlersTable::class);
-            
+
             expect($reflection->hasProperty('resourceName'))->toBeTrue();
-            
+
             $property = $reflection->getProperty('resourceName');
             expect($property->isProtected())->toBeTrue();
             expect($property->hasDefaultValue())->toBeTrue();
@@ -51,9 +51,9 @@ describe('BasePreviousWrestlersTable Unit Tests', function () {
 
         test('has databaseTableName property', function () {
             $reflection = new ReflectionClass(BasePreviousWrestlersTable::class);
-            
+
             expect($reflection->hasProperty('databaseTableName'))->toBeTrue();
-            
+
             $property = $reflection->getProperty('databaseTableName');
             expect($property->isProtected())->toBeTrue();
         });
@@ -62,9 +62,9 @@ describe('BasePreviousWrestlersTable Unit Tests', function () {
     describe('method existence', function () {
         test('has configure method', function () {
             $reflection = new ReflectionClass(BasePreviousWrestlersTable::class);
-            
+
             expect($reflection->hasMethod('configure'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('configure');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('void');
@@ -72,9 +72,9 @@ describe('BasePreviousWrestlersTable Unit Tests', function () {
 
         test('has columns method', function () {
             $reflection = new ReflectionClass(BasePreviousWrestlersTable::class);
-            
+
             expect($reflection->hasMethod('columns'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('columns');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('array');
@@ -96,10 +96,10 @@ describe('BasePreviousWrestlersTable Unit Tests', function () {
     describe('template method pattern', function () {
         test('follows template method pattern', function () {
             $reflection = new ReflectionClass(BasePreviousWrestlersTable::class);
-            
+
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
-            
+
             // Should have template methods
             expect($reflection->hasMethod('configure'))->toBeTrue();
             expect($reflection->hasMethod('columns'))->toBeTrue();
@@ -110,7 +110,7 @@ describe('BasePreviousWrestlersTable Unit Tests', function () {
         test('configured for wrestlers resource', function () {
             $reflection = new ReflectionClass(BasePreviousWrestlersTable::class);
             $property = $reflection->getProperty('resourceName');
-            
+
             expect($property->getDefaultValue())->toBe('wrestlers');
         });
     });

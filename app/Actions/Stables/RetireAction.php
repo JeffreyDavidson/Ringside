@@ -77,9 +77,9 @@ class RetireAction extends BaseStableAction
             // Retire current members who are available
             // Note: Managers are not direct stable members and are not retired with the stable
             $wrestlersToRetire = $stable->currentWrestlers
-                ->filter(fn ($wrestler) => ! $wrestler->isRetired());
+                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => ! $wrestler->isRetired());
             $tagTeamsToRetire = $stable->currentTagTeams
-                ->filter(fn ($tagTeam) => ! $tagTeam->isRetired());
+                ->filter(fn (\App\Models\TagTeams\TagTeam $tagTeam) => ! $tagTeam->isRetired());
 
             $this->retireMembers(
                 $wrestlersToRetire,

@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for StablesTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the StablesTableSeeder correctly populates
  * the database with stable records for development and testing purposes.
  *
- * @see \Database\Seeders\StablesTableSeeder
+ * @see Database\Seeders\StablesTableSeeder
  */
 describe('StablesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'StablesTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'StablesTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -51,7 +49,7 @@ describe('StablesTableSeeder Integration Tests', function () {
             foreach ($stables as $stable) {
                 expect($stable->name)->toBeString();
                 expect($stable->name)->not->toBeEmpty();
-                expect($stable->status)->toBeInstanceOf(\App\Enums\Stables\StableStatus::class);
+                expect($stable->status)->toBeInstanceOf(App\Enums\Stables\StableStatus::class);
             }
         });
 
@@ -61,7 +59,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect(strlen($stable->name))->toBeGreaterThan(5);
+                expect(mb_strlen($stable->name))->toBeGreaterThan(5);
                 expect($stable->name)->not->toContain('Test');
             }
         });
@@ -86,7 +84,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect($stable->status)->toBeInstanceOf(\App\Enums\Stables\StableStatus::class);
+                expect($stable->status)->toBeInstanceOf(App\Enums\Stables\StableStatus::class);
             }
         });
 

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
-use App\Models\Events\Venue;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;

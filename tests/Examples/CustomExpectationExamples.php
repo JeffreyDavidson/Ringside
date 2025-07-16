@@ -14,10 +14,11 @@ use App\Models\Matches\MatchType;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
-use function Pest\Laravel\assertDatabaseCount;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
+
+use function Pest\Laravel\assertDatabaseCount;
 
 /**
  * Examples of how custom expectations improve test readability and maintainability.
@@ -83,8 +84,8 @@ test('manager name validation - traditional way', function () {
     expect($manager->first_name)->not->toBeEmpty();
     expect($manager->last_name)->toBeString();
     expect($manager->last_name)->not->toBeEmpty();
-    expect(strlen($manager->first_name))->toBeGreaterThan(2);
-    expect(strlen($manager->last_name))->toBeGreaterThan(2);
+    expect(mb_strlen($manager->first_name))->toBeGreaterThan(2);
+    expect(mb_strlen($manager->last_name))->toBeGreaterThan(2);
     expect($manager->first_name)->not->toContain('Test');
     expect($manager->last_name)->not->toContain('Test');
 });
@@ -106,7 +107,7 @@ test('title validation - traditional way', function () {
 
     expect($title->name)->toBeString();
     expect($title->name)->not->toBeEmpty();
-    expect(strlen($title->name))->toBeGreaterThan(5);
+    expect(mb_strlen($title->name))->toBeGreaterThan(5);
     expect($title->name)->not->toContain('Test');
 
     $hasWrestlingTerms = str_contains($title->name, 'Championship') ||
@@ -130,7 +131,7 @@ test('title validation - with custom expectations', function () {
 
 // BEFORE: Using traditional assertions
 test('seeder execution - traditional way', function () {
-    expect(fn() => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
+    expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
         ->not->toThrow();
 
     assertDatabaseCount('match_types', 14);
