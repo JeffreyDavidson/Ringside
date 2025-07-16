@@ -9,6 +9,7 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Suspendable;
+use Illuminate\Support\Carbon;
 
 /**
  * Custom expectation functions for status and lifecycle testing.
@@ -288,17 +289,20 @@ function expectTagTeamMembership($wrestler, $tagTeam, array $expectedPivotData =
     expect($relationship->pivot->tag_team_id)->toBe($tagTeam->id);
     
     foreach ($expectedPivotData as $field => $expectedValue) {
-        if ($expectedValue instanceof Carbon) {
-            expect($relationship->pivot->{$field}->timestamp)->toBe($expectedValue->timestamp);
-        } elseif ($expectedValue === null) {
-            expect($relationship->pivot->{$field})->toBeNull();
+        $actualValue = $relationship->pivot->{$field};
+        
+        if ($expectedValue === null) {
+            expect($actualValue)->toBeNull();
+        } elseif ($expectedValue instanceof Carbon) {
+            // Handle Carbon instance comparison with string format
+            expect(Carbon::parse($actualValue)->format('Y-m-d H:i:s'))->toBe($expectedValue->format('Y-m-d H:i:s'));
+        } elseif ($actualValue instanceof Carbon && $expectedValue instanceof Carbon) {
+            // Handle Carbon instance comparison with string format
+            expect($actualValue->format('Y-m-d H:i:s'))->toBe($expectedValue->format('Y-m-d H:i:s'));
+        } elseif (is_numeric($actualValue) && is_numeric($expectedValue)) {
+            expect((int) $actualValue)->toBe((int) $expectedValue);
         } else {
-            $actualValue = $relationship->pivot->{$field};
-            if (is_numeric($actualValue) && is_numeric($expectedValue)) {
-                expect((int) $actualValue)->toBe((int) $expectedValue);
-            } else {
-                expect($actualValue)->toBe($expectedValue);
-            }
+            expect($actualValue)->toBe($expectedValue);
         }
     }
 }

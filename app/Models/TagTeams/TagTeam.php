@@ -29,7 +29,7 @@ use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\EventMatchCompetitor;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableMember;
+use App\Models\Stables\StableTagTeam;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamFactory;
@@ -45,7 +45,7 @@ use Illuminate\Support\Carbon;
 /**
  * @implements Bookable<EventMatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
- * @implements CanBeAStableMember<StableMember, static>
+ * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
  * @implements HasTagTeamWrestlers<static, TagTeamWrestler>
  * @implements Manageable<TagTeamManager, static>
@@ -123,7 +123,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableMember, static> */
+    /** @use CanJoinStables<StableTagTeam, static> */
     use CanJoinStables;
 
     /** @use CanWinTitles<TitleChampionship> */

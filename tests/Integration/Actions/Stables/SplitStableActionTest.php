@@ -100,8 +100,8 @@ describe('SplitStableAction Integration Tests', function () {
             $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
             $newStableTagTeamIds = $newStable->currentTagTeams()->pluck('tag_teams.id');
 
-            expect($newStableWrestlerIds->sort()->values())->toBe($transferWrestlerIds->sort()->values());
-            expect($newStableTagTeamIds->sort()->values())->toBe($transferTagTeamIds->sort()->values());
+            expect($newStableWrestlerIds->sort()->values())->toEqual($transferWrestlerIds->sort()->values());
+            expect($newStableTagTeamIds->sort()->values())->toEqual($transferTagTeamIds->sort()->values());
 
             // Verify members are no longer in original stable
             $refreshedOriginal = $this->originalStable->fresh();

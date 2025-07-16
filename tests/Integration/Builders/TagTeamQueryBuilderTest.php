@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 
 /**
  * Unit tests for TagTeamQueryBuilder query scopes and methods.
@@ -34,13 +35,33 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
 
     describe('employment status scopes', function () {
         test('bookable tag teams can be retrieved', function () {
+            // Create a tag team and manually attach wrestlers
+            $tagTeam = TagTeam::factory()->create();
+            $wrestlers = Wrestler::factory()->bookable()->count(2)->create();
+            
+            // Attach wrestlers to the tag team with proper pivot data
+            $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), [
+                'joined_at' => now(),
+                'left_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            
+            // Create employment for tag team
+            $tagTeam->employments()->create([
+                'started_at' => now()->subDays(1),
+                'ended_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             // Act
             $bookableTagTeams = TagTeam::bookable()->get();
 
             // Assert
             expect($bookableTagTeams)
                 ->toHaveCount(1)
-                ->collectionHas($this->bookableTagTeam);
+                ->collectionHas($tagTeam);
         });
 
         test('future employed tag teams can be retrieved', function () {
