@@ -43,7 +43,7 @@ class UsersTable extends BaseTableWithActions
             Column::make(__('users.role'), 'role')
                 ->format(fn (Role $value) => $value->name),
             Column::make(__('core.status'), 'status')
-                ->label(fn (\App\Models\Users\User $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (User $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             Column::make(__('users.email'), 'email')
                 ->searchable(),

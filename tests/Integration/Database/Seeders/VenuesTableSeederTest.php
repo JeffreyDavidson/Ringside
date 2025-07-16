@@ -21,13 +21,13 @@ use function Pest\Laravel\assertDatabaseHas;
  * the database with the required venue records for development and
  * testing purposes.
  *
- * @see \Database\Seeders\VenuesTableSeeder
+ * @see Database\Seeders\VenuesTableSeeder
  */
 describe('VenuesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'VenuesTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'VenuesTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 

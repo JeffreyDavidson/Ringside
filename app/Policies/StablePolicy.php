@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Users\User;
 use App\Models\Stables\Stable;
+use App\Models\Users\User;
 use Tests\Unit\Policies\StablePolicyTest;
 
 /**
@@ -44,7 +44,7 @@ class StablePolicy
     /**
      * Only administrators can view individual entities (handled by before hook).
      */
-    public function view(User $user, Stable $stable = null): bool
+    public function view(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -84,7 +84,7 @@ class StablePolicy
     /**
      * Only administrators can disband stables (handled by before hook).
      */
-    public function disband(User $user, Stable $stable = null): bool
+    public function disband(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

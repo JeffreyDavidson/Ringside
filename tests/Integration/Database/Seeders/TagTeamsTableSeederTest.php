@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for TagTeamsTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the TagTeamsTableSeeder correctly populates
  * the database with tag team records for development and testing purposes.
  *
- * @see \Database\Seeders\TagTeamsTableSeeder
+ * @see Database\Seeders\TagTeamsTableSeeder
  */
 describe('TagTeamsTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -51,7 +49,7 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
             foreach ($tagTeams as $tagTeam) {
                 expect($tagTeam->name)->toBeString();
                 expect($tagTeam->name)->not->toBeEmpty();
-                expect($tagTeam->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($tagTeam->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 
@@ -61,7 +59,7 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect(strlen($tagTeam->name))->toBeGreaterThan(5);
+                expect(mb_strlen($tagTeam->name))->toBeGreaterThan(5);
                 expect($tagTeam->name)->not->toContain('Test');
             }
         });
@@ -86,7 +84,7 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect($tagTeam->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($tagTeam->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 

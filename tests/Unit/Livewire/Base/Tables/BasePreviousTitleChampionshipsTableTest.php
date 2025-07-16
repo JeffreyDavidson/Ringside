@@ -17,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  * - Abstract class requirements
  *
  * @see BasePreviousTitleChampionshipsTable
- * @see \Tests\Integration\Livewire\Base\Tables\BasePreviousTitleChampionshipsTableTest
+ * @see Tests\Integration\Livewire\Base\Tables\BasePreviousTitleChampionshipsTableTest
  */
 describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
     describe('class structure and inheritance', function () {
@@ -40,9 +40,9 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
     describe('property structure', function () {
         test('has databaseTableName property with correct value', function () {
             $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
-            
+
             expect($reflection->hasProperty('databaseTableName'))->toBeTrue();
-            
+
             $property = $reflection->getProperty('databaseTableName');
             expect($property->isProtected())->toBeTrue();
             expect($property->hasDefaultValue())->toBeTrue();
@@ -51,9 +51,9 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
 
         test('has resourceName property with correct value', function () {
             $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
-            
+
             expect($reflection->hasProperty('resourceName'))->toBeTrue();
-            
+
             $property = $reflection->getProperty('resourceName');
             expect($property->isProtected())->toBeTrue();
             expect($property->hasDefaultValue())->toBeTrue();
@@ -64,9 +64,9 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
     describe('method existence', function () {
         test('has configure method', function () {
             $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
-            
+
             expect($reflection->hasMethod('configure'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('configure');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('void');
@@ -74,9 +74,9 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
 
         test('has columns method', function () {
             $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
-            
+
             expect($reflection->hasMethod('columns'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('columns');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('array');
@@ -98,10 +98,10 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
     describe('template method pattern', function () {
         test('follows template method pattern', function () {
             $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
-            
+
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
-            
+
             // Should have template methods
             expect($reflection->hasMethod('configure'))->toBeTrue();
             expect($reflection->hasMethod('columns'))->toBeTrue();
@@ -113,7 +113,7 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
             $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
             $resourceProperty = $reflection->getProperty('resourceName');
             $tableProperty = $reflection->getProperty('databaseTableName');
-            
+
             expect($resourceProperty->getDefaultValue())->toBe('title championships');
             expect($tableProperty->getDefaultValue())->toBe('titles_championships');
         });

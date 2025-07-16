@@ -52,28 +52,22 @@ class MatchDecision extends Model
 
     /**
      * Check if this decision type produces winners.
-     *
-     * @return bool
      */
     public function hasWinners(): bool
     {
-        return !in_array($this->slug, self::NO_OUTCOME_DECISIONS, true);
+        return ! in_array($this->slug, self::NO_OUTCOME_DECISIONS, true);
     }
 
     /**
      * Check if this decision type produces losers.
-     *
-     * @return bool
      */
     public function hasLosers(): bool
     {
-        return !in_array($this->slug, self::NO_OUTCOME_DECISIONS, true);
+        return ! in_array($this->slug, self::NO_OUTCOME_DECISIONS, true);
     }
 
     /**
      * Check if this decision results in no winners or losers.
-     *
-     * @return bool
      */
     public function hasNoOutcome(): bool
     {

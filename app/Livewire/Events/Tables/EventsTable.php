@@ -57,7 +57,7 @@ class EventsTable extends BaseTableWithActions
             Column::make(__('events.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn (\App\Models\Events\Event $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Event $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
             DateColumn::make(__('events.date'), 'date')
                 ->inputFormat('Y-m-d H:i:s')
@@ -95,7 +95,7 @@ class EventsTable extends BaseTableWithActions
                     'past' => 'Past',
                     'unscheduled' => 'Unscheduled',
                 ])
-                ->filter(function (\App\Builders\Events\EventBuilder $builder, string $value) {
+                ->filter(function (EventBuilder $builder, string $value) {
                     /** @var EventBuilder<Event> $builder */
                     match ($value) {
                         'scheduled' => $builder->scheduled(),

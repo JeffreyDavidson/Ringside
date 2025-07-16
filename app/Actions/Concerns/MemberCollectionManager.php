@@ -390,12 +390,12 @@ class MemberCollectionManager
     {
         $entities = $this->get();
 
-        $employed = $entities->filter(fn (\Illuminate\Database\Eloquent\Model $e) => RosterMemberType::hasCapability($e, 'employed') && ($e instanceof Employable) && $e->isEmployed());
-        $unemployed = $entities->filter(fn (\Illuminate\Database\Eloquent\Model $e) => RosterMemberType::hasCapability($e, 'employed') && ($e instanceof Employable) && ! $e->isEmployed());
-        $suspended = $entities->filter(fn (\Illuminate\Database\Eloquent\Model $e) => RosterMemberType::hasCapability($e, 'suspended') && ($e instanceof Suspendable) && $e->isSuspended());
-        $injured = $entities->filter(fn (\Illuminate\Database\Eloquent\Model $e) => RosterMemberType::hasCapability($e, 'injured') && ($e instanceof Injurable) && $e->isInjured());
-        $retired = $entities->filter(fn (\Illuminate\Database\Eloquent\Model $e) => RosterMemberType::hasCapability($e, 'retired') && ($e instanceof Retirable) && $e->isRetired());
-        $available = $entities->filter(function (\Illuminate\Database\Eloquent\Model $entity) {
+        $employed = $entities->filter(fn (Model $e) => RosterMemberType::hasCapability($e, 'employed') && ($e instanceof Employable) && $e->isEmployed());
+        $unemployed = $entities->filter(fn (Model $e) => RosterMemberType::hasCapability($e, 'employed') && ($e instanceof Employable) && ! $e->isEmployed());
+        $suspended = $entities->filter(fn (Model $e) => RosterMemberType::hasCapability($e, 'suspended') && ($e instanceof Suspendable) && $e->isSuspended());
+        $injured = $entities->filter(fn (Model $e) => RosterMemberType::hasCapability($e, 'injured') && ($e instanceof Injurable) && $e->isInjured());
+        $retired = $entities->filter(fn (Model $e) => RosterMemberType::hasCapability($e, 'retired') && ($e instanceof Retirable) && $e->isRetired());
+        $available = $entities->filter(function (Model $entity) {
             return (! RosterMemberType::hasCapability($entity, 'employed') || (($entity instanceof Employable) && $entity->isEmployed())) &&
                    (! RosterMemberType::hasCapability($entity, 'suspended') || ! (($entity instanceof Suspendable) && $entity->isSuspended())) &&
                    (! RosterMemberType::hasCapability($entity, 'injured') || ! (($entity instanceof Injurable) && $entity->isInjured())) &&

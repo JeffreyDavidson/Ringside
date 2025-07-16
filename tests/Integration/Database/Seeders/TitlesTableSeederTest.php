@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for TitlesTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the TitlesTableSeeder correctly populates
  * the database with title records for development and testing purposes.
  *
- * @see \Database\Seeders\TitlesTableSeeder
+ * @see Database\Seeders\TitlesTableSeeder
  */
 describe('TitlesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'TitlesTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'TitlesTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -51,7 +49,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
             foreach ($titles as $title) {
                 expect($title->name)->toBeString();
                 expect($title->name)->not->toBeEmpty();
-                expect($title->status)->toBeInstanceOf(\App\Enums\Titles\TitleStatus::class);
+                expect($title->status)->toBeInstanceOf(App\Enums\Titles\TitleStatus::class);
             }
         });
 
@@ -61,7 +59,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($titles as $title) {
-                expect(strlen($title->name))->toBeGreaterThan(5);
+                expect(mb_strlen($title->name))->toBeGreaterThan(5);
                 expect($title->name)->not->toContain('Test');
                 // Wrestling titles often contain words like "Championship", "Title", "Belt"
                 $hasWrestlingTerms = str_contains($title->name, 'Championship') ||
@@ -93,7 +91,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($titles as $title) {
-                expect($title->status)->toBeInstanceOf(\App\Enums\Titles\TitleStatus::class);
+                expect($title->status)->toBeInstanceOf(App\Enums\Titles\TitleStatus::class);
             }
         });
 

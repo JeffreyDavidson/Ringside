@@ -19,7 +19,7 @@ use Illuminate\Support\Collection;
  * These tests verify the HasMinimumMembers rule logic independently
  * of models, database, or Laravel's validation framework.
  *
- * @see \App\Rules\Stables\HasMinimumMembers
+ * @see HasMinimumMembers
  */
 describe('HasMinimumMembers Validation Rule Unit Tests', function () {
     describe('member calculation logic', function () {
@@ -28,7 +28,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1', 'wrestler2', 'wrestler3']);
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -46,7 +46,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection();
             $tagTeams = new Collection(['team1', 'team2']);
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -64,7 +64,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1']);
             $tagTeams = new Collection(['team1']);
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -82,7 +82,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection();
             $tagTeams = new Collection(['team1', 'team2', 'team3']); // 3 teams = 6 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -102,7 +102,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1', 'wrestler2']);
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failMessage = '';
             $failCallback = function (string $message) use (&$failCalled, &$failMessage) {
@@ -124,7 +124,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1', 'wrestler2', 'wrestler3']);
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -142,7 +142,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['w1', 'w2', 'w3', 'w4', 'w5']);
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -162,7 +162,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1']); // Only 1 member
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failMessage = '';
             $failCallback = function (string $message) use (&$failMessage) {
                 $failMessage = $message;
@@ -180,7 +180,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1']);
             $tagTeams = new Collection(); // Only 1 member total
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failMessage = '';
             $failCallback = function (string $message) use (&$failMessage) {
                 $failMessage = $message;
@@ -198,7 +198,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection();
             $tagTeams = new Collection(); // 0 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failMessage = '';
             $failCallback = function (string $message) use (&$failMessage) {
                 $failMessage = $message;
@@ -208,7 +208,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $rule->validate('members', 'test', $failCallback);
 
             // Assert
-            $expectedMessage = 'A stable must have at least ' . Stable::MIN_MEMBERS_COUNT . ' members. Currently adding 0 members.';
+            $expectedMessage = 'A stable must have at least '.Stable::MIN_MEMBERS_COUNT.' members. Currently adding 0 members.';
             expect($failMessage)->toBe($expectedMessage);
         });
     });
@@ -219,7 +219,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection();
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -238,7 +238,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $tagTeams = new Collection(range(1, 25));  // 25 tag teams = 50 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
             // Total: 50 + 50 = 100 members
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;
@@ -256,7 +256,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $wrestlers = new Collection(['wrestler1', 'wrestler2']);
             $tagTeams = new Collection();
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
-            
+
             $failCallCount = 0;
             $failCallback = function (string $message) use (&$failCallCount) {
                 $failCallCount++;
@@ -284,7 +284,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $tagTeams = new Collection(['t1']);       // 1 tag team = 2 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
             // Total: 1 + 2 = 3 members (exactly minimum)
-            
+
             $failCalled = false;
             $failCallback = function (string $message) use (&$failCalled) {
                 $failCalled = true;

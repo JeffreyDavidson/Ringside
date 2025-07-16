@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Users\User;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Users\User;
 use Tests\Unit\Policies\TagTeamPolicyTest;
 
 /**
@@ -44,7 +44,7 @@ class TagTeamPolicy
     /**
      * Only administrators can view individual entities (handled by before hook).
      */
-    public function view(User $user, TagTeam $tagTeam = null): bool
+    public function view(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -84,7 +84,7 @@ class TagTeamPolicy
     /**
      * Only administrators can employ tag teams (handled by before hook).
      */
-    public function employ(User $user, TagTeam $tagTeam = null): bool
+    public function employ(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -92,7 +92,7 @@ class TagTeamPolicy
     /**
      * Only administrators can release tag teams (handled by before hook).
      */
-    public function release(User $user, TagTeam $tagTeam = null): bool
+    public function release(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -100,7 +100,7 @@ class TagTeamPolicy
     /**
      * Only administrators can suspend tag teams (handled by before hook).
      */
-    public function suspend(User $user, TagTeam $tagTeam = null): bool
+    public function suspend(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -108,7 +108,7 @@ class TagTeamPolicy
     /**
      * Only administrators can reinstate tag teams (handled by before hook).
      */
-    public function reinstate(User $user, TagTeam $tagTeam = null): bool
+    public function reinstate(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -116,7 +116,7 @@ class TagTeamPolicy
     /**
      * Only administrators can retire tag teams (handled by before hook).
      */
-    public function retire(User $user, TagTeam $tagTeam = null): bool
+    public function retire(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -124,7 +124,7 @@ class TagTeamPolicy
     /**
      * Only administrators can unretire tag teams (handled by before hook).
      */
-    public function unretire(User $user, TagTeam $tagTeam = null): bool
+    public function unretire(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

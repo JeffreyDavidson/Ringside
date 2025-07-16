@@ -95,8 +95,8 @@ class InvalidDateRangeException extends BaseBusinessException
      * Exception for date range overlapping with existing period.
      */
     /**
-     * @param array{start: Carbon, end: Carbon} $newPeriod
-     * @param array{start: Carbon, end: Carbon} $existingPeriod
+     * @param  array{start: Carbon, end: Carbon}  $newPeriod
+     * @param  array{start: Carbon, end: Carbon}  $existingPeriod
      */
     public static function overlapsExisting(array $newPeriod, array $existingPeriod, string $type): static
     {

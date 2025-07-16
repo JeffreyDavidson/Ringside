@@ -130,7 +130,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     use CanWinTitles;
 
     use HasFactory;
-
     use IsBookableCompetitor;
 
     /** @use IsEmployable<TagTeamEmployment, static> */
@@ -194,19 +193,19 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
                 if ($this->isRetired()) {
                     return EmploymentStatus::Retired;
                 }
-                
+
                 if ($this->currentEmployment) {
                     return EmploymentStatus::Employed;
                 }
-                
+
                 if ($this->futureEmployment) {
                     return EmploymentStatus::FutureEmployment;
                 }
-                
+
                 if ($this->previousEmployments()->exists()) {
                     return EmploymentStatus::Released;
                 }
-                
+
                 return EmploymentStatus::Unemployed;
             }
         );

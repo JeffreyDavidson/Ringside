@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for EventsTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the EventsTableSeeder correctly populates
  * the database with event records for development and testing purposes.
  *
- * @see \Database\Seeders\EventsTableSeeder
+ * @see Database\Seeders\EventsTableSeeder
  */
 describe('EventsTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -51,7 +49,7 @@ describe('EventsTableSeeder Integration Tests', function () {
             foreach ($events as $event) {
                 expect($event->name)->toBeString();
                 expect($event->name)->not->toBeEmpty();
-                expect($event->date)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+                expect($event->date)->toBeInstanceOf(Illuminate\Support\Carbon::class);
                 expect($event->venue_id)->toBeInt();
             }
         });
@@ -62,7 +60,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($events as $event) {
-                expect(strlen($event->name))->toBeGreaterThan(5);
+                expect(mb_strlen($event->name))->toBeGreaterThan(5);
                 expect($event->name)->not->toContain('Test');
             }
         });
@@ -73,7 +71,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($events as $event) {
-                expect($event->date)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+                expect($event->date)->toBeInstanceOf(Illuminate\Support\Carbon::class);
                 // Events should be in the past or future (not null)
                 expect($event->date)->not->toBeNull();
             }

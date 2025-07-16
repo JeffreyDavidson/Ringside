@@ -38,7 +38,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 trait HasMembers
 {
-
     // ==================== WRESTLER RELATIONSHIPS ====================
 
     /**
@@ -198,5 +197,4 @@ trait HasMembers
 
         return $relation;
     }
-
 }

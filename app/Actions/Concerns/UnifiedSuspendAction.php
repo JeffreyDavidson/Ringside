@@ -251,7 +251,7 @@ class UnifiedSuspendAction
             if ($hasMethod) {
                 $members = $entity->{$relationshipMethod}()
                     ->get()
-                    ->filter(fn (\Illuminate\Database\Eloquent\Model $member) => $member->isEmployed() && ! $member->isSuspended());
+                    ->filter(fn (Model $member) => $member->isEmployed() && ! $member->isSuspended());
 
                 foreach ($members as $member) {
                     static::run($member, $suspensionDate, $notes);

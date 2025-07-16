@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Models\Matches\MatchType;
+use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
-use Illuminate\Support\Facades\Artisan;
 
 /**
  * Integration tests for MatchTypesTableSeeder data seeding and validation.
@@ -21,13 +21,13 @@ use Illuminate\Support\Facades\Artisan;
  * the database with all required match types needed for the
  * wrestling application business logic.
  *
- * @see \Database\Seeders\MatchTypesTableSeeder
+ * @see Database\Seeders\MatchTypesTableSeeder
  */
 describe('MatchTypesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 

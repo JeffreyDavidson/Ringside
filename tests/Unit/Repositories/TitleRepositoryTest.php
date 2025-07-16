@@ -17,7 +17,6 @@ use App\Repositories\Contracts\ManagesActivityInterface;
 use App\Repositories\Contracts\ManagesRetirementInterface;
 use App\Repositories\Contracts\TitleRepositoryInterface;
 use App\Repositories\TitleRepository;
-use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -65,7 +64,7 @@ describe('TitleRepository Unit Tests', function () {
                 'createActivity', 'endActivity', 'activate', 'deactivate',
                 'createRetirement', 'endRetirement', 'retire', 'unretire',
                 'createDebut', 'pull', 'createReinstatement',
-                'getLongestReigningChampion'
+                'getLongestReigningChampion',
             ];
 
             foreach ($methods as $method) {
@@ -365,7 +364,7 @@ describe('TitleRepository Unit Tests', function () {
             // Arrange
             $title = Title::factory()->create();
             $wrestler = Wrestler::factory()->create(['name' => 'Test Champion']);
-            
+
             // Create a championship with specific dates for testing
             $wonAt = now()->subDays(100);
             $lostAt = now()->subDays(10);
@@ -392,7 +391,7 @@ describe('TitleRepository Unit Tests', function () {
             // Arrange
             $title = Title::factory()->create();
             $tagTeam = TagTeam::factory()->create(['name' => 'Test Tag Team']);
-            
+
             // Create a championship with specific dates for testing
             $wonAt = now()->subDays(200);
             $lostAt = now()->subDays(50);
@@ -419,7 +418,7 @@ describe('TitleRepository Unit Tests', function () {
             // Arrange
             $title = Title::factory()->create();
             $wrestler = Wrestler::factory()->create(['name' => 'Current Champion']);
-            
+
             // Create current championship (no lost_at date)
             $wonAt = now()->subDays(30);
             TitleChampionship::factory()
@@ -446,7 +445,7 @@ describe('TitleRepository Unit Tests', function () {
             $title = Title::factory()->create();
             $shortReignWrestler = Wrestler::factory()->create(['name' => 'Short Reign']);
             $longReignWrestler = Wrestler::factory()->create(['name' => 'Long Reign']);
-            
+
             // Create short reign (10 days)
             TitleChampionship::factory()
                 ->for($title)
@@ -487,7 +486,7 @@ describe('TitleRepository Unit Tests', function () {
         test('handles missing championships gracefully', function () {
             // Arrange
             $title = Title::factory()->create();
-            
+
             // Don't create any championships for this title
 
             // Act

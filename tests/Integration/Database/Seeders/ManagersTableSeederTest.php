@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Managers\Manager;
 use Illuminate\Support\Facades\Artisan;
 
-use function Pest\Laravel\assertDatabaseCount;
-
 /**
  * Integration tests for ManagersTableSeeder data seeding and validation.
  *
@@ -19,13 +17,13 @@ use function Pest\Laravel\assertDatabaseCount;
  * These tests verify that the ManagersTableSeeder correctly populates
  * the database with manager records for development and testing purposes.
  *
- * @see \Database\Seeders\ManagersTableSeeder
+ * @see Database\Seeders\ManagersTableSeeder
  */
 describe('ManagersTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn() => Artisan::call('db:seed', ['--class' => 'ManagersTableSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'ManagersTableSeeder']))
                 ->not->toThrow(Exception::class);
         });
 
@@ -53,7 +51,7 @@ describe('ManagersTableSeeder Integration Tests', function () {
                 expect($manager->first_name)->not->toBeEmpty();
                 expect($manager->last_name)->toBeString();
                 expect($manager->last_name)->not->toBeEmpty();
-                expect($manager->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($manager->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 
@@ -63,8 +61,8 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect(strlen($manager->first_name))->toBeGreaterThan(2);
-                expect(strlen($manager->last_name))->toBeGreaterThan(2);
+                expect(mb_strlen($manager->first_name))->toBeGreaterThan(2);
+                expect(mb_strlen($manager->last_name))->toBeGreaterThan(2);
                 expect($manager->first_name)->not->toContain('Test');
                 expect($manager->last_name)->not->toContain('Test');
             }
@@ -79,7 +77,7 @@ describe('ManagersTableSeeder Integration Tests', function () {
         test('managers have unique name combinations', function () {
             // Arrange
             $managers = Manager::all();
-            $fullNames = $managers->map(fn($manager) => $manager->first_name . ' ' . $manager->last_name);
+            $fullNames = $managers->map(fn ($manager) => $manager->first_name.' '.$manager->last_name);
 
             // Assert
             expect($fullNames->unique())->toHaveCount($managers->count());
@@ -91,7 +89,7 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect($manager->status)->toBeInstanceOf(\App\Enums\Shared\EmploymentStatus::class);
+                expect($manager->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
             }
         });
 

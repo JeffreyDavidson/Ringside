@@ -9,8 +9,8 @@ use App\Builders\Contracts\HasRetirement;
 use App\Builders\Contracts\HasSuspension;
 use App\Builders\Roster\ManagerBuilder;
 use App\Builders\Roster\RefereeBuilder;
-use App\Builders\Roster\WrestlerBuilder;
 use App\Builders\Roster\TagTeamBuilder;
+use App\Builders\Roster\WrestlerBuilder;
 use App\Builders\Titles\TitleBuilder;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
@@ -33,11 +33,11 @@ use Carbon\Carbon;
  * across different entity types and provide consistent polymorphic behavior.
  * Tests focus on interface compliance rather than business logic details.
  *
- * @see \App\Builders\Contracts\HasAvailability
- * @see \App\Builders\Contracts\HasBooking
- * @see \App\Builders\Contracts\HasEmployment
- * @see \App\Builders\Contracts\HasRetirement
- * @see \App\Builders\Contracts\HasSuspension
+ * @see HasAvailability
+ * @see HasBooking
+ * @see HasEmployment
+ * @see HasRetirement
+ * @see HasSuspension
  */
 describe('Builder Contracts Unit Tests', function () {
     describe('HasAvailability contract implementation', function () {
@@ -114,10 +114,10 @@ describe('Builder Contracts Unit Tests', function () {
             // Act & Assert
             foreach ($builders as $builder) {
                 expect($builder)->toBeInstanceOf(HasAvailability::class);
-                
+
                 $availableBuilder = $builder->available();
                 $unavailableBuilder = $builder->unavailable();
-                
+
                 expect($availableBuilder)->toBeInstanceOf(HasAvailability::class);
                 expect($unavailableBuilder)->toBeInstanceOf(HasAvailability::class);
             }
@@ -171,7 +171,7 @@ describe('Builder Contracts Unit Tests', function () {
 
             // Act & Assert
             expect($builder)->toBeInstanceOf(HasBooking::class);
-            
+
             $bookableBuilder = $builder->bookable();
             expect($bookableBuilder)->toBeInstanceOf(HasBooking::class);
         });
@@ -262,12 +262,12 @@ describe('Builder Contracts Unit Tests', function () {
             // Act & Assert
             foreach ($builders as $builder) {
                 expect($builder)->toBeInstanceOf(HasEmployment::class);
-                
+
                 $unemployedBuilder = $builder->unemployed();
                 $employedBuilder = $builder->employed();
                 $releasedBuilder = $builder->released();
                 $futureEmployedBuilder = $builder->futureEmployed();
-                
+
                 expect($unemployedBuilder)->toBeInstanceOf(HasEmployment::class);
                 expect($employedBuilder)->toBeInstanceOf(HasEmployment::class);
                 expect($releasedBuilder)->toBeInstanceOf(HasEmployment::class);
@@ -334,7 +334,7 @@ describe('Builder Contracts Unit Tests', function () {
             // Act & Assert
             foreach ($builders as $builder) {
                 expect($builder)->toBeInstanceOf(HasRetirement::class);
-                
+
                 $retiredBuilder = $builder->retired();
                 expect($retiredBuilder)->toBeInstanceOf(HasRetirement::class);
             }
@@ -401,7 +401,7 @@ describe('Builder Contracts Unit Tests', function () {
             // Act & Assert
             foreach ($builders as $builder) {
                 expect($builder)->toBeInstanceOf(HasSuspension::class);
-                
+
                 $suspendedBuilder = $builder->suspended();
                 expect($suspendedBuilder)->toBeInstanceOf(HasSuspension::class);
             }

@@ -7,15 +7,12 @@ namespace App\Livewire\Stables\Tables;
 use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class PreviousWrestlersTable extends DataTableComponent
 {
-
     protected string $resourceName = 'wrestlers';
 
     protected string $databaseTableName = 'wrestlers';
@@ -34,12 +31,12 @@ class PreviousWrestlersTable extends DataTableComponent
         return Wrestler::query()
             ->whereHas('stables', function (Builder $query) {
                 $query->where('stable_id', $this->stableId)
-                      ->whereNotNull('left_at');
+                    ->whereNotNull('left_at');
             })
             ->with(['stables' => function (\Illuminate\Database\Eloquent\Relations\BelongsToMany $query) {
                 $query->where('stable_id', $this->stableId)
-                      ->whereNotNull('left_at')
-                      ->withPivot(['joined_at', 'left_at']);
+                    ->whereNotNull('left_at')
+                    ->withPivot(['joined_at', 'left_at']);
             }]);
     }
 
@@ -77,5 +74,4 @@ class PreviousWrestlersTable extends DataTableComponent
             ->setLoadingPlaceholderContent('Loading')
             ->setLoadingPlaceholderEnabled();
     }
-
 }

@@ -9,6 +9,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionEnum;
+use ReflectionEnumBackedCase;
 use ReflectionMethod;
 
 use function Laravel\Prompts\select;
@@ -449,7 +450,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Generate import statements for the test.
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      */
     protected function generateImports(ReflectionClass $reflection): string
     {
@@ -588,7 +589,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Generate trait assertions.
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      */
     protected function generateTraitAssertions(ReflectionClass $reflection): string
     {
@@ -611,7 +612,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Generate interface assertions.
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      */
     protected function generateInterfaceAssertions(ReflectionClass $reflection): string
     {
@@ -637,7 +638,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Get all meaningful traits used by a class (excluding Laravel internal traits).
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      * @return array<int, string>
      */
     protected function getUsedTraits(ReflectionClass $reflection): array
@@ -732,7 +733,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Get meaningful interfaces implemented by a model.
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      * @return array<int, string>
      */
     protected function getMeaningfulInterfaces(ReflectionClass $reflection): array
@@ -818,7 +819,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
         $reflection = new ReflectionEnum($enumClass);
         foreach ($reflection->getCases() as $case) {
             // Handle backed enums (have a scalar value)
-            if ($case instanceof \ReflectionEnumBackedCase) {
+            if ($case instanceof ReflectionEnumBackedCase) {
                 if ($case->getBackingValue() === $value) {
                     return $case->getName();
                 }
@@ -835,7 +836,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
     /**
      * Generate constants section for the test.
      *
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      */
     protected function generateConstantsSection(ReflectionClass $reflection): string
     {
@@ -871,7 +872,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Get model constants (excluding Laravel internal constants).
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      * @return array<string, mixed>
      */
     protected function getModelConstants(ReflectionClass $reflection): array
@@ -907,7 +908,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Generate business methods section for the test.
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      */
     protected function generateBusinessMethodsSection(ReflectionClass $reflection): string
     {
@@ -936,7 +937,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
      * Get business methods from the model (excluding Laravel framework methods).
      */
     /**
-     * @param ReflectionClass<object> $reflection
+     * @param  ReflectionClass<object>  $reflection
      * @return array<int, string>
      */
     protected function getBusinessMethods(ReflectionClass $reflection): array

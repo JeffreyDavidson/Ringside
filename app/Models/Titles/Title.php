@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Titles;
 
-use App\Builders\Titles\TitleBuilder;
 use App\Builders\Concerns\HasStatusScopes;
+use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasActivityPeriods;
@@ -158,17 +158,17 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
                 if ($this->isCurrentlyActive()) {
                     return TitleStatus::Active;
                 }
-                
+
                 // Check for future activity
                 if ($this->hasFutureActivity()) {
                     return TitleStatus::PendingDebut;
                 }
-                
+
                 // Check for previous activity periods
                 if ($this->hasActivityPeriods()) {
                     return TitleStatus::Inactive;
                 }
-                
+
                 // No activity periods at all
                 return TitleStatus::Undebuted;
             }

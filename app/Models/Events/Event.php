@@ -8,7 +8,6 @@ use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Models\Concerns\HasMatches;
 use App\Models\Matches\EventMatch;
-use App\Models\Events\Venue;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -52,8 +51,8 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(EventBuilder::class)]
 class Event extends Model
 {
-    use HasMatches;
     use HasFactory;
+    use HasMatches;
     use SoftDeletes;
 
     /**

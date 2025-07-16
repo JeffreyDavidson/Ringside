@@ -143,7 +143,7 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
      */
     public function removeFromCurrentManagers(Wrestler $wrestler, Carbon $removalDate): void
     {
-        $wrestler->currentManagers()->get()->each(function (\App\Models\Managers\Manager $manager) use ($wrestler, $removalDate) {
+        $wrestler->currentManagers()->get()->each(function (Manager $manager) use ($wrestler, $removalDate) {
             $this->removeManager($wrestler, $manager, $removalDate);
         });
     }

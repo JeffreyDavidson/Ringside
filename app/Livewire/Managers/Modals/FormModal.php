@@ -7,7 +7,6 @@ namespace App\Livewire\Managers\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Managers\Forms\Form;
 use App\Models\Managers\Manager;
-use Illuminate\Support\Str;
 
 /**
  * @extends BaseFormModal<Form, Manager>
@@ -34,9 +33,9 @@ class FormModal extends BaseFormModal
     protected function getDummyDataFields(): array
     {
         return [
-            'first_name' => fn() => fake()->firstName(),
-            'last_name' => fn() => fake()->lastName(),
-            'start_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'first_name' => fn () => fake()->firstName(),
+            'last_name' => fn () => fake()->lastName(),
+            'start_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
         ];
     }
 

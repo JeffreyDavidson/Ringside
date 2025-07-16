@@ -6,8 +6,8 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Support\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 /**
  * Integration tests for TitleChampionship table interactions and database operations.

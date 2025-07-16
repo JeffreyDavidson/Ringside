@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\Data\PresentsManagersList;
-use App\Models\Managers\Manager;
 use Livewire\Attributes\Computed;
 
 /**
@@ -17,7 +16,7 @@ use Livewire\Attributes\Computed;
  * - Livewire computed attribute usage
  *
  * @see PresentsManagersList
- * @see \Tests\Integration\Livewire\Concerns\Data\PresentsManagersListTest
+ * @see Tests\Integration\Livewire\Concerns\Data\PresentsManagersListTest
  */
 describe('PresentsManagersList Unit Tests', function () {
     describe('trait structure', function () {
@@ -35,9 +34,9 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('method signatures', function () {
         test('has getManagers method', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            
+
             expect($reflection->hasMethod('getManagers'))->toBeTrue();
-            
+
             $method = $reflection->getMethod('getManagers');
             expect($method->isPublic())->toBeTrue();
             expect($method->getReturnType()->getName())->toBe('array');
@@ -50,7 +49,7 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $method = $reflection->getMethod('getManagers');
             $docComment = $method->getDocComment();
-            
+
             expect($docComment)->toContain('@return array<int|string,string|null>');
         });
 
@@ -58,7 +57,7 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $method = $reflection->getMethod('getManagers');
             $attributes = $method->getAttributes();
-            
+
             expect($attributes)->toHaveCount(1);
             expect($attributes[0]->getName())->toBe('Livewire\\Attributes\\Computed');
         });
@@ -68,7 +67,7 @@ describe('PresentsManagersList Unit Tests', function () {
         test('Computed attribute has correct parameters', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for Computed attribute configuration
             expect($source)->toContain('#[Computed(cache: true, key: \'managers-list\', seconds: 180)]');
         });
@@ -90,14 +89,14 @@ describe('PresentsManagersList Unit Tests', function () {
         test('imports Manager model', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('use App\\Models\\Managers\\Manager;');
         });
 
         test('imports Computed attribute', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             expect($source)->toContain('use Livewire\\Attributes\\Computed;');
         });
     });
@@ -106,7 +105,7 @@ describe('PresentsManagersList Unit Tests', function () {
         test('getManagers uses correct query structure', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for expected query implementation
             expect($source)->toContain('Manager::select(\'id\', \'name\')');
             expect($source)->toContain('->pluck(\'name\', \'id\')');
@@ -119,9 +118,9 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $methods = array_filter(
                 $reflection->getMethods(),
-                fn($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
+                fn ($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
             );
-            
+
             expect($methods)->toHaveCount(1);
             expect($methods[0]->getName())->toBe('getManagers');
             expect($methods[0]->isPublic())->toBeTrue();
@@ -131,9 +130,9 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $protectedMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PROTECTED),
-                fn($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
+                fn ($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
             );
-            
+
             expect($protectedMethods)->toHaveCount(0);
         });
 
@@ -141,9 +140,9 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $privateMethods = array_filter(
                 $reflection->getMethods(ReflectionMethod::IS_PRIVATE),
-                fn($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
+                fn ($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
             );
-            
+
             expect($privateMethods)->toHaveCount(0);
         });
     });
@@ -151,13 +150,13 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('trait simplicity', function () {
         test('is minimal focused trait', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            
+
             // Should have minimal methods (just the getter)
             $methods = array_filter(
                 $reflection->getMethods(),
-                fn($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
+                fn ($method) => $method->getDeclaringClass()->getName() === PresentsManagersList::class
             );
-            
+
             expect($methods)->toHaveCount(1);
         });
 
@@ -165,9 +164,9 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $properties = array_filter(
                 $reflection->getProperties(),
-                fn($property) => $property->getDeclaringClass()->getName() === PresentsManagersList::class
+                fn ($property) => $property->getDeclaringClass()->getName() === PresentsManagersList::class
             );
-            
+
             expect($properties)->toHaveCount(0);
         });
     });
@@ -177,14 +176,14 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $method = $reflection->getMethod('getManagers');
             $attributes = $method->getAttributes(Computed::class);
-            
+
             expect($attributes)->toHaveCount(1);
         });
 
         test('enables caching for performance', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for cache enabled
             expect($source)->toContain('cache: true');
         });
@@ -192,7 +191,7 @@ describe('PresentsManagersList Unit Tests', function () {
         test('uses descriptive cache key', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for meaningful cache key
             expect($source)->toContain('key: \'managers-list\'');
         });
@@ -202,7 +201,7 @@ describe('PresentsManagersList Unit Tests', function () {
         test('selects only required fields', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for field selection optimization
             expect($source)->toContain('select(\'id\', \'name\')');
         });
@@ -210,7 +209,7 @@ describe('PresentsManagersList Unit Tests', function () {
         test('uses efficient pluck method', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = file_get_contents($reflection->getFileName());
-            
+
             // Check for pluck usage
             expect($source)->toContain('pluck(\'name\', \'id\')');
         });
@@ -219,7 +218,7 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('data presentation pattern', function () {
         test('follows data presentation trait pattern', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            
+
             // Should follow Presents[Entity]List naming pattern
             expect($reflection->getShortName())->toMatch('/^Presents.*List$/');
         });
@@ -227,7 +226,7 @@ describe('PresentsManagersList Unit Tests', function () {
         test('provides array output for dropdowns', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $method = $reflection->getMethod('getManagers');
-            
+
             // Should return array suitable for form dropdowns
             expect($method->getReturnType()->getName())->toBe('array');
         });

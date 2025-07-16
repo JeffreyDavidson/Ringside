@@ -116,7 +116,7 @@ class CreateAction extends BaseTagTeamAction
             ->ensure(Manager::class)
             ->values(); // Reset keys to be sequential integers
 
-        $managersCollection->whenNotEmpty(fn (\Illuminate\Support\Collection $managers) => $this->tagTeamRepository->addManagers($tagTeam, $managers, $datetime));
+        $managersCollection->whenNotEmpty(fn (Collection $managers) => $this->tagTeamRepository->addManagers($tagTeam, $managers, $datetime));
     }
 
     /**
@@ -135,12 +135,12 @@ class CreateAction extends BaseTagTeamAction
 
         // Employ wrestlers if they're not already employed
         $wrestlers
-            ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => ! $wrestler->isEmployed())
-            ->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $this->wrestlersEmployAction->handle($wrestler, $employmentDate));
+            ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed())
+            ->each(fn (Wrestler $wrestler) => $this->wrestlersEmployAction->handle($wrestler, $employmentDate));
 
         // Employ managers if they're not already employed
         $managers
-            ->filter(fn (\App\Models\Managers\Manager $manager) => ! $manager->isEmployed())
-            ->each(fn (\App\Models\Managers\Manager $manager) => $this->managersEmployAction->handle($manager, $employmentDate));
+            ->filter(fn (Manager $manager) => ! $manager->isEmployed())
+            ->each(fn (Manager $manager) => $this->managersEmployAction->handle($manager, $employmentDate));
     }
 }

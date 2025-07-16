@@ -26,7 +26,7 @@ use App\Models\Wrestlers\Wrestler;
  * shared functionality for all individual roster member builders (Wrestler, Manager, Referee).
  * Uses WrestlerBuilder as the concrete implementation for testing abstract functionality.
  *
- * @see \App\Builders\Roster\SingleRosterMemberBuilder
+ * @see SingleRosterMemberBuilder
  */
 describe('SingleRosterMemberBuilder Unit Tests', function () {
     beforeEach(function () {
@@ -38,8 +38,8 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
         $this->releasedWrestler = Wrestler::factory()->released()->create();
         $this->unemployedWrestler = Wrestler::factory()->unemployed()->create();
         $this->injuredWrestler = Wrestler::factory()->injured()->create();
-        
-        // Create a single employed wrestler that will be considered "available" 
+
+        // Create a single employed wrestler that will be considered "available"
         // (employed, not injured, not suspended, not retired)
         $this->availableWrestler = Wrestler::factory()->employed()->create();
     });
@@ -180,7 +180,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
 
             // Act & Assert - Verify the method exists on the base class
             expect(method_exists($builder, 'availableOn'))->toBeTrue();
-            
+
             // Note: WrestlerBuilder overrides this method with match-booking logic,
             // so we test method existence rather than full functionality to avoid
             // database table dependencies in unit tests.

@@ -24,7 +24,6 @@ use Livewire\Component;
  *
  * @see WrestlerForm
  */
-
 beforeEach(function () {
     // Mock the required Livewire dependencies for unit testing
     $mockComponent = mock(Component::class);
@@ -90,17 +89,17 @@ describe('WrestlerForm Unit Tests', function () {
 
         test('method signatures are correct', function () {
             $reflection = new ReflectionClass($this->form);
-            
+
             // Check rules method
             $rulesMethod = $reflection->getMethod('rules');
             expect($rulesMethod->isProtected())->toBeTrue();
             expect($rulesMethod->getReturnType()->getName())->toBe('array');
-            
+
             // Check getModelData method
             $getModelDataMethod = $reflection->getMethod('getModelData');
             expect($getModelDataMethod->isProtected())->toBeTrue();
             expect($getModelDataMethod->getReturnType()->getName())->toBe('array');
-            
+
             // Check getModelClass method
             $getModelClassMethod = $reflection->getMethod('getModelClass');
             expect($getModelClassMethod->isProtected())->toBeTrue();
@@ -232,13 +231,13 @@ describe('WrestlerForm Unit Tests', function () {
     describe('class hierarchy', function () {
         test('inherits from correct base classes', function () {
             $reflection = new ReflectionClass(WrestlerForm::class);
-            
+
             expect($reflection->getParentClass()->getName())->toBe(LivewireBaseForm::class);
         });
 
         test('implements required interfaces', function () {
             $interfaces = class_implements(WrestlerForm::class);
-            
+
             // Should implement Livewire component interfaces through inheritance
             expect($interfaces)->toBeArray();
         });
@@ -247,9 +246,9 @@ describe('WrestlerForm Unit Tests', function () {
     describe('property access control', function () {
         test('form properties are public', function () {
             $reflection = new ReflectionClass(WrestlerForm::class);
-            
+
             $publicProperties = ['name', 'hometown', 'height_feet', 'height_inches', 'weight', 'signature_move', 'employment_date'];
-            
+
             foreach ($publicProperties as $property) {
                 $propertyReflection = $reflection->getProperty($property);
                 expect($propertyReflection->isPublic())->toBeTrue("Property {$property} should be public");

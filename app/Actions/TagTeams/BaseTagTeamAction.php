@@ -76,10 +76,10 @@ abstract class BaseTagTeamAction
         ManagersEmployAction $managersEmployAction
     ): void {
         // Employ the provided wrestlers
-        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersEmployAction->handle($wrestler, $employmentDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersEmployAction->handle($wrestler, $employmentDate));
 
         // Employ the provided managers
-        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersEmployAction->handle($manager, $employmentDate));
+        $managers->each(fn (Manager $manager) => $managersEmployAction->handle($manager, $employmentDate));
     }
 
     /**
@@ -99,10 +99,10 @@ abstract class BaseTagTeamAction
         ManagersReinstateAction $managersReinstateAction
     ): void {
         // Reinstate the provided wrestlers
-        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
 
         // Reinstate the provided managers
-        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersReinstateAction->handle($manager, $reinstatementDate));
+        $managers->each(fn (Manager $manager) => $managersReinstateAction->handle($manager, $reinstatementDate));
     }
 
     /**
@@ -122,10 +122,10 @@ abstract class BaseTagTeamAction
         ManagersSuspendAction $managersSuspendAction
     ): void {
         // Suspend the provided wrestlers
-        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersSuspendAction->handle($wrestler, $suspensionDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersSuspendAction->handle($wrestler, $suspensionDate));
 
         // Suspend the provided managers
-        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersSuspendAction->handle($manager, $suspensionDate));
+        $managers->each(fn (Manager $manager) => $managersSuspendAction->handle($manager, $suspensionDate));
     }
 
     /**
@@ -145,10 +145,10 @@ abstract class BaseTagTeamAction
         ManagersUnretireAction $managersUnretireAction
     ): void {
         // Unretire the provided wrestlers
-        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersUnretireAction->handle($wrestler, $unretirementDate));
 
         // Unretire the provided managers
-        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersUnretireAction->handle($manager, $unretirementDate));
+        $managers->each(fn (Manager $manager) => $managersUnretireAction->handle($manager, $unretirementDate));
     }
 
     /**
@@ -203,9 +203,9 @@ abstract class BaseTagTeamAction
         TagTeamRepository $tagTeamRepository
     ): void {
         // Remove wrestlers from any current tag teams
-        $formerWrestlers->each(function (\App\Models\Wrestlers\Wrestler $wrestler) use ($restorationDate) {
+        $formerWrestlers->each(function (Wrestler $wrestler) use ($restorationDate) {
             $currentTagTeams = $wrestler->currentTagTeams; // @phpstan-ignore-line property.notFound
-            $currentTagTeams->each(function (\App\Models\TagTeams\TagTeam $currentTeam) use ($wrestler, $restorationDate) {
+            $currentTagTeams->each(function (TagTeam $currentTeam) use ($wrestler, $restorationDate) {
                 $this->tagTeamRepository->removeWrestler($currentTeam, $wrestler, $restorationDate);
             });
         });
@@ -231,7 +231,7 @@ abstract class BaseTagTeamAction
         TagTeamRepository $tagTeamRepository
     ): void {
         // Only restore wrestlers who are not currently in other tag teams
-        $availableWrestlers = $formerWrestlers->filter(function (\App\Models\Wrestlers\Wrestler $wrestler) {
+        $availableWrestlers = $formerWrestlers->filter(function (Wrestler $wrestler) {
             return $wrestler->currentTagTeams->isEmpty(); // @phpstan-ignore-line property.notFound
         });
 
@@ -261,9 +261,9 @@ abstract class BaseTagTeamAction
         ManagersRetireAction $managersRetireAction
     ): void {
         // Retire the provided wrestlers
-        $wrestlers->each(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestlersRetireAction->handle($wrestler, $retirementDate));
 
         // Retire the provided managers
-        $managers->each(fn (\App\Models\Managers\Manager $manager) => $managersRetireAction->handle($manager, $retirementDate));
+        $managers->each(fn (Manager $manager) => $managersRetireAction->handle($manager, $retirementDate));
     }
 }
