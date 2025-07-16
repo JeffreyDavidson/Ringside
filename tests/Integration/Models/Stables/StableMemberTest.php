@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableMember;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
@@ -71,10 +72,9 @@ describe('StableMember Model', function () {
 
             // Verify pivot data is correct
             $pivotData = $this->wrestler->stables()->first()->pivot;
-            expect(Carbon::parse($pivotData->joined_at)->equalTo($joinedDate))->toBeTrue();
+            expect(Carbon::parse($pivotData->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
             expect($pivotData->left_at)->toBeNull();
-            expect($pivotData->member_id)->toBe($this->wrestler->id);
-            expect($pivotData->member_type)->toBe('wrestler');
+            expect($pivotData->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotData->stable_id)->toBe($this->stable->id);
         });
 
@@ -95,42 +95,50 @@ describe('StableMember Model', function () {
 
             // Verify pivot data is correct
             $pivotData = $this->tagTeam->stables()->first()->pivot;
-            expect(Carbon::parse($pivotData->joined_at)->equalTo($joinedDate))->toBeTrue();
+            expect(Carbon::parse($pivotData->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
             expect($pivotData->left_at)->toBeNull();
-            expect($pivotData->member_id)->toBe($this->tagTeam->id);
-            expect($pivotData->member_type)->toBe('tagTeam');
+            expect($pivotData->tag_team_id)->toBe($this->tagTeam->id);
             expect($pivotData->stable_id)->toBe($this->stable->id);
         });
 
         test('stable can have multiple members of different types', function () {
+            // Create a fresh stable for this test to avoid interference
+            $stable = Stable::factory()->unactivated()->create(['name' => 'Test Stable']);
+            $wrestler = Wrestler::factory()->employed()->create(['name' => 'Test Wrestler']);
+            $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Test Tag Team']);
+            
             $wrestlerJoinDate = Carbon::now()->subMonths(6);
             $tagTeamJoinDate = Carbon::now()->subMonths(4);
 
             // Attach different member types to the same stable
-            $this->wrestler->stables()->attach($this->stable->id, [
+            $wrestler->stables()->attach($stable->id, [
                 'joined_at' => $wrestlerJoinDate,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            $this->tagTeam->stables()->attach($this->stable->id, [
+            $tagTeam->stables()->attach($stable->id, [
                 'joined_at' => $tagTeamJoinDate,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
             // Verify all relationships exist
-            expect($this->wrestler->currentStable->id)->toBe($this->stable->id);
-            expect($this->tagTeam->currentStable->id)->toBe($this->stable->id);
+            expect($wrestler->currentStable->id)->toBe($stable->id);
+            expect($tagTeam->currentStable->id)->toBe($stable->id);
 
             // Verify stable has both member types
-            expect($this->stable->currentWrestlers()->count())->toBe(1);
-            expect($this->stable->currentTagTeams()->count())->toBe(1);
+            expect($stable->currentWrestlers()->count())->toBe(1);
+            expect($stable->currentTagTeams()->count())->toBe(1);
 
-            // Verify total polymorphic member count
-            expect(StableMember::where('stable_id', $this->stable->id)
+            // Verify total member count across both tables
+            $wrestlerCount = StableWrestler::where('stable_id', $stable->id)
                 ->whereNull('left_at')
-                ->count())->toBe(2);
+                ->count();
+            $tagTeamCount = StableTagTeam::where('stable_id', $stable->id)
+                ->whereNull('left_at')
+                ->count();
+            expect($wrestlerCount + $tagTeamCount)->toBe(2);
         });
 
         test('member can be part of multiple stables across different time periods', function () {
@@ -161,14 +169,14 @@ describe('StableMember Model', function () {
             // Verify current stable is correct
             $currentStable = $this->wrestler->currentStable;
             expect($currentStable->id)->toBe($this->secondStable->id);
-            expect($currentStable->pivot->joined_at->equalTo($secondPeriodStart))->toBeTrue();
+            expect(Carbon::parse($currentStable->pivot->joined_at)->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
             expect($currentStable->pivot->left_at)->toBeNull();
 
             // Verify previous stable is correct
             $previousStable = $this->wrestler->previousStables()->first();
             expect($previousStable->id)->toBe($this->stable->id);
-            expect($previousStable->pivot->joined_at->equalTo($firstPeriodStart))->toBeTrue();
-            expect($previousStable->pivot->left_at->equalTo($firstPeriodEnd))->toBeTrue();
+            expect(Carbon::parse($previousStable->pivot->joined_at)->format('Y-m-d H:i:s'))->toBe($firstPeriodStart->format('Y-m-d H:i:s'));
+            expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($firstPeriodEnd->format('Y-m-d H:i:s'));
         });
     });
 
@@ -204,7 +212,7 @@ describe('StableMember Model', function () {
 
             // Verify pivot data is updated
             $previousStable = $this->wrestler->previousStables()->first();
-            expect($previousStable->pivot->left_at->equalTo($leaveDate))->toBeTrue();
+            expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($leaveDate->format('Y-m-d H:i:s'));
         });
 
         test('tag team leaving stable updates pivot correctly', function () {
@@ -222,7 +230,7 @@ describe('StableMember Model', function () {
 
             // Verify pivot data is updated
             $previousStable = $this->tagTeam->previousStables()->first();
-            expect($previousStable->pivot->left_at->equalTo($leaveDate))->toBeTrue();
+            expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($leaveDate->format('Y-m-d H:i:s'));
         });
 
         test('detaching member completely removes relationship', function () {
@@ -235,8 +243,7 @@ describe('StableMember Model', function () {
             expect($this->wrestler->previousStables()->count())->toBe(0);
 
             // Verify pivot record is deleted
-            expect(StableMember::where('member_id', $this->wrestler->id)
-                ->where('member_type', 'wrestler')
+            expect(StableWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('stable_id', $this->stable->id)
                 ->exists())->toBeFalse();
         });
@@ -323,51 +330,47 @@ describe('StableMember Model', function () {
     });
 
     describe('Stable Pivot Models', function () {
-        test('StableMember pivot model can be queried directly for wrestler', function () {
+        test('StableWrestler pivot model can be queried directly for wrestler', function () {
             $this->wrestler->stables()->attach($this->stable->id, [
                 'joined_at' => Carbon::now()->subMonths(6),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            $pivotRecord = StableMember::where('member_id', $this->wrestler->id)
-                ->where('member_type', 'wrestler')
+            $pivotRecord = StableWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('stable_id', $this->stable->id)
                 ->first();
 
             expect($pivotRecord)->not->toBeNull();
-            expect($pivotRecord->member_id)->toBe($this->wrestler->id);
-            expect($pivotRecord->member_type)->toBe('wrestler');
+            expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->stable_id)->toBe($this->stable->id);
             expect($pivotRecord->joined_at)->toBeInstanceOf(Carbon::class);
             expect($pivotRecord->left_at)->toBeNull();
 
             // Test pivot relationships
-            expect($pivotRecord->member->id)->toBe($this->wrestler->id);
+            expect($pivotRecord->wrestler->id)->toBe($this->wrestler->id);
             expect($pivotRecord->stable->id)->toBe($this->stable->id);
         });
 
-        test('StableMember pivot model can be queried directly for tag team', function () {
+        test('StableTagTeam pivot model can be queried directly for tag team', function () {
             $this->tagTeam->stables()->attach($this->stable->id, [
                 'joined_at' => Carbon::now()->subMonths(4),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            $pivotRecord = StableMember::where('member_id', $this->tagTeam->id)
-                ->where('member_type', 'tagTeam')
+            $pivotRecord = StableTagTeam::where('tag_team_id', $this->tagTeam->id)
                 ->where('stable_id', $this->stable->id)
                 ->first();
 
             expect($pivotRecord)->not->toBeNull();
-            expect($pivotRecord->member_id)->toBe($this->tagTeam->id);
-            expect($pivotRecord->member_type)->toBe('tagTeam');
+            expect($pivotRecord->tag_team_id)->toBe($this->tagTeam->id);
             expect($pivotRecord->stable_id)->toBe($this->stable->id);
             expect($pivotRecord->joined_at)->toBeInstanceOf(Carbon::class);
             expect($pivotRecord->left_at)->toBeNull();
 
             // Test pivot relationships
-            expect($pivotRecord->member->id)->toBe($this->tagTeam->id);
+            expect($pivotRecord->tagTeam->id)->toBe($this->tagTeam->id);
             expect($pivotRecord->stable->id)->toBe($this->stable->id);
         });
 
@@ -383,15 +386,14 @@ describe('StableMember Model', function () {
                 'updated_at' => now(),
             ]);
 
-            $wrestlerPivot = StableMember::where('member_id', $this->wrestler->id)
-                ->where('member_type', 'wrestler')
+            $wrestlerPivot = StableWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('stable_id', $this->stable->id)
                 ->first();
 
             expect($wrestlerPivot->joined_at)->toBeInstanceOf(Carbon::class);
             expect($wrestlerPivot->left_at)->toBeInstanceOf(Carbon::class);
-            expect($wrestlerPivot->joined_at->equalTo($joinedDate))->toBeTrue();
-            expect($wrestlerPivot->left_at->equalTo($leftDate))->toBeTrue();
+            expect($wrestlerPivot->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
+            expect($wrestlerPivot->left_at->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -456,8 +458,7 @@ describe('StableMember Model', function () {
                 'updated_at' => now(),
             ]);
 
-            $pivotRecord = StableMember::where('member_id', $this->wrestler->id)
-                ->where('member_type', 'wrestler')
+            $pivotRecord = StableWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('stable_id', $this->stable->id)
                 ->first();
 
@@ -568,12 +569,12 @@ describe('StableMember Model', function () {
 
             // Calculate duration of completed period
             $completedPeriod = $this->wrestler->previousStables()->first();
-            $duration = $completedPeriod->pivot->joined_at->diffInDays($completedPeriod->pivot->left_at);
+            $duration = Carbon::parse($completedPeriod->pivot->joined_at)->diffInDays(Carbon::parse($completedPeriod->pivot->left_at));
             expect($duration)->toBeGreaterThan(150); // Approximately 6 months
 
             // Calculate duration of current period
             $currentPeriod = $this->wrestler->currentStable;
-            $currentDuration = $currentPeriod->pivot->joined_at->diffInDays(Carbon::now());
+            $currentDuration = Carbon::parse($currentPeriod->pivot->joined_at)->diffInDays(Carbon::now());
             expect($currentDuration)->toBeGreaterThan(80); // Approximately 3 months
         });
     });
@@ -594,7 +595,7 @@ describe('StableMember Model', function () {
             ]);
 
             // Load wrestlers with their current stables
-            $wrestlers = Wrestler::with('currentStable')->get();
+            $wrestlers = Wrestler::with('currentStable')->whereIn('id', [$this->wrestler->id, $this->secondWrestler->id])->get();
 
             expect($wrestlers)->toHaveCount(2); // Including secondWrestler
 
