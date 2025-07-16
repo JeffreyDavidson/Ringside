@@ -222,3 +222,190 @@ function expectStatusPriorityRules(Employable $entity): void
         expect($entity->status)->toBe(EmploymentStatus::Unemployed);
     }
 }
+
+/**
+ * Expect that two status values are equivalent.
+ */
+function expectStatusEquivalent($actualStatus, $expectedStatus): void
+{
+    if (is_string($expectedStatus)) {
+        expect($actualStatus->value ?? $actualStatus)->toBe($expectedStatus);
+    } elseif ($expectedStatus instanceof BackedEnum) {
+        expect($actualStatus)->toBe($expectedStatus);
+    } else {
+        expect($actualStatus)->toEqual($expectedStatus);
+    }
+}
+
+/**
+ * Expect relationship counts to match expected values.
+ */
+function expectRelationshipCounts($entity, array $expectedCounts): void
+{
+    foreach ($expectedCounts as $relationship => $count) {
+        expect($entity->{$relationship}()->count())->toBe($count);
+    }
+}
+
+/**
+ * Expect manager relationship to be correctly configured.
+ */
+function expectManagerRelationship($wrestler, $manager, array $expectedPivotData = []): void
+{
+    expect($wrestler->managers()->count())->toBeGreaterThan(0);
+    
+    $relationship = $wrestler->managers()->where('manager_id', $manager->id)->first();
+    expect($relationship)->not->toBeNull();
+    expect($relationship->pivot->wrestler_id)->toBe($wrestler->id);
+    expect($relationship->pivot->manager_id)->toBe($manager->id);
+    
+    foreach ($expectedPivotData as $field => $expectedValue) {
+        if ($expectedValue instanceof Carbon) {
+            expect($relationship->pivot->{$field}->timestamp)->toBe($expectedValue->timestamp);
+        } elseif ($expectedValue === null) {
+            expect($relationship->pivot->{$field})->toBeNull();
+        } else {
+            $actualValue = $relationship->pivot->{$field};
+            if (is_numeric($actualValue) && is_numeric($expectedValue)) {
+                expect((int) $actualValue)->toBe((int) $expectedValue);
+            } else {
+                expect($actualValue)->toBe($expectedValue);
+            }
+        }
+    }
+}
+
+/**
+ * Expect tag team membership to be correctly configured.
+ */
+function expectTagTeamMembership($wrestler, $tagTeam, array $expectedPivotData = []): void
+{
+    expect($wrestler->tagTeams()->count())->toBeGreaterThan(0);
+    
+    $relationship = $wrestler->tagTeams()->where('tag_team_id', $tagTeam->id)->first();
+    expect($relationship)->not->toBeNull();
+    expect($relationship->pivot->wrestler_id)->toBe($wrestler->id);
+    expect($relationship->pivot->tag_team_id)->toBe($tagTeam->id);
+    
+    foreach ($expectedPivotData as $field => $expectedValue) {
+        if ($expectedValue instanceof Carbon) {
+            expect($relationship->pivot->{$field}->timestamp)->toBe($expectedValue->timestamp);
+        } elseif ($expectedValue === null) {
+            expect($relationship->pivot->{$field})->toBeNull();
+        } else {
+            $actualValue = $relationship->pivot->{$field};
+            if (is_numeric($actualValue) && is_numeric($expectedValue)) {
+                expect((int) $actualValue)->toBe((int) $expectedValue);
+            } else {
+                expect($actualValue)->toBe($expectedValue);
+            }
+        }
+    }
+}
+
+/**
+ * Expect current relationships to be active (no end date).
+ */
+function expectCurrentRelationshipsActive($wrestler): void
+{
+    $currentManagers = $wrestler->currentManagers()->get();
+    foreach ($currentManagers as $manager) {
+        expect($manager->pivot->fired_at)->toBeNull();
+    }
+    
+    if (method_exists($wrestler, 'currentTagTeam')) {
+        $currentTagTeam = $wrestler->currentTagTeam;
+        if ($currentTagTeam) {
+            expect($currentTagTeam->pivot->left_at)->toBeNull();
+        }
+    }
+}
+
+/**
+ * Expect previous relationships to have end dates.
+ */
+function expectPreviousRelationshipsEnded($wrestler): void
+{
+    $previousManagers = $wrestler->previousManagers()->get();
+    foreach ($previousManagers as $manager) {
+        expect($manager->pivot->fired_at)->not->toBeNull();
+    }
+    
+    if (method_exists($wrestler, 'previousTagTeams')) {
+        $previousTagTeams = $wrestler->previousTagTeams()->get();
+        foreach ($previousTagTeams as $tagTeam) {
+            expect($tagTeam->pivot->left_at)->not->toBeNull();
+        }
+    }
+}
+
+/**
+ * Expect relationship dates to be chronologically valid.
+ */
+function expectValidRelationshipDates($wrestler): void
+{
+    // Check manager relationships
+    $managers = $wrestler->managers()->get();
+    foreach ($managers as $manager) {
+        $pivot = $manager->pivot;
+        if ($pivot->fired_at) {
+            expect($pivot->hired_at->lessThan($pivot->fired_at))->toBeTrue();
+        }
+    }
+    
+    // Check tag team relationships
+    if (method_exists($wrestler, 'tagTeams')) {
+        $tagTeams = $wrestler->tagTeams()->get();
+        foreach ($tagTeams as $tagTeam) {
+            $pivot = $tagTeam->pivot;
+            if ($pivot->left_at) {
+                expect($pivot->joined_at->lessThan($pivot->left_at))->toBeTrue();
+            }
+        }
+    }
+}
+
+/**
+ * Expect no overlapping active relationships of the same type.
+ */
+function expectNoOverlappingRelationships($wrestler): void
+{
+    // Check for multiple current managers (should not exist)
+    expect($wrestler->currentManagers()->count())->toBeLessThanOrEqual(1);
+    
+    // Check for multiple current tag teams (should not exist per business rules)
+    if (method_exists($wrestler, 'isAMemberOfCurrentTagTeam')) {
+        $currentMemberships = $wrestler->tagTeams()->wherePivotNull('left_at')->count();
+        expect($currentMemberships)->toBeLessThanOrEqual(1);
+    }
+}
+
+/**
+ * Expect relationship history to be properly ordered.
+ */
+function expectProperRelationshipOrdering($wrestler): void
+{
+    // Managers should be ordered by hired_at
+    $managers = $wrestler->managers()->orderBy('hired_at', 'asc')->get();
+    $previousHiredDate = null;
+    
+    foreach ($managers as $manager) {
+        if ($previousHiredDate) {
+            expect($manager->pivot->hired_at->greaterThanOrEqualTo($previousHiredDate))->toBeTrue();
+        }
+        $previousHiredDate = $manager->pivot->hired_at;
+    }
+    
+    // Tag teams should be ordered by joined_at
+    if (method_exists($wrestler, 'tagTeams')) {
+        $tagTeams = $wrestler->tagTeams()->orderBy('joined_at', 'asc')->get();
+        $previousJoinedDate = null;
+        
+        foreach ($tagTeams as $tagTeam) {
+            if ($previousJoinedDate) {
+                expect($tagTeam->pivot->joined_at->greaterThanOrEqualTo($previousJoinedDate))->toBeTrue();
+            }
+            $previousJoinedDate = $tagTeam->pivot->joined_at;
+        }
+    }
+}

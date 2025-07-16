@@ -9,7 +9,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
- * Integration tests for Title-Championship relationship functionality.
+ * Integration tests for TitleChampionship model functionality.
  *
  * This test suite validates the complete workflow of title championships
  * including winning titles, losing titles, querying current and previous
@@ -19,20 +19,22 @@ use Illuminate\Support\Carbon;
  * Tests cover the CanWinTitles trait implementation and TitleChampionship
  * model functionality with real database relationships and polymorphic
  * champion associations.
+ *
+ * @see \App\Models\Titles\TitleChampionship
  */
-describe('Title-Championship Relationship Integration', function () {
+describe('TitleChampionship Model', function () {
     beforeEach(function () {
         // Create test entities with realistic factory states
         $this->title = Title::factory()->active()->create([
             'name' => 'WWE Championship',
         ]);
 
-        $this->wrestler = Wrestler::factory()->bookable()->create([
+        $this->wrestler = Wrestler::factory()->employed()->create([
             'name' => 'Stone Cold Steve Austin',
             'hometown' => 'Austin, Texas',
         ]);
 
-        $this->tagTeam = TagTeam::factory()->bookable()->create([
+        $this->tagTeam = TagTeam::factory()->employed()->create([
             'name' => 'The Hardy Boyz',
         ]);
 
@@ -40,12 +42,12 @@ describe('Title-Championship Relationship Integration', function () {
             'name' => 'Intercontinental Championship',
         ]);
 
-        $this->secondWrestler = Wrestler::factory()->bookable()->create([
+        $this->secondWrestler = Wrestler::factory()->employed()->create([
             'name' => 'The Rock',
             'hometown' => 'Miami, Florida',
         ]);
 
-        $this->secondTagTeam = TagTeam::factory()->bookable()->create([
+        $this->secondTagTeam = TagTeam::factory()->employed()->create([
             'name' => 'The Dudley Boyz',
         ]);
     });

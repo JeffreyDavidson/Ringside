@@ -292,6 +292,164 @@ function setupRealisticTestState(): array
 }
 
 /**
+ * Create management relationship with proper pivot data.
+ */
+function createManagementRelationship($wrestler, $manager, array $options = []): void
+{
+    $defaultOptions = [
+        'hired_at' => Carbon::now()->subMonths(6),
+        'fired_at' => null,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+
+    $pivotData = array_merge($defaultOptions, $options);
+    $wrestler->managers()->attach($manager->id, $pivotData);
+}
+
+/**
+ * Create tag team membership with proper pivot data.
+ */
+function createTagTeamMembership($wrestler, $tagTeam, array $options = []): void
+{
+    $defaultOptions = [
+        'joined_at' => Carbon::now()->subMonths(6),
+        'left_at' => null,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ];
+
+    $pivotData = array_merge($defaultOptions, $options);
+    $wrestler->tagTeams()->attach($tagTeam->id, $pivotData);
+}
+
+/**
+ * End management relationship by setting fired_at date.
+ */
+function endManagementRelationship($wrestler, $manager, ?Carbon $endDate = null): void
+{
+    $endDate = $endDate ?? Carbon::now();
+    $wrestler->managers()->updateExistingPivot($manager->id, [
+        'fired_at' => $endDate,
+        'updated_at' => now(),
+    ]);
+}
+
+/**
+ * End tag team membership by setting left_at date.
+ */
+function endTagTeamMembership($wrestler, $tagTeam, ?Carbon $endDate = null): void
+{
+    $endDate = $endDate ?? Carbon::now();
+    $wrestler->tagTeams()->updateExistingPivot($tagTeam->id, [
+        'left_at' => $endDate,
+        'updated_at' => now(),
+    ]);
+}
+
+/**
+ * Create multiple management periods for complex scenarios.
+ */
+function createManagementHistory($wrestler, array $periods): void
+{
+    foreach ($periods as $period) {
+        createManagementRelationship($wrestler, $period['manager'], [
+            'hired_at' => $period['hired_at'],
+            'fired_at' => $period['fired_at'] ?? null,
+        ]);
+    }
+}
+
+/**
+ * Create multiple tag team membership periods for complex scenarios.
+ */
+function createTagTeamHistory($wrestler, array $periods): void
+{
+    foreach ($periods as $period) {
+        createTagTeamMembership($wrestler, $period['tag_team'], [
+            'joined_at' => $period['joined_at'],
+            'left_at' => $period['left_at'] ?? null,
+        ]);
+    }
+}
+
+/**
+ * Create overlapping relationship periods for validation testing.
+ */
+function createOverlappingManagementPeriods($wrestler, $manager1, $manager2): array
+{
+    $firstPeriodStart = Carbon::now()->subYear();
+    $firstPeriodEnd = Carbon::now()->subMonths(6);
+    $secondPeriodStart = Carbon::now()->subMonths(8); // Overlaps
+
+    createManagementRelationship($wrestler, $manager1, [
+        'hired_at' => $firstPeriodStart,
+        'fired_at' => $firstPeriodEnd,
+    ]);
+
+    createManagementRelationship($wrestler, $manager2, [
+        'hired_at' => $secondPeriodStart,
+        'fired_at' => Carbon::now()->subMonths(4),
+    ]);
+
+    return [
+        'first_period_start' => $firstPeriodStart,
+        'first_period_end' => $firstPeriodEnd,
+        'second_period_start' => $secondPeriodStart,
+        'overlap_detected' => $secondPeriodStart->between($firstPeriodStart, $firstPeriodEnd),
+    ];
+}
+
+/**
+ * Create complex relationship scenario with multiple periods and partners.
+ */
+function createComplexRelationshipScenario($wrestler): array
+{
+    $manager1 = Manager::factory()->employed()->create(['name' => 'First Manager']);
+    $manager2 = Manager::factory()->employed()->create(['name' => 'Second Manager']);
+    $tagTeam1 = TagTeam::factory()->employed()->create(['name' => 'First Tag Team']);
+    $tagTeam2 = TagTeam::factory()->employed()->create(['name' => 'Second Tag Team']);
+
+    // Management history
+    createManagementHistory($wrestler, [
+        [
+            'manager' => $manager1,
+            'hired_at' => Carbon::now()->subYear(),
+            'fired_at' => Carbon::now()->subMonths(8),
+        ],
+        [
+            'manager' => $manager2,
+            'hired_at' => Carbon::now()->subMonths(3),
+            'fired_at' => null, // Current
+        ],
+    ]);
+
+    // Tag team history
+    createTagTeamHistory($wrestler, [
+        [
+            'tag_team' => $tagTeam1,
+            'joined_at' => Carbon::now()->subYear(),
+            'left_at' => Carbon::now()->subMonths(6),
+        ],
+        [
+            'tag_team' => $tagTeam2,
+            'joined_at' => Carbon::now()->subMonths(3),
+            'left_at' => null, // Current
+        ],
+    ]);
+
+    return [
+        'wrestler' => $wrestler,
+        'managers' => [$manager1, $manager2],
+        'tag_teams' => [$tagTeam1, $tagTeam2],
+        'current_manager' => $manager2,
+        'current_tag_team' => $tagTeam2,
+        'previous_manager' => $manager1,
+        'previous_tag_team' => $tagTeam1,
+    ];
+}
+
+/**
  * Clean up test state completely.
  */
 function cleanupTestState(): void
