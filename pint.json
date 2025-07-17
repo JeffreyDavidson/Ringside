@@ -11,7 +11,7 @@
         "lowercase_keywords": true,
         "lowercase_static_reference": true,
         "fully_qualified_strict_types": {
-            "import_symbols": false,
+            "import_symbols": true,
             "leading_backslash_in_global_namespace": false
         },
         "global_namespace_import": {

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Users\Modals;
 
 use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Users\UserForm;
+use App\Livewire\Users\Forms\Form;
 use App\Models\Users\User;
 
 /**
- * @extends BaseModal<UserForm, User>
+ * @extends BaseModal<Form, User>
  */
 class FormModal extends BaseModal
 {

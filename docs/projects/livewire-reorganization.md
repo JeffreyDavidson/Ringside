@@ -31,22 +31,22 @@
 
 ### 1. Form Integration Tests (`tests/Integration/Livewire/{Domain}/Forms/`)
 - **Focus**: Validation logic, data transformation, business rule enforcement
-- **Examples**: `WrestlerFormIntegrationTest.php`, `VenueFormIntegrationTest.php`
+- **Examples**: `FormTest.php`, `FormTest.php`
 - **Testing**: Rule objects, data processing, protected method behavior via reflection
 
 ### 2. Modal Integration Tests (`tests/Integration/Livewire/{Domain}/Modals/`)
 - **Focus**: State management, dummy data generation, modal lifecycle
-- **Examples**: `WrestlerFormModalIntegrationTest.php`, `ManagerFormModalIntegrationTest.php`
+- **Examples**: `FormModalTest.php`, `FormModalTest.php`
 - **Testing**: Modal state, realistic dummy data generation, trait integration
 
 ### 3. Table Integration Tests (`tests/Integration/Livewire/{Domain}/Tables/`)
 - **Focus**: Query building, filtering, column configuration
-- **Examples**: `PreviousEventsTableIntegrationTest.php`, `WrestlersTableIntegrationTest.php`
+- **Examples**: `PreviousEventsTableTest.php`, `WrestlersTableTest.php`
 - **Testing**: SQL query generation, entity filtering, data presentation
 
 ### 4. Component Integration Tests (`tests/Integration/Livewire/{Domain}/Components/`)
 - **Focus**: Business actions, authorization, component communication
-- **Examples**: `WrestlerActionsComponentIntegrationTest.php`
+- **Examples**: `ActionsComponentTest.php`
 - **Testing**: Action integration, Gate authorization, event dispatching
 
 ## Key Integration Test Features
@@ -84,10 +84,10 @@ test('generates realistic wrestling height values', function () {
 test('builder applies descending date ordering for chronological display', function () {
     $table = new PreviousEventsTable();
     $table->venueId = $this->venue->id;
-    
+
     $builder = $table->builder();
     $sql = $builder->toSql();
-    
+
     expect($sql)->toContain('order by "date" desc');
 });
 ```
