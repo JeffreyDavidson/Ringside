@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use Events\EventForm;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Livewire\Form;
-use Wrestlers\WrestlerForm;
 
 /**
  * Abstract base class for Livewire form components.

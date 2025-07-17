@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
@@ -25,17 +25,17 @@ use Illuminate\Validation\Rule;
  * - User identification and contact information
  * - Role-based access control preparation
  *
- * @extends LivewireBaseForm<Form, User>
+ * @extends BaseForm<Form, User>
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  *
  * @property string $name Full name for user identification and display
  * @property string $email Email address for authentication and communication
  * @property string $password Secure password for account access
  * @property string $password_confirmation Password confirmation for security
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     /**
      * The model instance being edited, or null for new user creation.

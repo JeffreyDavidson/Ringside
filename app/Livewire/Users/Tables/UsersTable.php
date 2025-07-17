@@ -6,13 +6,15 @@ namespace App\Livewire\Users\Tables;
 
 use App\Builders\Users\UserBuilder;
 use App\Enums\Users\Role;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class UsersTable extends BaseTableWithActions
+class UsersTable extends BaseTable
 {
+    protected bool $showActionColumn = true;
+
     protected string $databaseTableName = 'users';
 
     protected string $routeBasePath = 'users';

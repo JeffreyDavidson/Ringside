@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesActivityPeriods;
 use App\Models\Stables\Stable;
 use App\Rules\Shared\CanChangeDebutDate;
@@ -29,19 +29,19 @@ use Illuminate\Validation\Rule;
  * - Integration with stable activation relationship system
  * - Wrestling storyline and faction management support
  *
- * @extends LivewireBaseForm<Form, Stable>
+ * @extends BaseForm<Form, Stable>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  * @see ManagesActivityPeriods For activation period tracking
  * @see CanChangeDebutDate For custom activation validation
  *
  * @property string $name Stable's official name for storylines and promotion
  * @property Carbon|string|null $start_date Stable activation start date
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     use ManagesActivityPeriods;
 
