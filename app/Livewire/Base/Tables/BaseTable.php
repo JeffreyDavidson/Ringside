@@ -39,8 +39,6 @@ abstract class BaseTable extends DataTableComponent
     /** @var array<string, bool> */
     protected array $actionLinksToDisplay = ['view' => true, 'edit' => true, 'delete' => true];
 
-    protected bool $showActionColumn = false;
-
     /**
      * Delete a model with proper authorization checking.
      *
