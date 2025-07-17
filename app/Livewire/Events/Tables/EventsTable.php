@@ -6,7 +6,7 @@ namespace App\Livewire\Events\Tables;
 
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Exception;
@@ -20,8 +20,10 @@ use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class EventsTable extends BaseTableWithActions
+class EventsTable extends BaseTable
 {
+    protected bool $showActionColumn = true;
+
     protected string $databaseTableName = 'events';
 
     protected string $routeBasePath = 'events';

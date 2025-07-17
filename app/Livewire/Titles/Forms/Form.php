@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Titles\Forms;
 
 use App\Enums\Titles\TitleType;
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesActivityPeriods;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
@@ -28,12 +28,12 @@ use Illuminate\Validation\Rule;
  * - Wrestling-specific validation (titles must end with "Title" or "Titles")
  * - Integration with title activation relationship system
  *
- * @extends LivewireBaseForm<TitleForm, Title>
+ * @extends BaseForm<TitleForm, Title>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  * @see ManagesActivityPeriods For activation period tracking
  * @see CanChangeDebutDate For custom activation validation
  *
@@ -41,7 +41,7 @@ use Illuminate\Validation\Rule;
  * @property TitleType|string $type Title type (singles or tag-team)
  * @property Carbon|string|null $start_date Title activation start date
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     use ManagesActivityPeriods;
 

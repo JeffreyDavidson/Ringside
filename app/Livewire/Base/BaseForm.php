@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use Events\EventForm;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Livewire\Form;
-use Wrestlers\WrestlerForm;
 
 /**
  * Abstract base class for Livewire form components.
@@ -37,7 +35,7 @@ use Wrestlers\WrestlerForm;
  * extend this base to inherit common form behaviors while implementing their
  * specific validation rules and data handling logic.
  *
- * @template TForm of LivewireBaseForm The concrete form class extending this base
+ * @template TForm of BaseForm The concrete form class extending this base
  * @template TFormModel of Model|null The Eloquent model type this form manages
  *
  * @author Your Name
@@ -50,7 +48,7 @@ use Wrestlers\WrestlerForm;
  * @example
  * ```php
  * // Creating a concrete form implementation
- * class WrestlerForm extends LivewireBaseForm
+ * class WrestlerForm extends BaseForm
  * {
  *     protected ?Model $formModel = null;
  *
@@ -93,7 +91,7 @@ use Wrestlers\WrestlerForm;
  * }
  * ```
  */
-abstract class LivewireBaseForm extends Form
+abstract class BaseForm extends Form
 {
     /**
      * The Eloquent model instance being managed by this form.

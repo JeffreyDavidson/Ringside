@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
@@ -28,12 +28,12 @@ use Illuminate\Validation\Rule;
  * - Event uniqueness validation across the system
  * - Cached venue list presentation for efficient form rendering
  *
- * @extends LivewireBaseForm<EventForm, Event>
+ * @extends BaseForm<EventForm, Event>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality
+ * @see BaseForm For base form functionality
  * @see PresentsVenuesList For venue selection functionality
  * @see Event For the underlying event model
  * @see DateCanBeChanged For custom date validation rules
@@ -43,7 +43,7 @@ use Illuminate\Validation\Rule;
  * @property int $venue Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     use PresentsVenuesList;
 

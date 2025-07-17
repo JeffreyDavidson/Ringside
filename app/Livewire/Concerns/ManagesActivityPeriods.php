@@ -33,7 +33,7 @@ use Illuminate\Database\QueryException;
  *
  * @example
  * ```php
- * class TitleForm extends LivewireBaseForm
+ * class TitleForm extends BaseForm
  * {
  *     use ManagesActivityPeriods;
  *

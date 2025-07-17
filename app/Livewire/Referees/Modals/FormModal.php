@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Modals;
 
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\BaseModal;
 use App\Livewire\Referees\Forms\Form;
 use App\Models\Referees\Referee;
@@ -14,7 +15,7 @@ use Illuminate\Support\Carbon;
  */
 class FormModal extends BaseModal
 {
-    public Form $form;
+    public BaseForm $form;
 
     protected function getFormClass(): string
     {

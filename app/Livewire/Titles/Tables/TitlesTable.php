@@ -10,7 +10,7 @@ use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Livewire\Titles\Components\ActionsComponent;
@@ -45,8 +45,13 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
  * // - Tag Team Titles (Inactive, First Activated: 2021-03-10)
  * ```
  */
-class TitlesTable extends BaseTableWithActions
+class TitlesTable extends BaseTable
 {
+    /**
+     * Enable action column for this table.
+     */
+    protected bool $showActionColumn = true;
+
     /**
      * The database table name for the main query.
      *
