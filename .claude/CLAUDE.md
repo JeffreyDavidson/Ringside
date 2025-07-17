@@ -271,7 +271,55 @@ app/Models/Titles/TitleChampionship.php → tests/Integration/Models/Titles/Titl
 - Remove simple functional tests that duplicate structural coverage
 - Consolidate similar tests using parameterization
 
-### Livewire Component Naming
+### Livewire Component Architecture Standardization
+
+#### Current Problems Identified:
+- **Redundant suffixes**: `ActionsComponent.php` in `/Components/` folder (folder already indicates type)
+- **Generic names**: `Form.php` doesn't indicate purpose (Create? Edit? Both?)
+- **Inconsistent patterns**: Mix of descriptive vs generic names across domains
+- **Legacy files**: Old form files outside folder structure need cleanup
+- **Poor scalability**: Hard to add multiple forms/tables/components per domain
+
+#### Standardized Naming Convention:
+
+```
+app/Livewire/{Domain}/
+├── Components/
+│   ├── Actions.php              (not ActionsComponent.php)
+│   ├── StatusCard.php
+│   ├── QuickStats.php
+│   └── RelationshipManager.php
+├── Forms/
+│   ├── Create.php              (not Form.php)
+│   ├── Edit.php
+│   ├── Bulk.php
+│   └── Import.php
+├── Modals/
+│   ├── CreateEdit.php          (not FormModal.php)
+│   ├── Delete.php
+│   ├── BulkActions.php
+│   └── Import.php
+└── Tables/
+    ├── Main.php                (not TitlesTable.php)
+    ├── PreviousManagers.php    (descriptive names kept)
+    ├── PreviousMatches.php
+    ├── Championships.php
+    └── Archive.php
+```
+
+#### Naming Principles:
+1. **No redundant suffixes** - folder indicates component type
+2. **Descriptive purposes** - `Create.php`, `Edit.php`, `Main.php`, `Actions.php`
+3. **Scalable structure** - supports multiple forms/tables/components per domain
+4. **Consistent patterns** - same naming rules across all domains
+
+#### Implementation Strategy:
+- **Phase 1**: Audit current components and document usage
+- **Phase 2**: Rename files following new convention
+- **Phase 3**: Update tests, views, and route references
+- **Phase 4**: Clean up legacy files and documentation
+
+### Livewire Component Naming (Legacy Reference)
 
 **Class to View Mapping:**
 - Class: `MatchesTable` → Component: `matches.tables.matches-table`
