@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Modals;
 
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\Form;
@@ -18,7 +19,7 @@ class FormModal extends BaseFormModal
 {
     use PresentsVenuesList;
 
-    public Form $form;
+    public BaseForm $form;
 
     protected function getFormClass(): string
     {

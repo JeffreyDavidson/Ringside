@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
@@ -28,12 +28,12 @@ use Illuminate\Validation\Rule;
  * - Wrestling persona data (signature moves, career information)
  * - Custom validation rules for wrestling industry requirements
  *
- * @extends LivewireBaseForm<WrestlerForm, Wrestler>
+ * @extends BaseForm<WrestlerForm, Wrestler>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see Height For height value object operations
  * @see CanChangeEmploymentDate For custom validation rules
@@ -46,7 +46,7 @@ use Illuminate\Validation\Rule;
  * @property string|null $signature_move Wrestler's finishing move or signature
  * @property Carbon|string|null $employment_date Employment start date
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     use ManagesEmployment;
 

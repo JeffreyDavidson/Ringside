@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Modals;
 
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Managers\Forms\Form;
 use App\Models\Managers\Manager;
@@ -13,7 +14,7 @@ use App\Models\Managers\Manager;
  */
 class FormModal extends BaseFormModal
 {
-    public Form $form;
+    public BaseForm $form;
 
     protected function getFormClass(): string
     {

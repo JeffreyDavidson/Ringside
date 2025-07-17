@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\TagTeams\TagTeam;
 use App\Rules\Shared\CanChangeEmploymentDate;
@@ -28,12 +28,12 @@ use Illuminate\Validation\Rule;
  * - Tag team partnership data (formation dates, career information)
  * - Custom validation rules for wrestling tag team requirements
  *
- * @extends LivewireBaseForm<TagTeamForm, TagTeam>
+ * @extends BaseForm<TagTeamForm, TagTeam>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules
  *
@@ -44,7 +44,7 @@ use Illuminate\Validation\Rule;
  * @property array<int, int> $managers Array of manager IDs assigned to the tag team
  * @property Carbon|string|null $employment_date Employment start date
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     use ManagesEmployment;
 

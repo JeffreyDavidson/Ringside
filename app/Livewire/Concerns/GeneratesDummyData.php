@@ -22,7 +22,7 @@ use Throwable;
  *
  * @example
  * ```php
- * class EventMatchForm extends LivewireBaseForm
+ * class EventMatchForm extends BaseForm
  * {
  *     use GeneratesDummyData;
  *

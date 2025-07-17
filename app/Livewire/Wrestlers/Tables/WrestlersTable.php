@@ -7,7 +7,7 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Actions\Wrestlers\RestoreAction;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Wrestlers\Components\ActionsComponent;
@@ -18,8 +18,10 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class WrestlersTable extends BaseTableWithActions
+class WrestlersTable extends BaseTable
 {
+    protected bool $showActionColumn = true;
+
     protected string $databaseTableName = 'wrestlers';
 
     protected string $routeBasePath = 'wrestlers';

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Modals;
 
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
 use App\Livewire\Concerns\Data\PresentsRefereesList;
@@ -16,7 +17,6 @@ use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Form;
 
 /**
  * Livewire modal component for wrestling match management within events.
@@ -55,7 +55,7 @@ class FormModal extends BaseFormModal
      * Handles all event match-specific validation, data transformation,
      * and persistence operations within the modal interface.
      */
-    public Form $form;
+    public BaseForm $form;
 
     /**
      * String name to render view for each match type.

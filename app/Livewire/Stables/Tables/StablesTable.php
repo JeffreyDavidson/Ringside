@@ -13,7 +13,7 @@ use App\Builders\Roster\StableBuilder;
 use App\Exceptions\Status\CannotBeDisbandedException;
 use App\Exceptions\Status\CannotBeRetiredException;
 use App\Exceptions\Status\CannotBeUnretiredException;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Models\Stables\Stable;
@@ -25,8 +25,10 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class StablesTable extends BaseTableWithActions
+class StablesTable extends BaseTable
 {
+    protected bool $showActionColumn = true;
+
     protected string $databaseTableName = 'stables';
 
     protected string $routeBasePath = 'stables';

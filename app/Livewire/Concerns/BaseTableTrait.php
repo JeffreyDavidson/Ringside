@@ -14,7 +14,7 @@ trait BaseTableTrait
     /** @var array<string, bool> */
     protected array $actionLinksToDisplay = ['view' => true, 'edit' => true, 'delete' => true];
 
-    protected bool $showActionColumn = true;
+    protected bool $showActionColumn = false;
 
     protected string $databaseTableName = '';
 
