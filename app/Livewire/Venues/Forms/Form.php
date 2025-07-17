@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -25,12 +25,12 @@ use Illuminate\Validation\Rule;
  * - ZIP code format validation for postal accuracy
  * - Location data integrity for event management systems
  *
- * @extends LivewireBaseForm<VenueForm, Venue>
+ * @extends BaseForm<VenueForm, Venue>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  *
  * @property string $name Venue's official name for events and promotion
  * @property string $street_address Complete street address for location
@@ -38,7 +38,7 @@ use Illuminate\Validation\Rule;
  * @property string $state State name (validated against State model)
  * @property int|string $zipcode 5-digit ZIP code for postal addressing
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     /**
      * The model instance being edited, or null for new venue creation.

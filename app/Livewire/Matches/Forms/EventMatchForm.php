@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
@@ -25,12 +25,12 @@ use Illuminate\Database\Eloquent\Model;
  * - Championship title stakes and implications
  * - Match-specific validation and business rules
  *
- * @extends LivewireBaseForm<EventMatchForm, EventMatch>
+ * @extends BaseForm<EventMatchForm, EventMatch>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  * @see EventMatch For the underlying event match model
  *
  * @property string $preview Match promotional preview content
@@ -39,7 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property array<int> $referees Array of referee IDs for match officials
  * @property array<int> $titles Array of title IDs at stake in the match
  */
-class EventMatchForm extends LivewireBaseForm
+class EventMatchForm extends BaseForm
 {
     use GeneratesDummyData;
 

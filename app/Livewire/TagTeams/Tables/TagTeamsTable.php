@@ -19,7 +19,7 @@ use App\Exceptions\Status\CannotBeReleasedException;
 use App\Exceptions\Status\CannotBeRetiredException;
 use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Exceptions\Status\CannotBeUnretiredException;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Models\TagTeams\TagTeam;
@@ -30,8 +30,10 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class TagTeamsTable extends BaseTableWithActions
+class TagTeamsTable extends BaseTable
 {
+    protected bool $showActionColumn = true;
+
     protected string $databaseTableName = 'tag_teams';
 
     protected string $routeBasePath = 'tag-teams';

@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace App\Livewire\Venues\Tables;
 
 use App\Actions\Venues\RestoreAction;
-use App\Livewire\Base\Tables\BaseTableWithActions;
+use App\Livewire\Base\Tables\BaseTable;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
-class VenuesTable extends BaseTableWithActions
+class VenuesTable extends BaseTable
 {
+    protected bool $showActionColumn = true;
+
     protected string $databaseTableName = 'venues';
 
     protected string $routeBasePath = 'venues';

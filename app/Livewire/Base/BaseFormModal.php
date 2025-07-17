@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use App\Livewire\Concerns\BaseModal;
+use App\Livewire\Base\BaseForm;
+use App\Livewire\Base\BaseModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,7 +35,7 @@ use Illuminate\Database\Eloquent\Model;
  * - Fail fast: Let individual components handle their own validation
  * - Single responsibility: Focus on modal-specific concerns
  *
- * @template TForm of LivewireBaseForm The form class this modal manages
+ * @template TForm of BaseForm The form class this modal manages
  * @template TModel of Model The Eloquent model type this modal creates/edits
  *
  * @extends BaseModal<TForm, TModel>
@@ -44,7 +45,7 @@ use Illuminate\Database\Eloquent\Model;
  * @since 1.0.0
  * @see BaseModal For core modal functionality and lifecycle management
  * @see GeneratesDummyData For dummy data generation capabilities
- * @see LivewireBaseForm For form implementation requirements
+ * @see BaseForm For form implementation requirements
  *
  * @example
  * ```php
@@ -107,7 +108,7 @@ abstract class BaseFormModal extends BaseModal
      *
      * Returns the fully qualified class name of the Livewire form that will
      * handle the creation or editing of models within this modal. The form
-     * must extend LivewireBaseForm to ensure compatibility with the modal's
+     * must extend BaseForm to ensure compatibility with the modal's
      * lifecycle and data binding patterns.
      *
      * This method is called during modal initialization to set up the proper
@@ -132,7 +133,7 @@ abstract class BaseFormModal extends BaseModal
      * }
      * ```
      *
-     * @see LivewireBaseForm For form implementation requirements
+     * @see BaseForm For form implementation requirements
      * @see mount() For when this method is called during initialization
      */
     abstract protected function getFormClass(): string;
@@ -211,6 +212,13 @@ abstract class BaseFormModal extends BaseModal
      * @see mount() For when this path is set during modal initialization
      */
     abstract protected function getModalPath(): string;
+
+    /**
+     * The form instance for this modal.
+     *
+     * @var BaseForm
+     */
+    public BaseForm $form;
 
     /**
      * Indicates if the modal is currently open.

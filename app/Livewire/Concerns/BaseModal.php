@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +12,7 @@ use Illuminate\View\View;
 use LivewireUI\Modal\ModalComponent;
 
 /**
- * @template TModelForm of LivewireBaseForm
+ * @template TModelForm of BaseForm
  * @template TModelType of Model
  */
 abstract class BaseModal extends ModalComponent

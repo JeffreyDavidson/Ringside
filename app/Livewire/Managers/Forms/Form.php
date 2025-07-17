@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Forms;
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
@@ -27,12 +27,12 @@ use Illuminate\Support\Carbon;
  * - Integration with wrestler representation and storyline systems
  * - Personnel record management for wrestling entertainment operations
  *
- * @extends LivewireBaseForm<ManagerForm, Manager>
+ * @extends BaseForm<ManagerForm, Manager>
  *
  * @author Your Name
  *
  * @since 1.0.0
- * @see LivewireBaseForm For base form functionality and patterns
+ * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules
  *
@@ -40,7 +40,7 @@ use Illuminate\Support\Carbon;
  * @property string $last_name Manager's last name for identification
  * @property Carbon|string|null $employment_date Employment start date
  */
-class Form extends LivewireBaseForm
+class Form extends BaseForm
 {
     use ManagesEmployment;
 
