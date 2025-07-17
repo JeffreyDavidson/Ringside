@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Modals;
 
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
@@ -21,7 +22,7 @@ class FormModal extends BaseFormModal
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
-    public Form $form;
+    public BaseForm $form;
 
     protected function getFormClass(): string
     {
