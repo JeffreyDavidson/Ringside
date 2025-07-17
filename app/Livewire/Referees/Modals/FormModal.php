@@ -5,22 +5,31 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Modals;
 
 use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Referees\RefereeForm;
+use App\Livewire\Referees\Forms\Form;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 
 /**
- * @extends BaseModal<RefereeForm, Referee>
+ * @extends BaseModal<Form, Referee>
  */
 class FormModal extends BaseModal
 {
-    protected string $modalFormPath = 'referees.modals.form-modal';
+    public Form $form;
 
-    protected string $modelTitleField = 'full_name';
+    protected function getFormClass(): string
+    {
+        return Form::class;
+    }
 
-    protected $modelForm;
+    protected function getModelClass(): string
+    {
+        return Referee::class;
+    }
 
-    protected $modelType;
+    protected function getModalPath(): string
+    {
+        return 'livewire.referees.modals.form-modal';
+    }
 
     public function fillDummyFields(): void
     {
@@ -29,6 +38,6 @@ class FormModal extends BaseModal
 
         $this->modelForm->first_name = fake()->firstName();
         $this->modelForm->last_name = fake()->lastName();
-        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
+        $this->modelForm->employment_date = $datetime?->format('Y-m-d H:i:s');
     }
 }
