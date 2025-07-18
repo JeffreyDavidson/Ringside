@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Modals;
 
-use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
@@ -14,7 +13,6 @@ use App\Models\Users\User;
  */
 class FormModal extends BaseFormModal
 {
-    public BaseForm $form;
 
     protected function getFormClass(): string
     {

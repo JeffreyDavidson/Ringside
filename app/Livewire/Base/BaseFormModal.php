@@ -218,7 +218,7 @@ abstract class BaseFormModal extends BaseModal
      *
      * @var BaseForm
      */
-    public BaseForm $form;
+    public $form;
 
     /**
      * Indicates if the modal is currently open.
@@ -325,7 +325,7 @@ abstract class BaseFormModal extends BaseModal
         // Initialize the form if it doesn't exist (Livewire auto-initialization)
         if (! isset($this->form)) {
             $formClass = $this->getFormClass();
-            $this->form = new $formClass();
+            $this->form = new $formClass($this, 'form');
         }
 
         // Set the form as the modelForm for BaseModal compatibility
