@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Stables\Forms\Form;
+use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -18,7 +18,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('started_at', '')
             ->call('store');
@@ -32,7 +32,7 @@ describe('Form Validation Rules', function () {
     it('validates stable name uniqueness', function () {
         Stable::factory()->create(['name' => 'Existing Stable']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Existing Stable')
             ->set('started_at', '2024-01-01')
             ->call('store');
@@ -41,7 +41,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates started_at date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', 'invalid-date')
             ->call('store');
@@ -50,7 +50,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates ended_at date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('ended_at', 'invalid-date')
@@ -60,7 +60,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates ended_at is after started_at', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-06-01')
             ->set('ended_at', '2024-01-01')
@@ -70,7 +70,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('allows ended_at to be null', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('ended_at', null)
@@ -80,7 +80,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('allows ended_at to be after started_at', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('ended_at', '2024-06-01')
@@ -94,7 +94,7 @@ describe('Form Field Validation', function () {
     it('validates name maximum length', function () {
         $longName = str_repeat('a', 256);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $longName)
             ->set('started_at', '2024-01-01')
             ->call('store');
@@ -105,7 +105,7 @@ describe('Form Field Validation', function () {
     it('accepts valid name length', function () {
         $validName = str_repeat('a', 255);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $validName)
             ->set('started_at', '2024-01-01')
             ->call('store');
@@ -114,7 +114,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates wrestlers array', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('wrestlers', 'invalid-array')
@@ -124,7 +124,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates tag_teams array', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('tag_teams', 'invalid-array')
@@ -134,7 +134,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates managers array', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('managers', 'invalid-array')
@@ -146,7 +146,7 @@ describe('Form Field Validation', function () {
 
 describe('Form Relationship Validation', function () {
     it('validates wrestlers exist', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('wrestlers', [999])
@@ -156,7 +156,7 @@ describe('Form Relationship Validation', function () {
     });
 
     it('validates tag teams exist', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('tag_teams', [999])
@@ -166,7 +166,7 @@ describe('Form Relationship Validation', function () {
     });
 
     it('validates managers exist', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('managers', [999])
@@ -178,7 +178,7 @@ describe('Form Relationship Validation', function () {
     it('accepts valid wrestler relationships', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('wrestlers', [$wrestler->id])
@@ -190,7 +190,7 @@ describe('Form Relationship Validation', function () {
     it('accepts valid tag team relationships', function () {
         $tagTeam = TagTeam::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('tag_teams', [$tagTeam->id])
@@ -202,7 +202,7 @@ describe('Form Relationship Validation', function () {
     it('accepts valid manager relationships', function () {
         $manager = Manager::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('managers', [$manager->id])
@@ -214,7 +214,7 @@ describe('Form Relationship Validation', function () {
 
 describe('Form Store Operations', function () {
     it('can store valid stable data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'The New World Order')
             ->set('started_at', '2024-01-01')
             ->set('ended_at', '2024-12-31')
@@ -231,7 +231,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores stable with minimal required data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Basic Stable')
             ->set('started_at', '2024-01-01')
             ->call('store');
@@ -246,7 +246,7 @@ describe('Form Store Operations', function () {
     });
 
     it('converts date strings to Carbon instances', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('ended_at', '2024-12-31')
@@ -266,7 +266,7 @@ describe('Form Store Operations', function () {
         $tagTeam = TagTeam::factory()->create();
         $manager = Manager::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('wrestlers', [$wrestler->id])
@@ -290,7 +290,7 @@ describe('Form Update Operations', function () {
             'started_at' => '2024-01-01',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $stable)
             ->set('name', 'Updated Stable')
             ->set('started_at', '2024-01-02')
@@ -312,7 +312,7 @@ describe('Form Update Operations', function () {
         $stable1 = Stable::factory()->create(['name' => 'Stable One']);
         $stable2 = Stable::factory()->create(['name' => 'Stable Two']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $stable2)
             ->set('name', 'Stable One')
             ->set('started_at', '2024-01-01')
@@ -327,7 +327,7 @@ describe('Form Update Operations', function () {
             'started_at' => '2024-01-01',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $stable)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-02')
@@ -342,7 +342,7 @@ describe('Form Update Operations', function () {
         $wrestler = Wrestler::factory()->create();
         $tagTeam = TagTeam::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $stable)
             ->set('name', $stable->name)
             ->set('started_at', $stable->started_at->toDateString())
@@ -364,7 +364,7 @@ describe('Form Business Logic', function () {
             'started_at' => '2023-01-01',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $stable)
             ->set('name', $stable->name)
             ->set('started_at', '2024-01-01')
@@ -375,7 +375,7 @@ describe('Form Business Logic', function () {
     });
 
     it('handles activity period management correctly', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->call('store');
@@ -387,7 +387,7 @@ describe('Form Business Logic', function () {
     });
 
     it('handles ended stable correctly', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Ended Stable')
             ->set('started_at', '2024-01-01')
             ->set('ended_at', '2024-06-01')
@@ -402,7 +402,7 @@ describe('Form Business Logic', function () {
     it('validates member employment status', function () {
         $unemployedWrestler = Wrestler::factory()->unemployed()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('wrestlers', [$unemployedWrestler->id])
@@ -414,7 +414,7 @@ describe('Form Business Logic', function () {
 
 describe('Form State Management', function () {
     it('resets form after successful store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->call('store');
@@ -426,7 +426,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', 'invalid-date')
             ->call('store');
@@ -443,7 +443,7 @@ describe('Form State Management', function () {
             'ended_at' => '2024-12-31',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $stable);
 
         $form->assertSet('name', 'Test Stable');
@@ -455,7 +455,7 @@ describe('Form State Management', function () {
         $wrestler = Wrestler::factory()->create();
         $tagTeam = TagTeam::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Stable')
             ->set('started_at', '2024-01-01')
             ->set('wrestlers', [$wrestler->id])

@@ -9,12 +9,12 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use App\Livewire\Stables\Forms\Form;
+use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseFormModal<Form, Stable>
+ * @extends BaseFormModal<CreateEditForm, Stable>
  */
 class FormModal extends BaseFormModal
 {
@@ -26,7 +26,7 @@ class FormModal extends BaseFormModal
 
     protected function getFormClass(): string
     {
-        return Form::class;
+        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

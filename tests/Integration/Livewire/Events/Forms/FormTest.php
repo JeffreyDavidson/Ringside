@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Events\Forms\Form;
+use App\Livewire\Events\Forms\CreateEditForm;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
@@ -16,7 +16,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('date', '')
             ->set('venue_id', '')
@@ -32,7 +32,7 @@ describe('Form Validation Rules', function () {
     it('validates event name uniqueness', function () {
         Event::factory()->create(['name' => 'Existing Event']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Existing Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', Venue::factory()->create()->id)
@@ -42,7 +42,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', 'invalid-date')
             ->set('venue_id', Venue::factory()->create()->id)
@@ -52,7 +52,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates venue exists', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', 999)
@@ -65,7 +65,7 @@ describe('Form Validation Rules', function () {
         $yesterday = Carbon::yesterday()->toDateString();
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', $yesterday)
             ->set('venue_id', $venue->id)
@@ -78,7 +78,7 @@ describe('Form Validation Rules', function () {
         $tomorrow = Carbon::tomorrow()->toDateString();
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', $tomorrow)
             ->set('venue_id', $venue->id)
@@ -93,7 +93,7 @@ describe('Form Field Validation', function () {
         $longName = str_repeat('a', 256);
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $longName)
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -106,7 +106,7 @@ describe('Form Field Validation', function () {
         $longDescription = str_repeat('a', 1001);
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -120,7 +120,7 @@ describe('Form Field Validation', function () {
         $longPreview = str_repeat('a', 501);
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -133,7 +133,7 @@ describe('Form Field Validation', function () {
     it('accepts valid optional fields', function () {
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -149,7 +149,7 @@ describe('Form Store Operations', function () {
     it('can store valid event data', function () {
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'WrestleMania 40')
             ->set('date', '2024-04-06')
             ->set('venue_id', $venue->id)
@@ -172,7 +172,7 @@ describe('Form Store Operations', function () {
     it('stores event with minimal required data', function () {
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Basic Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -190,7 +190,7 @@ describe('Form Store Operations', function () {
     it('converts date string to Carbon instance', function () {
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-04-06')
             ->set('venue_id', $venue->id)
@@ -214,7 +214,7 @@ describe('Form Update Operations', function () {
             'venue_id' => $venue1->id,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $event)
             ->set('name', 'Updated Event')
             ->set('date', '2024-02-01')
@@ -237,7 +237,7 @@ describe('Form Update Operations', function () {
         $event1 = Event::factory()->create(['name' => 'Event One']);
         $event2 = Event::factory()->create(['name' => 'Event Two']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $event2)
             ->set('name', 'Event One')
             ->set('date', '2024-12-31')
@@ -255,7 +255,7 @@ describe('Form Update Operations', function () {
             'venue_id' => $venue->id,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $event)
             ->set('name', 'Test Event')
             ->set('date', '2024-02-01')
@@ -275,7 +275,7 @@ describe('Form Business Logic', function () {
             'venue_id' => $venue->id,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $event)
             ->set('name', $event->name)
             ->set('date', '2024-12-31')
@@ -289,7 +289,7 @@ describe('Form Business Logic', function () {
     it('handles venue relationship correctly', function () {
         $venue = Venue::factory()->create(['name' => 'Test Arena']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -304,7 +304,7 @@ describe('Form Business Logic', function () {
     it('validates venue is active', function () {
         $inactiveVenue = Venue::factory()->inactive()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $inactiveVenue->id)
@@ -318,7 +318,7 @@ describe('Form State Management', function () {
     it('resets form after successful store', function () {
         $venue = Venue::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
@@ -331,7 +331,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Event')
             ->set('date', 'invalid-date')
             ->call('store');
@@ -350,7 +350,7 @@ describe('Form State Management', function () {
             'description' => 'Test description',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $event);
 
         $form->assertSet('name', 'Test Event');

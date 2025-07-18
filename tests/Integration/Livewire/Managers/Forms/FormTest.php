@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Managers\Forms\Form;
+use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 use App\Models\Users\User;
 use Livewire\Livewire;
@@ -14,7 +14,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', '')
             ->set('last_name', '')
             ->call('store');
@@ -28,7 +28,7 @@ describe('Form Validation Rules', function () {
     it('validates field lengths', function () {
         $longName = str_repeat('a', 256);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', $longName)
             ->set('last_name', $longName)
             ->call('store');
@@ -42,7 +42,7 @@ describe('Form Validation Rules', function () {
     it('accepts valid field lengths', function () {
         $validName = str_repeat('a', 255);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', $validName)
             ->set('last_name', $validName)
             ->call('store');
@@ -51,7 +51,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates employment date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'John')
             ->set('last_name', 'Doe')
             ->set('employment_date', 'invalid-date')
@@ -61,7 +61,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('accepts valid employment date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'John')
             ->set('last_name', 'Doe')
             ->set('employment_date', '2023-01-15')
@@ -71,7 +71,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('allows null employment date', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'John')
             ->set('last_name', 'Doe')
             ->set('employment_date', null)
@@ -83,7 +83,7 @@ describe('Form Validation Rules', function () {
 
 describe('Form Store Operations', function () {
     it('can store valid manager data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'John')
             ->set('last_name', 'Manager')
             ->call('store');
@@ -98,7 +98,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores manager with complete name information', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'Professional')
             ->set('last_name', 'Wrestling')
             ->set('employment_date', '2023-06-15')
@@ -118,7 +118,7 @@ describe('Form Store Operations', function () {
     it('creates employment record when employment date provided', function () {
         $employmentDate = '2023-01-15';
         
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'Employed')
             ->set('last_name', 'Manager')
             ->set('employment_date', $employmentDate)
@@ -135,7 +135,7 @@ describe('Form Store Operations', function () {
     });
 
     it('does not create employment record when employment date omitted', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'Unemployed')
             ->set('last_name', 'Manager')
             ->call('store');
@@ -157,7 +157,7 @@ describe('Form Update Operations', function () {
             'last_name' => 'Name',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $manager)
             ->set('first_name', 'Updated')
             ->set('last_name', 'Manager')
@@ -179,7 +179,7 @@ describe('Form Update Operations', function () {
             'last_name' => 'Doe',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $manager)
             ->set('first_name', 'Jane')
             ->set('last_name', 'Doe')
@@ -195,7 +195,7 @@ describe('Form Update Operations', function () {
     it('can update employment date', function () {
         $manager = Manager::factory()->create();
         
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $manager)
             ->set('first_name', $manager->first_name)
             ->set('last_name', $manager->last_name)
@@ -212,7 +212,7 @@ describe('Form Update Operations', function () {
 
 describe('Form State Management', function () {
     it('resets form after successful store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'John')
             ->set('last_name', 'Manager')
             ->set('employment_date', '2023-01-15')
@@ -225,7 +225,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', '')
             ->set('last_name', 'Manager')
             ->set('employment_date', '2023-01-15')
@@ -243,7 +243,7 @@ describe('Form State Management', function () {
             'last_name' => 'Test',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $manager);
 
         $form->assertSet('first_name', 'Load');
@@ -259,7 +259,7 @@ describe('Form State Management', function () {
             'started_at' => $employmentDate,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $manager);
 
         $form->assertSet('employment_date', $employmentDate);
@@ -277,7 +277,7 @@ describe('Form Manager Name Handling', function () {
         ];
 
         foreach ($nameTests as [$firstName, $lastName]) {
-            $form = Livewire::test(Form::class)
+            $form = Livewire::test(CreateEditForm::class)
                 ->set('first_name', $firstName)
                 ->set('last_name', $lastName)
                 ->call('store');
@@ -292,7 +292,7 @@ describe('Form Manager Name Handling', function () {
     });
 
     it('handles single character names', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'A')
             ->set('last_name', 'B')
             ->call('store');
@@ -309,7 +309,7 @@ describe('Form Manager Name Handling', function () {
         $longFirstName = str_repeat('A', 100);
         $longLastName = str_repeat('B', 100);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', $longFirstName)
             ->set('last_name', $longLastName)
             ->call('store');
@@ -327,7 +327,7 @@ describe('Form Employment Integration', function () {
     it('handles employment date creation correctly', function () {
         $employmentDate = '2023-06-15';
         
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'Employment')
             ->set('last_name', 'Test')
             ->set('employment_date', $employmentDate)
@@ -344,7 +344,7 @@ describe('Form Employment Integration', function () {
     });
 
     it('does not create employment without date', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('first_name', 'No Employment')
             ->set('last_name', 'Test')
             ->call('store');
@@ -366,7 +366,7 @@ describe('Form Employment Integration', function () {
             'started_at' => $employmentDate,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $manager);
 
         $form->assertSet('employment_date', $employmentDate);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\TagTeams\Forms\Form;
+use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Users\User;
@@ -20,7 +20,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('wrestlerA', null)
             ->set('wrestlerB', null)
@@ -36,7 +36,7 @@ describe('Form Validation Rules', function () {
     it('validates tag team name uniqueness', function () {
         TagTeam::factory()->create(['name' => 'Existing Team']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Existing Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -48,7 +48,7 @@ describe('Form Validation Rules', function () {
     it('validates signature move uniqueness', function () {
         TagTeam::factory()->create(['signature_move' => 'Existing Move']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'New Team')
             ->set('signature_move', 'Existing Move')
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -59,7 +59,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates wrestlers are different', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerA->id)
@@ -69,7 +69,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates wrestlers exist', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('wrestlerA', 99999)
             ->set('wrestlerB', 99998)
@@ -82,7 +82,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates managers exist', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -93,7 +93,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('allows null signature move', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('signature_move', null)
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -109,7 +109,7 @@ describe('Form Field Validation', function () {
         $longName = str_repeat('a', 256);
         $longMove = str_repeat('a', 256);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $longName)
             ->set('signature_move', $longMove)
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -126,7 +126,7 @@ describe('Form Field Validation', function () {
         $validName = str_repeat('a', 255);
         $validMove = str_repeat('a', 255);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $validName)
             ->set('signature_move', $validMove)
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -137,7 +137,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates employment date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -148,7 +148,7 @@ describe('Form Field Validation', function () {
     });
 
     it('accepts valid employment date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -161,7 +161,7 @@ describe('Form Field Validation', function () {
 
 describe('Form Store Operations', function () {
     it('can store valid tag team data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Tag Team')
             ->set('signature_move', 'Double Suplex')
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -178,7 +178,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores tag team with wrestler relationships', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Wrestling Duo')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -193,7 +193,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores tag team with manager relationships', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Managed Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -210,7 +210,7 @@ describe('Form Store Operations', function () {
     it('creates employment record when employment date provided', function () {
         $employmentDate = '2023-01-15';
         
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Employed Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -225,7 +225,7 @@ describe('Form Store Operations', function () {
     });
 
     it('does not create employment record when employment date omitted', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Unemployed Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -245,7 +245,7 @@ describe('Form Update Operations', function () {
             'signature_move' => 'Original Move',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam)
             ->set('name', 'Updated Team')
             ->set('signature_move', 'Updated Move')
@@ -267,7 +267,7 @@ describe('Form Update Operations', function () {
         $tagTeam1 = TagTeam::factory()->create(['name' => 'Team One']);
         $tagTeam2 = TagTeam::factory()->create(['name' => 'Team Two']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam2)
             ->set('name', 'Team One')
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -280,7 +280,7 @@ describe('Form Update Operations', function () {
     it('allows keeping same name when updating', function () {
         $tagTeam = TagTeam::factory()->create(['name' => 'Same Name Team']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam)
             ->set('name', 'Same Name Team')
             ->set('signature_move', 'New Move')
@@ -297,7 +297,7 @@ describe('Form Update Operations', function () {
         $newWrestlerA = Wrestler::factory()->create();
         $newWrestlerB = Wrestler::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam)
             ->set('name', $tagTeam->name)
             ->set('wrestlerA', $newWrestlerA->id)
@@ -315,7 +315,7 @@ describe('Form Update Operations', function () {
 
 describe('Form State Management', function () {
     it('resets form after successful store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Team')
             ->set('signature_move', 'Test Move')
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -332,7 +332,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('signature_move', 'Test Move')
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -352,7 +352,7 @@ describe('Form State Management', function () {
             'signature_move' => 'Load Move',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam);
 
         $form->assertSet('name', 'Load Test Team');
@@ -363,7 +363,7 @@ describe('Form State Management', function () {
         $tagTeam = TagTeam::factory()->create();
         $tagTeam->wrestlers()->attach([$this->wrestlerA->id, $this->wrestlerB->id]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam);
 
         $form->assertSet('wrestlerA', $this->wrestlerA->id);
@@ -374,7 +374,7 @@ describe('Form State Management', function () {
         $tagTeam = TagTeam::factory()->create();
         $tagTeam->managers()->attach([$this->manager->id]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam);
 
         $form->assertSet('managers', [$this->manager->id]);
@@ -386,7 +386,7 @@ describe('Form Tag Team Relationships', function () {
         $manager1 = Manager::factory()->create();
         $manager2 = Manager::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Multi Manager Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -402,7 +402,7 @@ describe('Form Tag Team Relationships', function () {
     });
 
     it('handles empty managers array', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'No Manager Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)
@@ -420,7 +420,7 @@ describe('Form Tag Team Relationships', function () {
         $oldWrestler = Wrestler::factory()->create();
         $tagTeam->wrestlers()->attach($oldWrestler->id);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $tagTeam)
             ->set('name', $tagTeam->name)
             ->set('wrestlerA', $this->wrestlerA->id)
@@ -448,7 +448,7 @@ describe('Form Wrestling Team Validation', function () {
         ];
 
         foreach ($teamNames as $name) {
-            $form = Livewire::test(Form::class)
+            $form = Livewire::test(CreateEditForm::class)
                 ->set('name', $name)
                 ->set('wrestlerA', $this->wrestlerA->id)
                 ->set('wrestlerB', $this->wrestlerB->id)
@@ -468,7 +468,7 @@ describe('Form Wrestling Team Validation', function () {
         ];
 
         foreach ($signatureMoves as $move) {
-            $form = Livewire::test(Form::class)
+            $form = Livewire::test(CreateEditForm::class)
                 ->set('name', "Team for {$move}")
                 ->set('signature_move', $move)
                 ->set('wrestlerA', $this->wrestlerA->id)
@@ -480,7 +480,7 @@ describe('Form Wrestling Team Validation', function () {
     });
 
     it('handles tag team with no signature move', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Generic Team')
             ->set('wrestlerA', $this->wrestlerA->id)
             ->set('wrestlerB', $this->wrestlerB->id)

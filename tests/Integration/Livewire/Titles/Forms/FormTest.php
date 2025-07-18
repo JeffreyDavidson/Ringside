@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Titles\TitleType;
-use App\Livewire\Titles\Forms\Form;
+use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
@@ -16,7 +16,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('type', '')
             ->call('store');
@@ -28,7 +28,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates title name ends with Title or Titles', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Championship Belt')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -37,7 +37,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('accepts valid title names ending with Title', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Heavyweight Championship Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -46,7 +46,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('accepts valid title names ending with Titles', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Tag Team Titles')
             ->set('type', TitleType::TagTeam->value)
             ->call('store');
@@ -57,7 +57,7 @@ describe('Form Validation Rules', function () {
     it('validates title name uniqueness', function () {
         Title::factory()->create(['name' => 'Existing Championship Title']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Existing Championship Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -66,7 +66,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates title type enum values', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Championship Title')
             ->set('type', 'InvalidType')
             ->call('store');
@@ -75,14 +75,14 @@ describe('Form Validation Rules', function () {
     });
 
     it('accepts valid title type values', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Singles Championship Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
 
         $form->assertHasNoErrors(['type']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Tag Team Championship Titles')
             ->set('type', TitleType::TagTeam->value)
             ->call('store');
@@ -95,7 +95,7 @@ describe('Form Field Validation', function () {
     it('validates title name length', function () {
         $longName = str_repeat('a', 251) . 'Title';
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $longName)
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -106,7 +106,7 @@ describe('Form Field Validation', function () {
     it('accepts valid title name length', function () {
         $validName = str_repeat('a', 250) . 'Title';
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $validName)
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -115,7 +115,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates start date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Date Test Title')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', 'invalid-date')
@@ -125,7 +125,7 @@ describe('Form Field Validation', function () {
     });
 
     it('accepts valid start date format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Date Valid Title')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', '2023-01-15')
@@ -135,7 +135,7 @@ describe('Form Field Validation', function () {
     });
 
     it('allows null start date', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Null Date Title')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', null)
@@ -147,7 +147,7 @@ describe('Form Field Validation', function () {
 
 describe('Form Store Operations', function () {
     it('can store valid title data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Championship Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -162,7 +162,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores title with all fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Complete Championship Title')
             ->set('type', TitleType::TagTeam->value)
             ->set('start_date', '2023-06-15')
@@ -177,7 +177,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores title with proper enum casting', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Enum Test Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -192,7 +192,7 @@ describe('Form Store Operations', function () {
     it('creates activity period when start date provided', function () {
         $startDate = '2023-01-15';
         
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Activity Test Title')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', $startDate)
@@ -206,7 +206,7 @@ describe('Form Store Operations', function () {
     });
 
     it('does not create activity period when start date omitted', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'No Activity Test Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -225,7 +225,7 @@ describe('Form Update Operations', function () {
             'type' => TitleType::Singles,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title)
             ->set('name', 'Updated Championship Title')
             ->set('type', TitleType::TagTeam->value)
@@ -245,7 +245,7 @@ describe('Form Update Operations', function () {
         $title1 = Title::factory()->create(['name' => 'Title One']);
         $title2 = Title::factory()->create(['name' => 'Title Two']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title2)
             ->set('name', 'Title One')
             ->set('type', $title2->type->value)
@@ -260,7 +260,7 @@ describe('Form Update Operations', function () {
             'type' => TitleType::Singles,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title)
             ->set('name', 'Same Name Title')
             ->set('type', TitleType::TagTeam->value)
@@ -276,7 +276,7 @@ describe('Form Update Operations', function () {
             'type' => TitleType::Singles,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title)
             ->set('name', 'Type Change Title')
             ->set('type', TitleType::TagTeam->value)
@@ -291,7 +291,7 @@ describe('Form Update Operations', function () {
 
 describe('Form State Management', function () {
     it('resets form after successful store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Reset Test Title')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', '2023-01-15')
@@ -304,7 +304,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Invalid Name')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', '2023-01-15')
@@ -322,7 +322,7 @@ describe('Form State Management', function () {
             'type' => TitleType::TagTeam,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title);
 
         $form->assertSet('name', 'Load Test Title');
@@ -341,7 +341,7 @@ describe('Form State Management', function () {
             'started_at' => $startDate,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title);
 
         $form->assertSet('start_date', '2023-01-15');
@@ -360,7 +360,7 @@ describe('Form Title Naming Conventions', function () {
         ];
 
         foreach ($validNames as $name) {
-            $form = Livewire::test(Form::class)
+            $form = Livewire::test(CreateEditForm::class)
                 ->set('name', $name)
                 ->set('type', TitleType::Singles->value)
                 ->call('store');
@@ -379,7 +379,7 @@ describe('Form Title Naming Conventions', function () {
         ];
 
         foreach ($invalidNames as $name) {
-            $form = Livewire::test(Form::class)
+            $form = Livewire::test(CreateEditForm::class)
                 ->set('name', $name)
                 ->set('type', TitleType::Singles->value)
                 ->call('store');
@@ -390,7 +390,7 @@ describe('Form Title Naming Conventions', function () {
 
     it('matches title type with naming conventions', function () {
         // Singles titles often use "Title"
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Singles Championship Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -398,7 +398,7 @@ describe('Form Title Naming Conventions', function () {
         $form->assertHasNoErrors();
 
         // Tag team titles often use "Titles"
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Tag Team Championship Titles')
             ->set('type', TitleType::TagTeam->value)
             ->call('store');
@@ -409,7 +409,7 @@ describe('Form Title Naming Conventions', function () {
 
 describe('Form Activity Period Integration', function () {
     it('handles activity period creation on title store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Activity Integration Title')
             ->set('type', TitleType::Singles->value)
             ->set('start_date', '2023-06-15')
@@ -423,7 +423,7 @@ describe('Form Activity Period Integration', function () {
     });
 
     it('does not create activity period without start date', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'No Activity Title')
             ->set('type', TitleType::Singles->value)
             ->call('store');
@@ -442,7 +442,7 @@ describe('Form Activity Period Integration', function () {
             'started_at' => $startDate,
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $title);
 
         $form->assertSet('start_date', '2023-03-01');

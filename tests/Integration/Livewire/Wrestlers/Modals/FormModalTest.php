@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Wrestlers\Forms\Form;
+use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
@@ -20,7 +20,7 @@ describe('FormModal Configuration', function () {
         $method = $reflection->getMethod('getFormClass');
         $method->setAccessible(true);
 
-        expect($method->invoke($modal))->toBe(Form::class);
+        expect($method->invoke($modal))->toBe(CreateEditForm::class);
     });
 
     it('returns correct model class', function () {
@@ -46,7 +46,7 @@ describe('FormModal Mounting', function () {
     it('can mount for creating new wrestler', function () {
         $component = Livewire::test(FormModal::class);
 
-        expect($component->instance()->form)->toBeInstanceOf(Form::class);
+        expect($component->instance()->form)->toBeInstanceOf(CreateEditForm::class);
         $component->assertSuccessful();
     });
 
@@ -55,7 +55,7 @@ describe('FormModal Mounting', function () {
 
         $component = Livewire::test(FormModal::class, ['modelId' => $wrestler->id]);
 
-        expect($component->instance()->form)->toBeInstanceOf(Form::class);
+        expect($component->instance()->form)->toBeInstanceOf(CreateEditForm::class);
         expect($component->instance()->form->name)->toBe($wrestler->name);
         $component->assertSuccessful();
     });
