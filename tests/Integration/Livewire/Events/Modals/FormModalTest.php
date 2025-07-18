@@ -89,11 +89,11 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        $component->assertDispatched('eventCreated');
+        $component->assertDispatched('form-submitted');
 
         $this->assertDatabaseHas('events', [
             'name' => 'WrestleMania 40',
-            'date' => '2024-04-06',
+            'date' => '2024-04-06 00:00:00',
             'venue_id' => $venue->id,
         ]);
     });

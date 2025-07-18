@@ -250,6 +250,17 @@ abstract class BaseFormModal extends BaseModal
     }
 
     /**
+     * Save method for backward compatibility with tests.
+     *
+     * This method delegates to submitForm() to maintain compatibility
+     * with existing test patterns while using the new BaseFormModal API.
+     */
+    public function save(): void
+    {
+        $this->submitForm();
+    }
+
+    /**
      * Submit the form through the modal.
      *
      * This method provides a bridge for testing that allows calling

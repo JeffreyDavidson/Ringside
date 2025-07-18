@@ -42,7 +42,7 @@ class FormModal extends BaseFormModal
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
             'date' => fn () => fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s'),
-            'venue' => fn () => $venue?->id ?? Venue::factory()->create()->id,
+            'venue_id' => fn () => $venue?->id ?? Venue::factory()->create()->id,
             'preview' => fn () => Str::of(fake()->text())->value(),
         ];
     }
