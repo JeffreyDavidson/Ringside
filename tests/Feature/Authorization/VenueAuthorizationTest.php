@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Venues\Tables\VenuesTable;
+use App\Livewire\Venues\Tables\Main;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
 use Livewire\Livewire;

@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal as ManagerFormModal;
-use App\Livewire\Managers\Tables\ManagersTable;
+use App\Livewire\Managers\Tables\Main as ManagersTable;
 use App\Livewire\Stables\Modals\FormModal as StableFormModal;
-use App\Livewire\Stables\Tables\StablesTable;
+use App\Livewire\Stables\Tables\Main as StablesTable;
 use App\Livewire\TagTeams\Modals\FormModal as TagTeamFormModal;
-use App\Livewire\TagTeams\Tables\TagTeamsTable;
+use App\Livewire\TagTeams\Tables\Main as TagTeamsTable;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -50,7 +50,7 @@ describe('Manager Assignment Workflow', function () {
 
         // And: Manager appears in managers table
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(ManagersTable::class)
             ->assertSee('Paul')
             ->assertSee('Heyman');
     });
@@ -62,7 +62,7 @@ describe('Manager Assignment Workflow', function () {
 
         // When: Managing employment status
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(ManagersTable::class)
             ->call('handleManagerAction', 'employ', $manager->id)
             ->assertHasNoErrors();
 
@@ -71,7 +71,7 @@ describe('Manager Assignment Workflow', function () {
 
         // When: Suspending manager
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(ManagersTable::class)
             ->call('handleManagerAction', 'suspend', $manager->id)
             ->assertHasNoErrors();
 
@@ -80,7 +80,7 @@ describe('Manager Assignment Workflow', function () {
 
         // When: Reinstating manager
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(ManagersTable::class)
             ->call('handleManagerAction', 'reinstate', $manager->id)
             ->assertHasNoErrors();
 
@@ -113,7 +113,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // And: Stable appears in stables table
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(StablesTable::class)
             ->assertSee('D-Generation X');
     });
 
@@ -124,7 +124,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // When: Debuting the stable
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(StablesTable::class)
             ->call('handleStableAction', 'debut', $stable->id)
             ->assertHasNoErrors();
 
@@ -133,7 +133,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // When: Retiring the stable
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(StablesTable::class)
             ->call('handleStableAction', 'retire', $stable->id)
             ->assertHasNoErrors();
 
@@ -142,7 +142,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // When: Unretiring the stable
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(StablesTable::class)
             ->call('handleStableAction', 'unretire', $stable->id)
             ->assertHasNoErrors();
 
@@ -175,7 +175,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // And: Tag team appears in tag teams table
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(TagTeamsTable::class)
             ->assertSee('The Hardy Boyz');
 
         // When: Viewing tag team details
@@ -195,7 +195,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Employing the tag team
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'employ', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -204,7 +204,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Suspending tag team
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'suspend', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -213,7 +213,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Reinstating tag team
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'reinstate', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -223,7 +223,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Retiring tag team
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'retire', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -248,11 +248,11 @@ describe('Complex Roster Relationship Workflow', function () {
 
         // Then: History tables should be empty but visible
         $historyComponents = [
-            'previous-managers-table',
-            'previous-stables-table',
-            'previous-tag-teams-table',
-            'previous-title-championships-table',
-            'previous-matches-table',
+            'previous-managers',
+            'previous-stables',
+            'previous-tag-teams',
+            'previous-title-championships',
+            'previous-matches',
         ];
 
         foreach ($historyComponents as $component) {

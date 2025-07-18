@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Stables\IndexController;
-use App\Livewire\Stables\Tables\StablesTable;
+use App\Livewire\Stables\Tables\Main;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Titles\Tables\TitlesTable;
+use App\Livewire\Titles\Tables\Main;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Livewire\Livewire;

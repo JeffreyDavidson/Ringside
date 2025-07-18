@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Managers\ShowController;
-use App\Livewire\Managers\Tables\PreviousTagTeamsTable;
-use App\Livewire\Managers\Tables\PreviousWrestlersTable;
+use App\Livewire\Managers\Tables\PreviousTagTeams;
+use App\Livewire\Managers\Tables\PreviousWrestlers;
 use App\Models\Managers\Manager;
 
 use function Pest\Laravel\actingAs;
@@ -30,7 +30,7 @@ describe('Managers Show Controller', function () {
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $this->manager)
             ->assertSeeLivewire(PreviousWrestlers::class)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousTagTeams::class);
     });
 
     /**

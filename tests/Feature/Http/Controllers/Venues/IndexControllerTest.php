@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Venues\IndexController;
-use App\Livewire\Venues\Tables\VenuesTable;
+use App\Livewire\Venues\Tables\Main;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
