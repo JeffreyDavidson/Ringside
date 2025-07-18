@@ -41,7 +41,7 @@ use Illuminate\Validation\Rule;
  * @property string $name Stable's official name for storylines and promotion
  * @property Carbon|string|null $start_date Stable activation start date
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     use ManagesActivityPeriods;
 

@@ -46,7 +46,7 @@ use Illuminate\Validation\Rule;
  * @property string|null $signature_move Wrestler's finishing move or signature
  * @property Carbon|string|null $employment_date Employment start date
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     use ManagesEmployment;
 

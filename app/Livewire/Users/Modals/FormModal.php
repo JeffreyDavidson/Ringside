@@ -4,20 +4,39 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Modals;
 
-use App\Livewire\Concerns\BaseModal;
+use App\Livewire\Base\BaseForm;
+use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
 
 /**
- * @extends BaseModal<CreateEditForm, User>
+ * @extends BaseFormModal<CreateEditForm, User>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
-    protected string $modalFormPath = 'users.modals.form-modal';
+    public BaseForm $form;
 
-    protected $modelForm;
+    protected function getFormClass(): string
+    {
+        return CreateEditForm::class;
+    }
 
-    protected $modelType;
+    protected function getModelClass(): string
+    {
+        return User::class;
+    }
 
-    public function fillDummyFields(): void {}
+    protected function getModalPath(): string
+    {
+        return 'livewire.users.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
+    {
+        return [
+            'first_name' => fn() => fake()->firstName(),
+            'last_name' => fn() => fake()->lastName(),
+            'email' => fn() => fake()->unique()->safeEmail(),
+        ];
+    }
 }
