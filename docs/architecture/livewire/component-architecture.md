@@ -160,17 +160,17 @@ app/Livewire/{Domain}/
 ├── Modals/
 │   └── FormModal.php           # Modal wrapper for forms
 ├── Tables/
-│   ├── {Domain}Table.php       # Main entity table
-│   └── Previous{Related}Table.php # Relationship tables
+│   ├── Main.php                # Main entity table
+│   └── Previous{Related}.php   # Relationship tables
 └── Components/
-    └── Actions.php    # Business action handlers
+    └── Actions.php             # Business action handlers
 ```
 
 ### Naming Conventions
 
 - **Forms**: `CreateEditForm` - Handles both create and edit operations
 - **Modals**: `FormModal` - Wraps CreateEditForm in modal interface
-- **Tables**: `Main` - Main entity display table
+- **Tables**: `Main` - Main entity display table, `Previous{Related}` - Relationship tables
 - **Components**: `Actions` - Business action handlers
 
 ### Implementation Requirements
