@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Matches\Forms\EventMatchForm;
+use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -27,7 +27,7 @@ describe('FormModal Configuration', function () {
         $method = $reflection->getMethod('getFormClass');
         $method->setAccessible(true);
 
-        expect($method->invoke($modal))->toBe(EventMatchForm::class);
+        expect($method->invoke($modal))->toBe(CreateEditForm::class);
     });
 
     it('returns correct model class', function () {

@@ -46,7 +46,7 @@ app/Livewire/
     ├── Tables/
     │   └── {Domain}Table.php   # Domain-specific table implementation
     └── Components/
-        └── ActionsComponent.php # Domain-specific actions
+        └── Actions.php # Domain-specific actions
 ```
 
 ## Base Classes
@@ -163,15 +163,15 @@ app/Livewire/{Domain}/
 │   ├── {Domain}Table.php       # Main entity table
 │   └── Previous{Related}Table.php # Relationship tables
 └── Components/
-    └── ActionsComponent.php    # Business action handlers
+    └── Actions.php    # Business action handlers
 ```
 
 ### Naming Conventions
 
 - **Forms**: `CreateEditForm` - Handles both create and edit operations
 - **Modals**: `FormModal` - Wraps CreateEditForm in modal interface
-- **Tables**: `{Entity}Table` - Main entity display table
-- **Components**: `ActionsComponent` - Business action handlers
+- **Tables**: `Main` - Main entity display table
+- **Components**: `Actions` - Business action handlers
 
 ### Implementation Requirements
 

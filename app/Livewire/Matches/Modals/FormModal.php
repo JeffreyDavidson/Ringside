@@ -10,7 +10,7 @@ use App\Livewire\Concerns\Data\PresentsRefereesList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsTitlesList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use App\Livewire\Matches\Forms\EventMatchForm;
+use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
@@ -69,11 +69,11 @@ class FormModal extends BaseFormModal
     /**
      * Get the form class that handles event match data validation and processing.
      *
-     * @return class-string<EventMatchForm> The fully qualified class name of EventMatchForm
+     * @return class-string<CreateEditForm> The fully qualified class name of CreateEditForm
      */
     protected function getFormClass(): string
     {
-        return EventMatchForm::class;
+        return CreateEditForm::class;
     }
 
     /**

@@ -28,7 +28,7 @@ describe('Titles Show Controller', function () {
             ->assertOk()
             ->assertViewIs('titles.show')
             ->assertViewHas('title', $this->title)
-            ->assertSeeLivewire(PreviousTitleChampionshipsTable::class);
+            ->assertSeeLivewire(PreviousTitleChampionships::class);
     });
 
     /**

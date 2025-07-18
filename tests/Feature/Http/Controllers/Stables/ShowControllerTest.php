@@ -30,8 +30,8 @@ describe('Stables Show Controller', function () {
         $response->assertOk();
         $response->assertViewIs('stables.show')
             ->assertViewHas('stable', $this->stable)
-            ->assertSeeLivewire(PreviousWrestlersTable::class)
-            ->assertSeeLivewire(PreviousTagTeamsTable::class);
+            ->assertSeeLivewire(PreviousWrestlers::class)
+            ->assertSeeLivewire(PreviousMain::class);
     });
 
     /**

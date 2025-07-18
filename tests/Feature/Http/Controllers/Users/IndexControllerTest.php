@@ -22,7 +22,7 @@ describe('Users Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('users.index')
-            ->assertSeeLivewire(UsersTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

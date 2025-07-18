@@ -22,7 +22,7 @@ describe('Events Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('events.index')
-            ->assertSeeLivewire(EventsTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

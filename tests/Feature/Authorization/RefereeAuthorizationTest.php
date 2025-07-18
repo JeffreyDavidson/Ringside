@@ -37,7 +37,7 @@ describe('Referee Authorization', function () {
             // Assert
             $response->assertOk()
                 ->assertViewIs('referees.index')
-                ->assertSeeLivewire(RefereesTable::class);
+                ->assertSeeLivewire(Main::class);
         });
 
         test('basic user cannot access referees index', function () {
@@ -99,7 +99,7 @@ describe('Referee Authorization', function () {
         test('admin can access referees table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->admin)
-                ->test(RefereesTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertOk()
@@ -109,7 +109,7 @@ describe('Referee Authorization', function () {
         test('basic user cannot access referees table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->basicUser)
-                ->test(RefereesTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -117,7 +117,7 @@ describe('Referee Authorization', function () {
 
         test('guest user cannot access referees table component', function () {
             // Act
-            $component = Livewire::test(RefereesTable::class);
+            $component = Livewire::test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -134,7 +134,7 @@ describe('Referee Authorization', function () {
             $httpResponse->assertOk();
 
             $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(RefereesTable::class);
+                ->test(Main::class);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -143,7 +143,7 @@ describe('Referee Authorization', function () {
             $httpResponse->assertForbidden();
 
             $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(RefereesTable::class);
+                ->test(Main::class);
             $livewireComponent->assertForbidden();
         });
 

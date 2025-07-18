@@ -37,7 +37,7 @@ describe('Stable Authorization', function () {
             // Assert
             $response->assertOk()
                 ->assertViewIs('stables.index')
-                ->assertSeeLivewire(StablesTable::class);
+                ->assertSeeLivewire(Main::class);
         });
 
         test('basic user cannot access stables index', function () {
@@ -98,7 +98,7 @@ describe('Stable Authorization', function () {
         test('admin can access stables table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->admin)
-                ->test(StablesTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertOk();
@@ -107,7 +107,7 @@ describe('Stable Authorization', function () {
         test('basic user cannot access stables table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->basicUser)
-                ->test(StablesTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -115,7 +115,7 @@ describe('Stable Authorization', function () {
 
         test('guest user cannot access stables table component', function () {
             // Act
-            $component = Livewire::test(StablesTable::class);
+            $component = Livewire::test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -132,7 +132,7 @@ describe('Stable Authorization', function () {
             $httpResponse->assertOk();
 
             $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(StablesTable::class);
+                ->test(Main::class);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -141,7 +141,7 @@ describe('Stable Authorization', function () {
             $httpResponse->assertForbidden();
 
             $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(StablesTable::class);
+                ->test(Main::class);
             $livewireComponent->assertForbidden();
         });
 

@@ -22,7 +22,7 @@ describe('Managers Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('managers.index')
-            ->assertSeeLivewire(ManagersTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

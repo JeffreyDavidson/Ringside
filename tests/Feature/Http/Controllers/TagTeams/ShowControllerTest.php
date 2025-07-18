@@ -32,11 +32,11 @@ describe('TagTeams Show Controller', function () {
             ->assertOk()
             ->assertViewIs('tag-teams.show')
             ->assertViewHas('tagTeam', $this->tagTeam)
-            ->assertSeeLivewire(PreviousTitleChampionshipsTable::class)
-            ->assertSeeLivewire(PreviousMatchesTable::class)
-            ->assertSeeLivewire(PreviousWrestlersTable::class)
-            ->assertSeeLivewire(PreviousManagersTable::class)
-            ->assertSeeLivewire(PreviousStablesTable::class);
+            ->assertSeeLivewire(PreviousTitleChampionships::class)
+            ->assertSeeLivewire(PreviousMatches::class)
+            ->assertSeeLivewire(PreviousWrestlers::class)
+            ->assertSeeLivewire(PreviousMain::class)
+            ->assertSeeLivewire(PreviousMain::class);
     });
 
     /**

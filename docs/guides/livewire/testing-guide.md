@@ -41,7 +41,7 @@ tests/
             ├── Modals/
             │   └── FormModalTest.php
             └── Components/
-                └── ActionsComponentTest.php
+                └── ActionsTest.php
 ```
 
 ### Test Naming Convention
@@ -96,7 +96,7 @@ Each component type has its own focused testing guide with patterns and examples
   - Business logic testing
   - Action confirmation workflows
   - Event dispatching and handling
-  - Real examples from ActionsComponent implementations
+  - Real examples from Actions implementations
 
 ### Advanced Testing
 Specialized testing guides for complex scenarios:

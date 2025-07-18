@@ -96,7 +96,7 @@ describe('Title Championship Authorization', function () {
         test('admin can access title championships table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->admin)
-                ->test(PreviousTitleChampionshipsTable::class, ['titleId' => $this->title->id]);
+                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
 
             // Assert
             $component->assertOk();
@@ -105,7 +105,7 @@ describe('Title Championship Authorization', function () {
         test('basic user cannot access title championships table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->basicUser)
-                ->test(PreviousTitleChampionshipsTable::class, ['titleId' => $this->title->id]);
+                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
 
             // Assert
             $component->assertForbidden();
@@ -113,7 +113,7 @@ describe('Title Championship Authorization', function () {
 
         test('guest user cannot access title championships table component', function () {
             // Act
-            $component = Livewire::test(PreviousTitleChampionshipsTable::class, ['titleId' => $this->title->id]);
+            $component = Livewire::test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
 
             // Assert
             $component->assertForbidden();
@@ -130,7 +130,7 @@ describe('Title Championship Authorization', function () {
             $httpResponse->assertOk();
 
             $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(PreviousTitleChampionshipsTable::class, ['titleId' => $this->title->id]);
+                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -139,7 +139,7 @@ describe('Title Championship Authorization', function () {
             $httpResponse->assertForbidden();
 
             $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(PreviousTitleChampionshipsTable::class, ['titleId' => $this->title->id]);
+                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
             $livewireComponent->assertForbidden();
         });
     });

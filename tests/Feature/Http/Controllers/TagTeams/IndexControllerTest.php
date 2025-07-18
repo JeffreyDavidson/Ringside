@@ -22,7 +22,7 @@ describe('TagTeams Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('tag-teams.index')
-            ->assertSeeLivewire(TagTeamsTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**
