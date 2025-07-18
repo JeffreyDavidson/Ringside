@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Events\Forms\Form;
+use App\Livewire\Events\Forms\CreateEditForm;
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
@@ -21,7 +21,7 @@ describe('FormModal Configuration', function () {
         $method = $reflection->getMethod('getFormClass');
         $method->setAccessible(true);
 
-        expect($method->invoke($modal))->toBe(Form::class);
+        expect($method->invoke($modal))->toBe(CreateEditForm::class);
     });
 
     it('returns correct model class', function () {

@@ -6,12 +6,12 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Wrestlers\Forms\Form;
+use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseFormModal<Form, Wrestler>
+ * @extends BaseFormModal<CreateEditForm, Wrestler>
  */
 class FormModal extends BaseFormModal
 {
@@ -19,7 +19,7 @@ class FormModal extends BaseFormModal
 
     protected function getFormClass(): string
     {
-        return Form::class;
+        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

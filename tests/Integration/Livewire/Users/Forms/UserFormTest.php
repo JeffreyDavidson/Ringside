@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Users\Forms\Form;
+use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
@@ -14,7 +14,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('email', '')
             ->set('password', '')
@@ -28,7 +28,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates email format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'invalid-email')
             ->set('password', 'password123')
@@ -40,7 +40,7 @@ describe('Form Validation Rules', function () {
     it('validates email uniqueness', function () {
         User::factory()->create(['email' => 'existing@example.com']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'existing@example.com')
             ->set('password', 'password123')
@@ -50,7 +50,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates password minimum length', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', '123')
@@ -60,7 +60,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates password confirmation', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -71,7 +71,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('accepts valid password with confirmation', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -86,7 +86,7 @@ describe('Form Field Validation', function () {
     it('validates name maximum length', function () {
         $longName = str_repeat('a', 256);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $longName)
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -98,7 +98,7 @@ describe('Form Field Validation', function () {
     it('validates email maximum length', function () {
         $longEmail = str_repeat('a', 248) . '@example.com';
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', $longEmail)
             ->set('password', 'password123')
@@ -111,7 +111,7 @@ describe('Form Field Validation', function () {
         $validName = str_repeat('a', 255);
         $validEmail = str_repeat('a', 243) . '@example.com';
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $validName)
             ->set('email', $validEmail)
             ->set('password', 'password123')
@@ -122,7 +122,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates role enum values', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -133,7 +133,7 @@ describe('Form Field Validation', function () {
     });
 
     it('accepts valid role values', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -146,7 +146,7 @@ describe('Form Field Validation', function () {
 
 describe('Form Store Operations', function () {
     it('can store valid user data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -165,7 +165,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores user with minimal required data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Basic User')
             ->set('email', 'basic@example.com')
             ->set('password', 'password123')
@@ -181,7 +181,7 @@ describe('Form Store Operations', function () {
     });
 
     it('hashes password when storing', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -196,7 +196,7 @@ describe('Form Store Operations', function () {
     });
 
     it('assigns default role when not specified', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -210,7 +210,7 @@ describe('Form Store Operations', function () {
     });
 
     it('sets user as unverified by default', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -232,7 +232,7 @@ describe('Form Update Operations', function () {
             'role' => 'User',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', 'Updated Name')
             ->set('email', 'updated@example.com')
@@ -254,7 +254,7 @@ describe('Form Update Operations', function () {
         $user1 = User::factory()->create(['email' => 'user1@example.com']);
         $user2 = User::factory()->create(['email' => 'user2@example.com']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user2)
             ->set('name', $user2->name)
             ->set('email', 'user1@example.com')
@@ -269,7 +269,7 @@ describe('Form Update Operations', function () {
             'email' => 'test@example.com',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', 'Updated Name')
             ->set('email', 'test@example.com')
@@ -282,7 +282,7 @@ describe('Form Update Operations', function () {
     it('does not require password when updating', function () {
         $user = User::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', 'Updated Name')
             ->call('update');
@@ -295,7 +295,7 @@ describe('Form Update Operations', function () {
         $user = User::factory()->create();
         $originalPassword = $user->password;
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', $user->name)
             ->set('email', $user->email)
@@ -313,7 +313,7 @@ describe('Form Update Operations', function () {
     it('validates password confirmation when updating password', function () {
         $user = User::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', $user->name)
             ->set('email', $user->email)
@@ -328,7 +328,7 @@ describe('Form Update Operations', function () {
         $user = User::factory()->create();
         $originalPassword = $user->password;
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', 'Updated Name')
             ->call('update');
@@ -342,7 +342,7 @@ describe('Form Update Operations', function () {
 
 describe('Form Role Management', function () {
     it('can assign administrator role', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Admin User')
             ->set('email', 'admin@example.com')
             ->set('password', 'password123')
@@ -358,7 +358,7 @@ describe('Form Role Management', function () {
     });
 
     it('can assign user role', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Regular User')
             ->set('email', 'user@example.com')
             ->set('password', 'password123')
@@ -376,7 +376,7 @@ describe('Form Role Management', function () {
     it('can change user role when updating', function () {
         $user = User::factory()->create(['role' => 'User']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user)
             ->set('name', $user->name)
             ->set('email', $user->email)
@@ -392,7 +392,7 @@ describe('Form Role Management', function () {
 
 describe('Form State Management', function () {
     it('resets form after successful store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -407,7 +407,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'invalid-email')
             ->set('password', 'password123')
@@ -426,7 +426,7 @@ describe('Form State Management', function () {
             'role' => 'Administrator',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $user);
 
         $form->assertSet('name', 'Test User');
@@ -439,7 +439,7 @@ describe('Form State Management', function () {
     it('clears password fields when loading existing model', function () {
         $user = User::factory()->create();
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('password', 'some-password')
             ->set('password_confirmation', 'some-password')
             ->call('setModel', $user);
@@ -451,7 +451,7 @@ describe('Form State Management', function () {
 
 describe('Form Security', function () {
     it('prevents password from being displayed in form state', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'password123')
@@ -466,7 +466,7 @@ describe('Form Security', function () {
     });
 
     it('validates password strength requirements', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'John Doe')
             ->set('email', 'john@example.com')
             ->set('password', 'weak')

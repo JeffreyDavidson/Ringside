@@ -6,11 +6,11 @@ namespace App\Livewire\Managers\Modals;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Managers\Forms\Form;
+use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 
 /**
- * @extends BaseFormModal<Form, Manager>
+ * @extends BaseFormModal<CreateEditForm, Manager>
  */
 class FormModal extends BaseFormModal
 {
@@ -18,7 +18,7 @@ class FormModal extends BaseFormModal
 
     protected function getFormClass(): string
     {
-        return Form::class;
+        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

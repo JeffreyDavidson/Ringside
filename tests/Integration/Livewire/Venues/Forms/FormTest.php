@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Venues\Forms\Form;
+use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
 use App\Models\Geo\State;
 use App\Models\Users\User;
@@ -17,7 +17,7 @@ beforeEach(function () {
 
 describe('Form Validation Rules', function () {
     it('validates required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', '')
             ->set('street_address', '')
             ->set('city', '')
@@ -37,7 +37,7 @@ describe('Form Validation Rules', function () {
     it('validates venue name uniqueness', function () {
         Venue::factory()->create(['name' => 'Existing Arena']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Existing Arena')
             ->set('street_address', '123 Main St')
             ->set('city', 'Los Angeles')
@@ -49,7 +49,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates state exists in database', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -61,7 +61,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('validates zipcode format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -73,7 +73,7 @@ describe('Form Validation Rules', function () {
     });
 
     it('accepts valid zipcode format', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Valid Arena')
             ->set('street_address', '123 Valid St')
             ->set('city', 'Valid City')
@@ -91,7 +91,7 @@ describe('Form Field Validation', function () {
         $longAddress = str_repeat('a', 256);
         $longCity = str_repeat('a', 256);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $longName)
             ->set('street_address', $longAddress)
             ->set('city', $longCity)
@@ -111,7 +111,7 @@ describe('Form Field Validation', function () {
         $validAddress = str_repeat('a', 255);
         $validCity = str_repeat('a', 255);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', $validName)
             ->set('street_address', $validAddress)
             ->set('city', $validCity)
@@ -123,7 +123,7 @@ describe('Form Field Validation', function () {
     });
 
     it('validates zipcode as numeric', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -136,7 +136,7 @@ describe('Form Field Validation', function () {
 
     it('validates zipcode exact length', function () {
         // Test too short
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -147,7 +147,7 @@ describe('Form Field Validation', function () {
         $form->assertHasErrors(['zipcode' => 'digits']);
 
         // Test too long
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -161,7 +161,7 @@ describe('Form Field Validation', function () {
 
 describe('Form Store Operations', function () {
     it('can store valid venue data', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Wrestling Arena')
             ->set('street_address', '123 Wrestling Way')
             ->set('city', 'Los Angeles')
@@ -182,7 +182,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores venue with all required fields', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Complete Arena')
             ->set('street_address', '456 Complete St')
             ->set('city', 'Sacramento')
@@ -202,7 +202,7 @@ describe('Form Store Operations', function () {
     });
 
     it('stores venue with proper data types', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Type Test Arena')
             ->set('street_address', '789 Type Test St')
             ->set('city', 'San Francisco')
@@ -228,7 +228,7 @@ describe('Form Update Operations', function () {
             'zipcode' => '90210',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $venue)
             ->set('name', 'Updated Arena')
             ->set('street_address', '456 Updated Ave')
@@ -254,7 +254,7 @@ describe('Form Update Operations', function () {
         $venue1 = Venue::factory()->create(['name' => 'Venue One']);
         $venue2 = Venue::factory()->create(['name' => 'Venue Two']);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $venue2)
             ->set('name', 'Venue One')
             ->set('street_address', $venue2->street_address)
@@ -275,7 +275,7 @@ describe('Form Update Operations', function () {
             'zipcode' => '90210',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $venue)
             ->set('name', 'Same Name Arena')
             ->set('street_address', '456 Different St')
@@ -297,7 +297,7 @@ describe('Form Update Operations', function () {
             'zipcode' => '90210',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $venue)
             ->set('name', 'Partial Arena')
             ->set('street_address', '456 New Address')
@@ -316,7 +316,7 @@ describe('Form Update Operations', function () {
 
 describe('Form State Management', function () {
     it('resets form after successful store', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -333,7 +333,7 @@ describe('Form State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Test Arena')
             ->set('street_address', '123 Test St')
             ->set('city', 'Test City')
@@ -358,7 +358,7 @@ describe('Form State Management', function () {
             'zipcode' => '95814',
         ]);
 
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->call('setModel', $venue);
 
         $form->assertSet('name', 'Load Test Arena');
@@ -371,7 +371,7 @@ describe('Form State Management', function () {
 
 describe('Form Address Validation', function () {
     it('validates complete address information', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Address Test Arena')
             ->set('street_address', '1234 Main Street')
             ->set('city', 'Los Angeles')
@@ -397,7 +397,7 @@ describe('Form Address Validation', function () {
         ];
 
         foreach ($addresses as $index => $address) {
-            $form = Livewire::test(Form::class)
+            $form = Livewire::test(CreateEditForm::class)
                 ->set('name', "Arena {$index}")
                 ->set('street_address', $address)
                 ->set('city', 'Test City')
@@ -416,7 +416,7 @@ describe('Form Address Validation', function () {
 
     it('validates state must exist in states table', function () {
         // Test with known invalid state
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'State Test Arena')
             ->set('street_address', '123 State St')
             ->set('city', 'State City')
@@ -428,7 +428,7 @@ describe('Form Address Validation', function () {
     });
 
     it('accepts valid state from states table', function () {
-        $form = Livewire::test(Form::class)
+        $form = Livewire::test(CreateEditForm::class)
             ->set('name', 'Valid State Arena')
             ->set('street_address', '123 Valid St')
             ->set('city', 'Valid City')
