@@ -1,56 +1,133 @@
 # Ringside Documentation
 
-This directory contains comprehensive documentation for the Ringside wrestling promotion management application.
+Comprehensive documentation for the Ringside wrestling promotion management system.
 
-## Quick Navigation
+## Overview
 
-### For Developers
-- **[Getting Started](development/commands.md)** - Development commands and setup
-- **[Architecture Guide](development/architecture.md)** - Domain structure and patterns
-- **[Development Workflow](development/workflow.md)** - Git workflow and collaboration
+Ringside is a Laravel-based application for managing wrestling promotions, including wrestlers, matches, championships, and events. This documentation provides comprehensive guidance for development, architecture, and maintenance.
 
-### For Testing
-- **[Testing Standards](testing/standards.md)** - Comprehensive testing guidelines
-- **[Validation Rules](testing/validation-rules.md)** - Validation rule testing patterns
-- **[Browser Testing](testing/browser-testing.md)** - Dusk and UI testing (future)
+## Quick Start
 
-### For Code Quality
-- **[Code Style Guide](guidelines/code-style.md)** - PSR standards and conventions
-- **[Project Conventions](guidelines/conventions.md)** - Naming, structure, and patterns
+### Development Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd ringside
 
-## About Ringside
+# Install dependencies
+composer install
+npm install
 
-Ringside is a Laravel-based web application for wrestling promoters to manage their roster and schedule events. It handles wrestlers, managers, referees, stables, tag teams, titles, events, venues, and matches with complex relationships and time-based tracking.
+# Set up environment
+cp .env.example .env
+php artisan key:generate
 
-## Key Features
+# Run migrations and seeders
+php artisan migrate --seed
 
-- **Roster Management**: Complete wrestler, manager, and referee lifecycle
-- **Event Scheduling**: Event planning with match creation and competitor booking
-- **Title Management**: Championship tracking with reign history
-- **Stable & Tag Team Management**: Group management with membership tracking
-- **Status Tracking**: Employment, injury, suspension, and retirement states
-- **Time-Based Logic**: Activity periods, employment history, championship reigns
+# Start development server
+php artisan serve
+```
 
-## Architecture Highlights
+### Code Quality Tools
+```bash
+# Code formatting
+composer lint
 
-- **Domain-Driven Design**: Modular structure with clear domain boundaries
-- **Repository Pattern**: Data access abstraction with trait-based shared functionality
-- **Laravel Actions**: Business logic encapsulation using Lorisleiva\Actions
-- **Livewire Components**: Interactive UI with standardized base classes
-- **Comprehensive Testing**: 100% test coverage with proper separation of concerns
+# Static analysis
+composer test:types
 
-## Documentation Standards
+# Test coverage
+composer test:coverage
 
-All documentation follows these principles:
-- **Modular Organization**: Focused files for specific topics
-- **Clear Navigation**: Easy linking between related concepts
-- **Practical Examples**: Real code samples and usage patterns
-- **Maintenance Focus**: Guidelines for keeping code and docs current
+# Code modernization
+composer rector
+```
 
-## Getting Help
+## Documentation Structure
 
-For questions about:
-- **Development Setup**: See [development/commands.md](development/commands.md)
-- **Architecture Decisions**: See [development/architecture.md](development/architecture.md)
-- **Testing Patterns**: See [testing/standards.md](testing/standards.md)
-- **Code Standards**: See [guidelines/code-style.md](guidelines/code-style.md)
+### Development Guidelines
+- **[Code Style Guide](guidelines/code-style.md)** - Comprehensive coding standards
+- **[PHP Standards](guidelines/php.md)** - PHP-specific conventions
+- **[Laravel Conventions](guidelines/laravel.md)** - Laravel framework patterns
+- **[Testing Standards](guidelines/testing.md)** - Testing conventions and practices
+- **[Quality Tools](guidelines/quality-tools.md)** - Automated quality assurance
+
+### Architecture Documentation
+- **[Business Rules](architecture/business-rules.md)** - Core business logic and rules
+- **[Core Capabilities](architecture/core-capabilities.md)** - Entity capabilities and restrictions
+- **[Match System](architecture/match-system.md)** - Match types and competitor rules
+- **[Championship System](architecture/championship-system.md)** - Title management and validation
+
+### Naming Conventions
+- **[Class Naming](guidelines/conventions/class-naming.md)** - Model, action, and controller naming
+- **[File Naming](guidelines/conventions/file-naming.md)** - Directory structure and file organization
+- **[Database Naming](guidelines/conventions/database-naming.md)** - Table and column naming standards
+- **[Method Naming](guidelines/conventions/method-naming.md)** - Method naming patterns
+- **[Variable Naming](guidelines/conventions/variable-naming.md)** - Variable naming conventions
+
+## Key Concepts
+
+### Domain Entities
+- **Wrestlers** - Individual performers with employment, injury, and retirement status
+- **Tag Teams** - Groups of wrestlers who compete together
+- **Stables** - Groups of wrestlers and tag teams with shared affiliations
+- **Titles** - Championships that can be won, lost, and defended
+- **Events** - Wrestling shows with scheduled matches
+- **Venues** - Locations where events are held
+
+### Business Capabilities
+- **Employment** - Managing working relationships with the promotion
+- **Injury Management** - Tracking wrestler injuries and recovery
+- **Suspension System** - Managing disciplinary actions
+- **Retirement Tracking** - Handling career endings
+- **Match Booking** - Scheduling and managing wrestling matches
+- **Championship Management** - Title defenses and changes
+
+## Development Workflow
+
+### Code Standards
+1. **Follow PSR-12** - PHP coding standards compliance
+2. **Use Strict Types** - `declare(strict_types=1);` in all files
+3. **Document Everything** - Comprehensive PHPDoc for all classes and methods
+4. **Write Tests** - 100% test coverage requirement
+5. **Type Safety** - PHPStan level 6 static analysis
+
+### Quality Assurance
+- **Automated Formatting** - Laravel Pint for code formatting
+- **Static Analysis** - PHPStan for type checking
+- **Test Coverage** - Pest for comprehensive testing
+- **Code Modernization** - Rector for automated updates
+
+## Contributing
+
+### Development Process
+1. **Create Feature Branch** - Branch from main for new features
+2. **Follow Standards** - Adhere to all coding and documentation standards
+3. **Write Tests** - Include comprehensive test coverage
+4. **Update Documentation** - Keep documentation current with changes
+5. **Submit Pull Request** - Include detailed description and testing notes
+
+### Code Review Process
+- **Automated Checks** - CI/CD pipeline runs quality checks
+- **Manual Review** - Code review by team members
+- **Quality Gates** - Must pass all quality checks for merge
+- **Documentation Review** - Ensure documentation is updated
+
+## Support and Resources
+
+### Getting Help
+- **Documentation** - Comprehensive guides in this documentation
+- **Code Examples** - See test files for usage examples
+- **Architecture Guides** - Detailed architecture documentation
+- **Development Standards** - Clear coding and testing standards
+
+### Additional Resources
+- **Laravel Documentation** - [laravel.com/docs](https://laravel.com/docs)
+- **PHP Documentation** - [php.net/manual](https://php.net/manual)
+- **Pest Testing** - [pestphp.com](https://pestphp.com)
+- **PHPStan** - [phpstan.org](https://phpstan.org)
+
+## License
+
+This project is proprietary software. All rights reserved.
