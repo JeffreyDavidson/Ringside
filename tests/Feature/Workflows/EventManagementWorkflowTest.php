@@ -146,7 +146,7 @@ describe('Event Creation and Scheduling Workflow', function () {
         $eventData = [
             'name' => 'WrestleMania 40',
             'date' => now()->addMonths(3)->format('Y-m-d'),
-            'venue' => $venue->id,
+            'venue_id' => $venue->id,
         ];
 
         foreach ($eventData as $field => $value) {
@@ -272,7 +272,7 @@ describe('Event Editing Workflow', function () {
 
         // Then: Form should be populated with existing data
         expect($component->get('form.name'))->toBe('Original Event');
-        expect($component->get('form.venue'))->toBe($venue1->id);
+        expect($component->get('form.venue_id'))->toBe($venue1->id);
 
         // When: Updating event information
         $component
@@ -326,7 +326,7 @@ describe('Venue Detail and Event History Workflow', function () {
         // Then: Should see the venue's event history
         actingAs($admin)
             ->get(route('venues.show', $venue))
-            ->assertSeeLivewire('venues.tables.previous-events-table');
+            ->assertSeeLivewire('venues.tables.previous-events');
     });
 });
 

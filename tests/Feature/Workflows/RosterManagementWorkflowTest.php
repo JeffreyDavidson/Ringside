@@ -248,11 +248,11 @@ describe('Complex Roster Relationship Workflow', function () {
 
         // Then: History tables should be empty but visible
         $historyComponents = [
-            'previous-managers-table',
-            'previous-stables-table',
-            'previous-tag-teams-table',
-            'previous-title-championships-table',
-            'previous-matches-table',
+            'previous-managers',
+            'previous-stables',
+            'previous-tag-teams',
+            'previous-title-championships',
+            'previous-matches',
         ];
 
         foreach ($historyComponents as $component) {
