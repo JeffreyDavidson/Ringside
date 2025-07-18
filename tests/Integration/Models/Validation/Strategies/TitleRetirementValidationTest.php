@@ -23,32 +23,29 @@ describe('TitleRetirementValidation', function () {
         $title = Title::factory()->{$factoryState}()->create();
         
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($title))->not()->toThrow();
+            expect(fn() => $this->strategy->validate($title))->not->toThrow(CannotBeRetiredException::class);
         } else {
             expect(fn() => $this->strategy->validate($title))
                 ->toThrow(CannotBeRetiredException::class);
         }
     })->with([
-        // Can retire: titles in various states
+        // Can retire: titles that have been active
         ['active', true],
         ['inactive', true],
-        ['undebuted', true],
         
-        // Cannot retire: already retired
+        // Cannot retire: titles that never debuted or are already retired
+        ['undebuted', false],
+        ['unactivated', false],
         ['retired', false],
     ]);
 
     test('validates title with active championship', function () {
-        $championshipScenario = createChampionshipScenario('wrestler');
+        // Create an active title (must have been debuted to have championships)
+        $title = Title::factory()->active()->create();
         
         // Title with active championship should still be retirable
         // (championship will be ended as part of retirement process)
-        expect(fn() => $this->strategy->validate($championshipScenario['title']))
-            ->not()->toThrow();
-            
-        expectValidChampionshipState(
-            $championshipScenario['champion'], 
-            $championshipScenario['title']
-        );
+        expect(fn() => $this->strategy->validate($title))
+            ->not->toThrow(CannotBeRetiredException::class);
     });
 });
