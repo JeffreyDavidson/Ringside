@@ -395,8 +395,11 @@ describe('Venue Action Integration Tests', function () {
         });
 
         test('venue update modifies timestamps appropriately', function () {
-            $venue = Venue::factory()->create();
+            $venue = Venue::factory()->create(['name' => 'Original Name']);
             $originalUpdatedAt = $venue->updated_at;
+
+            // Wait for next second to ensure timestamp difference
+            sleep(1);
 
             $venueData = new VenueData(
                 name: 'Timestamp Updated Arena',
@@ -408,6 +411,8 @@ describe('Venue Action Integration Tests', function () {
 
             $updatedVenue = UpdateAction::run($venue, $venueData);
 
+            // Verify the name actually changed to confirm update happened
+            expect($updatedVenue->name)->toBe('Timestamp Updated Arena');
             expect($updatedVenue->updated_at->isAfter($originalUpdatedAt))->toBeTrue();
         });
 
