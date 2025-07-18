@@ -22,24 +22,24 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
     describe('class structure and inheritance', function () {
         test('extends DataTableComponent', function () {
-            expect(BasePreviousTitleChampionshipsTable::class)->toExtend(DataTableComponent::class);
+            expect(BasePreviousTitleChampionships::class)->toExtend(DataTableComponent::class);
         });
 
         test('is abstract class', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
             expect($reflection->isAbstract())->toBeTrue();
         });
     });
 
     describe('trait integration', function () {
         test('uses ShowTableTrait', function () {
-            expect(BasePreviousTitleChampionshipsTable::class)->usesTrait(ShowTableTrait::class);
+            expect(BasePreviousTitleChampionships::class)->usesTrait(ShowTableTrait::class);
         });
     });
 
     describe('property structure', function () {
         test('has databaseTableName property with correct value', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
 
             expect($reflection->hasProperty('databaseTableName'))->toBeTrue();
 
@@ -50,7 +50,7 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
         });
 
         test('has resourceName property with correct value', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
 
             expect($reflection->hasProperty('resourceName'))->toBeTrue();
 
@@ -63,7 +63,7 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
 
     describe('method existence', function () {
         test('has configure method', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
 
             expect($reflection->hasMethod('configure'))->toBeTrue();
 
@@ -73,7 +73,7 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
         });
 
         test('has columns method', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
 
             expect($reflection->hasMethod('columns'))->toBeTrue();
 
@@ -85,19 +85,19 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
 
     describe('namespace and naming', function () {
         test('uses correct namespace', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
             expect($reflection->getNamespaceName())->toBe('App\\Livewire\\Base\\Tables');
         });
 
         test('follows base class naming convention', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
             expect($reflection->getShortName())->toBe('BasePreviousTitleChampionshipsTable');
         });
     });
 
     describe('template method pattern', function () {
         test('follows template method pattern', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
 
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
@@ -110,7 +110,7 @@ describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
 
     describe('resource configuration', function () {
         test('configured for title championships resource', function () {
-            $reflection = new ReflectionClass(BasePreviousTitleChampionshipsTable::class);
+            $reflection = new ReflectionClass(BasePreviousTitleChampionships::class);
             $resourceProperty = $reflection->getProperty('resourceName');
             $tableProperty = $reflection->getProperty('databaseTableName');
 

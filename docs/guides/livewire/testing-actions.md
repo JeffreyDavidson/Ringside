@@ -6,14 +6,14 @@ This guide covers comprehensive testing strategies for Livewire action component
 
 ## Actions Component Architecture
 
-### ActionsComponent Testing
+### Actions Testing
 Action components handle business operations for specific entities:
 
 ```php
 /**
  * @extends BaseComponent
  */
-class ActionsComponent extends Component
+class Actions extends Component
 {
     public Model $model;
     public bool $showConfirmation = false;
@@ -29,7 +29,7 @@ class ActionsComponent extends Component
 
 ### Basic Test Setup
 ```php
-use App\Livewire\Events\Components\ActionsComponent;
+use App\Livewire\Events\Components\Actions;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
@@ -45,23 +45,23 @@ beforeEach(function () {
 Organize actions tests using clear `describe()` blocks:
 
 ```php
-describe('ActionsComponent Configuration', function () {
+describe('Actions Configuration', function () {
     // Test component initialization and setup
 });
 
-describe('ActionsComponent Business Logic', function () {
+describe('Actions Business Logic', function () {
     // Test business operations and workflows
 });
 
-describe('ActionsComponent Authorization', function () {
+describe('Actions Authorization', function () {
     // Test permissions and access control
 });
 
-describe('ActionsComponent Event Handling', function () {
+describe('Actions Event Handling', function () {
     // Test event dispatching and communication
 });
 
-describe('ActionsComponent State Management', function () {
+describe('Actions State Management', function () {
     // Test component state and confirmation flows
 });
 ```
@@ -72,11 +72,11 @@ describe('ActionsComponent State Management', function () {
 Test that action components initialize correctly:
 
 ```php
-describe('ActionsComponent Configuration', function () {
+describe('Actions Configuration', function () {
     test('initializes with correct model', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+        $component = Livewire::test(Actions::class, ['model' => $event]);
         
         expect($component->instance()->model)->toBe($event);
     });
@@ -84,7 +84,7 @@ describe('ActionsComponent Configuration', function () {
     test('initializes with default state', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+        $component = Livewire::test(Actions::class, ['model' => $event]);
         
         expect($component->instance()->showConfirmation)->toBeFalse();
     });
@@ -92,7 +92,7 @@ describe('ActionsComponent Configuration', function () {
     test('renders with model data', function () {
         $event = Event::factory()->create(['name' => 'Test Event']);
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+        $component = Livewire::test(Actions::class, ['model' => $event]);
         
         $component->assertOk();
         $component->assertSee('Test Event');
@@ -107,7 +107,7 @@ Test that available actions are displayed correctly:
 test('displays available actions', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $component = Livewire::test(Actions::class, ['model' => $event]);
     
     $component->assertSee('Edit');
     $component->assertSee('Delete');
@@ -118,8 +118,8 @@ test('conditionally displays actions based on model state', function () {
     $completedEvent = Event::factory()->create(['status' => 'completed']);
     $scheduledEvent = Event::factory()->create(['status' => 'scheduled']);
     
-    $completedComponent = Livewire::test(ActionsComponent::class, ['model' => $completedEvent]);
-    $scheduledComponent = Livewire::test(ActionsComponent::class, ['model' => $scheduledEvent]);
+    $completedComponent = Livewire::test(Actions::class, ['model' => $completedEvent]);
+    $scheduledComponent = Livewire::test(Actions::class, ['model' => $scheduledEvent]);
     
     $completedComponent->assertDontSee('Cancel');
     $scheduledComponent->assertSee('Cancel');
@@ -132,11 +132,11 @@ test('conditionally displays actions based on model state', function () {
 Test fundamental business operations:
 
 ```php
-describe('ActionsComponent Business Logic', function () {
+describe('Actions Business Logic', function () {
     test('edit action dispatches correct event', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('edit');
         
         $component->assertDispatched('open-edit-modal', $event->id);
@@ -145,7 +145,7 @@ describe('ActionsComponent Business Logic', function () {
     test('duplicate action creates new event', function () {
         $event = Event::factory()->create(['name' => 'Original Event']);
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('duplicate');
         
         expect(Event::where('name', 'Copy of Original Event')->exists())->toBeTrue();
@@ -155,7 +155,7 @@ describe('ActionsComponent Business Logic', function () {
     test('delete action removes event', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('delete');
         
         expect(Event::find($event->id))->toBeNull();
@@ -171,7 +171,7 @@ Test complex business operations:
 test('cancel action updates event status', function () {
     $event = Event::factory()->create(['status' => 'scheduled']);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('cancel');
     
     expect($event->fresh()->status)->toBe('cancelled');
@@ -181,7 +181,7 @@ test('cancel action updates event status', function () {
 test('reschedule action opens reschedule modal', function () {
     $event = Event::factory()->create(['status' => 'cancelled']);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('reschedule');
     
     $component->assertDispatched('open-reschedule-modal', $event->id);
@@ -190,7 +190,7 @@ test('reschedule action opens reschedule modal', function () {
 test('publish action updates event visibility', function () {
     $event = Event::factory()->create(['published' => false]);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('publish');
     
     expect($event->fresh()->published)->toBeTrue();
@@ -205,7 +205,7 @@ Test business rule validation:
 test('prevents deletion of past events', function () {
     $pastEvent = Event::factory()->past()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $pastEvent])
+    $component = Livewire::test(Actions::class, ['model' => $pastEvent])
         ->call('delete');
     
     expect(Event::find($pastEvent->id))->not->toBeNull();
@@ -215,7 +215,7 @@ test('prevents deletion of past events', function () {
 test('prevents cancellation of completed events', function () {
     $completedEvent = Event::factory()->create(['status' => 'completed']);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $completedEvent])
+    $component = Livewire::test(Actions::class, ['model' => $completedEvent])
         ->call('cancel');
     
     expect($completedEvent->fresh()->status)->toBe('completed');
@@ -225,7 +225,7 @@ test('prevents cancellation of completed events', function () {
 test('validates event has venue before publishing', function () {
     $event = Event::factory()->create(['venue_id' => null]);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('publish');
     
     expect($event->fresh()->published)->toBeFalse();
@@ -239,13 +239,13 @@ test('validates event has venue before publishing', function () {
 Test permission-based access control:
 
 ```php
-describe('ActionsComponent Authorization', function () {
+describe('Actions Authorization', function () {
     test('requires authentication', function () {
         auth()->logout();
         
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('edit');
         
         $component->assertUnauthorized();
@@ -257,7 +257,7 @@ describe('ActionsComponent Authorization', function () {
         
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('delete');
         
         $component->assertUnauthorized();
@@ -269,7 +269,7 @@ describe('ActionsComponent Authorization', function () {
         
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('edit');
         
         $component->assertDispatched('open-edit-modal', $event->id);
@@ -288,7 +288,7 @@ test('displays different actions based on user role', function () {
     $admin = User::factory()->administrator()->create();
     $this->actingAs($admin);
     
-    $adminComponent = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $adminComponent = Livewire::test(Actions::class, ['model' => $event]);
     $adminComponent->assertSee('Delete');
     $adminComponent->assertSee('Edit');
     
@@ -296,7 +296,7 @@ test('displays different actions based on user role', function () {
     $editor = User::factory()->editor()->create();
     $this->actingAs($editor);
     
-    $editorComponent = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $editorComponent = Livewire::test(Actions::class, ['model' => $event]);
     $editorComponent->assertDontSee('Delete');
     $editorComponent->assertSee('Edit');
 });
@@ -307,7 +307,7 @@ test('hides actions for insufficient permissions', function () {
     
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $component = Livewire::test(Actions::class, ['model' => $event]);
     
     $component->assertDontSee('Edit');
     $component->assertDontSee('Delete');
@@ -321,11 +321,11 @@ test('hides actions for insufficient permissions', function () {
 Test event dispatching and communication:
 
 ```php
-describe('ActionsComponent Event Handling', function () {
+describe('Actions Event Handling', function () {
     test('dispatches events with correct parameters', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('edit');
         
         $component->assertDispatched('open-edit-modal', $event->id);
@@ -334,7 +334,7 @@ describe('ActionsComponent Event Handling', function () {
     test('dispatches multiple events for complex actions', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('publish');
         
         $component->assertDispatched('event-published', $event->id);
@@ -345,7 +345,7 @@ describe('ActionsComponent Event Handling', function () {
     test('dispatches error events on failure', function () {
         $event = Event::factory()->create(['venue_id' => null]);
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('publish');
         
         $component->assertDispatched('action-failed');
@@ -361,7 +361,7 @@ Test component response to external events:
 test('responds to external events', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $component = Livewire::test(Actions::class, ['model' => $event]);
     
     // Simulate external event
     $component->dispatch('model-updated', $event->id);
@@ -373,7 +373,7 @@ test('responds to external events', function () {
 test('handles event listener correctly', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $component = Livewire::test(Actions::class, ['model' => $event]);
     
     // Simulate parent component dispatching refresh
     $component->dispatch('refresh-actions');
@@ -388,11 +388,11 @@ test('handles event listener correctly', function () {
 Test confirmation state management:
 
 ```php
-describe('ActionsComponent State Management', function () {
+describe('Actions State Management', function () {
     test('shows confirmation for dangerous actions', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('confirmDelete');
         
         expect($component->instance()->showConfirmation)->toBeTrue();
@@ -402,7 +402,7 @@ describe('ActionsComponent State Management', function () {
     test('hides confirmation after cancellation', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('confirmDelete')
             ->call('cancelDelete');
         
@@ -413,7 +413,7 @@ describe('ActionsComponent State Management', function () {
     test('executes action after confirmation', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('confirmDelete')
             ->call('confirmDeleteAction');
         
@@ -430,7 +430,7 @@ Test state persistence across interactions:
 test('maintains state during confirmation flow', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('confirmDelete');
     
     expect($component->instance()->model)->toBe($event);
@@ -445,7 +445,7 @@ test('maintains state during confirmation flow', function () {
 test('resets state after action completion', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('confirmDelete')
         ->call('confirmDeleteAction');
     
@@ -459,11 +459,11 @@ test('resets state after action completion', function () {
 Test integration with other components:
 
 ```php
-describe('ActionsComponent Integration', function () {
+describe('Actions Integration', function () {
     test('integrates with table component', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('delete');
         
         $component->assertDispatched('event-deleted');
@@ -473,7 +473,7 @@ describe('ActionsComponent Integration', function () {
     test('integrates with modal components', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('edit');
         
         $component->assertDispatched('open-edit-modal', $event->id);
@@ -482,7 +482,7 @@ describe('ActionsComponent Integration', function () {
     test('integrates with notification system', function () {
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('publish');
         
         $component->assertDispatched('show-notification', 'Event published successfully');
@@ -497,7 +497,7 @@ Test communication between components:
 test('communicates with parent component', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('duplicate');
     
     $component->assertDispatched('event-duplicated');
@@ -507,7 +507,7 @@ test('communicates with parent component', function () {
 test('responds to parent component events', function () {
     $event = Event::factory()->create();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $component = Livewire::test(Actions::class, ['model' => $event]);
     
     // Simulate parent updating model
     $component->dispatch('model-updated', $event->id);
@@ -522,13 +522,13 @@ test('responds to parent component events', function () {
 Test error handling and recovery:
 
 ```php
-describe('ActionsComponent Error Handling', function () {
+describe('Actions Error Handling', function () {
     test('handles database exceptions gracefully', function () {
         DB::shouldReceive('beginTransaction')->andThrow(new \Exception('Database error'));
         
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('delete');
         
         expect(Event::find($event->id))->not->toBeNull();
@@ -538,7 +538,7 @@ describe('ActionsComponent Error Handling', function () {
     test('handles validation errors', function () {
         $event = Event::factory()->create(['venue_id' => null]);
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('publish');
         
         $component->assertDispatched('action-failed');
@@ -551,7 +551,7 @@ describe('ActionsComponent Error Handling', function () {
         
         $event = Event::factory()->create();
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('delete');
         
         $component->assertUnauthorized();
@@ -566,7 +566,7 @@ Test error recovery scenarios:
 test('recovers from temporary errors', function () {
     $event = Event::factory()->create(['venue_id' => null]);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+    $component = Livewire::test(Actions::class, ['model' => $event])
         ->call('publish');
     
     // Initial failure
@@ -588,7 +588,7 @@ test('recovers from temporary errors', function () {
 Test action performance characteristics:
 
 ```php
-describe('ActionsComponent Performance', function () {
+describe('Actions Performance', function () {
     test('executes actions efficiently', function () {
         $event = Event::factory()->create();
         
@@ -597,7 +597,7 @@ describe('ActionsComponent Performance', function () {
             $queryCount++;
         });
         
-        $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+        $component = Livewire::test(Actions::class, ['model' => $event])
             ->call('edit');
         
         expect($queryCount)->toBeLessThan(2);
@@ -609,7 +609,7 @@ describe('ActionsComponent Performance', function () {
         $startTime = microtime(true);
         
         foreach ($events as $event) {
-            $component = Livewire::test(ActionsComponent::class, ['model' => $event])
+            $component = Livewire::test(Actions::class, ['model' => $event])
                 ->call('delete');
         }
         
@@ -630,7 +630,7 @@ test('manages memory efficiently during actions', function () {
     
     $initialMemory = memory_get_usage();
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $event]);
+    $component = Livewire::test(Actions::class, ['model' => $event]);
     
     // Perform multiple actions
     for ($i = 0; $i < 100; $i++) {

@@ -23,7 +23,7 @@ describe('Title Creation and Setup Workflow', function () {
         actingAs($admin)
             ->get(route('titles.index'))
             ->assertOk()
-            ->assertSeeLivewire(TitlesTable::class);
+            ->assertSeeLivewire(Main::class);
 
         // And: Creating title through modal workflow
         $modalComponent = Livewire::actingAs($admin)
@@ -57,7 +57,7 @@ describe('Title Creation and Setup Workflow', function () {
 
         // And: Should appear in the titles table
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->assertSee('WWE Championship Title');
     });
 
@@ -95,7 +95,7 @@ describe('Title Lifecycle Management Workflow', function () {
 
         // When: Debuting the title
         $component = Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'debut', $title->id)
             ->assertHasNoErrors();
 
@@ -104,7 +104,7 @@ describe('Title Lifecycle Management Workflow', function () {
 
         // When: Pulling (deactivating) the title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'pull', $title->id)
             ->assertHasNoErrors();
 
@@ -113,7 +113,7 @@ describe('Title Lifecycle Management Workflow', function () {
 
         // When: Reinstating the title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'reinstate', $title->id)
             ->assertHasNoErrors();
 
@@ -122,7 +122,7 @@ describe('Title Lifecycle Management Workflow', function () {
 
         // When: Retiring the title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'retire', $title->id)
             ->assertHasNoErrors();
 
@@ -131,7 +131,7 @@ describe('Title Lifecycle Management Workflow', function () {
 
         // When: Unretiring the title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'unretire', $title->id)
             ->assertHasNoErrors();
 
@@ -170,7 +170,7 @@ describe('Title Search and Filtering Workflow', function () {
 
         // When: Searching for specific title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->set('search', 'WWE')
             ->assertSee('WWE Championship Title')
             ->assertDontSee('WCW Championship Title')
@@ -178,19 +178,19 @@ describe('Title Search and Filtering Workflow', function () {
 
         // When: Filtering by active status
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->set('filterComponents.status', 'active')
             ->assertSee('WWE Championship Title');
 
         // When: Filtering by retired status
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->set('filterComponents.status', 'retired')
             ->assertSee('WCW Championship Title');
 
         // When: Clearing filters
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->set('filterComponents.status', '')
             ->set('search', '')
             ->assertSee('WWE Championship Title')
@@ -229,7 +229,7 @@ describe('Title Editing Workflow', function () {
 
         // And: Updated information should appear in table
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->assertSee('Updated Championship Title');
     });
 });
@@ -257,7 +257,7 @@ describe('Championship Reign Workflow', function () {
 
         // And: Title appears in main titles listing
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->assertSee('United States Championship Title');
     });
 });
@@ -270,7 +270,7 @@ describe('Title Deletion and Restoration Workflow', function () {
 
         // When: Deleting the title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('delete', $title)
             ->assertHasNoErrors();
 
@@ -280,7 +280,7 @@ describe('Title Deletion and Restoration Workflow', function () {
 
         // When: Restoring the title
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('restore', $title->id)
             ->assertHasNoErrors();
 
@@ -298,13 +298,13 @@ describe('Title Business Rules Workflow', function () {
 
         // When: Attempting to pull an inactive title (business rule check)
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'pull', $title->id)
             ->assertHasNoErrors();
 
         // When: Properly debuting title first
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'debut', $title->id)
             ->assertHasNoErrors();
 
@@ -313,7 +313,7 @@ describe('Title Business Rules Workflow', function () {
 
         // When: Now pulling the active title (should succeed)
         Livewire::actingAs($admin)
-            ->test(TitlesTable::class)
+            ->test(Main::class)
             ->call('handleTitleAction', 'pull', $title->id)
             ->assertHasNoErrors();
 
