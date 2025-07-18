@@ -35,7 +35,7 @@ use Illuminate\Validation\Rule;
  * @property string $password Secure password for account access
  * @property string $password_confirmation Password confirmation for security
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     /**
      * The model instance being edited, or null for new user creation.

@@ -41,7 +41,7 @@ use Illuminate\Validation\Rule;
  * @property TitleType|string $type Title type (singles or tag-team)
  * @property Carbon|string|null $start_date Title activation start date
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     use ManagesActivityPeriods;
 

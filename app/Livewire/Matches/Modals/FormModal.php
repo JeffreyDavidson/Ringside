@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Modals;
 
-use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
 use App\Livewire\Concerns\Data\PresentsRefereesList;

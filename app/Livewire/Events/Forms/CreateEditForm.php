@@ -40,10 +40,10 @@ use Illuminate\Validation\Rule;
  *
  * @property string $name Event name for promotional purposes
  * @property Carbon|string|null $date Scheduled event date
- * @property int $venue Venue ID for event location
+ * @property int $venue_id Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     use PresentsVenuesList;
 
@@ -90,7 +90,7 @@ class Form extends BaseForm
      *
      * @see getVenues() For venue selection list generation
      */
-    public int $venue = 0;
+    public int $venue_id = 0;
 
     /**
      * Promotional preview content for marketing purposes.
@@ -118,9 +118,9 @@ class Form extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Map venue_id from model to venue form field
+        // Map venue_id from model to venue_id form field
         if ($this->formModel && isset($this->formModel->venue_id)) {
-            $this->venue = $this->formModel->venue_id;
+            $this->venue_id = $this->formModel->venue_id;
         }
 
         // Venue list is cached automatically via PresentsVenuesList trait
@@ -147,7 +147,7 @@ class Form extends BaseForm
         return [
             'name' => $this->name,
             'date' => $this->date,
-            'venue_id' => $this->venue,
+            'venue_id' => $this->venue_id,
             'preview' => $this->preview,
         ];
     }
@@ -194,7 +194,7 @@ class Form extends BaseForm
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel)],
             'date' => ['nullable', 'date', new DateCanBeChanged($this->formModel)],
-            'venue' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
+            'venue_id' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];
     }
@@ -211,7 +211,7 @@ class Form extends BaseForm
     {
         return [
             'date' => 'event date',
-            'venue' => 'venue',
+            'venue_id' => 'venue',
             'preview' => 'event preview',
         ];
     }

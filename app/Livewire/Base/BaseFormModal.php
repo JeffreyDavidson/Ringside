@@ -218,7 +218,7 @@ abstract class BaseFormModal extends BaseModal
      *
      * @var BaseForm
      */
-    public BaseForm $form;
+    public $form;
 
     /**
      * Indicates if the modal is currently open.
@@ -247,6 +247,17 @@ abstract class BaseFormModal extends BaseModal
     public function closeModal(): void
     {
         $this->isModalOpen = false;
+    }
+
+    /**
+     * Save method for backward compatibility with tests.
+     *
+     * This method delegates to submitForm() to maintain compatibility
+     * with existing test patterns while using the new BaseFormModal API.
+     */
+    public function save(): void
+    {
+        $this->submitForm();
     }
 
     /**
@@ -325,7 +336,7 @@ abstract class BaseFormModal extends BaseModal
         // Initialize the form if it doesn't exist (Livewire auto-initialization)
         if (! isset($this->form)) {
             $formClass = $this->getFormClass();
-            $this->form = new $formClass();
+            $this->form = new $formClass($this, 'form');
         }
 
         // Set the form as the modelForm for BaseModal compatibility

@@ -38,7 +38,7 @@ use Illuminate\Validation\Rule;
  * @property string $state State name (validated against State model)
  * @property int|string $zipcode 5-digit ZIP code for postal addressing
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     /**
      * The model instance being edited, or null for new venue creation.

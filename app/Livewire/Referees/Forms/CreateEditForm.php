@@ -40,7 +40,7 @@ use Illuminate\Support\Carbon;
  * @property string $last_name Referee's last name for identification
  * @property Carbon|string|null $employment_date Employment start date
  */
-class Form extends BaseForm
+class CreateEditForm extends BaseForm
 {
     use ManagesEmployment;
 
