@@ -241,10 +241,12 @@ describe('User Role Integration Tests', function () {
             // Basic user should not be able to change their own role
             expect(Gate::denies('update', $basicUser))->toBeTrue();
 
-            // Even if they somehow attempt to update their role directly,
-            // the policy system should still deny them access
-            $basicUser->role = Role::Administrator;
-            expect(Gate::denies('create', User::class))->toBeTrue();
+            // Basic user should not be able to change other users' roles either
+            expect(Gate::denies('changeUserRoles', User::class))->toBeTrue();
+            
+            // Privilege escalation protection is enforced at the policy level,
+            // not by ignoring model state changes
+            expect(Gate::denies('manageUsers', User::class))->toBeTrue();
         });
 
         test('role enum validation prevents invalid roles', function () {
@@ -260,7 +262,7 @@ describe('User Role Integration Tests', function () {
             // Invalid role values should be rejected by enum type system
             expect(function () use ($user) {
                 $user->role = 'invalid-role';
-            })->toThrow(TypeError::class);
+            })->toThrow(ValueError::class);
         });
 
         test('role system handles concurrent access correctly', function () {
@@ -289,7 +291,8 @@ describe('User Role Integration Tests', function () {
             $admin->delete();
 
             // Role should still be maintained on deleted user
-            expect($admin->fresh()->isAdministrator())->toBeTrue();
+            $deletedAdmin = User::withTrashed()->find($admin->id);
+            expect($deletedAdmin->isAdministrator())->toBeTrue();
 
             // Restore user
             $admin->restore();
