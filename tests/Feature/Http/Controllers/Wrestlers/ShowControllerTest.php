@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Wrestlers\ShowController;
-use App\Livewire\Wrestlers\Tables\PreviousManagersTable;
-use App\Livewire\Wrestlers\Tables\PreviousMatchesTable;
-use App\Livewire\Wrestlers\Tables\PreviousStablesTable;
-use App\Livewire\Wrestlers\Tables\PreviousTagTeamsTable;
-use App\Livewire\Wrestlers\Tables\PreviousTitleChampionshipsTable;
+use App\Livewire\Wrestlers\Tables\PreviousManagers;
+use App\Livewire\Wrestlers\Tables\PreviousMatches;
+use App\Livewire\Wrestlers\Tables\PreviousStables;
+use App\Livewire\Wrestlers\Tables\PreviousTagTeams;
+use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
 use App\Models\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
@@ -34,9 +34,9 @@ describe('Wrestlers Show Controller', function () {
             ->assertViewHas('wrestler', $this->wrestler)
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
-            ->assertSeeLivewire(PreviousMain::class)
-            ->assertSeeLivewire(PreviousMain::class)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousTagTeams::class)
+            ->assertSeeLivewire(PreviousManagers::class)
+            ->assertSeeLivewire(PreviousStables::class);
     });
 
     /**

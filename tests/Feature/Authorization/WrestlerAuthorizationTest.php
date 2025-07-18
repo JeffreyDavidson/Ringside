@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Wrestlers\Tables\WrestlersTable;
+use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
@@ -36,7 +36,7 @@ describe('Wrestler Authorization', function () {
             // Assert
             $response->assertOk()
                 ->assertViewIs('wrestlers.index')
-                ->assertSeeLivewire(WrestlersTable::class);
+                ->assertSeeLivewire(Main::class);
         });
 
         test('basic user cannot access wrestlers index', function () {
@@ -97,7 +97,7 @@ describe('Wrestler Authorization', function () {
         test('admin can access wrestlers table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlersTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertOk();
@@ -106,7 +106,7 @@ describe('Wrestler Authorization', function () {
         test('basic user cannot access wrestlers table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->basicUser)
-                ->test(WrestlersTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -114,7 +114,7 @@ describe('Wrestler Authorization', function () {
 
         test('guest user cannot access wrestlers table component', function () {
             // Act
-            $component = Livewire::test(WrestlersTable::class);
+            $component = Livewire::test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -127,7 +127,7 @@ describe('Wrestler Authorization', function () {
             $deletedWrestler = Wrestler::factory()->trashed()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(WrestlersTable::class);
+                ->test(Main::class);
 
             // Basic CRUD actions that don't involve complex business logic
             $component->call('delete', $wrestler)->assertHasNoErrors();
@@ -145,7 +145,7 @@ describe('Wrestler Authorization', function () {
             $httpResponse->assertOk();
 
             $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(WrestlersTable::class);
+                ->test(Main::class);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -154,7 +154,7 @@ describe('Wrestler Authorization', function () {
             $httpResponse->assertForbidden();
 
             $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(WrestlersTable::class);
+                ->test(Main::class);
             $livewireComponent->assertForbidden();
         });
     });

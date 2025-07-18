@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Wrestlers\Tables\PreviousTitleChampionshipsTable;
+use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;

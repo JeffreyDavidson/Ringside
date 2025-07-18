@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:users.tables.users-table />
+    <livewire:users.tables.main />
 </x-layouts.app>

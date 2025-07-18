@@ -1,3 +1,3 @@
 <x-layouts.app>
-    <livewire:titles.tables.titles-table />
+    <livewire:titles.tables.main />
 </x-layouts.app>

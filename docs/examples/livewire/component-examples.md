@@ -372,7 +372,7 @@ class FormModal extends BaseFormModal
 Comprehensive table with filtering, sorting, and actions:
 
 ```php
-// app/Livewire/Events/Tables/EventsTable.php
+// app/Livewire/Events/Tables/Main.php
 <?php
 
 namespace App\Livewire\Events\Tables;
@@ -382,7 +382,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 
-class EventsTable extends BaseTable
+class Main extends BaseTable
 {
     protected function getModelClass(): string
     {
@@ -515,7 +515,7 @@ class EventsTable extends BaseTable
 Table with image display and complex status management:
 
 ```php
-// app/Livewire/Wrestlers/Tables/WrestlersTable.php
+// app/Livewire/Wrestlers/Tables/Main.php
 <?php
 
 namespace App\Livewire\Wrestlers\Tables;
@@ -524,7 +524,7 @@ use App\Livewire\Tables\BaseTable;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
-class WrestlersTable extends BaseTable
+class Main extends BaseTable
 {
     protected function getModelClass(): string
     {

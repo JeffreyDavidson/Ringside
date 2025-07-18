@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Wrestlers\IndexController;
-use App\Livewire\Wrestlers\Tables\WrestlersTable;
+use App\Livewire\Wrestlers\Tables\Main;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -22,7 +22,7 @@ describe('Wrestlers Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
-            ->assertSeeLivewire(WrestlersTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

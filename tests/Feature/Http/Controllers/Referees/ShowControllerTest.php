@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Referees\ShowController;
-use App\Livewire\Referees\Tables\PreviousMatchesTable;
+use App\Livewire\Referees\Tables\PreviousMatches;
 use App\Models\Referees\Referee;
 
 use function Pest\Laravel\actingAs;

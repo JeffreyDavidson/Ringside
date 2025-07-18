@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Wrestlers\Tables\PreviousManagersTable;
+use App\Livewire\Wrestlers\Tables\PreviousManagers;
 use App\Models\Managers\Manager;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
@@ -16,28 +16,28 @@ beforeEach(function () {
     $this->actingAs($this->admin);
 });
 
-describe('PreviousManagersTable Configuration', function () {
+describe('PreviousManagers Configuration', function () {
     it('requires wrestler id to be set', function () {
         expect(function () {
-            Livewire::test(PreviousMain::class)
+            Livewire::test(PreviousManagers::class)
                 ->call('builder');
         })->toThrow(Exception::class, "You didn't specify a wrestler");
     });
 
     it('can set wrestler id', function () {
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         expect($component->instance()->wrestlerId)->toBe($this->wrestler->id);
     });
 
     it('has correct database table name', function () {
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         expect($component->instance()->databaseTableName)->toBe('wrestlers_managers');
     });
 
     it('adds correct additional selects', function () {
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->instance()->configure();
 
@@ -47,9 +47,9 @@ describe('PreviousManagersTable Configuration', function () {
     });
 });
 
-describe('PreviousManagersTable Query Building', function () {
+describe('PreviousManagers Query Building', function () {
     it('builds query correctly with wrestler id', function () {
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $builder = $component->instance()->builder();
 
@@ -77,7 +77,7 @@ describe('PreviousManagersTable Query Building', function () {
             'fired_at' => now()->subMonth(),
         ]);
 
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $results = $component->instance()->builder()->get();
 
@@ -103,7 +103,7 @@ describe('PreviousManagersTable Query Building', function () {
             'fired_at' => now()->subMonths(2),
         ]);
 
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $results = $component->instance()->builder()->get();
 
@@ -138,7 +138,7 @@ describe('PreviousManagersTable Query Building', function () {
             'fired_at' => now()->subMonths(7),
         ]);
 
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $results = $component->instance()->builder()->get();
 
@@ -150,7 +150,7 @@ describe('PreviousManagersTable Query Building', function () {
     });
 });
 
-describe('PreviousManagersTable Rendering', function () {
+describe('PreviousManagers Rendering', function () {
     it('can render with previous manager relationships', function () {
         WrestlerManager::create([
             'wrestler_id' => $this->wrestler->id,
@@ -159,13 +159,13 @@ describe('PreviousManagersTable Rendering', function () {
             'fired_at' => now()->subMonths(2),
         ]);
 
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
 
     it('can render with no previous manager relationships', function () {
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
@@ -195,7 +195,7 @@ describe('PreviousManagersTable Rendering', function () {
             'fired_at' => now()->subMonths(7),
         ]);
 
-        $component = Livewire::test(PreviousMain::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $results = $component->instance()->builder()->get();
         expect($results)->toHaveCount(3);

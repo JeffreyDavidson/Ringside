@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Livewire\Events\Modals\FormModal as EventFormModal;
-use App\Livewire\Events\Tables\EventsTable;
+use App\Livewire\Events\Tables\Main as EventsTable;
 use App\Livewire\Venues\Modals\FormModal as VenueFormModal;
-use App\Livewire\Venues\Tables\VenuesTable;
+use App\Livewire\Venues\Tables\Main as VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +45,7 @@ describe('Venue Creation and Setup Workflow', function () {
         actingAs($admin)
             ->get(route('venues.index'))
             ->assertOk()
-            ->assertSeeLivewire(Main::class);
+            ->assertSeeLivewire(VenuesTable::class);
 
         // And: Creating venue through modal workflow
         $modalComponent = Livewire::actingAs($admin)
@@ -84,7 +84,7 @@ describe('Venue Creation and Setup Workflow', function () {
 
         // And: Should appear in the venues table
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(VenuesTable::class)
             ->assertSee('Madison Square Garden');
     });
 
@@ -134,7 +134,7 @@ describe('Event Creation and Scheduling Workflow', function () {
         actingAs($admin)
             ->get(route('events.index'))
             ->assertOk()
-            ->assertSeeLivewire(Main::class);
+            ->assertSeeLivewire(EventsTable::class);
 
         // And: Creating event through modal workflow
         $modalComponent = Livewire::actingAs($admin)
@@ -146,7 +146,7 @@ describe('Event Creation and Scheduling Workflow', function () {
         $eventData = [
             'name' => 'WrestleMania 40',
             'date' => now()->addMonths(3)->format('Y-m-d'),
-            'venue' => $venue->id,
+            'venue_id' => $venue->id,
         ];
 
         foreach ($eventData as $field => $value) {
@@ -168,7 +168,7 @@ describe('Event Creation and Scheduling Workflow', function () {
 
         // And: Should appear in the events table
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(EventsTable::class)
             ->assertSee('WrestleMania 40')
             ->assertSee('Allstate Arena');
     });
@@ -243,7 +243,7 @@ describe('Event Search and Filtering Workflow', function () {
 
         // When: Testing search functionality exists
         $component = Livewire::actingAs($admin)
-            ->test(Main::class);
+            ->test(EventsTable::class);
 
         // Verify the component loads successfully
         expect($component)->not->toBeNull();
@@ -272,7 +272,7 @@ describe('Event Editing Workflow', function () {
 
         // Then: Form should be populated with existing data
         expect($component->get('form.name'))->toBe('Original Event');
-        expect($component->get('form.venue'))->toBe($venue1->id);
+        expect($component->get('form.venue_id'))->toBe($venue1->id);
 
         // When: Updating event information
         $component
@@ -326,7 +326,7 @@ describe('Venue Detail and Event History Workflow', function () {
         // Then: Should see the venue's event history
         actingAs($admin)
             ->get(route('venues.show', $venue))
-            ->assertSeeLivewire('venues.tables.previous-events-table');
+            ->assertSeeLivewire('venues.tables.previous-events');
     });
 });
 
@@ -342,7 +342,7 @@ describe('Event Deletion and Restoration Workflow', function () {
 
         // When: Deleting the event
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(EventsTable::class)
             ->call('delete', $event)
             ->assertHasNoErrors();
 
@@ -352,7 +352,7 @@ describe('Event Deletion and Restoration Workflow', function () {
 
         // When: Restoring the event
         Livewire::actingAs($admin)
-            ->test(Main::class)
+            ->test(EventsTable::class)
             ->call('restore', $event->id)
             ->assertHasNoErrors();
 

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\TagTeams\IndexController;
-use App\Livewire\TagTeams\Tables\TagTeamsTable;
+use App\Livewire\TagTeams\Tables\Main;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
