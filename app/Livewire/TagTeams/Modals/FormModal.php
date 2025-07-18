@@ -7,13 +7,13 @@ namespace App\Livewire\TagTeams\Modals;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use App\Livewire\TagTeams\Forms\Form;
+use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseFormModal<Form, TagTeam>
+ * @extends BaseFormModal<CreateEditForm, TagTeam>
  */
 class FormModal extends BaseFormModal
 {
@@ -23,7 +23,7 @@ class FormModal extends BaseFormModal
 
     protected function getFormClass(): string
     {
-        return Form::class;
+        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

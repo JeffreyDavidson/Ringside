@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Stables\Forms\Form;
+use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Livewire\Stables\Modals\FormModal;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
@@ -23,7 +23,7 @@ describe('FormModal Configuration', function () {
         $method = $reflection->getMethod('getFormClass');
         $method->setAccessible(true);
 
-        expect($method->invoke($modal))->toBe(Form::class);
+        expect($method->invoke($modal))->toBe(CreateEditForm::class);
     });
 
     it('returns correct model class', function () {
