@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Venues\ShowController;
-use App\Livewire\Venues\Tables\PreviousEventsTable;
+use App\Livewire\Venues\Tables\PreviousEvents;
 use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
@@ -28,7 +28,7 @@ describe('Venues Show Controller', function () {
             ->assertOk()
             ->assertViewIs('venues.show')
             ->assertViewHas('venue', $this->venue)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousEvents::class);
     });
 
     /**

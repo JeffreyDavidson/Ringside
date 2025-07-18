@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\TagTeams\ShowController;
-use App\Livewire\TagTeams\Tables\PreviousManagersTable;
-use App\Livewire\TagTeams\Tables\PreviousMatchesTable;
-use App\Livewire\TagTeams\Tables\PreviousStablesTable;
-use App\Livewire\TagTeams\Tables\PreviousTitleChampionshipsTable;
-use App\Livewire\TagTeams\Tables\PreviousWrestlersTable;
+use App\Livewire\TagTeams\Tables\PreviousManagers;
+use App\Livewire\TagTeams\Tables\PreviousMatches;
+use App\Livewire\TagTeams\Tables\PreviousStables;
+use App\Livewire\TagTeams\Tables\PreviousTitleChampionships;
+use App\Livewire\TagTeams\Tables\PreviousWrestlers;
 use App\Models\TagTeams\TagTeam;
 
 use function Pest\Laravel\actingAs;
@@ -35,8 +35,8 @@ describe('TagTeams Show Controller', function () {
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
             ->assertSeeLivewire(PreviousWrestlers::class)
-            ->assertSeeLivewire(PreviousMain::class)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousManagers::class)
+            ->assertSeeLivewire(PreviousStables::class);
     });
 
     /**

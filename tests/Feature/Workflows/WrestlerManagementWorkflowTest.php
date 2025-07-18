@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Modals\FormModal;
-use App\Livewire\Wrestlers\Tables\WrestlersTable;
+use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
@@ -22,7 +22,7 @@ describe('Wrestler Creation Journey', function () {
         actingAs($admin)
             ->get(route('wrestlers.index'))
             ->assertOk()
-            ->assertSeeLivewire(WrestlersTable::class);
+            ->assertSeeLivewire(Main::class);
 
         // And: Creating wrestler through modal workflow
         $modalComponent = Livewire::actingAs($admin)
@@ -63,7 +63,7 @@ describe('Wrestler Creation Journey', function () {
 
         // And: Should appear in the wrestlers table
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->assertSee('John Cena')
             ->assertSee('West Newbury, MA');
     });
@@ -104,7 +104,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Employing the wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'employ', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -113,7 +113,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Suspending the employed wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'suspend', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -122,7 +122,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Reinstating the suspended wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'reinstate', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -132,7 +132,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Retiring the wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'retire', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -141,7 +141,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Unretiring the wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'unretire', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -159,7 +159,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Injuring the wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'injure', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -168,7 +168,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // When: Healing the wrestler from injury
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('handleWrestlerAction', 'heal', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -214,7 +214,7 @@ describe('Wrestler Profile Management Journey', function () {
 
         // And: Updated information should appear in table
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->assertSee('Updated Name')
             ->assertSee('Updated City, UT');
     });
@@ -237,11 +237,11 @@ describe('Wrestler Detail View Journey', function () {
 
         // Then: Should see all the history tables
         $historyTables = [
-            'previous-title-championships-table',
-            'previous-matches-table',
-            'previous-tag-teams-table',
-            'previous-managers-table',
-            'previous-stables-table',
+            'previous-title-championships',
+            'previous-matches',
+            'previous-tag-teams',
+            'previous-managers',
+            'previous-stables',
         ];
 
         foreach ($historyTables as $table) {
@@ -262,7 +262,7 @@ describe('Wrestler Search and Filtering Journey', function () {
 
         // When: Searching for specific wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->set('search', 'John')
             ->assertSee($bookableWrestler->name)
             ->assertDontSee($releasedWrestler->name)
@@ -270,21 +270,21 @@ describe('Wrestler Search and Filtering Journey', function () {
 
         // When: Filtering by employment status
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->set('filterComponents.status', 'employed')
             ->assertSee($bookableWrestler->name)
             ->assertDontSee($releasedWrestler->name);
 
         // When: Filtering by released status
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->set('filterComponents.status', 'released')
             ->assertSee($releasedWrestler->name)
             ->assertDontSee($bookableWrestler->name);
 
         // When: Clearing filters
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->set('filterComponents.status', '')
             ->set('search', '')
             ->assertSee($bookableWrestler->name)
@@ -301,7 +301,7 @@ describe('Wrestler Deletion and Restoration Journey', function () {
 
         // When: Deleting the wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('delete', $wrestler)
             ->assertHasNoErrors();
 
@@ -311,7 +311,7 @@ describe('Wrestler Deletion and Restoration Journey', function () {
 
         // When: Restoring the wrestler
         Livewire::actingAs($admin)
-            ->test(WrestlersTable::class)
+            ->test(Main::class)
             ->call('restore', $wrestler->id)
             ->assertHasNoErrors();
 
