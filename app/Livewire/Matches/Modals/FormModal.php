@@ -49,14 +49,6 @@ class FormModal extends BaseFormModal
     use PresentsWrestlersList;
 
     /**
-     * The event match form instance for data management.
-     *
-     * Handles all event match-specific validation, data transformation,
-     * and persistence operations within the modal interface.
-     */
-    public BaseForm $form;
-
-    /**
      * String name to render view for each match type.
      *
      * Determines which Blade template to use for rendering match-specific
