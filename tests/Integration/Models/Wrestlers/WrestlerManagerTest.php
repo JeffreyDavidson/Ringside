@@ -262,22 +262,20 @@ describe('WrestlerManager Pivot Model', function () {
     });
 
     describe('Business Rule Validation', function () {
-        test('cannot have duplicate active management relationships', function () {
+        test('can have multiple active management relationships', function () {
             createManagementRelationship($this->wrestler, $this->manager);
             $initialCount = $this->wrestler->currentManagers()->count();
 
-            // Try to attach the same manager again
-            try {
-                createManagementRelationship($this->wrestler, $this->manager, [
-                    'hired_at' => Carbon::now()->subMonths(3),
-                ]);
+            // Add a second manager
+            createManagementRelationship($this->wrestler, $this->secondManager, [
+                'hired_at' => Carbon::now()->subMonths(3),
+            ]);
 
-                // If duplicate is allowed, verify only one current relationship exists
-                expect($this->wrestler->currentManagers()->count())->toBe($initialCount);
-            } catch (Exception $e) {
-                // If exception is thrown, that's expected behavior
-                expect($this->wrestler->currentManagers()->count())->toBe($initialCount);
-            }
+            // Verify wrestler now has multiple current managers
+            expect($this->wrestler->currentManagers()->count())->toBe($initialCount + 1);
+            expect($this->wrestler->currentManagers()->pluck('managers.id'))
+                ->toContain($this->manager->id)
+                ->toContain($this->secondManager->id);
         });
 
         test('management periods cannot overlap incorrectly', function () {
