@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Concerns\BaseModal;
+use App\Livewire\Base\BaseModal;
 use LivewireUI\Modal\ModalComponent;
 
 /**
@@ -33,7 +33,7 @@ describe('BaseModal Unit Tests', function () {
             $reflection = new ReflectionClass(BaseModal::class);
             $docComment = $reflection->getDocComment();
 
-            expect($docComment)->toContain('@template TModelForm of LivewireBaseForm');
+            expect($docComment)->toContain('@template TModelForm of BaseForm');
             expect($docComment)->toContain('@template TModelType of Model');
         });
     });
@@ -158,7 +158,7 @@ describe('BaseModal Unit Tests', function () {
     describe('namespace and naming', function () {
         test('uses correct namespace', function () {
             $reflection = new ReflectionClass(BaseModal::class);
-            expect($reflection->getNamespaceName())->toBe('App\\Livewire\\Concerns');
+            expect($reflection->getNamespaceName())->toBe('App\\Livewire\\Base');
         });
 
         test('follows base class naming convention', function () {
@@ -172,7 +172,7 @@ describe('BaseModal Unit Tests', function () {
             $reflection = new ReflectionClass(BaseModal::class);
             $source = file_get_contents($reflection->getFileName());
 
-            expect($source)->toContain('use App\\Livewire\\Base\\LivewireBaseForm;');
+            expect($source)->toContain('use App\\Livewire\\Base\\BaseForm;');
             expect($source)->toContain('use Illuminate\\Database\\Eloquent\\Model;');
             expect($source)->toContain('use Illuminate\\View\\View;');
             expect($source)->toContain('use LivewireUI\\Modal\\ModalComponent;');
@@ -198,7 +198,7 @@ describe('BaseModal Unit Tests', function () {
             $reflection = new ReflectionClass(BaseModal::class);
             $docComment = $reflection->getDocComment();
 
-            expect($docComment)->toContain('TModelForm of LivewireBaseForm');
+            expect($docComment)->toContain('TModelForm of BaseForm');
             expect($docComment)->toContain('TModelType of Model');
         });
 

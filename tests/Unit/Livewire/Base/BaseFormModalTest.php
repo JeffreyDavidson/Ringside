@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\BaseModal;
+use App\Livewire\Base\BaseModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use Livewire\Component;
 
@@ -116,7 +116,7 @@ describe('BaseFormModal Unit Tests', function () {
             $docComment = $reflection->getDocComment();
 
             expect($docComment)->toContain('@template');
-            expect($docComment)->toContain('TForm of LivewireBaseForm');
+            expect($docComment)->toContain('TForm of BaseForm');
             expect($docComment)->toContain('TModel of Model');
             expect($docComment)->toContain('@extends BaseModal');
             expect($docComment)->toContain('@see BaseModal');

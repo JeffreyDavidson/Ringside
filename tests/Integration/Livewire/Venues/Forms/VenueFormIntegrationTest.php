@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Venues\Forms\VenueForm;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Model;
@@ -185,8 +185,8 @@ describe('VenueForm Integration Tests', function () {
     });
 
     describe('form inheritance and structure', function () {
-        test('extends LivewireBaseForm correctly', function () {
-            expect($this->form)->toBeInstanceOf(LivewireBaseForm::class);
+        test('extends BaseForm correctly', function () {
+            expect($this->form)->toBeInstanceOf(BaseForm::class);
         });
 
         test('implements required abstract methods', function () {

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Modals;
 
-use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
@@ -19,7 +18,6 @@ class FormModal extends BaseFormModal
 {
     use PresentsWrestlersList;
 
-    public BaseForm $form;
 
     protected function getFormClass(): string
     {

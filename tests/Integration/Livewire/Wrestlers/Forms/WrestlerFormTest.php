@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
 use App\Livewire\Wrestlers\Forms\WrestlerForm;
 use App\Models\Wrestlers\Wrestler;
@@ -37,8 +37,8 @@ describe('WrestlerForm Unit Tests', function () {
             expect($this->form)->toBeInstanceOf(WrestlerForm::class);
         });
 
-        test('extends LivewireBaseForm', function () {
-            expect($this->form)->toBeInstanceOf(LivewireBaseForm::class);
+        test('extends BaseForm', function () {
+            expect($this->form)->toBeInstanceOf(BaseForm::class);
         });
 
         test('has required form properties', function () {
@@ -232,7 +232,7 @@ describe('WrestlerForm Unit Tests', function () {
         test('inherits from correct base classes', function () {
             $reflection = new ReflectionClass(WrestlerForm::class);
 
-            expect($reflection->getParentClass()->getName())->toBe(LivewireBaseForm::class);
+            expect($reflection->getParentClass()->getName())->toBe(BaseForm::class);
         });
 
         test('implements required interfaces', function () {

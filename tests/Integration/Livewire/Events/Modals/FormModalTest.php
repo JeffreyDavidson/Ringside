@@ -37,7 +37,7 @@ describe('FormModal Configuration', function () {
 describe('FormModal Rendering', function () {
     it('can render in create mode', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertOk();
     });
@@ -46,14 +46,14 @@ describe('FormModal Rendering', function () {
         $event = Event::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id);
+            ->call('openModal', $event->id);
 
         $component->assertOk();
     });
 
     it('displays correct title in create mode', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Create Event');
     });
@@ -62,7 +62,7 @@ describe('FormModal Rendering', function () {
         $event = Event::factory()->create(['name' => 'Test Event']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id);
+            ->call('openModal', $event->id);
 
         $component->assertSee('Edit Event');
     });
@@ -71,7 +71,7 @@ describe('FormModal Rendering', function () {
         $venue = Venue::factory()->create(['name' => 'Test Arena']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Test Arena');
     });
@@ -82,25 +82,25 @@ describe('FormModal Create Operations', function () {
         $venue = Venue::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'WrestleMania 40')
             ->set('form.date', '2024-04-06')
             ->set('form.venue_id', $venue->id)
             ->call('save');
 
         $component->assertHasNoErrors();
-        $component->assertDispatched('eventCreated');
+        $component->assertDispatched('form-submitted');
 
         $this->assertDatabaseHas('events', [
             'name' => 'WrestleMania 40',
-            'date' => '2024-04-06',
+            'date' => '2024-04-06 00:00:00',
             'venue_id' => $venue->id,
         ]);
     });
 
     it('validates required fields when creating', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', '')
             ->set('form.date', '')
             ->set('form.venue_id', '')
@@ -117,7 +117,7 @@ describe('FormModal Create Operations', function () {
         Event::factory()->create(['name' => 'Existing Event']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Existing Event')
             ->set('form.date', '2024-04-06')
             ->call('save');
@@ -127,7 +127,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates date format', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Test Event')
             ->set('form.date', 'invalid-date')
             ->call('save');
@@ -137,7 +137,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates venue exists', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Test Event')
             ->set('form.date', '2024-04-06')
             ->set('form.venue_id', 999)
@@ -151,7 +151,7 @@ describe('FormModal Create Operations', function () {
         $venue = Venue::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Test Event')
             ->set('form.date', $yesterday)
             ->set('form.venue_id', $venue->id)
@@ -172,7 +172,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id)
+            ->call('openModal', $event->id)
             ->set('form.name', 'Updated Event')
             ->set('form.date', '2024-04-07')
             ->set('form.venue_id', $venue2->id)
@@ -198,7 +198,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id);
+            ->call('openModal', $event->id);
 
         $component->assertSet('form.name', 'Test Event');
         $component->assertSet('form.date', '2024-04-06');
@@ -210,7 +210,7 @@ describe('FormModal Edit Operations', function () {
         $event2 = Event::factory()->create(['name' => 'Event Two']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event2->id)
+            ->call('openModal', $event2->id)
             ->set('form.name', 'Event One')
             ->call('save');
 
@@ -226,7 +226,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id)
+            ->call('openModal', $event->id)
             ->set('form.name', 'Test Event')
             ->set('form.date', '2024-04-07')
             ->call('save');
@@ -239,7 +239,7 @@ describe('FormModal Edit Operations', function () {
         $event = Event::factory()->past()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id)
+            ->call('openModal', $event->id)
             ->set('form.date', '2025-01-01')
             ->call('save');
 
@@ -254,7 +254,7 @@ describe('FormModal Venue Integration', function () {
         $venue2 = Venue::factory()->create(['name' => 'Arena Two']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Arena One');
         $component->assertSee('Arena Two');
@@ -265,7 +265,7 @@ describe('FormModal Venue Integration', function () {
         $inactiveVenue = Venue::factory()->inactive()->create(['name' => 'Inactive Arena']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Active Arena');
         $component->assertDontSee('Inactive Arena');
@@ -279,7 +279,7 @@ describe('FormModal Venue Integration', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.venue_id', $venue->id);
 
         $component->assertSee('Test Arena');
@@ -294,8 +294,8 @@ describe('FormModal State Management', function () {
         $event = Event::factory()->create(['name' => 'Test Event']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $event->id)
-            ->call('createMode');
+            ->call('openModal', $event->id)
+            ->call('openModal');
 
         $component->assertSet('form.name', null);
         $component->assertSet('form.date', null);
@@ -306,7 +306,7 @@ describe('FormModal State Management', function () {
         $venue = Venue::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Test Event')
             ->set('form.date', '2024-04-06')
             ->set('form.venue_id', $venue->id)
@@ -317,7 +317,7 @@ describe('FormModal State Management', function () {
 
     it('keeps modal open when validation fails', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', '')
             ->call('save');
 
@@ -330,7 +330,7 @@ describe('FormModal Business Logic', function () {
         $venue = Venue::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Test Event')
             ->set('form.date', '2024-04-06')
             ->set('form.venue_id', $venue->id)
@@ -349,7 +349,7 @@ describe('FormModal Business Logic', function () {
         $venue = Venue::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'Test Event')
             ->set('form.date', '2024-04-06')
             ->set('form.venue_id', $venue->id)
@@ -370,7 +370,7 @@ describe('FormModal Authorization', function () {
         auth()->logout();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertUnauthorized();
     });
@@ -380,7 +380,7 @@ describe('FormModal Authorization', function () {
         $this->actingAs($user);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertUnauthorized();
     });
