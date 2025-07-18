@@ -50,7 +50,7 @@ describe('Manager Assignment Workflow', function () {
 
         // And: Manager appears in managers table
         Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+            ->test(Main::class)
             ->assertSee('Paul')
             ->assertSee('Heyman');
     });
@@ -62,7 +62,7 @@ describe('Manager Assignment Workflow', function () {
 
         // When: Managing employment status
         Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+            ->test(Main::class)
             ->call('handleManagerAction', 'employ', $manager->id)
             ->assertHasNoErrors();
 
@@ -71,7 +71,7 @@ describe('Manager Assignment Workflow', function () {
 
         // When: Suspending manager
         Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+            ->test(Main::class)
             ->call('handleManagerAction', 'suspend', $manager->id)
             ->assertHasNoErrors();
 
@@ -80,7 +80,7 @@ describe('Manager Assignment Workflow', function () {
 
         // When: Reinstating manager
         Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+            ->test(Main::class)
             ->call('handleManagerAction', 'reinstate', $manager->id)
             ->assertHasNoErrors();
 
@@ -113,7 +113,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // And: Stable appears in stables table
         Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+            ->test(Main::class)
             ->assertSee('D-Generation X');
     });
 
@@ -124,7 +124,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // When: Debuting the stable
         Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+            ->test(Main::class)
             ->call('handleStableAction', 'debut', $stable->id)
             ->assertHasNoErrors();
 
@@ -133,7 +133,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // When: Retiring the stable
         Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+            ->test(Main::class)
             ->call('handleStableAction', 'retire', $stable->id)
             ->assertHasNoErrors();
 
@@ -142,7 +142,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // When: Unretiring the stable
         Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+            ->test(Main::class)
             ->call('handleStableAction', 'unretire', $stable->id)
             ->assertHasNoErrors();
 
@@ -175,7 +175,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // And: Tag team appears in tag teams table
         Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+            ->test(Main::class)
             ->assertSee('The Hardy Boyz');
 
         // When: Viewing tag team details
@@ -195,7 +195,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Employing the tag team
         Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+            ->test(Main::class)
             ->call('handleTagTeamAction', 'employ', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -204,7 +204,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Suspending tag team
         Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+            ->test(Main::class)
             ->call('handleTagTeamAction', 'suspend', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -213,7 +213,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Reinstating tag team
         Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+            ->test(Main::class)
             ->call('handleTagTeamAction', 'reinstate', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -223,7 +223,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // When: Retiring tag team
         Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+            ->test(Main::class)
             ->call('handleTagTeamAction', 'retire', $tagTeam->id)
             ->assertHasNoErrors();
 

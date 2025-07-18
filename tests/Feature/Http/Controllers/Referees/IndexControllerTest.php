@@ -22,7 +22,7 @@ describe('Referees Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('referees.index')
-            ->assertSeeLivewire(RefereesTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

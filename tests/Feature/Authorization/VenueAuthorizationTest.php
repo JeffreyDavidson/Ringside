@@ -36,7 +36,7 @@ describe('Venue Authorization', function () {
             // Assert
             $response->assertOk()
                 ->assertViewIs('venues.index')
-                ->assertSeeLivewire(VenuesTable::class);
+                ->assertSeeLivewire(Main::class);
         });
 
         test('basic user cannot access venues index', function () {
@@ -97,7 +97,7 @@ describe('Venue Authorization', function () {
         test('admin can access venues table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->admin)
-                ->test(VenuesTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertOk();
@@ -106,7 +106,7 @@ describe('Venue Authorization', function () {
         test('basic user cannot access venues table component', function () {
             // Arrange & Act
             $component = Livewire::actingAs($this->basicUser)
-                ->test(VenuesTable::class);
+                ->test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -114,7 +114,7 @@ describe('Venue Authorization', function () {
 
         test('guest user cannot access venues table component', function () {
             // Act
-            $component = Livewire::test(VenuesTable::class);
+            $component = Livewire::test(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -127,7 +127,7 @@ describe('Venue Authorization', function () {
             $deletedVenue = Venue::factory()->trashed()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(VenuesTable::class);
+                ->test(Main::class);
 
             // Basic CRUD actions that don't involve complex business logic
             $component->call('delete', $venue)->assertHasNoErrors();
@@ -145,7 +145,7 @@ describe('Venue Authorization', function () {
             $httpResponse->assertOk();
 
             $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(VenuesTable::class);
+                ->test(Main::class);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -154,7 +154,7 @@ describe('Venue Authorization', function () {
             $httpResponse->assertForbidden();
 
             $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(VenuesTable::class);
+                ->test(Main::class);
             $livewireComponent->assertForbidden();
         });
     });

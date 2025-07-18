@@ -27,7 +27,7 @@ describe('Referees Show Controller', function () {
             ->get(action(ShowController::class, $this->referee))
             ->assertViewIs('referees.show')
             ->assertViewHas('referee', $this->referee)
-            ->assertSeeLivewire(PreviousMatchesTable::class);
+            ->assertSeeLivewire(PreviousMatches::class);
     });
 
     /**

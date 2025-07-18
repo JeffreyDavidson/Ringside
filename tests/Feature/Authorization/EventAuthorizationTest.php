@@ -30,7 +30,7 @@ describe('Event Authorization Feature Tests', function () {
     describe('admin user authorization', function () {
         test('admin can access events table component', function () {
             Livewire::actingAs($this->admin)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertOk();
         });
 
@@ -39,7 +39,7 @@ describe('Event Authorization Feature Tests', function () {
             $deletedEvent = Event::factory()->trashed()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Event management actions
             $component->call('delete', $event)->assertHasNoErrors();
@@ -52,7 +52,7 @@ describe('Event Authorization Feature Tests', function () {
             $pastEvent = Event::factory()->past()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin should be able to perform appropriate actions on each status
             $component->call('delete', $scheduledEvent)->assertHasNoErrors();
@@ -65,7 +65,7 @@ describe('Event Authorization Feature Tests', function () {
             $eventWithoutVenue = Event::factory()->scheduled()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin can manage events regardless of venue association
             $component->call('delete', $eventWithVenue)->assertHasNoErrors();
@@ -76,7 +76,7 @@ describe('Event Authorization Feature Tests', function () {
             $event = Event::factory()->unscheduled()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Event lifecycle through admin actions
             $component->call('delete', $event)
@@ -95,7 +95,7 @@ describe('Event Authorization Feature Tests', function () {
     describe('basic user authorization', function () {
         test('basic user cannot access events table component', function () {
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -104,7 +104,7 @@ describe('Event Authorization Feature Tests', function () {
 
             // Attempt to test component should fail at authorization level
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -115,7 +115,7 @@ describe('Event Authorization Feature Tests', function () {
 
             // All attempts should fail at the component authorization level
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -125,14 +125,14 @@ describe('Event Authorization Feature Tests', function () {
 
             // Component access should be denied
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
 
     describe('guest user authorization', function () {
         test('guest user cannot access events table component', function () {
-            Livewire::test(EventsTable::class)
+            Livewire::test(Main::class)
                 ->assertForbidden();
         });
 
@@ -140,7 +140,7 @@ describe('Event Authorization Feature Tests', function () {
             $event = Event::factory()->scheduled()->create();
 
             // All attempts should fail immediately
-            Livewire::test(EventsTable::class)
+            Livewire::test(Main::class)
                 ->assertForbidden();
         });
     });
@@ -152,13 +152,13 @@ describe('Event Authorization Feature Tests', function () {
 
             // Admin can perform actions
             Livewire::actingAs($this->admin)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->call('delete', $scheduledEvent)
                 ->assertHasNoErrors();
 
             // Basic user cannot even access component
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -168,14 +168,14 @@ describe('Event Authorization Feature Tests', function () {
 
             // Admin can manage events
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             $component->call('delete', $event)->assertHasNoErrors();
             $component->call('restore', $deletedEvent->id)->assertHasNoErrors();
 
             // Basic user cannot access
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -185,14 +185,14 @@ describe('Event Authorization Feature Tests', function () {
 
             // Admin can manage venue associations
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             $component->call('delete', $eventWithVenue)->assertHasNoErrors();
             $component->call('delete', $eventWithoutVenue)->assertHasNoErrors();
 
             // Basic user cannot access
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -202,14 +202,14 @@ describe('Event Authorization Feature Tests', function () {
 
             // Admin can perform CRUD
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             $component->call('delete', $event)->assertHasNoErrors();
             $component->call('restore', $deletedEvent->id)->assertHasNoErrors();
 
             // Basic user cannot access
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
@@ -223,8 +223,8 @@ describe('Event Authorization Feature Tests', function () {
             $event2 = Event::factory()->unscheduled()->create();
 
             // Both admins can perform actions simultaneously
-            $component1 = Livewire::actingAs($admin1)->test(EventsTable::class);
-            $component2 = Livewire::actingAs($admin2)->test(EventsTable::class);
+            $component1 = Livewire::actingAs($admin1)->test(Main::class);
+            $component2 = Livewire::actingAs($admin2)->test(Main::class);
 
             $component1->call('delete', $event1)->assertHasNoErrors();
             $component2->call('delete', $event2)->assertHasNoErrors();
@@ -238,13 +238,13 @@ describe('Event Authorization Feature Tests', function () {
 
             // Admin can access
             Livewire::actingAs($this->admin)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->call('delete', $event)
                 ->assertHasNoErrors();
 
             // Basic user still cannot access even after admin action
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -252,7 +252,7 @@ describe('Event Authorization Feature Tests', function () {
             $event = Event::factory()->unscheduled()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Delete event
             $component->call('delete', $event)->assertHasNoErrors();
@@ -264,7 +264,7 @@ describe('Event Authorization Feature Tests', function () {
 
             // Basic user still cannot access regardless of event state
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
@@ -275,7 +275,7 @@ describe('Event Authorization Feature Tests', function () {
             $pastEvent = Event::factory()->past()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin is authorized for all operations
             $component->call('delete', $scheduledEvent)->assertHasNoErrors();
@@ -288,7 +288,7 @@ describe('Event Authorization Feature Tests', function () {
             // Basic user should be denied at authorization level,
             // not reach business rule validation
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -297,7 +297,7 @@ describe('Event Authorization Feature Tests', function () {
             $pastEvent = Event::factory()->past()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin should be authorized for all operations
             $component->call('delete', $scheduledEvent)->assertHasNoErrors();
@@ -310,12 +310,12 @@ describe('Event Authorization Feature Tests', function () {
     describe('authorization error handling', function () {
         test('unauthorized component access returns proper error response', function () {
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
         test('guest access attempts are properly handled', function () {
-            Livewire::test(EventsTable::class)
+            Livewire::test(Main::class)
                 ->assertForbidden();
         });
 
@@ -324,7 +324,7 @@ describe('Event Authorization Feature Tests', function () {
 
             // Authorization failure should not expose event details
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
@@ -336,7 +336,7 @@ describe('Event Authorization Feature Tests', function () {
             $unscheduledEvent = Event::factory()->unscheduled()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin can manage events regardless of scheduling complexity
             $component->call('delete', $futureEvent)->assertHasNoErrors();
@@ -350,7 +350,7 @@ describe('Event Authorization Feature Tests', function () {
             $eventWithoutVenue = Event::factory()->scheduled()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin can manage complex venue scenarios
             $component->call('delete', $eventWithVenue)->assertHasNoErrors();
@@ -358,7 +358,7 @@ describe('Event Authorization Feature Tests', function () {
 
             // Basic user still cannot access
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
@@ -368,7 +368,7 @@ describe('Event Authorization Feature Tests', function () {
             $event = Event::factory()->unscheduled()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Complete lifecycle management
             $component->call('delete', $event)->assertHasNoErrors();
@@ -383,14 +383,14 @@ describe('Event Authorization Feature Tests', function () {
 
             // Admin can perform lifecycle operations
             $adminComponent = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             $adminComponent->call('delete', $event)->assertHasNoErrors();
             $adminComponent->call('restore', $event->id)->assertHasNoErrors();
 
             // Basic user cannot perform any lifecycle operations
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
@@ -401,7 +401,7 @@ describe('Event Authorization Feature Tests', function () {
             // Note: In a real scenario, this would have matches attached
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin can manage events with relationships
             $component->call('delete', $eventWithMatches)->assertHasNoErrors();
@@ -412,14 +412,14 @@ describe('Event Authorization Feature Tests', function () {
             $complexEvent = Event::factory()->scheduled()->withVenue()->withPreview()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(EventsTable::class);
+                ->test(Main::class);
 
             // Admin authorized for complex events
             $component->call('delete', $complexEvent)->assertHasNoErrors();
 
             // Basic user still denied
             Livewire::actingAs($this->basicUser)
-                ->test(EventsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
     });
