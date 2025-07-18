@@ -237,11 +237,11 @@ describe('Wrestler Detail View Journey', function () {
 
         // Then: Should see all the history tables
         $historyTables = [
-            'previous-title-championships-table',
-            'previous-matches-table',
-            'previous-tag-teams-table',
-            'previous-managers-table',
-            'previous-stables-table',
+            'previous-title-championships',
+            'previous-matches',
+            'previous-tag-teams',
+            'previous-managers',
+            'previous-stables',
         ];
 
         foreach ($historyTables as $table) {

@@ -156,7 +156,7 @@ describe('Title Detail and History Workflow', function () {
         // Then: Should see the championship history table
         actingAs($admin)
             ->get(route('titles.show', $title))
-            ->assertSeeLivewire('titles.tables.previous-title-championships-table');
+            ->assertSeeLivewire('titles.tables.previous-title-championships');
     });
 });
 
@@ -253,7 +253,7 @@ describe('Championship Reign Workflow', function () {
         // Then: Championship history table should be visible
         actingAs($admin)
             ->get(route('titles.show', $title))
-            ->assertSeeLivewire('titles.tables.previous-title-championships-table');
+            ->assertSeeLivewire('titles.tables.previous-title-championships');
 
         // And: Title appears in main titles listing
         Livewire::actingAs($admin)
