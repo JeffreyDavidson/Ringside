@@ -43,7 +43,7 @@ describe('FormModal Configuration', function () {
 describe('FormModal Rendering', function () {
     it('can render in create mode', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertOk();
     });
@@ -52,14 +52,14 @@ describe('FormModal Rendering', function () {
         $match = EventMatch::factory()->for($this->event)->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $match->id);
+            ->call('openModal', $match->id);
 
         $component->assertOk();
     });
 
     it('displays correct title in create mode', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Create Match');
     });
@@ -68,7 +68,7 @@ describe('FormModal Rendering', function () {
         $match = EventMatch::factory()->for($this->event)->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $match->id);
+            ->call('openModal', $match->id);
 
         $component->assertSee('Edit Match');
     });
@@ -77,7 +77,7 @@ describe('FormModal Rendering', function () {
         $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Test Wrestler']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Test Wrestler');
     });
@@ -86,7 +86,7 @@ describe('FormModal Rendering', function () {
         $referee = Referee::factory()->bookable()->create(['name' => 'Test Referee']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Test Referee');
     });
@@ -95,7 +95,7 @@ describe('FormModal Rendering', function () {
         $matchType = MatchType::factory()->create(['name' => 'Singles Match']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Singles Match');
     });
@@ -109,7 +109,7 @@ describe('FormModal Create Operations', function () {
         $referee = Referee::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -129,7 +129,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates required fields when creating', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', '')
             ->set('form.match_type_id', '')
             ->set('form.competitors', [])
@@ -147,7 +147,7 @@ describe('FormModal Create Operations', function () {
         $wrestler = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler->id])
@@ -162,7 +162,7 @@ describe('FormModal Create Operations', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', 999)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -176,7 +176,7 @@ describe('FormModal Create Operations', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', 999)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -189,7 +189,7 @@ describe('FormModal Create Operations', function () {
         $matchType = MatchType::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [999, 998])
@@ -204,7 +204,7 @@ describe('FormModal Create Operations', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -223,7 +223,7 @@ describe('FormModal Edit Operations', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $match->id)
+            ->call('openModal', $match->id)
             ->set('form.match_type_id', $newMatchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
             ->set('form.preview', 'Updated match preview')
@@ -247,7 +247,7 @@ describe('FormModal Edit Operations', function () {
             ->create(['preview' => 'Original preview']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $match->id);
+            ->call('openModal', $match->id);
 
         $component->assertSet('form.event_id', $this->event->id);
         $component->assertSet('form.match_type_id', $matchType->id);
@@ -263,7 +263,7 @@ describe('FormModal Title Championship Integration', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -281,7 +281,7 @@ describe('FormModal Title Championship Integration', function () {
         $title = Title::factory()->active()->create(['name' => 'World Championship']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('World Championship');
     });
@@ -293,7 +293,7 @@ describe('FormModal Title Championship Integration', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -311,7 +311,7 @@ describe('FormModal Tag Team Integration', function () {
         $tagTeam2 = TagTeam::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$tagTeam1->id, $tagTeam2->id])
@@ -325,7 +325,7 @@ describe('FormModal Tag Team Integration', function () {
         $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'The Hardy Boyz']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('The Hardy Boyz');
     });
@@ -336,8 +336,8 @@ describe('FormModal State Management', function () {
         $match = EventMatch::factory()->for($this->event)->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $match->id)
-            ->call('createMode');
+            ->call('openModal', $match->id)
+            ->call('openModal');
 
         $component->assertSet('form.event_id', null);
         $component->assertSet('form.match_type_id', null);
@@ -350,7 +350,7 @@ describe('FormModal State Management', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', $this->event->id)
             ->set('form.match_type_id', $matchType->id)
             ->set('form.competitors', [$wrestler1->id, $wrestler2->id])
@@ -361,7 +361,7 @@ describe('FormModal State Management', function () {
 
     it('keeps modal open when validation fails', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.event_id', '')
             ->call('save');
 
@@ -374,7 +374,7 @@ describe('FormModal Authorization', function () {
         auth()->logout();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertUnauthorized();
     });
@@ -384,7 +384,7 @@ describe('FormModal Authorization', function () {
         $this->actingAs($user);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertUnauthorized();
     });

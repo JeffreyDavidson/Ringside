@@ -35,7 +35,7 @@ describe('FormModal Configuration', function () {
 describe('FormModal Rendering', function () {
     it('can render in create mode', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertOk();
     });
@@ -44,14 +44,14 @@ describe('FormModal Rendering', function () {
         $user = User::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id);
+            ->call('openModal', $user->id);
 
         $component->assertOk();
     });
 
     it('displays correct title in create mode', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertSee('Create User');
     });
@@ -60,7 +60,7 @@ describe('FormModal Rendering', function () {
         $user = User::factory()->create(['name' => 'Test User']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id);
+            ->call('openModal', $user->id);
 
         $component->assertSee('Edit User');
     });
@@ -69,7 +69,7 @@ describe('FormModal Rendering', function () {
 describe('FormModal Create Operations', function () {
     it('can create a new user with valid data', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', 'password123')
@@ -87,7 +87,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates required fields when creating', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', '')
             ->set('form.email', '')
             ->set('form.password', '')
@@ -102,7 +102,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates email format', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'invalid-email')
             ->set('form.password', 'password123')
@@ -115,7 +115,7 @@ describe('FormModal Create Operations', function () {
         User::factory()->create(['email' => 'existing@example.com']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'existing@example.com')
             ->set('form.password', 'password123')
@@ -126,7 +126,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates password confirmation', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', 'password123')
@@ -138,7 +138,7 @@ describe('FormModal Create Operations', function () {
 
     it('validates minimum password length', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', '123')
@@ -150,7 +150,7 @@ describe('FormModal Create Operations', function () {
 
     it('hashes password when creating user', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', 'password123')
@@ -170,7 +170,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id)
+            ->call('openModal', $user->id)
             ->set('form.name', 'Updated Name')
             ->set('form.email', 'updated@example.com')
             ->call('save');
@@ -192,7 +192,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id);
+            ->call('openModal', $user->id);
 
         $component->assertSet('form.name', 'Test User');
         $component->assertSet('form.email', 'test@example.com');
@@ -203,7 +203,7 @@ describe('FormModal Edit Operations', function () {
         $user2 = User::factory()->create(['email' => 'user2@example.com']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user2->id)
+            ->call('openModal', $user2->id)
             ->set('form.email', 'user1@example.com')
             ->call('save');
 
@@ -217,7 +217,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id)
+            ->call('openModal', $user->id)
             ->set('form.name', 'Updated Name')
             ->set('form.email', 'test@example.com')
             ->call('save');
@@ -230,7 +230,7 @@ describe('FormModal Edit Operations', function () {
         $user = User::factory()->create();
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id)
+            ->call('openModal', $user->id)
             ->set('form.name', 'Updated Name')
             ->call('save');
 
@@ -242,7 +242,7 @@ describe('FormModal Edit Operations', function () {
         $originalPassword = $user->password;
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id)
+            ->call('openModal', $user->id)
             ->set('form.password', 'newpassword123')
             ->set('form.password_confirmation', 'newpassword123')
             ->call('save');
@@ -260,8 +260,8 @@ describe('FormModal State Management', function () {
         $user = User::factory()->create(['name' => 'Test User']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id)
-            ->call('createMode');
+            ->call('openModal', $user->id)
+            ->call('openModal');
 
         $component->assertSet('form.name', null);
         $component->assertSet('form.email', null);
@@ -269,7 +269,7 @@ describe('FormModal State Management', function () {
 
     it('closes modal after successful save', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', 'password123')
@@ -281,7 +281,7 @@ describe('FormModal State Management', function () {
 
     it('keeps modal open when validation fails', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', '')
             ->call('save');
 
@@ -292,7 +292,7 @@ describe('FormModal State Management', function () {
 describe('FormModal Role Management', function () {
     it('can assign user role when creating', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', 'password123')
@@ -310,7 +310,7 @@ describe('FormModal Role Management', function () {
         $user = User::factory()->create(['role' => 'User']);
 
         $component = Livewire::test(FormModal::class)
-            ->call('editMode', $user->id)
+            ->call('openModal', $user->id)
             ->set('form.role', 'Administrator')
             ->call('save');
 
@@ -322,7 +322,7 @@ describe('FormModal Role Management', function () {
 
     it('validates role enum values', function () {
         $component = Livewire::test(FormModal::class)
-            ->call('createMode')
+            ->call('openModal')
             ->set('form.name', 'John Doe')
             ->set('form.email', 'john@example.com')
             ->set('form.password', 'password123')
@@ -338,7 +338,7 @@ describe('FormModal Authorization', function () {
         auth()->logout();
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertUnauthorized();
     });
@@ -348,7 +348,7 @@ describe('FormModal Authorization', function () {
         $this->actingAs($user);
 
         $component = Livewire::test(FormModal::class)
-            ->call('createMode');
+            ->call('openModal');
 
         $component->assertUnauthorized();
     });
