@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Modals;
 
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Referees\Forms\Form;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Referees\Forms\CreateEditForm;
 use App\Models\Referees\Referee;
-use Illuminate\Support\Carbon;
 
 /**
- * @extends BaseModal<Form, Referee>
+ * @extends BaseFormModal<CreateEditForm, Referee>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
     public BaseForm $form;
 
     protected function getFormClass(): string
     {
-        return Form::class;
+        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string
@@ -32,13 +31,12 @@ class FormModal extends BaseModal
         return 'livewire.referees.modals.form-modal';
     }
 
-    public function fillDummyFields(): void
+    protected function getDummyDataFields(): array
     {
-        /** @var Carbon|null $datetime */
-        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
-
-        $this->modelForm->first_name = fake()->firstName();
-        $this->modelForm->last_name = fake()->lastName();
-        $this->modelForm->employment_date = $datetime?->format('Y-m-d H:i:s');
+        return [
+            'first_name' => fn() => fake()->firstName(),
+            'last_name' => fn() => fake()->lastName(),
+            'employment_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+        ];
     }
 }

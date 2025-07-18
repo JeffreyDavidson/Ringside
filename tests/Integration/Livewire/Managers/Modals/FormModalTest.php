@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Managers\Forms\Form;
+use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Managers\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;

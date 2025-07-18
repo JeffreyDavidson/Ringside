@@ -6,12 +6,12 @@ namespace App\Livewire\Venues\Modals;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Venues\Forms\Form;
+use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
 use Illuminate\Support\Str;
 
 /**
- * @extends BaseFormModal<Form, Venue>
+ * @extends BaseFormModal<CreateEditForm, Venue>
  */
 class FormModal extends BaseFormModal
 {
@@ -19,7 +19,7 @@ class FormModal extends BaseFormModal
 
     protected function getFormClass(): string
     {
-        return Form::class;
+        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

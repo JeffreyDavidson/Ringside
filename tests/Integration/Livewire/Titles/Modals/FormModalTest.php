@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Titles\Forms\Form;
+use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
@@ -20,7 +20,7 @@ describe('FormModal Configuration', function () {
         $method = $reflection->getMethod('getFormClass');
         $method->setAccessible(true);
 
-        expect($method->invoke($modal))->toBe(Form::class);
+        expect($method->invoke($modal))->toBe(CreateEditForm::class);
     });
 
     it('returns correct model class', function () {
