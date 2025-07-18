@@ -22,7 +22,10 @@
       "Bash(git commit:*)",
       "Bash(git rm:*)",
       "Bash(ls:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(for file in tests/Integration/Livewire/*/Modals/FormModalTest.php)",
+      "Bash(do)",
+      "Bash(done)"
     ],
     "deny": []
   }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Modals;
 
-use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
@@ -15,7 +14,6 @@ use Illuminate\Support\Str;
  */
 class FormModal extends BaseFormModal
 {
-    public BaseForm $form;
 
     protected function getFormClass(): string
     {

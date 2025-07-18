@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Modals;
 
-use App\Livewire\Base\BaseForm;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
@@ -19,7 +18,6 @@ class FormModal extends BaseFormModal
 {
     use PresentsVenuesList;
 
-    public BaseForm $form;
 
     protected function getFormClass(): string
     {
@@ -44,7 +42,7 @@ class FormModal extends BaseFormModal
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
             'date' => fn () => fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s'),
-            'venue' => fn () => $venue?->id ?? Venue::factory()->create()->id,
+            'venue_id' => fn () => $venue?->id ?? Venue::factory()->create()->id,
             'preview' => fn () => Str::of(fake()->text())->value(),
         ];
     }

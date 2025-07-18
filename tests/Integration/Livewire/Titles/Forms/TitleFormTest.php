@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Titles\TitleType;
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesActivityPeriods;
 use App\Livewire\Titles\Forms\TitleForm;
 use App\Models\Titles\Title;
@@ -197,8 +197,8 @@ describe('TitleForm Tests', function () {
     });
 
     describe('form inheritance and structure', function () {
-        test('extends LivewireBaseForm correctly', function () {
-            expect($this->form)->toBeInstanceOf(LivewireBaseForm::class);
+        test('extends BaseForm correctly', function () {
+            expect($this->form)->toBeInstanceOf(BaseForm::class);
         });
 
         test('implements required abstract methods', function () {

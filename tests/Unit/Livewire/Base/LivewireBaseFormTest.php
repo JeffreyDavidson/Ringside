@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Base\LivewireBaseForm;
+use App\Livewire\Base\BaseForm;
 use Livewire\Form;
 
 /**
@@ -15,24 +15,24 @@ use Livewire\Form;
  * - Method signatures and return types
  * - Generic type annotations
  *
- * @see LivewireBaseForm
- * @see Tests\Integration\Livewire\Base\LivewireBaseFormTest
+ * @see BaseForm
+ * @see Tests\Integration\Livewire\Base\BaseFormTest
  */
-describe('LivewireBaseForm Unit Tests', function () {
+describe('BaseForm Unit Tests', function () {
     describe('class structure and inheritance', function () {
         test('extends Livewire Form class', function () {
-            expect(LivewireBaseForm::class)->toExtend(Form::class);
+            expect(BaseForm::class)->toExtend(Form::class);
         });
 
         test('is abstract class', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
             expect($reflection->isAbstract())->toBeTrue();
         });
     });
 
     describe('abstract methods', function () {
         test('has required abstract methods', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
             $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
@@ -44,7 +44,7 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('method signatures', function () {
         test('abstract methods have correct signatures', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             // rules method
             $rules = $reflection->getMethod('rules');
@@ -62,7 +62,7 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('concrete methods', function () {
         test('has concrete methods for common functionality', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
             $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
@@ -75,7 +75,7 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('property structure', function () {
         test('has formModel property', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             expect($reflection->hasProperty('formModel'))->toBeTrue();
 
@@ -89,7 +89,7 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('template method pattern', function () {
         test('implements template method pattern', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
@@ -108,7 +108,7 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('method visibility', function () {
         test('protected methods are properly encapsulated', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             // Abstract methods should be protected
             $rules = $reflection->getMethod('rules');
@@ -121,14 +121,14 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('class constants', function () {
         test('has no class-specific constants', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
             $constants = $reflection->getConstants();
 
             // Filter out inherited constants
             $classConstants = array_filter($constants, function ($value, $key) use ($reflection) {
                 $constant = $reflection->getReflectionConstant($key);
 
-                return $constant && $constant->getDeclaringClass()->getName() === LivewireBaseForm::class;
+                return $constant && $constant->getDeclaringClass()->getName() === BaseForm::class;
             }, ARRAY_FILTER_USE_BOTH);
 
             expect($classConstants)->toBeEmpty();
@@ -137,11 +137,11 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('documentation and annotations', function () {
         test('has proper PHPDoc annotations', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
             $docComment = $reflection->getDocComment();
 
             expect($docComment)->toContain('@template');
-            expect($docComment)->toContain('TForm of LivewireBaseForm');
+            expect($docComment)->toContain('TForm of BaseForm');
             expect($docComment)->toContain('TFormModel of Model');
             expect($docComment)->toContain('@author');
             expect($docComment)->toContain('@since');
@@ -152,20 +152,20 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('namespace and naming', function () {
         test('uses correct namespace', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
             expect($reflection->getNamespaceName())->toBe('App\\Livewire\\Base');
         });
 
         test('follows base class naming convention', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
-            expect($reflection->getShortName())->toBe('LivewireBaseForm');
-            expect($reflection->getName())->toBe('App\\Livewire\\Base\\LivewireBaseForm');
+            $reflection = new ReflectionClass(BaseForm::class);
+            expect($reflection->getShortName())->toBe('BaseForm');
+            expect($reflection->getName())->toBe('App\\Livewire\\Base\\BaseForm');
         });
     });
 
     describe('generic type safety', function () {
         test('provides type safety through generics', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
             $docComment = $reflection->getDocComment();
 
             // Should use template generics for type safety
@@ -176,7 +176,7 @@ describe('LivewireBaseForm Unit Tests', function () {
 
     describe('extensibility hooks', function () {
         test('provides hooks for custom implementations', function () {
-            $reflection = new ReflectionClass(LivewireBaseForm::class);
+            $reflection = new ReflectionClass(BaseForm::class);
 
             // Check if loadExtraData method exists as extensibility hook
             $methods = $reflection->getMethods();
