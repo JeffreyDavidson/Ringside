@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Stables\ShowController;
-use App\Livewire\Stables\Tables\PreviousTagTeamsTable;
-use App\Livewire\Stables\Tables\PreviousWrestlersTable;
+use App\Livewire\Stables\Tables\PreviousTagTeams;
+use App\Livewire\Stables\Tables\PreviousWrestlers;
 use App\Models\Stables\Stable;
 
 use function Pest\Laravel\actingAs;

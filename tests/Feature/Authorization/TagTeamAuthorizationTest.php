@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Livewire\TagTeams\Tables\TagTeamsTable;
+use App\Livewire\TagTeams\Tables\Main;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Users\User;
 use Livewire\Livewire;

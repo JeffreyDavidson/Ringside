@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Events\IndexController;
-use App\Livewire\Events\Tables\EventsTable;
+use App\Livewire\Events\Tables\Main;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

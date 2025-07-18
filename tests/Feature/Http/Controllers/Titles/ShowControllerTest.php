@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Titles\ShowController;
-use App\Livewire\Titles\Tables\PreviousTitleChampionshipsTable;
+use App\Livewire\Titles\Tables\PreviousTitleChampionships;
 use App\Models\Titles\Title;
 
 use function Pest\Laravel\actingAs;

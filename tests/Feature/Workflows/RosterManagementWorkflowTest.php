@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal as ManagerFormModal;
-use App\Livewire\Managers\Tables\ManagersTable;
+use App\Livewire\Managers\Tables\Main;
 use App\Livewire\Stables\Modals\FormModal as StableFormModal;
-use App\Livewire\Stables\Tables\StablesTable;
+use App\Livewire\Stables\Tables\Main;
 use App\Livewire\TagTeams\Modals\FormModal as TagTeamFormModal;
-use App\Livewire\TagTeams\Tables\TagTeamsTable;
+use App\Livewire\TagTeams\Tables\Main;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
