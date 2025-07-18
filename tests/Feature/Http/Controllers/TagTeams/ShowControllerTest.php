@@ -35,8 +35,8 @@ describe('TagTeams Show Controller', function () {
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
             ->assertSeeLivewire(PreviousWrestlers::class)
-            ->assertSeeLivewire(PreviousMain::class)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousManagers::class)
+            ->assertSeeLivewire(PreviousStables::class);
     });
 
     /**

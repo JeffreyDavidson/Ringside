@@ -28,7 +28,7 @@ describe('Venues Show Controller', function () {
             ->assertOk()
             ->assertViewIs('venues.show')
             ->assertViewHas('venue', $this->venue)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousEvents::class);
     });
 
     /**

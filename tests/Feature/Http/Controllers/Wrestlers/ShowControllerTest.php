@@ -34,9 +34,9 @@ describe('Wrestlers Show Controller', function () {
             ->assertViewHas('wrestler', $this->wrestler)
             ->assertSeeLivewire(PreviousTitleChampionships::class)
             ->assertSeeLivewire(PreviousMatches::class)
-            ->assertSeeLivewire(PreviousMain::class)
-            ->assertSeeLivewire(PreviousMain::class)
-            ->assertSeeLivewire(PreviousMain::class);
+            ->assertSeeLivewire(PreviousTagTeams::class)
+            ->assertSeeLivewire(PreviousManagers::class)
+            ->assertSeeLivewire(PreviousStables::class);
     });
 
     /**
