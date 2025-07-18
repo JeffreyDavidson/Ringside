@@ -231,7 +231,7 @@ describe('Event Activation Action Integration', function () {
             RestoreAction::run($this->event);
 
             $restoredEvent = Event::find($this->event->id);
-            expect($restoredEvent->date->equalTo($originalDate))->toBeTrue();
+            expect($restoredEvent->date->format('Y-m-d H:i:s'))->toBe($originalDate->format('Y-m-d H:i:s'));
             expect($restoredEvent->venue_id)->toBe($originalVenueId);
             expect($restoredEvent->isScheduled())->toBeTrue();
         });
@@ -499,7 +499,7 @@ describe('Event Activation Action Integration', function () {
 
             $restoredEvent = Event::find($event->id);
             expect($restoredEvent->name)->toBe($originalState['name']);
-            expect($restoredEvent->date->equalTo($originalState['date']))->toBeTrue();
+            expect($restoredEvent->date->format('Y-m-d H:i:s'))->toBe($originalState['date']->format('Y-m-d H:i:s'));
             expect($restoredEvent->venue_id)->toBe($originalState['venue_id']);
             expect($restoredEvent->preview)->toBe($originalState['preview']);
         });

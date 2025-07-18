@@ -25,7 +25,7 @@ describe('IndividualRetirementValidation', function () {
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
         
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($wrestler))->not->toThrow();
+            expect(fn() => $this->strategy->validate($wrestler))->not()->toThrow();
             expectValidEntityState($wrestler);
         } else {
             expect(fn() => $this->strategy->validate($wrestler))
@@ -70,7 +70,7 @@ describe('IndividualRetirementValidation', function () {
             };
 
             // Should handle missing methods gracefully
-            expect(fn() => $this->strategy->validate($mockEntity))->not->toThrow();
+            expect(fn() => $this->strategy->validate($mockEntity))->not()->toThrow();
         })->with([
             'hasFutureEmployment',
             'isRetired', 

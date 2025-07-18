@@ -23,7 +23,7 @@ describe('TitleRetirementValidation', function () {
         $title = Title::factory()->{$factoryState}()->create();
         
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($title))->not->toThrow();
+            expect(fn() => $this->strategy->validate($title))->not()->toThrow();
         } else {
             expect(fn() => $this->strategy->validate($title))
                 ->toThrow(CannotBeRetiredException::class);
@@ -44,7 +44,7 @@ describe('TitleRetirementValidation', function () {
         // Title with active championship should still be retirable
         // (championship will be ended as part of retirement process)
         expect(fn() => $this->strategy->validate($championshipScenario['title']))
-            ->not->toThrow();
+            ->not()->toThrow();
             
         expectValidChampionshipState(
             $championshipScenario['champion'], 

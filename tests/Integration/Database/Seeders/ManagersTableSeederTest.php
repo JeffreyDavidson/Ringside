@@ -24,7 +24,7 @@ describe('ManagersTableSeeder Integration Tests', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'ManagersTableSeeder']))
-                ->not->toThrow(Exception::class);
+                ->not()->toThrow(Exception::class);
         });
 
         test('creates managers in database', function () {

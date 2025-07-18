@@ -76,7 +76,7 @@ test('title pull validation throws correct exceptions', function () {
     $activeTitle = Title::factory()->active()->create();
     $inactiveTitle = Title::factory()->inactive()->create();
 
-    expect(fn () => $activeTitle->ensureCanBeDeactivated())->not->toThrow(Exception::class);
+    expect(fn () => $activeTitle->ensureCanBeDeactivated())->not()->toThrow(Exception::class);
     expect(fn () => $inactiveTitle->ensureCanBeDeactivated())
         ->toThrow(CannotBeDeactivatedException::class);
 });

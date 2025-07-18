@@ -296,11 +296,11 @@ describe('Stable Activation Action Integration', function () {
 
             // Should work from active
             expect(fn () => RetireAction::run($activeStable, Carbon::now()))
-                ->not->toThrow(Exception::class);
+                ->not()->toThrow(Exception::class);
 
             // Should work from disbanded
             expect(fn () => RetireAction::run($disbandedStable, Carbon::now()))
-                ->not->toThrow(Exception::class);
+                ->not()->toThrow(Exception::class);
         });
 
         test('unretire action requires retired status', function () {

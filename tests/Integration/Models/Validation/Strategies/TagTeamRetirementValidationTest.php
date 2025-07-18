@@ -23,7 +23,7 @@ describe('TagTeamRetirementValidation', function () {
         $tagTeam = TagTeam::factory()->{$factoryState}()->create();
         
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($tagTeam))->not->toThrow();
+            expect(fn() => $this->strategy->validate($tagTeam))->not()->toThrow();
             expectValidEntityState($tagTeam);
         } else {
             expect(fn() => $this->strategy->validate($tagTeam))
@@ -54,6 +54,6 @@ describe('TagTeamRetirementValidation', function () {
         ]);
 
         // Tag team retirement validation should consider wrestler states
-        expect(fn() => $this->strategy->validate($tagTeam->fresh()))->not->toThrow();
+        expect(fn() => $this->strategy->validate($tagTeam->fresh()))->not()->toThrow();
     });
 });

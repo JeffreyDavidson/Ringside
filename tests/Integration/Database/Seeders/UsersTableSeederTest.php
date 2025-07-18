@@ -30,7 +30,7 @@ describe('UsersTableSeeder Integration Tests', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'UsersTableSeeder']))
-                ->not->toThrow(Exception::class);
+                ->not()->toThrow(Exception::class);
         });
 
         test('creates correct total number of users', function () {

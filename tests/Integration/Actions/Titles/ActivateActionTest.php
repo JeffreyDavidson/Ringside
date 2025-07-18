@@ -217,14 +217,14 @@ test('title debut validation throws correct exceptions', function () {
     expect(fn () => $activeTitle->ensureCanBeDebuted())
         ->toThrow(CannotBeDebutedException::class);
     expect(fn () => $undebutedTitle->ensureCanBeDebuted())
-        ->not->toThrow(Exception::class);
+        ->not()->toThrow(Exception::class);
 });
 
 test('title reinstatement validation throws correct exceptions', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
 
-    expect(fn () => $inactiveTitle->ensureCanBeReinstated())->not->toThrow(Exception::class);
+    expect(fn () => $inactiveTitle->ensureCanBeReinstated())->not()->toThrow(Exception::class);
     expect(fn () => $activeTitle->ensureCanBeReinstated())
         ->toThrow(CannotBeActivatedException::class);
 });

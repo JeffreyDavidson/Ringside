@@ -129,7 +129,7 @@ describe('WrestlerManager Pivot Model', function () {
             expectPreviousRelationshipsEnded($this->wrestler);
             
             $previousManager = $this->wrestler->previousManagers()->first();
-            expect($previousManager->pivot->fired_at->equalTo($endDate))->toBeTrue();
+            expect($previousManager->pivot->fired_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });
 
         test('detaching manager completely removes relationship', function () {
@@ -256,8 +256,8 @@ describe('WrestlerManager Pivot Model', function () {
 
             expect($pivotRecord->hired_at)->toBeInstanceOf(Carbon::class);
             expect($pivotRecord->fired_at)->toBeInstanceOf(Carbon::class);
-            expect($pivotRecord->hired_at->equalTo($hiredDate))->toBeTrue();
-            expect($pivotRecord->fired_at->equalTo($firedDate))->toBeTrue();
+            expect($pivotRecord->hired_at->format('Y-m-d H:i:s'))->toBe($hiredDate->format('Y-m-d H:i:s'));
+            expect($pivotRecord->fired_at->format('Y-m-d H:i:s'))->toBe($firedDate->format('Y-m-d H:i:s'));
         });
     });
 

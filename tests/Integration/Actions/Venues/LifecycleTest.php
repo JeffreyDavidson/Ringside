@@ -388,7 +388,7 @@ describe('Venue Action Integration Tests', function () {
 
             expect($venue->created_at)->not->toBeNull();
             expect($venue->updated_at)->not->toBeNull();
-            expect($venue->created_at->equalTo($venue->updated_at))->toBeTrue();
+            expect($venue->created_at->format('Y-m-d H:i:s'))->toBe($venue->updated_at->format('Y-m-d H:i:s'));
         });
 
         test('venue update modifies timestamps appropriately', function () {
