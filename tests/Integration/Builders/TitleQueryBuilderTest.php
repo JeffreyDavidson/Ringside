@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Titles\Title;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -29,7 +30,8 @@ describe('TitleBuilder Query Scopes', function () {
         $this->futureDebutTitle = Title::factory()->withFutureDebut()->create(['name' => 'Future Debut Title']);
 
         // Create titles with championships
-        $this->titleWithChampion = Title::factory()->withCurrentChampion()->create(['name' => 'Defended Title']);
+        $champion = Wrestler::factory()->employed()->create();
+        $this->titleWithChampion = Title::factory()->active()->withCurrentChampion($champion)->create(['name' => 'Defended Title']);
         $this->vacantTitle = Title::factory()->active()->create(['name' => 'Vacant Title']);
         $this->newTitle = Title::factory()->active()->create(['name' => 'New Title']);
     });
