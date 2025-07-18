@@ -22,7 +22,7 @@ describe('Stables Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('stables.index')
-            ->assertSeeLivewire(StablesTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

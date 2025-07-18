@@ -45,7 +45,7 @@ describe('Venue Creation and Setup Workflow', function () {
         actingAs($admin)
             ->get(route('venues.index'))
             ->assertOk()
-            ->assertSeeLivewire(VenuesTable::class);
+            ->assertSeeLivewire(Main::class);
 
         // And: Creating venue through modal workflow
         $modalComponent = Livewire::actingAs($admin)
@@ -84,7 +84,7 @@ describe('Venue Creation and Setup Workflow', function () {
 
         // And: Should appear in the venues table
         Livewire::actingAs($admin)
-            ->test(VenuesTable::class)
+            ->test(Main::class)
             ->assertSee('Madison Square Garden');
     });
 
@@ -134,7 +134,7 @@ describe('Event Creation and Scheduling Workflow', function () {
         actingAs($admin)
             ->get(route('events.index'))
             ->assertOk()
-            ->assertSeeLivewire(EventsTable::class);
+            ->assertSeeLivewire(Main::class);
 
         // And: Creating event through modal workflow
         $modalComponent = Livewire::actingAs($admin)
@@ -168,7 +168,7 @@ describe('Event Creation and Scheduling Workflow', function () {
 
         // And: Should appear in the events table
         Livewire::actingAs($admin)
-            ->test(EventsTable::class)
+            ->test(Main::class)
             ->assertSee('WrestleMania 40')
             ->assertSee('Allstate Arena');
     });
@@ -243,7 +243,7 @@ describe('Event Search and Filtering Workflow', function () {
 
         // When: Testing search functionality exists
         $component = Livewire::actingAs($admin)
-            ->test(EventsTable::class);
+            ->test(Main::class);
 
         // Verify the component loads successfully
         expect($component)->not->toBeNull();
@@ -342,7 +342,7 @@ describe('Event Deletion and Restoration Workflow', function () {
 
         // When: Deleting the event
         Livewire::actingAs($admin)
-            ->test(EventsTable::class)
+            ->test(Main::class)
             ->call('delete', $event)
             ->assertHasNoErrors();
 
@@ -352,7 +352,7 @@ describe('Event Deletion and Restoration Workflow', function () {
 
         // When: Restoring the event
         Livewire::actingAs($admin)
-            ->test(EventsTable::class)
+            ->test(Main::class)
             ->call('restore', $event->id)
             ->assertHasNoErrors();
 

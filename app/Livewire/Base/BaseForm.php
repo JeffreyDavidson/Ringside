@@ -43,7 +43,7 @@ use Livewire\Form;
  * @since 1.0.0
  * @see WrestlerForm For a comprehensive implementation example
  * @see EventForm For a simple implementation example
- * @see EventMatchForm For a complex relationship example
+ * @see CreateEditForm For a complex relationship example
  *
  * @example
  * ```php
@@ -361,7 +361,7 @@ abstract class BaseForm extends Form
      *     }
      * }
      *
-     * // In EventMatchForm - Relationship loading example
+     * // In CreateEditForm - Relationship loading example
      * public function loadExtraData(): void
      * {
      *     if ($this->formModel) {
@@ -387,7 +387,7 @@ abstract class BaseForm extends Form
      * ```
      *
      * @see WrestlerForm::loadExtraData() For height conversion and employment loading
-     * @see EventMatchForm::loadExtraData() For relationship array population
+     * @see CreateEditForm::loadExtraData() For relationship array population
      * @see setModel() For the complete model binding workflow
      */
     protected function loadExtraData(): void
@@ -597,7 +597,7 @@ abstract class BaseForm extends Form
      *     ];
      * }
      *
-     * // In EventMatchForm - Relationship exclusion example
+     * // In CreateEditForm - Relationship exclusion example
      * protected function getModelData(): array
      * {
      *     return [
@@ -719,7 +719,7 @@ abstract class BaseForm extends Form
      * }
      * // Error message: "The feet field is required" instead of "The height_feet field is required"
      *
-     * // In EventMatchForm - Domain terminology example
+     * // In CreateEditForm - Domain terminology example
      * protected function validationAttributes(): array
      * {
      *     return [

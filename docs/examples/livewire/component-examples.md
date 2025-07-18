@@ -648,16 +648,16 @@ class WrestlersTable extends BaseTable
 Actions component with conditional visibility and confirmation:
 
 ```php
-// app/Livewire/Events/Components/ActionsComponent.php
+// app/Livewire/Events/Components/Actions.php
 <?php
 
 namespace App\Livewire\Events\Components;
 
-use App\Livewire\Components\BaseActionsComponent;
+use App\Livewire\Components\BaseActions;
 use App\Models\Events\Event;
 use Livewire\Component;
 
-class ActionsComponent extends Component
+class Actions extends Component
 {
     public Event $event;
     public bool $showConfirmation = false;
@@ -776,7 +776,7 @@ class ActionsComponent extends Component
 Actions with employment status management:
 
 ```php
-// app/Livewire/Wrestlers/Components/ActionsComponent.php
+// app/Livewire/Wrestlers/Components/Actions.php
 <?php
 
 namespace App\Livewire\Wrestlers\Components;
@@ -784,7 +784,7 @@ namespace App\Livewire\Wrestlers\Components;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Component;
 
-class ActionsComponent extends Component
+class Actions extends Component
 {
     public Wrestler $wrestler;
     public bool $showConfirmation = false;

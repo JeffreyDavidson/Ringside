@@ -40,7 +40,7 @@ use Livewire\Component;
  *
  * @author Your Name
  * @since 1.0.0
- * @see ActionsComponent For concrete implementation examples
+ * @see Actions For concrete implementation examples
  *
  * @example
  * ```php

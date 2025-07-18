@@ -679,7 +679,7 @@ test('prevents deletion of past events', function () {
         'date' => now()->subDay(),
     ]);
     
-    $component = Livewire::test(ActionsComponent::class, ['model' => $pastEvent])
+    $component = Livewire::test(Actions::class, ['model' => $pastEvent])
         ->call('delete');
     
     // Event should still exist

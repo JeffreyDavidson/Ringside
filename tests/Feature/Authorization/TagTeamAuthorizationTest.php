@@ -30,7 +30,7 @@ describe('TagTeam Authorization Feature Tests', function () {
     describe('admin user authorization', function () {
         test('admin can access tag teams table component', function () {
             Livewire::actingAs($this->admin)
-                ->test(TagTeamsTable::class)
+                ->test(Main::class)
                 ->assertOk();
         });
 
@@ -39,7 +39,7 @@ describe('TagTeam Authorization Feature Tests', function () {
             $deletedTeam = TagTeam::factory()->trashed()->create();
 
             $component = Livewire::actingAs($this->admin)
-                ->test(TagTeamsTable::class);
+                ->test(Main::class);
 
             // Basic CRUD actions that don't involve complex business logic
             $component->call('delete', $tagTeam)->assertHasNoErrors();
@@ -51,7 +51,7 @@ describe('TagTeam Authorization Feature Tests', function () {
     describe('basic user authorization', function () {
         test('basic user cannot access tag teams table component', function () {
             Livewire::actingAs($this->basicUser)
-                ->test(TagTeamsTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
@@ -59,7 +59,7 @@ describe('TagTeam Authorization Feature Tests', function () {
 
     describe('guest user authorization', function () {
         test('guest user cannot access tag teams table component', function () {
-            Livewire::test(TagTeamsTable::class)
+            Livewire::test(Main::class)
                 ->assertForbidden();
         });
 

@@ -22,7 +22,7 @@ describe('Titles Index Controller', function () {
             ->get(action(IndexController::class))
             ->assertOk()
             ->assertViewIs('titles.index')
-            ->assertSeeLivewire(TitlesTable::class);
+            ->assertSeeLivewire(Main::class);
     });
 
     /**

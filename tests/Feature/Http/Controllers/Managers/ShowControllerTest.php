@@ -29,8 +29,8 @@ describe('Managers Show Controller', function () {
             ->assertOk()
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $this->manager)
-            ->assertSeeLivewire(PreviousWrestlersTable::class)
-            ->assertSeeLivewire(PreviousTagTeamsTable::class);
+            ->assertSeeLivewire(PreviousWrestlers::class)
+            ->assertSeeLivewire(PreviousMain::class);
     });
 
     /**

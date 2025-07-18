@@ -35,7 +35,7 @@ describe('Title Authorization and Workflows', function () {
     describe('component access authorization', function () {
         test('admin can access titles table', function () {
             Livewire::actingAs($this->admin)
-                ->test(TitlesTable::class)
+                ->test(Main::class)
                 ->assertOk()
                 ->assertSee('titles')
                 ->assertSee($this->title->name);
@@ -43,12 +43,12 @@ describe('Title Authorization and Workflows', function () {
 
         test('basic user cannot access titles table', function () {
             Livewire::actingAs($this->basicUser)
-                ->test(TitlesTable::class)
+                ->test(Main::class)
                 ->assertForbidden();
         });
 
         test('guest user cannot access titles table', function () {
-            Livewire::test(TitlesTable::class)
+            Livewire::test(Main::class)
                 ->assertForbidden();
         });
     });
