@@ -46,12 +46,12 @@ describe('TagTeams FormModal Tests', function () {
         test('modal renders with correct form fields', function () {
             Livewire::test(FormModal::class)
                 ->call('openModal')
-                ->assertSeeHtml('wire:model="form.name"')
-                ->assertSeeHtml('wire:model="form.signature_move"')
-                ->assertSeeHtml('wire:model="form.wrestlerA"')
-                ->assertSeeHtml('wire:model="form.wrestlerB"')
-                ->assertSeeHtml('wire:model="form.managers"')
-                ->assertSeeHtml('wire:model="form.employment_date"');
+                ->assertPropertyWired('form.name')
+                ->assertPropertyWired('form.signature_move')
+                ->assertPropertyWired('form.wrestlerA')
+                ->assertPropertyWired('form.wrestlerB')
+                ->assertPropertyWired('form.managers')
+                ->assertPropertyWired('form.employment_date');
         });
 
         test('modal shows correct title for create mode', function () {
