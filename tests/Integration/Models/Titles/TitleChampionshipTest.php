@@ -75,7 +75,7 @@ describe('TitleChampionship Model', function () {
                     'lost_at' => null,
                 ]);
 
-            expect($championship)->not->toBeNull();
+            expect($championship)->not()->toBeNull();
             expect($championship->title_id)->toBe($this->title->id);
             expect($championship->champion_id)->toBe($this->wrestler->id);
             expect($championship->champion_type)->toBe('wrestler');
@@ -191,7 +191,7 @@ describe('TitleChampionship Model', function () {
         test('current championship query returns only active championship', function () {
             $currentChampionship = $this->title->currentChampionship;
 
-            expect($currentChampionship)->not->toBeNull();
+            expect($currentChampionship)->not()->toBeNull();
             expect($currentChampionship->champion->id)->toBe($this->secondWrestler->id);
             expect($currentChampionship->lost_at)->toBeNull();
         });
@@ -454,7 +454,7 @@ describe('TitleChampionship Model', function () {
 
             // Verify wrestler is champion
             expect($this->wrestler->fresh()->titleChampionships)->toHaveCount(1);
-            expect($this->title->fresh()->currentChampionship)->not->toBeNull();
+            expect($this->title->fresh()->currentChampionship)->not()->toBeNull();
 
             // Retire wrestler
             WrestlerRetireAction::run($this->wrestler, Carbon::now());
@@ -467,7 +467,7 @@ describe('TitleChampionship Model', function () {
 
             // Championship should be ended when wrestler retires
             $championship->refresh();
-            expect($championship->lost_at)->not->toBeNull();
+            expect($championship->lost_at)->not()->toBeNull();
 
             // Title should be vacant
             expect($refreshedTitle->currentChampionship)->toBeNull();
@@ -514,7 +514,7 @@ describe('TitleChampionship Model', function () {
 
             // Business rule: Released wrestler should be stripped of championship
             $championship->refresh();
-            expect($championship->lost_at)->not->toBeNull();
+            expect($championship->lost_at)->not()->toBeNull();
         });
 
         test('title retirement while championship is active', function () {
@@ -535,7 +535,7 @@ describe('TitleChampionship Model', function () {
 
             // Championship should end when title is retired
             $championship->refresh();
-            expect($championship->lost_at)->not->toBeNull();
+            expect($championship->lost_at)->not()->toBeNull();
 
             // Wrestler should no longer have current championships for this title
             $refreshedWrestler = $this->wrestler->fresh();
@@ -622,7 +622,7 @@ describe('TitleChampionship Model', function () {
 
             // Verify championship history exists
             expect($title->titleChampionships)->toHaveCount(1);
-            expect($title->titleChampionships->first()->lost_at)->not->toBeNull();
+            expect($title->titleChampionships->first()->lost_at)->not()->toBeNull();
         });
 
         test('handles championship on exact same timestamp', function () {
@@ -672,7 +672,7 @@ describe('TitleChampionship Model', function () {
             expect($reignLength)->toBeGreaterThan(3650); // More than 10 years
 
             // Verify current championship is still valid
-            expect($title->fresh()->currentChampionship)->not->toBeNull();
+            expect($title->fresh()->currentChampionship)->not()->toBeNull();
             expect($title->currentChampionship->champion->id)->toBe($wrestler->id);
         });
     });

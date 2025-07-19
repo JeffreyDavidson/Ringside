@@ -149,7 +149,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             expect($previousChampionships)->toHaveCount(2);
 
             foreach ($previousChampionships as $championship) {
-                expect($championship->lost_at)->not->toBeNull();
+                expect($championship->lost_at)->not()->toBeNull();
             }
         });
 
@@ -244,7 +244,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->get();
 
             foreach ($championshipsWithLength as $championship) {
-                expect($championship->reign_length)->not->toBeNull();
+                expect($championship->reign_length)->not()->toBeNull();
                 expect($championship->reign_length)->toBeNumeric();
             }
         });
@@ -320,7 +320,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
 
             foreach ($result as $championship) {
                 expect($championship->reign_length)->toBeNumeric();
-                expect($championship->lost_at)->not->toBeNull();
+                expect($championship->lost_at)->not()->toBeNull();
             }
         });
 
@@ -344,7 +344,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
 
             $result = $complexQuery->first();
 
-            expect($result)->not->toBeNull();
+            expect($result)->not()->toBeNull();
             expect($result->id)->toBe($this->recentEndedChampionship->id);
             expect($result->reign_length)->toBeNumeric();
         });

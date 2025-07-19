@@ -215,7 +215,7 @@ describe('Previous Wrestlers Table Configuration', function () {
         
         $records = $table->instance()->getTableRecords();
         expect($records)->toHaveCount(1);
-        expect($records->first()->wrestler)->not->toBeNull();
+        expect($records->first()->wrestler)->not()->toBeNull();
     });
 });
 

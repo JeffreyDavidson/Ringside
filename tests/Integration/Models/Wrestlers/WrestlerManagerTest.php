@@ -182,7 +182,7 @@ describe('WrestlerManager Pivot Model', function () {
 
             expect($previousManagers)->toHaveCount(1);
             expect($previousManagers->first()->id)->toBe($this->manager->id);
-            expect($previousManagers->first()->pivot->fired_at)->not->toBeNull();
+            expect($previousManagers->first()->pivot->fired_at)->not()->toBeNull();
         });
 
         test('all managers query returns complete relationship history', function () {
@@ -222,7 +222,7 @@ describe('WrestlerManager Pivot Model', function () {
                 ->where('manager_id', $this->manager->id)
                 ->first();
 
-            expect($pivotRecord)->not->toBeNull();
+            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->manager_id)->toBe($this->manager->id);
             expect($pivotRecord->hired_at)->toBeInstanceOf(Carbon::class);

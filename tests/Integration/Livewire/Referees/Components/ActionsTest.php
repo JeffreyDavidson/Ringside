@@ -267,7 +267,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(Referee::find($this->referee->id))->not->toBeNull();
+            expect(Referee::find($this->referee->id))->not()->toBeNull();
             expect(session('status'))->toBe('Referee successfully restored.');
         });
     });

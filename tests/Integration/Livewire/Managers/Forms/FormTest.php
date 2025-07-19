@@ -110,7 +110,7 @@ describe('Form Store Operations', function () {
             ->where('last_name', 'Wrestling')
             ->first();
 
-        expect($manager)->not->toBeNull();
+        expect($manager)->not()->toBeNull();
         expect($manager->first_name)->toBe('Professional');
         expect($manager->last_name)->toBe('Wrestling');
     });
@@ -130,7 +130,7 @@ describe('Form Store Operations', function () {
             ->where('last_name', 'Manager')
             ->first();
 
-        expect($manager->firstEmployment)->not->toBeNull();
+        expect($manager->firstEmployment)->not()->toBeNull();
         expect($manager->firstEmployment->started_at->toDateString())->toBe($employmentDate);
     });
 
@@ -205,7 +205,7 @@ describe('Form Update Operations', function () {
         $form->assertHasNoErrors();
 
         $manager->refresh();
-        expect($manager->firstEmployment)->not->toBeNull();
+        expect($manager->firstEmployment)->not()->toBeNull();
         expect($manager->firstEmployment->started_at->toDateString())->toBe('2023-03-01');
     });
 });

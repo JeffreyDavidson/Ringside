@@ -220,7 +220,7 @@ describe('Form Store Operations', function () {
         $form->assertHasNoErrors();
 
         $tagTeam = TagTeam::where('name', 'Employed Team')->first();
-        expect($tagTeam->firstEmployment)->not->toBeNull();
+        expect($tagTeam->firstEmployment)->not()->toBeNull();
         expect($tagTeam->firstEmployment->started_at->toDateString())->toBe($employmentDate);
     });
 

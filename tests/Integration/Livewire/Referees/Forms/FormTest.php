@@ -110,7 +110,7 @@ describe('Form Store Operations', function () {
             ->where('last_name', 'Referee')
             ->first();
 
-        expect($referee)->not->toBeNull();
+        expect($referee)->not()->toBeNull();
         expect($referee->first_name)->toBe('Senior');
         expect($referee->last_name)->toBe('Referee');
     });
@@ -130,7 +130,7 @@ describe('Form Store Operations', function () {
             ->where('last_name', 'Referee')
             ->first();
 
-        expect($referee->firstEmployment)->not->toBeNull();
+        expect($referee->firstEmployment)->not()->toBeNull();
         expect($referee->firstEmployment->started_at->toDateString())->toBe($employmentDate);
     });
 
@@ -205,7 +205,7 @@ describe('Form Update Operations', function () {
         $form->assertHasNoErrors();
 
         $referee->refresh();
-        expect($referee->firstEmployment)->not->toBeNull();
+        expect($referee->firstEmployment)->not()->toBeNull();
         expect($referee->firstEmployment->started_at->toDateString())->toBe('2023-03-01');
     });
 });

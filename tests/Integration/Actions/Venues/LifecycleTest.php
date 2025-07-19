@@ -64,7 +64,7 @@ describe('Venue Action Integration Tests', function () {
             $venue = CreateAction::run($venueData);
 
             $retrievedVenue = Venue::find($venue->id);
-            expect($retrievedVenue)->not->toBeNull();
+            expect($retrievedVenue)->not()->toBeNull();
             expect($retrievedVenue->name)->toBe('Database Test Arena');
             expect($retrievedVenue->street_address)->toBe('456 Database Lane');
             expect($retrievedVenue->city)->toBe('Database City');
@@ -202,7 +202,7 @@ describe('Venue Action Integration Tests', function () {
             DeleteAction::run($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($venue->id))->not->toBeNull();
+            expect(Venue::onlyTrashed()->find($venue->id))->not()->toBeNull();
         });
 
         test('delete action maintains event relationships', function () {
@@ -233,7 +233,7 @@ describe('Venue Action Integration Tests', function () {
             DeleteAction::run($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($venue->id))->not->toBeNull();
+            expect(Venue::onlyTrashed()->find($venue->id))->not()->toBeNull();
         });
     });
 
@@ -249,7 +249,7 @@ describe('Venue Action Integration Tests', function () {
             RestoreAction::run($deletedVenue);
 
             $restoredVenue = Venue::find($venueId);
-            expect($restoredVenue)->not->toBeNull();
+            expect($restoredVenue)->not()->toBeNull();
             expect($restoredVenue->name)->toBe('Restoration Test Arena');
         });
 
@@ -263,7 +263,7 @@ describe('Venue Action Integration Tests', function () {
 
             $restoredVenue = Venue::find($venue->id);
             expect($restoredVenue->events->pluck('id'))->toContain($event->id);
-            expect($event->fresh()->venue)->not->toBeNull();
+            expect($event->fresh()->venue)->not()->toBeNull();
         });
 
         test('restore action handles venue with complex relationships', function () {
@@ -332,7 +332,7 @@ describe('Venue Action Integration Tests', function () {
 
             DeleteAction::run($venue);
 
-            expect(Event::find($event->id))->not->toBeNull();
+            expect(Event::find($event->id))->not()->toBeNull();
             expect($event->fresh()->venue_id)->toBe($venue->id);
         });
     });
@@ -389,8 +389,8 @@ describe('Venue Action Integration Tests', function () {
 
             $venue = CreateAction::run($venueData);
 
-            expect($venue->created_at)->not->toBeNull();
-            expect($venue->updated_at)->not->toBeNull();
+            expect($venue->created_at)->not()->toBeNull();
+            expect($venue->updated_at)->not()->toBeNull();
             expect($venue->created_at->format('Y-m-d H:i:s'))->toBe($venue->updated_at->format('Y-m-d H:i:s'));
         });
 

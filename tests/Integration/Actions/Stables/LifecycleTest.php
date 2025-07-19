@@ -36,7 +36,7 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify activity period is created
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->first();
-            expect($activityPeriod)->not->toBeNull();
+            expect($activityPeriod)->not()->toBeNull();
             expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($debutDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at)->toBeNull();
         });
@@ -79,7 +79,7 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify activity period is ended
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->first();
-            expect($activityPeriod->ended_at)->not->toBeNull();
+            expect($activityPeriod->ended_at)->not()->toBeNull();
             expect($activityPeriod->ended_at->format('Y-m-d H:i:s'))->toBe($disbandDate->format('Y-m-d H:i:s'));
         });
 
@@ -128,8 +128,8 @@ describe('Stable Activation Action Integration', function () {
             $endedPeriod = $activityPeriods->where('ended_at', '!=', null)->first();
             $activePeriod = $activityPeriods->where('ended_at', null)->first();
 
-            expect($endedPeriod)->not->toBeNull();
-            expect($activePeriod)->not->toBeNull();
+            expect($endedPeriod)->not()->toBeNull();
+            expect($activePeriod)->not()->toBeNull();
         });
     });
 
@@ -149,7 +149,7 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify retirement record
             $retirement = $refreshedStable->retirements()->latest()->first();
-            expect($retirement)->not->toBeNull();
+            expect($retirement)->not()->toBeNull();
             expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retireDate->format('Y-m-d H:i:s'));
             expect($retirement->ended_at)->toBeNull();
 
@@ -241,8 +241,8 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify retirement record
             $retirement = $finalStable->retirements()->first();
-            expect($retirement->started_at)->not->toBeNull();
-            expect($retirement->ended_at)->not->toBeNull();
+            expect($retirement->started_at)->not()->toBeNull();
+            expect($retirement->ended_at)->not()->toBeNull();
         });
 
         test('action date validation maintains data integrity', function () {

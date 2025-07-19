@@ -250,7 +250,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(Wrestler::find($this->wrestler->id))->not->toBeNull();
+            expect(Wrestler::find($this->wrestler->id))->not()->toBeNull();
             expect(session('status'))->toBe('Wrestler successfully restored.');
         });
     });

@@ -31,7 +31,7 @@ test('it activates an unactivated title at the current datetime by default', fun
     
     // Verify the debut was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod;
-    expect($activityPeriod)->not->toBeNull();
+    expect($activityPeriod)->not()->toBeNull();
     expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
@@ -54,7 +54,7 @@ test('it activates an inactive title at the current datetime by default', functi
     
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod;
-    expect($activityPeriod)->not->toBeNull();
+    expect($activityPeriod)->not()->toBeNull();
     expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
@@ -77,7 +77,7 @@ test('it activates an unactivated title at a specific datetime', function () {
     
     // Verify the debut was created with the specific datetime
     $activityPeriod = $refreshedTitle->futureActivityPeriod;
-    expect($activityPeriod)->not->toBeNull();
+    expect($activityPeriod)->not()->toBeNull();
     expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
@@ -102,7 +102,7 @@ test('it activates an inactive title at a specific datetime', function () {
     
     // Verify the reinstatement was created with the specific datetime
     $activityPeriod = $refreshedTitle->futureActivityPeriod;
-    expect($activityPeriod)->not->toBeNull();
+    expect($activityPeriod)->not()->toBeNull();
     expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
@@ -125,13 +125,13 @@ test('it activates a retired title at the current datetime by default', function
     
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod;
-    expect($activityPeriod)->not->toBeNull();
+    expect($activityPeriod)->not()->toBeNull();
     expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
     
     // Verify retirement was ended
     $latestRetirement = $refreshedTitle->previousRetirement;
-    expect($latestRetirement)->not->toBeNull();
-    expect($latestRetirement->ended_at)->not->toBeNull();
+    expect($latestRetirement)->not()->toBeNull();
+    expect($latestRetirement->ended_at)->not()->toBeNull();
     expect($latestRetirement->ended_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
@@ -156,13 +156,13 @@ test('it activates a retired title at a specific datetime', function () {
     
     // Verify the reinstatement was created with the specific datetime
     $activityPeriod = $refreshedTitle->futureActivityPeriod;
-    expect($activityPeriod)->not->toBeNull();
+    expect($activityPeriod)->not()->toBeNull();
     expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
     
     // Verify retirement was ended with the specific datetime
     $latestRetirement = $refreshedTitle->previousRetirement;
-    expect($latestRetirement)->not->toBeNull();
-    expect($latestRetirement->ended_at)->not->toBeNull();
+    expect($latestRetirement)->not()->toBeNull();
+    expect($latestRetirement->ended_at)->not()->toBeNull();
     expect($latestRetirement->ended_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 

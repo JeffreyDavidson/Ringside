@@ -267,7 +267,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(Manager::find($this->manager->id))->not->toBeNull();
+            expect(Manager::find($this->manager->id))->not()->toBeNull();
             expect(session('status'))->toBe('Manager successfully restored.');
         });
     });

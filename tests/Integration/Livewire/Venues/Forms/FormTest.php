@@ -193,7 +193,7 @@ describe('Form Store Operations', function () {
         $form->assertHasNoErrors();
 
         $venue = Venue::where('name', 'Complete Arena')->first();
-        expect($venue)->not->toBeNull();
+        expect($venue)->not()->toBeNull();
         expect($venue->name)->toBe('Complete Arena');
         expect($venue->street_address)->toBe('456 Complete St');
         expect($venue->city)->toBe('Sacramento');

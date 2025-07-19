@@ -142,7 +142,7 @@ describe('TitleForm Tests', function () {
                 return is_string($rule) && str_contains($rule, 'ends_with');
             });
 
-            expect($endsWithRule)->not->toBeNull();
+            expect($endsWithRule)->not()->toBeNull();
         });
 
         test('validates title type against wrestling championship categories', function () {
@@ -155,7 +155,7 @@ describe('TitleForm Tests', function () {
                 return $rule instanceof Illuminate\Validation\Rules\Enum;
             });
 
-            expect($enumRule)->not->toBeNull();
+            expect($enumRule)->not()->toBeNull();
         });
 
         test('enforces title name uniqueness across all titles', function () {
@@ -168,7 +168,7 @@ describe('TitleForm Tests', function () {
                 return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
 
-            expect($uniqueRule)->not->toBeNull();
+            expect($uniqueRule)->not()->toBeNull();
         });
     });
 

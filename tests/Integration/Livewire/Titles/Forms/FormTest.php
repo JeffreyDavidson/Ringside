@@ -171,7 +171,7 @@ describe('Form Store Operations', function () {
         $form->assertHasNoErrors();
 
         $title = Title::where('name', 'Complete Championship Title')->first();
-        expect($title)->not->toBeNull();
+        expect($title)->not()->toBeNull();
         expect($title->name)->toBe('Complete Championship Title');
         expect($title->type)->toBe(TitleType::TagTeam);
     });
@@ -201,7 +201,7 @@ describe('Form Store Operations', function () {
         $form->assertHasNoErrors();
 
         $title = Title::where('name', 'Activity Test Title')->first();
-        expect($title->firstActivityPeriod)->not->toBeNull();
+        expect($title->firstActivityPeriod)->not()->toBeNull();
         expect($title->firstActivityPeriod->started_at->toDateString())->toBe($startDate);
     });
 

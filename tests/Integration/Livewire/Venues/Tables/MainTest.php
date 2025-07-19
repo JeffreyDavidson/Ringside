@@ -207,7 +207,7 @@ describe('VenuesTable Integration Tests', function () {
                 ->assertHasNoErrors();
 
             expect(Venue::find($this->activeVenue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($this->activeVenue->id))->not->toBeNull();
+            expect(Venue::onlyTrashed()->find($this->activeVenue->id))->not()->toBeNull();
         });
 
         test('administrators can restore deleted venues', function () {
@@ -216,7 +216,7 @@ describe('VenuesTable Integration Tests', function () {
             $component->call('restore', $this->deletedVenue->id)
                 ->assertHasNoErrors();
 
-            expect(Venue::find($this->deletedVenue->id))->not->toBeNull();
+            expect(Venue::find($this->deletedVenue->id))->not()->toBeNull();
         });
 
         test('delete operation preserves event relationships', function () {

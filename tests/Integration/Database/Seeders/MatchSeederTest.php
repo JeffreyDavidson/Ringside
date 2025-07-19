@@ -110,8 +110,8 @@ describe('EventMatchSeeder Integration Tests', function () {
             $eventMatch = EventMatch::with(['event', 'matchType'])->first();
 
             // Assert
-            expect($eventMatch->event)->not->toBeNull();
-            expect($eventMatch->matchType)->not->toBeNull();
+            expect($eventMatch->event)->not()->toBeNull();
+            expect($eventMatch->matchType)->not()->toBeNull();
             expect($eventMatch->event->name)->toBeString();
             expect($eventMatch->matchType->name)->toBeString();
         });

@@ -28,7 +28,8 @@
       "Bash(do)",
       "Bash(done)",
       "Bash(cat:*)",
-      "Bash(php:*)"
+      "Bash(php:*)",
+      "Bash(rg:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

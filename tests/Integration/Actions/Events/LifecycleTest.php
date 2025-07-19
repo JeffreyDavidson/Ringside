@@ -207,8 +207,8 @@ describe('Event Activation Action Integration', function () {
             DeleteAction::run($this->event);
 
             expect(Event::find($this->event->id))->toBeNull();
-            expect(Event::onlyTrashed()->find($this->event->id))->not->toBeNull();
-            expect($this->event->fresh()->deleted_at)->not->toBeNull();
+            expect(Event::onlyTrashed()->find($this->event->id))->not()->toBeNull();
+            expect($this->event->fresh()->deleted_at)->not()->toBeNull();
         });
 
         test('restore action recovers deleted event', function () {
@@ -218,7 +218,7 @@ describe('Event Activation Action Integration', function () {
             RestoreAction::run($this->event);
 
             $restoredEvent = Event::find($this->event->id);
-            expect($restoredEvent)->not->toBeNull();
+            expect($restoredEvent)->not()->toBeNull();
             expect($restoredEvent->name)->toBe('Deletable Event');
             expect($restoredEvent->deleted_at)->toBeNull();
         });
@@ -406,7 +406,7 @@ describe('Event Activation Action Integration', function () {
             $refreshedEvent = $event->fresh();
             $refreshedEvent->load('venue');
 
-            expect($refreshedEvent->venue)->not->toBeNull();
+            expect($refreshedEvent->venue)->not()->toBeNull();
             expect($refreshedEvent->venue->id)->toBe($this->venue->id);
             expect($refreshedEvent->venue->name)->toBe($this->venue->name);
         });

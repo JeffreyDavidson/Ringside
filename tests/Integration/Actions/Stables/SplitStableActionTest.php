@@ -139,12 +139,12 @@ describe('SplitStableAction Integration Tests', function () {
             $newStableTagTeams = $newStable->tagTeams()->get();
 
             foreach ($newStableWrestlers as $wrestler) {
-                expect($wrestler->pivot->joined_at)->not->toBeNull();
+                expect($wrestler->pivot->joined_at)->not()->toBeNull();
                 expect(Carbon::parse($wrestler->pivot->joined_at)->gte($splitDate->subSecond()))->toBeTrue();
             }
 
             foreach ($newStableTagTeams as $tagTeam) {
-                expect($tagTeam->pivot->joined_at)->not->toBeNull();
+                expect($tagTeam->pivot->joined_at)->not()->toBeNull();
                 expect(Carbon::parse($tagTeam->pivot->joined_at)->gte($splitDate->subSecond()))->toBeTrue();
             }
 
@@ -502,11 +502,11 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify all members still exist in the system
             foreach ($originalWrestlerIds as $wrestlerId) {
-                expect(Wrestler::find($wrestlerId))->not->toBeNull();
+                expect(Wrestler::find($wrestlerId))->not()->toBeNull();
             }
 
             foreach ($originalTagTeamIds as $tagTeamId) {
-                expect(TagTeam::find($tagTeamId))->not->toBeNull();
+                expect(TagTeam::find($tagTeamId))->not()->toBeNull();
             }
         });
 
