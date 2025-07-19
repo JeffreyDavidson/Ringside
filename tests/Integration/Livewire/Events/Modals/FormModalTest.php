@@ -129,7 +129,7 @@ describe('FormModal Create Operations', function () {
         $component = Livewire::test(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Event')
-            ->set('form.date', 'invalid-date')
+            ->set('form.date', '2023-13-32')
             ->call('save');
 
         $component->assertHasErrors(['form.date']);

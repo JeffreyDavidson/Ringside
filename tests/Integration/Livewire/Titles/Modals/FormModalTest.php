@@ -126,7 +126,7 @@ describe('FormModal Create Operations', function () {
             ->call('openModal')
             ->set('form.name', 'Test Championship')
             ->set('form.type', 'Singles')
-            ->set('form.introduced_at', 'invalid-date')
+            ->set('form.introduced_at', '2023-13-32')
             ->call('save');
 
         $component->assertHasErrors(['form.introduced_at']);
