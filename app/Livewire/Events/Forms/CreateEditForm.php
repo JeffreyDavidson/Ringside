@@ -6,6 +6,7 @@ namespace App\Livewire\Events\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
+use Livewire\Component;
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Database\Eloquent\Model;
@@ -43,7 +44,7 @@ use Illuminate\Validation\Rule;
  * @property int $venue_id Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
-class CreateEditForm extends BaseForm
+class CreateEditForm extends Component
 {
     use PresentsVenuesList;
 
@@ -200,16 +201,14 @@ class CreateEditForm extends BaseForm
     }
 
     /**
-     * Get event-specific validation attributes.
-     *
-     * All standard attributes are provided by HasStandardValidationAttributes trait.
-     * This method handles event-specific field naming.
+     * Get custom validation attributes for this form.
      *
      * @return array<string, string> Custom validation attributes for this form
      */
-    protected function getCustomValidationAttributes(): array
+    public function validationAttributes(): array
     {
         return [
+            'name' => 'event name',
             'date' => 'event date',
             'venue_id' => 'venue',
             'preview' => 'event preview',

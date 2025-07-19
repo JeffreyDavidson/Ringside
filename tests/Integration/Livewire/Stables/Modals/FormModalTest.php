@@ -9,6 +9,7 @@ use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -88,7 +89,7 @@ describe('FormModal Rendering', function () {
     });
 
     it('presents managers list for selection', function () {
-        $manager = Manager::factory()->create(['name' => 'Test Manager']);
+        $manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
 
         $component = Livewire::test(FormModal::class)
             ->call('openModal');

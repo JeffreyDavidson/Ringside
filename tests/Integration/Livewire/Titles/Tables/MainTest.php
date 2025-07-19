@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Titles\Tables\Main;
 use App\Livewire\Titles\Tables\TitlesTable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;

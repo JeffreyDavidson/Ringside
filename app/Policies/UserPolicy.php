@@ -79,4 +79,28 @@ class UserPolicy
     {
         return false; // Will be bypassed by before hook for administrators
     }
+
+    /**
+     * Only administrators can manage users (handled by before hook).
+     */
+    public function manageUsers(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can change user roles (handled by before hook).
+     */
+    public function changeUserRoles(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
+     * Only administrators can view audit logs (handled by before hook).
+     */
+    public function viewAuditLogs(User $user): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
 }

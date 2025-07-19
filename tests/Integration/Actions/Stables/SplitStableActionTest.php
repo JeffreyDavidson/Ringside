@@ -22,7 +22,13 @@ use Illuminate\Support\Facades\DB;
 describe('SplitStableAction Integration Tests', function () {
     beforeEach(function () {
         // Create original stable with mixed members
-        $this->originalStable = Stable::factory()->active()->create(['name' => 'Original Stable']);
+        $this->originalStable = Stable::factory()->create(['name' => 'Original Stable']);
+        
+        // Make it active by adding activation period manually
+        $activationDate = Carbon::yesterday();
+        $this->originalStable->activations()->create([
+            'started_at' => $activationDate,
+        ]);
 
         // Create wrestlers for the stable
         $this->wrestlers = Wrestler::factory()->bookable()->count(4)->create();
@@ -39,6 +45,9 @@ describe('SplitStableAction Integration Tests', function () {
         // Define members to transfer (split selection)
         $this->transferWrestlers = $this->wrestlers->take(2);
         $this->transferTagTeams = $this->tagTeams->take(1);
+        
+        // Managers are not directly associated with stables, so empty collection
+        $this->transferManagers = collect();
 
         // Create new stable name
         $this->newStableName = 'New Split Stable';
@@ -130,12 +139,12 @@ describe('SplitStableAction Integration Tests', function () {
             $newStableTagTeams = $newStable->tagTeams()->get();
 
             foreach ($newStableWrestlers as $wrestler) {
-                expect($wrestler->pivot->joined_at)->not->toBeNull();
+                expect($wrestler->pivot->joined_at)->not()->toBeNull();
                 expect(Carbon::parse($wrestler->pivot->joined_at)->gte($splitDate->subSecond()))->toBeTrue();
             }
 
             foreach ($newStableTagTeams as $tagTeam) {
-                expect($tagTeam->pivot->joined_at)->not->toBeNull();
+                expect($tagTeam->pivot->joined_at)->not()->toBeNull();
                 expect(Carbon::parse($tagTeam->pivot->joined_at)->gte($splitDate->subSecond()))->toBeTrue();
             }
 
@@ -230,9 +239,7 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                $this->transferManagers,
+                $this->membersForNewStable,
                 $splitDate
             );
 
@@ -350,9 +357,7 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                collect(),
+                $this->membersForNewStable,
                 $splitDate
             );
 
@@ -394,9 +399,7 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                collect(),
+                $this->membersForNewStable,
                 $splitDate
             );
 
@@ -419,9 +422,7 @@ describe('SplitStableAction Integration Tests', function () {
                 $newStable = SplitStableAction::run(
                     $this->originalStable,
                     $this->newStableName,
-                    $this->transferWrestlers,
-                    $this->transferTagTeams,
-                    collect(),
+                    $this->membersForNewStable,
                     $splitDate
                 );
 
@@ -443,9 +444,7 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                collect(),
+                $this->membersForNewStable,
                 $splitDate
             );
 
@@ -467,9 +466,7 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                collect(),
+                $this->membersForNewStable,
                 $splitDate
             );
 
@@ -499,19 +496,17 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                collect(),
+                $this->membersForNewStable,
                 $splitDate
             );
 
             // Verify all members still exist in the system
             foreach ($originalWrestlerIds as $wrestlerId) {
-                expect(Wrestler::find($wrestlerId))->not->toBeNull();
+                expect(Wrestler::find($wrestlerId))->not()->toBeNull();
             }
 
             foreach ($originalTagTeamIds as $tagTeamId) {
-                expect(TagTeam::find($tagTeamId))->not->toBeNull();
+                expect(TagTeam::find($tagTeamId))->not()->toBeNull();
             }
         });
 
@@ -522,9 +517,7 @@ describe('SplitStableAction Integration Tests', function () {
             $newStable = SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
-                $this->transferWrestlers,
-                $this->transferTagTeams,
-                collect(),
+                $this->membersForNewStable,
                 $splitDate
             );
 

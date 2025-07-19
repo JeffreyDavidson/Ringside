@@ -52,4 +52,14 @@ abstract class BaseWrestlerAction
     {
         $this->wrestlerRepository->removeFromCurrentManagers($wrestler, $removalDate);
     }
+
+    /**
+     * End all current championships held by the wrestler.
+     *
+     * When a wrestler retires or is released, they should be stripped of any titles they hold.
+     */
+    protected function endCurrentChampionships(Wrestler $wrestler, Carbon $endDate): void
+    {
+        $wrestler->currentChampionships()->update(['lost_at' => $endDate]);
+    }
 }

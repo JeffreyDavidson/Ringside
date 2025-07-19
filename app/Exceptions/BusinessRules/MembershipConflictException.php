@@ -101,6 +101,9 @@ class MembershipConflictException extends BaseBusinessException
 
     /**
      * Exception for entity already having a manager.
+     * 
+     * NOTE: Multiple managers are generally allowed in the system. This exception
+     * should only be used in specific contexts where single manager restriction applies.
      */
     public static function alreadyHasManager(Model $entity, Model $currentManager, Model $newManager): static
     {

@@ -43,7 +43,7 @@ describe('Title Activation Action Integration', function () {
             expect($refreshedTitle->isCurrentlyActive())->toBeTrue();
             expect($refreshedTitle->isUnactivated())->toBeFalse();
             expect($refreshedTitle->status)->toBe(TitleStatus::Active);
-            expect($refreshedTitle->currentActivityPeriod)->not->toBeNull();
+            expect($refreshedTitle->currentActivityPeriod)->not()->toBeNull();
             expect($refreshedTitle->currentActivityPeriod->started_at->toDateTimeString())
                 ->toBe($debutDate->toDateTimeString());
         });
@@ -72,7 +72,7 @@ describe('Title Activation Action Integration', function () {
             $refreshedTitle = $title->fresh();
             expect($refreshedTitle->status)->toBe(TitleStatus::Active);
             expect($refreshedTitle->isCurrentlyActive())->toBeTrue();
-            expect($refreshedTitle->currentActivityPeriod)->not->toBeNull();
+            expect($refreshedTitle->currentActivityPeriod)->not()->toBeNull();
         });
     });
 
@@ -143,7 +143,7 @@ describe('Title Activation Action Integration', function () {
             $refreshedTitle = $title->fresh();
             expect($refreshedTitle->isCurrentlyActive())->toBeTrue();
             expect($refreshedTitle->status)->toBe(TitleStatus::Active);
-            expect($refreshedTitle->currentActivityPeriod)->not->toBeNull();
+            expect($refreshedTitle->currentActivityPeriod)->not()->toBeNull();
 
             // Verify no partial updates occurred
             expect($refreshedTitle->activityPeriods()->whereNull('ended_at')->count())->toBe(1);
@@ -161,7 +161,7 @@ describe('Title Activation Action Integration', function () {
             // Verify all state is consistent - no orphaned records
             if ($refreshedTitle->isCurrentlyActive()) {
                 expect($refreshedTitle->status)->toBe(TitleStatus::Active);
-                expect($refreshedTitle->currentActivityPeriod)->not->toBeNull();
+                expect($refreshedTitle->currentActivityPeriod)->not()->toBeNull();
             }
         });
     });

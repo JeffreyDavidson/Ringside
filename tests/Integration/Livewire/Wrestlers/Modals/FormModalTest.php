@@ -38,7 +38,7 @@ describe('FormModal Configuration', function () {
         $method = $reflection->getMethod('getModalPath');
         $method->setAccessible(true);
 
-        expect($method->invoke($modal))->toBe('wrestlers.modals.form-modal');
+        expect($method->invoke($modal))->toBe('livewire.wrestlers.modals.form-modal');
     });
 });
 
@@ -95,7 +95,7 @@ describe('FormModal Form Integration', function () {
             ->set('form.height_inches', 2)
             ->set('form.weight', 220)
             ->set('form.signature_move', 'Test Finisher')
-            ->call('form.submit');
+            ->call('submitForm');
 
         expect(Wrestler::where('name', 'Test Wrestler')->exists())->toBeTrue();
         $component->assertSuccessful();
@@ -105,7 +105,7 @@ describe('FormModal Form Integration', function () {
         $component = Livewire::test(FormModal::class);
 
         $component->set('form.name', '') // Required field empty
-            ->call('form.submit')
+            ->call('submitForm')
             ->assertHasErrors(['form.name' => 'required']);
 
         $component->assertSuccessful(); // Modal should stay open on validation errors
@@ -121,7 +121,7 @@ describe('FormModal Form Integration', function () {
 
         $component->set('form.name', 'Updated Name')
             ->set('form.hometown', 'Updated City')
-            ->call('form.submit');
+            ->call('submitForm');
 
         $wrestler->refresh();
         expect($wrestler->name)->toBe('Updated Name');
@@ -184,7 +184,7 @@ describe('FormModal Event Handling', function () {
             ->set('form.height_feet', 6)
             ->set('form.height_inches', 0)
             ->set('form.weight', 200)
-            ->call('form.submit')
+            ->call('submitForm')
             ->assertDispatched('form-submitted');
     });
 

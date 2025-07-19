@@ -172,7 +172,7 @@ describe('PreviousEventsTable Integration Tests', function () {
                 return $column instanceof LinkColumn;
             });
 
-            expect($linkColumn)->not->toBeNull();
+            expect($linkColumn)->not()->toBeNull();
         });
 
         test('columns include DateColumn for proper date formatting', function () {
@@ -183,7 +183,7 @@ describe('PreviousEventsTable Integration Tests', function () {
                 return $column instanceof DateColumn;
             });
 
-            expect($dateColumn)->not->toBeNull();
+            expect($dateColumn)->not()->toBeNull();
         });
 
         test('date column uses consistent Y-m-d format', function () {
@@ -207,7 +207,7 @@ describe('PreviousEventsTable Integration Tests', function () {
                 return $column instanceof LinkColumn;
             });
 
-            expect($linkColumn)->not->toBeNull();
+            expect($linkColumn)->not()->toBeNull();
         });
 
         test('displays clickable event names for navigation', function () {

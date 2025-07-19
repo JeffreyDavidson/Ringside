@@ -299,7 +299,7 @@ describe('Wrestler Employment Workflows', function () {
             $refreshedWrestler = $wrestler->fresh();
             expect($refreshedWrestler->isEmployed())->toBeTrue();
             expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-            expect($refreshedWrestler->currentEmployment)->not->toBeNull();
+            expect($refreshedWrestler->currentEmployment)->not()->toBeNull();
 
             // Verify no partial updates occurred
             expect($refreshedWrestler->employments()->whereNull('ended_at')->count())->toBe(1);
@@ -321,7 +321,7 @@ describe('Wrestler Employment Workflows', function () {
             // Verify all state changes are consistent and complete
             expect($reinstated->isEmployed())->toBeTrue();
             expect($reinstated->isSuspended())->toBeFalse();
-            expect($reinstated->currentEmployment)->not->toBeNull();
+            expect($reinstated->currentEmployment)->not()->toBeNull();
             expect($reinstated->currentSuspension)->toBeNull();
 
             // Verify proper record keeping
@@ -341,7 +341,7 @@ describe('Wrestler Employment Workflows', function () {
             // Verify all state is consistent - no orphaned records
             if ($refreshedWrestler->isEmployed()) {
                 expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-                expect($refreshedWrestler->currentEmployment)->not->toBeNull();
+                expect($refreshedWrestler->currentEmployment)->not()->toBeNull();
             }
         });
     });

@@ -40,4 +40,11 @@ class RefereeEmploymentFactory extends Factory
             'ended_at' => $releaseDate->toDateTimeString(),
         ]);
     }
+
+    public function current(): static
+    {
+        return $this->state([
+            'ended_at' => null,
+        ]);
+    }
 }

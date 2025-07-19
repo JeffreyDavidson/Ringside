@@ -24,6 +24,7 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
         "barryvdh/laravel-ide-helper": "^3.5",
+        "christophrumpel/missing-livewire-assertions": "^2.11",
         "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.14",

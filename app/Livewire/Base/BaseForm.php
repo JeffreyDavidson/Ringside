@@ -300,13 +300,14 @@ abstract class BaseForm extends Form
             return 'Unknown';
         }
 
-        // Check if the requested field exists on the model
-        if (property_exists($this->formModel, $fieldName)) {
-            return (string) ($this->formModel->{$fieldName} ?? 'Unknown');
+        // Try to access the field (handles both properties and accessors)
+        try {
+            $value = $this->formModel->{$fieldName};
+            return (string) ($value ?? 'Unknown');
+        } catch (\Exception) {
+            // Fallback for non-existent fields or other errors
+            return 'Unknown';
         }
-
-        // Fallback for non-existent fields
-        return 'Unknown';
     }
 
     /**

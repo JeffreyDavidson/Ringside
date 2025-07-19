@@ -11,6 +11,7 @@ Stable membership defines how wrestlers and tag teams can belong to stables.
 ### Membership Types
 - **Wrestler Membership**: Individual wrestlers can belong to stables
 - **Tag Team Membership**: Tag teams can belong to stables
+- **Manager Exclusion**: Managers do NOT belong to stables directly (they manage individual wrestlers/tag teams)
 - **Multiple Stables**: Wrestlers and tag teams can belong to multiple stables
 - **Stable Leadership**: Stables can have designated leaders
 

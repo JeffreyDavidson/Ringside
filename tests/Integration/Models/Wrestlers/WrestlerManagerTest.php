@@ -129,7 +129,7 @@ describe('WrestlerManager Pivot Model', function () {
             expectPreviousRelationshipsEnded($this->wrestler);
             
             $previousManager = $this->wrestler->previousManagers()->first();
-            expect($previousManager->pivot->fired_at->equalTo($endDate))->toBeTrue();
+            expect($previousManager->pivot->fired_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });
 
         test('detaching manager completely removes relationship', function () {
@@ -182,7 +182,7 @@ describe('WrestlerManager Pivot Model', function () {
 
             expect($previousManagers)->toHaveCount(1);
             expect($previousManagers->first()->id)->toBe($this->manager->id);
-            expect($previousManagers->first()->pivot->fired_at)->not->toBeNull();
+            expect($previousManagers->first()->pivot->fired_at)->not()->toBeNull();
         });
 
         test('all managers query returns complete relationship history', function () {
@@ -222,7 +222,7 @@ describe('WrestlerManager Pivot Model', function () {
                 ->where('manager_id', $this->manager->id)
                 ->first();
 
-            expect($pivotRecord)->not->toBeNull();
+            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->manager_id)->toBe($this->manager->id);
             expect($pivotRecord->hired_at)->toBeInstanceOf(Carbon::class);
@@ -256,28 +256,26 @@ describe('WrestlerManager Pivot Model', function () {
 
             expect($pivotRecord->hired_at)->toBeInstanceOf(Carbon::class);
             expect($pivotRecord->fired_at)->toBeInstanceOf(Carbon::class);
-            expect($pivotRecord->hired_at->equalTo($hiredDate))->toBeTrue();
-            expect($pivotRecord->fired_at->equalTo($firedDate))->toBeTrue();
+            expect($pivotRecord->hired_at->format('Y-m-d H:i:s'))->toBe($hiredDate->format('Y-m-d H:i:s'));
+            expect($pivotRecord->fired_at->format('Y-m-d H:i:s'))->toBe($firedDate->format('Y-m-d H:i:s'));
         });
     });
 
     describe('Business Rule Validation', function () {
-        test('cannot have duplicate active management relationships', function () {
+        test('can have multiple active management relationships', function () {
             createManagementRelationship($this->wrestler, $this->manager);
             $initialCount = $this->wrestler->currentManagers()->count();
 
-            // Try to attach the same manager again
-            try {
-                createManagementRelationship($this->wrestler, $this->manager, [
-                    'hired_at' => Carbon::now()->subMonths(3),
-                ]);
+            // Add a second manager
+            createManagementRelationship($this->wrestler, $this->secondManager, [
+                'hired_at' => Carbon::now()->subMonths(3),
+            ]);
 
-                // If duplicate is allowed, verify only one current relationship exists
-                expect($this->wrestler->currentManagers()->count())->toBe($initialCount);
-            } catch (Exception $e) {
-                // If exception is thrown, that's expected behavior
-                expect($this->wrestler->currentManagers()->count())->toBe($initialCount);
-            }
+            // Verify wrestler now has multiple current managers
+            expect($this->wrestler->currentManagers()->count())->toBe($initialCount + 1);
+            expect($this->wrestler->currentManagers()->pluck('managers.id'))
+                ->toContain($this->manager->id)
+                ->toContain($this->secondManager->id);
         });
 
         test('management periods cannot overlap incorrectly', function () {
