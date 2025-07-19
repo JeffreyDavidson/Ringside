@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Stables\Tables\Main;
 use App\Livewire\Stables\Tables\StablesTable;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;

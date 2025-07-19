@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Events\Tables\EventsTable;
+use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
