@@ -85,4 +85,14 @@ class TitleChampionshipFactory extends Factory
             'lost_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that this championship has ended.
+     */
+    public function ended(): static
+    {
+        return $this->state([
+            'lost_at' => Carbon::yesterday(),
+        ]);
+    }
 }

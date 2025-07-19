@@ -82,7 +82,6 @@ describe('StablesTable Component', function () {
             // Add members to stable
             $wrestler = Wrestler::factory()->bookable()->create();
             $tagTeam = TagTeam::factory()->bookable()->create();
-            $manager = Manager::factory()->bookable()->create();
 
             $wrestler->stables()->attach($stable->id, [
                 'joined_at' => now()->subMonths(3),
@@ -92,12 +91,6 @@ describe('StablesTable Component', function () {
 
             $tagTeam->stables()->attach($stable->id, [
                 'joined_at' => now()->subMonths(2),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $manager->stables()->attach($stable->id, [
-                'joined_at' => now()->subMonths(1),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
