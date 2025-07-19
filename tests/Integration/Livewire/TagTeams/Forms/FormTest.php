@@ -13,8 +13,8 @@ beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
     
-    $this->wrestlerA = Wrestler::factory()->create(['first_name' => 'John', 'last_name' => 'Wrestler']);
-    $this->wrestlerB = Wrestler::factory()->create(['first_name' => 'Jane', 'last_name' => 'Wrestler']);
+    $this->wrestlerA = Wrestler::factory()->create(['name' => 'John Wrestler']);
+    $this->wrestlerB = Wrestler::factory()->create(['name' => 'Jane Wrestler']);
     $this->manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
 });
 

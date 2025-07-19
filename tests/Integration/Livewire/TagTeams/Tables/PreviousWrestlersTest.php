@@ -19,8 +19,7 @@ beforeEach(function () {
     ]);
     
     $this->wrestler = Wrestler::factory()->create([
-        'first_name' => 'Test',
-        'last_name' => 'Wrestler',
+        'name' => 'Test Wrestler',
     ]);
 });
 

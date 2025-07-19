@@ -15,8 +15,7 @@ beforeEach(function () {
     $this->actingAs($this->admin);
     
     $this->wrestler = Wrestler::factory()->create([
-        'first_name' => 'Test',
-        'last_name' => 'Wrestler',
+        'name' => 'Test Wrestler',
     ]);
     
     $this->manager = Manager::factory()->create([

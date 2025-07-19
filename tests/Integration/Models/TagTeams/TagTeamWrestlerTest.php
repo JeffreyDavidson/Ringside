@@ -21,9 +21,15 @@ use Illuminate\Support\Carbon;
  */
 describe('TagTeamWrestler Pivot Model', function () {
     beforeEach(function () {
-        // Create test entities with realistic factory states
-        $this->tagTeam = TagTeam::factory()->employed()->create([
+        // Create test entities with realistic factory states (basic team without auto-attached wrestlers)
+        $this->tagTeam = TagTeam::factory()->create([
             'name' => 'The Hardy Boyz',
+        ]);
+        
+        // Create employment for tag team manually
+        $this->tagTeam->employments()->create([
+            'started_at' => now()->subDays(3),
+            'ended_at' => null,
         ]);
 
         $this->wrestler = Wrestler::factory()->employed()->create([
@@ -31,8 +37,14 @@ describe('TagTeamWrestler Pivot Model', function () {
             'hometown' => 'Cameron, North Carolina',
         ]);
 
-        $this->secondTagTeam = TagTeam::factory()->employed()->create([
+        $this->secondTagTeam = TagTeam::factory()->create([
             'name' => 'The Dudley Boyz',
+        ]);
+        
+        // Create employment for second tag team manually
+        $this->secondTagTeam->employments()->create([
+            'started_at' => now()->subDays(3),
+            'ended_at' => null,
         ]);
 
         $this->secondWrestler = Wrestler::factory()->employed()->create([
@@ -438,7 +450,7 @@ describe('TagTeamWrestler Pivot Model', function () {
             // Load wrestlers with their current tag teams
             $wrestlers = Wrestler::with('currentTagTeam')->get();
 
-            expect($wrestlers)->toHaveCount(7); // Multiple wrestlers from various tests
+            expect($wrestlers)->toHaveCount(3); // wrestler, secondWrestler, thirdWrestler from beforeEach
 
             // Verify relationships are loaded
             $wrestlerWithTagTeam = $wrestlers->firstWhere('id', $this->wrestler->id);
