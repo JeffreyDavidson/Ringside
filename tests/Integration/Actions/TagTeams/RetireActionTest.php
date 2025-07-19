@@ -109,30 +109,19 @@ test('it retires a released tag team at a specific datetime', function () {
     resolve(RetireAction::class)->handle($tagTeam, $datetime);
 });
 
-test('it retires a suspended tag team at the current datetime by default', function () {
+test('it throws exception for retiring a suspended tag team at the current datetime', function () {
     [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
     $tagTeam = TagTeam::factory()
         ->hasAttached($wrestlerA, ['joined_at' => now()->toDateTimeString()])
         ->hasAttached($wrestlerB, ['joined_at' => now()->toDateTimeString()])
         ->suspended()
         ->create();
-    $datetime = now();
 
-    $this->tagTeamRepository
-        ->shouldReceive('createRetirement')
-        ->once()
-        ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
-            expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    resolve(RetireAction::class)->handle($tagTeam);
+    expect(fn() => resolve(RetireAction::class)->handle($tagTeam))
+        ->toThrow(CannotBeRetiredException::class);
 });
 
-test('it retires a suspended tag team at a specific datetime', function () {
+test('it throws exception for retiring a suspended tag team at a specific datetime', function () {
     [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
     $tagTeam = TagTeam::factory()
         ->hasAttached($wrestlerA, ['joined_at' => now()->toDateTimeString()])
@@ -141,18 +130,8 @@ test('it retires a suspended tag team at a specific datetime', function () {
         ->create();
     $datetime = now()->addDays(2);
 
-    $this->tagTeamRepository
-        ->shouldReceive('createRetirement')
-        ->once()
-        ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
-            expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    resolve(RetireAction::class)->handle($tagTeam, $datetime);
+    expect(fn() => resolve(RetireAction::class)->handle($tagTeam, $datetime))
+        ->toThrow(CannotBeRetiredException::class);
 });
 
 test('it retires an unbookable tag team at the current datetime by default', function () {
