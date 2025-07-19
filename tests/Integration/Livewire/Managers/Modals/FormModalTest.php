@@ -43,9 +43,9 @@ describe('Managers FormModal Tests', function () {
         test('modal renders with correct form fields', function () {
             Livewire::test(FormModal::class)
                 ->call('openModal')
-                ->assertPropertyWired('form.first_name')
-                ->assertPropertyWired('form.last_name')
-                ->assertPropertyWired('form.employment_date');
+                ->assertPropertyWired('modelForm.first_name')
+                ->assertPropertyWired('modelForm.last_name')
+                ->assertPropertyWired('modelForm.start_date');
         });
 
         test('modal shows correct title for create mode', function () {
@@ -151,7 +151,7 @@ describe('Managers FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $manager = Manager::where('first_name', 'Simple')->where('last_name', 'Manager')->first();
-            expect($manager)->not->toBeNull();
+            expect($manager)->not()->toBeNull();
             expect($manager->firstEmployment)->toBeNull();
         });
 
@@ -173,7 +173,7 @@ describe('Managers FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $manager = Manager::where('first_name', "O'Connor")->where('last_name', 'Van Der Berg')->first();
-            expect($manager)->not->toBeNull();
+            expect($manager)->not()->toBeNull();
             expect($manager->first_name)->toBe("O'Connor");
             expect($manager->last_name)->toBe('Van Der Berg');
         });
@@ -311,7 +311,7 @@ describe('Managers FormModal Tests', function () {
                     ->where('last_name', $testCase['last'])
                     ->first();
 
-                expect($manager)->not->toBeNull("Failed for test case {$index}: {$testCase['first']} {$testCase['last']}");
+                expect($manager)->not()->toBeNull("Failed for test case {$index}: {$testCase['first']} {$testCase['last']}");
             }
         });
 
@@ -349,7 +349,7 @@ describe('Managers FormModal Tests', function () {
             if (!$manager) {
                 // If trimming is not implemented, look for the untrimmed version
                 $manager = Manager::where('first_name', '  Trimmed  ')->first();
-                expect($manager)->not->toBeNull();
+                expect($manager)->not()->toBeNull();
             }
         });
     });
@@ -411,7 +411,7 @@ describe('Managers FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $manager = Manager::where('first_name', 'Employment')->where('last_name', 'Test')->first();
-            expect($manager->firstEmployment)->not->toBeNull();
+            expect($manager->firstEmployment)->not()->toBeNull();
             expect($manager->firstEmployment->started_at->toDateString())->toBe('2024-01-01');
         });
 
@@ -468,7 +468,7 @@ describe('Managers FormModal Tests', function () {
                     ->where('last_name', $name['last'])
                     ->first();
 
-                expect($manager)->not->toBeNull();
+                expect($manager)->not()->toBeNull();
             }
         });
 

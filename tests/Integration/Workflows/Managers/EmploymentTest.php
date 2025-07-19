@@ -88,8 +88,8 @@ describe('Manager Employment Workflows', function () {
             // Verify all state changes are consistent
             expect($suspended->isEmployed())->toBeTrue(); // Still employed
             expect($suspended->isSuspended())->toBeTrue(); // But suspended
-            expect($suspended->currentEmployment)->not->toBeNull();
-            expect($suspended->currentSuspension)->not->toBeNull();
+            expect($suspended->currentEmployment)->not()->toBeNull();
+            expect($suspended->currentSuspension)->not()->toBeNull();
         });
 
         test('action rollback maintains data consistency on failure', function () {
@@ -104,7 +104,7 @@ describe('Manager Employment Workflows', function () {
             // Verify all state is consistent - no orphaned records
             if ($refreshedManager->isEmployed()) {
                 expect($refreshedManager->status)->toBe(EmploymentStatus::Employed);
-                expect($refreshedManager->currentEmployment)->not->toBeNull();
+                expect($refreshedManager->currentEmployment)->not()->toBeNull();
             }
         });
     });

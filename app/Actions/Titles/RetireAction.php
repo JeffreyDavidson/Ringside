@@ -52,6 +52,13 @@ class RetireAction extends BaseTitleAction
                 $this->titleRepository->pull($title, $retirementDate);
             }
 
+            // End current championship if title has an active champion
+            $currentChampionship = $title->currentChampionship;
+            if ($currentChampionship) {
+                // End the championship when title is retired
+                $currentChampionship->update(['lost_at' => $retirementDate]);
+            }
+
             // Create the retirement record to permanently end the title's lineage
             $this->titleRepository->createRetirement($title, $retirementDate);
         });

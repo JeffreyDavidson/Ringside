@@ -10,6 +10,7 @@ use App\Actions\Referees\ReleaseAction;
 use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
+use App\Livewire\Referees\Tables\Main;
 use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;

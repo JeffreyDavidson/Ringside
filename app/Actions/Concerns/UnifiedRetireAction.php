@@ -156,6 +156,11 @@ class UnifiedRetireAction
                 // Remove entity from current stable
                 $entity->leaveStable($date);
             }
+
+            // End current championships
+            if ($entity instanceof CanBeChampion && $entity->isChampion()) {
+                $entity->currentChampionships()->update(['lost_at' => $date]);
+            }
         });
     }
 
@@ -181,6 +186,11 @@ class UnifiedRetireAction
                 if (method_exists($repository, 'removeCurrentManagers')) {
                     $repository->removeCurrentManagers($entity, $date);
                 }
+            }
+
+            // End current championships
+            if ($entity instanceof CanBeChampion && $entity->isChampion()) {
+                $entity->currentChampionships()->update(['lost_at' => $date]);
             }
         });
     }
@@ -274,13 +284,11 @@ class UnifiedRetireAction
                 return;
             }
 
-            // End current championship if active
-            if ($entity instanceof CanBeChampion && $entity->isChampion()) {
-                $currentChampionship = $entity->currentChampionship()->first();
-                if ($currentChampionship) {
-                    // End the championship directly on the model
-                    $currentChampionship->update(['lost_at' => $date]);
-                }
+            // End current championship if title has an active champion
+            $currentChampionship = $entity->currentChampionship;
+            if ($currentChampionship) {
+                // End the championship when title is retired
+                $currentChampionship->update(['lost_at' => $date]);
             }
         });
     }

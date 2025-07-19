@@ -104,7 +104,7 @@ describe('TagTeam Employment Workflows', function () {
             $refreshedTagTeam = $tagTeam->fresh();
             expect($refreshedTagTeam->isEmployed())->toBeTrue();
             expect($refreshedTagTeam->status)->toBe(EmploymentStatus::Employed);
-            expect($refreshedTagTeam->currentEmployment)->not->toBeNull();
+            expect($refreshedTagTeam->currentEmployment)->not()->toBeNull();
 
             // Verify no partial updates occurred
             expect($refreshedTagTeam->employments()->whereNull('ended_at')->count())->toBe(1);
@@ -122,7 +122,7 @@ describe('TagTeam Employment Workflows', function () {
             // Verify all state is consistent - no orphaned records
             if ($refreshedTagTeam->isEmployed()) {
                 expect($refreshedTagTeam->status)->toBe(EmploymentStatus::Employed);
-                expect($refreshedTagTeam->currentEmployment)->not->toBeNull();
+                expect($refreshedTagTeam->currentEmployment)->not()->toBeNull();
             }
         });
     });

@@ -123,11 +123,9 @@ class TagTeamFactory extends Factory
     }
 
 
-    public function withCurrentWrestlers($wrestler, $joinDate = null): static
+    public function withCurrentWrestlers($wrestlers, $joinDate = null): static
     {
-        $this->hasAttached($wrestler, ['joined_at' => $joinDate ?? now(), 'left_at' => null]);
-
-        return $this;
+        return $this->hasAttached($wrestlers, ['joined_at' => $joinDate ?? now(), 'left_at' => null]);
     }
 
     public function unactivated(): static

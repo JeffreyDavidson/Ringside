@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\InjureAction;
+use App\Livewire\Managers\Tables\Main;
 use App\Livewire\Managers\Tables\ManagersTable;
 use App\Models\Managers\Manager;
 use App\Models\Managers\ManagerEmployment;

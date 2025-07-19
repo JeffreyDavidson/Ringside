@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Stables\Tables\Main;
 use App\Livewire\Stables\Tables\StablesTable;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
@@ -66,7 +67,7 @@ describe('StablesTable Component', function () {
             $stable = Stable::factory()->active()->create(['name' => 'Test Stable']);
 
             // Verify activity period exists
-            expect($stable->currentActivityPeriod)->not->toBeNull();
+            expect($stable->currentActivityPeriod)->not()->toBeNull();
 
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class);
@@ -81,7 +82,6 @@ describe('StablesTable Component', function () {
             // Add members to stable
             $wrestler = Wrestler::factory()->bookable()->create();
             $tagTeam = TagTeam::factory()->bookable()->create();
-            $manager = Manager::factory()->bookable()->create();
 
             $wrestler->stables()->attach($stable->id, [
                 'joined_at' => now()->subMonths(3),
@@ -91,12 +91,6 @@ describe('StablesTable Component', function () {
 
             $tagTeam->stables()->attach($stable->id, [
                 'joined_at' => now()->subMonths(2),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $manager->stables()->attach($stable->id, [
-                'joined_at' => now()->subMonths(1),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -216,8 +210,8 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is restored
-            expect(Stable::find($deletedStable->id))->not->toBeNull();
-            expect($deletedStable->fresh())->not->toBeNull();
+            expect(Stable::find($deletedStable->id))->not()->toBeNull();
+            expect($deletedStable->fresh())->not()->toBeNull();
         });
 
         test('delete action integration works correctly', function () {
@@ -231,7 +225,7 @@ describe('StablesTable Component', function () {
 
             // Verify stable is soft deleted
             expect(Stable::find($stable->id))->toBeNull();
-            expect(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
+            expect(Stable::onlyTrashed()->find($stable->id))->not()->toBeNull();
         });
     });
 
@@ -322,7 +316,7 @@ describe('StablesTable Component', function () {
             $stable = Stable::factory()->active()->create(['name' => 'Test Stable']);
 
             // Ensure activity period exists for eager loading test
-            expect($stable->currentActivityPeriod)->not->toBeNull();
+            expect($stable->currentActivityPeriod)->not()->toBeNull();
 
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class);

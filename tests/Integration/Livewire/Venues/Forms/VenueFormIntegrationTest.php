@@ -158,7 +158,7 @@ describe('VenueForm Integration Tests', function () {
                 return $rule instanceof Illuminate\Validation\Rules\Unique;
             });
 
-            expect($uniqueRule)->not->toBeNull();
+            expect($uniqueRule)->not()->toBeNull();
         });
 
         test('validates US ZIP code format specifically', function () {
@@ -180,7 +180,7 @@ describe('VenueForm Integration Tests', function () {
                 return $rule instanceof Illuminate\Validation\Rules\Exists;
             });
 
-            expect($existsRule)->not->toBeNull();
+            expect($existsRule)->not()->toBeNull();
         });
     });
 

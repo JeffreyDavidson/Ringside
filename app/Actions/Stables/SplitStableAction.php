@@ -33,6 +33,20 @@ class SplitStableAction extends BaseStableAction
         array $membersForNewStable,
         Carbon $date
     ): Stable {
+        // Validate that the original stable can be split
+        if (method_exists($originalStable, 'isRetired') && $originalStable->isRetired()) {
+            throw new \Exception('Cannot split a retired stable');
+        }
+        
+        if (method_exists($originalStable, 'isCurrentlyActive') && !$originalStable->isCurrentlyActive()) {
+            throw new \Exception('Cannot split an inactive stable');
+        }
+        
+        // Validate that the new stable name is unique
+        if (Stable::where('name', $newStableName)->exists()) {
+            throw new \Exception('A stable with this name already exists');
+        }
+
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
             // Create the new stable
             $newStable = $this->stableRepository->create(
@@ -48,19 +62,27 @@ class SplitStableAction extends BaseStableAction
             // Create activity period to make the stable active
             $this->stableRepository->createDebut($newStable, $date);
 
-            // Transfer wrestlers
+            // Transfer wrestlers (only if they are employed/available)
             if (isset($membersForNewStable['wrestlers'])) {
                 foreach ($membersForNewStable['wrestlers'] as $wrestler) {
-                    $this->stableRepository->removeWrestler($originalStable, $wrestler, $date);
-                    $this->stableRepository->addWrestler($newStable, $wrestler, $date);
+                    // Only transfer wrestlers who are employed/available
+                    if (method_exists($wrestler, 'isEmployed') && $wrestler->isEmployed()) {
+                        $this->stableRepository->removeWrestler($originalStable, $wrestler, $date);
+                        $this->stableRepository->addWrestler($newStable, $wrestler, $date);
+                    }
+                    // Skip unemployed wrestlers without throwing an exception
                 }
             }
 
-            // Transfer tag teams
+            // Transfer tag teams (only if they are employed/available)
             if (isset($membersForNewStable['tagTeams'])) {
                 foreach ($membersForNewStable['tagTeams'] as $tagTeam) {
-                    $this->stableRepository->removeTagTeam($originalStable, $tagTeam, $date);
-                    $this->stableRepository->addTagTeam($newStable, $tagTeam, $date);
+                    // Only transfer tag teams who are employed/available
+                    if (method_exists($tagTeam, 'isEmployed') && $tagTeam->isEmployed()) {
+                        $this->stableRepository->removeTagTeam($originalStable, $tagTeam, $date);
+                        $this->stableRepository->addTagTeam($newStable, $tagTeam, $date);
+                    }
+                    // Skip unemployed tag teams without throwing an exception
                 }
             }
 

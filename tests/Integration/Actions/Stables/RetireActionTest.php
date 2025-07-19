@@ -16,158 +16,113 @@ use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
-
-    $this->stableRepository = $this->mock(StableRepository::class);
-    $this->app->instance(StableRepository::class, $this->stableRepository);
 });
 
 test('it retires an active stable at the current datetime by default', function () {
     $stable = Stable::factory()->active()->create();
-    $datetime = now();
-
-    // Mock repository calls
-    $this->stableRepository->shouldReceive('endActivity')->with($stable, $datetime)->andReturn($stable);
-    $this->stableRepository->shouldReceive('deactivate')->with($stable)->andReturn($stable);
-    $this->stableRepository->shouldReceive('retire')->with($stable)->andReturn($stable);
-    $this->stableRepository->shouldReceive('removeWrestlers')->with($stable)->andReturn(null);
-    $this->stableRepository->shouldReceive('removeTagTeams')->with($stable)->andReturn(null);
-    $this->stableRepository->shouldReceive('createRetirement')->with($stable, $datetime)->andReturn(null);
+    
+    // Verify stable is active before retirement
+    expect($stable->isCurrentlyActive())->toBeTrue();
+    expect($stable->isRetired())->toBeFalse();
 
     // Call the action
     resolve(RetireAction::class)->handle($stable);
 
-    // If we get here, the action ran successfully
-    expect(true)->toBeTrue();
+    // Verify stable is retired after action
+    $stable->refresh();
+    expect($stable->isRetired())->toBeTrue();
+    expect($stable->isCurrentlyActive())->toBeFalse();
 });
 
 test('it retires an active stable at a specific datetime', function () {
     $stable = Stable::factory()->active()->create();
     $datetime = now()->addDays(2);
 
-    // Mock repository calls
-    $this->stableRepository->shouldReceive('endActivity')->with($stable, $datetime)->andReturn($stable);
-    $this->stableRepository->shouldReceive('deactivate')->with($stable)->andReturn($stable);
-    $this->stableRepository->shouldReceive('retire')->with($stable)->andReturn($stable);
-    $this->stableRepository->shouldReceive('removeWrestlers')->with($stable)->andReturn(null);
-    $this->stableRepository->shouldReceive('removeTagTeams')->with($stable)->andReturn(null);
-    $this->stableRepository->shouldReceive('createRetirement')->with($stable, $datetime)->andReturn(null);
+    // Verify stable is active before retirement
+    expect($stable->isCurrentlyActive())->toBeTrue();
+    expect($stable->isRetired())->toBeFalse();
 
     // Call the action
     resolve(RetireAction::class)->handle($stable, $datetime);
 
-    // If we get here, the action ran successfully
-    expect(true)->toBeTrue();
+    // Verify stable is retired after action
+    $stable->refresh();
+    expect($stable->isRetired())->toBeTrue();
+    expect($stable->isCurrentlyActive())->toBeFalse();
 });
 
 test('it retires an inactive stable at the current datetime by default', function () {
-    $stable = $this->partialMock(Stable::class);
-    $datetime = now();
+    $stable = Stable::factory()->inactive()->create();
 
-    // Mock the stable to return empty collections for current members
-    $stable->shouldReceive('hasDebuted')->andReturn(false);
-    $stable->shouldReceive('ensureCanBeRetired')->andReturn(null);
-    $stable->shouldReceive('isRetired')->andReturn(false);
-    $stable->shouldReceive('currentRetirement')->andReturn(collect());
+    // Verify stable is inactive before retirement
+    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->isRetired())->toBeFalse();
 
-    // Don't expect any repository calls for now - just see if the action runs
-    $this->stableRepository->shouldReceive('retire')->andReturn($stable);
-    $this->stableRepository->shouldReceive('removeWrestlers')->andReturn(null);
-    $this->stableRepository->shouldReceive('removeTagTeams')->andReturn(null);
-    // Note: Managers are not direct stable members, so removeManagers is not called
-    $this->stableRepository->shouldReceive('createRetirement')->andReturn(null);
-
-    // Just call the action and see what happens
+    // Call the action
     resolve(RetireAction::class)->handle($stable);
 
-    // If we get here, the action ran successfully
-    expect(true)->toBeTrue();
+    // Verify stable is retired after action
+    $stable->refresh();
+    expect($stable->isRetired())->toBeTrue();
+    expect($stable->isCurrentlyActive())->toBeFalse();
 });
 
 test('it retires an inactive stable at a specific datetime', function () {
-    $stable = $this->partialMock(Stable::class);
+    $stable = Stable::factory()->inactive()->create();
     $datetime = now()->addDays(2);
 
-    // Mock the stable to return empty collections for current members
-    $stable->shouldReceive('hasDebuted')->andReturn(false);
-    $stable->shouldReceive('ensureCanBeRetired')->andReturn(null);
-    $stable->shouldReceive('isRetired')->andReturn(false);
-    $stable->shouldReceive('currentRetirement')->andReturn(collect());
+    // Verify stable is inactive before retirement
+    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->isRetired())->toBeFalse();
 
-    // Don't expect any repository calls for now - just see if the action runs
-    $this->stableRepository->shouldReceive('retire')->andReturn($stable);
-    $this->stableRepository->shouldReceive('removeWrestlers')->andReturn(null);
-    $this->stableRepository->shouldReceive('removeTagTeams')->andReturn(null);
-    // Note: Managers are not direct stable members, so removeManagers is not called
-    $this->stableRepository->shouldReceive('createRetirement')->andReturn(null);
-
-    // Just call the action and see what happens
+    // Call the action
     resolve(RetireAction::class)->handle($stable, $datetime);
 
-    // If we get here, the action ran successfully
-    expect(true)->toBeTrue();
+    // Verify stable is retired after action
+    $stable->refresh();
+    expect($stable->isRetired())->toBeTrue();
+    expect($stable->isCurrentlyActive())->toBeFalse();
 });
 
 test('it retires the current tag teams and current wrestlers of a stable', function () {
-    $tagTeams = TagTeam::factory()->bookable()->count(1)->create();
-    $wrestlers = Wrestler::factory()->bookable()->count(1)->create();
-    // Note: Managers are not direct stable members
-    $datetime = now();
+    $stable = Stable::factory()->active()->create();
+    
+    // Verify stable has current members before retirement
+    expect($stable->currentWrestlers()->count())->toBeGreaterThan(0);
+    expect($stable->currentTagTeams()->count())->toBeGreaterThan(0);
+    
+    // Get the current members before retirement
+    $currentWrestlers = $stable->currentWrestlers;
+    $currentTagTeams = $stable->currentTagTeams;
+    
+    // Verify they are not retired before action
+    foreach ($currentWrestlers as $wrestler) {
+        expect($wrestler->isRetired())->toBeFalse();
+    }
+    foreach ($currentTagTeams as $tagTeam) {
+        expect($tagTeam->isRetired())->toBeFalse();
+    }
 
-    $stable = $this->partialMock(Stable::class);
-    $stable->shouldReceive('hasDebuted')->andReturn(true);
-    $stable->shouldReceive('ensureCanBeRetired')->andReturn(null);
-    $stable->shouldReceive('isRetired')->andReturn(false);
-    $stable->shouldReceive('currentRetirement')->andReturn(collect());
-    $stable->shouldReceive('getAttribute')->with('currentWrestlers')->andReturn($wrestlers);
-    $stable->shouldReceive('getAttribute')->with('currentTagTeams')->andReturn($tagTeams);
-    // Note: currentManagers not used since managers are not direct stable members
+    // Call the action
+    resolve(RetireAction::class)->handle($stable);
 
-    $this->stableRepository
-        ->shouldReceive('endActivity')
-        ->once()
-        ->with($stable, $datetime)
-        ->andReturns($stable);
-
-    // Remove the retire expectation for debuted stables
-    // $this->stableRepository
-    //     ->shouldReceive('retire')
-    //     ->once()
-    //     ->with($stable, $datetime)
-    //     ->andReturns($stable);
-
-    $this->stableRepository
-        ->shouldReceive('removeWrestlers')
-        ->once()
-        ->with($stable, Mockery::any(), $datetime)
-        ->andReturns(null);
-
-    $this->stableRepository
-        ->shouldReceive('removeTagTeams')
-        ->once()
-        ->with($stable, Mockery::any(), $datetime)
-        ->andReturns(null);
-
-    // Note: Managers are not direct stable members, so removeManagers is not called
-
-    $this->stableRepository
-        ->shouldReceive('createRetirement')
-        ->once()
-        ->with($stable, $datetime)
-        ->andReturns(null);
-
-    TagTeamRetireAction::shouldRun()->times(1);
-    WrestlerRetireAction::shouldRun()->times(1);
-    // Note: ManagerRetireAction not called since managers are not direct stable members
-
-    resolve(RetireAction::class)->handle($stable, $datetime);
+    // Verify stable is retired
+    $stable->refresh();
+    expect($stable->isRetired())->toBeTrue();
+    
+    // Verify current members were retired
+    foreach ($currentWrestlers as $wrestler) {
+        $wrestler->refresh();
+        expect($wrestler->isRetired())->toBeTrue();
+    }
+    foreach ($currentTagTeams as $tagTeam) {
+        $tagTeam->refresh();
+        expect($tagTeam->isRetired())->toBeTrue();
+    }
 });
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
-    $stable = $this->partialMock(Stable::class);
-
-    // Mock the stable to throw the expected exception
-    $stable->shouldReceive('ensureCanBeRetired')
-        ->andThrow(CannotBeRetiredException::class);
+    $stable = Stable::factory()->{$factoryState}()->create();
 
     resolve(RetireAction::class)->handle($stable);
 })->throws(CannotBeRetiredException::class)->with([

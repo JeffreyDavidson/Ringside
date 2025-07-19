@@ -7,6 +7,7 @@ use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
+use App\Livewire\Wrestlers\Tables\Main;
 use App\Livewire\Wrestlers\Tables\WrestlersTable;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;

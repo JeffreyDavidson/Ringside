@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Events\Tables\EventsTable;
+use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
@@ -65,7 +66,7 @@ describe('EventsTable Component Integration', function () {
             $event = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'Venue Event']);
 
             // Verify venue relationship exists
-            expect($event->venue)->not->toBeNull();
+            expect($event->venue)->not()->toBeNull();
             expect($event->venue->name)->toBe('Test Arena');
 
             $component = Livewire::actingAs($this->admin)
@@ -185,7 +186,7 @@ describe('EventsTable Component Integration', function () {
 
             // Verify event is soft deleted
             expect(Event::find($event->id))->toBeNull();
-            expect(Event::onlyTrashed()->find($event->id))->not->toBeNull();
+            expect(Event::onlyTrashed()->find($event->id))->not()->toBeNull();
         });
 
         test('restore action integration works correctly', function () {
@@ -199,7 +200,7 @@ describe('EventsTable Component Integration', function () {
                 ->assertRedirect();
 
             // Verify event is restored
-            expect(Event::find($deletedEvent->id))->not->toBeNull();
+            expect(Event::find($deletedEvent->id))->not()->toBeNull();
             expect($deletedEvent->fresh()->deleted_at)->toBeNull();
         });
     });
@@ -228,7 +229,7 @@ describe('EventsTable Component Integration', function () {
                 ->assertHasNoErrors()
                 ->assertRedirect();
 
-            expect(Event::find($deletedEvent->id))->not->toBeNull();
+            expect(Event::find($deletedEvent->id))->not()->toBeNull();
         });
     });
 
@@ -275,7 +276,7 @@ describe('EventsTable Component Integration', function () {
             $event = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'Test Event']);
 
             // Ensure venue relationship exists for eager loading test
-            expect($event->venue)->not->toBeNull();
+            expect($event->venue)->not()->toBeNull();
 
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class);

@@ -146,6 +146,16 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     ];
 
     /**
+     * Get the manager's full name.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::get(fn () => trim("{$this->first_name} {$this->last_name}"));
+    }
+
+    /**
      * Get the computed status attribute.
      *
      * Computes the employment status based on the manager's current relationships:

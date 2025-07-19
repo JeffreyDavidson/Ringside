@@ -231,7 +231,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $tagTeam = TagTeam::where('name', 'Simple Tag Team')->first();
-            expect($tagTeam)->not->toBeNull();
+            expect($tagTeam)->not()->toBeNull();
             expect($tagTeam->signature_move)->toBeNull();
             expect($tagTeam->currentManagers)->toHaveCount(0);
             expect($tagTeam->firstEmployment)->toBeNull();
@@ -510,8 +510,8 @@ describe('TagTeams FormModal Tests', function () {
 
             // All required fields should be populated
             expect($component->get('form.name'))->not->toBeEmpty();
-            expect($component->get('form.wrestlerA'))->not->toBeNull();
-            expect($component->get('form.wrestlerB'))->not->toBeNull();
+            expect($component->get('form.wrestlerA'))->not()->toBeNull();
+            expect($component->get('form.wrestlerB'))->not()->toBeNull();
         });
 
         test('dummy data uses different wrestlers', function () {
@@ -544,7 +544,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $tagTeam = TagTeam::where('name', 'Employment Test Team')->first();
-            expect($tagTeam->firstEmployment)->not->toBeNull();
+            expect($tagTeam->firstEmployment)->not()->toBeNull();
             expect($tagTeam->firstEmployment->started_at->toDateString())->toBe('2024-01-01');
         });
 

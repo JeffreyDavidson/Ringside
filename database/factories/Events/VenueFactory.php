@@ -29,4 +29,14 @@ class VenueFactory extends Factory
             'zipcode' => str(fake()->postcode())->substr(0, 5)->value(),
         ];
     }
+
+    /**
+     * Indicate that the venue is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => $attributes['name'] . ' (Inactive)',
+        ]);
+    }
 }

@@ -8,6 +8,7 @@ use App\Actions\TagTeams\ReleaseAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
+use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamEmployment;

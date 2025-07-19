@@ -21,9 +21,15 @@ use Illuminate\Support\Carbon;
  */
 describe('TagTeamWrestler Pivot Model', function () {
     beforeEach(function () {
-        // Create test entities with realistic factory states
-        $this->tagTeam = TagTeam::factory()->employed()->create([
+        // Create test entities with realistic factory states (basic team without auto-attached wrestlers)
+        $this->tagTeam = TagTeam::factory()->create([
             'name' => 'The Hardy Boyz',
+        ]);
+        
+        // Create employment for tag team manually
+        $this->tagTeam->employments()->create([
+            'started_at' => now()->subDays(3),
+            'ended_at' => null,
         ]);
 
         $this->wrestler = Wrestler::factory()->employed()->create([
@@ -31,8 +37,14 @@ describe('TagTeamWrestler Pivot Model', function () {
             'hometown' => 'Cameron, North Carolina',
         ]);
 
-        $this->secondTagTeam = TagTeam::factory()->employed()->create([
+        $this->secondTagTeam = TagTeam::factory()->create([
             'name' => 'The Dudley Boyz',
+        ]);
+        
+        // Create employment for second tag team manually
+        $this->secondTagTeam->employments()->create([
+            'started_at' => now()->subDays(3),
+            'ended_at' => null,
         ]);
 
         $this->secondWrestler = Wrestler::factory()->employed()->create([
@@ -113,7 +125,7 @@ describe('TagTeamWrestler Pivot Model', function () {
             // Verify previous tag team is correct
             $previousTagTeam = $this->wrestler->previousTagTeams()->first();
             expect($previousTagTeam->id)->toBe($this->tagTeam->id);
-            expect($previousTagTeam->pivot->left_at)->not->toBeNull();
+            expect($previousTagTeam->pivot->left_at)->not()->toBeNull();
         });
     });
 
@@ -174,7 +186,7 @@ describe('TagTeamWrestler Pivot Model', function () {
         test('current tag team query returns only active relationship', function () {
             $currentTagTeam = $this->wrestler->currentTagTeam;
 
-            expect($currentTagTeam)->not->toBeNull();
+            expect($currentTagTeam)->not()->toBeNull();
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
             expect($currentTagTeam->pivot->left_at)->toBeNull();
         });
@@ -184,7 +196,7 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             expect($previousTagTeams)->toHaveCount(1);
             expect($previousTagTeams->first()->id)->toBe($this->tagTeam->id);
-            expect($previousTagTeams->first()->pivot->left_at)->not->toBeNull();
+            expect($previousTagTeams->first()->pivot->left_at)->not()->toBeNull();
         });
 
         test('all tag teams query returns complete relationship history', function () {
@@ -209,7 +221,7 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             $mostRecentPrevious = $this->wrestler->previousTagTeam;
 
-            expect($mostRecentPrevious)->not->toBeNull();
+            expect($mostRecentPrevious)->not()->toBeNull();
             expect($mostRecentPrevious->id)->toBe($this->tagTeam->id); // More recent than the third team
         });
 
@@ -246,7 +258,7 @@ describe('TagTeamWrestler Pivot Model', function () {
                 ->where('tag_team_id', $this->tagTeam->id)
                 ->first();
 
-            expect($pivotRecord)->not->toBeNull();
+            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->tag_team_id)->toBe($this->tagTeam->id);
             expect($pivotRecord->joined_at)->toBeInstanceOf(Carbon::class);
@@ -438,12 +450,12 @@ describe('TagTeamWrestler Pivot Model', function () {
             // Load wrestlers with their current tag teams
             $wrestlers = Wrestler::with('currentTagTeam')->get();
 
-            expect($wrestlers)->toHaveCount(7); // Multiple wrestlers from various tests
+            expect($wrestlers)->toHaveCount(3); // wrestler, secondWrestler, thirdWrestler from beforeEach
 
             // Verify relationships are loaded
             $wrestlerWithTagTeam = $wrestlers->firstWhere('id', $this->wrestler->id);
             expect($wrestlerWithTagTeam->relationLoaded('currentTagTeam'))->toBeTrue();
-            expect($wrestlerWithTagTeam->currentTagTeam)->not->toBeNull();
+            expect($wrestlerWithTagTeam->currentTagTeam)->not()->toBeNull();
         });
 
         test('can efficiently count tag team relationships without loading them', function () {
@@ -486,11 +498,11 @@ describe('TagTeamWrestler Pivot Model', function () {
             $currentTagTeam = $this->wrestler->currentTagTeam;
             $previousTagTeam = $this->wrestler->previousTagTeam;
 
-            expect($currentTagTeam)->not->toBeNull();
+            expect($currentTagTeam)->not()->toBeNull();
             expect($currentTagTeam)->toBeInstanceOf(TagTeam::class);
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
 
-            expect($previousTagTeam)->not->toBeNull();
+            expect($previousTagTeam)->not()->toBeNull();
             expect($previousTagTeam)->toBeInstanceOf(TagTeam::class);
             expect($previousTagTeam->id)->toBe($this->tagTeam->id);
         });

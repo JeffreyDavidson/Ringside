@@ -57,6 +57,9 @@ class ReleaseAction extends BaseWrestlerAction
             // End current manager relationships
             $this->removeCurrentManagers($wrestler, $releaseDate);
 
+            // End current championships
+            $this->endCurrentChampionships($wrestler, $releaseDate);
+
             // End current suspension if active
             if ($wrestler->isSuspended()) {
                 $this->wrestlerRepository->endSuspension($wrestler, $releaseDate);

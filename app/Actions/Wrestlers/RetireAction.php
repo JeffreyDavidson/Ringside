@@ -71,6 +71,9 @@ class RetireAction extends BaseWrestlerAction
             // End current manager relationships
             $this->removeCurrentManagers($wrestler, $retirementDate);
 
+            // End current championships
+            $this->endCurrentChampionships($wrestler, $retirementDate);
+
             // Create retirement record
             $this->wrestlerRepository->createRetirement($wrestler, $retirementDate);
         });

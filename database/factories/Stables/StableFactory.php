@@ -64,7 +64,15 @@ class StableFactory extends Factory
                 ['joined_at' => $activationDate]
             )
             ->hasAttached(
-                TagTeam::factory()->has(TagTeamEmployment::factory()->started($activationDate), 'employments'),
+                TagTeam::factory()
+                    ->has(TagTeamEmployment::factory()->started($activationDate), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($activationDate) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started($activationDate), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $activationDate]);
+                    }),
                 ['joined_at' => $activationDate]
             )
             ->afterCreating(function (Stable $stable) {
@@ -90,7 +98,15 @@ class StableFactory extends Factory
                 ['joined_at' => $start, 'left_at' => $end]
             )
             ->hasAttached(
-                TagTeam::factory()->has(TagTeamEmployment::factory()->started($start), 'employments'),
+                TagTeam::factory()
+                    ->has(TagTeamEmployment::factory()->started($start), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($start) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
+                    }),
                 ['joined_at' => $start, 'left_at' => $end]
             )
             ->afterCreating(function (Stable $stable) {
@@ -121,7 +137,15 @@ class StableFactory extends Factory
             ->hasAttached(
                 TagTeam::factory()
                     ->has(TagTeamEmployment::factory()->started($start)->ended($end), 'employments')
-                    ->has(TagTeamRetirement::factory()->started($end), 'retirements'),
+                    ->has(TagTeamRetirement::factory()->started($end), 'retirements')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($start, $end) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers for validation
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
+                            ->has(WrestlerRetirement::factory()->started($end), 'retirements')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
+                    }),
                 ['joined_at' => $start]
             )
             ->afterCreating(function (Stable $stable) {
@@ -152,7 +176,14 @@ class StableFactory extends Factory
             )
             ->hasAttached(
                 TagTeam::factory()
-                    ->has(TagTeamEmployment::factory()->started(Carbon::yesterday()), 'employments'),
+                    ->has(TagTeamEmployment::factory()->started(Carbon::yesterday()), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => Carbon::yesterday()]);
+                    }),
                 ['joined_at' => now()]
             )
             ->afterCreating(function (Stable $stable) {

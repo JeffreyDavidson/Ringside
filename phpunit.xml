@@ -26,6 +26,9 @@
     <testsuite name="Browser">
       <directory suffix="Test.php">./tests/Browser</directory>
     </testsuite>
+    <testsuite name="Integration">
+      <directory suffix="Test.php">./tests/Integration</directory>
+    </testsuite>
   </testsuites>
   <php>
     <env name="APP_ENV" value="testing"/>
