@@ -13,6 +13,14 @@ use App\Models\Managers\Manager;
  */
 class FormModal extends BaseFormModal
 {
+    public function mount(mixed $modelId = null): void
+    {
+        parent::mount($modelId);
+        
+        // Override title field to use display_name for managers
+        $this->modelTitleField = 'display_name';
+        $this->titleField = 'display_name';
+    }
 
     protected function getFormClass(): string
     {
