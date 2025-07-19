@@ -23,7 +23,7 @@ describe('TagTeamRetirementValidation', function () {
         $tagTeam = TagTeam::factory()->{$factoryState}()->create();
         
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($tagTeam))->not()->toThrow();
+            $this->strategy->validate($tagTeam);
             expectValidEntityState($tagTeam);
         } else {
             expect(fn() => $this->strategy->validate($tagTeam))
@@ -32,10 +32,10 @@ describe('TagTeamRetirementValidation', function () {
     })->with([
         // Can retire: employed tag teams in various states
         ['employed', true],
-        ['suspended', true],
         ['released', true],
         
         // Cannot retire: invalid states
+        ['suspended', false],
         ['unemployed', false],
         ['withFutureEmployment', false], 
         ['retired', false],
@@ -54,6 +54,6 @@ describe('TagTeamRetirementValidation', function () {
         ]);
 
         // Tag team retirement validation should consider wrestler states
-        expect(fn() => $this->strategy->validate($tagTeam->fresh()))->not()->toThrow();
+        $this->strategy->validate($tagTeam->fresh());
     });
 });

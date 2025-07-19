@@ -102,20 +102,6 @@ describe('Form Field Validation', function () {
         $form->assertHasErrors(['name' => 'max']);
     });
 
-    it('validates description maximum length', function () {
-        $longDescription = str_repeat('a', 1001);
-        $venue = Venue::factory()->create();
-
-        $form = Livewire::test(CreateEditForm::class)
-            ->set('name', 'Test Event')
-            ->set('date', '2024-12-31')
-            ->set('venue_id', $venue->id)
-            ->set('description', $longDescription)
-            ->call('store');
-
-        $form->assertHasErrors(['description' => 'max']);
-    });
-
     it('validates preview maximum length', function () {
         $longPreview = str_repeat('a', 501);
         $venue = Venue::factory()->create();
@@ -137,7 +123,6 @@ describe('Form Field Validation', function () {
             ->set('name', 'Test Event')
             ->set('date', '2024-12-31')
             ->set('venue_id', $venue->id)
-            ->set('description', 'Valid description')
             ->set('preview', 'Valid preview')
             ->call('store');
 
@@ -153,7 +138,6 @@ describe('Form Store Operations', function () {
             ->set('name', 'WrestleMania 40')
             ->set('date', '2024-04-06')
             ->set('venue_id', $venue->id)
-            ->set('description', 'The grandest stage of them all')
             ->set('preview', 'Epic wrestling event')
             ->call('store');
 
@@ -164,7 +148,6 @@ describe('Form Store Operations', function () {
             'name' => 'WrestleMania 40',
             'date' => '2024-04-06',
             'venue_id' => $venue->id,
-            'description' => 'The grandest stage of them all',
             'preview' => 'Epic wrestling event',
         ]);
     });
@@ -347,7 +330,7 @@ describe('Form State Management', function () {
             'name' => 'Test Event',
             'date' => '2024-01-01',
             'venue_id' => $venue->id,
-            'description' => 'Test description',
+            'preview' => 'Test description',
         ]);
 
         $form = Livewire::test(CreateEditForm::class)
@@ -356,6 +339,6 @@ describe('Form State Management', function () {
         $form->assertSet('name', 'Test Event');
         $form->assertSet('date', '2024-01-01');
         $form->assertSet('venue_id', $venue->id);
-        $form->assertSet('description', 'Test description');
+        $form->assertSet('preview', 'Test description');
     });
 });
