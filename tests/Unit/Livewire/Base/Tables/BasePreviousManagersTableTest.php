@@ -22,24 +22,24 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 describe('BasePreviousManagersTable Unit Tests', function () {
     describe('class structure and inheritance', function () {
         test('extends DataTableComponent', function () {
-            expect(BasePreviousMain::class)->toExtend(DataTableComponent::class);
+            expect(BasePreviousManagersTable::class)->toExtend(DataTableComponent::class);
         });
 
         test('is abstract class', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
             expect($reflection->isAbstract())->toBeTrue();
         });
     });
 
     describe('trait integration', function () {
         test('uses ShowTableTrait', function () {
-            expect(BasePreviousMain::class)->usesTrait(ShowTableTrait::class);
+            expect(BasePreviousManagersTable::class)->usesTrait(ShowTableTrait::class);
         });
     });
 
     describe('property structure', function () {
         test('has resourceName property with correct value', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
 
             expect($reflection->hasProperty('resourceName'))->toBeTrue();
 
@@ -50,7 +50,7 @@ describe('BasePreviousManagersTable Unit Tests', function () {
         });
 
         test('has databaseTableName property', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
 
             expect($reflection->hasProperty('databaseTableName'))->toBeTrue();
 
@@ -61,7 +61,7 @@ describe('BasePreviousManagersTable Unit Tests', function () {
 
     describe('method existence', function () {
         test('has configure method', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
 
             expect($reflection->hasMethod('configure'))->toBeTrue();
 
@@ -71,7 +71,7 @@ describe('BasePreviousManagersTable Unit Tests', function () {
         });
 
         test('has columns method', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
 
             expect($reflection->hasMethod('columns'))->toBeTrue();
 
@@ -83,19 +83,19 @@ describe('BasePreviousManagersTable Unit Tests', function () {
 
     describe('namespace and naming', function () {
         test('uses correct namespace', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
             expect($reflection->getNamespaceName())->toBe('App\\Livewire\\Base\\Tables');
         });
 
         test('follows base class naming convention', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
             expect($reflection->getShortName())->toBe('BasePreviousManagersTable');
         });
     });
 
     describe('template method pattern', function () {
         test('follows template method pattern', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
 
             // Should be abstract (template)
             expect($reflection->isAbstract())->toBeTrue();
@@ -108,7 +108,7 @@ describe('BasePreviousManagersTable Unit Tests', function () {
 
     describe('resource configuration', function () {
         test('configured for managers resource', function () {
-            $reflection = new ReflectionClass(BasePreviousMain::class);
+            $reflection = new ReflectionClass(BasePreviousManagersTable::class);
             $property = $reflection->getProperty('resourceName');
 
             expect($property->getDefaultValue())->toBe('managers');
