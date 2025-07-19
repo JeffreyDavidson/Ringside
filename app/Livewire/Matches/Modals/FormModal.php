@@ -85,7 +85,7 @@ class FormModal extends BaseFormModal
      */
     protected function getModalPath(): string
     {
-        return 'event-matches.modals.form-modal';
+        return 'livewire.matches.modals.form-modal';
     }
 
     /**
