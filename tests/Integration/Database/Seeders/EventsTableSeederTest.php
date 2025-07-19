@@ -24,7 +24,7 @@ describe('EventsTableSeeder Integration Tests', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']))
-                ->not->toThrow(Exception::class);
+                ->not()->toThrow(Exception::class);
         });
 
         test('creates events in database', function () {
@@ -76,7 +76,7 @@ describe('EventsTableSeeder Integration Tests', function () {
             foreach ($events as $event) {
                 expect($event->date)->toBeInstanceOf(Illuminate\Support\Carbon::class);
                 // Events should be in the past or future (not null)
-                expect($event->date)->not->toBeNull();
+                expect($event->date)->not()->toBeNull();
             }
         });
     });
@@ -106,7 +106,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert
             if ($event) {
-                expect($event->venue)->not->toBeNull();
+                expect($event->venue)->not()->toBeNull();
                 expect($event->venue->name)->toBeString();
             } else {
                 // If no events have venues, that's also valid (all future events)

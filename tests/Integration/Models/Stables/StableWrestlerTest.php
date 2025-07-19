@@ -54,7 +54,7 @@ describe('StableWrestler Pivot Model', function () {
 
             // Verify the relationship exists
             expect($this->wrestler->stables()->count())->toBe(1);
-            expect($this->wrestler->currentStable)->not->toBeNull();
+            expect($this->wrestler->currentStable)->not()->toBeNull();
             expect($this->wrestler->previousStables()->count())->toBe(0);
 
             // Verify pivot data is correct
@@ -118,7 +118,7 @@ describe('StableWrestler Pivot Model', function () {
 
             // Verify relationship counts
             expect($this->wrestler->stables()->count())->toBe(2);
-            expect($this->wrestler->currentStable)->not->toBeNull();
+            expect($this->wrestler->currentStable)->not()->toBeNull();
             expect($this->wrestler->previousStables()->count())->toBe(1);
 
             // Verify current stable is correct
@@ -191,7 +191,7 @@ describe('StableWrestler Pivot Model', function () {
                 ->where('stable_id', $this->stable->id)
                 ->first();
 
-            expect($pivotRecord)->not->toBeNull();
+            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->stable_id)->toBe($this->stable->id);
             expect($pivotRecord->joined_at)->toBeInstanceOf(Carbon::class);
@@ -245,7 +245,7 @@ describe('StableWrestler Pivot Model', function () {
         test('current stable query returns only active relationship', function () {
             $currentStable = $this->wrestler->currentStable;
 
-            expect($currentStable)->not->toBeNull();
+            expect($currentStable)->not()->toBeNull();
             expect($currentStable->id)->toBe($this->secondStable->id);
             expect($currentStable->pivot->left_at)->toBeNull();
         });
@@ -255,7 +255,7 @@ describe('StableWrestler Pivot Model', function () {
 
             expect($previousStables)->toHaveCount(1);
             expect($previousStables->first()->id)->toBe($this->stable->id);
-            expect($previousStables->first()->pivot->left_at)->not->toBeNull();
+            expect($previousStables->first()->pivot->left_at)->not()->toBeNull();
         });
 
         test('all stables query returns complete membership history', function () {

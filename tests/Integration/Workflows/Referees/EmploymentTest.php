@@ -86,8 +86,8 @@ describe('Referee Employment Workflows', function () {
             // Verify all state changes are consistent
             expect($suspended->isEmployed())->toBeTrue(); // Still employed
             expect($suspended->isSuspended())->toBeTrue(); // But suspended
-            expect($suspended->currentEmployment)->not->toBeNull();
-            expect($suspended->currentSuspension)->not->toBeNull();
+            expect($suspended->currentEmployment)->not()->toBeNull();
+            expect($suspended->currentSuspension)->not()->toBeNull();
         });
 
         test('action rollback maintains data consistency on failure', function () {
@@ -102,7 +102,7 @@ describe('Referee Employment Workflows', function () {
             // Verify all state is consistent - no orphaned records
             if ($refreshedReferee->isEmployed()) {
                 expect($refreshedReferee->status)->toBe(EmploymentStatus::Employed);
-                expect($refreshedReferee->currentEmployment)->not->toBeNull();
+                expect($refreshedReferee->currentEmployment)->not()->toBeNull();
             }
         });
     });

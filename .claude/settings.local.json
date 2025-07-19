@@ -27,7 +27,9 @@
       "Bash(for file in tests/Integration/Livewire/*/Modals/FormModalTest.php)",
       "Bash(do)",
       "Bash(done)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(php:*)",
+      "Bash(rg:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

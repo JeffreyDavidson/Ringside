@@ -80,4 +80,10 @@ class ManagerFactory extends Factory
         return $this->has(ManagerEmployment::factory()->started($start), 'employments')
             ->has(ManagerInjury::factory()->started($now), 'injuries');
     }
+
+    public function available(): static
+    {
+        // Available means employed and not injured/suspended/retired
+        return $this->employed();
+    }
 }

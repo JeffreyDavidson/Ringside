@@ -25,7 +25,7 @@ describe('IndividualRetirementValidation', function () {
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
         
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($wrestler))->not->toThrow();
+            $this->strategy->validate($wrestler);
             expectValidEntityState($wrestler);
         } else {
             expect(fn() => $this->strategy->validate($wrestler))
@@ -45,36 +45,55 @@ describe('IndividualRetirementValidation', function () {
     ]);
 
     describe('edge cases', function () {
-        test('handles entities without required methods', function ($missingMethod) {
-            $mockEntity = new class($missingMethod) extends Model {
-                public function __construct(private string $skip = '') {}
-                
+        test('handles entities without hasFutureEmployment method', function () {
+            $mockEntity = new class extends Model {
                 public function hasStatus(EmploymentStatus $status): bool {
-                    return $this->skip === 'hasStatus' ? null : false;
+                    return false;
                 }
                 
                 public function isRetired(): bool {
-                    return $this->skip === 'isRetired' ? null : false;  
+                    return false;  
+                }
+                
+                // Note: hasFutureEmployment method intentionally missing
+            };
+
+            // Should handle missing hasFutureEmployment method gracefully
+            $this->strategy->validate($mockEntity);
+        });
+
+        test('handles entities without isRetired method', function () {
+            $mockEntity = new class extends Model {
+                public function hasStatus(EmploymentStatus $status): bool {
+                    return false;
                 }
                 
                 public function hasFutureEmployment(): bool {
-                    return $this->skip === 'hasFutureEmployment' ? null : false;
+                    return false;
                 }
                 
-                public function __call($method, $args) {
-                    if ($method === $this->skip) {
-                        throw new BadMethodCallException("Method {$method} does not exist");
-                    }
-                    return parent::__call($method, $args);
-                }
+                // Note: isRetired method intentionally missing
             };
 
-            // Should handle missing methods gracefully
-            expect(fn() => $this->strategy->validate($mockEntity))->not->toThrow();
-        })->with([
-            'hasFutureEmployment',
-            'isRetired', 
-            'hasStatus',
-        ]);
+            // Should handle missing isRetired method gracefully
+            $this->strategy->validate($mockEntity);
+        });
+
+        test('handles entities without hasStatus method', function () {
+            $mockEntity = new class extends Model {
+                public function isRetired(): bool {
+                    return false;  
+                }
+                
+                public function hasFutureEmployment(): bool {
+                    return false;
+                }
+                
+                // Note: hasStatus method intentionally missing
+            };
+
+            // Should handle missing hasStatus method gracefully
+            $this->strategy->validate($mockEntity);
+        });
     });
 });

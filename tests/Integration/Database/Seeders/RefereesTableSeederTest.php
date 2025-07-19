@@ -24,7 +24,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'RefereesTableSeeder']))
-                ->not->toThrow(Exception::class);
+                ->not()->toThrow(Exception::class);
         });
 
         test('creates referees in database', function () {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
+use App\Livewire\Users\Tables\Main;
 use App\Livewire\Users\Tables\UsersTable;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;

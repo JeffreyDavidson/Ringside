@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Venues\Tables\Main;
 use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
@@ -207,7 +208,7 @@ describe('VenuesTable Integration Tests', function () {
                 ->assertHasNoErrors();
 
             expect(Venue::find($this->activeVenue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($this->activeVenue->id))->not->toBeNull();
+            expect(Venue::onlyTrashed()->find($this->activeVenue->id))->not()->toBeNull();
         });
 
         test('administrators can restore deleted venues', function () {
@@ -216,7 +217,7 @@ describe('VenuesTable Integration Tests', function () {
             $component->call('restore', $this->deletedVenue->id)
                 ->assertHasNoErrors();
 
-            expect(Venue::find($this->deletedVenue->id))->not->toBeNull();
+            expect(Venue::find($this->deletedVenue->id))->not()->toBeNull();
         });
 
         test('delete operation preserves event relationships', function () {

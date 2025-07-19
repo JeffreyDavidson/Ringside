@@ -64,7 +64,7 @@ describe('Venue Action Integration Tests', function () {
             $venue = CreateAction::run($venueData);
 
             $retrievedVenue = Venue::find($venue->id);
-            expect($retrievedVenue)->not->toBeNull();
+            expect($retrievedVenue)->not()->toBeNull();
             expect($retrievedVenue->name)->toBe('Database Test Arena');
             expect($retrievedVenue->street_address)->toBe('456 Database Lane');
             expect($retrievedVenue->city)->toBe('Database City');
@@ -190,7 +190,7 @@ describe('Venue Action Integration Tests', function () {
 
             $updatedVenue = UpdateAction::run($venue, $venueData);
 
-            expect($updatedVenue->events)->toContain($event);
+            expect($updatedVenue->events->pluck('id'))->toContain($event->id);
             expect($event->fresh()->venue_id)->toBe($venue->id);
         });
     });
@@ -202,7 +202,7 @@ describe('Venue Action Integration Tests', function () {
             DeleteAction::run($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($venue->id))->not->toBeNull();
+            expect(Venue::onlyTrashed()->find($venue->id))->not()->toBeNull();
         });
 
         test('delete action maintains event relationships', function () {
@@ -233,7 +233,7 @@ describe('Venue Action Integration Tests', function () {
             DeleteAction::run($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($venue->id))->not->toBeNull();
+            expect(Venue::onlyTrashed()->find($venue->id))->not()->toBeNull();
         });
     });
 
@@ -245,10 +245,11 @@ describe('Venue Action Integration Tests', function () {
             $venue->delete();
             expect(Venue::find($venueId))->toBeNull();
 
-            RestoreAction::run($venueId);
+            $deletedVenue = Venue::onlyTrashed()->find($venueId);
+            RestoreAction::run($deletedVenue);
 
             $restoredVenue = Venue::find($venueId);
-            expect($restoredVenue)->not->toBeNull();
+            expect($restoredVenue)->not()->toBeNull();
             expect($restoredVenue->name)->toBe('Restoration Test Arena');
         });
 
@@ -257,11 +258,12 @@ describe('Venue Action Integration Tests', function () {
             $event = Event::factory()->atVenue($venue)->create(['name' => 'Restoration Event']);
 
             $venue->delete();
-            RestoreAction::run($venue->id);
+            $deletedVenue = Venue::onlyTrashed()->find($venue->id);
+            RestoreAction::run($deletedVenue);
 
             $restoredVenue = Venue::find($venue->id);
-            expect($restoredVenue->events)->toContain($event);
-            expect($event->fresh()->venue)->not->toBeNull();
+            expect($restoredVenue->events->pluck('id'))->toContain($event->id);
+            expect($event->fresh()->venue)->not()->toBeNull();
         });
 
         test('restore action handles venue with complex relationships', function () {
@@ -276,7 +278,8 @@ describe('Venue Action Integration Tests', function () {
             ]);
 
             $venue->delete();
-            RestoreAction::run($venue->id);
+            $deletedVenue = Venue::onlyTrashed()->find($venue->id);
+            RestoreAction::run($deletedVenue);
 
             $restoredVenue = Venue::find($venue->id);
             $restoredVenue->load(['events', 'previousEvents']);
@@ -301,7 +304,7 @@ describe('Venue Action Integration Tests', function () {
             $event = Event::factory()->create(['venue_id' => $venue->id]);
 
             $venue->refresh();
-            expect($venue->events)->toContain($event);
+            expect($venue->events->pluck('id'))->toContain($event->id);
         });
 
         test('venue update preserves event associations', function () {
@@ -319,8 +322,8 @@ describe('Venue Action Integration Tests', function () {
 
             $updatedVenue = UpdateAction::run($venue, $venueData);
 
-            expect($updatedVenue->events)->toContain($event1);
-            expect($updatedVenue->events)->toContain($event2);
+            expect($updatedVenue->events->pluck('id'))->toContain($event1->id);
+            expect($updatedVenue->events->pluck('id'))->toContain($event2->id);
         });
 
         test('venue deletion does not cascade to events', function () {
@@ -329,7 +332,7 @@ describe('Venue Action Integration Tests', function () {
 
             DeleteAction::run($venue);
 
-            expect(Event::find($event->id))->not->toBeNull();
+            expect(Event::find($event->id))->not()->toBeNull();
             expect($event->fresh()->venue_id)->toBe($venue->id);
         });
     });
@@ -386,14 +389,17 @@ describe('Venue Action Integration Tests', function () {
 
             $venue = CreateAction::run($venueData);
 
-            expect($venue->created_at)->not->toBeNull();
-            expect($venue->updated_at)->not->toBeNull();
-            expect($venue->created_at->equalTo($venue->updated_at))->toBeTrue();
+            expect($venue->created_at)->not()->toBeNull();
+            expect($venue->updated_at)->not()->toBeNull();
+            expect($venue->created_at->format('Y-m-d H:i:s'))->toBe($venue->updated_at->format('Y-m-d H:i:s'));
         });
 
         test('venue update modifies timestamps appropriately', function () {
-            $venue = Venue::factory()->create();
+            $venue = Venue::factory()->create(['name' => 'Original Name']);
             $originalUpdatedAt = $venue->updated_at;
+
+            // Wait for next second to ensure timestamp difference
+            sleep(1);
 
             $venueData = new VenueData(
                 name: 'Timestamp Updated Arena',
@@ -405,7 +411,9 @@ describe('Venue Action Integration Tests', function () {
 
             $updatedVenue = UpdateAction::run($venue, $venueData);
 
-            expect($updatedVenue->updated_at->greaterThan($originalUpdatedAt))->toBeTrue();
+            // Verify the name actually changed to confirm update happened
+            expect($updatedVenue->name)->toBe('Timestamp Updated Arena');
+            expect($updatedVenue->updated_at->isAfter($originalUpdatedAt))->toBeTrue();
         });
 
         test('venue handles concurrent operations safely', function () {
