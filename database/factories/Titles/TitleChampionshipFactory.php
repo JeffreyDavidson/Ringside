@@ -75,4 +75,14 @@ class TitleChampionshipFactory extends Factory
             'lost_at' => $lostEventMatch->event->date,
         ]);
     }
+
+    /**
+     * Indicate that this is a current championship (not lost yet).
+     */
+    public function current(): static
+    {
+        return $this->state([
+            'lost_at' => null,
+        ]);
+    }
 }
