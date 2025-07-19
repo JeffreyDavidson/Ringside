@@ -6,7 +6,6 @@ namespace App\Livewire\Events\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
-use Livewire\Component;
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Database\Eloquent\Model;
@@ -44,16 +43,10 @@ use Illuminate\Validation\Rule;
  * @property int $venue_id Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
-class CreateEditForm extends Component
+class CreateEditForm extends BaseForm
 {
     use PresentsVenuesList;
 
-    /**
-     * The model instance being edited, or null for new event creation.
-     *
-     * @var Event|null Current event model or null for creation
-     */
-    protected ?Model $formModel = null;
 
     /**
      * Event name for promotional and administrative purposes.
@@ -91,7 +84,7 @@ class CreateEditForm extends Component
      *
      * @see getVenues() For venue selection list generation
      */
-    public int $venue_id = 0;
+    public ?int $venue_id = 0;
 
     /**
      * Promotional preview content for marketing purposes.

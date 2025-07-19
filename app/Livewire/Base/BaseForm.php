@@ -110,7 +110,7 @@ abstract class BaseForm extends Form
      *
      * @var TFormModel The model instance or null for new records
      */
-    protected ?Model $formModel;
+    protected ?Model $formModel = null;
 
     /**
      * The ID of the model being edited, or null for new records.
