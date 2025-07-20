@@ -11,7 +11,7 @@ use Livewire\Livewire;
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
-    
+
     // Create states table for testing - Sushi models need manual table creation in tests
     // to work with Laravel's validation rules like Rule::exists()
     \Schema::dropIfExists('states');
@@ -21,7 +21,7 @@ beforeEach(function () {
         $table->string('code');
         $table->timestamps();
     });
-    
+
     // Populate with all states from the Sushi model data
     collect((new State())->rows)->each(function ($stateData) {
         \DB::table('states')->insert(array_merge($stateData, [
@@ -29,21 +29,21 @@ beforeEach(function () {
             'updated_at' => now(),
         ]));
     });
-    
+
     $this->state = \DB::table('states')->where('name', 'California')->first();
 });
 
 describe('Form Modal Initialization', function () {
     it('can mount modal component', function () {
         $modal = Livewire::test(FormModal::class);
-        
+
         $modal->assertOk();
         $modal->assertViewIs('livewire.venues.modals.form-modal');
     });
 
     it('initializes with empty form for creation', function () {
         $modal = Livewire::test(FormModal::class);
-        
+
         $modal->assertSet('form.name', '');
         $modal->assertSet('form.street_address', '');
         $modal->assertSet('form.city', '');
@@ -54,7 +54,7 @@ describe('Form Modal Initialization', function () {
     it('can open modal for creating new venue', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal');
-        
+
         $modal->assertSet('isModalOpen', true);
         $modal->assertSet('form.name', '');
     });
@@ -63,7 +63,7 @@ describe('Form Modal Initialization', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
             ->call('closeModal');
-        
+
         $modal->assertSet('isOpen', false);
     });
 });
@@ -354,7 +354,7 @@ describe('Form Modal Dummy Data', function () {
     it('can submit form with dummy data', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
-            ->call('fillWithDummyData')
+            ->call('fillDummyFields')
             ->call('save');
 
         $modal->assertHasNoErrors();
