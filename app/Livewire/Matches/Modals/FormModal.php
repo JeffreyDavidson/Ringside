@@ -235,4 +235,17 @@ class FormModal extends BaseFormModal
                fake()->randomElement($matchElements).'. '.
                fake()->randomElement($callsToAction);
     }
+
+    public function getModalTitle(): string
+    {
+        if (isset($this->model)) {
+            return 'Edit Match';
+        }
+        return 'Create Match';
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view($this->modalFormPath ?? 'livewire.matches.modals.form-modal');
+    }
 }
