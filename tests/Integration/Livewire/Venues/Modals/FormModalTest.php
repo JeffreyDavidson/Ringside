@@ -12,7 +12,25 @@ beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
     
-    $this->state = State::where('name', 'California')->first();
+    // Create states table for testing - Sushi models need manual table creation in tests
+    // to work with Laravel's validation rules like Rule::exists()
+    \Schema::dropIfExists('states');
+    \Schema::create('states', function ($table) {
+        $table->id();
+        $table->string('name');
+        $table->string('code');
+        $table->timestamps();
+    });
+    
+    // Populate with all states from the Sushi model data
+    collect((new State())->rows)->each(function ($stateData) {
+        \DB::table('states')->insert(array_merge($stateData, [
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]));
+    });
+    
+    $this->state = \DB::table('states')->where('name', 'California')->first();
 });
 
 describe('Form Modal Initialization', function () {

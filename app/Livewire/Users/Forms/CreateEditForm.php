@@ -39,15 +39,18 @@ class CreateEditForm extends BaseForm
 {
 
     /**
-     * User's full name for identification and display purposes.
+     * User's first name for identification and display purposes.
      *
-     * Used throughout the system for user identification, display in
-     * interfaces, and communication purposes. Should be the user's
-     * real name for administrative and operational clarity.
-     *
-     * @var string User's full name for identification
+     * @var string User's first name
      */
-    public string $name = '';
+    public string $first_name = '';
+
+    /**
+     * User's last name for identification and display purposes.
+     *
+     * @var string User's last name
+     */
+    public string $last_name = '';
 
     /**
      * User's email address for authentication and communication.
@@ -81,6 +84,13 @@ class CreateEditForm extends BaseForm
      * @var string Password confirmation for validation
      */
     public string $password_confirmation = '';
+
+    /**
+     * User's role for authorization and access control.
+     *
+     * @var string User's role
+     */
+    public string $role = 'basic';
 
     /**
      * Load additional data when editing existing user records.
@@ -119,8 +129,10 @@ class CreateEditForm extends BaseForm
     protected function getModelData(): array
     {
         $data = [
-            'name' => $this->name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
             'email' => $this->email,
+            'role' => $this->role,
         ];
 
         // Only include password if provided (allows profile updates without password change)
@@ -164,13 +176,15 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->modelId),
             ],
+            'role' => ['required', 'string', 'in:administrator,basic'],
         ];
 
         // Password rules - required for creation, optional for updates

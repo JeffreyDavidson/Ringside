@@ -35,6 +35,9 @@ class FormModal extends BaseFormModal
             'first_name' => fn() => fake()->firstName(),
             'last_name' => fn() => fake()->lastName(),
             'email' => fn() => fake()->unique()->safeEmail(),
+            'password' => fn() => 'password123',
+            'password_confirmation' => fn() => 'password123',
+            'role' => fn() => 'basic',
         ];
     }
 }
