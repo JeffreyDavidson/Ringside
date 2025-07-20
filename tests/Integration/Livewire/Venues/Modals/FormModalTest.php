@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
-use App\Models\Geo\State;
+use App\Models\Shared\State;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
@@ -12,7 +12,7 @@ beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
     
-    $this->state = State::factory()->create(['name' => 'California']);
+    $this->state = State::where('name', 'California')->first();
 });
 
 describe('Form Modal Initialization', function () {
