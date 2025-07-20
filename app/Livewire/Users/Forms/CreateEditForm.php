@@ -37,12 +37,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new user creation.
-     *
-     * @var User|null Current user model or null for creation
-     */
-    protected ?Model $formModel = null;
 
     /**
      * User's full name for identification and display purposes.
