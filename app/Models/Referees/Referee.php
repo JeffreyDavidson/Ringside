@@ -175,6 +175,18 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     }
 
     /**
+     * Get the referee's full name.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): string => mb_trim("{$this->first_name} {$this->last_name}")
+        );
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
