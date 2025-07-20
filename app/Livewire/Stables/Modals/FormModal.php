@@ -45,6 +45,15 @@ class FormModal extends BaseFormModal
         ];
     }
 
+    public function getModalTitle(): string
+    {
+        if (isset($this->model)) {
+            return 'Edit Stable';
+        }
+
+        return 'Create Stable';
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view($this->modalFormPath ?? 'livewire.stables.modals.form-modal');

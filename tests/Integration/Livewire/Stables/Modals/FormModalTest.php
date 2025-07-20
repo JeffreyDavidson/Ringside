@@ -107,7 +107,7 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        $component->assertDispatched('stableCreated');
+        $component->assertDispatched('form-submitted');
 
         $this->assertDatabaseHas('stables', [
             'name' => 'The New World Order',
@@ -170,7 +170,7 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        $component->assertDispatched('stableCreated');
+        $component->assertDispatched('form-submitted');
 
         $this->assertDatabaseHas('stables', [
             'name' => 'Test Stable',
