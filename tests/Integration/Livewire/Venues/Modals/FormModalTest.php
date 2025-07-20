@@ -342,7 +342,7 @@ describe('Form Modal Dummy Data', function () {
     it('can fill form with dummy data', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
-            ->call('fillWithDummyData');
+            ->call('fillDummyFields');
 
         $modal->assertSet('form.name', fn($value) => str_contains($value, 'Arena'));
         $modal->assertSet('form.street_address', fn($value) => !empty($value));
