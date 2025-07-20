@@ -46,9 +46,12 @@ class Main extends BaseTable
         return [
             Column::make(__('venues.name'), 'name')
                 ->searchable(),
-            Column::make(__('venues.street_address'), 'street_address'),
-            Column::make(__('venues.city'), 'city'),
-            Column::make(__('venues.state'), 'state'),
+            Column::make(__('venues.street_address'), 'street_address')
+                ->searchable(),
+            Column::make(__('venues.city'), 'city')
+                ->searchable(),
+            Column::make(__('venues.state'), 'state')
+                ->searchable(),
             Column::make(__('venues.zipcode'), 'zipcode'),
         ];
     }

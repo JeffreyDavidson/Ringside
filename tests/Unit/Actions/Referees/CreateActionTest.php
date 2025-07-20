@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\CreateAction;
-use App\Data\RefereeData;
+use App\Data\Referees\RefereeData;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 

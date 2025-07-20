@@ -227,11 +227,18 @@ describe('PreviousEventsTable Integration Tests', function () {
 
         test('has required properties from ShowTableTrait', function () {
             $table = new PreviousEvents();
+            $reflection = new ReflectionClass($table);
 
             expect(property_exists($table, 'databaseTableName'))->toBeTrue();
             expect(property_exists($table, 'resourceName'))->toBeTrue();
-            expect($table->databaseTableName)->toBe('events');
-            expect($table->resourceName)->toBe('events');
+            
+            $databaseTableNameProperty = $reflection->getProperty('databaseTableName');
+            $databaseTableNameProperty->setAccessible(true);
+            expect($databaseTableNameProperty->getValue($table))->toBe('events');
+            
+            $resourceNameProperty = $reflection->getProperty('resourceName');
+            $resourceNameProperty->setAccessible(true);
+            expect($resourceNameProperty->getValue($table))->toBe('events');
         });
     });
 

@@ -85,7 +85,7 @@ class FormModal extends BaseFormModal
      */
     protected function getModalPath(): string
     {
-        return 'event-matches.modals.form-modal';
+        return 'livewire.matches.modals.form-modal';
     }
 
     /**
@@ -234,5 +234,18 @@ class FormModal extends BaseFormModal
         return fake()->randomElement($matchIntros).' '.
                fake()->randomElement($matchElements).'. '.
                fake()->randomElement($callsToAction);
+    }
+
+    public function getModalTitle(): string
+    {
+        if (isset($this->model)) {
+            return 'Edit Match';
+        }
+        return 'Create Match';
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view($this->modalFormPath ?? 'livewire.matches.modals.form-modal');
     }
 }

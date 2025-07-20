@@ -16,7 +16,7 @@ namespace Tests\Unit\Models\Concerns;
 use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableMember;
+use App\Models\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -29,7 +29,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             expect($model->stables())->toBeInstanceOf(BelongsToMany::class);
@@ -42,7 +42,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             expect($model->currentStable())->toBeInstanceOf(BelongsToOne::class);
@@ -55,7 +55,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             expect($model->previousStables())->toBeInstanceOf(BelongsToMany::class);
@@ -68,7 +68,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $relation = $model->stables();
@@ -83,7 +83,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $relation = $model->currentStable();
@@ -98,7 +98,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $relation = $model->previousStables();
@@ -118,7 +118,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
                     return $this->resolveStablePivotModel();
                 }
             };
-            expect($model->testResolveStablePivotModel())->toBe(StableMember::class);
+            expect($model->testResolveStablePivotModel())->toBe(StableWrestler::class);
         });
 
         test('can override stable pivot model class', function () {
@@ -169,7 +169,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $relation = $model->stables();
@@ -185,7 +185,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $relation = $model->currentStable();
@@ -201,7 +201,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $relation = $model->previousStables();
@@ -217,7 +217,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
 
                 public function resolveStablePivotModel(): string
                 {
-                    return StableMember::class;
+                    return StableWrestler::class;
                 }
             };
             $stablesRelation = $model->stables();

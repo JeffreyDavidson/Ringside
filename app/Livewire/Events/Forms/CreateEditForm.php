@@ -6,7 +6,6 @@ namespace App\Livewire\Events\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
-use Livewire\Component;
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Database\Eloquent\Model;
@@ -40,20 +39,14 @@ use Illuminate\Validation\Rule;
  * @see DateCanBeChanged For custom date validation rules
  *
  * @property string $name Event name for promotional purposes
- * @property Carbon|string|null $date Scheduled event date
+ * @property string|null $date Scheduled event date (string to prevent auto-casting)
  * @property int $venue_id Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
-class CreateEditForm extends Component
+class CreateEditForm extends BaseForm
 {
     use PresentsVenuesList;
 
-    /**
-     * The model instance being edited, or null for new event creation.
-     *
-     * @var Event|null Current event model or null for creation
-     */
-    protected ?Model $formModel = null;
 
     /**
      * Event name for promotional and administrative purposes.
@@ -73,9 +66,9 @@ class CreateEditForm extends Component
      * Validated against business rules to ensure proper event scheduling
      * and avoid conflicts with existing events or venue availability.
      *
-     * @var Carbon|string|null Event date and time
+     * @var string|null Event date and time (string to prevent auto-casting issues)
      */
-    public Carbon|string|null $date = '';
+    public string|null $date = '';
 
     /**
      * Venue identifier for event location assignment.
@@ -91,7 +84,7 @@ class CreateEditForm extends Component
      *
      * @see getVenues() For venue selection list generation
      */
-    public int $venue_id = 0;
+    public ?int $venue_id = 0;
 
     /**
      * Promotional preview content for marketing purposes.
@@ -193,9 +186,9 @@ class CreateEditForm extends Component
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->modelId)],
             'date' => ['nullable', 'date', new DateCanBeChanged($this->formModel)],
-            'venue_id' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
+            'venue_id' => ['nullable', 'required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];
     }

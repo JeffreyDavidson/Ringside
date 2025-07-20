@@ -17,9 +17,9 @@ class FormModal extends BaseFormModal
     {
         parent::mount($modelId);
         
-        // Override title field to use display_name for managers
-        $this->modelTitleField = 'display_name';
-        $this->titleField = 'display_name';
+        // Override title field to use full_name for managers
+        $this->modelTitleField = 'full_name';
+        $this->titleField = 'full_name';
     }
 
     protected function getFormClass(): string

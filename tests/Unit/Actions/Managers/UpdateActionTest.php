@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\UpdateAction;
-use App\Data\ManagerData;
+use App\Data\Managers\ManagerData;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 

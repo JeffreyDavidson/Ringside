@@ -42,7 +42,7 @@ use Illuminate\Validation\Rule;
  * @property int|null $wrestlerA First wrestler ID in the tag team
  * @property int|null $wrestlerB Second wrestler ID in the tag team
  * @property array<int, int> $managers Array of manager IDs assigned to the tag team
- * @property Carbon|string|null $employment_date Employment start date
+ * @property string|null $employment_date Employment start date (string to prevent auto-casting)
  */
 class CreateEditForm extends BaseForm
 {
@@ -111,12 +111,11 @@ class CreateEditForm extends BaseForm
      * Employment start date for contract and career tracking.
      *
      * Managed through ManagesEmployment trait for consistent employment
-     * tracking across all personnel types. Supports Carbon objects or
-     * string dates for flexible input handling.
+     * tracking across all personnel types. String to prevent auto-casting.
      *
-     * @var Carbon|string|null Employment start date
+     * @var string|null Employment start date (string to prevent auto-casting issues)
      */
-    public Carbon|string|null $employment_date = '';
+    public string|null $employment_date = '';
 
     /**
      * Load additional data when editing existing tag team records.
@@ -157,6 +156,32 @@ class CreateEditForm extends BaseForm
 
         // Load current manager assignments
         $this->managers = $this->formModel->currentManagers->pluck('id')->toArray();
+    }
+
+    /**
+     * Store the tag team data with relationship handling.
+     */
+    public function store(): bool
+    {
+        $this->validate();
+        
+        $wasCreating = $this->isCreating();
+        $result = $this->storeModel();
+        
+        if ($result) {
+            if ($wasCreating) {
+                $this->handlePostCreationTasks();
+            } else {
+                // Handle edit mode updates
+                $this->updateWrestlerRelationships();
+                $this->updateManagerRelationships();
+                if ($this->employment_date) {
+                    $this->handleEmploymentCreation();
+                }
+            }
+        }
+        
+        return $result;
     }
 
     /**
@@ -207,7 +232,17 @@ class CreateEditForm extends BaseForm
             return;
         }
 
-        $this->formModel->managers()->sync($this->managers);
+        // Prepare sync data with required hired_at timestamp
+        $syncData = [];
+        foreach ($this->managers as $managerId) {
+            $syncData[$managerId] = [
+                'hired_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        $this->formModel->managers()->sync($syncData);
     }
 
     /**
@@ -228,7 +263,7 @@ class CreateEditForm extends BaseForm
     {
         return [
             'name' => $this->name,
-            'signature_move' => $this->signature_move,
+            'signature_move' => $this->signature_move ?: null,
         ];
         // Note: wrestler relationships and employment data handled separately
     }
@@ -267,8 +302,8 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->formModel)],
-            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->modelId)],
+            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->modelId)],
             'wrestlerA' => ['required', 'integer', 'exists:wrestlers,id'],
             'wrestlerB' => ['required', 'integer', 'exists:wrestlers,id', 'different:wrestlerA'],
             'managers' => ['array'],

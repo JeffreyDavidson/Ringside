@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\CreateAction;
-use App\Data\TitleData;
+use App\Data\Titles\TitleData;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 
