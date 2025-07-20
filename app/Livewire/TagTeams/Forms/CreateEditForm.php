@@ -267,8 +267,8 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->formModel)],
-            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->modelId)],
+            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->modelId)],
             'wrestlerA' => ['required', 'integer', 'exists:wrestlers,id'],
             'wrestlerB' => ['required', 'integer', 'exists:wrestlers,id', 'different:wrestlerA'],
             'managers' => ['array'],

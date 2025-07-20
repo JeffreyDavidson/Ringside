@@ -218,12 +218,12 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->modelId)],
             'hometown' => ['required', 'string', 'max:255'],
             'height_feet' => ['required', 'integer', 'max:7'],
             'height_inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
-            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->formModel)],
+            'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->modelId)],
             'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
         ];
     }

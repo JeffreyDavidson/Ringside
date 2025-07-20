@@ -160,7 +160,7 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('venues', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('venues', 'name')->ignore($this->modelId)],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'state' => ['required', 'string', Rule::exists('states', 'name')],

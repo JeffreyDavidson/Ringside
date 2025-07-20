@@ -169,7 +169,7 @@ class CreateEditForm extends BaseForm
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->ignore($this->formModel),
+                Rule::unique('users', 'email')->ignore($this->modelId),
             ],
         ];
 
