@@ -8,7 +8,6 @@ use App\Builders\Roster\WrestlerBuilder;
 use App\Data\Wrestlers\WrestlerData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
-use App\Models\Stables\StableMember;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
@@ -59,7 +58,7 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
     /** @use ManagesInjury<WrestlerInjury, Wrestler> */
     use ManagesInjury;
 
-    /** @use ManagesMembers<StableMember, Wrestler> */
+    /** @use ManagesMembers<Wrestler, Manager|TagTeam> */
     use ManagesMembers;
 
     /** @use ManagesRetirement<WrestlerRetirement, Wrestler> */

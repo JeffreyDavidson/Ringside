@@ -232,15 +232,25 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('restore operation restores event relationships', function () {
-            $event = Event::factory()->atVenue($this->deletedVenue)->create();
+            // Create event before venue is deleted (venue gets deleted in setUp)
+            $venue = Venue::factory()->create(['name' => 'Test Restore Venue']);
+            $event = Event::factory()->atVenue($venue)->create();
+            
+            // Now delete the venue
+            $venue->delete();
 
             $component = Livewire::actingAs($this->admin)->test(Main::class);
 
-            $component->call('restore', $this->deletedVenue->id)
+            $component->call('restore', $venue->id)
                 ->assertHasNoErrors();
 
-            $restoredVenue = Venue::find($this->deletedVenue->id);
-            expect($restoredVenue->events)->toContain($event);
+            $restoredVenue = Venue::find($venue->id);
+            $event->refresh(); // Refresh the event to get latest venue relationship
+            
+            // Debug the relationship
+            expect($restoredVenue)->not()->toBeNull();
+            expect($event->venue_id)->toBe($restoredVenue->id);
+            expect($restoredVenue->events()->count())->toBeGreaterThan(0);
         });
     });
 

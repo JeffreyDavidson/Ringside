@@ -71,9 +71,9 @@ class CreateEditForm extends BaseForm
      * or tag team competitors (tag-team). This affects championship
      * rules, match types, and who can compete for the title.
      *
-     * @var TitleType|string Title type (singles or tag-team)
+     * @var string|null Title type (string to prevent auto-casting issues)
      */
-    public TitleType|string $type = '';
+    public string|null $type = '';
 
     /**
      * Title activation start date for championship history tracking.
@@ -82,9 +82,9 @@ class CreateEditForm extends BaseForm
      * competition. Managed through ManagesActivityPeriods trait for
      * consistent activation tracking across the title system.
      *
-     * @var Carbon|string|null Title activation start date
+     * @var string|null Title activation start date (string to prevent auto-casting)
      */
-    public Carbon|string|null $start_date = '';
+    public string|null $start_date = '';
 
     /**
      * Load additional data when editing existing title records.
@@ -110,6 +110,23 @@ class CreateEditForm extends BaseForm
 
         // Load activation start date from first activity period relationship
         $this->start_date = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
+    }
+
+    /**
+     * Store the title data with activity period handling.
+     */
+    public function store(): bool
+    {
+        $this->validate();
+        
+        $wasCreating = $this->isCreating();
+        $result = $this->storeModel();
+        
+        if ($result && $wasCreating) {
+            $this->handlePostCreationTasks();
+        }
+        
+        return $result;
     }
 
     /**
@@ -179,7 +196,7 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->modelId)],
             'type' => ['required', Rule::enum(TitleType::class)],
             'start_date' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
         ];

@@ -6,7 +6,7 @@ use App\Actions\Matches\AddCompetitorsToMatchAction;
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\AddRefereesToMatchAction;
 use App\Actions\Matches\AddTitlesToMatchAction;
-use App\Data\EventMatchData;
+use App\Data\Matches\EventMatchData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchType;

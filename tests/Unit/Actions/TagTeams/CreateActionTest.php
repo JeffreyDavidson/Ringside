@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\CreateAction;
-use App\Data\TagTeamData;
+use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;

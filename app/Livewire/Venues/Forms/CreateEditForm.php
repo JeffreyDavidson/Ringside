@@ -98,9 +98,9 @@ class CreateEditForm extends BaseForm
      * identification, and regional analysis. Validated as exactly 5 digits
      * to ensure proper format for shipping and correspondence systems.
      *
-     * @var int|string ZIP code in 5-digit format
+     * @var int|string|null ZIP code in 5-digit format (nullable for form handling)
      */
-    public int|string $zipcode = '';
+    public int|string|null $zipcode = '';
 
     /**
      * Load additional data when editing existing venue records.
@@ -160,7 +160,7 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('venues', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('venues', 'name')->ignore($this->modelId)],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'state' => ['required', 'string', Rule::exists('states', 'name')],
