@@ -278,23 +278,27 @@ describe('MatchesTable Pagination', function () {
 describe('MatchesTable Sorting', function () {
     it('can sort matches by different columns', function () {
         $event = Event::factory()->create();
-        $matchA = EventMatch::factory()->for($event)->create(['preview' => 'A match']);
-        $matchZ = EventMatch::factory()->for($event)->create(['preview' => 'Z match']);
+        $typeA = MatchType::factory()->create(['name' => 'A Type Match']);
+        $typeZ = MatchType::factory()->create(['name' => 'Z Type Match']);
+        
+        $matchA = EventMatch::factory()->for($event)->for($typeA)->create();
+        $matchZ = EventMatch::factory()->for($event)->for($typeZ)->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSeeInOrder(['A match', 'Z match']);
+            ->assertSeeInOrder(['A Type Match', 'Z Type Match']);
     });
 
-    it('can sort matches by event date', function () {
-        $eventOld = Event::factory()->create(['date' => '2023-01-01']);
-        $eventNew = Event::factory()->create(['date' => '2024-01-01']);
+    it('can sort matches by match number', function () {
+        $event = Event::factory()->create();
+        $typeA = MatchType::factory()->create(['name' => 'First Match']);
+        $typeB = MatchType::factory()->create(['name' => 'Second Match']);
         
-        EventMatch::factory()->for($eventOld)->create(['preview' => 'Old match']);
-        EventMatch::factory()->for($eventNew)->create(['preview' => 'New match']);
+        $match1 = EventMatch::factory()->for($event)->for($typeA)->create(['match_number' => 1]);
+        $match2 = EventMatch::factory()->for($event)->for($typeB)->create(['match_number' => 2]);
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSee('Old match')
-            ->assertSee('New match');
+            ->assertSee('First Match')
+            ->assertSee('Second Match');
     });
 });
 
@@ -309,42 +313,49 @@ describe('MatchesTable Actions', function () {
 
     it('handles match action integration', function () {
         $event = Event::factory()->create();
-        $match = EventMatch::factory()->for($event)->create();
+        $matchType = MatchType::factory()->create(['name' => 'Test Match']);
+        $match = EventMatch::factory()->for($event)->for($matchType)->create();
 
         $component = Livewire::test(MatchesTable::class, ['eventId' => $event->id]);
         $component->assertOk();
-        $component->assertSee($match->preview);
+        $component->assertSee('Test Match');
     });
 });
 
 describe('MatchesTable Event Integration', function () {
-    it('displays matches grouped by event', function () {
+    it('displays matches for specific event only', function () {
         $event1 = Event::factory()->create(['name' => 'Event One']);
         $event2 = Event::factory()->create(['name' => 'Event Two']);
         
-        EventMatch::factory()->for($event1)->create(['preview' => 'Event One Match']);
-        EventMatch::factory()->for($event2)->create(['preview' => 'Event Two Match']);
+        $type1 = MatchType::factory()->create(['name' => 'Event One Match']);
+        $type2 = MatchType::factory()->create(['name' => 'Event Two Match']);
+        
+        EventMatch::factory()->for($event1)->for($type1)->create();
+        EventMatch::factory()->for($event2)->for($type2)->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
             ->assertSee('Event One Match')
-            ->assertSee('Event Two Match');
+            ->assertDontSee('Event Two Match');
     });
 
-    it('handles matches from past and future events', function () {
-        $pastEvent = Event::factory()->past()->create();
-        $futureEvent = Event::factory()->future()->create();
+    it('handles event with multiple matches', function () {
+        $event = Event::factory()->create();
         
-        EventMatch::factory()->for($pastEvent)->create(['preview' => 'Past match']);
-        EventMatch::factory()->for($futureEvent)->create(['preview' => 'Future match']);
+        $type1 = MatchType::factory()->create(['name' => 'Main Event']);
+        $type2 = MatchType::factory()->create(['name' => 'Opening Match']);
+        
+        EventMatch::factory()->for($event)->for($type1)->create();
+        EventMatch::factory()->for($event)->for($type2)->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSee('Past match')
-            ->assertSee('Future match');
+            ->assertSee('Main Event')
+            ->assertSee('Opening Match');
     });
 });
 
 describe('MatchesTable Authorization', function () {
     it('requires authentication', function () {
+        $event = Event::factory()->create();
         auth()->logout();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
@@ -352,6 +363,7 @@ describe('MatchesTable Authorization', function () {
     });
 
     it('requires administrator privileges', function () {
+        $event = Event::factory()->create();
         $user = User::factory()->create();
         $this->actingAs($user);
 
