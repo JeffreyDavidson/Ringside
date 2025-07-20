@@ -73,7 +73,7 @@ class CreateEditForm extends BaseForm
      *
      * @var TitleType|string Title type (singles or tag-team)
      */
-    public TitleType|string $type = '';
+    public TitleType|string|null $type = '';
 
     /**
      * Title activation start date for championship history tracking.
