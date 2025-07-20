@@ -164,7 +164,7 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         $rules = [
-            'name' => $this->getRequiredStringRules(),
+            'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'email',
@@ -185,12 +185,11 @@ class CreateEditForm extends BaseForm
     /**
      * Get user-specific validation attributes.
      *
-     * All standard attributes are provided by HasStandardValidationAttributes trait.
-     * This method handles user-specific field naming.
+     * Provides custom field names for validation messages.
      *
      * @return array<string, string> Custom validation attributes for this form
      */
-    protected function getCustomValidationAttributes(): array
+    protected function validationAttributes(): array
     {
         return [
             'password_confirmation' => 'password confirmation',
