@@ -103,7 +103,7 @@ describe('FormModal Create Operations', function () {
         $component = Livewire::test(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'The New World Order')
-            ->set('form.started_at', '2024-01-01')
+            ->set('form.start_date', '2024-01-01')
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -111,20 +111,22 @@ describe('FormModal Create Operations', function () {
 
         $this->assertDatabaseHas('stables', [
             'name' => 'The New World Order',
-            'started_at' => '2024-01-01',
         ]);
+        
+        // Check activity period was created correctly
+        $stable = \App\Models\Stables\Stable::where('name', 'The New World Order')->first();
+        expect($stable->firstActivityPeriod)->not()->toBeNull();
+        expect($stable->firstActivityPeriod->started_at->toDateString())->toBe('2024-01-01');
     });
 
     it('validates required fields when creating', function () {
         $component = Livewire::test(FormModal::class)
             ->call('openModal')
             ->set('form.name', '')
-            ->set('form.started_at', '')
             ->call('save');
 
         $component->assertHasErrors([
             'form.name' => 'required',
-            'form.started_at' => 'required',
         ]);
     });
 

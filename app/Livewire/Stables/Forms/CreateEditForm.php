@@ -72,9 +72,9 @@ class CreateEditForm extends BaseForm
      * trait for consistent activation tracking across the stable system,
      * allowing for stable reformations and storyline continuity.
      *
-     * @var Carbon|string|null Stable activation start date
+     * @var string|null Stable activation start date (string to prevent auto-casting)
      */
-    public Carbon|string|null $start_date = null;
+    public string|null $start_date = null;
 
     /**
      * Load additional data when editing existing stable records.
@@ -102,6 +102,23 @@ class CreateEditForm extends BaseForm
 
         // Load activation start date from first activity period relationship
         $this->start_date = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
+    }
+
+    /**
+     * Store the stable data with activity period handling.
+     */
+    public function store(): bool
+    {
+        $this->validate();
+        
+        $wasCreating = $this->isCreating();
+        $result = $this->storeModel();
+        
+        if ($result && $wasCreating) {
+            $this->handlePostCreationTasks();
+        }
+        
+        return $result;
     }
 
     /**

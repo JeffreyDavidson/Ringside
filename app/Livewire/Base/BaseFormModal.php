@@ -278,6 +278,7 @@ abstract class BaseFormModal extends BaseModal
         $result = $this->form->store();
 
         if ($result) {
+            $this->dispatch('refreshDatatable');
             $this->closeModal();
             $this->dispatch('closeModal');
             $this->dispatch('form-submitted');

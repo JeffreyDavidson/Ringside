@@ -395,7 +395,7 @@ describe('Main Component Integration', function () {
 
             $component
                 ->assertSee('Big Wrestler')
-                ->assertSee('78')
+                ->assertSee('6\'6"') // Height is displayed as feet'inches" format
                 ->assertSee('300')
                 ->assertSee('Test City, TX');
         });

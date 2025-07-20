@@ -39,7 +39,7 @@ use Illuminate\Validation\Rule;
  * @see DateCanBeChanged For custom date validation rules
  *
  * @property string $name Event name for promotional purposes
- * @property Carbon|string|null $date Scheduled event date
+ * @property string|null $date Scheduled event date (string to prevent auto-casting)
  * @property int $venue_id Venue ID for event location
  * @property string $preview Promotional preview text for marketing
  */
@@ -66,9 +66,9 @@ class CreateEditForm extends BaseForm
      * Validated against business rules to ensure proper event scheduling
      * and avoid conflicts with existing events or venue availability.
      *
-     * @var Carbon|string|null Event date and time
+     * @var string|null Event date and time (string to prevent auto-casting issues)
      */
-    public Carbon|string|null $date = '';
+    public string|null $date = '';
 
     /**
      * Venue identifier for event location assignment.

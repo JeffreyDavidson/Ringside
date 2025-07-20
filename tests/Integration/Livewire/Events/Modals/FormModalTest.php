@@ -139,7 +139,7 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasErrors(['form.date']);
-    })->skip('Carbon auto-casting issue prevents validation testing');
+    });
 
     it('validates venue exists', function () {
         $component = Livewire::test(FormModal::class)

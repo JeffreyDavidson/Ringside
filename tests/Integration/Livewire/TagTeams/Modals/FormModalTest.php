@@ -179,10 +179,20 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasErrors(['form.managers.0' => 'exists']);
         });
 
-        // NOTE: Date validation test disabled due to Carbon auto-casting issue
-        // The Carbon|string|null union type causes automatic parsing that throws
-        // InvalidFormatException before validation rules can be applied
-        // This test has been temporarily disabled - date validation works in practice
+        test('validates employment date format', function () {
+            $wrestlerA = Wrestler::factory()->create();
+            $wrestlerB = Wrestler::factory()->create();
+
+            $component = Livewire::test(FormModal::class)
+                ->call('openModal')
+                ->set('form.name', 'Test Team')
+                ->set('form.wrestlerA', $wrestlerA->id)
+                ->set('form.wrestlerB', $wrestlerB->id)
+                ->set('form.employment_date', 'invalid-date-format')
+                ->call('submitForm');
+
+            $component->assertHasErrors(['form.employment_date']);
+        });
     });
 
     describe('create functionality', function () {
@@ -261,7 +271,7 @@ describe('TagTeams FormModal Tests', function () {
 
             // Set up relationships
             $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
-            $tagTeam->managers()->sync([$manager->id]);
+            $tagTeam->managers()->sync([$manager->id => ['hired_at' => now()]]);
 
             $component = Livewire::test(FormModal::class)
                 ->call('openModal', $tagTeam->id);
@@ -422,7 +432,7 @@ describe('TagTeams FormModal Tests', function () {
 
             $tagTeam = TagTeam::factory()->create();
             $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
-            $tagTeam->managers()->sync([$originalManager->id]);
+            $tagTeam->managers()->sync([$originalManager->id => ['hired_at' => now()]]);
 
             Livewire::test(FormModal::class)
                 ->call('openModal', $tagTeam->id)
@@ -442,7 +452,7 @@ describe('TagTeams FormModal Tests', function () {
 
             $tagTeam = TagTeam::factory()->create();
             $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
-            $tagTeam->managers()->sync([$manager->id]);
+            $tagTeam->managers()->sync([$manager->id => ['hired_at' => now()]]);
 
             Livewire::test(FormModal::class)
                 ->call('openModal', $tagTeam->id)

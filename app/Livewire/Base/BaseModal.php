@@ -79,7 +79,7 @@ abstract class BaseModal extends ModalComponent
             }
         } else {
             // Reset to create mode
-            unset($this->model);
+            $this->model = null;
             $this->modelForm->reset();
         }
     }
@@ -110,7 +110,11 @@ abstract class BaseModal extends ModalComponent
      */
     public function clear(): void
     {
-        if (! is_null($this->model)) {
+        if (! isset($this->modelForm)) {
+            return; // Cannot clear if form is not initialized
+        }
+        
+        if (isset($this->model) && ! is_null($this->model)) {
             $this->modelForm->setModel($this->model);
         } else {
             $this->modelForm->reset();
