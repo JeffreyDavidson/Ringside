@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Users\Modals\FormModal;
-use App\Livewire\Users\UserForm;
+use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
@@ -16,19 +16,19 @@ describe('FormModal Configuration', function () {
     it('uses correct user form class', function () {
         $modal = new FormModal();
         $reflection = new ReflectionClass($modal);
-        $property = $reflection->getProperty('modelForm');
-        $property->setAccessible(true);
+        $method = $reflection->getMethod('getFormClass');
+        $method->setAccessible(true);
 
-        expect($property->getValue($modal))->toBe(UserForm::class);
+        expect($method->invoke($modal))->toBe(CreateEditForm::class);
     });
 
     it('uses correct model type', function () {
         $modal = new FormModal();
         $reflection = new ReflectionClass($modal);
-        $property = $reflection->getProperty('modelType');
-        $property->setAccessible(true);
+        $method = $reflection->getMethod('getModelClass');
+        $method->setAccessible(true);
 
-        expect($property->getValue($modal))->toBe(User::class);
+        expect($method->invoke($modal))->toBe(User::class);
     });
 });
 

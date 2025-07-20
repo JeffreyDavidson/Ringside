@@ -10,7 +10,6 @@ use App\Models\Contracts\HasActivityPeriods;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivityPeriod;
-use App\Models\Stables\StableMember;
 use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -31,7 +30,7 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     /** @use ManagesActivity<StableActivityPeriod, Stable> */
     use ManagesActivity;
 
-    /** @use ManagesMembers<StableMember, Stable> */
+    /** @use ManagesMembers<Stable, Wrestler|TagTeam> */
     use ManagesMembers {
         ManagesMembers::addMember as addMemberToGroup;
         ManagesMembers::removeMember as removeMemberFromGroup;

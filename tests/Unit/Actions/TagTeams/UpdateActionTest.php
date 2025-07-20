@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\UpdateAction;
-use App\Data\TagTeamData;
+use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamEmployment;
 use App\Repositories\TagTeamRepository;
@@ -53,7 +53,7 @@ test('it employs an unemployed tag team', function () {
     $this->tagTeamRepository
         ->shouldReceive('employ')
         ->once()
-        ->with($tagTeam, $data->start_date)
+        ->with($tagTeam, $data->employment_date)
         ->andReturns($tagTeam);
 
     resolve(UpdateAction::class)->handle($tagTeam, $data);
@@ -81,7 +81,7 @@ test('it employs a tag team with a future employment date', function () {
     $this->tagTeamRepository
         ->shouldReceive('employ')
         ->once()
-        ->with($tagTeam, $data->start_date)
+        ->with($tagTeam, $data->employment_date)
         ->andReturns($tagTeam);
 
     resolve(UpdateAction::class)->handle($tagTeam, $data);

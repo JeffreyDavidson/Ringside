@@ -58,7 +58,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string Marketing preview text for the match
      */
-    public string $preview = '';
+    public ?string $preview = '';
 
     /**
      * Match type identifier for match style specification.

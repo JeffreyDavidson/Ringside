@@ -31,6 +31,15 @@ class VenueFactory extends Factory
     }
 
     /**
+     * Indicate that the venue is available for booking.
+     */
+    public function available(): static
+    {
+        // Available is the default state, so no modifications needed
+        return $this->state([]);
+    }
+
+    /**
      * Indicate that the venue is inactive.
      */
     public function inactive(): static

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Stables\UpdateAction;
 use App\Actions\Stables\UpdateMembersAction;
-use App\Data\StableData;
+use App\Data\Stables\StableData;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;

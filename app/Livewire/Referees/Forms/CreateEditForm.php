@@ -85,7 +85,7 @@ class CreateEditForm extends BaseForm
      *
      * @var Carbon|string|null Referee employment start date
      */
-    public Carbon|string|null $employment_date = null;
+    public string|null $employment_date = null;
 
     /**
      * Load additional data when editing existing referee records.
@@ -180,5 +180,39 @@ class CreateEditForm extends BaseForm
             'last_name' => 'last name',
             'employment_date' => 'employment date',
         ];
+    }
+
+    /**
+     * Store the referee form data with post-creation tasks.
+     *
+     * Extends the base store functionality to handle employment creation
+     * for referees when employment dates are provided.
+     */
+    public function store(): bool
+    {
+        $this->validate();
+        
+        $wasCreating = $this->isCreating();
+        $result = $this->storeModel();
+        
+        if ($result && $wasCreating) {
+            $this->handlePostCreationTasks();
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Handle post-creation tasks after referee creation.
+     *
+     * Creates employment record for new referees with employment dates.
+     * Called automatically by the store process after successful creation.
+     */
+    protected function handlePostCreationTasks(): void
+    {
+        // Create employment record for referees with employment dates
+        if ($this->employment_date) {
+            $this->handleEmploymentCreation();
+        }
     }
 }

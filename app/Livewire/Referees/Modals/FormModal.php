@@ -37,4 +37,19 @@ class FormModal extends BaseFormModal
             'employment_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
         ];
     }
+
+    public function mount($modelId = null): void
+    {
+        parent::mount($modelId);
+        
+        // Set the title field to use full_name instead of name
+        $this->modelTitleField = 'full_name';
+        $this->titleField = 'full_name';
+    }
+
+
+    public function render(): \Illuminate\View\View
+    {
+        return view($this->modalFormPath ?? 'livewire.referees.modals.form-modal');
+    }
 }

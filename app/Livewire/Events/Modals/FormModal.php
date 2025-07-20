@@ -9,6 +9,7 @@ use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 /**
@@ -45,6 +46,29 @@ class FormModal extends BaseFormModal
             'venue_id' => fn () => $venue?->id ?? Venue::factory()->create()->id,
             'preview' => fn () => Str::of(fake()->text())->value(),
         ];
+    }
+
+    public function getModalTitle(): string
+    {
+        if (isset($this->model)) {
+            return 'Edit Event';
+        }
+
+        return 'Create Event';
+    }
+
+    public function openModal(mixed $modelId = null): void
+    {
+        // Check authorization before opening modal
+        if ($modelId !== null) {
+            // Editing existing event - check update permission
+            Gate::authorize('update', Event::class);
+        } else {
+            // Creating new event - check create permission
+            Gate::authorize('create', Event::class);
+        }
+
+        parent::openModal($modelId);
     }
 
     public function render(): \Illuminate\View\View

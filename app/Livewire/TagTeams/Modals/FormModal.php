@@ -18,6 +18,21 @@ class FormModal extends BaseFormModal
 {
     use PresentsWrestlersList;
 
+    public function getWrestlersListProperty()
+    {
+        return Wrestler::all();
+    }
+
+    public function getManagersProperty()
+    {
+        return \App\Models\Managers\Manager::select('id', 'first_name', 'last_name')
+            ->get()
+            ->mapWithKeys(function ($manager) {
+                return [$manager->id => $manager->first_name . ' ' . $manager->last_name];
+            })
+            ->toArray();
+    }
+
 
     protected function getFormClass(): string
     {

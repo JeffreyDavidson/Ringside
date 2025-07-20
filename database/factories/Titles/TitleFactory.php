@@ -109,4 +109,17 @@ class TitleFactory extends Factory
     {
         return $this->withChampion($champion);
     }
+
+    public function withActivationPeriod($startDate = null, $endDate = null): static
+    {
+        $startDate = $startDate ?? Carbon::yesterday();
+        
+        if ($endDate) {
+            return $this->state(fn () => ['status' => TitleStatus::Inactive])
+                ->has(TitleActivityPeriod::factory()->started($startDate)->ended($endDate), 'activations');
+        }
+        
+        return $this->state(fn () => ['status' => TitleStatus::Active])
+            ->has(TitleActivityPeriod::factory()->started($startDate), 'activations');
+    }
 }

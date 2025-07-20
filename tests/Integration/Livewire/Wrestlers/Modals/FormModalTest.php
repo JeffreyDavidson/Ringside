@@ -117,7 +117,7 @@ describe('FormModal Form Integration', function () {
             'hometown' => 'Original City',
         ]);
 
-        $component = Livewire::test(FormModal::class);
+        $component = Livewire::test(FormModal::class, ['modelId' => $wrestler->id]);
 
         $component->set('form.name', 'Updated Name')
             ->set('form.hometown', 'Updated City')
@@ -203,15 +203,14 @@ describe('FormModal Reset Functionality', function () {
     it('resets form when modal closes', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $component = Livewire::test(FormModal::class);
+        $component = Livewire::test(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Modify form data
         $component->set('form.name', 'Modified Name');
 
-        // Close modal
+        // Close modal and reopen with same wrestler
         $component->call('closeModal');
-
-        // Reopen modal with same wrestler
+        $component->call('mount', $wrestler->id);
 
         // Form should be reset to original data
         expect($component->get('form.name'))->toBe($wrestler->name);
@@ -220,13 +219,14 @@ describe('FormModal Reset Functionality', function () {
     it('clears form when opening for creation after editing', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $component = Livewire::test(FormModal::class);
+        $component = Livewire::test(FormModal::class, ['modelId' => $wrestler->id]);
 
-        // First, edit a wrestler
+        // First, edit a wrestler - verify it's loaded
         expect($component->get('form.name'))->toBe($wrestler->name);
         $component->call('closeModal');
 
-        // Then open for creation
+        // Then open for creation (mount with null)
+        $component->call('mount', null);
         expect($component->get('form.name'))->toBe('');
     });
 });

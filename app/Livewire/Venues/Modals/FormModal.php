@@ -48,6 +48,15 @@ class FormModal extends BaseFormModal
         ];
     }
 
+    public function getModalTitle(): string
+    {
+        if (isset($this->model)) {
+            return 'Edit Venue';
+        }
+
+        return 'Create Venue';
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view($this->modalFormPath ?? 'livewire.venues.modals.form-modal');

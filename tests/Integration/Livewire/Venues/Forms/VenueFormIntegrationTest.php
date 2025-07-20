@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Venues\Forms\VenueForm;
+use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -28,7 +28,7 @@ use Livewire\Component;
 describe('VenueForm Integration Tests', function () {
     beforeEach(function () {
         $mockComponent = mock(Component::class);
-        $this->form = new VenueForm($mockComponent, 'form');
+        $this->form = new CreateEditForm($mockComponent, 'form');
     });
 
     describe('validation rules configuration', function () {
