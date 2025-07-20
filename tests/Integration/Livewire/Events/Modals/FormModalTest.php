@@ -345,14 +345,14 @@ describe('FormModal Business Logic', function () {
             ->set('form.name', 'Test Event')
             ->set('form.date', '2024-04-06')
             ->set('form.venue_id', $venue->id)
-            ->set('form.description', 'Epic wrestling event')
+            ->set('form.preview', 'Epic wrestling event')
             ->call('save');
 
         $component->assertHasNoErrors();
 
         $this->assertDatabaseHas('events', [
             'name' => 'Test Event',
-            'description' => 'Epic wrestling event',
+            'preview' => 'Epic wrestling event',
         ]);
     });
 

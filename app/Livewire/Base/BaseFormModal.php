@@ -233,8 +233,8 @@ abstract class BaseFormModal extends BaseModal
         // Ensure proper initialization if mount wasn't called
         if (! isset($this->modalFormPath)) {
             $this->mount($modelId);
-        } elseif ($modelId !== null) {
-            // Re-mount with the specific model ID
+        } else {
+            // Always re-mount to ensure proper form state
             $this->mount($modelId);
         }
 
@@ -279,6 +279,7 @@ abstract class BaseFormModal extends BaseModal
 
         if ($result) {
             $this->closeModal();
+            $this->dispatch('closeModal');
             $this->dispatch('form-submitted');
         }
 

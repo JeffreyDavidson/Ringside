@@ -69,7 +69,7 @@ abstract class BaseModal extends ModalComponent
      */
     public function mount(int|string|null $modelId = null): void
     {
-        if (isset($modelId)) {
+        if ($modelId !== null) {
             try {
                 $id = is_numeric($modelId) ? (int) $modelId : $modelId;
                 $this->model = $this->modelType::findOrFail($id);
@@ -77,6 +77,10 @@ abstract class BaseModal extends ModalComponent
             } catch (Exception $e) {
                 Log::error($e->getMessage());
             }
+        } else {
+            // Reset to create mode
+            unset($this->model);
+            $this->modelForm->reset();
         }
     }
 
