@@ -179,7 +179,7 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', 'ends_with:Title,Titles', Rule::unique('titles', 'name')->ignore($this->modelId)],
             'type' => ['required', Rule::enum(TitleType::class)],
             'start_date' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
         ];

@@ -186,9 +186,9 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->formModel)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->modelId)],
             'date' => ['nullable', 'date', new DateCanBeChanged($this->formModel)],
-            'venue_id' => ['required_with:date', 'integer', Rule::exists('venues', 'id')],
+            'venue_id' => ['nullable', 'required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];
     }
