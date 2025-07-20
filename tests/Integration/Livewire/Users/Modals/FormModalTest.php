@@ -57,7 +57,7 @@ describe('FormModal Rendering', function () {
     });
 
     it('displays correct title in edit mode', function () {
-        $user = User::factory()->create(['name' => 'Test User']);
+        $user = User::factory()->create(['first_name' => 'Test', 'last_name' => 'User']);
 
         $component = Livewire::test(FormModal::class)
             ->call('openModal', $user->id);
@@ -73,6 +73,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', 'password123')
             ->set('form.password_confirmation', 'password123')
             ->call('save');
@@ -136,6 +137,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', 'password123')
             ->set('form.password_confirmation', 'different-password')
             ->call('save');
@@ -149,6 +151,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', '123')
             ->set('form.password_confirmation', '123')
             ->call('save');
@@ -162,11 +165,13 @@ describe('FormModal Create Operations', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', 'password123')
             ->set('form.password_confirmation', 'password123')
             ->call('save');
 
         $user = User::where('email', 'john@example.com')->first();
+        expect($user)->not->toBeNull('User should be created but was not found');
         expect(Hash::check('password123', $user->password))->toBeTrue();
     });
 });
@@ -174,7 +179,8 @@ describe('FormModal Create Operations', function () {
 describe('FormModal Edit Operations', function () {
     it('can edit an existing user', function () {
         $user = User::factory()->create([
-            'name' => 'Original Name',
+            'first_name' => 'Original',
+            'last_name' => 'Name',
             'email' => 'original@example.com',
         ]);
 
@@ -198,7 +204,8 @@ describe('FormModal Edit Operations', function () {
 
     it('loads existing user data in edit mode', function () {
         $user = User::factory()->create([
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
         ]);
 
@@ -224,7 +231,8 @@ describe('FormModal Edit Operations', function () {
 
     it('allows keeping same email when editing', function () {
         $user = User::factory()->create([
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
         ]);
 
@@ -271,7 +279,7 @@ describe('FormModal Edit Operations', function () {
 
 describe('FormModal State Management', function () {
     it('resets form when switching modes', function () {
-        $user = User::factory()->create(['name' => 'Test User']);
+        $user = User::factory()->create(['first_name' => 'Test', 'last_name' => 'User']);
 
         $component = Livewire::test(FormModal::class)
             ->call('openModal', $user->id)
@@ -288,6 +296,7 @@ describe('FormModal State Management', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', 'password123')
             ->set('form.password_confirmation', 'password123')
             ->call('save');
@@ -312,6 +321,7 @@ describe('FormModal Role Management', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', 'password123')
             ->set('form.password_confirmation', 'password123')
             ->set('form.role', 'administrator')
@@ -343,6 +353,7 @@ describe('FormModal Role Management', function () {
             ->set('form.first_name', 'John')
             ->set('form.last_name', 'Doe')
             ->set('form.email', 'john@example.com')
+            ->set('form.role', 'basic')
             ->set('form.password', 'password123')
             ->set('form.role', 'InvalidRole')
             ->call('save');

@@ -137,7 +137,8 @@ class CreateEditForm extends BaseForm
 
         // Only include password if provided (allows profile updates without password change)
         if (! empty($this->password)) {
-            $data['password'] = Hash::make($this->password);
+            // Model handles password hashing via Attribute cast
+            $data['password'] = $this->password;
         }
 
         return $data;
