@@ -7,6 +7,7 @@ use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -179,7 +180,7 @@ describe('FormModal Edit Operations', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        $component->assertDispatched('eventUpdated');
+        $component->assertDispatched('form-submitted');
 
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
@@ -232,7 +233,7 @@ describe('FormModal Edit Operations', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        $component->assertDispatched('eventUpdated');
+        $component->assertDispatched('form-submitted');
     });
 
     it('validates date change rules for existing events', function () {
