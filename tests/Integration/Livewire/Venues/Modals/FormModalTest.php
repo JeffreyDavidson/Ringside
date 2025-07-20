@@ -37,7 +37,7 @@ describe('Form Modal Initialization', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal');
         
-        $modal->assertSet('isOpen', true);
+        $modal->assertSet('isModalOpen', true);
         $modal->assertSet('form.name', '');
     });
 
@@ -85,7 +85,7 @@ describe('Form Modal Editing', function () {
             ->set('form.street_address', '456 Oak Ave')
             ->set('form.city', 'San Francisco')
             ->set('form.zipcode', '94102')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasNoErrors();
         $modal->assertDispatched('venueUpdated');
@@ -111,7 +111,7 @@ describe('Form Modal Editing', function () {
             ->set('form.city', 'Test City')
             ->set('form.state', 'Invalid State')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors(['form.state']);
         $modal->assertSet('form.name', 'Test Venue');
@@ -130,7 +130,7 @@ describe('Form Modal Creation', function () {
             ->set('form.city', 'Sacramento')
             ->set('form.state', 'California')
             ->set('form.zipcode', '95814')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasNoErrors();
         $modal->assertDispatched('venueCreated');
@@ -153,7 +153,7 @@ describe('Form Modal Creation', function () {
             ->set('form.city', '')
             ->set('form.state', '')
             ->set('form.zipcode', '')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors([
             'form.name' => 'required',
@@ -174,7 +174,7 @@ describe('Form Modal Creation', function () {
             ->set('form.city', 'Los Angeles')
             ->set('form.state', 'California')
             ->set('form.zipcode', '90210')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors(['form.name' => 'unique']);
     });
@@ -187,7 +187,7 @@ describe('Form Modal Creation', function () {
             ->set('form.city', 'Test City')
             ->set('form.state', 'Nonexistent State')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors(['form.state' => 'exists']);
     });
@@ -200,7 +200,7 @@ describe('Form Modal Creation', function () {
             ->set('form.city', 'Test City')
             ->set('form.state', 'California')
             ->set('form.zipcode', '123')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors(['form.zipcode' => 'digits']);
     });
@@ -213,7 +213,7 @@ describe('Form Modal Creation', function () {
             ->set('form.city', 'Valid City')
             ->set('form.state', 'California')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasNoErrors();
     });
@@ -232,7 +232,7 @@ describe('Form Modal Validation', function () {
             ->set('form.city', $longCity)
             ->set('form.state', 'California')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors([
             'form.name' => 'max',
@@ -253,7 +253,7 @@ describe('Form Modal Validation', function () {
             ->set('form.city', $validCity)
             ->set('form.state', 'California')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasNoErrors();
     });
@@ -266,7 +266,7 @@ describe('Form Modal Validation', function () {
             ->set('form.city', 'Test City')
             ->set('form.state', 'California')
             ->set('form.zipcode', 'abcde')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors(['form.zipcode' => 'digits']);
     });
@@ -281,7 +281,7 @@ describe('Form Modal State Management', function () {
             ->set('form.city', 'Test City')
             ->set('form.state', 'California')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasNoErrors();
         $modal->assertSet('form.name', '');
@@ -299,7 +299,7 @@ describe('Form Modal State Management', function () {
             ->set('form.city', 'Test City')
             ->set('form.state', 'Invalid State')
             ->set('form.zipcode', '12345')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasErrors();
         $modal->assertSet('form.name', 'Test Arena');
@@ -337,7 +337,7 @@ describe('Form Modal Dummy Data', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
             ->call('fillWithDummyData')
-            ->call('submit');
+            ->call('save');
 
         $modal->assertHasNoErrors();
         $modal->assertDispatched('venueCreated');

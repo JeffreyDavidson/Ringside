@@ -98,9 +98,9 @@ class CreateEditForm extends BaseForm
      * identification, and regional analysis. Validated as exactly 5 digits
      * to ensure proper format for shipping and correspondence systems.
      *
-     * @var int|string ZIP code in 5-digit format
+     * @var int|string|null ZIP code in 5-digit format (nullable for form handling)
      */
-    public int|string $zipcode = '';
+    public int|string|null $zipcode = '';
 
     /**
      * Load additional data when editing existing venue records.
