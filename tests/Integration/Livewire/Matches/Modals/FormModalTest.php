@@ -110,7 +110,6 @@ describe('FormModal Create Operations', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
@@ -147,7 +146,6 @@ describe('FormModal Create Operations', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [$wrestler->id])
             ->call('save');
@@ -162,7 +160,6 @@ describe('FormModal Create Operations', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', 999)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
@@ -178,7 +175,6 @@ describe('FormModal Create Operations', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [999]],
@@ -196,7 +192,6 @@ describe('FormModal Create Operations', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
@@ -261,7 +256,6 @@ describe('FormModal Title Championship Integration', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
@@ -274,7 +268,7 @@ describe('FormModal Title Championship Integration', function () {
         $component->assertDispatched('matchCreated');
 
         $match = EventMatch::where('event_id', $this->event->id)->first();
-        expect($match->titles)->toContain($title);
+        expect($match->titles->pluck('id'))->toContain($title->id);
     });
 
     it('presents available titles for championship matches', function () {
@@ -302,7 +296,7 @@ describe('FormModal Title Championship Integration', function () {
             ->set('form.titles', [$inactiveTitle->id])
             ->call('save');
 
-        $component->assertHasErrors(['form.titles']);
+        $component->assertHasErrors(['form.titles.0']);
     });
 });
 
@@ -314,7 +308,6 @@ describe('FormModal Tag Team Integration', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['tag_teams' => [$tagTeam1->id]],
@@ -344,7 +337,8 @@ describe('FormModal State Management', function () {
             ->call('openModal', $match->id)
             ->call('openModal');
 
-        $component->assertSet('form.eventId', null);
+        // eventId should remain set since it comes from route context, not form data
+        $component->assertSet('form.eventId', $this->event->id);
         $component->assertSet('form.matchTypeId', null);
         $component->assertSet('form.competitors', []);
     });
@@ -356,7 +350,6 @@ describe('FormModal State Management', function () {
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
-            ->set('form.eventId', $this->event->id)
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],

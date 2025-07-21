@@ -116,6 +116,42 @@ class CreateEditForm extends BaseForm
     public array $titles = [];
 
     /**
+     * Store a new event match.
+     *
+     * Creates a new match with all relationships properly synced.
+     *
+     * @return bool True if the match was successfully created
+     */
+    public function store(): bool
+    {
+        $result = parent::store();
+        
+        if ($result) {
+            $this->syncRelationships();
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Update an existing event match.
+     *
+     * Updates the match with all relationships properly synced.
+     *
+     * @return bool True if the match was successfully updated
+     */
+    public function update(): bool
+    {
+        $result = parent::update();
+        
+        if ($result) {
+            $this->syncRelationships();
+        }
+        
+        return $result;
+    }
+
+    /**
      * Load additional data when editing existing event match records.
      *
      * Handles complex relationship data loading for edit operations,
@@ -280,7 +316,16 @@ class CreateEditForm extends BaseForm
             'referees' => ['sometimes', 'array'],
             'referees.*' => ['integer', 'exists:referees,id'],
             'titles' => ['sometimes', 'array'],
-            'titles.*' => ['integer', 'exists:titles,id'],
+            'titles.*' => [
+                'integer', 
+                'exists:titles,id',
+                function ($attribute, $value, $fail) {
+                    $title = \App\Models\Titles\Title::find($value);
+                    if ($title && $title->status->value !== 'active') {
+                        $fail('The selected title must be active.');
+                    }
+                }
+            ],
         ];
 
         // Add dynamic competitor validation based on match type
