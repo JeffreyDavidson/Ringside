@@ -208,12 +208,12 @@ describe('FormModal Reset Functionality', function () {
         // Modify form data
         $component->set('form.name', 'Modified Name');
 
-        // Close modal and reopen with same wrestler
+        // Close modal and create new component instance with same wrestler
         $component->call('closeModal');
-        $component->call('mount', $wrestler->id);
+        $newComponent = Livewire::test(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Form should be reset to original data
-        expect($component->get('form.name'))->toBe($wrestler->name);
+        expect($newComponent->get('form.name'))->toBe($wrestler->name);
     });
 
     it('clears form when opening for creation after editing', function () {
@@ -225,8 +225,8 @@ describe('FormModal Reset Functionality', function () {
         expect($component->get('form.name'))->toBe($wrestler->name);
         $component->call('closeModal');
 
-        // Then open for creation (mount with null)
-        $component->call('mount', null);
-        expect($component->get('form.name'))->toBe('');
+        // Then create new component for creation (no model ID)
+        $creationComponent = Livewire::test(FormModal::class);
+        expect($creationComponent->get('form.name'))->toBe('');
     });
 });

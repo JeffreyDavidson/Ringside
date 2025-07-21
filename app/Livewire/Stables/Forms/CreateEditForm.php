@@ -68,13 +68,47 @@ class CreateEditForm extends BaseForm
      * Stable activation start date for faction history tracking.
      *
      * Tracks when a wrestling stable becomes active and begins appearing
-     * in storylines and programming. Managed through ManagesActivityPeriods
-     * trait for consistent activation tracking across the stable system,
-     * allowing for stable reformations and storyline continuity.
+     * in storylines and programming. Used for activity period creation.
      *
      * @var string|null Stable activation start date (string to prevent auto-casting)
      */
-    public string|null $start_date = null;
+    public string|null $started_at = null;
+
+    /**
+     * Stable deactivation end date for faction history tracking.
+     *
+     * Tracks when a wrestling stable becomes inactive or is disbanded.
+     * Used for completing activity periods.
+     *
+     * @var string|null Stable deactivation end date (string to prevent auto-casting)
+     */
+    public string|null $ended_at = null;
+
+    /**
+     * Accessor for trait compatibility - ManagesActivityPeriods expects start_date.
+     */
+    protected function getStartDateAttribute(): ?string
+    {
+        return $this->started_at;
+    }
+
+    /**
+     * Handle activity period creation when creating a new model.
+     * Override the trait method to use our property names.
+     */
+    protected function handleActivityPeriodCreation(): void
+    {
+        if (! empty($this->started_at)) {
+            $data = ['started_at' => $this->started_at];
+            
+            // Include end date if provided
+            if (! empty($this->ended_at)) {
+                $data['ended_at'] = $this->ended_at;
+            }
+            
+            $this->formModel->activityPeriods()->create($data);
+        }
+    }
 
     /**
      * Load additional data when editing existing stable records.
@@ -100,8 +134,9 @@ class CreateEditForm extends BaseForm
             return;
         }
 
-        // Load activation start date from first activity period relationship
-        $this->start_date = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
+        // Load activation dates from first activity period relationship
+        $this->started_at = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
+        $this->ended_at = $this->formModel->firstActivityPeriod?->ended_at?->toDateString();
     }
 
     /**
@@ -130,7 +165,7 @@ class CreateEditForm extends BaseForm
     protected function handlePostCreationTasks(): void
     {
         // Create activation record for new stables with start dates
-        if ($this->start_date) {
+        if ($this->started_at) {
             $this->handleActivityPeriodCreation();
         }
     }
@@ -187,10 +222,18 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255', Rule::unique('stables', 'name')->ignore($this->modelId)],
-            'start_date' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
+            'started_at' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
+            'ended_at' => ['nullable', 'date'],
         ];
+
+        // Add validation that ended_at is after started_at if both are provided
+        if (!empty($this->started_at) && !empty($this->ended_at)) {
+            $rules['ended_at'][] = 'after:started_at';
+        }
+
+        return $rules;
     }
 
     /**
@@ -204,7 +247,8 @@ class CreateEditForm extends BaseForm
     protected function getCustomValidationAttributes(): array
     {
         return [
-            'start_date' => 'start date',
+            'started_at' => 'start date',
+            'ended_at' => 'end date',
         ];
     }
 }

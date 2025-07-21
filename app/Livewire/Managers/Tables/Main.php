@@ -29,7 +29,6 @@ use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Managers\Components\Actions;
 use App\Models\Managers\Manager;
 use Exception;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
@@ -118,87 +117,87 @@ class Main extends BaseTable
     /**
      * Clear an injured manager.
      */
-    public function clearFromInjury(Manager $manager): RedirectResponse
+    public function clearFromInjury(Manager $manager): void
     {
         Gate::authorize('clearFromInjury', $manager);
 
         try {
             resolve(HealAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeClearedFromInjuryException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Employ a manager.
      */
-    public function employ(Manager $manager): RedirectResponse
+    public function employ(Manager $manager): void
     {
         Gate::authorize('employ', $manager);
 
         try {
             resolve(EmployAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeEmployedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Injure a manager.
      */
-    public function injure(Manager $manager): RedirectResponse
+    public function injure(Manager $manager): void
     {
         Gate::authorize('injure', $manager);
 
         try {
             resolve(InjureAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeInjuredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Reinstate a suspended manager.
      */
-    public function reinstate(Manager $manager): RedirectResponse
+    public function reinstate(Manager $manager): void
     {
         Gate::authorize('reinstate', $manager);
 
         try {
             resolve(ReinstateAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeReinstatedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Release a manager.
      */
-    public function release(Manager $manager): RedirectResponse
+    public function release(Manager $manager): void
     {
         Gate::authorize('release', $manager);
 
         try {
             resolve(ReleaseAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeReleasedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Restore a deleted manager.
      */
-    public function restore(int $managerId): RedirectResponse
+    public function restore(int $managerId): void
     {
         $manager = Manager::onlyTrashed()->findOrFail($managerId);
 
@@ -206,59 +205,59 @@ class Main extends BaseTable
 
         try {
             resolve(RestoreAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Retire a manager.
      */
-    public function retire(Manager $manager): RedirectResponse
+    public function retire(Manager $manager): void
     {
         Gate::authorize('retire', $manager);
 
         try {
             resolve(RetireAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeRetiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Suspend a manager.
      */
-    public function suspend(Manager $manager): RedirectResponse
+    public function suspend(Manager $manager): void
     {
         Gate::authorize('suspend', $manager);
 
         try {
             resolve(SuspendAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeSuspendedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     /**
      * Unretire a retired manager.
      */
-    public function unretire(Manager $manager): RedirectResponse
+    public function unretire(Manager $manager): void
     {
         Gate::authorize('unretire', $manager);
 
         try {
             resolve(UnretireAction::class)->handle($manager);
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         } catch (CannotBeUnretiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('managers.index'));
         }
-
-        return back();
     }
 
     public function handleManagerAction(string $action, int $managerId): void

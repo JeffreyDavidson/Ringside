@@ -26,7 +26,7 @@ class MatchesTable extends DataTableComponent
     /**
      * Event to use for component.
      */
-    public ?int $eventId;
+    public ?int $eventId = null;
 
     /**
      * @return Builder<EventMatch>
@@ -57,8 +57,8 @@ class MatchesTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('event-matches.match_type'), 'matchType.name'),
-            ArrayColumn::make(__('event-matches.competitors'))
+            Column::make(__('matches.match_type'), 'matchType.name')->searchable(),
+            ArrayColumn::make(__('matches.competitors'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
                 ->outputFormat(function (int $index, EventMatchCompetitor $value): string {
                     $competitor = $value->getCompetitor();
@@ -67,21 +67,21 @@ class MatchesTable extends DataTableComponent
                     return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
                 })
                 ->separator(' vs '),
-            ArrayColumn::make(__('event-matches.referees'))
+            ArrayColumn::make(__('matches.referees'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->referees))
                 ->outputFormat(function (int $index, Referee $value): string {
                     return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
                 })
                 ->separator(', ')
                 ->emptyValue('N/A'),
-            ArrayColumn::make(__('event-matches.titles'))
+            ArrayColumn::make(__('matches.titles'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->titles))
                 ->outputFormat(function (int $index, Title $value): string {
                     return '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>';
                 })
                 ->separator(', ')
                 ->emptyValue('N/A'),
-            Column::make(__('event-matches.result'))
+            Column::make(__('matches.result'))
                 ->label(
                     function (EventMatch $row, Column $column): string {
                         $winner = $row->result?->getWinner();

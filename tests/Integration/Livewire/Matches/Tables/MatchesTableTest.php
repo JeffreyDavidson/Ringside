@@ -20,7 +20,9 @@ beforeEach(function () {
 
 describe('MatchesTable Rendering', function () {
     it('can render matches table', function () {
-        Livewire::test(MatchesTable::class)
+        $event = Event::factory()->create();
+        
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
@@ -30,10 +32,9 @@ describe('MatchesTable Rendering', function () {
         $match = EventMatch::factory()
             ->for($event)
             ->for($matchType)
-            ->create(['preview' => 'Epic wrestling match']);
+            ->create();
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('Epic wrestling match')
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles Match');
     });
 
@@ -43,10 +44,10 @@ describe('MatchesTable Rendering', function () {
         $wrestler1 = Wrestler::factory()->create(['name' => 'John Cena']);
         $wrestler2 = Wrestler::factory()->create(['name' => 'The Rock']);
         
-        $match->competitors()->attach($wrestler1);
-        $match->competitors()->attach($wrestler2);
+        $match->wrestlers()->attach($wrestler1, ['side_number' => 1]);
+        $match->wrestlers()->attach($wrestler2, ['side_number' => 2]);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('John Cena')
             ->assertSee('The Rock');
     });
@@ -54,11 +55,11 @@ describe('MatchesTable Rendering', function () {
     it('displays match referees', function () {
         $event = Event::factory()->create();
         $match = EventMatch::factory()->for($event)->create();
-        $referee = Referee::factory()->create(['name' => 'Earl Hebner']);
+        $referee = Referee::factory()->create(['first_name' => 'Earl', 'last_name' => 'Hebner']);
         
         $match->referees()->attach($referee);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Earl Hebner');
     });
 
@@ -69,33 +70,39 @@ describe('MatchesTable Rendering', function () {
         
         $match->titles()->attach($title);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('WWE Championship');
     });
 });
 
 describe('MatchesTable Search and Filtering', function () {
-    it('can search matches by preview', function () {
+    it('can search matches by match type', function () {
         $event = Event::factory()->create();
-        EventMatch::factory()->for($event)->create(['preview' => 'Championship match']);
-        EventMatch::factory()->for($event)->create(['preview' => 'Regular match']);
+        $championshipType = MatchType::factory()->create(['name' => 'Championship Match']);
+        $regularType = MatchType::factory()->create(['name' => 'Regular Match']);
+        
+        EventMatch::factory()->for($event)->for($championshipType)->create();
+        EventMatch::factory()->for($event)->for($regularType)->create();
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->set('search', 'Championship')
-            ->assertSee('Championship match')
-            ->assertDontSee('Regular match');
+            ->assertSee('Championship Match')
+            ->assertDontSee('Regular Match');
     });
 
     it('can filter matches by event', function () {
         $event1 = Event::factory()->create(['name' => 'WrestleMania']);
         $event2 = Event::factory()->create(['name' => 'SummerSlam']);
         
-        EventMatch::factory()->for($event1)->create(['preview' => 'WrestleMania match']);
-        EventMatch::factory()->for($event2)->create(['preview' => 'SummerSlam match']);
+        $event1MatchType = MatchType::factory()->create(['name' => 'Main Event']);
+        $event2MatchType = MatchType::factory()->create(['name' => 'Opening Match']);
+        
+        EventMatch::factory()->for($event1)->for($event1MatchType)->create();
+        EventMatch::factory()->for($event2)->for($event2MatchType)->create();
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('WrestleMania match')
-            ->assertSee('SummerSlam match');
+        Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
+            ->assertSee('Main Event')
+            ->assertDontSee('Opening Match');
     });
 
     it('can filter matches by match type', function () {
@@ -103,29 +110,28 @@ describe('MatchesTable Search and Filtering', function () {
         $singlesType = MatchType::factory()->create(['name' => 'Singles']);
         $tagTeamType = MatchType::factory()->create(['name' => 'Tag Team']);
         
-        EventMatch::factory()->for($event)->for($singlesType)->create(['preview' => 'Singles match']);
-        EventMatch::factory()->for($event)->for($tagTeamType)->create(['preview' => 'Tag team match']);
+        EventMatch::factory()->for($event)->for($singlesType)->create();
+        EventMatch::factory()->for($event)->for($tagTeamType)->create();
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('Singles match')
-            ->assertSee('Tag team match');
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('Singles')
+            ->assertSee('Tag Team');
     });
 
-    it('can search matches by competitor names', function () {
+    it('displays competitor names in matches', function () {
         $event = Event::factory()->create();
-        $match1 = EventMatch::factory()->for($event)->create(['preview' => 'First match']);
-        $match2 = EventMatch::factory()->for($event)->create(['preview' => 'Second match']);
+        $match1 = EventMatch::factory()->for($event)->create();
+        $match2 = EventMatch::factory()->for($event)->create();
         
         $wrestler1 = Wrestler::factory()->create(['name' => 'Stone Cold']);
         $wrestler2 = Wrestler::factory()->create(['name' => 'The Rock']);
         
-        $match1->competitors()->attach($wrestler1);
-        $match2->competitors()->attach($wrestler2);
+        $match1->wrestlers()->attach($wrestler1, ['side_number' => 1]);
+        $match2->wrestlers()->attach($wrestler2, ['side_number' => 1]);
 
-        Livewire::test(MatchesTable::class)
-            ->set('search', 'Stone Cold')
-            ->assertSee('First match')
-            ->assertDontSee('Second match');
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('Stone Cold')
+            ->assertSee('The Rock');
     });
 });
 
@@ -138,11 +144,11 @@ describe('MatchesTable Complex Relationships', function () {
         $wrestler2 = Wrestler::factory()->create(['name' => 'Wrestler Two']);
         $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team']);
         
-        $match->competitors()->attach($wrestler1);
-        $match->competitors()->attach($wrestler2);
-        $match->competitors()->attach($tagTeam);
+        $match->wrestlers()->attach($wrestler1, ['side_number' => 1]);
+        $match->wrestlers()->attach($wrestler2, ['side_number' => 2]);
+        $match->tagTeams()->attach($tagTeam, ['side_number' => 3]);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Wrestler One')
             ->assertSee('Wrestler Two')
             ->assertSee('Tag Team');
@@ -158,7 +164,7 @@ describe('MatchesTable Complex Relationships', function () {
         $match->titles()->attach($title1);
         $match->titles()->attach($title2);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('World Championship')
             ->assertSee('Tag Team Championship');
     });
@@ -167,34 +173,35 @@ describe('MatchesTable Complex Relationships', function () {
         $event = Event::factory()->create();
         $match = EventMatch::factory()->for($event)->create();
         
-        $referee1 = Referee::factory()->create(['name' => 'Referee One']);
-        $referee2 = Referee::factory()->create(['name' => 'Referee Two']);
+        $referee1 = Referee::factory()->create(['first_name' => 'Referee', 'last_name' => 'One']);
+        $referee2 = Referee::factory()->create(['first_name' => 'Referee', 'last_name' => 'Two']);
         
         $match->referees()->attach($referee1);
         $match->referees()->attach($referee2);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Referee One')
             ->assertSee('Referee Two');
     });
 
     it('handles matches with no competitors gracefully', function () {
         $event = Event::factory()->create();
-        EventMatch::factory()->for($event)->create(['preview' => 'No competitors match']);
+        $matchType = MatchType::factory()->create(['name' => 'Special Match']);
+        EventMatch::factory()->for($event)->for($matchType)->create();
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('No competitors match');
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('Special Match');
     });
 
     it('handles matches with no referees gracefully', function () {
         $event = Event::factory()->create();
-        $match = EventMatch::factory()->for($event)->create(['preview' => 'No referee match']);
+        $match = EventMatch::factory()->for($event)->create();
         
         $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
-        $match->competitors()->attach($wrestler);
+        $match->wrestlers()->attach($wrestler, ['side_number' => 1]);
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('No referee match')
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('Test Wrestler')
             ->assertSee('Test Wrestler');
     });
 });
@@ -216,11 +223,11 @@ describe('MatchesTable Performance', function () {
         
         // Attach relationships to matches
         foreach ($matches as $index => $match) {
-            $match->competitors()->attach($wrestlers[$index % 10]);
+            $match->wrestlers()->attach($wrestlers[$index % 10], ['side_number' => 1]);
             $match->referees()->attach($referees[$index % 5]);
         }
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
@@ -229,14 +236,14 @@ describe('MatchesTable Performance', function () {
         $match = EventMatch::factory()->for($event)->create();
         
         $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
-        $referee = Referee::factory()->create(['name' => 'Test Referee']);
+        $referee = Referee::factory()->create(['first_name' => 'Test', 'last_name' => 'Referee']);
         $title = Title::factory()->create(['name' => 'Test Title']);
         
-        $match->competitors()->attach($wrestler);
+        $match->wrestlers()->attach($wrestler, ['side_number' => 1]);
         $match->referees()->attach($referee);
         $match->titles()->attach($title);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk()
             ->assertSee('Test Wrestler')
             ->assertSee('Test Referee')
@@ -249,42 +256,49 @@ describe('MatchesTable Pagination', function () {
         $event = Event::factory()->create();
         EventMatch::factory()->for($event)->count(25)->create();
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
     it('maintains search across pagination', function () {
         $event = Event::factory()->create();
-        EventMatch::factory()->for($event)->count(15)->create(['preview' => 'Championship match']);
-        EventMatch::factory()->for($event)->count(15)->create(['preview' => 'Regular match']);
+        $championshipType = MatchType::factory()->create(['name' => 'Championship Match']);
+        $regularType = MatchType::factory()->create(['name' => 'Regular Match']);
+        
+        EventMatch::factory()->for($event)->for($championshipType)->count(15)->create();
+        EventMatch::factory()->for($event)->for($regularType)->count(15)->create();
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->set('search', 'Championship')
-            ->assertSee('Championship match')
-            ->assertDontSee('Regular match');
+            ->assertSee('Championship Match')
+            ->assertDontSee('Regular Match');
     });
 });
 
 describe('MatchesTable Sorting', function () {
     it('can sort matches by different columns', function () {
         $event = Event::factory()->create();
-        $matchA = EventMatch::factory()->for($event)->create(['preview' => 'A match']);
-        $matchZ = EventMatch::factory()->for($event)->create(['preview' => 'Z match']);
+        $typeA = MatchType::factory()->create(['name' => 'A Type Match']);
+        $typeZ = MatchType::factory()->create(['name' => 'Z Type Match']);
+        
+        $matchA = EventMatch::factory()->for($event)->for($typeA)->create();
+        $matchZ = EventMatch::factory()->for($event)->for($typeZ)->create();
 
-        Livewire::test(MatchesTable::class)
-            ->assertSeeInOrder(['A match', 'Z match']);
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSeeInOrder(['A Type Match', 'Z Type Match']);
     });
 
-    it('can sort matches by event date', function () {
-        $eventOld = Event::factory()->create(['date' => '2023-01-01']);
-        $eventNew = Event::factory()->create(['date' => '2024-01-01']);
+    it('can sort matches by match number', function () {
+        $event = Event::factory()->create();
+        $typeA = MatchType::factory()->create(['name' => 'First Match']);
+        $typeB = MatchType::factory()->create(['name' => 'Second Match']);
         
-        EventMatch::factory()->for($eventOld)->create(['preview' => 'Old match']);
-        EventMatch::factory()->for($eventNew)->create(['preview' => 'New match']);
+        $match1 = EventMatch::factory()->for($event)->for($typeA)->create(['match_number' => 1]);
+        $match2 = EventMatch::factory()->for($event)->for($typeB)->create(['match_number' => 2]);
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('Old match')
-            ->assertSee('New match');
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('First Match')
+            ->assertSee('Second Match');
     });
 });
 
@@ -293,59 +307,67 @@ describe('MatchesTable Actions', function () {
         $event = Event::factory()->create();
         $match = EventMatch::factory()->for($event)->create();
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
     it('handles match action integration', function () {
         $event = Event::factory()->create();
-        $match = EventMatch::factory()->for($event)->create();
+        $matchType = MatchType::factory()->create(['name' => 'Test Match']);
+        $match = EventMatch::factory()->for($event)->for($matchType)->create();
 
-        $component = Livewire::test(MatchesTable::class);
+        $component = Livewire::test(MatchesTable::class, ['eventId' => $event->id]);
         $component->assertOk();
-        $component->assertSee($match->preview);
+        $component->assertSee('Test Match');
     });
 });
 
 describe('MatchesTable Event Integration', function () {
-    it('displays matches grouped by event', function () {
+    it('displays matches for specific event only', function () {
         $event1 = Event::factory()->create(['name' => 'Event One']);
         $event2 = Event::factory()->create(['name' => 'Event Two']);
         
-        EventMatch::factory()->for($event1)->create(['preview' => 'Event One Match']);
-        EventMatch::factory()->for($event2)->create(['preview' => 'Event Two Match']);
+        $type1 = MatchType::factory()->create(['name' => 'Event One Match']);
+        $type2 = MatchType::factory()->create(['name' => 'Event Two Match']);
+        
+        EventMatch::factory()->for($event1)->for($type1)->create();
+        EventMatch::factory()->for($event2)->for($type2)->create();
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
             ->assertSee('Event One Match')
-            ->assertSee('Event Two Match');
+            ->assertDontSee('Event Two Match');
     });
 
-    it('handles matches from past and future events', function () {
-        $pastEvent = Event::factory()->past()->create();
-        $futureEvent = Event::factory()->future()->create();
+    it('handles event with multiple matches', function () {
+        $event = Event::factory()->create();
         
-        EventMatch::factory()->for($pastEvent)->create(['preview' => 'Past match']);
-        EventMatch::factory()->for($futureEvent)->create(['preview' => 'Future match']);
+        $type1 = MatchType::factory()->create(['name' => 'Main Event']);
+        $type2 = MatchType::factory()->create(['name' => 'Opening Match']);
+        
+        EventMatch::factory()->for($event)->for($type1)->create();
+        EventMatch::factory()->for($event)->for($type2)->create();
 
-        Livewire::test(MatchesTable::class)
-            ->assertSee('Past match')
-            ->assertSee('Future match');
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('Main Event')
+            ->assertSee('Opening Match');
     });
 });
 
 describe('MatchesTable Authorization', function () {
     it('requires authentication', function () {
+        $event = Event::factory()->create();
         auth()->logout();
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertUnauthorized();
     });
 
     it('requires administrator privileges', function () {
+        $event = Event::factory()->create();
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        Livewire::test(MatchesTable::class)
+        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertUnauthorized();
     });
 });

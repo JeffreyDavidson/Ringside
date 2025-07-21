@@ -12,7 +12,7 @@ trait PresentsWrestlersList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: true, key: 'wrestlers-list', seconds: 180)]
+    #[Computed(cache: false)]
     public function getWrestlers(): array
     {
         return Wrestler::select('id', 'name')->pluck('name', 'id')->toArray();

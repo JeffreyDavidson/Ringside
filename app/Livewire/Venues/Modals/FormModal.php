@@ -61,4 +61,33 @@ class FormModal extends BaseFormModal
     {
         return view($this->modalFormPath ?? 'livewire.venues.modals.form-modal');
     }
+
+    public function submitForm(): bool
+    {
+        // Store whether we're creating or updating before the form submission
+        $isCreating = $this->form->isCreating();
+        
+        $result = parent::submitForm();
+        
+        if ($result) {
+            // Dispatch the appropriate event based on whether we created or updated
+            if ($isCreating) {
+                $this->dispatch('venueCreated');
+            } else {
+                $this->dispatch('venueUpdated');
+            }
+            
+            // Reset the form after successful submission
+            $this->form->reset();
+        }
+        
+        return $result;
+    }
+
+    public function closeModal(): void
+    {
+        parent::closeModal();
+        // Reset the form when modal is closed
+        $this->form->reset();
+    }
 }

@@ -103,23 +103,23 @@ class Main extends BaseTable
     /**
      * Disband a stable.
      */
-    public function disband(Stable $stable): RedirectResponse
+    public function disband(Stable $stable): void
     {
         Gate::authorize('disband', $stable);
 
         try {
             resolve(DisbandAction::class)->handle($stable);
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         } catch (CannotBeDisbandedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         }
-
-        return back();
     }
 
     /**
      * Restore a stable.
      */
-    public function restore(int $stableId): RedirectResponse
+    public function restore(int $stableId): void
     {
         $stable = Stable::onlyTrashed()->findOrFail($stableId);
 
@@ -127,43 +127,43 @@ class Main extends BaseTable
 
         try {
             resolve(RestoreAction::class)->handle($stable);
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         }
-
-        return back();
     }
 
     /**
      * Retire a stable.
      */
-    public function retire(Stable $stable): RedirectResponse
+    public function retire(Stable $stable): void
     {
         Gate::authorize('retire', $stable);
 
         try {
             resolve(RetireAction::class)->handle($stable);
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         } catch (CannotBeRetiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         }
-
-        return back();
     }
 
     /**
      * Unretire a stable.
      */
-    public function unretire(Stable $stable): RedirectResponse
+    public function unretire(Stable $stable): void
     {
         Gate::authorize('unretire', $stable);
 
         try {
             resolve(UnretireAction::class)->handle($stable);
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         } catch (CannotBeUnretiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
         }
-
-        return back();
     }
 
     /**
