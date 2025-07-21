@@ -489,6 +489,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('referee full name consistency maintained', function () {
+            // Ensure referee has virtual column loaded
+            $this->referee = $this->referee->fresh();
+            
             $component = Livewire::actingAs($this->admin)
                 ->test(Actions::class, ['referee' => $this->referee]);
 

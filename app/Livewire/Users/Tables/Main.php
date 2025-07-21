@@ -41,14 +41,18 @@ class Main extends BaseTable
                         'model' => $row,
                     ])
                 )->html()
-                ->searchable(),
+                ->searchable(function ($builder, $searchTerm) {
+                    $builder->where(function($query) use ($searchTerm) {
+                        $query->where('first_name', 'like', $searchTerm . '%')
+                              ->orWhere('last_name', 'like', $searchTerm . '%');
+                    });
+                }),
             Column::make(__('users.role'), 'role')
                 ->format(fn (Role $value) => $value->name),
             Column::make(__('core.status'), 'status')
                 ->label(fn (User $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
-            Column::make(__('users.email'), 'email')
-                ->searchable(),
+            Column::make(__('users.email'), 'email'),
             Column::make(__('users.phone'), 'phone_number')
                 ->label(fn (User $row, Column $column): string => $row->formattedPhoneNumber),
         ];
