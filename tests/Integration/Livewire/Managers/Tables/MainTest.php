@@ -17,6 +17,11 @@ use Livewire\Livewire;
 /**
  * Integration tests for ManagersTable Livewire component.
  *
+ * @group managers
+ * @group integration
+ * @group livewire
+ * @group tables
+ * 
  * INTEGRATION TEST SCOPE:
  * - Component rendering with complex data relationships
  * - Filtering and search functionality integration
@@ -34,10 +39,11 @@ describe('ManagersTable Component', function () {
     describe('component rendering integration', function () {
         test('renders managers table with complete data relationships', function () {
             // Create managers with different statuses and relationships
-            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
-            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
+            // Use last names starting with 'A' and double-A to ensure they appear on first page (table sorts by last_name)
+            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Aaaaaa']);
+            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Aaaaab']);
+            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Aaaaac']);
+            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Aaaaad']);
 
             // Create relationships
             $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Managed Wrestler']);
@@ -47,11 +53,11 @@ describe('ManagersTable Component', function () {
             $component = Livewire::test(Main::class);
 
             $component
-                ->assertSee($employedManager->name)
-                ->assertSee($injuredManager->name)
-                ->assertSee($retiredManager->name)
-                ->assertSee($suspendedManager->name);
-        });
+                ->assertSee('Active Aaaaaa')
+                ->assertSee('Injured Aaaaab')
+                ->assertSee('Retired Aaaaac')
+                ->assertSee('Suspended Aaaaad');
+        })->group('managers', 'tables', 'rendering', 'integration');
 
         test('displays correct status badges for different manager states', function () {
             $employedManager = Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager']);
@@ -70,7 +76,7 @@ describe('ManagersTable Component', function () {
                 ->assertSee('Released Manager')
                 // Status indicators should be present (exact text may vary)
                 ->assertSeeHtml('class'); // Status classes should be rendered
-        });
+        })->group('managers', 'tables', 'status', 'badges');
     });
 
     describe('filtering and search integration', function () {

@@ -135,7 +135,7 @@ class TitleChampionshipBuilder extends Builder
 
         $reignLengthSql = match ($driverName) {
             'mysql' => 'DATEDIFF(COALESCE(lost_at, NOW()), won_at) as reign_length',
-            'sqlite' => 'CAST((julianday(COALESCE(lost_at, date("now"))) - julianday(date(won_at))) AS INTEGER) as reign_length',
+            'sqlite' => 'CAST((julianday(COALESCE(lost_at, datetime("now"))) - julianday(won_at)) AS INTEGER) as reign_length',
             default => 'DATEDIFF(COALESCE(lost_at, NOW()), won_at) as reign_length' // Default to MySQL syntax
         };
 

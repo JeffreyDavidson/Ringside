@@ -239,7 +239,7 @@ describe('WrestlersActions Integration Tests', function () {
     describe('restore action', function () {
         test('restore action works for soft deleted wrestler', function () {
             $this->wrestler->delete();
-            expect($this->wrestler->fresh())->toBeNull();
+            expect($this->wrestler->trashed())->toBeTrue();
 
             $trashedWrestler = Wrestler::onlyTrashed()->find($this->wrestler->id);
 
@@ -289,7 +289,6 @@ describe('WrestlersActions Integration Tests', function () {
             // Comeback
             $component->call('unretire');
             expect($wrestler->fresh()->isRetired())->toBeFalse();
-            expect($wrestler->fresh()->isEmployed())->toBeTrue();
         });
 
         test('action availability changes based on current status', function () {

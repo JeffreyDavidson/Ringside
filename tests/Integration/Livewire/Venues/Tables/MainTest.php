@@ -12,6 +12,11 @@ use Livewire\Livewire;
 /**
  * Integration tests for VenuesTable Livewire component.
  *
+ * @group venues
+ * @group integration
+ * @group livewire
+ * @group tables
+ *
  * INTEGRATION TEST SCOPE:
  * - Livewire component lifecycle with real database
  * - Table rendering with actual venue data

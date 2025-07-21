@@ -20,6 +20,11 @@ use Livewire\Livewire;
 /**
  * Integration tests for TagTeamsTable Livewire component.
  *
+ * @group tagteams
+ * @group integration
+ * @group livewire
+ * @group tables
+ *
  * INTEGRATION TEST SCOPE:
  * - Component rendering with complex data relationships
  * - Filtering and search functionality integration

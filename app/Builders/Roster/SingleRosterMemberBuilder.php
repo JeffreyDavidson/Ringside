@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Builders\Roster;
 
 use App\Builders\Concerns\HasAvailabilityScopes;
+use App\Builders\Concerns\HasNameSearch;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Contracts\HasAvailability;
 use App\Builders\Contracts\HasEmployment;
@@ -56,6 +57,7 @@ use Illuminate\Database\Eloquent\Model;
 abstract class SingleRosterMemberBuilder extends Builder implements HasAvailability, HasEmployment, HasRetirement, HasSuspension
 {
     use HasAvailabilityScopes;
+    use HasNameSearch;
     use HasRetirementScopes;
 
     /**

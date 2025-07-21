@@ -94,7 +94,7 @@ class Main extends BaseTable
     public function builder(): TitleBuilder
     {
         return Title::query()
-            ->with(['currentActivityPeriod'])
+            ->with(['currentActivityPeriod', 'currentChampionship.champion'])
             ->oldest('name');
     }
 
@@ -135,7 +135,8 @@ class Main extends BaseTable
             Column::make(__('core.status'), 'status')
                 ->label(fn (Title $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
-            // Column::make(__('titles.current_champion'), 'champion_name'),
+            Column::make(__('titles.current_champion'), 'champion_name')
+                ->label(fn (Title $row) => $row->currentChampion()?->name ?? 'Vacant'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
     }

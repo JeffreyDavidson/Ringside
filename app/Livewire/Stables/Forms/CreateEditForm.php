@@ -85,6 +85,20 @@ class CreateEditForm extends BaseForm
     public string|null $ended_at = null;
 
     /**
+     * Array of wrestler IDs to be assigned to the stable.
+     *
+     * @var array<int>
+     */
+    public array $wrestlers = [];
+
+    /**
+     * Array of tag team IDs to be assigned to the stable.
+     *
+     * @var array<int>
+     */
+    public array $tag_teams = [];
+
+    /**
      * Accessor for trait compatibility - ManagesActivityPeriods expects start_date.
      */
     protected function getStartDateAttribute(): ?string
@@ -149,8 +163,12 @@ class CreateEditForm extends BaseForm
         $wasCreating = $this->isCreating();
         $result = $this->storeModel();
         
-        if ($result && $wasCreating) {
-            $this->handlePostCreationTasks();
+        if ($result) {
+            if ($wasCreating) {
+                $this->handlePostCreationTasks();
+            } else {
+                $this->handlePostUpdateTasks();
+            }
         }
         
         return $result;
@@ -167,6 +185,46 @@ class CreateEditForm extends BaseForm
         // Create activation record for new stables with start dates
         if ($this->started_at) {
             $this->handleActivityPeriodCreation();
+        }
+        
+        // Handle member assignments
+        $this->handleMemberAssignments();
+    }
+
+    /**
+     * Handle additional tasks after stable update.
+     */
+    protected function handlePostUpdateTasks(): void
+    {
+        // Update the first activity period if dates changed
+        if ($this->started_at && $this->formModel->firstActivityPeriod) {
+            $updateData = ['started_at' => $this->started_at];
+            if ($this->ended_at) {
+                $updateData['ended_at'] = $this->ended_at;
+            }
+            $this->formModel->firstActivityPeriod()->update($updateData);
+        }
+    }
+
+    /**
+     * Handle assigning wrestlers and tag teams to the stable.
+     */
+    protected function handleMemberAssignments(): void
+    {
+        if (!empty($this->wrestlers)) {
+            $wrestlerData = [];
+            foreach ($this->wrestlers as $wrestlerId) {
+                $wrestlerData[$wrestlerId] = ['joined_at' => $this->started_at ?? now()];
+            }
+            $this->formModel->wrestlers()->attach($wrestlerData);
+        }
+        
+        if (!empty($this->tag_teams)) {
+            $tagTeamData = [];
+            foreach ($this->tag_teams as $tagTeamId) {
+                $tagTeamData[$tagTeamId] = ['joined_at' => $this->started_at ?? now()];
+            }
+            $this->formModel->tagTeams()->attach($tagTeamData);
         }
     }
 
@@ -226,6 +284,10 @@ class CreateEditForm extends BaseForm
             'name' => ['required', 'string', 'max:255', Rule::unique('stables', 'name')->ignore($this->modelId)],
             'started_at' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
             'ended_at' => ['nullable', 'date'],
+            'wrestlers' => ['nullable', 'array'],
+            'wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            'tag_teams' => ['nullable', 'array'],
+            'tag_teams.*' => ['integer', 'exists:tag_teams,id'],
         ];
 
         // Add validation that ended_at is after started_at if both are provided
