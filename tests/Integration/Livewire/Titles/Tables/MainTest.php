@@ -52,7 +52,7 @@ describe('TitlesTable Component', function () {
             TitleChampionship::factory()
                 ->for($retiredTitle, 'title')
                 ->for($tagTeam, 'champion')
-                ->ended()
+                ->current()
                 ->create();
 
             $component = Livewire::test(Main::class);
@@ -238,7 +238,8 @@ describe('TitlesTable Component', function () {
             $component->assertOk();
 
             // Should not have N+1 query issues (would require query monitoring in real implementation)
-            expect($component->get('titles'))->not->toBeEmpty();
+            $titles = $component->instance()->builder()->get();
+            expect($titles)->not->toBeEmpty();
         });
 
         test('component eager loads necessary relationships', function () {

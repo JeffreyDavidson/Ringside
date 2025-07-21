@@ -25,7 +25,7 @@ class Main extends BaseTable
     public function builder(): UserBuilder
     {
         return User::query()
-            ->select('full_name', 'phone_number', 'email', 'status', 'avatar_path')
+            ->select('id', 'first_name', 'last_name', 'full_name', 'phone_number', 'email', 'role', 'status', 'avatar_path')
             ->oldest('last_name');
     }
 

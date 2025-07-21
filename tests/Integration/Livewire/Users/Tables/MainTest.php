@@ -226,7 +226,7 @@ describe('UsersTable Component', function () {
             $component = Livewire::test(Main::class);
 
             // Get the rendered content to check ordering
-            $html = $component->get('users')->toHtml();
+            $html = $component->html();
 
             // Anderson should appear before Baker, Baker before Cooper
             $andersonPos = mb_strpos($html, 'Anderson');
@@ -327,7 +327,8 @@ describe('UsersTable Component', function () {
             $component->assertOk();
 
             // Should not have N+1 query issues (query counting would require additional setup)
-            expect($component->get('users'))->not->toBeEmpty();
+            $users = $component->instance()->builder()->get();
+            expect($users)->not->toBeEmpty();
         });
 
         test('component eager loads necessary relationships', function () {
